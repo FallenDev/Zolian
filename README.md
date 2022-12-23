@@ -10,11 +10,11 @@ Hades, Formally known as Lorule was the original basis of this infrastructure.
 
 # Zolian
 
-Zolian is an open-source project. 
+
 
 ## Contributing
 
-Zolian is a learning project, there are quite a few ways you can contribute here:
+Zolian is an open-source project, there are quite a few ways you can contribute here:
 * Designing new sprites
 * Developing directly to the project
 * Helping create a wiki
