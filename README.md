@@ -25,5 +25,5 @@ Zolian is an open-source project, there are quite a few ways you can contribute 
 Zolian is a fair-use project and accepts zero compensations of any kind
 
 ## License
-Zolian source, and components are released under the GNU AGPL v3
-Please visit: https://www.thebucknetwork.com/Privacy
+- Zolian source, and components are released under the GNU AGPL v3
+- Please visit: https://www.thebucknetwork.com/Privacy
