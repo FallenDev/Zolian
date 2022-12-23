@@ -1,0 +1,11 @@
+Debug
+b29807bd-6f27-41f0-8113-fbf78a9b3d39
+
+Release
+361945fa-7654-481c-a5b5-e8f5d0ef6a9d
+=========================================
+
+Do not change the locations of the keys above.
+To create your own keys to monitor your own server, visit https://appcenter.ms/
+Follow the steps to create two new environment keys
+Save and run the server, it will then use your keys

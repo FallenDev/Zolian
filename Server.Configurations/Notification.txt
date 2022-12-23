@@ -1,0 +1,7 @@
+﻿{=aWelcome to Zolian.
+{=bZolian: {=uis a server based on Dungeons & Dragons, Final Fantasy, Diablo 3, Zelda, Elder Scrolls, World of Warcraft and many other MMORPGs. ({=cAll Rights Reserved{=u)
+Many of the grind mechanics are from traditional Hack and Slashers that you know and love. Here you'll be able to build a character up and play either with friends or run solo. The main focus of Zolian is to balance the characters while breathing new life into Nexon's Darkages. That includes new music, new maps, classes, races, and pvp zones much like you would see in World of Warcraft.  
+{=eGame content is in an {=qalpha phase {=eand is currently being worked on. Fixes to the server will happen daily, expect sudden interruptions and/or character loss.
+{=cFair Use in accordance of U.S. Const. Art. I, SS 8, cl. 8. under Section 107 of the Copyright Act "Nonprofit Educational Purposes"
+{=eThank you,
+- {=bDeath

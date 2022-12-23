@@ -1,0 +1,245 @@
+{
+  "Content": {
+    "Location": "Z:\\Zolian\\Data\\ServerData",
+    // https://www.abuseipdb.com/ API Key -- Will need to setup an account to obtain a key
+    // This keycode is important to prevent attackers from attacking your server
+    // Default: 
+    "KeyCode": "",
+    // GM Command used on login screen to unlock an account
+    // Default: unlock
+    "Unlock": "unlock",
+    // Set this address to your external facing IP if you're hosting
+    // Default: 127.0.0.1 -- leave as-is if you're developing and not publically hosting
+    "ServerIp": "127.0.0.1"
+  },
+  "Editor": {
+    "Location": "Z:\\Zolian\\Data",
+    "GameLocation": "Z:\\Zolian\\game"
+  },
+  "ServerConfig": {
+    // Last Client Refresh rate delay
+    // Default: 200 miliseconds
+    "RefreshRate": 200,
+    // Save player every x seconds
+    // Default: 3 seconds
+    "SaveRate": 3,
+    // Check if a player is warping
+    // Default: 200 miliseconds
+    "WarpCheckRate": 200,
+    // If set to true, player will cancel spells when they begin to walk
+    // Default: false
+    "CancelCastingWhenWalking": false,
+    // If set to true, player will cancel spells if they press F5
+    // Default: true
+    "CancelWalkingIfRefreshing": true,
+    // Hours to wait until a player is sent home, while logged out.
+    // Currently disabled
+    "NationReturnHours": 1,
+    // Map to spawn players after they log in the first time
+    // Default Map: 7000, X: 7, Y: 23
+    "StartingMap": 7000,
+    "StartingPosition": {
+      "X": 7,
+      "Y": 23
+    },
+
+    // Limbo map used during world server transitions
+    // Default Map: 1001, X: 5, Y: 5
+    "TransitionPointX": 5,
+    "TransitionPointY": 5,
+    "TransitionZone": 1001,
+
+    // Scripts
+    // These helper scripts control logic related to mechanics, change
+    // these here if you want to test different scripts
+    "ElementTableScript": "Elements 4.0",
+    "ACFormulaScript": "AC Formula",
+    "BaseDamageScript": "Base Damage",
+    "MonsterCreationScript": "Create Monster",
+    "MonsterRewardScript": "Rewards 1x",
+    "HelperMenuTemplateKey": "Jenkins",
+
+    // Offense
+    // Aite spell damage reduction
+    // Default: 25% (0.25)
+    "AiteDamageReductionMod": 0.25,
+    // Damage behind a mob bonus
+    // Default: 45% (0.45)
+    "BehindDamageMod": 0.45,
+
+    // Defense
+    // Minimum Health a player can be withered to or start out as
+    // Default: 128 - I do not recommend changing this value
+    "MinimumHp": 128,
+    // Maximum Health a player can raise their base to
+    // Default: 999999
+    "MaxHP": 999999,
+
+    // Skills
+    // Assail base delay
+    // Default: 1 second (1000.0)
+    "GlobalBaseSkillDelay": 1000.0,
+    // Can assails cancel spells?
+    // Default: true
+    "AssailsCancelSpells": true,
+
+    // Items
+    // Distance on map for which you can pick up items
+    // Default: 11 tiles
+    "ClickLootDistance": 11,
+    // Default Item Durability if not set within the database
+    // Default: 3000
+    "DefaultItemDurability": 3000,
+    // Default Item Value if not set within the database
+    // Default: 1000
+    "DefaultItemValue": 1000,
+
+    // Death
+    // Player health loss after death
+    // Default: 50
+    "DeathHPPenalty": 50,
+    // Death Map after a player dies
+    // Default Map: 23352, X: 21, Y: 21, CanMove?: false
+    "DeathMap": 23352,
+    "CanMoveDuringReap": false,
+    "DeathMapX": 21,
+    "DeathMapY": 21,
+
+    // Monsters | NPCs
+    // Seconds to wait until mundanes respawn
+    // Default: 10 seconds
+    "MundaneRespawnInterval": 10.0,
+    // Monolith Spawn Timer - spawns a map with a mob after a mob dies based on database values
+    // Default: 3000 (3 seconds)
+    "GlobalSpawnTimer": 3000.0,
+    // Base damage modifier for monsters
+    // Default: 1
+    "BaseDamageMod": 1,
+
+    // Players
+    // Max level for players
+    // Default: 500
+    "PlayerLevelCap": 500,
+    // Bonus given to players in groups
+    // Default: 1.0 (100%)
+    "GroupExpBonus": 1.0,
+    // Max gold a player can carry on them
+    // Default: 500000000
+    "MaxCarryGold": 500000000,
+    // Max value a stat can have
+    // Default: 1000
+    "StatCap": 1000,
+    // Stat points given to a player per levelup
+    // Default: 2
+    "StatsPerLevel": 2,
+    // Base carrying weight a player starts at
+    // Default: 50
+    "WeightIncreaseModifer": 50,
+    // Leveling Hp/Mp Factor
+    // Default: 5/5
+    "HpGainFactor": 5,
+    "MpGainFactor": 5,
+    // Map proximity calculations - adjusting these values could have severe impacts to gameplay or performance
+    // Default: 5
+    "VeryNearByProximity": 5,
+    // Default: 12
+    "WithinRangeProximity": 12,
+
+    // Server Related Maintenance
+    // Max number of active connections to the server
+    // Default: 100
+    "ConnectionCapacity": 100,
+    // Helper Menu to pull up advanced stats - do not change unless you know what you're doing
+    // Default: -1
+    "HelperMenuId": -1,
+    // Logging for client side and server side packets - enable if you wish to debug issues
+    // Default: false
+    "LogClientPackets": false,
+    // Default: false
+    "LogServerPackets": false,
+    // Checks whether or not a user is already logged in
+    // Default: true
+    "MultiUserLoginCheck": true,
+    // Interval for Ping checks, also used with a built in security and increasing/decreasing this value could cause
+    // performance impacts and connectivity issues
+    // Default: 7.0 (7 seconds)
+    "PingInterval": 7.0,
+    // Default Ports for the server -- Do not recommend changing these values
+    // Default: 2615
+    "SERVER_PORT": 2615,
+    // Default: 2610
+    "LOGIN_PORT": 2610,
+    // Name of the server
+    "SERVER_TITLE": "Zolian",
+    // Welcome messages shown to players upon login
+    "ServerWelcomeMessage": "Welcome to Zolian",
+    // Names of GMs, if a name is added here, it grants that player GM powers.
+    "GameMasters": [
+      "Death",
+      "Alvino",
+      "Shrek"
+    ],
+    // If learning_predicates is contained within this array, it exempts GMs from learning predicates
+    // Default: "learning_predicates"
+    "DevModeExemptions": [
+      "learning_predicates"
+    ],
+    // Allows custom settings within the F4 window. -- This is currently disabled within the codebase
+    "Settings": [
+      {
+        "SettingOn": "PVP  :ON",
+        "SettingOff": "PVP  :OFF",
+        "Enabled": false
+      },
+      {
+        "SettingOn": "Display Damage Overlay :ON",
+        "SettingOff": "Display Damage Overlay :OFF",
+        "Enabled": true
+      }
+    ],
+
+    // Check Packet 00
+    // This check sets the current client that should be used
+    // Zolian Default: 910 
+    // 7.18 Default: 718
+    "ClientVersion": 910,
+
+    // Messages
+    // Forces the client to send a clear message every set seconds
+    // Default: 1 minute (60.0)
+    "MessageClearInterval": 60.0,
+    
+    // Various Hard-Coded Server Messages
+    "BadRequestMessage": "(Invalid Request)",
+    "CantAttack": "I can't attack that.",
+    "CantCarryMoreMsg": "I can't carry any more.",
+    "CantDoThat": "I can't do that.",
+    "CantDropItemMsg": "I can't drop that.",
+    "CantUseThat": "I can't use that.",
+    "StrAddedMessage": "Your muscles begin to build fibers.",
+    "IntAddedMessage": "Synapses in your mind expand.",
+    "WisAddedMessage": "You're becoming wise beyond your years.",
+    "ConAddedMessage": "You've become more fit.",
+    "DexAddedMessage": "You're starting to feel more flexible.",
+    "CursedItemMessage": "That does not belong to you... yet.",
+    "GroupRequestDeclinedMsg": "noname does not wish to join your group.",
+    "LevelUpMessage": "The power inside you grows. Leveled up!",
+    "AbilityUpMessage": "The darkness has increased!",
+    "MerchantCancelMessage": "No, thanks.",
+    "MerchantConfirmMessage": "Yes, please.",
+    "MerchantRefuseTradeMessage": "I don't want that.",
+    "MerchantStackErrorMessage": "You don't have that many.",
+    "MerchantTradeCompletedMessage": "Thank you.",
+    "NoManaMessage": "My will is too weak.",
+    "NotEnoughGoldToDropMsg": "I don't have enough gold.",
+    "ReapMessage": "You are dying.|You cannot move nor raise your arms.|The Barron has missed you.|All things eventually come to an end.",
+    "DeathReapingMessage": "damn it all...",
+    "ReapMessageDuringAction": "You can't do that, you are about to die!",
+    "SomethingWentWrong": "Something went wrong.",
+    "SpellFailedMessage": "Something backfired!",
+    "ToWeakToLift": "You are too weak to lift it.",
+    "UserDroppedGoldMsg": "noname has dropped some money nearby.",
+    "YouDroppedGoldMsg": "You've dropped some gold.",
+    "ItemNotRequiredMsg": "Come back when you have the items required. \n{=q"
+  }
+}

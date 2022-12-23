@@ -1,0 +1,1 @@
+﻿new Zolian.AlwaysOn.ZolianDaemon();
