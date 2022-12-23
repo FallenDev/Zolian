@@ -4,10 +4,10 @@ C# .NET 7 - Private DarkAges Server
 ## Authors & Contributors
 
 Hades, Formally known as Lorule was the original basis of this infrastructure.
-wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server
-Team Hybrasyl
-Team Legends
-Team FoT
+- wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server
+- Team Hybrasyl: https://github.com/hybrasyl
+- Team Legends
+- Team FoT
 
 # Zolian
 
