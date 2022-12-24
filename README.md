@@ -9,8 +9,7 @@ Hades, Formally known as Lorule was the original basis of this infrastructure.
 - Special Mentions: Team Legends, Team FoT
 
 # Zolian
-
-
+Server is a custom implementation of the doomvas emulator. Most of the mechanics featured, are derived from other popular mmorpgs. Here you can explore, create, and test ideas out. Or host your own private server for learning purposes. I hope you enjoy exploring this source!
 
 ## Contributing
 
