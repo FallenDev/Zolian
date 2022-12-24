@@ -1,4 +1,4 @@
-# Zolian; - Kingdom of Chaos
+# Zolian - Kingdom of Chaos
 C# .NET 7 - Private DarkAges Server
 
 ## Authors & Contributors
