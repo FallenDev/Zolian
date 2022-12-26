@@ -1,5 +1,9 @@
 # Zolian - Kingdom of Chaos
-C# .NET 7 - Private DarkAges Server
+Darkages Server Emulator
+** Zolian Team and Owners DO NOT support or sponsor illegal public servers. Using this project is for testing, and learning. Please see licensing https://www.thebucknetwork.com/privacy for more details.
+
+## Tech Stack
+C# .NET 7 & SQL Server 2019
 
 ## Authors & Contributors
 
