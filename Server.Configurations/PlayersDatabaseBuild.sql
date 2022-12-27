@@ -1,0 +1,283 @@
+USE [ZolianPlayers]
+GO
+
+DROP TABLE PlayersEquipped;
+DROP TABLE PlayersInventory;
+DROP TABLE PlayersBanked;
+DROP TABLE PlayersLegend;
+DROP TABLE PlayersSkillBook;
+DROP TABLE PlayersSpellBook;
+DROP TABLE PlayersDebuffs;
+DROP TABLE PlayersBuffs;
+DROP TABLE PlayersDiscoveredMaps;
+DROP TABLE PlayersQuests;
+DROP TABLE PlayersIgnoreList;
+DROP TABLE Players;
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE Players
+(
+    [Serial] INT NOT NULL PRIMARY KEY,
+	[Created] DATETIME DEFAULT CURRENT_TIMESTAMP,
+	[Username] VARCHAR(12) NOT NULL,
+	[Password] VARCHAR(8) NOT NULL,
+	[PasswordAttempts] INT NOT NULL DEFAULT 0,
+	[Hacked] BIT NOT NULL DEFAULT 0,
+	[LoggedIn] BIT NOT NULL DEFAULT 0,
+	[LastLogged] DATETIME DEFAULT CURRENT_TIMESTAMP,
+	[LastIP] VARCHAR(15) DEFAULT '127.0.0.1',
+	[LastAttemptIP] VARCHAR(15) DEFAULT '127.0.0.1',
+	[X] INT NOT NULL DEFAULT 0,
+	[Y] INT NOT NULL DEFAULT 0,
+	[CurrentMapId] INT NOT NULL DEFAULT 3029,
+	[OffenseElement] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[DefenseElement] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[SecondaryOffensiveElement] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[SecondaryDefensiveElement] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[Direction] INT NOT NULL DEFAULT 0,
+	[CurrentHp] INT NOT NULL DEFAULT 0,
+	[BaseHp] INT NOT NULL DEFAULT 0,
+	[CurrentMp] INT NOT NULL DEFAULT 0,
+	[BaseMp] INT NOT NULL DEFAULT 0,
+	[_ac] INT NOT NULL DEFAULT 0,
+	[_Regen] INT NOT NULL DEFAULT 0,
+	[_Dmg] INT NOT NULL DEFAULT 0,
+	[_Hit] INT NOT NULL DEFAULT 0,
+	[_Mr] INT NOT NULL DEFAULT 0,
+	[_Str] INT NOT NULL DEFAULT 0,
+	[_Int] INT NOT NULL DEFAULT 0,
+	[_Wis] INT NOT NULL DEFAULT 0,
+	[_Con] INT NOT NULL DEFAULT 0,
+	[_Dex] INT NOT NULL DEFAULT 0,
+	[_Luck] INT NOT NULL DEFAULT 0,
+	[AbpLevel] INT NOT NULL DEFAULT 0,
+	[AbpNext] INT NOT NULL DEFAULT 0,
+	[AbpTotal] INT NOT NULL DEFAULT 0,
+	[ExpLevel] INT NOT NULL DEFAULT 1,
+	[ExpNext] INT NOT NULL DEFAULT 0,
+	[ExpTotal] INT NOT NULL DEFAULT 0,
+	[Stage] VARCHAR(10) NOT NULL,
+	[Path] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
+	[PastClass] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
+	[Race] VARCHAR(10) NOT NULL DEFAULT 'Human',
+	[Afflictions] VARCHAR(10) NOT NULL DEFAULT 'Normal',
+	[Gender] VARCHAR(6) NOT NULL DEFAULT 'Both',
+	[HairColor] INT NOT NULL DEFAULT 0,
+	[HairStyle] INT NOT NULL DEFAULT 0,
+	[OldColor] INT NOT NULL DEFAULT 0,
+	[OldStyle] INT NOT NULL DEFAULT 0,
+	[NameColor] INT NOT NULL DEFAULT 1,
+	[ProfileMessage] VARCHAR(100) NULL,
+	[Nation] VARCHAR(30) NOT NULL DEFAULT 'Mileth',
+	[Clan] VARCHAR(20) NULL,
+	[ClanRank] VARCHAR(20) NULL,
+	[ClanTitle] VARCHAR(20) NULL,
+	[AnimalForm] VARCHAR(10) NOT NULL DEFAULT 'None',
+	[MonsterForm] INT NOT NULL DEFAULT 0,
+	[ActiveStatus] VARCHAR(15) NOT NULL DEFAULT 'Awake',
+	[Flags] VARCHAR(6) NOT NULL DEFAULT 'Normal',
+	[CurrentWeight] INT NOT NULL DEFAULT 0,
+	[World] INT NOT NULL DEFAULT 0,
+	[Lantern] INT NOT NULL DEFAULT 0,
+	[Invisible] BIT NOT NULL DEFAULT 0,
+	[Resting] VARCHAR(13) NOT NULL DEFAULT 'Standing',
+	[FireImmunity] BIT NOT NULL DEFAULT 0,
+	[WaterImmunity] BIT NOT NULL DEFAULT 0,
+	[WindImmunity] BIT NOT NULL DEFAULT 0,
+	[EarthImmunity] BIT NOT NULL DEFAULT 0,
+	[LightImmunity] BIT NOT NULL DEFAULT 0,
+	[DarkImmunity] BIT NOT NULL DEFAULT 0,
+	[PoisonImmunity] BIT NOT NULL DEFAULT 0,
+	[EnticeImmunity] BIT NOT NULL DEFAULT 0,
+	[PartyStatus] VARCHAR(21) NOT NULL DEFAULT 1,
+	[RaceSkill] VARCHAR(20) NULL,
+	[RaceSpell] VARCHAR(20) NULL,
+	[GameMaster] BIT NOT NULL DEFAULT 0,
+	[ArenaHost] BIT NOT NULL DEFAULT 0,
+	[Developer] BIT NOT NULL DEFAULT 0,
+	[Ranger] BIT NOT NULL DEFAULT 0,
+	[Knight] BIT NOT NULL DEFAULT 0,
+	[GoldPoints] BIGINT NOT NULL DEFAULT 0,
+	[StatPoints] INT NOT NULL DEFAULT 0,
+	[GamePoints] INT NOT NULL DEFAULT 0,
+	[BankedGold] BIGINT NOT NULL DEFAULT 0,
+	[Display] VARCHAR(12) NOT NULL DEFAULT 'None',
+	[ArmorImg] INT NOT NULL DEFAULT 0,
+	[HelmetImg] INT NOT NULL DEFAULT 0,
+	[ShieldImg] INT NOT NULL DEFAULT 0,
+	[WeaponImg] INT NOT NULL DEFAULT 0,
+	[BootsImg] INT NOT NULL DEFAULT 0,
+	[HeadAccessory1Img] INT NOT NULL DEFAULT 0,
+	[HeadAccessory2Img] INT NOT NULL DEFAULT 0,
+	[OverCoatImg] INT NOT NULL DEFAULT 0,
+	[BootColor] INT NOT NULL DEFAULT 0,
+	[OverCoatColor] INT NOT NULL DEFAULT 0,
+	[Pants] INT NOT NULL DEFAULT 0,
+	[Aegis] INT NOT NULL DEFAULT 0,
+	[Bleeding] INT NOT NULL DEFAULT 0,
+	[Spikes] INT NOT NULL DEFAULT 0,
+	[Rending] INT NOT NULL DEFAULT 0,
+	[Reaping] INT NOT NULL DEFAULT 0,
+	[Vampirism] INT NOT NULL DEFAULT 0,
+	[Haste] INT NOT NULL DEFAULT 0,
+	[Hastened] INT NOT NULL DEFAULT 0,
+	[Gust] INT NOT NULL DEFAULT 0,
+	[Quake] INT NOT NULL DEFAULT 0,
+	[Rain] INT NOT NULL DEFAULT 0,
+	[Flame] INT NOT NULL DEFAULT 0,
+	[Dusk] INT NOT NULL DEFAULT 0,
+	[Dawn] INT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersDiscoveredMaps
+(
+	[DiscoveredId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[MapId] INT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersBuffs
+(
+	[BuffId] INT NOT NULL PRIMARY KEY, 
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Name] VARCHAR(30) NULL,
+	[TimeLeft] INT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersDebuffs
+(
+	[DebuffId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Name] VARCHAR(30) NULL,
+	[TimeLeft] INT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersSpellBook
+(
+	[SpellId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Level] INT NOT NULL DEFAULT 0,
+	[Slot] INT NULL,
+	[SpellName] VARCHAR(30) NULL,
+	[Casts] INT NOT NULL DEFAULT 0,
+	[CurrentCooldown] INT NULL
+)
+
+CREATE TABLE PlayersSkillBook
+(
+	[SkillId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Level] INT NOT NULL DEFAULT 0,
+	[Slot] INT NULL,
+	[SkillName] VARCHAR(30) NULL,
+	[Uses] INT NOT NULL DEFAULT 0,
+	[CurrentCooldown] INT NULL
+)
+
+CREATE TABLE PlayersLegend
+(
+	[LegendId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Category] VARCHAR(20) NOT NULL,
+	[Time] DATETIME DEFAULT CURRENT_TIMESTAMP,
+	[Color] VARCHAR(25) NOT NULL DEFAULT 'Blue',
+	[Icon] INT NOT NULL DEFAULT 0,
+	[Value] VARCHAR(50) NOT NULL
+)
+
+CREATE TABLE PlayersBanked
+(
+	[ItemId] INT NOT NULL PRIMARY KEY,
+	[Name] VARCHAR(45) NOT NULL,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Color] INT NOT NULL DEFAULT 0, 
+	[Cursed] BIT NOT NULL DEFAULT 0,
+	[Durability] INT NOT NULL DEFAULT 0,
+	[Identified] BIT NOT NULL DEFAULT 0,
+	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[ItemQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[OriginalQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[Stacks] INT NOT NULL DEFAULT 0,
+	[Enchantable] BIT NOT NULL DEFAULT 0,
+	[Stackable] BIT NULL
+)
+
+CREATE TABLE PlayersInventory
+(
+	[ItemId] INT NOT NULL PRIMARY KEY,
+	[Name] VARCHAR(45) NOT NULL,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Color] INT NOT NULL DEFAULT 0, 
+	[Cursed] BIT NOT NULL DEFAULT 0,
+	[Durability] INT NOT NULL DEFAULT 0,
+	[Identified] BIT NOT NULL DEFAULT 0,
+	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[ItemQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[OriginalQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[InventorySlot] INT NOT NULL DEFAULT 0,
+	[Stacks] INT NOT NULL DEFAULT 0,
+	[Enchantable] BIT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersEquipped
+(
+	[ItemId] INT NOT NULL PRIMARY KEY,
+	[Name] VARCHAR(45) NOT NULL,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[Slot] INT NOT NULL DEFAULT 0,
+	[Color] INT NOT NULL DEFAULT 0,
+	[Cursed] BIT NOT NULL DEFAULT 0,
+	[Durability] INT NOT NULL DEFAULT 0,
+	[Identified] BIT NOT NULL DEFAULT 0,
+	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
+	[ItemQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[OriginalQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
+	[Stacks] INT NOT NULL DEFAULT 0,
+	[Enchantable] BIT NOT NULL DEFAULT 0
+)
+
+CREATE TABLE PlayersQuests
+(
+	[QuestId] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[TutorialCompleted] BIT NULL,
+	[BetaReset] BIT NULL,
+	[StoneSmithing] INT NULL,
+	[MilethReputation] INT NULL,
+	[ArtursGift] INT NULL,
+	[CamilleGreetingComplete] BIT NULL,
+	[ConnPotions] BIT NULL,
+	[CryptTerror] BIT NULL,
+	[CryptTerrorSlayed] BIT NULL,
+	[Dar] INT NULL,
+	[DarItem] VARCHAR(20) NULL,
+	[DrunkenHabit] BIT NULL,
+	[EternalLove] BIT NULL,
+	[FionaDance] BIT NULL,
+	[Keela] INT NULL,
+	[KeelaCount] INT NULL,
+	[KeelaKill] VARCHAR(20) NULL,
+	[KeelaQuesting] BIT NULL,
+	[KillerBee] BIT NULL,
+	[Neal] INT NULL,
+	[NealCount] INT NULL,
+	[NealKill] VARCHAR(20) NULL,
+	[AbelShopAccess] BIT NULL,
+	[PeteKill] INT NULL,
+	[PeteComplete] BIT NULL,
+)
+
+CREATE TABLE PlayersIgnoreList
+(
+	[Id] INT NOT NULL PRIMARY KEY,
+	[Serial] INT FOREIGN KEY REFERENCES Players(Serial),
+	[PlayerIgnored] VARCHAR(12) NOT NULL,
+)

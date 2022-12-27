@@ -15,6 +15,7 @@
     <None Include="$(MSBuildThisFileDirectory)Notification.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)PlayersDatabaseBuild.sql" />
     <None Include="$(MSBuildThisFileDirectory)ServerConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
