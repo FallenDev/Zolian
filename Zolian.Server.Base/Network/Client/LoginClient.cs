@@ -2,12 +2,11 @@
 
 using Darkages.Network.Formats.Models.ClientFormats;
 
-namespace Darkages.Network.Client
+namespace Darkages.Network.Client;
+
+public class LoginClient : NetworkClient
 {
-    public class LoginClient : NetworkClient
-    {
-        public ClientFormat02 CreateInfo { get; set; }
-        public bool Authorized { get; set; }
-        public IPEndPoint ClientIP { get; set; }
-    }
+    public ClientFormat02 CreateInfo { get; set; }
+    public bool Authorized { get; set; }
+    public IPEndPoint ClientIP { get; set; }
 }

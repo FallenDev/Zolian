@@ -1,11 +1,10 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+public enum PrimaryStat
 {
-    public enum PrimaryStat
-    {
-        STR,
-        INT,
-        WIS,
-        CON,
-        DEX
-    }
+    STR,
+    INT,
+    WIS,
+    CON,
+    DEX
 }

@@ -3,121 +3,119 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Spells
+namespace Darkages.GameScripts.Spells;
+// Berserker Spells
+
+// Defender Spells
+[Script("Asgall")]
+public class Asgall : SpellScript
 {
-    // Berserker Spells
+    private readonly Spell _spell;
+    private readonly Buff _buff = new buff_skill_reflect();
+    private readonly GlobalSpellMethods _spellMethod;
 
-    // Defender Spells
-    [Script("Asgall")]
-    public class Asgall : SpellScript
+    public Asgall(Spell spell) : base(spell)
     {
-        private readonly Spell _spell;
-        private readonly Buff _buff = new buff_skill_reflect();
-        private readonly GlobalSpellMethods _spellMethod;
-
-        public Asgall(Spell spell) : base(spell)
-        {
-            _spell = spell;
-            _spellMethod = new GlobalSpellMethods();
-        }
-
-        public override void OnFailed(Sprite sprite, Sprite target) { }
-
-        public override void OnSuccess(Sprite sprite, Sprite target) { }
-
-        public override void OnUse(Sprite sprite, Sprite target)
-        {
-            if (!sprite.CanCast)
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "Incapacitated.");
-                return;
-            };
-
-            if (sprite.HasBuff("Asgall"))
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "Already reflecting skills.");
-                return;
-            }
-
-            _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
-        }
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
     }
 
-    [Script("Defensive Stance")]
-    public class Defensive_Stance : SpellScript
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
     {
-        private readonly Spell _spell;
-        private readonly Buff _buff = new buff_DefenseUp();
-        private readonly GlobalSpellMethods _spellMethod;
-
-        public Defensive_Stance(Spell spell) : base(spell)
+        if (!sprite.CanCast)
         {
-            _spell = spell;
-            _spellMethod = new GlobalSpellMethods();
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "Incapacitated.");
+            return;
+        };
+
+        if (sprite.HasBuff("Asgall"))
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "Already reflecting skills.");
+            return;
         }
 
-        public override void OnFailed(Sprite sprite, Sprite target) { }
+        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+    }
+}
 
-        public override void OnSuccess(Sprite sprite, Sprite target) { }
+[Script("Defensive Stance")]
+public class Defensive_Stance : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Buff _buff = new buff_DefenseUp();
+    private readonly GlobalSpellMethods _spellMethod;
 
-        public override void OnUse(Sprite sprite, Sprite target)
-        {
-            if (!sprite.CanCast)
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "Incapacitated.");
-                return;
-            };
-
-            if (sprite.HasBuff("Defensive Stance"))
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "You're already alert..");
-                return;
-            }
-
-            _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
-        }
+    public Defensive_Stance(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
     }
 
-    // Master Spells
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    [Script("Perfect Defense")]
-    public class Perfect_Defense : SpellScript
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
     {
-        private readonly Spell _spell;
-        private readonly Buff _buff = new buff_PerfectDefense();
-        private readonly GlobalSpellMethods _spellMethod;
-
-        public Perfect_Defense(Spell spell) : base(spell)
+        if (!sprite.CanCast)
         {
-            _spell = spell;
-            _spellMethod = new GlobalSpellMethods();
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "Incapacitated.");
+            return;
+        };
+
+        if (sprite.HasBuff("Defensive Stance"))
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "You're already alert..");
+            return;
         }
 
-        public override void OnFailed(Sprite sprite, Sprite target) { }
+        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+    }
+}
 
-        public override void OnSuccess(Sprite sprite, Sprite target) { }
+// Master Spells
 
-        public override void OnUse(Sprite sprite, Sprite target)
+[Script("Perfect Defense")]
+public class Perfect_Defense : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Buff _buff = new buff_PerfectDefense();
+    private readonly GlobalSpellMethods _spellMethod;
+
+    public Perfect_Defense(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (!sprite.CanCast)
         {
-            if (!sprite.CanCast)
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "Incapacitated.");
-                return;
-            };
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "Incapacitated.");
+            return;
+        };
 
-            if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
-            {
-                if (sprite is Aisling aisling)
-                    aisling.Client.SendMessage(0x02, "A similar spell has already been cast.");
-                return;
-            }
-
-            _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendMessage(0x02, "A similar spell has already been cast.");
+            return;
         }
+
+        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
     }
 }

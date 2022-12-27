@@ -1,11 +1,10 @@
 ﻿using Darkages.Types;
 
-namespace Darkages.Models
+namespace Darkages.Models;
+
+public class Warp
 {
-    public class Warp
-    {
-        public int AreaID { get; set; }
-        public Position Location { get; set; }
-        public int PortalKey { get; set; }
-    }
+    public int AreaID { get; set; }
+    public Position Location { get; set; }
+    public int PortalKey { get; set; }
 }

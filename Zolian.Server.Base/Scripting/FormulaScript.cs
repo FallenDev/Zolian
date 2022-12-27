@@ -1,10 +1,9 @@
 ﻿using Darkages.Interfaces;
 using Darkages.Sprites;
 
-namespace Darkages.Scripting
+namespace Darkages.Scripting;
+
+public abstract class FormulaScript : IScriptBase
 {
-    public abstract class FormulaScript : IScriptBase
-    {
-        public abstract long Calculate(Sprite obj, long value);
-    }
+    public abstract long Calculate(Sprite obj, long value);
 }

@@ -7,61 +7,60 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Generic
+namespace Darkages.GameScripts.Mundanes.Generic;
+
+[Script("Temple of Light")]
+public class TempleOfLight : MundaneScript
 {
-    [Script("Temple of Light")]
-    public class TempleOfLight : MundaneScript
+    public TempleOfLight(GameServer server, Mundane mundane) : base(server, mundane) { }
+
+    public override void OnClick(GameServer server, GameClient client)
     {
-        public TempleOfLight(GameServer server, Mundane mundane) : base(server, mundane) { }
+        TopMenu(client);
+    }
 
-        public override void OnClick(GameServer server, GameClient client)
+    public override void TopMenu(IGameClient client)
+    {
+        var options = new List<OptionsDataItem>
         {
-            TopMenu(client);
+            new(0x01, "Approach the Temple"),
+            new(0x02, "...")
+        };
+
+        client.SendOptionsDialog(Mundane, "Cleansing such an item here? Very well, do you wish to visit the temple?", options.ToArray());
+    }
+
+    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    {
+        if (client.Aisling.Map.ID != 500)
+        {
+            client.Dispose();
+            return;
         }
 
-        public override void TopMenu(IGameClient client)
+        switch (responseID)
         {
-            var options = new List<OptionsDataItem>
+            case 1:
             {
-                new(0x01, "Approach the Temple"),
-                new(0x02, "...")
-            };
+                var rand = Generator.RandNumGen100();
 
-            client.SendOptionsDialog(Mundane, "Cleansing such an item here? Very well, do you wish to visit the temple?", options.ToArray());
-        }
+                switch (rand)
+                {
+                    case >= 50:
+                        client.TransitionToMap(14758, new Position(17, 58));
+                        break;
+                    default:
+                        client.TransitionToMap(14758, new Position(18, 58));
+                        break;
+                }
 
-        public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
-        {
-            if (client.Aisling.Map.ID != 500)
-            {
-                client.Dispose();
-                return;
+                client.SendAnimation(262, client.Aisling, client.Aisling);
+                break;
             }
-
-            switch (responseID)
+            case 2:
             {
-                case 1:
-                {
-                    var rand = Generator.RandNumGen100();
-
-                    switch (rand)
-                    {
-                        case >= 50:
-                            client.TransitionToMap(14758, new Position(17, 58));
-                            break;
-                        default:
-                            client.TransitionToMap(14758, new Position(18, 58));
-                            break;
-                    }
-
-                    client.SendAnimation(262, client.Aisling, client.Aisling);
-                    break;
-                }
-                case 2:
-                {
-                    client.CloseDialog();
-                    break;
-                }
+                client.CloseDialog();
+                break;
             }
         }
     }

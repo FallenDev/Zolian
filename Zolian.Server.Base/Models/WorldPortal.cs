@@ -1,13 +1,12 @@
-﻿namespace Darkages.Models
+﻿namespace Darkages.Models;
+
+public class WorldPortal
 {
-    public class WorldPortal
-    {
-        public Warp Destination { get; set; }
+    public Warp Destination { get; set; }
 
-        public string DisplayName { get; set; }
+    public string DisplayName { get; set; }
 
-        public short PointX { get; set; }
+    public short PointX { get; set; }
 
-        public short PointY { get; set; }
-    }
+    public short PointY { get; set; }
 }

@@ -1,21 +1,20 @@
-﻿namespace Darkages.Types
+﻿namespace Darkages.Types;
+
+public class ClientGameSettings
 {
-    public class ClientGameSettings
+    public string EnabledSettingStr, DisabledSettingStr;
+
+    public ClientGameSettings(string lpEnabledStr, string lpDisabledStr, bool state = false)
     {
-        public string EnabledSettingStr, DisabledSettingStr;
+        EnabledSettingStr = lpEnabledStr;
+        DisabledSettingStr = lpDisabledStr;
+        Enabled = state;
+    }
 
-        public ClientGameSettings(string lpEnabledStr, string lpDisabledStr, bool state = false)
-        {
-            EnabledSettingStr = lpEnabledStr;
-            DisabledSettingStr = lpDisabledStr;
-            Enabled = state;
-        }
+    public bool Enabled { get; set; }
 
-        public bool Enabled { get; set; }
-
-        public void Toggle()
-        {
-            Enabled = !Enabled;
-        }
+    public void Toggle()
+    {
+        Enabled = !Enabled;
     }
 }

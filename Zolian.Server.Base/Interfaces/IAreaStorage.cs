@@ -1,10 +1,9 @@
 ﻿using Darkages.Types;
 
-namespace Darkages.Interfaces
+namespace Darkages.Interfaces;
+
+public interface IAreaStorage
 {
-    public interface IAreaStorage
-    {
-        void CacheFromDatabase();
-        bool LoadMap(Area mapObj, string mapFile);
-    }
+    void CacheFromDatabase();
+    bool LoadMap(Area mapObj, string mapFile);
 }

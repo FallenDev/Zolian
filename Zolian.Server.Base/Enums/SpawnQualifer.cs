@@ -1,10 +1,9 @@
 ﻿
-namespace Darkages.Enums
+namespace Darkages.Enums;
+
+[Flags]
+public enum SpawnQualifer
 {
-    [Flags]
-    public enum SpawnQualifer
-    {
-        Random = 1 << 1,
-        Defined = 1 << 2
-    }
+    Random = 1 << 1,
+    Defined = 1 << 2
 }

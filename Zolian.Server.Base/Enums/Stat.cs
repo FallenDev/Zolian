@@ -1,12 +1,11 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+[Flags]
+public enum Stat
 {
-    [Flags]
-    public enum Stat
-    {
-        Str = 0x01,
-        Int = 0x04,
-        Wis = 0x08,
-        Con = 0x10,
-        Dex = 0x02
-    }
+    Str = 0x01,
+    Int = 0x04,
+    Wis = 0x08,
+    Con = 0x10,
+    Dex = 0x02
 }

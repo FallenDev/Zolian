@@ -1,10 +1,9 @@
 ﻿using Darkages.Network;
 
-namespace Darkages.Interfaces
+namespace Darkages.Interfaces;
+
+public interface IFormattableNetwork
 {
-    public interface IFormattableNetwork
-    {
-        void Serialize(NetworkPacketReader reader);
-        void Serialize(NetworkPacketWriter writer);
-    }
+    void Serialize(NetworkPacketReader reader);
+    void Serialize(NetworkPacketWriter writer);
 }

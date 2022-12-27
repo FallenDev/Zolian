@@ -1,34 +1,33 @@
 ﻿using Darkages.Sprites;
 
-namespace Darkages.Network.Formats.Models.ServerFormats
+namespace Darkages.Network.Formats.Models.ServerFormats;
+
+public class ServerFormat04 : NetworkFormat
 {
-    public class ServerFormat04 : NetworkFormat
+    /// <summary>
+    /// Location
+    /// </summary>
+    /// <param name="sprite"></param>
+    public ServerFormat04(Sprite sprite) : this()
     {
-        /// <summary>
-        /// Location
-        /// </summary>
-        /// <param name="sprite"></param>
-        public ServerFormat04(Sprite sprite) : this()
-        {
-            X = (ushort)sprite.Pos.X;
-            Y = (ushort)sprite.Pos.Y;
-        }
+        X = (ushort)sprite.Pos.X;
+        Y = (ushort)sprite.Pos.Y;
+    }
 
-        private ServerFormat04()
-        {
-            Encrypted = true;
-            Command = 0x04;
-        }
+    private ServerFormat04()
+    {
+        Encrypted = true;
+        Command = 0x04;
+    }
 
-        private ushort X { get; }
-        private ushort Y { get; }
+    private ushort X { get; }
+    private ushort Y { get; }
 
-        public override void Serialize(NetworkPacketReader reader) { }
+    public override void Serialize(NetworkPacketReader reader) { }
 
-        public override void Serialize(NetworkPacketWriter writer)
-        {
-            writer.Write(X);
-            writer.Write(Y);
-        }
+    public override void Serialize(NetworkPacketWriter writer)
+    {
+        writer.Write(X);
+        writer.Write(Y);
     }
 }

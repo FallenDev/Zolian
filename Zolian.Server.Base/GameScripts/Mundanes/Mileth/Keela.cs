@@ -12,554 +12,553 @@ using Darkages.Types;
 
 using ServiceStack;
 
-namespace Darkages.GameScripts.Mundanes.Mileth
+namespace Darkages.GameScripts.Mundanes.Mileth;
+
+[Script("Keela")]
+public class Keela : MundaneScript
 {
-    [Script("Keela")]
-    public class Keela : MundaneScript
+    private string _kill;
+    private readonly List<SkillTemplate> _skillList;
+    private readonly List<SpellTemplate> _spellList;
+
+    public Keela(GameServer server, Mundane mundane) : base(server, mundane)
     {
-        private string _kill;
-        private readonly List<SkillTemplate> _skillList;
-        private readonly List<SpellTemplate> _spellList;
+        _skillList = ObtainSkillList();
+        _spellList = ObtainSpellList();
+    }
 
-        public Keela(GameServer server, Mundane mundane) : base(server, mundane)
+    public override void OnClick(GameServer server, GameClient client)
+    {
+        TopMenu(client);
+    }
+
+    public override void TopMenu(IGameClient client)
+    {
+        var options = new List<OptionsDataItem>();
+
+        if (client.Aisling.QuestManager.Keela <= 1 && client.Aisling.QuestManager.KeelaQuesting)
         {
-            _skillList = ObtainSkillList();
-            _spellList = ObtainSpellList();
-        }
-
-        public override void OnClick(GameServer server, GameClient client)
-        {
-            TopMenu(client);
-        }
-
-        public override void TopMenu(IGameClient client)
-        {
-            var options = new List<OptionsDataItem>();
-
-            if (client.Aisling.QuestManager.Keela <= 1 && client.Aisling.QuestManager.KeelaQuesting)
+            switch (client.Aisling.QuestManager.Keela)
             {
-                switch (client.Aisling.QuestManager.Keela)
+                case 0 when client.Aisling.Level >= 3 || client.Aisling.GameMaster:
+                    options.Add(new(0x0B, $"{{=cI have returned{{=a."));
+                    break;
+                case 1 when client.Aisling.Level >= 30 || client.Aisling.GameMaster:
+                    options.Add(new(0x0D, $"{{=cI found the path{{=a."));
+                    break;
+            }
+        }
+
+        if (!client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && client.Aisling.QuestManager.Keela > 1)
+            options.Add(new(0x0F, $"{{=cI have returned{{=a."));
+
+        if (_skillList.Count > 0)
+        {
+            options.Add(new(0x01, "Show Available Skills"));
+        }
+
+        if (_spellList.Count > 0)
+        {
+            options.Add(new(0x0010, "Show Available Spells"));
+        }
+
+        options.Add(new(0x02, "Forget Skill"));
+        options.Add(new(0x0011, "Forget Spell"));
+
+        if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster))
+        {
+            switch (client.Aisling.QuestManager.Keela)
+            {
+                case 0 when client.Aisling.Level >= 6:
+                    options.Add(new(0x0A, "Mischievous Deeds"));
+                    break;
+                case 1 when client.Aisling.Level >= 30:
+                    options.Add(new(0x0C, "Hidden Paths"));
+                    break;
+                case 2 when client.Aisling.Level >= 71:
+                    options.Add(new(0x0E, "Detrimental Exploits"));
+                    break;
+            }
+        }
+
+        client.SendOptionsDialog(Mundane,
+            client.Aisling.Level <= 98
+                ? "Did you come alone?"
+                : "Always walk in the shadows my dear friend.", options.ToArray());
+    }
+
+    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    {
+        if (client.Aisling.Map.ID != Mundane.Map.ID)
+        {
+            client.Dispose();
+            return;
+        }
+
+        var assassinThings = Random.Shared.Next(1, 5);
+        var countMon = Random.Shared.Next(6, 10);
+        var advExp = (uint)Random.Shared.Next(20000, 25000);
+        var advExp2 = (uint)Random.Shared.Next(750000, 1000000);
+        var advExp3 = (uint)Random.Shared.Next(3000000, 4500000);
+
+        _kill = assassinThings switch
+        {
+            1 => "Mantis",
+            2 => "Bat",
+            3 => "Centipede",
+            4 => "Honey Bee",
+            _ => _kill
+        };
+
+        switch (responseID)
+        {
+            #region Skills
+
+            case 0x0001:
+            {
+                var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+                var newSkills = _skillList.Except(learnedSkills).ToList();
+
+                newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
+
+                if (newSkills.Count > 0)
                 {
-                    case 0 when client.Aisling.Level >= 3 || client.Aisling.GameMaster:
-                        options.Add(new(0x0B, $"{{=cI have returned{{=a."));
-                        break;
-                    case 1 when client.Aisling.Level >= 30 || client.Aisling.GameMaster:
-                        options.Add(new(0x0D, $"{{=cI found the path{{=a."));
-                        break;
+                    client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003,
+                        newSkills.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                             || i.Prerequisites.ClassRequired == Class.Peasant));
                 }
-            }
-
-            if (!client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && client.Aisling.QuestManager.Keela > 1)
-                options.Add(new(0x0F, $"{{=cI have returned{{=a."));
-
-            if (_skillList.Count > 0)
-            {
-                options.Add(new(0x01, "Show Available Skills"));
-            }
-
-            if (_spellList.Count > 0)
-            {
-                options.Add(new(0x0010, "Show Available Spells"));
-            }
-
-            options.Add(new(0x02, "Forget Skill"));
-            options.Add(new(0x0011, "Forget Spell"));
-
-            if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster))
-            {
-                switch (client.Aisling.QuestManager.Keela)
+                else
                 {
-                    case 0 when client.Aisling.Level >= 6:
-                        options.Add(new(0x0A, "Mischievous Deeds"));
-                        break;
-                    case 1 when client.Aisling.Level >= 30:
-                        options.Add(new(0x0C, "Hidden Paths"));
-                        break;
-                    case 2 when client.Aisling.Level >= 71:
-                        options.Add(new(0x0E, "Detrimental Exploits"));
-                        break;
+                    client.CloseDialog();
+                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
                 }
+
+                break;
+            }
+            case 0x0002:
+            {
+                client.SendSkillForgetDialog(Mundane,
+                    "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
+                break;
+            }
+            case 0x9000:
+            {
+                int.TryParse(args, out var idx);
+
+                if (idx is < 0 or > byte.MaxValue)
+                {
+                    client.SendMessage(0x02, "You don't quite have that skill.");
+                    client.CloseDialog();
+                }
+
+                client.Aisling.SkillBook.Remove((byte)idx, true);
+                client.Send(new ServerFormat2D((byte)idx));
+                client.LoadSkillBook();
+
+                client.SendSkillForgetDialog(Mundane,
+                    "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+                break;
+            }
+            case 0x0003:
+            {
+                client.SendOptionsDialog(Mundane, "Are you sure you want to learn the method of " + args + "? \nLet me test if you're ready.", args,
+                    new OptionsDataItem(0x0006, $"What does {args} do?"),
+                    new OptionsDataItem(0x0004, "Learn"),
+                    new OptionsDataItem(0x0001, "No, thank you."));
+                break;
+            }
+            case 0x0004:
+            {
+                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                if (subject == null) return;
+
+                var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+                {
+                    if (!result)
+                    {
+                        client.SendOptionsDialog(Mundane, msg, subject.Name);
+                    }
+                });
+
+                if (conditions)
+                {
+                    client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                        subject.Name,
+                        new OptionsDataItem(0x0005, "Yes."),
+                        new OptionsDataItem(0x0001, "I'll come back later."));
+                }
+
+                break;
+            }
+            case 0x0006:
+            {
+                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                if (subject == null) return;
+
+                client.SendOptionsDialog(Mundane,
+                    $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+                    subject.Name,
+                    new OptionsDataItem(0x0004, "Yes"),
+                    new OptionsDataItem(0x0001, "No"));
+
+                break;
+            }
+            case 0x0005:
+            {
+                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                if (subject == null) return;
+
+                client.SendAnimation(109, client.Aisling, Mundane);
+                client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
+
+                break;
             }
 
-            client.SendOptionsDialog(Mundane,
-                client.Aisling.Level <= 98
-                    ? "Did you come alone?"
-                    : "Always walk in the shadows my dear friend.", options.ToArray());
-        }
+            #endregion
 
-        public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
-        {
-            if (client.Aisling.Map.ID != Mundane.Map.ID)
+            #region Spells
+
+            case 0x0010:
             {
-                client.Dispose();
-                return;
+                var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+                var newSpells = _spellList.Except(learnedSpells).ToList();
+
+                newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
+
+                if (newSpells.Count > 0)
+                {
+                    client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012,
+                        newSpells.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                             || i.Prerequisites.ClassRequired == Class.Peasant));
+                }
+                else
+                {
+                    client.CloseDialog();
+                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
+                }
+
+                break;
+            }
+            case 0x0011:
+            {
+                client.SendSpellForgetDialog(Mundane, "Every road leads to a different path. \nBe warned, This cannot be undone.", 0x0800);
+                break;
+            }
+            case 0x0012:
+            {
+                client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
+                    new OptionsDataItem(0x0015, $"What does {args} do?"),
+                    new OptionsDataItem(0x0013, "Learn"),
+                    new OptionsDataItem(0x0010, "No, thank you."));
+                break;
+            }
+            case 0x0013:
+            {
+                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                if (subject == null) return;
+
+                var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+                {
+                    if (!result)
+                    {
+                        client.SendOptionsDialog(Mundane, msg, subject.Name);
+                    }
+                });
+
+                if (conditions)
+                {
+                    client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                        subject.Name,
+                        new OptionsDataItem(0x0014, "Yes."),
+                        new OptionsDataItem(0x0010, "I'll come back later."));
+                }
+
+                break;
+            }
+            case 0x0014:
+            {
+                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                if (subject == null) return;
+
+                client.SendAnimation(109, client.Aisling, Mundane);
+                client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
+
+                break;
+            }
+            case 0x0015:
+            {
+                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                if (subject == null) return;
+
+                client.SendOptionsDialog(Mundane,
+                    $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+                    subject.Name,
+                    new OptionsDataItem(0x0013, "Yes"),
+                    new OptionsDataItem(0x0010, "No"));
+
+                break;
+            }
+            case 0x0800:
+            {
+                int.TryParse(args, out var idx);
+
+                if (idx is < 0 or > byte.MaxValue)
+                {
+                    client.SendMessage(0x02, "I do not sense this spell within you any longer.");
+                    client.CloseDialog();
+                }
+
+                client.Aisling.SpellBook.Remove((byte)idx, true);
+                client.Send(new ServerFormat18((byte)idx));
+                client.LoadSpellBook();
+
+                client.SendSpellForgetDialog(Mundane, "It is done.\nRemember, This cannot be undone.", 0x0800);
+                break;
             }
 
-            var assassinThings = Random.Shared.Next(1, 5);
-            var countMon = Random.Shared.Next(6, 10);
-            var advExp = (uint)Random.Shared.Next(20000, 25000);
-            var advExp2 = (uint)Random.Shared.Next(750000, 1000000);
-            var advExp3 = (uint)Random.Shared.Next(3000000, 4500000);
+            #endregion
 
-            _kill = assassinThings switch
+            case 0x0008:
             {
-                1 => "Mantis",
-                2 => "Bat",
-                3 => "Centipede",
-                4 => "Honey Bee",
-                _ => _kill
-            };
-
-            switch (responseID)
+                client.SendOptionsDialog(Mundane, "Like a still pond, I am but mist over a shallow mountain.");
+                break;
+            }
+            case 0x0009:
             {
-                #region Skills
+                if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
+                {
+                    client.Aisling.QuestManager.KeelaKill = _kill;
+                    client.Aisling.QuestManager.KeelaCount = countMon;
+                }
 
-                case 0x0001:
+                client.SendOptionsDialog(Mundane, $"Do not be seen. Leave no trace.\n{{=qKill: {countMon}, {_kill}'s");
+                client.Aisling.QuestManager.KeelaQuesting = true;
+                break;
+            }
+
+            #region Mischievous Deeds
+
+            case 0x000A:
+            {
+                var options = new List<OptionsDataItem>
+                {
+                    new (0x0009, "Sure."),
+                    new (0x0008, "Not right now.")
+                };
+
+                client.SendOptionsDialog(Mundane, $"I want you to slay some monsters to test your worth.", options.ToArray());
+                break;
+            }
+            case 0x000B:
+            {
+                if (client.Aisling.HasKilled(client.Aisling.QuestManager.KeelaKill, client.Aisling.QuestManager.KeelaCount) || client.Aisling.GameMaster)
+                {
+                    if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
                     {
-                        var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                        var newSkills = _skillList.Except(learnedSkills).ToList();
-
-                        newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                        if (newSkills.Count > 0)
+                        if (client.Aisling.QuestManager.Keela == 0)
                         {
-                            client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003,
-                                newSkills.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                                      || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                                      || i.Prerequisites.ClassRequired == Class.Peasant));
+                            client.Aisling.QuestManager.Keela++;
+                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                            client.Aisling.QuestManager.KeelaKill = null;
+                            client.Aisling.QuestManager.KeelaCount = 0;
+                            client.Aisling.QuestManager.KeelaQuesting = false;
+                            client.GiveExp(advExp);
+                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                            client.SendStats(StatusFlags.StructC);
+                            client.SendOptionsDialog(Mundane, "Tougher than I thought you were.");
                         }
-                        else
+                    }
+                }
+                else
+                {
+                    client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.KeelaKill}");
+                }
+
+                break;
+            }
+
+            #endregion
+
+            #region Hidden Paths
+
+            case 0x000C:
+            {
+                var options = new List<OptionsDataItem>
+                {
+                    new (0x0016, "Sure."),
+                    new (0x0008, "Not right now.")
+                };
+
+                client.SendOptionsDialog(Mundane, "There is a hidden store for us in Abel, find it.", options.ToArray());
+                break;
+            }
+            case 0x000D:
+            {
+                if (client.Aisling.HasItem("Assassin Notes"))
+                {
+                    if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
+                    {
+                        if (client.Aisling.QuestManager.Keela == 1)
                         {
-                            client.CloseDialog();
-                            client.SendMessage(0x02, "I have nothing left to teach you, for now.");
-                        }
+                            var item = client.Aisling.HasItemReturnItem("Assassin Notes");
+                            if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.Remove(client, item);
 
-                        break;
-                    }
-                case 0x0002:
-                    {
-                        client.SendSkillForgetDialog(Mundane,
-                            "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
-                        break;
-                    }
-                case 0x9000:
-                    {
-                        int.TryParse(args, out var idx);
+                            var skill = Skill.GiveTo(client.Aisling, "Sneak", 1);
+                            if (skill) client.LoadSkillBook();
+                            client.Aisling.QuestManager.Keela++;
+                            client.Aisling.QuestManager.KeelaQuesting = false;
+                            client.GiveExp(advExp2);
+                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                            client.SendStats(StatusFlags.StructC);
+                            client.SendOptionsDialog(Mundane, "Ahh, so that's what Teegan wants done. Come here, let me teach you something useful.");
 
-                        if (idx is < 0 or > byte.MaxValue)
-                        {
-                            client.SendMessage(0x02, "You don't quite have that skill.");
-                            client.CloseDialog();
-                        }
-
-                        client.Aisling.SkillBook.Remove((byte)idx, true);
-                        client.Send(new ServerFormat2D((byte)idx));
-                        client.LoadSkillBook();
-
-                        client.SendSkillForgetDialog(Mundane,
-                            "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
-                        break;
-                    }
-                case 0x0003:
-                    {
-                        client.SendOptionsDialog(Mundane, "Are you sure you want to learn the method of " + args + "? \nLet me test if you're ready.", args,
-                            new OptionsDataItem(0x0006, $"What does {args} do?"),
-                            new OptionsDataItem(0x0004, "Learn"),
-                            new OptionsDataItem(0x0001, "No, thank you."));
-                        break;
-                    }
-                case 0x0004:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                        if (subject == null) return;
-
-                        var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                        {
-                            if (!result)
+                            if (client.Aisling.QuestManager.Keela == 2)
                             {
-                                client.SendOptionsDialog(Mundane, msg, subject.Name);
-                            }
-                        });
-
-                        if (conditions)
-                        {
-                            client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                                subject.Name,
-                                new OptionsDataItem(0x0005, "Yes."),
-                                new OptionsDataItem(0x0001, "I'll come back later."));
-                        }
-
-                        break;
-                    }
-                case 0x0006:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                        if (subject == null) return;
-
-                        client.SendOptionsDialog(Mundane,
-                            $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                            subject.Name,
-                            new OptionsDataItem(0x0004, "Yes"),
-                            new OptionsDataItem(0x0001, "No"));
-
-                        break;
-                    }
-                case 0x0005:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                        if (subject == null) return;
-
-                        client.SendAnimation(109, client.Aisling, Mundane);
-                        client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
-
-                        break;
-                    }
-
-                #endregion
-
-                #region Spells
-
-                case 0x0010:
-                    {
-                        var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                        var newSpells = _spellList.Except(learnedSpells).ToList();
-
-                        newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                        if (newSpells.Count > 0)
-                        {
-                            client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012,
-                                newSpells.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                                      || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                                      || i.Prerequisites.ClassRequired == Class.Peasant));
-                        }
-                        else
-                        {
-                            client.CloseDialog();
-                            client.SendMessage(0x02, "I have nothing left to teach you, for now.");
-                        }
-
-                        break;
-                    }
-                case 0x0011:
-                    {
-                        client.SendSpellForgetDialog(Mundane, "Every road leads to a different path. \nBe warned, This cannot be undone.", 0x0800);
-                        break;
-                    }
-                case 0x0012:
-                    {
-                        client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
-                            new OptionsDataItem(0x0015, $"What does {args} do?"),
-                            new OptionsDataItem(0x0013, "Learn"),
-                            new OptionsDataItem(0x0010, "No, thank you."));
-                        break;
-                    }
-                case 0x0013:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                        if (subject == null) return;
-
-                        var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                        {
-                            if (!result)
-                            {
-                                client.SendOptionsDialog(Mundane, msg, subject.Name);
-                            }
-                        });
-
-                        if (conditions)
-                        {
-                            client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                                subject.Name,
-                                new OptionsDataItem(0x0014, "Yes."),
-                                new OptionsDataItem(0x0010, "I'll come back later."));
-                        }
-
-                        break;
-                    }
-                case 0x0014:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                        if (subject == null) return;
-
-                        client.SendAnimation(109, client.Aisling, Mundane);
-                        client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
-
-                        break;
-                    }
-                case 0x0015:
-                    {
-                        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                        if (subject == null) return;
-
-                        client.SendOptionsDialog(Mundane,
-                            $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                            subject.Name,
-                            new OptionsDataItem(0x0013, "Yes"),
-                            new OptionsDataItem(0x0010, "No"));
-
-                        break;
-                    }
-                case 0x0800:
-                    {
-                        int.TryParse(args, out var idx);
-
-                        if (idx is < 0 or > byte.MaxValue)
-                        {
-                            client.SendMessage(0x02, "I do not sense this spell within you any longer.");
-                            client.CloseDialog();
-                        }
-
-                        client.Aisling.SpellBook.Remove((byte)idx, true);
-                        client.Send(new ServerFormat18((byte)idx));
-                        client.LoadSpellBook();
-
-                        client.SendSpellForgetDialog(Mundane, "It is done.\nRemember, This cannot be undone.", 0x0800);
-                        break;
-                    }
-
-                #endregion
-
-                case 0x0008:
-                    {
-                        client.SendOptionsDialog(Mundane, "Like a still pond, I am but mist over a shallow mountain.");
-                        break;
-                    }
-                case 0x0009:
-                    {
-                        if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
-                        {
-                            client.Aisling.QuestManager.KeelaKill = _kill;
-                            client.Aisling.QuestManager.KeelaCount = countMon;
-                        }
-
-                        client.SendOptionsDialog(Mundane, $"Do not be seen. Leave no trace.\n{{=qKill: {countMon}, {_kill}'s");
-                        client.Aisling.QuestManager.KeelaQuesting = true;
-                        break;
-                    }
-
-                #region Mischievous Deeds
-
-                case 0x000A:
-                    {
-                        var options = new List<OptionsDataItem>
-                        {
-                            new (0x0009, "Sure."),
-                            new (0x0008, "Not right now.")
-                        };
-
-                        client.SendOptionsDialog(Mundane, $"I want you to slay some monsters to test your worth.", options.ToArray());
-                        break;
-                    }
-                case 0x000B:
-                    {
-                        if (client.Aisling.HasKilled(client.Aisling.QuestManager.KeelaKill, client.Aisling.QuestManager.KeelaCount) || client.Aisling.GameMaster)
-                        {
-                            if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
-                            {
-                                if (client.Aisling.QuestManager.Keela == 0)
+                                var legend = new Legend.LegendItem
                                 {
-                                    client.Aisling.QuestManager.Keela++;
-                                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                                    client.Aisling.QuestManager.KeelaKill = null;
-                                    client.Aisling.QuestManager.KeelaCount = 0;
-                                    client.Aisling.QuestManager.KeelaQuesting = false;
-                                    client.GiveExp(advExp);
-                                    client.SendMessage(0x03, $"You've gained {advExp} experience.");
-                                    client.SendStats(StatusFlags.StructC);
-                                    client.SendOptionsDialog(Mundane, "Tougher than I thought you were.");
-                                }
+                                    Category = "Skill",
+                                    Time = DateTime.Now,
+                                    Color = LegendColor.Pink,
+                                    Icon = (byte)LegendIcon.Rogue,
+                                    Value = "Keela's Training (Sneak)"
+                                };
+
+                                client.Aisling.LegendBook.AddLegend(legend, client);
                             }
                         }
-                        else
-                        {
-                            client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.KeelaKill}");
-                        }
-
-                        break;
                     }
+                }
+                else
+                {
+                    client.SendOptionsDialog(Mundane, "You haven't visited the hidden store just yet. You'll find it in Abel.");
+                }
 
-                #endregion
-
-                #region Hidden Paths
-
-                case 0x000C:
-                    {
-                        var options = new List<OptionsDataItem>
-                        {
-                            new (0x0016, "Sure."),
-                            new (0x0008, "Not right now.")
-                        };
-
-                        client.SendOptionsDialog(Mundane, "There is a hidden store for us in Abel, find it.", options.ToArray());
-                        break;
-                    }
-                case 0x000D:
-                    {
-                        if (client.Aisling.HasItem("Assassin Notes"))
-                        {
-                            if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
-                            {
-                                if (client.Aisling.QuestManager.Keela == 1)
-                                {
-                                    var item = client.Aisling.HasItemReturnItem("Assassin Notes");
-                                    if (item == null) TopMenu(client);
-                                    client.Aisling.Inventory.Remove(client, item);
-
-                                    var skill = Skill.GiveTo(client.Aisling, "Sneak", 1);
-                                    if (skill) client.LoadSkillBook();
-                                    client.Aisling.QuestManager.Keela++;
-                                    client.Aisling.QuestManager.KeelaQuesting = false;
-                                    client.GiveExp(advExp2);
-                                    client.SendMessage(0x03, $"You've gained {advExp2} experience.");
-                                    client.SendStats(StatusFlags.StructC);
-                                    client.SendOptionsDialog(Mundane, "Ahh, so that's what Teegan wants done. Come here, let me teach you something useful.");
-
-                                    if (client.Aisling.QuestManager.Keela == 2)
-                                    {
-                                        var legend = new Legend.LegendItem
-                                        {
-                                            Category = "Skill",
-                                            Time = DateTime.Now,
-                                            Color = LegendColor.Pink,
-                                            Icon = (byte)LegendIcon.Rogue,
-                                            Value = "Keela's Training (Sneak)"
-                                        };
-
-                                        client.Aisling.LegendBook.AddLegend(legend, client);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            client.SendOptionsDialog(Mundane, "You haven't visited the hidden store just yet. You'll find it in Abel.");
-                        }
-
-                        break;
-                    }
-
-                #endregion
-
-                #region Detrimental Exploits
-
-                case 0x000E:
-                    {
-                        var options = new List<OptionsDataItem>
-                        {
-                            new (0x0017, "Sure."),
-                            new (0x0008, "Not right now.")
-                        };
-
-                        client.SendOptionsDialog(Mundane, "I want you to eliminate 5 Succubus.", options.ToArray());
-
-                        break;
-                    }
-                case 0x000F:
-                    {
-                        if (client.Aisling.HasKilled("Succubus", 5))
-                        {
-                            if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
-                            {
-                                if (client.Aisling.QuestManager.Keela == 2)
-                                {
-                                    var skill = Skill.GiveTo(client.Aisling, "Shadow Step", 1);
-                                    if (skill) client.LoadSkillBook();
-                                    client.Aisling.QuestManager.Keela++;
-                                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                                    client.Aisling.QuestManager.KeelaKill = null;
-                                    client.Aisling.QuestManager.KeelaCount = 0;
-                                    client.Aisling.QuestManager.KeelaQuesting = false;
-                                    client.GiveExp(advExp3);
-                                    client.SendMessage(0x03, $"You've gained {advExp3} experience.");
-                                    client.SendStats(StatusFlags.StructC);
-                                    client.SendOptionsDialog(Mundane, "Always walk in the shadows, indeed, let me show you a technique.");
-
-                                    if (client.Aisling.QuestManager.Keela == 3)
-                                    {
-                                        var legend = new Legend.LegendItem
-                                        {
-                                            Category = "Skill",
-                                            Time = DateTime.Now,
-                                            Color = LegendColor.Pink,
-                                            Icon = (byte)LegendIcon.Rogue,
-                                            Value = "Keela's Training (Shadow Step)"
-                                        };
-
-                                        client.Aisling.LegendBook.AddLegend(legend, client);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            client.SendOptionsDialog(Mundane, "You have not finished your task, eliminate three succubi.");
-                        }
-
-                        if (client.Aisling.QuestManager.Keela == 3)
-                        {
-                            var item = new Legend.LegendItem
-                            {
-                                Category = "Adventure",
-                                Time = DateTime.Now,
-                                Color = LegendColor.Yellow,
-                                Icon = (byte)LegendIcon.Victory,
-                                Value = "Walks in the Shadows"
-                            };
-
-                            client.Aisling.LegendBook.AddLegend(item, client);
-                        }
-
-                        break;
-                    }
-
-                #endregion
-
-                case 0x0016:
-                    {
-                        client.SendOptionsDialog(Mundane, "When you find it, return to me.");
-                        client.Aisling.QuestManager.KeelaQuesting = true;
-                        break;
-                    }
-                case 0x0017:
-                    {
-                        if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
-                        {
-                            client.Aisling.QuestManager.KeelaKill = "Succubus";
-                            client.Aisling.QuestManager.KeelaCount = 5;
-                        }
-
-                        client.SendOptionsDialog(Mundane, $"Becareful out there.\n{{=qKill: {client.Aisling.QuestManager.KeelaCount}, {client.Aisling.QuestManager.KeelaKill}'s");
-                        client.Aisling.QuestManager.KeelaQuesting = true;
-                        break;
-                    }
+                break;
             }
-        }
 
-        private List<SkillTemplate> ObtainSkillList()
-        {
-            var skills = ServerSetup.Instance.GlobalSkillTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-            var possibleSkillTemplates = new List<SkillTemplate>();
+            #endregion
 
-            foreach (var (key, value) in skills)
+            #region Detrimental Exploits
+
+            case 0x000E:
             {
-                possibleSkillTemplates.Add(value);
+                var options = new List<OptionsDataItem>
+                {
+                    new (0x0017, "Sure."),
+                    new (0x0008, "Not right now.")
+                };
+
+                client.SendOptionsDialog(Mundane, "I want you to eliminate 5 Succubus.", options.ToArray());
+
+                break;
             }
-
-            return possibleSkillTemplates;
-        }
-
-        private List<SpellTemplate> ObtainSpellList()
-        {
-            var spells = ServerSetup.Instance.GlobalSpellTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-            var possibleSpellTemplates = new List<SpellTemplate>();
-
-            foreach (var (key, value) in spells)
+            case 0x000F:
             {
-                possibleSpellTemplates.Add(value);
+                if (client.Aisling.HasKilled("Succubus", 5))
+                {
+                    if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
+                    {
+                        if (client.Aisling.QuestManager.Keela == 2)
+                        {
+                            var skill = Skill.GiveTo(client.Aisling, "Shadow Step", 1);
+                            if (skill) client.LoadSkillBook();
+                            client.Aisling.QuestManager.Keela++;
+                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                            client.Aisling.QuestManager.KeelaKill = null;
+                            client.Aisling.QuestManager.KeelaCount = 0;
+                            client.Aisling.QuestManager.KeelaQuesting = false;
+                            client.GiveExp(advExp3);
+                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                            client.SendStats(StatusFlags.StructC);
+                            client.SendOptionsDialog(Mundane, "Always walk in the shadows, indeed, let me show you a technique.");
+
+                            if (client.Aisling.QuestManager.Keela == 3)
+                            {
+                                var legend = new Legend.LegendItem
+                                {
+                                    Category = "Skill",
+                                    Time = DateTime.Now,
+                                    Color = LegendColor.Pink,
+                                    Icon = (byte)LegendIcon.Rogue,
+                                    Value = "Keela's Training (Shadow Step)"
+                                };
+
+                                client.Aisling.LegendBook.AddLegend(legend, client);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    client.SendOptionsDialog(Mundane, "You have not finished your task, eliminate three succubi.");
+                }
+
+                if (client.Aisling.QuestManager.Keela == 3)
+                {
+                    var item = new Legend.LegendItem
+                    {
+                        Category = "Adventure",
+                        Time = DateTime.Now,
+                        Color = LegendColor.Yellow,
+                        Icon = (byte)LegendIcon.Victory,
+                        Value = "Walks in the Shadows"
+                    };
+
+                    client.Aisling.LegendBook.AddLegend(item, client);
+                }
+
+                break;
             }
 
-            return possibleSpellTemplates;
+            #endregion
+
+            case 0x0016:
+            {
+                client.SendOptionsDialog(Mundane, "When you find it, return to me.");
+                client.Aisling.QuestManager.KeelaQuesting = true;
+                break;
+            }
+            case 0x0017:
+            {
+                if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
+                {
+                    client.Aisling.QuestManager.KeelaKill = "Succubus";
+                    client.Aisling.QuestManager.KeelaCount = 5;
+                }
+
+                client.SendOptionsDialog(Mundane, $"Becareful out there.\n{{=qKill: {client.Aisling.QuestManager.KeelaCount}, {client.Aisling.QuestManager.KeelaKill}'s");
+                client.Aisling.QuestManager.KeelaQuesting = true;
+                break;
+            }
         }
+    }
+
+    private List<SkillTemplate> ObtainSkillList()
+    {
+        var skills = ServerSetup.Instance.GlobalSkillTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
+        var possibleSkillTemplates = new List<SkillTemplate>();
+
+        foreach (var (key, value) in skills)
+        {
+            possibleSkillTemplates.Add(value);
+        }
+
+        return possibleSkillTemplates;
+    }
+
+    private List<SpellTemplate> ObtainSpellList()
+    {
+        var spells = ServerSetup.Instance.GlobalSpellTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
+        var possibleSpellTemplates = new List<SpellTemplate>();
+
+        foreach (var (key, value) in spells)
+        {
+            possibleSpellTemplates.Add(value);
+        }
+
+        return possibleSpellTemplates;
     }
 }

@@ -1,22 +1,21 @@
 ﻿using Darkages.Enums;
 
-namespace Darkages.Models
+namespace Darkages.Models;
+
+public class StatusOperator
 {
-    public class StatusOperator
+    public StatusOperator(Operator option, int value)
     {
-        public StatusOperator(Operator option, int value)
-        {
-            Option = option;
-            Value = value;
-        }
-
-        public StatusOperator()
-        {
-            Option = Operator.Add;
-            Value = 0;
-        }
-
-        public Operator Option { get; set; }
-        public int Value { get; set; }
+        Option = option;
+        Value = value;
     }
+
+    public StatusOperator()
+    {
+        Option = Operator.Add;
+        Value = 0;
+    }
+
+    public Operator Option { get; set; }
+    public int Value { get; set; }
 }

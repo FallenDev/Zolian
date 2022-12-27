@@ -1,14 +1,13 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+public enum TileContent
 {
-    public enum TileContent
-    {
-        None,
-        Aisling,
-        Monster,
-        Mundane,
-        Wall,
-        Warp,
-        Item,
-        Money
-    }
+    None,
+    Aisling,
+    Monster,
+    Mundane,
+    Wall,
+    Warp,
+    Item,
+    Money
 }

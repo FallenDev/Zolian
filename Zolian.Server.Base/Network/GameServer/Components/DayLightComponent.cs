@@ -1,34 +1,33 @@
 ﻿using Darkages.Infrastructure;
 using Darkages.Network.Formats.Models.ServerFormats;
 
-namespace Darkages.Network.GameServer.Components
+namespace Darkages.Network.GameServer.Components;
+
+public class DayLightComponent : GameServerComponent
 {
-    public class DayLightComponent : GameServerComponent
+    private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(20.0f));
+    private byte _shade;
+
+    public DayLightComponent(Server.GameServer server) : base(server) { }
+
+    protected internal override void Update(TimeSpan elapsedTime)
     {
-        private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(20.0f));
-        private byte _shade;
+        if (!_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateDayLight);
+    }
 
-        public DayLightComponent(Server.GameServer server) : base(server) { }
+    private void UpdateDayLight()
+    {
+        var format20 = new ServerFormat20 { Shade = _shade };
 
-        protected internal override void Update(TimeSpan elapsedTime)
+        lock (Server.Clients)
         {
-            if (!_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateDayLight);
-        }
-
-        private void UpdateDayLight()
-        {
-            var format20 = new ServerFormat20 { Shade = _shade };
-
-            lock (Server.Clients)
+            foreach (var client in Server.Clients.Values)
             {
-                foreach (var client in Server.Clients.Values)
-                {
-                    client?.Send(format20);
-                }
+                client?.Send(format20);
             }
-
-            _shade += 1;
-            _shade %= 18;
         }
+
+        _shade += 1;
+        _shade %= 18;
     }
 }

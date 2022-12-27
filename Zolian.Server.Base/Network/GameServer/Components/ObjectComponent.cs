@@ -6,124 +6,123 @@ using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.Network.GameServer.Components
+namespace Darkages.Network.GameServer.Components;
+
+public class ObjectComponent : GameServerComponent
 {
-    public class ObjectComponent : GameServerComponent
+    private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(50));
+
+    public ObjectComponent(Server.GameServer server) : base(server) { }
+
+    protected internal override void Update(TimeSpan elapsedTime)
     {
-        private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(50));
+        if (_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateObjects);
+    }
 
-        public ObjectComponent(Server.GameServer server) : base(server) { }
+    private void UpdateObjects()
+    {
+        var connectedUsers = Server.Clients.Values.Where(i => i is { Aisling: { }, SerialSent: true }).Select(i => i.Aisling).ToArray();
+        var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
 
-        protected internal override void Update(TimeSpan elapsedTime)
+        foreach (var user in readyLoggedIn)
         {
-            if (_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateObjects);
+            UpdateClientObjects(user);
+
+            var onMap = user.Map.IsLocationOnMap(user);
+
+            if (onMap) continue;
+            user.Client.TransitionToMap(136, new Position(5, 7));
+            user.Client.SendMessage(0x02, "Something grabs your hand...");
         }
+    }
 
-        private void UpdateObjects()
+    private static void UpdateClientObjects(Aisling user)
+    {
+        var payload = new List<Sprite>();
+
+        if (user?.Map == null) return;
+        if (!user.LoggedIn || !user.Map.Ready) return;
+        if (!user.Client.SerialSent) return;
+
+        var objects = user.GetObjects(user.Map, selector => selector is { }, ObjectManager.Get.All).ToArray();
+        var objectsInView = objects.Where(s => s is { } && s.WithinRangeOf(user)).ToArray();
+        var objectsNotInView = objects.Where(s => s is { } && !s.WithinRangeOf(user)).ToArray();
+
+        RemoveObjects(user, objectsNotInView);
+        AddObjects(payload, user, objectsInView);
+
+        if (payload.Count <= 0) return;
+        payload.Reverse();
+        user.Show(Scope.Self, new ServerFormat07(payload));
+    }
+
+    private static void RemoveObjects(Aisling client, Sprite[] objectsToRemove)
+    {
+        if (objectsToRemove == null) return;
+        if (client == null) return;
+
+        foreach (var obj in objectsToRemove)
         {
-            var connectedUsers = Server.Clients.Values.Where(i => i is { Aisling: { }, SerialSent: true }).Select(i => i.Aisling).ToArray();
-            var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
+            if (obj.Serial == client.Serial) continue;
+            if (!client.View.ContainsKey(obj.Serial)) continue;
+            if (!client.View.TryRemove(obj.Serial, out _)) continue;
 
-            foreach (var user in readyLoggedIn)
+            if (obj is Monster monster)
             {
-                UpdateClientObjects(user);
+                if (monster.Summoner != null) continue;
 
-                var onMap = user.Map.IsLocationOnMap(user);
+                var valueCollection = monster.Scripts?.Values;
 
-                if (onMap) continue;
-                user.Client.TransitionToMap(136, new Position(5, 7));
-                user.Client.SendMessage(0x02, "Something grabs your hand...");
+                if (valueCollection != null)
+                    foreach (var script in valueCollection)
+                        script.OnLeave(client.Client);
             }
+
+            obj.HideFrom(client);
         }
+    }
 
-        private static void UpdateClientObjects(Aisling user)
+    private static void AddObjects(ICollection<Sprite> payload, Aisling self, IEnumerable<Sprite> objectsToAdd)
+    {
+        if (payload == null) return;
+        if (self == null) return;
+        if (objectsToAdd == null) return;
+
+        foreach (var obj in objectsToAdd)
         {
-            var payload = new List<Sprite>();
+            if (obj.Serial == self.Serial) continue;
+            if (self.View.ContainsKey(obj.Serial)) continue;
+            // If object is not an item or money, try to add it; If you cannot add it, continue
+            if (obj is not Item or Money)
+                if (!self.View.TryAdd(obj.Serial, obj)) continue;
 
-            if (user?.Map == null) return;
-            if (!user.LoggedIn || !user.Map.Ready) return;
-            if (!user.Client.SerialSent) return;
-
-            var objects = user.GetObjects(user.Map, selector => selector is { }, ObjectManager.Get.All).ToArray();
-            var objectsInView = objects.Where(s => s is { } && s.WithinRangeOf(user)).ToArray();
-            var objectsNotInView = objects.Where(s => s is { } && !s.WithinRangeOf(user)).ToArray();
-
-            RemoveObjects(user, objectsNotInView);
-            AddObjects(payload, user, objectsInView);
-
-            if (payload.Count <= 0) return;
-            payload.Reverse();
-            user.Show(Scope.Self, new ServerFormat07(payload));
-        }
-
-        private static void RemoveObjects(Aisling client, Sprite[] objectsToRemove)
-        {
-            if (objectsToRemove == null) return;
-            if (client == null) return;
-
-            foreach (var obj in objectsToRemove)
+            if (obj is Monster monster)
             {
-                if (obj.Serial == client.Serial) continue;
-                if (!client.View.ContainsKey(obj.Serial)) continue;
-                if (!client.View.TryRemove(obj.Serial, out _)) continue;
+                var valueCollection = monster.Scripts?.Values;
 
-                if (obj is Monster monster)
-                {
-                    if (monster.Summoner != null) continue;
+                if (monster.Template != null && (monster.Map != null))
+                    Monster.InitScripting(monster.Template, monster.Map, monster);
 
-                    var valueCollection = monster.Scripts?.Values;
-
-                    if (valueCollection != null)
-                        foreach (var script in valueCollection)
-                            script.OnLeave(client.Client);
-                }
-
-                obj.HideFrom(client);
+                if (valueCollection != null && valueCollection.Any())
+                    foreach (var script in valueCollection)
+                        script.OnApproach(self.Client);
             }
-        }
 
-        private static void AddObjects(ICollection<Sprite> payload, Aisling self, IEnumerable<Sprite> objectsToAdd)
-        {
-            if (payload == null) return;
-            if (self == null) return;
-            if (objectsToAdd == null) return;
-
-            foreach (var obj in objectsToAdd)
+            if (obj is Aisling other)
             {
-                if (obj.Serial == self.Serial) continue;
-                if (self.View.ContainsKey(obj.Serial)) continue;
-                // If object is not an item or money, try to add it; If you cannot add it, continue
-                if (obj is not Item or Money)
-                    if (!self.View.TryAdd(obj.Serial, obj)) continue;
+                if (self.Serial == other.Serial)
+                    continue;
 
-                if (obj is Monster monster)
-                {
-                    var valueCollection = monster.Scripts?.Values;
+                if (self.CanSeeSprite(other))
+                    other.ShowTo(self);
 
-                    if (monster.Template != null && (monster.Map != null))
-                        Monster.InitScripting(monster.Template, monster.Map, monster);
-
-                    if (valueCollection != null && valueCollection.Any())
-                        foreach (var script in valueCollection)
-                            script.OnApproach(self.Client);
-                }
-
-                if (obj is Aisling other)
-                {
-                    if (self.Serial == other.Serial)
-                        continue;
-
-                    if (self.CanSeeSprite(other))
-                        other.ShowTo(self);
-
-                    if (other.CanSeeSprite(self))
-                        self.ShowTo(other);
-                }
-                else
-                {
-                    self.View.TryAdd(obj.Serial, obj);
-                    payload.Add(obj);
-                }
+                if (other.CanSeeSprite(self))
+                    self.ShowTo(other);
+            }
+            else
+            {
+                self.View.TryAdd(obj.Serial, obj);
+                payload.Add(obj);
             }
         }
     }

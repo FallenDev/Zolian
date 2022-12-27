@@ -1,9 +1,8 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+public enum ElementQualifer
 {
-    public enum ElementQualifer
-    {
-        None = 0,
-        Random = 1,
-        Defined = 2
-    }
+    None = 0,
+    Random = 1,
+    Defined = 2
 }

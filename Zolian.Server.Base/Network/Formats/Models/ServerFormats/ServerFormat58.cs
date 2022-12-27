@@ -1,18 +1,17 @@
-﻿namespace Darkages.Network.Formats.Models.ServerFormats
+﻿namespace Darkages.Network.Formats.Models.ServerFormats;
+
+public class ServerFormat58 : NetworkFormat
 {
-    public class ServerFormat58 : NetworkFormat
+    /// <summary>
+    /// Map Load Complete
+    /// </summary>
+    public ServerFormat58()
     {
-        /// <summary>
-        /// Map Load Complete
-        /// </summary>
-        public ServerFormat58()
-        {
-            Command = 0x58;
-            Encrypted = true;
-        }
-
-        public override void Serialize(NetworkPacketReader reader) { }
-
-        public override void Serialize(NetworkPacketWriter writer) => writer.Write((ushort)0);
+        Command = 0x58;
+        Encrypted = true;
     }
+
+    public override void Serialize(NetworkPacketReader reader) { }
+
+    public override void Serialize(NetworkPacketWriter writer) => writer.Write((ushort)0);
 }

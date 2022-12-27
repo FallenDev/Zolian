@@ -12,112 +12,111 @@ using Microsoft.Extensions.Logging;
 
 using System.Data;
 
-namespace Darkages.Types
+namespace Darkages.Types;
+
+public class Legend
 {
-    public class Legend
+    public readonly List<LegendItem> LegendMarks = new();
+
+    public void AddLegend(LegendItem legend, GameClient client)
     {
-        public readonly List<LegendItem> LegendMarks = new();
+        if (legend == null) return;
+        if (client.Aisling == null) return;
+        if (LegendMarks.Contains(legend)) return;
+        LegendMarks.Add(legend);
+        AddToAislingDb(client.Aisling, legend);
+    }
 
-        public void AddLegend(LegendItem legend, GameClient client)
+    public bool Has(string lpVal)
+    {
+        return LegendMarks.Any(i => i.Value.Equals(lpVal));
+    }
+
+    public void Remove(LegendItem legend, GameClient client)
+    {
+        if (legend == null) return;
+        if (client.Aisling == null) return;
+        LegendMarks.Remove(legend);
+        DeleteFromAislingDb(legend);
+    }
+
+    public class LegendItem
+    {
+        public int LegendId { get; init; }
+        public string Category { get; init; }
+        public DateTime Time { get; init; }
+        public LegendColor Color { get; init; }
+        public byte Icon { get; init; }
+        public string Value { get; init; }
+    }
+
+    private static async void AddToAislingDb(Aisling aisling, LegendItem legend)
+    {
+        try
         {
-            if (legend == null) return;
-            if (client.Aisling == null) return;
-            if (LegendMarks.Contains(legend)) return;
-            LegendMarks.Add(legend);
-            AddToAislingDb(client.Aisling, legend);
+            await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            sConn.Open();
+            var cmd = new SqlCommand("AddLegendMark", sConn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            var legendId = Generator.GenerateNumber();
+
+            cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
+            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
+            cmd.Parameters.Add("@Category", SqlDbType.VarChar).Value = legend.Category;
+            cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
+            cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
+            cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;
+            cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = legend.Value;
+
+            cmd.CommandTimeout = 5;
+            cmd.ExecuteNonQuery();
+            sConn.Close();
         }
-
-        public bool Has(string lpVal)
+        catch (SqlException e)
         {
-            return LegendMarks.Any(i => i.Value.Equals(lpVal));
-        }
-
-        public void Remove(LegendItem legend, GameClient client)
-        {
-            if (legend == null) return;
-            if (client.Aisling == null) return;
-            LegendMarks.Remove(legend);
-            DeleteFromAislingDb(legend);
-        }
-
-        public class LegendItem
-        {
-            public int LegendId { get; init; }
-            public string Category { get; init; }
-            public DateTime Time { get; init; }
-            public LegendColor Color { get; init; }
-            public byte Icon { get; init; }
-            public string Value { get; init; }
-        }
-
-        private static async void AddToAislingDb(Aisling aisling, LegendItem legend)
-        {
-            try
+            if (e.Message.Contains("PK__Players"))
             {
-                await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var cmd = new SqlCommand("AddLegendMark", sConn);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                var legendId = Generator.GenerateNumber();
-
-                cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
-                cmd.Parameters.Add("@Category", SqlDbType.VarChar).Value = legend.Category;
-                cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
-                cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
-                cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;
-                cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = legend.Value;
-
-                cmd.CommandTimeout = 5;
-                cmd.ExecuteNonQuery();
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                if (e.Message.Contains("PK__Players"))
-                {
-                    aisling.Client.SendMessage(0x03, "Issue saving legend mark. Contact GM");
-                    Crashes.TrackError(e);
-                    return;
-                }
-
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                aisling.Client.SendMessage(0x03, "Issue saving legend mark. Contact GM");
                 Crashes.TrackError(e);
+                return;
             }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
+
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
         }
-
-        private static async void DeleteFromAislingDb(LegendItem legend)
+        catch (Exception e)
         {
-            if (legend.LegendId == 0) return;
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+    }
 
-            try
-            {
-                var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersLegend WHERE LegendId = @LegendId";
-                await sConn.ExecuteAsync(cmd, new { legend.LegendId });
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
+    private static async void DeleteFromAislingDb(LegendItem legend)
+    {
+        if (legend.LegendId == 0) return;
+
+        try
+        {
+            var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            sConn.Open();
+            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersLegend WHERE LegendId = @LegendId";
+            await sConn.ExecuteAsync(cmd, new { legend.LegendId });
+            sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
         }
     }
 }

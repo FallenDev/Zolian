@@ -1,23 +1,22 @@
 ﻿using Darkages.Interfaces;
 using Darkages.Network;
 
-namespace Darkages.Meta
+namespace Darkages.Meta;
+
+public class MetafileCollection : List<Metafile>, IFormattableNetwork
 {
-    public class MetafileCollection : List<Metafile>, IFormattableNetwork
+    public MetafileCollection(int capacity) : base(capacity) { }
+
+    public void Serialize(NetworkPacketReader reader) { }
+
+    public void Serialize(NetworkPacketWriter writer)
     {
-        public MetafileCollection(int capacity) : base(capacity) { }
+        writer.Write((ushort)Count);
 
-        public void Serialize(NetworkPacketReader reader) { }
-
-        public void Serialize(NetworkPacketWriter writer)
+        foreach (var metafile in this)
         {
-            writer.Write((ushort)Count);
-
-            foreach (var metafile in this)
-            {
-                writer.WriteStringA(metafile.Name);
-                writer.Write(metafile.Hash);
-            }
+            writer.WriteStringA(metafile.Name);
+            writer.Write(metafile.Hash);
         }
     }
 }

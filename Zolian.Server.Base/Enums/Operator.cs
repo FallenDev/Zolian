@@ -1,8 +1,7 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+public enum Operator
 {
-    public enum Operator
-    {
-        Add = 0,
-        Remove = 1
-    }
+    Add = 0,
+    Remove = 1
 }

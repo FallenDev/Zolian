@@ -3,25 +3,24 @@ using Darkages.Templates;
 using Moq;
 using NUnit.Framework;
 
-namespace ZolianTest.Sprites
+namespace ZolianTest.Sprites;
+
+public class ItemTest
 {
-    public class ItemTest
+    private Item variantItem;
+    private Item nonVariantItem;
+
+    [SetUp]
+    public void Setup()
     {
-        private Item variantItem;
-        private Item nonVariantItem;
+        variantItem = Mock.Of<Item>();
+        nonVariantItem = Mock.Of<Item>();
+        var templateOne = Mock.Of<ItemTemplate>();
+    }
 
-        [SetUp]
-        public void Setup()
-        {
-            variantItem = Mock.Of<Item>();
-            nonVariantItem = Mock.Of<Item>();
-            var templateOne = Mock.Of<ItemTemplate>();
-        }
+    [Test]
+    public void ShouldGetDisplayName()
+    {
 
-        [Test]
-        public void ShouldGetDisplayName()
-        {
-
-        }
     }
 }

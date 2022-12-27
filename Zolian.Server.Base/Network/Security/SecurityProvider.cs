@@ -1,12 +1,12 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.AppCenter.Crashes;
 
-namespace Darkages.Network.Security
+namespace Darkages.Network.Security;
+
+public sealed class SecurityProvider
 {
-    public sealed class SecurityProvider
+    private static readonly ImmutableArray<ImmutableArray<byte>> SaltTree = new[]
     {
-        private static readonly ImmutableArray<ImmutableArray<byte>> SaltTree = new[]
-        {
         new byte[]
         {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -148,36 +148,35 @@ namespace Darkages.Network.Security
         }.ToImmutableArray()
     }.ToImmutableArray();
 
-        public SecurityProvider()
-            : this(SecurityParameters.Default)
+    public SecurityProvider()
+        : this(SecurityParameters.Default)
+    {
+    }
+
+    private SecurityProvider(SecurityParameters parameters) => Parameters = parameters;
+
+    public SecurityParameters Parameters { get; set; }
+
+    public void Transform(NetworkPacket packet)
+    {
+        try
         {
+            Parallel.For(0, packet.Data.Length, delegate(int i)
+            {
+                var mod = (i / Parameters.Salt.Length) & 0xFF;
+
+                packet.Data[i] ^= (byte) (
+                    Parameters.Salt[i % Parameters.Salt.Length] ^
+                    SaltTree[Parameters.Seed][packet.Ordinal] ^
+                    SaltTree[Parameters.Seed][mod]);
+
+                if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Parameters.Seed][packet.Ordinal];
+            });
         }
-
-        private SecurityProvider(SecurityParameters parameters) => Parameters = parameters;
-
-        public SecurityParameters Parameters { get; set; }
-
-        public void Transform(NetworkPacket packet)
+        catch (Exception e)
         {
-            try
-            {
-                Parallel.For(0, packet.Data.Length, delegate(int i)
-                {
-                    var mod = (i / Parameters.Salt.Length) & 0xFF;
-
-                    packet.Data[i] ^= (byte) (
-                        Parameters.Salt[i % Parameters.Salt.Length] ^
-                        SaltTree[Parameters.Seed][packet.Ordinal] ^
-                        SaltTree[Parameters.Seed][mod]);
-
-                    if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Parameters.Seed][packet.Ordinal];
-                });
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.ToString());
-                Crashes.TrackError(e);
-            }
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
         }
     }
 }

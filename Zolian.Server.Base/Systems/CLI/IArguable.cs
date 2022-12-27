@@ -1,13 +1,12 @@
-﻿namespace Darkages.Systems.CLI
+﻿namespace Darkages.Systems.CLI;
+
+/// <summary>
+/// Represents an object that has multiple arguments/parameters.
+/// </summary>
+internal interface IArguable // Calm down! Why are we arguing?!
 {
     /// <summary>
-    /// Represents an object that has multiple arguments/parameters.
+    /// The arguments the object contains. Arguments may be nested inside others to create links of arguments.
     /// </summary>
-    internal interface IArguable // Calm down! Why are we arguing?!
-    {
-        /// <summary>
-        /// The arguments the object contains. Arguments may be nested inside others to create links of arguments.
-        /// </summary>
-        List<Argument> Arguments { get; }
-    }
+    List<Argument> Arguments { get; }
 }

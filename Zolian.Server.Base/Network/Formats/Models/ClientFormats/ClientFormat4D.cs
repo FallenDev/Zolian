@@ -1,20 +1,19 @@
-﻿namespace Darkages.Network.Formats.Models.ClientFormats
+﻿namespace Darkages.Network.Formats.Models.ClientFormats;
+
+public class ClientFormat4D : NetworkFormat
 {
-    public class ClientFormat4D : NetworkFormat
+    /// <summary>
+    /// Begin Casting
+    /// </summary>
+    public ClientFormat4D()
     {
-        /// <summary>
-        /// Begin Casting
-        /// </summary>
-        public ClientFormat4D()
-        {
-            Encrypted = true;
-            Command = 0x4D;
-        }
-
-        public byte Lines { get; private set; }
-
-        public override void Serialize(NetworkPacketReader reader) => Lines = reader.ReadByte();
-
-        public override void Serialize(NetworkPacketWriter writer) { }
+        Encrypted = true;
+        Command = 0x4D;
     }
+
+    public byte Lines { get; private set; }
+
+    public override void Serialize(NetworkPacketReader reader) => Lines = reader.ReadByte();
+
+    public override void Serialize(NetworkPacketWriter writer) { }
 }

@@ -8,122 +8,121 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Mileth
+namespace Darkages.GameScripts.Mundanes.Mileth;
+
+[Script("Pete")]
+public class Pete : MundaneScript
 {
-    [Script("Pete")]
-    public class Pete : MundaneScript
+    public Pete(GameServer server, Mundane mundane) : base(server, mundane) { }
+
+    public override void OnClick(GameServer server, GameClient client)
     {
-        public Pete(GameServer server, Mundane mundane) : base(server, mundane) { }
+        TopMenu(client);
+    }
 
-        public override void OnClick(GameServer server, GameClient client)
+    public override void TopMenu(IGameClient client)
+    {
+        var options = new List<OptionsDataItem>();
+
+        if (!client.Aisling.QuestManager.PeteComplete && client.Aisling.QuestManager.PeteKill == 0)
         {
-            TopMenu(client);
+            options.Add(new(0x01, "What's wrong?"));
         }
 
-        public override void TopMenu(IGameClient client)
+        if (!client.Aisling.QuestManager.PeteComplete && client.Aisling.QuestManager.PeteKill >= 1)
+            options.Add(new(0x04, $"{{=cI took care of them{{=a."));
+
+        client.SendOptionsDialog(Mundane, !client.Aisling.QuestManager.PeteComplete
+            ? "What to do.. Oh what to do?"
+            : "Thank you friend, please enjoy some mead on us in the tavern!", options.ToArray());
+    }
+
+    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    {
+        if (client.Aisling.Map.ID != Mundane.Map.ID)
         {
-            var options = new List<OptionsDataItem>();
-
-            if (!client.Aisling.QuestManager.PeteComplete && client.Aisling.QuestManager.PeteKill == 0)
-            {
-                options.Add(new(0x01, "What's wrong?"));
-            }
-
-            if (!client.Aisling.QuestManager.PeteComplete && client.Aisling.QuestManager.PeteKill >= 1)
-                options.Add(new(0x04, $"{{=cI took care of them{{=a."));
-
-            client.SendOptionsDialog(Mundane, !client.Aisling.QuestManager.PeteComplete
-                    ? "What to do.. Oh what to do?"
-                    : "Thank you friend, please enjoy some mead on us in the tavern!", options.ToArray());
+            client.Dispose();
+            return;
         }
 
-        public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+        var exp = (uint)Random.Shared.Next(1000, 5000);
+
+        switch (responseID)
         {
-            if (client.Aisling.Map.ID != Mundane.Map.ID)
+            case 0x01:
             {
-                client.Dispose();
-                return;
+                var options = new List<OptionsDataItem>
+                {
+                    new (0x03, "Sure."),
+                    new (0x02, "Not right now.")
+                };
+
+                client.SendOptionsDialog(Mundane, "We're having an issue in town with mice. They're getting into our mead, causing it to sour. Would you mind taking care of them for us?", options.ToArray());
+                break;
             }
-
-            var exp = (uint)Random.Shared.Next(1000, 5000);
-
-            switch (responseID)
+            case 0x02:
             {
-                case 0x01:
+                client.CloseDialog();
+                break;
+            }
+            case 0x03:
+            {
+                var killCount = Generator.RandNumGen10();
+                client.Aisling.QuestManager.PeteKill = killCount;
+                client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner");
+                client.SendOptionsDialog(Mundane, $"Please cull {killCount} mice anywhere in the crypt. {{=cCoords{{=a: {{=q89{{=a,{{=q 52");
+                Task.Delay(5000).ContinueWith(ct =>
+                {
+                    client.CloseDialog();
+                    client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
+                });
+                Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
+                Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                Task.Delay(25000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages"); });
+                Task.Delay(30000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                break;
+            }
+            case 0x04:
+            {
+                var options = new List<OptionsDataItem>();
+
+                if (client.Aisling.HasKilled("Mouse", client.Aisling.QuestManager.PeteKill))
+                {
+                    client.Aisling.QuestManager.PeteComplete = true;
+                    client.GiveExp(exp);
+                    client.Aisling.QuestManager.MilethReputation += 1;
+                    client.SendMessage(0x03, $"You've gained {exp} experience.");
+                    client.SendStats(StatusFlags.StructC);
+
+                    var legend = new Legend.LegendItem
                     {
-                        var options = new List<OptionsDataItem>
-                        {
-                            new (0x03, "Sure."),
-                            new (0x02, "Not right now.")
-                        };
+                        Category = "Adventure",
+                        Time = DateTime.Now,
+                        Color = LegendColor.Brass,
+                        Icon = (byte)LegendIcon.Heart,
+                        Value = "Saved Mileth's Mead"
+                    };
 
-                        client.SendOptionsDialog(Mundane, "We're having an issue in town with mice. They're getting into our mead, causing it to sour. Would you mind taking care of them for us?", options.ToArray());
-                        break;
-                    }
-                case 0x02:
+                    client.Aisling.LegendBook.AddLegend(legend, client);
+                }
+                else
+                {
+                    options.Add(new(0x02, "Sorry, I'll head back."));
+                    client.SendOptionsDialog(Mundane, "These darn mice... Are you sure you got them?.", options.ToArray());
+                    Task.Delay(5000).ContinueWith(ct =>
                     {
                         client.CloseDialog();
-                        break;
-                    }
-                case 0x03:
-                    {
-                        var killCount = Generator.RandNumGen10();
-                        client.Aisling.QuestManager.PeteKill = killCount;
-                        client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner");
-                        client.SendOptionsDialog(Mundane, $"Please cull {killCount} mice anywhere in the crypt. {{=cCoords{{=a: {{=q89{{=a,{{=q 52");
-                        Task.Delay(5000).ContinueWith(ct =>
-                        {
-                            client.CloseDialog();
-                            client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
-                        });
-                        Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                        Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
-                        Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                        Task.Delay(25000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages"); });
-                        Task.Delay(30000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                        break;
-                    }
-                case 0x04:
-                    {
-                        var options = new List<OptionsDataItem>();
+                        client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
+                    });
+                    Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                    Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
+                    Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                    break;
+                }
 
-                        if (client.Aisling.HasKilled("Mouse", client.Aisling.QuestManager.PeteKill))
-                        {
-                            client.Aisling.QuestManager.PeteComplete = true;
-                            client.GiveExp(exp);
-                            client.Aisling.QuestManager.MilethReputation += 1;
-                            client.SendMessage(0x03, $"You've gained {exp} experience.");
-                            client.SendStats(StatusFlags.StructC);
-
-                            var legend = new Legend.LegendItem
-                            {
-                                Category = "Adventure",
-                                Time = DateTime.Now,
-                                Color = LegendColor.Brass,
-                                Icon = (byte)LegendIcon.Heart,
-                                Value = "Saved Mileth's Mead"
-                            };
-
-                            client.Aisling.LegendBook.AddLegend(legend, client);
-                        }
-                        else
-                        {
-                            options.Add(new(0x02, "Sorry, I'll head back."));
-                            client.SendOptionsDialog(Mundane, "These darn mice... Are you sure you got them?.", options.ToArray());
-                            Task.Delay(5000).ContinueWith(ct =>
-                            {
-                                client.CloseDialog();
-                                client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
-                            });
-                            Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                            Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
-                            Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                            break;
-                        }
-
-                        client.SendOptionsDialog(Mundane, "Thank you friend, please enjoy some mead on us in the tavern!");
-                        break;
-                    }
+                client.SendOptionsDialog(Mundane, "Thank you friend, please enjoy some mead on us in the tavern!");
+                break;
             }
         }
     }

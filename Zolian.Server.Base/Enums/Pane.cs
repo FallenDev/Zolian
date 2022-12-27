@@ -1,11 +1,10 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+[Flags]
+public enum Pane
 {
-    [Flags]
-    public enum Pane
-    {
-        Inventory = 0,
-        Spells = 1,
-        Skills = 2,
-        Tools = 3
-    }
+    Inventory = 0,
+    Spells = 1,
+    Skills = 2,
+    Tools = 3
 }

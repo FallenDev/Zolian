@@ -6,52 +6,51 @@ using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
 
-namespace Darkages.GameScripts.Mundanes.Generic
+namespace Darkages.GameScripts.Mundanes.Generic;
+
+[Script("WorldShout")]
+public class WorldShout : MundaneScript
 {
-    [Script("WorldShout")]
-    public class WorldShout : MundaneScript
+    public WorldShout(GameServer server, Mundane mundane) : base(server, mundane) { }
+
+    public override void OnClick(GameServer server, GameClient client)
     {
-        public WorldShout(GameServer server, Mundane mundane) : base(server, mundane) { }
+        TopMenu(client);
+    }
 
-        public override void OnClick(GameServer server, GameClient client)
+    public override void TopMenu(IGameClient client)
+    {
+        var options = new List<OptionsDataItem>
         {
-            TopMenu(client);
+            new (0x0001, "World Announce"),
+        };
+        client.SendOptionsDialog(Mundane, "What do you wish to announce?", options.ToArray());
+
+        client.DlgSession ??= new DialogSession(client.Aisling, Mundane.Serial)
+        {
+            Callback = OnResponse
+        };
+    }
+
+    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    {
+        if (!string.IsNullOrEmpty(args))
+        {
+            foreach (var m in GetObjects<Aisling>(null, n => n.LoggedIn))
+                m.Client.SystemMessage($"{{=s{client.Aisling}: {args}");
+
+            client.CloseDialog();
+            client.CloseDialog();
         }
-
-        public override void TopMenu(IGameClient client)
+        else
         {
-            var options = new List<OptionsDataItem>
+            switch (responseID)
             {
-                new (0x0001, "World Announce"),
-            };
-            client.SendOptionsDialog(Mundane, "What do you wish to announce?", options.ToArray());
-
-            client.DlgSession ??= new DialogSession(client.Aisling, Mundane.Serial)
-            {
-                Callback = OnResponse
-            };
-        }
-
-        public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
-        {
-            if (!string.IsNullOrEmpty(args))
-            {
-                foreach (var m in GetObjects<Aisling>(null, n => n.LoggedIn))
-                    m.Client.SystemMessage($"{{=s{client.Aisling}: {args}");
-
-                client.CloseDialog();
-                client.CloseDialog();
-            }
-            else
-            {
-                switch (responseID)
+                case 0x0001:
                 {
-                    case 0x0001:
-                    {
-                        client.Send(new ReactorInputSequence(Mundane, "What do you want to shout?", "Remember to always be kind and considerate.", 40));
-                    }
-                        break;
+                    client.Send(new ReactorInputSequence(Mundane, "What do you want to shout?", "Remember to always be kind and considerate.", 40));
                 }
+                    break;
             }
         }
     }

@@ -1,44 +1,43 @@
 ﻿using Darkages.Network.Client;
 
-namespace Darkages.Types
+namespace Darkages.Types;
+
+public class Pet : Summon
 {
-    public class Pet : Summon
+    private readonly GameClient _client;
+
+    public Pet(GameClient client) : base(client)
     {
-        private readonly GameClient _client;
+        _client = client;
+    }
 
-        public Pet(GameClient client) : base(client)
+    // addition pet logic can go here, such as TP back to player.
+    public override void UpdateSpawns(TimeSpan elapsedTime)
+    {
+        KeepSpawnsNearSummoner();
+
+        void KeepSpawnsNearSummoner()
         {
-            _client = client;
-        }
-
-        // addition pet logic can go here, such as TP back to player.
-        public override void UpdateSpawns(TimeSpan elapsedTime)
-        {
-            KeepSpawnsNearSummoner();
-
-            void KeepSpawnsNearSummoner()
+            foreach (var (_, spawn) in Spawns)
             {
-                foreach (var (_, spawn) in Spawns)
+                var aisling = spawn.Summoner;
+
+                if (aisling == null)
+                    DeSpawn();
+
+                if (aisling == null || aisling.WithinRangeOf(spawn, 9, true))
+                    continue;
+
+                var sprite = GetObject(null, i => i.Serial == spawn.Serial, Get.All);
+
+                //warp to our summoner.
+                if (sprite != null)
                 {
-                    var aisling = spawn.Summoner;
-
-                    if (aisling == null)
-                        DeSpawn();
-
-                    if (aisling == null || aisling.WithinRangeOf(spawn, 9, true))
-                        continue;
-
-                    var sprite = GetObject(null, i => i.Serial == spawn.Serial, Get.All);
-
-                    //warp to our summoner.
-                    if (sprite != null)
-                    {
-                        sprite.X = aisling.X;
-                        sprite.Y = aisling.Y;
-                        sprite.CurrentMapId = aisling.CurrentMapId;
-                        sprite.Direction = aisling.Direction;
-                        sprite.UpdateAddAndRemove();
-                    }
+                    sprite.X = aisling.X;
+                    sprite.Y = aisling.Y;
+                    sprite.CurrentMapId = aisling.CurrentMapId;
+                    sprite.Direction = aisling.Direction;
+                    sprite.UpdateAddAndRemove();
                 }
             }
         }

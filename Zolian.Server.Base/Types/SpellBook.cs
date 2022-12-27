@@ -10,93 +10,92 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using ServiceStack;
 
-namespace Darkages.Types
+namespace Darkages.Types;
+
+public class SpellBook : ObjectManager
 {
-    public class SpellBook : ObjectManager
+    private const int SpellLength = 86;
+    public readonly ConcurrentDictionary<int, Spell> Spells = new();
+
+    public SpellBook()
     {
-        private const int SpellLength = 86;
-        public readonly ConcurrentDictionary<int, Spell> Spells = new();
+        for (var i = 0; i < SpellLength; i++) Spells[i + 1] = null;
+    }
 
-        public SpellBook()
+    public int FindEmpty(int start = 0)
+    {
+        for (var i = start; i < SpellLength; i++)
         {
-            for (var i = 0; i < SpellLength; i++) Spells[i + 1] = null;
-        }
-
-        public int FindEmpty(int start = 0)
-        {
-            for (var i = start; i < SpellLength; i++)
+            switch (i)
             {
-                switch (i)
-                {
-                    case 35:
-                    case 71:
-                        continue;
-                }
-
-                if (Spells[i + 1] == null) return i + 1;
+                case 35:
+                case 71:
+                    continue;
             }
 
-            return -1;
+            if (Spells[i + 1] == null) return i + 1;
         }
 
-        public Spell FindInSlot(int slot)
+        return -1;
+    }
+
+    public Spell FindInSlot(int slot)
+    {
+        Spell ret = null;
+
+        if (Spells.ContainsKey(slot))
+            ret = Spells[slot];
+
+        return ret is { Template: { } } ? ret : null;
+    }
+
+    public IEnumerable<Spell> GetSpells(Predicate<Spell> predicate) => Spells.Values.Where(i => i != null && predicate(i)).ToArray();
+
+    public bool HasSpell(string s)
+    {
+        if (Spells == null || Spells.Count == 0) return false;
+
+        return Spells.Values.Where(spell => spell is not null).Where(spell => !spell.Template.Name.IsNullOrEmpty()).Any(spell => spell.Template.Name.ToLower().Equals(s.ToLower()));
+    }
+
+    public bool Has(SpellTemplate s) => Spells.Where(i => i.Value?.Template != null).Select(i => i.Value.Template).FirstOrDefault(i => i.Name.Equals(s.Name)) != null;
+
+    public Spell Remove(byte movingFrom, bool spellDelete = false)
+    {
+        if (!Spells.ContainsKey(movingFrom)) return null;
+        var copy = Spells[movingFrom];
+        if (spellDelete)
         {
-            Spell ret = null;
-
-            if (Spells.ContainsKey(slot))
-                ret = Spells[slot];
-
-            return ret is { Template: { } } ? ret : null;
+            DeleteFromAislingDb(copy);
         }
 
-        public IEnumerable<Spell> GetSpells(Predicate<Spell> predicate) => Spells.Values.Where(i => i != null && predicate(i)).ToArray();
+        Spells[movingFrom] = null;
+        return copy;
+    }
 
-        public bool HasSpell(string s)
+    public void Set(Spell s) => Spells[s.Slot] = s;
+
+    private static void DeleteFromAislingDb(Spell spell)
+    {
+        try
         {
-            if (Spells == null || Spells.Count == 0) return false;
-
-            return Spells.Values.Where(spell => spell is not null).Where(spell => !spell.Template.Name.IsNullOrEmpty()).Any(spell => spell.Template.Name.ToLower().Equals(s.ToLower()));
+            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            sConn.Open();
+            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellId = @SpellId";
+            sConn.Execute(cmd, new { spell.SpellId });
+            sConn.Close();
         }
-
-        public bool Has(SpellTemplate s) => Spells.Where(i => i.Value?.Template != null).Select(i => i.Value.Template).FirstOrDefault(i => i.Name.Equals(s.Name)) != null;
-
-        public Spell Remove(byte movingFrom, bool spellDelete = false)
+        catch (SqlException e)
         {
-            if (!Spells.ContainsKey(movingFrom)) return null;
-            var copy = Spells[movingFrom];
-            if (spellDelete)
-            {
-                DeleteFromAislingDb(copy);
-            }
-
-            Spells[movingFrom] = null;
-            return copy;
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
         }
-
-        public void Set(Spell s) => Spells[s.Slot] = s;
-
-        private static void DeleteFromAislingDb(Spell spell)
+        catch (Exception e)
         {
-            try
-            {
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellId = @SpellId";
-                sConn.Execute(cmd, new { spell.SpellId });
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
         }
     }
 }

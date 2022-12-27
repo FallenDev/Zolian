@@ -3,40 +3,39 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ServerFormats;
 
-namespace Darkages.Types
+namespace Darkages.Types;
+
+public class Dialog
 {
-    public class Dialog
+    private List<DialogSequence> Sequences = new();
+
+    public Dialog()
     {
-        private List<DialogSequence> Sequences = new();
+        Serial = Generator.GenerateNumber();
+    }
 
-        public Dialog()
+    public bool CanMoveBack => SequenceIndex - 1 >= 0;
+    public bool CanMoveNext => SequenceIndex + 1 < Sequences.Count;
+    public DialogSequence Current => Sequences[SequenceIndex];
+
+    public ushort DisplayImage { get; set; }
+    private int SequenceIndex { get; set; }
+    private int Serial { get; set; }
+
+    public DialogSequence Invoke(GameClient client)
+    {
+        client.Send(new ServerFormat30(client, this));
         {
-            Serial = Generator.GenerateNumber();
+            Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
+            return Current;
         }
+    }
 
-        public bool CanMoveBack => SequenceIndex - 1 >= 0;
-        public bool CanMoveNext => SequenceIndex + 1 < Sequences.Count;
-        public DialogSequence Current => Sequences[SequenceIndex];
+    public void MoveNext(GameClient client)
+    {
+        if (CanMoveNext)
+            SequenceIndex++;
 
-        public ushort DisplayImage { get; set; }
-        private int SequenceIndex { get; set; }
-        private int Serial { get; set; }
-
-        public DialogSequence Invoke(GameClient client)
-        {
-            client.Send(new ServerFormat30(client, this));
-            {
-                Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
-                return Current;
-            }
-        }
-
-        public void MoveNext(GameClient client)
-        {
-            if (CanMoveNext)
-                SequenceIndex++;
-
-            client.DlgSession.Sequence = (ushort)SequenceIndex;
-        }
+        client.DlgSession.Sequence = (ushort)SequenceIndex;
     }
 }

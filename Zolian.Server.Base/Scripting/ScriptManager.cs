@@ -1,51 +1,50 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Darkages.Scripting
+namespace Darkages.Scripting;
+
+public static class ScriptManager
 {
-    public static class ScriptManager
+    private static readonly Dictionary<string, Type> Scripts = new();
+
+    static ScriptManager()
     {
-        private static readonly Dictionary<string, Type> Scripts = new();
+        var assembly = Assembly.GetExecutingAssembly();
 
-        static ScriptManager()
+        foreach (var type in assembly.GetTypes())
         {
-            var assembly = Assembly.GetExecutingAssembly();
+            var attribute = type.GetCustomAttributes(typeof(ScriptAttribute), false).Cast<ScriptAttribute>().FirstOrDefault();
 
-            foreach (var type in assembly.GetTypes())
-            {
-                var attribute = type.GetCustomAttributes(typeof(ScriptAttribute), false).Cast<ScriptAttribute>().FirstOrDefault();
+            if (attribute == null) continue;
 
-                if (attribute == null) continue;
-
-                Scripts.Add(attribute.Name, type);
-            }
-        }
-
-        public static ConcurrentDictionary<string, TScript> Load<TScript>(string values, params object[] args)
-            where TScript : class
-        {
-            if (values == null) return null;
-
-            var data = new ConcurrentDictionary<string, TScript>();
-
-            Scripts.TryGetValue(values, out var script);
-            if (script == null) return null;
-
-            var instance = Activator.CreateInstance(script, args);
-            data[values] = instance as TScript;
-
-            return data;
+            Scripts.Add(attribute.Name, type);
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class ScriptAttribute : Attribute
+    public static ConcurrentDictionary<string, TScript> Load<TScript>(string values, params object[] args)
+        where TScript : class
     {
-        public ScriptAttribute(string name)
-        {
-            Name = name;
-        }
+        if (values == null) return null;
 
-        public string Name { get; }
+        var data = new ConcurrentDictionary<string, TScript>();
+
+        Scripts.TryGetValue(values, out var script);
+        if (script == null) return null;
+
+        var instance = Activator.CreateInstance(script, args);
+        data[values] = instance as TScript;
+
+        return data;
     }
+}
+
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+public class ScriptAttribute : Attribute
+{
+    public ScriptAttribute(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; }
 }

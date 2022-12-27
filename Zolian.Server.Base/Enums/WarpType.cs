@@ -1,9 +1,8 @@
-﻿namespace Darkages.Enums
+﻿namespace Darkages.Enums;
+
+[Flags]
+public enum WarpType
 {
-    [Flags]
-    public enum WarpType
-    {
-        Map,
-        World
-    }
+    Map,
+    World
 }
