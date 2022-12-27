@@ -273,6 +273,8 @@ CREATE TABLE PlayersQuests
 	[AbelShopAccess] BIT NULL,
 	[PeteKill] INT NULL,
 	[PeteComplete] BIT NULL,
+	[SwampAccess] BIT NULL,
+	[SwampCount] INT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
