@@ -4,6 +4,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
 [![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
 ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/FallenDev/Zolian)
+![GitHub](https://img.shields.io/github/license/FallenDev/Zolian)
 
 Darkages Server Emulator
 * Zolian Team and FallenDev DO NOT support or sponsor illegal public servers. Using this project is for testing, and learning. Please see licensing https://www.thebucknetwork.com/privacy for more details. 
