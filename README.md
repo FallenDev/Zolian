@@ -1,4 +1,10 @@
-# Zolian - Kingdom of Chaos
+# Zolian - Kingdom of Chaos  
+
+[![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
+![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
+![Scrutinizer code quality (GitHub/Bitbucket)](https://img.shields.io/scrutinizer/quality/g/FallenDev/Zolian/master)
+[![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
+
 Darkages Server Emulator
 * Zolian Team and FallenDev DO NOT support or sponsor illegal public servers. Using this project is for testing, and learning. Please see licensing https://www.thebucknetwork.com/privacy for more details. 
 * Zolian runs as a fair-use project although the server is legal and released under GNU AGPL v3, the client for which it runs on is proprietary software and Licensed to Kru Interactive.
