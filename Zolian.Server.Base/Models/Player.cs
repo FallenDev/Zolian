@@ -12,6 +12,8 @@ namespace Darkages.Models
         public bool Hacked { get; set; }
         public bool LoggedIn { get; set; }
         public DateTime LastLogged { get; set; }
+        public string LastIP { get; set; }
+        public string LastAttemptIP { get; set; }
         public uint AbpLevel { get; set; }
         public uint AbpNext { get; set; }
         public uint AbpTotal { get; set; }

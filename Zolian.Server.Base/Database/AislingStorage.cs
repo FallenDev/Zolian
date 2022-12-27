@@ -80,6 +80,8 @@ namespace Darkages.Database
                 cmd.Parameters.Add("@Pass", SqlDbType.VarChar).Value = obj.Password;
                 cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
                 cmd.Parameters.Add("@Hacked", SqlDbType.Bit).Value = obj.Hacked;
+                cmd.Parameters.Add("@LastIP", SqlDbType.VarChar).Value = obj.LastIP;
+                cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
                 cmd.CommandTimeout = 5;
                 cmd.ExecuteNonQuery();
                 connection.Close();

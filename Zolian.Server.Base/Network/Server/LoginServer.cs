@@ -271,6 +271,8 @@ namespace Darkages.Network.Server
 
             try
             {
+                aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
+
                 switch (format.Username.ToLower())
                 {
                     //ToDo: If name is set in database as 'asdf' it locks the account as a maintenance account. This can be used to ban players.
@@ -287,7 +289,9 @@ namespace Darkages.Network.Server
                         // Set IP check
                         if (ip.Equals(ipLocal))
                         {
-                            aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
+                            aisling.Result.LastAttemptIP = $"{ip}";
+                            aisling.Result.LastIP = $"{ip}";
+                            aisling.Result.PasswordAttempts = 0;
                             SavePassword(aisling.Result);
                             LoginAsAisling(client, aisling.Result);
                             return;
@@ -296,7 +300,9 @@ namespace Darkages.Network.Server
                         // Loopback check
                         if (ip.Equals(loopback))
                         {
-                            aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
+                            aisling.Result.LastAttemptIP = $"{ip}";
+                            aisling.Result.LastIP = $"{ip}";
+                            aisling.Result.PasswordAttempts = 0;
                             SavePassword(aisling.Result);
                             LoginAsAisling(client, aisling.Result);
                             return;
@@ -307,8 +313,6 @@ namespace Darkages.Network.Server
                         return;
                     }
                 }
-
-                aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
 
                 if (aisling.Result != null)
                 {
@@ -335,6 +339,7 @@ namespace Darkages.Network.Server
                         if (aisling.Result.PasswordAttempts <= 9)
                         {
                             ServerSetup.Logger($"{aisling.Result} attempted an incorrect password.");
+                            aisling.Result.LastAttemptIP = $"{ip}";
                             aisling.Result.PasswordAttempts += 1;
                             SavePassword(aisling.Result);
                             client.SendMessageBox(0x02, "Incorrect Information provided.");
@@ -343,6 +348,7 @@ namespace Darkages.Network.Server
 
                         ServerSetup.Logger($"{aisling.Result} was locked to protect their account.");
                         client.SendMessageBox(0x02, "Hacking detected, the player has been locked.");
+                        aisling.Result.LastAttemptIP = $"{ip}";
                         aisling.Result.Hacked = true;
                         SavePassword(aisling.Result);
                         return;
@@ -377,6 +383,8 @@ namespace Darkages.Network.Server
                 }
             }
 
+            aisling.Result.LastAttemptIP = $"{ip}";
+            aisling.Result.LastIP = $"{ip}";
             aisling.Result.PasswordAttempts = 0;
             SavePassword(aisling.Result);
             LoginAsAisling(client, aisling.Result);
