@@ -50,7 +50,7 @@ namespace Zolian.AlwaysOn
 
         private static void StartProcess()
         {
-            const string exePath = "Z:\\Zolian\\Staging\\net7.0-windows\\win-x64\\Zolian.GameServer.exe";
+            var exePath = Directory.GetCurrentDirectory() + "\\Zolian.GameServer.exe";
             if (!File.Exists(exePath)) return;
             var pr = new Process();
 
