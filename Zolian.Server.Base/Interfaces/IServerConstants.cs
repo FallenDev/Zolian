@@ -1,5 +1,4 @@
-﻿using Darkages.Enums;
-using Darkages.Infrastructure;
+﻿using Darkages.Infrastructure;
 using Darkages.Types;
 
 namespace Darkages.Interfaces;

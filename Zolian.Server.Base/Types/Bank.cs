@@ -7,8 +7,6 @@ using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Sprites;
-using Funq;
-
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;

@@ -17,8 +17,6 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using RestSharp;
 
 using ServiceStack;
@@ -41,7 +39,6 @@ namespace Darkages.Network.Server
         /// <summary>
         /// Lobby Connection - First client-side checks
         /// </summary>
-        /// <param name="client"></param>
         protected override async void ClientConnected(LoginClient client)
         {
             if (client == null) return;
@@ -71,6 +68,9 @@ namespace Darkages.Network.Server
             client.Send(new ServerFormat7E());
         }
 
+        /// <summary>
+        /// Client versioning check
+        /// </summary>
         protected override void Format00Handler(LoginClient client, ClientFormat00 format)
         {
             if (client == null) return;
@@ -94,6 +94,10 @@ namespace Darkages.Network.Server
             }
         }
 
+        /// <summary>
+        /// Client IP Check - Blacklist and BOGON list checks
+        /// </summary>
+        /// <returns>Boolean, whether or not the IP has been listed as valid</returns>
         private async Task<bool> ClientOnBlackList(LoginClient client, IPEndPoint endPoint)
         {
             if (client == null) return true;
@@ -210,6 +214,9 @@ namespace Darkages.Network.Server
             return true;
         }
 
+        /// <summary>
+        /// Player Creation checks
+        /// </summary>
         protected override void Format02Handler(LoginClient client, ClientFormat02 format)
         {
             if (client is not { Authorized: true }) return;
@@ -222,7 +229,7 @@ namespace Darkages.Network.Server
             {
                 if (regex.IsMatch(format.AislingUsername))
                 {
-                    Analytics.TrackEvent($"Player attempted to create an unsupported username. {format.AislingUsername} \n {client.Serial.ToString()}");
+                    Analytics.TrackEvent($"Player attempted to create an unsupported username. {format.AislingUsername} \n {client.Serial}");
                     client.SendMessageBox(0x08, "{=b Yea... No. \n\n{=qDepending on what you just tried to do, you may receive a strike on your IP.");
                     client.CreateInfo = null;
                     return;
@@ -253,6 +260,9 @@ namespace Darkages.Network.Server
             client.SendMessageBox(0x00, "");
         }
 
+        /// <summary>
+        /// Player Login checks
+        /// </summary>
         protected override void Format03Handler(LoginClient client, ClientFormat03 format)
         {
             if (client is not { Authorized: true }) return;
@@ -263,15 +273,18 @@ namespace Darkages.Network.Server
             {
                 switch (format.Username.ToLower())
                 {
+                    //ToDo: If name is set in database as 'asdf' it locks the account as a maintenance account. This can be used to ban players.
                     case "asdf":
                         client.SendMessageBox(0x02, "Maintenance Account, denied access");
                         return;
+                    //ToDo: If GM account, restrict that account based on IP address connecting to that account.
                     case "death":
                     {
-                        const string gmIp = "192.168.50.1";
+                        const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
                         var ipLocal = IPAddress.Parse(gmIp);
                         var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
 
+                        // Set IP check
                         if (ip.Equals(ipLocal))
                         {
                             aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
@@ -280,6 +293,7 @@ namespace Darkages.Network.Server
                             return;
                         }
 
+                        // Loopback check
                         if (ip.Equals(loopback))
                         {
                             aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
@@ -288,6 +302,7 @@ namespace Darkages.Network.Server
                             return;
                         }
                         
+                        // Deny access if neither check 'true'
                         client.SendMessageBox(0x02, "GM Account, denied access");
                         return;
                     }
@@ -297,6 +312,7 @@ namespace Darkages.Network.Server
 
                 if (aisling.Result != null)
                 {
+                    // GM 'unlock' command is used -- This is set within your Server.Configurations
                     if (format.Password == ServerSetup.Instance.Unlock)
                     {
                         aisling.Result.Hacked = false;
@@ -307,6 +323,7 @@ namespace Darkages.Network.Server
                         return;
                     }
 
+                    // Check if player brute force protection was activated - GM will need to unlock account
                     if (aisling.Result.Hacked)
                     {
                         client.SendMessageBox(0x02, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
@@ -345,6 +362,7 @@ namespace Darkages.Network.Server
                 return;
             }
 
+            // This setting is for testing purposes, do not change it unless you are debugging
             if (ServerSetup.Instance.Config.MultiUserLoginCheck)
             {
                 var aislings = ServerSetup.Instance.Game.Clients.Values.Where(i =>
@@ -364,6 +382,9 @@ namespace Darkages.Network.Server
             LoginAsAisling(client, aisling.Result);
         }
 
+        /// <summary>
+        /// Redirect player and login, after all checks have returned successful
+        /// </summary>
         private void LoginAsAisling(LoginClient client, Aisling aisling)
         {
             if (client is not { Authorized: true }) return;
@@ -411,6 +432,9 @@ namespace Darkages.Network.Server
             }
         }
 
+        /// <summary>
+        /// Create New Player from template
+        /// </summary>
         protected override async void Format04Handler(LoginClient client, ClientFormat04 format)
         {
             if (client is not { Authorized: true }) return;
@@ -471,6 +495,9 @@ namespace Darkages.Network.Server
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Change Player's password
+        /// </summary>
         protected override void Format26Handler(LoginClient client, ClientFormat26 format)
         {
             if (client is not { Authorized: true }) return;
@@ -520,6 +547,9 @@ namespace Darkages.Network.Server
             client.SendMessageBox(0x00, "");
         }
 
+        /// <summary>
+        /// GM Notification Load
+        /// </summary>
         protected override void Format4BHandler(LoginClient client, ClientFormat4B format)
         {
             if (client is not { Authorized: true }) return;
@@ -532,6 +562,9 @@ namespace Darkages.Network.Server
             });
         }
 
+        /// <summary>
+        /// Server Table and Redirect
+        /// </summary>
         protected override void Format57Handler(LoginClient client, ClientFormat57 format)
         {
             if (client is not { Authorized: true }) return;
@@ -563,6 +596,9 @@ namespace Darkages.Network.Server
             }
         }
 
+        /// <summary>
+        /// Nexon Verification
+        /// </summary>
         protected override void Format68Handler(LoginClient client, ClientFormat68 format)
         {
             if (client is not { Authorized: true }) return;
@@ -570,6 +606,9 @@ namespace Darkages.Network.Server
             client.Send(new ServerFormat66());
         }
 
+        /// <summary>
+        /// Metadata Load (Skills, Spells, Quests, etc)
+        /// </summary>
         protected override void Format7BHandler(LoginClient client, ClientFormat7B format)
         {
             if (client is not { Authorized: true }) return;

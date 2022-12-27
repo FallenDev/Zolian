@@ -1,12 +1,9 @@
-﻿using Darkages.Common;
-using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
-using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Mehadi
 {

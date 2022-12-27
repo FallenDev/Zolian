@@ -3,7 +3,6 @@ using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
-using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.GameScripts.Items
 {
