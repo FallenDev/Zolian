@@ -2,7 +2,6 @@
 
 [![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
 ![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
-![Scrutinizer code quality (GitHub/Bitbucket)](https://img.shields.io/scrutinizer/quality/g/FallenDev/Zolian/master)
 [![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
 
 Darkages Server Emulator
