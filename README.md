@@ -1,23 +1,34 @@
-# Zolian; - Kingdom of Chaos
-A Private DarkAges Project
+# Zolian - Kingdom of Chaos
+Darkages Server Emulator
+* Zolian Team and FallenDev DO NOT support or sponsor illegal public servers. Using this project is for testing, and learning. Please see licensing https://www.thebucknetwork.com/privacy for more details. 
+* Zolian runs as a fair-use project although the server is legal and released under GNU AGPL v3, the client for which it runs on is proprietary software and Licensed to Kru Interactive.
 
-# Hades
+## Tech Stack
+C# .NET 7 & SQL Server 2019
 
-Hades, Formally known as Lorule, is a Sandbox Server built upon the DarkAges 7.18 Client
-The base logic was built by wren; located here: https://github.com/wren11/DarkAges-Lorule-Server
+## Authors & Contributors
 
-This repository is currently live and playable here: https://TheBuckNetwork.com
+Hades, Formally known as Lorule was the original basis of this infrastructure.
+- wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server
+- Team Hybrasyl: https://github.com/hybrasyl
+- Special Mentions: Team Legends, Team FoT
 
 # Zolian
+Server is a custom implementation of the doomvas emulator. Most of the mechanics featured, are derived from other popular mmorpgs. Here you can explore, create, and test ideas out. Or host your own private server for learning purposes. I hope you enjoy exploring this source!
 
-Is a different approach to the darkages universe. 
-Zolian is a server based on Dungeons & Dragons, Final Fantasy, Diablo 3, Zelda, Elder Scrolls, 
-World of Warcraft and many other MMORPGs. Many of the grind mechanics are from traditional Hack
-and Slashers that you know and love. Here you'll be able to build a character up and play either
-with friends or run solo. The main focus of Zolian is to balance the characters while breathing
-new life into Nexon's Darkages. That includes new music, new maps, classes, races, and pvp zones
-much like you would see in open world MMOs. 
+## Contributing
+
+Zolian is an open-source project, there are quite a few ways you can contribute here:
+* Join the Community: https://discord.gg/WbP2wU5CcB
+* Designing new sprites
+* Developing directly to the project
+* Helping create a wiki
+* By joining our Discord and making suggestions
+
+## Financial
+
+Zolian is a fair-use project and accepts zero compensations of any kind
 
 ## License
-
-Please visit: https://www.thebucknetwork.com/Privacy
+- Zolian source, and components are released under the GNU AGPL v3
+- Please visit: https://www.thebucknetwork.com/Privacy
