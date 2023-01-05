@@ -16,9 +16,11 @@ C# .NET 7 & SQL Server 2022
 ## Authors & Contributors
 
 Hades, Formally known as Lorule was the original basis of this infrastructure.
-- wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server
+- wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server   
+
 Hybrasyl, helped with multiple packet formations   
-- Team Hybrasyl: https://github.com/hybrasyl
+- Team Hybrasyl: https://github.com/hybrasyl   
+
 Other teams, apart of the Discord DA Community Developers Group
 - Special Mentions: Team Legends, Team FoT
 
