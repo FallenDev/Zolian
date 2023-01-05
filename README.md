@@ -6,7 +6,7 @@
 ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/FallenDev/Zolian)
 ![GitHub](https://img.shields.io/github/license/FallenDev/Zolian)
 
-Darkages Server Emulator
+Darkages Server Emulator (Currently Emulating for 7.18 US Client)   
 * Zolian Team and FallenDev DO NOT support or sponsor illegal public servers. Using this project is for testing, and learning purposes. Please see licensing https://www.thebucknetwork.com/privacy for more details. 
 * Zolian runs as a fair-use project although the server is legal and released under GNU AGPL v3, the client for which it runs on is proprietary software and Licensed to Kru Interactive from Nexon.
 
