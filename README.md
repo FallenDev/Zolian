@@ -1,5 +1,4 @@
 # Zolian - Kingdom of Chaos  
-
 [![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
 ![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
 [![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
@@ -28,7 +27,6 @@ Other teams, apart of the Discord DA Community Developers Group
 Server is a custom implementation of the doomvas emulator. Most of the mechanics featured, are derived from other popular mmorpgs. Here you can explore, create, and test ideas out. Or host your own private server for learning purposes. I hope you enjoy exploring this source!
 
 ## Contributing
-
 Zolian is an open-source project, there are quite a few ways you can contribute here:
 * Join the Community: https://discord.gg/WbP2wU5CcB
 * Designing new sprites
@@ -36,8 +34,16 @@ Zolian is an open-source project, there are quite a few ways you can contribute 
 * Helping create a wiki
 * By joining our Discord and making suggestions
 
-## Financial
+## Community
+Zolian isn't the only project out there, nor does it claim to have any exlusivity over any of the others. Please visit their projects and enjoy what they've built.   
+[Hybrasyl](https://www.hybrasyl.com/)   
+[Legends Age of Chaos](https://discord.gg/YekJdzKzQR)   
+[Fragments of Temuair](https://fragmentsoftemuair1.wixsite.com/website/downloads)   
+[Hemloch](https://discord.gg/GU4j5wv66H)   
+[Elia Online - LoD Project](https://discord.gg/SKvK6b4ECv)   
+- If any of these links are broken, please report so in Zolian's Discord, and they'll be promptly fixed
 
+## Financial
 Zolian is a fair-use project and accepts zero compensations of any kind
 
 ## License
