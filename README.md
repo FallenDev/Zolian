@@ -46,6 +46,7 @@ Zolian isn't the only project out there, nor does it claim to have any exlusivit
 ## Financial
 Zolian is a fair-use project and accepts zero compensations of any kind
 
-## License
+## License   
+- [Copyright.gov - U.S. Copyright Office Fair Use Index](https://www.copyright.gov/fair-use/)
 - Zolian source, and components are released under the GNU AGPL v3
 - Please visit: https://www.thebucknetwork.com/Privacy
