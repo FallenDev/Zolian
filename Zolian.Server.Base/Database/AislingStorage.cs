@@ -1,4 +1,5 @@
 ﻿using System.Data;
+
 using Dapper;
 
 using Darkages.Common;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Darkages.Database;
 
-public record AislingStorage : IAislingStorage
+public record AislingStorage : Sql, IAislingStorage
 {
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True";
@@ -32,13 +33,9 @@ public record AislingStorage : IAislingStorage
             var continueLoad = await CheckIfPlayerExists(name, serial);
             if (!continueLoad) return null;
 
-            var sConn = new SqlConnection(ConnectionString);
-            sConn.Open();
-
-            const string procedure = "[SelectPlayer]";
+            var sConn = ConnectToDatabase(ConnectionString);
             var values = new { Name = name };
-            aisling = await sConn.QueryFirstAsync<Aisling>(procedure, values, commandType: CommandType.StoredProcedure);
-
+            aisling = await sConn.QueryFirstAsync<Aisling>("[SelectPlayer]", values, commandType: CommandType.StoredProcedure);
             sConn.Close();
         }
         catch (SqlException e)
@@ -72,19 +69,15 @@ public record AislingStorage : IAislingStorage
 
         try
         {
-            await using var connection = new SqlConnection(EncryptedConnectionString);
-            connection.Open();
-            var cmd = new SqlCommand("PasswordSave", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
+            var connection = ConnectToDatabase(EncryptedConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("PasswordSave", connection);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
             cmd.Parameters.Add("@Pass", SqlDbType.VarChar).Value = obj.Password;
             cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
             cmd.Parameters.Add("@Hacked", SqlDbType.Bit).Value = obj.Hacked;
             cmd.Parameters.Add("@LastIP", SqlDbType.VarChar).Value = obj.LastIP;
             cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            connection.Close();
+            ExecuteAndCloseConnection(cmd, connection);
         }
         catch (SqlException e)
         {
@@ -124,12 +117,12 @@ public record AislingStorage : IAislingStorage
 
         try
         {
-            await using var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            var skills = SaveSkills(obj, connection);
-            var spells = SaveSpells(obj, connection);
-            var cmd = new SqlCommand("PlayerQuickSave", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
+            var connection = ConnectToDatabase(ConnectionString);
+            var connectionSkills = ConnectToDatabase(ConnectionString);
+            var connectionSpells = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("PlayerQuickSave", connection);
+            var skills = SaveSkills(obj, connectionSkills);
+            var spells = SaveSpells(obj, connectionSpells);
 
             #region Parameters
 
@@ -209,9 +202,7 @@ public record AislingStorage : IAislingStorage
 
             #endregion
 
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            connection.Close();
+            ExecuteAndCloseConnection(cmd, connection);
 
             if (skills && spells) return;
 
@@ -254,10 +245,9 @@ public record AislingStorage : IAislingStorage
 
         try
         {
-            await using var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            var cmd = new SqlCommand("PlayerSave", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
+            var connection = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("PlayerSave", connection);
+            var cmd2 = ConnectToDatabaseSqlCommand("PlayerQuestSave", connection);
 
             #region Parameters
 
@@ -293,11 +283,7 @@ public record AislingStorage : IAislingStorage
 
             #endregion
 
-            cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
-
-            var cmd2 = new SqlCommand("PlayerQuestSave", connection);
-            cmd2.CommandType = CommandType.StoredProcedure;
 
             #region Parameters
 
@@ -331,9 +317,7 @@ public record AislingStorage : IAislingStorage
 
             #endregion
 
-            cmd2.CommandTimeout = 5;
-            cmd2.ExecuteNonQuery();
-            connection.Close();
+            ExecuteAndCloseConnection(cmd2, connection);
         }
         catch (SqlException e)
         {
@@ -370,23 +354,17 @@ public record AislingStorage : IAislingStorage
         {
             foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: { } }))
             {
-                var cmd = new SqlCommand("PlayerSaveSkills", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                #region Parameters
-
+                var cmd = ConnectToDatabaseSqlCommand("PlayerSaveSkills", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
                 cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = skill.Uses;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-
-                #endregion
-
-                cmd.CommandTimeout = 5;
                 cmd.ExecuteNonQuery();
             }
+
+            connection.Close();
         }
         catch (SqlException e)
         {
@@ -419,23 +397,17 @@ public record AislingStorage : IAislingStorage
         {
             foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: { } }))
             {
-                var cmd = new SqlCommand("PlayerSaveSpells", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                #region Parameters
-
+                var cmd = ConnectToDatabaseSqlCommand("PlayerSaveSpells", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
                 cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = skill.Casts;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-
-                #endregion
-
-                cmd.CommandTimeout = 5;
                 cmd.ExecuteNonQuery();
             }
+
+            connection.Close();
         }
         catch (SqlException e)
         {
@@ -464,17 +436,9 @@ public record AislingStorage : IAislingStorage
     {
         try
         {
-            const string procedure = "[CheckIfPlayerExists]";
-            var sConn = new SqlConnection(ConnectionString);
-            sConn.Open();
-
-            var cmd = new SqlCommand(procedure, sConn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("CheckIfPlayerExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
-            cmd.CommandTimeout = 5;
-
             var reader = await cmd.ExecuteReaderAsync();
 
             while (reader.Read())
@@ -507,29 +471,26 @@ public record AislingStorage : IAislingStorage
     {
         try
         {
-            const string procedure = "[CheckIfPlayerHashExists]";
-            var sConn = new SqlConnection(ConnectionString);
-            sConn.Open();
-
-            var cmd = new SqlCommand(procedure, sConn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("CheckIfPlayerHashExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = serial;
-            cmd.CommandTimeout = 5;
-
             var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
 
             while (reader.Read())
             {
                 var userName = reader["Username"].ToString();
                 if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
-                return string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase);
+                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    userFound = true;
+                }
             }
 
             reader.Close();
             sConn.Close();
+            return userFound;
         }
         catch (SqlException e)
         {
@@ -556,12 +517,9 @@ public record AislingStorage : IAislingStorage
             var continueLoad = await CheckIfPlayerExists(name);
             if (!continueLoad) return null;
 
-            const string procedure = "[PlayerSecurity]";
+            var sConn = ConnectToDatabase(EncryptedConnectionString);
             var values = new { Name = name };
-            var sConn = new SqlConnection(EncryptedConnectionString);
-            sConn.Open();
-            using var multi = await sConn.QueryMultipleAsync(procedure, values, commandType: CommandType.StoredProcedure);
-            aisling = multi.Read<Aisling>().Single();
+            aisling = await sConn.QueryFirstAsync<Aisling>("[PlayerSecurity]", values, commandType: CommandType.StoredProcedure);
             sConn.Close();
         }
         catch (SqlException e)
@@ -592,10 +550,8 @@ public record AislingStorage : IAislingStorage
         try
         {
             // Player
-            await using var connection = new SqlConnection(EncryptedConnectionString);
-            connection.Open();
-            var cmd = new SqlCommand("PlayerCreation", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
+            var connection = ConnectToDatabase(EncryptedConnectionString);
+            var cmd = ConnectToDatabaseSqlCommand("PlayerCreation", connection);
 
             #region Parameters
 
@@ -614,16 +570,12 @@ public record AislingStorage : IAislingStorage
 
             #endregion
 
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            connection.Close();
-                
-            await using var sConn = new SqlConnection(ConnectionString);
-            sConn.Open();
+            ExecuteAndCloseConnection(cmd, connection);
+
+            var sConn = ConnectToDatabase(ConnectionString);
+            var adapter = new SqlDataAdapter();
 
             #region Adapter Inserts
-
-            var adapter = new SqlDataAdapter();
 
             // Discovered
             var playerDiscoveredMaps =
@@ -659,9 +611,8 @@ public record AislingStorage : IAislingStorage
             adapter.InsertCommand.ExecuteNonQuery();
 
             #endregion
-                
-            var cmd5 = new SqlCommand("InsertQuests", sConn);
-            cmd5.CommandType = CommandType.StoredProcedure;
+
+            var cmd5 = ConnectToDatabaseSqlCommand("InsertQuests", sConn);
 
             #region Parameters
 
@@ -696,9 +647,7 @@ public record AislingStorage : IAislingStorage
 
             #endregion
 
-            cmd5.CommandTimeout = 5;
-            cmd5.ExecuteNonQuery();
-            sConn.Close();
+            ExecuteAndCloseConnection(cmd5, sConn);
         }
         catch (SqlException e) when (e.Number == 2627)
         {

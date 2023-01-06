@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Meta;
@@ -17,6 +18,7 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
+
 using RestSharp;
 
 using ServiceStack;
@@ -63,7 +65,7 @@ public class LoginServer : NetworkServer<LoginClient>
                 return;
             }
         }
-            
+
         client.Authorized = true;
         client.Send(new ServerFormat7E());
     }
@@ -277,41 +279,52 @@ public class LoginServer : NetworkServer<LoginClient>
             {
                 //ToDo: If name is set in database as 'asdf' it locks the account as a maintenance account. This can be used to ban players.
                 case "asdf":
+                    if (aisling.Result == null)
+                    {
+                        client.SendMessageBox(0x02, $"{{=q'{format.Username}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+                        return;
+                    }
                     client.SendMessageBox(0x02, "Maintenance Account, denied access");
                     return;
                 //ToDo: If GM account, restrict that account based on IP address connecting to that account.
                 case "death":
-                {
-                    const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
-                    var ipLocal = IPAddress.Parse(gmIp);
-                    var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
-
-                    // Set IP check
-                    if (ip.Equals(ipLocal))
                     {
-                        aisling.Result.LastAttemptIP = $"{ip}";
-                        aisling.Result.LastIP = $"{ip}";
-                        aisling.Result.PasswordAttempts = 0;
-                        SavePassword(aisling.Result);
-                        LoginAsAisling(client, aisling.Result);
+                        if (aisling.Result == null)
+                        {
+                            client.SendMessageBox(0x02, $"{{=q'{format.Username}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+                            return;
+                        }
+
+                        const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
+                        var ipLocal = IPAddress.Parse(gmIp);
+                        var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
+
+                        // Set IP check
+                        if (ip.Equals(ipLocal))
+                        {
+                            aisling.Result.LastAttemptIP = $"{ip}";
+                            aisling.Result.LastIP = $"{ip}";
+                            aisling.Result.PasswordAttempts = 0;
+                            SavePassword(aisling.Result);
+                            LoginAsAisling(client, aisling.Result);
+                            return;
+                        }
+
+                        // Loopback check
+                        if (ip.Equals(loopback))
+                        {
+                            aisling.Result.LastAttemptIP = $"{ip}";
+                            aisling.Result.LastIP = $"{ip}";
+                            aisling.Result.PasswordAttempts = 0;
+                            SavePassword(aisling.Result);
+                            LoginAsAisling(client, aisling.Result);
+                            return;
+                        }
+
+                        // Deny access if neither check 'true'
+                        client.SendMessageBox(0x02, "GM Account, denied access");
                         return;
                     }
-
-                    // Loopback check
-                    if (ip.Equals(loopback))
-                    {
-                        aisling.Result.LastAttemptIP = $"{ip}";
-                        aisling.Result.LastIP = $"{ip}";
-                        aisling.Result.PasswordAttempts = 0;
-                        SavePassword(aisling.Result);
-                        LoginAsAisling(client, aisling.Result);
-                        return;
-                    }
-                        
-                    // Deny access if neither check 'true'
-                    client.SendMessageBox(0x02, "GM Account, denied access");
-                    return;
-                }
             }
 
             if (aisling.Result != null)
@@ -487,7 +500,7 @@ public class LoginServer : NetworkServer<LoginClient>
     }
 
     protected override void Format0BHandler(LoginClient client, ClientFormat0B format) => RemoveClient(client);
-        
+
     /// <summary>
     /// Client Redirect to LoginServer
     /// </summary>
