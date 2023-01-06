@@ -70,7 +70,7 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var connection = ConnectToDatabase(EncryptedConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("PasswordSave", connection);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PasswordSave", connection);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
             cmd.Parameters.Add("@Pass", SqlDbType.VarChar).Value = obj.Password;
             cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
@@ -120,7 +120,7 @@ public record AislingStorage : Sql, IAislingStorage
             var connection = ConnectToDatabase(ConnectionString);
             var connectionSkills = ConnectToDatabase(ConnectionString);
             var connectionSpells = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("PlayerQuickSave", connection);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuickSave", connection);
             var skills = SaveSkills(obj, connectionSkills);
             var spells = SaveSpells(obj, connectionSpells);
 
@@ -246,8 +246,8 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var connection = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("PlayerSave", connection);
-            var cmd2 = ConnectToDatabaseSqlCommand("PlayerQuestSave", connection);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSave", connection);
+            var cmd2 = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuestSave", connection);
 
             #region Parameters
 
@@ -354,7 +354,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: { } }))
             {
-                var cmd = ConnectToDatabaseSqlCommand("PlayerSaveSkills", connection);
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSkills", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
@@ -397,7 +397,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: { } }))
             {
-                var cmd = ConnectToDatabaseSqlCommand("PlayerSaveSpells", connection);
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSpells", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
@@ -437,7 +437,7 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("CheckIfPlayerExists", sConn);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
             var reader = await cmd.ExecuteReaderAsync();
 
@@ -472,7 +472,7 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("CheckIfPlayerHashExists", sConn);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerHashExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = serial;
             var reader = await cmd.ExecuteReaderAsync();
@@ -551,7 +551,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             // Player
             var connection = ConnectToDatabase(EncryptedConnectionString);
-            var cmd = ConnectToDatabaseSqlCommand("PlayerCreation", connection);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerCreation", connection);
 
             #region Parameters
 
@@ -612,7 +612,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #endregion
 
-            var cmd5 = ConnectToDatabaseSqlCommand("InsertQuests", sConn);
+            var cmd5 = ConnectToDatabaseSqlCommandWithProcedure("InsertQuests", sConn);
 
             #region Parameters
 

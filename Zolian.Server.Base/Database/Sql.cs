@@ -13,12 +13,13 @@ public abstract record Sql : ISql
         return sConn;
     }
 
-    public SqlCommand ConnectToDatabaseSqlCommand(string command, SqlConnection conn)
+    public SqlCommand ConnectToDatabaseSqlCommandWithProcedure(string command, SqlConnection conn)
     {
-        var sConn = new SqlCommand(command, conn);
-        sConn.CommandType = CommandType.StoredProcedure;
-        sConn.CommandTimeout = 5;
-        return sConn;
+        return new SqlCommand(command, conn)
+        {
+            CommandType = CommandType.StoredProcedure,
+            CommandTimeout = 5
+        };
     }
 
     public void ExecuteAndCloseConnection(SqlCommand command, SqlConnection conn)
