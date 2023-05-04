@@ -15,12 +15,73 @@
     <None Include="$(MSBuildThisFileDirectory)Notification.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)PlayersDatabaseBuild.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianAbilities\dbo.Skills.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianAbilities\dbo.SkillsPrerequisites.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianAbilities\dbo.Spells.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianAbilities\dbo.SpellsPrerequisites.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Maps.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Nations.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Warps.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.WorldMaps.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Abel.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.EasternWoods.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.EnchantedGarden.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.GMIsland.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Mileth.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Piet.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Tagor.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Tutorial.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Wastelands.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.WesternWoodlands.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Abel.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Arena.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Generic.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Mehadi.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Mileth.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Piet.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Rionnag.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Rucesion.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Tagor.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.TempleofLight.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\dbo.Tutorial.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\PlayersDatabaseBuild.sql" />
     <None Include="$(MSBuildThisFileDirectory)ServerConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)sotp.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorArcanus.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorAssassin.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorBerserker.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorCleric.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorDefender.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorGeneric.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorMonk.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Belts.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Boots.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Consumables.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Earrings.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.EnemyDrops.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Gems.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Greaves.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Hands.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Necklaces.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Potions.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Quest.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Rings.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Scrolls.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Shields.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.Sources.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponArcanus.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponAssassin.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponBerserker.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponCleric.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponDefender.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponMonk.Table.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponPeasant.Table.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)ZolianPlayers\" />
   </ItemGroup>
 </Project>
