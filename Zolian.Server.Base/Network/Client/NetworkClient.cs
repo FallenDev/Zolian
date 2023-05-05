@@ -40,6 +40,31 @@ public abstract class NetworkClient : IDisposable
     public DateTime LastPacket0X38FromClient { get; set; } // User F5 Limiter
     public byte LastPacketFromClient { get; set; }
 
+    public void SetLastPacketTime(int command, DateTime time)
+    {
+        switch (command)
+        {
+            case 0x0F:
+                LastPacket0X0FFromClient = time;
+                break;
+            case 0x13:
+                LastPacket0X13FromClient = time;
+                break;
+            case 0x1B:
+                LastPacket0X1BFromClient = time;
+                break;
+            case 0x1C:
+                LastPacket0X1CFromClient = time;
+                break;
+            case 0x2D:
+                LastPacket0X2DFromClient = time;
+                break;
+            case 0x38:
+                LastPacket0X38FromClient = time;
+                break;
+        }
+    }
+
     /// <summary>
     /// Send method for single packets
     /// </summary>

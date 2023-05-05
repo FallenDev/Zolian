@@ -799,11 +799,11 @@ public class GameServer : NetworkServer<GameClient>
                 client.Send(new ServerFormat4C());
                 break;
             case 3:
-            {
-                client.Aisling.Remove(true);
-                ExitGame(client);
-                break;
-            }
+                {
+                    client.Aisling.Remove(true);
+                    ExitGame(client);
+                    break;
+                }
         }
     }
 
@@ -974,41 +974,33 @@ public class GameServer : NetworkServer<GameClient>
     {
         client.Encryption.Parameters = format.Parameters;
         client.Server = this;
+        var serialString = string.Concat(format.Name.Where(char.IsDigit));
 
-        var serialString = string.Join("", format.Name.Where(char.IsDigit));
-        uint.TryParse(serialString, out var serial);
-        if (serial == 0)
+        if (!uint.TryParse(serialString, out var serial) || serial == 0)
         {
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectAndRemoveClient(client);
             return;
         }
 
-        char[] removeInt = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        var playerName = format.Name.TrimEnd(removeInt);
+        var playerName = string.Concat(format.Name.TrimEnd("0123456789".ToCharArray()).Select(char.ToLowerInvariant));
 
-        foreach (var globalClients in Clients.Values)
+        if (Clients.Values.Any(globalClient => globalClient.Serial != client.Serial &&
+                                               globalClient.Aisling?.Username?.Equals(playerName, StringComparison.OrdinalIgnoreCase) == true))
         {
-            if (globalClients.Serial == client.Serial) continue;
-            if (globalClients.Aisling?.Username is null) continue;
-            if (!globalClients.Aisling.Username.ToLower().Equals(playerName.ToLower())) continue;
-
             client.SendMessage(0x08, "You're already logged in.");
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectAndRemoveClient(client);
             return;
         }
 
         var player = await LoadPlayer(client, playerName, serial);
 
-        if (player == null)
+        if (player == null || serial != client.Aisling.Serial)
         {
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectAndRemoveClient(client);
             return;
         }
 
-        player.GameMaster = ServerSetup.Instance.Config.GameMasters?.Any(n => string.Equals(n.ToLower(), player.Username.ToLower(), StringComparison.CurrentCulture)) ?? false;
+        player.GameMaster = ServerSetup.Instance.Config.GameMasters?.Any(n => string.Equals(n, player.Username, StringComparison.OrdinalIgnoreCase)) ?? false;
 
         if (player.GameMaster)
         {
@@ -1021,8 +1013,7 @@ public class GameServer : NetworkServer<GameClient>
             }
             else
             {
-                ClientDisconnected(client);
-                RemoveClient(client);
+                DisconnectAndRemoveClient(client);
                 return;
             }
         }
@@ -1031,6 +1022,12 @@ public class GameServer : NetworkServer<GameClient>
         var time = DateTime.Now;
         ServerSetup.Logger($"{player.Username} logged in at: {time}");
         client.LastPing = time;
+    }
+
+    private void DisconnectAndRemoveClient(GameClient client)
+    {
+        ClientDisconnected(client);
+        RemoveClient(client);
     }
 
     /// <summary>
@@ -1167,8 +1164,8 @@ public class GameServer : NetworkServer<GameClient>
                 break;
             case "!" when !string.IsNullOrEmpty(client.Aisling.Clan):
                 foreach (var client2 in from client2 in ServerSetup.Instance.Game.Clients.Values
-                         where client2?.Aisling != null
-                         select client2)
+                                        where client2?.Aisling != null
+                                        select client2)
                 {
                     if (client2 is null) return;
                     if (client2.Aisling.Clan == client.Aisling.Clan)
@@ -1182,8 +1179,8 @@ public class GameServer : NetworkServer<GameClient>
                 return;
             case "!!" when client.Aisling.PartyMembers != null:
                 foreach (var client2 in from client2 in ServerSetup.Instance.Game.Clients.Values
-                         where client2?.Aisling != null
-                         select client2)
+                                        where client2?.Aisling != null
+                                        select client2)
                 {
                     if (client2 is null) return;
                     if (client2.Aisling.GroupParty == client.Aisling.GroupParty)
@@ -1419,53 +1416,53 @@ public class GameServer : NetworkServer<GameClient>
             switch (sprite)
             {
                 case Monster monster:
-                {
-                    var script = monster.Scripts.Values.First();
-                    var item = client.Aisling.Inventory.Items[format.ItemSlot];
-                    client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
-                    script?.OnItemDropped(client, item);
+                    {
+                        var script = monster.Scripts.Values.First();
+                        var item = client.Aisling.Inventory.Items[format.ItemSlot];
+                        client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                        script?.OnItemDropped(client, item);
 
-                    break;
-                }
+                        break;
+                    }
                 case Mundane mundane:
-                {
-                    var script = mundane.Scripts.Values.First();
-                    var item = client.Aisling.Inventory.Items[format.ItemSlot];
-                    script?.OnItemDropped(client, item);
+                    {
+                        var script = mundane.Scripts.Values.First();
+                        var item = client.Aisling.Inventory.Items[format.ItemSlot];
+                        script?.OnItemDropped(client, item);
 
-                    break;
-                }
+                        break;
+                    }
                 case Aisling aisling:
-                {
-                    if (format.ItemSlot == 0) return;
-                    var item = client.Aisling.Inventory.Items[format.ItemSlot];
-
-                    if (item.DisplayName.StringContains("deum"))
                     {
-                        var script = item.Scripts.Values.First();
-                        client.Aisling.Inventory.RemoveRange(client, item, 1);
-                        client.Aisling.ThrewHealingPot = true;
+                        if (format.ItemSlot == 0) return;
+                        var item = client.Aisling.Inventory.Items[format.ItemSlot];
 
-                        var action = new ServerFormat1A
+                        if (item.DisplayName.StringContains("deum"))
                         {
-                            Serial = aisling.Serial,
-                            Number = 0x06,
-                            Speed = 50
-                        };
+                            var script = item.Scripts.Values.First();
+                            client.Aisling.Inventory.RemoveRange(client, item, 1);
+                            client.Aisling.ThrewHealingPot = true;
 
-                        script?.OnUse(aisling, format.ItemSlot);
-                        client.Aisling.Show(Scope.NearbyAislings, action);
+                            var action = new ServerFormat1A
+                            {
+                                Serial = aisling.Serial,
+                                Number = 0x06,
+                                Speed = 50
+                            };
+
+                            script?.OnUse(aisling, format.ItemSlot);
+                            client.Aisling.Show(Scope.NearbyAislings, action);
+                        }
+
+                        if (item.DisplayName == "Elixir of Life")
+                        {
+                            client.Aisling.Inventory.RemoveRange(client, item, 1);
+                            client.Aisling.ThrewHealingPot = true;
+                            client.Aisling.ReviveFromAfar(aisling);
+                        }
+
+                        break;
                     }
-
-                    if (item.DisplayName == "Elixir of Life")
-                    {
-                        client.Aisling.Inventory.RemoveRange(client, item, 1);
-                        client.Aisling.ThrewHealingPot = true;
-                        client.Aisling.ReviveFromAfar(aisling);
-                    }
-
-                    break;
-                }
             }
         }
     }
@@ -1500,58 +1497,58 @@ public class GameServer : NetworkServer<GameClient>
             switch (sprite)
             {
                 case Monster monster:
-                {
-                    var script = monster.Scripts.Values.First();
-
-                    if (client.Aisling.GoldPoints >= format.Gold)
                     {
-                        client.Aisling.GoldPoints -= format.Gold;
-                        client.SendStats(StatusFlags.WeightMoney);
-                    }
-                    else
+                        var script = monster.Scripts.Values.First();
+
+                        if (client.Aisling.GoldPoints >= format.Gold)
+                        {
+                            client.Aisling.GoldPoints -= format.Gold;
+                            client.SendStats(StatusFlags.WeightMoney);
+                        }
+                        else
+                            break;
+
+                        script?.OnGoldDropped(client, format.Gold);
+
                         break;
-
-                    script?.OnGoldDropped(client, format.Gold);
-
-                    break;
-                }
+                    }
                 case Mundane mundane:
-                {
-                    var script = mundane.Scripts.Values.First();
-
-                    if (client.Aisling.GoldPoints >= format.Gold)
                     {
-                        client.Aisling.GoldPoints -= format.Gold;
-                        client.SendStats(StatusFlags.WeightMoney);
-                    }
-                    else
+                        var script = mundane.Scripts.Values.First();
+
+                        if (client.Aisling.GoldPoints >= format.Gold)
+                        {
+                            client.Aisling.GoldPoints -= format.Gold;
+                            client.SendStats(StatusFlags.WeightMoney);
+                        }
+                        else
+                            break;
+
+                        script?.OnGoldDropped(client, format.Gold);
+
                         break;
-
-                    script?.OnGoldDropped(client, format.Gold);
-
-                    break;
-                }
+                    }
                 case Aisling aisling:
-                {
-                    var format4AReceiver = new ClientFormat4A
                     {
-                        Id = (uint)client.Aisling.Serial,
-                        Type = byte.MinValue,
-                        Command = 74
-                    };
+                        var format4AReceiver = new ClientFormat4A
+                        {
+                            Id = (uint)client.Aisling.Serial,
+                            Type = byte.MinValue,
+                            Command = 74
+                        };
 
-                    var format4ASender = new ClientFormat4A
-                    {
-                        Gold = format.Gold,
-                        Id = format.ID,
-                        Type = 0x03,
-                        Command = 74
-                    };
+                        var format4ASender = new ClientFormat4A
+                        {
+                            Gold = format.Gold,
+                            Id = format.ID,
+                            Type = 0x03,
+                            Command = 74
+                        };
 
-                    Format4AHandler(aisling.Client, format4AReceiver);
-                    Format4AHandler(client, format4ASender);
-                    break;
-                }
+                        Format4AHandler(aisling.Client, format4AReceiver);
+                        Format4AHandler(client, format4ASender);
+                        break;
+                    }
             }
         }
     }
@@ -1676,134 +1673,134 @@ public class GameServer : NetworkServer<GameClient>
         switch (format.PaneType)
         {
             case Pane.Inventory:
-            {
-                if (format.MovingTo > 59) return;
-                if (format.MovingFrom > 59) return;
-                if (format.MovingTo - 1 < 0) return;
-                if (format.MovingFrom - 1 < 0) return;
-
-                client.Send(new ServerFormat10(format.MovingFrom));
-                client.Send(new ServerFormat10(format.MovingTo));
-
-                var a = client.Aisling.Inventory.Remove(format.MovingFrom);
-                var b = client.Aisling.Inventory.Remove(format.MovingTo);
-
-                if (a != null)
                 {
-                    a.InventorySlot = format.MovingTo;
-                    client.Aisling.Inventory.Set(a);
-                    client.Aisling.Inventory.UpdateSlot(client, a);
-                }
+                    if (format.MovingTo > 59) return;
+                    if (format.MovingFrom > 59) return;
+                    if (format.MovingTo - 1 < 0) return;
+                    if (format.MovingFrom - 1 < 0) return;
 
-                if (b != null)
-                {
-                    b.InventorySlot = format.MovingFrom;
-                    client.Aisling.Inventory.Set(b);
-                    client.Aisling.Inventory.UpdateSlot(client, b);
+                    client.Send(new ServerFormat10(format.MovingFrom));
+                    client.Send(new ServerFormat10(format.MovingTo));
+
+                    var a = client.Aisling.Inventory.Remove(format.MovingFrom);
+                    var b = client.Aisling.Inventory.Remove(format.MovingTo);
+
+                    if (a != null)
+                    {
+                        a.InventorySlot = format.MovingTo;
+                        client.Aisling.Inventory.Set(a);
+                        client.Aisling.Inventory.UpdateSlot(client, a);
+                    }
+
+                    if (b != null)
+                    {
+                        b.InventorySlot = format.MovingFrom;
+                        client.Aisling.Inventory.Set(b);
+                        client.Aisling.Inventory.UpdateSlot(client, b);
+                    }
                 }
-            }
                 break;
             case Pane.Skills:
-            {
-                if (format.MovingTo - 1 < 0) return;
-                if (format.MovingFrom - 1 < 0) return;
-
-                if (format.MovingTo == 35)
                 {
-                    var skillSlot = client.Aisling.SkillBook.FindEmpty(36);
-                    format.MovingTo = (byte)skillSlot;
+                    if (format.MovingTo - 1 < 0) return;
+                    if (format.MovingFrom - 1 < 0) return;
+
+                    if (format.MovingTo == 35)
+                    {
+                        var skillSlot = client.Aisling.SkillBook.FindEmpty(36);
+                        format.MovingTo = (byte)skillSlot;
+                    }
+
+                    if (format.MovingTo == 71)
+                    {
+                        var skillSlot = client.Aisling.SkillBook.FindEmpty();
+                        format.MovingTo = (byte)skillSlot;
+                    }
+
+                    client.Send(new ServerFormat2D(format.MovingFrom));
+                    client.Send(new ServerFormat2D(format.MovingTo));
+
+                    var a = client.Aisling.SkillBook.Remove(format.MovingFrom);
+                    var b = client.Aisling.SkillBook.Remove(format.MovingTo);
+
+                    if (a != null)
+                    {
+                        a.Slot = format.MovingTo;
+                        client.Send(new ServerFormat2C(a.Slot, a.Icon, a.Name));
+                        client.Aisling.SkillBook.Set(a);
+                    }
+
+                    if (b != null)
+                    {
+                        b.Slot = format.MovingFrom;
+                        client.Send(new ServerFormat2C(b.Slot, b.Icon, b.Name));
+                        client.Aisling.SkillBook.Set(b);
+                    }
                 }
-
-                if (format.MovingTo == 71)
-                {
-                    var skillSlot = client.Aisling.SkillBook.FindEmpty();
-                    format.MovingTo = (byte)skillSlot;
-                }
-
-                client.Send(new ServerFormat2D(format.MovingFrom));
-                client.Send(new ServerFormat2D(format.MovingTo));
-
-                var a = client.Aisling.SkillBook.Remove(format.MovingFrom);
-                var b = client.Aisling.SkillBook.Remove(format.MovingTo);
-
-                if (a != null)
-                {
-                    a.Slot = format.MovingTo;
-                    client.Send(new ServerFormat2C(a.Slot, a.Icon, a.Name));
-                    client.Aisling.SkillBook.Set(a);
-                }
-
-                if (b != null)
-                {
-                    b.Slot = format.MovingFrom;
-                    client.Send(new ServerFormat2C(b.Slot, b.Icon, b.Name));
-                    client.Aisling.SkillBook.Set(b);
-                }
-            }
                 break;
             case Pane.Spells:
-            {
-                if (format.MovingTo - 1 < 0) return;
-                if (format.MovingFrom - 1 < 0) return;
-
-                if (format.MovingTo == 35)
                 {
-                    var spellSlot = client.Aisling.SpellBook.FindEmpty(36);
-                    format.MovingTo = (byte)spellSlot;
+                    if (format.MovingTo - 1 < 0) return;
+                    if (format.MovingFrom - 1 < 0) return;
+
+                    if (format.MovingTo == 35)
+                    {
+                        var spellSlot = client.Aisling.SpellBook.FindEmpty(36);
+                        format.MovingTo = (byte)spellSlot;
+                    }
+
+                    if (format.MovingTo == 71)
+                    {
+                        var spellSlot = client.Aisling.SpellBook.FindEmpty();
+                        format.MovingTo = (byte)spellSlot;
+                    }
+
+                    client.Send(new ServerFormat18(format.MovingFrom));
+                    client.Send(new ServerFormat18(format.MovingTo));
+
+                    var a = client.Aisling.SpellBook.Remove(format.MovingFrom);
+                    var b = client.Aisling.SpellBook.Remove(format.MovingTo);
+
+                    if (a != null)
+                    {
+                        a.Slot = format.MovingTo;
+                        client.Send(new ServerFormat17(a));
+                        client.Aisling.SpellBook.Set(a);
+                    }
+
+                    if (b != null)
+                    {
+                        b.Slot = format.MovingFrom;
+                        client.Send(new ServerFormat17(b));
+                        client.Aisling.SpellBook.Set(b);
+                    }
                 }
-
-                if (format.MovingTo == 71)
-                {
-                    var spellSlot = client.Aisling.SpellBook.FindEmpty();
-                    format.MovingTo = (byte)spellSlot;
-                }
-
-                client.Send(new ServerFormat18(format.MovingFrom));
-                client.Send(new ServerFormat18(format.MovingTo));
-
-                var a = client.Aisling.SpellBook.Remove(format.MovingFrom);
-                var b = client.Aisling.SpellBook.Remove(format.MovingTo);
-
-                if (a != null)
-                {
-                    a.Slot = format.MovingTo;
-                    client.Send(new ServerFormat17(a));
-                    client.Aisling.SpellBook.Set(a);
-                }
-
-                if (b != null)
-                {
-                    b.Slot = format.MovingFrom;
-                    client.Send(new ServerFormat17(b));
-                    client.Aisling.SpellBook.Set(b);
-                }
-            }
                 break;
             case Pane.Tools:
-            {
-                if (format.MovingTo - 1 < 0) return;
-                if (format.MovingFrom - 1 < 0) return;
-
-                client.Send(new ServerFormat18(format.MovingFrom));
-                client.Send(new ServerFormat18(format.MovingTo));
-
-                var a = client.Aisling.SpellBook.Remove(format.MovingFrom);
-                var b = client.Aisling.SpellBook.Remove(format.MovingTo);
-
-                if (a != null)
                 {
-                    a.Slot = format.MovingTo;
-                    client.Send(new ServerFormat17(a));
-                    client.Aisling.SpellBook.Set(a);
-                }
+                    if (format.MovingTo - 1 < 0) return;
+                    if (format.MovingFrom - 1 < 0) return;
 
-                if (b != null)
-                {
-                    b.Slot = format.MovingFrom;
-                    client.Send(new ServerFormat17(b));
-                    client.Aisling.SpellBook.Set(b);
+                    client.Send(new ServerFormat18(format.MovingFrom));
+                    client.Send(new ServerFormat18(format.MovingTo));
+
+                    var a = client.Aisling.SpellBook.Remove(format.MovingFrom);
+                    var b = client.Aisling.SpellBook.Remove(format.MovingTo);
+
+                    if (a != null)
+                    {
+                        a.Slot = format.MovingTo;
+                        client.Send(new ServerFormat17(a));
+                        client.Aisling.SpellBook.Set(a);
+                    }
+
+                    if (b != null)
+                    {
+                        b.Slot = format.MovingFrom;
+                        client.Send(new ServerFormat17(b));
+                        client.Aisling.SpellBook.Set(b);
+                    }
                 }
-            }
                 break;
         }
     }
@@ -2482,197 +2479,197 @@ public class GameServer : NetworkServer<GameClient>
         switch (format.Type)
         {
             case 0x00:
-            {
-                if (player.ThrewHealingPot) break;
+                {
+                    if (player.ThrewHealingPot) break;
 
-                player.Exchange = new ExchangeSession(trader);
-                trader.Exchange = new ExchangeSession(player);
+                    player.Exchange = new ExchangeSession(trader);
+                    trader.Exchange = new ExchangeSession(player);
 
-                var packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
-                packet.Write((byte)0x00);
-                packet.Write((uint)trader.Serial);
-                packet.WriteStringA(trader.Username);
-                client.Send(packet);
+                    var packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
+                    packet.Write((byte)0x00);
+                    packet.Write((uint)trader.Serial);
+                    packet.WriteStringA(trader.Username);
+                    client.Send(packet);
 
-                packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
-                packet.Write((byte)0x00);
-                packet.Write((uint)player.Serial);
-                packet.WriteStringA(player.Username);
-                trader.Client.Send(packet);
-            }
+                    packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
+                    packet.Write((byte)0x00);
+                    packet.Write((uint)player.Serial);
+                    packet.WriteStringA(player.Username);
+                    trader.Client.Send(packet);
+                }
                 break;
             case 0x01:
-            {
-                if (player.ThrewHealingPot)
                 {
-                    player.ThrewHealingPot = false;
-                    break;
-                }
-
-                var item = client.Aisling.Inventory.Items[format.ItemSlot];
-
-                if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
-                {
-                    player.Client.SendMessage(0x03, "That item is not tradeable");
-                    return;
-                }
-
-                if (player.Exchange == null) return;
-                if (trader.Exchange == null) return;
-                if (player.Exchange.Trader != trader) return;
-                if (trader.Exchange.Trader != player) return;
-                if (player.Exchange.Confirmed) return;
-                if (item?.Template == null) return;
-
-                if (trader.CurrentWeight + item.Template.CarryWeight < trader.MaximumWeight)
-                {
-                    if (player.EquipmentManager.RemoveFromInventory(item, true))
+                    if (player.ThrewHealingPot)
                     {
-                        player.Exchange.Items.Add(item);
-                        player.Exchange.Weight += item.Template.CarryWeight;
+                        player.ThrewHealingPot = false;
+                        break;
                     }
 
-                    var packet = new NetworkPacketWriter();
-                    packet.Write((byte)0x42);
-                    packet.Write((byte)0x00);
+                    var item = client.Aisling.Inventory.Items[format.ItemSlot];
 
-                    packet.Write((byte)0x02);
-                    packet.Write((byte)0x00);
-                    packet.Write((byte)player.Exchange.Items.Count);
-                    packet.Write(item.DisplayImage);
-                    packet.Write(item.Color);
-                    packet.WriteStringA(item.NoColorDisplayName);
-                    client.Send(packet);
+                    if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
+                    {
+                        player.Client.SendMessage(0x03, "That item is not tradeable");
+                        return;
+                    }
 
-                    packet = new NetworkPacketWriter();
-                    packet.Write((byte)0x42);
-                    packet.Write((byte)0x00);
+                    if (player.Exchange == null) return;
+                    if (trader.Exchange == null) return;
+                    if (player.Exchange.Trader != trader) return;
+                    if (trader.Exchange.Trader != player) return;
+                    if (player.Exchange.Confirmed) return;
+                    if (item?.Template == null) return;
 
-                    packet.Write((byte)0x02);
-                    packet.Write((byte)0x01);
-                    packet.Write((byte)player.Exchange.Items.Count);
-                    packet.Write(item.DisplayImage);
-                    packet.Write(item.Color);
-                    packet.WriteStringA(item.NoColorDisplayName);
-                    trader.Client.Send(packet);
+                    if (trader.CurrentWeight + item.Template.CarryWeight < trader.MaximumWeight)
+                    {
+                        if (player.EquipmentManager.RemoveFromInventory(item, true))
+                        {
+                            player.Exchange.Items.Add(item);
+                            player.Exchange.Weight += item.Template.CarryWeight;
+                        }
+
+                        var packet = new NetworkPacketWriter();
+                        packet.Write((byte)0x42);
+                        packet.Write((byte)0x00);
+
+                        packet.Write((byte)0x02);
+                        packet.Write((byte)0x00);
+                        packet.Write((byte)player.Exchange.Items.Count);
+                        packet.Write(item.DisplayImage);
+                        packet.Write(item.Color);
+                        packet.WriteStringA(item.NoColorDisplayName);
+                        client.Send(packet);
+
+                        packet = new NetworkPacketWriter();
+                        packet.Write((byte)0x42);
+                        packet.Write((byte)0x00);
+
+                        packet.Write((byte)0x02);
+                        packet.Write((byte)0x01);
+                        packet.Write((byte)player.Exchange.Items.Count);
+                        packet.Write(item.DisplayImage);
+                        packet.Write(item.Color);
+                        packet.WriteStringA(item.NoColorDisplayName);
+                        trader.Client.Send(packet);
+                    }
+                    else
+                    {
+                        var packet = new NetworkPacketWriter();
+                        packet.Write((byte)0x42);
+                        packet.Write((byte)0x00);
+
+                        packet.Write((byte)0x04);
+                        packet.Write((byte)0x00);
+                        packet.WriteStringA("They can't seem to lift that. The trade has been cancelled.");
+                        client.Send(packet);
+
+                        packet = new NetworkPacketWriter();
+                        packet.Write((byte)0x42);
+                        packet.Write((byte)0x00);
+
+                        packet.Write((byte)0x04);
+                        packet.Write((byte)0x01);
+                        packet.WriteStringA("That item seems to be too heavy. The trade has been cancelled.");
+                        trader.Client.Send(packet);
+                        player.CancelExchange();
+                    }
                 }
-                else
-                {
-                    var packet = new NetworkPacketWriter();
-                    packet.Write((byte)0x42);
-                    packet.Write((byte)0x00);
-
-                    packet.Write((byte)0x04);
-                    packet.Write((byte)0x00);
-                    packet.WriteStringA("They can't seem to lift that. The trade has been cancelled.");
-                    client.Send(packet);
-
-                    packet = new NetworkPacketWriter();
-                    packet.Write((byte)0x42);
-                    packet.Write((byte)0x00);
-
-                    packet.Write((byte)0x04);
-                    packet.Write((byte)0x01);
-                    packet.WriteStringA("That item seems to be too heavy. The trade has been cancelled.");
-                    trader.Client.Send(packet);
-                    player.CancelExchange();
-                }
-            }
                 break;
             case 0x02:
                 break;
             case 0x03:
-            {
-                if (player.Exchange == null) return;
-                if (trader.Exchange == null) return;
-                if (player.Exchange.Trader != trader) return;
-                if (trader.Exchange.Trader != player) return;
-                if (player.Exchange.Confirmed) return;
-                if (player.Exchange.Gold != 0) return;
-
-                var gold = format.Gold;
-
-                if (gold > player.GoldPoints)
                 {
-                    player.Client.SendMessage(0x03, "You don't have that much.");
-                    return;
+                    if (player.Exchange == null) return;
+                    if (trader.Exchange == null) return;
+                    if (player.Exchange.Trader != trader) return;
+                    if (trader.Exchange.Trader != player) return;
+                    if (player.Exchange.Confirmed) return;
+                    if (player.Exchange.Gold != 0) return;
+
+                    var gold = format.Gold;
+
+                    if (gold > player.GoldPoints)
+                    {
+                        player.Client.SendMessage(0x03, "You don't have that much.");
+                        return;
+                    }
+
+                    if (trader.GoldPoints + gold > ServerSetup.Instance.Config.MaxCarryGold)
+                    {
+                        player.Client.SendMessage(0x03, "Player cannot hold that amount.");
+                        return;
+                    }
+
+                    player.GoldPoints -= gold;
+                    player.Exchange.Gold = gold;
+                    player.Client.SendStats(StatusFlags.StructC);
+
+                    var packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
+
+                    packet.Write((byte)0x03);
+                    packet.Write((byte)0x00);
+                    packet.Write(gold);
+                    client.Send(packet);
+
+                    packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
+
+                    packet.Write((byte)0x03);
+                    packet.Write((byte)0x01);
+                    packet.Write(gold);
+                    trader.Client.Send(packet);
                 }
-
-                if (trader.GoldPoints + gold > ServerSetup.Instance.Config.MaxCarryGold)
-                {
-                    player.Client.SendMessage(0x03, "Player cannot hold that amount.");
-                    return;
-                }
-                        
-                player.GoldPoints -= gold;
-                player.Exchange.Gold = gold;
-                player.Client.SendStats(StatusFlags.StructC);
-
-                var packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
-
-                packet.Write((byte)0x03);
-                packet.Write((byte)0x00);
-                packet.Write(gold);
-                client.Send(packet);
-
-                packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
-
-                packet.Write((byte)0x03);
-                packet.Write((byte)0x01);
-                packet.Write(gold);
-                trader.Client.Send(packet);
-            }
                 break;
             case 0x04:
-            {
-                if (player.Exchange == null) return;
-                if (trader.Exchange == null) return;
-                if (player.Exchange.Trader != trader) return;
-                if (trader.Exchange.Trader != player) return;
+                {
+                    if (player.Exchange == null) return;
+                    if (trader.Exchange == null) return;
+                    if (player.Exchange.Trader != trader) return;
+                    if (trader.Exchange.Trader != player) return;
 
-                player.CancelExchange();
-            }
+                    player.CancelExchange();
+                }
                 break;
 
             case 0x05:
-            {
-                if (player.Exchange == null) return;
-                if (trader.Exchange == null) return;
-                if (player.Exchange.Trader != trader) return;
-                if (trader.Exchange.Trader != player) return;
-                if (player.Exchange.Confirmed) return;
+                {
+                    if (player.Exchange == null) return;
+                    if (trader.Exchange == null) return;
+                    if (player.Exchange.Trader != trader) return;
+                    if (trader.Exchange.Trader != player) return;
+                    if (player.Exchange.Confirmed) return;
 
-                player.Exchange.Confirmed = true;
+                    player.Exchange.Confirmed = true;
 
-                if (trader.Exchange.Confirmed)
-                    player.FinishExchange();
+                    if (trader.Exchange.Confirmed)
+                        player.FinishExchange();
 
-                var packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
+                    var packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
 
-                packet.Write((byte)0x05);
-                packet.Write((byte)0x00);
-                packet.WriteStringA("Trade was completed.");
-                client.Send(packet);
+                    packet.Write((byte)0x05);
+                    packet.Write((byte)0x00);
+                    packet.WriteStringA("Trade was completed.");
+                    client.Send(packet);
 
-                packet = new NetworkPacketWriter();
-                packet.Write((byte)0x42);
-                packet.Write((byte)0x00);
+                    packet = new NetworkPacketWriter();
+                    packet.Write((byte)0x42);
+                    packet.Write((byte)0x00);
 
-                packet.Write((byte)0x05);
-                packet.Write((byte)0x01);
-                packet.WriteStringA("Trade was completed.");
-                trader.Client.Send(packet);
-            }
+                    packet.Write((byte)0x05);
+                    packet.Write((byte)0x01);
+                    packet.WriteStringA("Trade was completed.");
+                    trader.Client.Send(packet);
+                }
                 break;
         }
     }
@@ -2771,26 +2768,26 @@ public class GameServer : NetworkServer<GameClient>
         switch (format.Type)
         {
             case 0x00:
-            {
-                if (!format.Name.Contains("Class"))
                 {
+                    if (!format.Name.Contains("Class"))
+                    {
+                        client.Send(new ServerFormat6F
+                        {
+                            Type = 0x00,
+                            Name = format.Name
+                        });
+                        break;
+                    }
+
+                    var name = DecideOnSkillsToPull(client);
+
                     client.Send(new ServerFormat6F
                     {
+                        Client = client,
                         Type = 0x00,
-                        Name = format.Name
+                        Name = name
                     });
-                    break;
                 }
-
-                var name = DecideOnSkillsToPull(client);
-
-                client.Send(new ServerFormat6F
-                {
-                    Client = client,
-                    Type = 0x00,
-                    Name = name
-                });
-            }
                 break;
             case 0x01:
                 client.Send(new ServerFormat6F

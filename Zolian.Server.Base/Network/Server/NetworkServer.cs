@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Darkages.Common;
 using Darkages.Network.Client;
 using Darkages.Network.Formats;
+
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
@@ -84,16 +85,14 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
     }
 
     protected virtual void ClientConnected(TClient client) { }
-        
+
     private void ClientDataReceived(TClient client, NetworkPacket packet)
     {
-        if (client == null) return;
+        if (client is null) return;
         var format = NetworkFormatManager.GetClientFormat(packet.Command);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
-        if (format == null) return;
-        if (!Clients.ContainsKey(client.Serial)) return;
-        if (client.MapOpen && format.Command is not (63 or 69)) return;
+        if (format is null || !Clients.ContainsKey(client.Serial) || (client.MapOpen && format.Command is not (63 or 69))) return;
 
         if (client.Serial == 0)
         {
@@ -105,63 +104,38 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
 
         try
         {
-            var timeCheck250 = client.LastMessageFromClient.AddMilliseconds(250);
-            var timeCheck500 = client.LastMessageFromClient.AddMilliseconds(500);
-            var timeCheck600 = client.LastMessageFromClient.AddMilliseconds(600);
-            var profileCheck = client.LastMessageFromClient.AddSeconds(1);
+            var now = DateTime.Now;
+            client.LastMessageFromClient = now;
 
-            switch (client.LastPacketFromClient)
+            static DateTime AddTime(DateTime baseTime, TimeSpan duration) => baseTime.Add(duration);
+
+            var timeChecks = new Dictionary<int, Func<DateTime, bool>>
             {
-                case 0x0F when format.Command == 0x0F && timeCheck500 > client.LastPacket0X0FFromClient:
-                    client.LastPacket0X0FFromClient = DateTime.Now;
-                    return;
-                case 0x0F when format.Command == 0x0F && timeCheck500 < client.LastPacket0X0FFromClient:
-                    client.LastPacket0X0FFromClient = DateTime.Now;
-                    break;
-                case 0x13 when format.Command == 0x13 && timeCheck500 > client.LastPacket0X13FromClient:
-                    client.LastPacket0X13FromClient = DateTime.Now;
-                    return;
-                case 0x13 when format.Command == 0x13 && timeCheck500 < client.LastPacket0X13FromClient:
-                    client.LastPacket0X13FromClient = DateTime.Now;
-                    break;
-                case 0x1B when format.Command == 0x1B && timeCheck250 > client.LastPacket0X1BFromClient:
-                    client.LastPacket0X1BFromClient = DateTime.Now;
-                    return;
-                case 0x1B when format.Command == 0x1B && timeCheck250 < client.LastPacket0X1BFromClient:
-                    client.LastPacket0X1BFromClient = DateTime.Now;
-                    break;
-                case 0x1C when format.Command == 0x1C && timeCheck250 > client.LastPacket0X1CFromClient:
-                    client.LastPacket0X1CFromClient = DateTime.Now;
-                    return;
-                case 0x1C when format.Command == 0x1C && timeCheck250 < client.LastPacket0X1CFromClient:
-                    client.LastPacket0X1CFromClient = DateTime.Now;
-                    break;
-                case 0x2D when format.Command == 0x2D && profileCheck > client.LastPacket0X2DFromClient:
-                    client.LastPacket0X2DFromClient = DateTime.Now;
-                    return;
-                case 0x2D when format.Command == 0x2D && profileCheck < client.LastPacket0X2DFromClient:
-                    client.LastPacket0X2DFromClient = DateTime.Now;
-                    break;
-                case 0x38 when format.Command == 0x38 && timeCheck600 > client.LastPacket0X38FromClient:
-                    client.LastPacket0X38FromClient = DateTime.Now;
-                    return;
-                case 0x38 when format.Command == 0x38 && timeCheck600 < client.LastPacket0X38FromClient:
-                    client.LastPacket0X38FromClient = DateTime.Now;
-                    break;
+                [0x0F] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) > client.LastPacket0X0FFromClient,
+                [0x13] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) > client.LastPacket0X13FromClient,
+                [0x1B] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) > client.LastPacket0X1BFromClient,
+                [0x1C] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) > client.LastPacket0X1CFromClient,
+                [0x2D] = t => AddTime(t, TimeSpan.FromSeconds(1)) > client.LastPacket0X2DFromClient,
+                [0x38] = t => AddTime(t, TimeSpan.FromMilliseconds(600)) > client.LastPacket0X38FromClient
+            };
+
+            if (client.LastPacketFromClient == format.Command && timeChecks.TryGetValue(format.Command, out var check) && check(client.LastMessageFromClient))
+            {
+                client.SetLastPacketTime(format.Command, now);
+                return;
             }
 
+            client.SetLastPacketTime(format.Command, now);
+
             if (format.Command != 0x45)
-                client.LastMessageFromClientNot0X45 = DateTime.Now;
+                client.LastMessageFromClientNot0X45 = now;
 
             client.LastPacketFromClient = format.Command;
-            client.LastMessageFromClient = DateTime.Now;
             client.Read(packet, format);
 
-            if (_handlers[format.Command] == null) return;
-
-            _handlers[format.Command].Invoke(this, new object[]
+            _handlers[format.Command]?.Invoke(this, new object[]
             {
-                client, format
+            client, format
             });
         }
         catch (Exception ex)
@@ -353,7 +327,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         try
         {
             var bytes = client.State.EndReceiveHeader(result, out var error);
-                
+
             if (bytes == 0 || error != SocketError.Success)
             {
                 ClientDisconnected(client);

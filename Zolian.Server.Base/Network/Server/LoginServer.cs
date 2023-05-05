@@ -267,110 +267,50 @@ public class LoginServer : NetworkServer<LoginClient>
     /// </summary>
     protected override void Format03Handler(LoginClient client, ClientFormat03 format)
     {
-        if (client is not { Authorized: true }) return;
+        if (client?.Authorized != true) return;
         var ip = client.ClientIP.Address;
-        Task<Aisling> aisling;
+        Task<Aisling> aislingTask;
 
         try
         {
-            aisling = StorageManager.AislingBucket.CheckPassword(format.Username);
+            aislingTask = StorageManager.AislingBucket.CheckPassword(format.Username);
+            var usernameLower = format.Username.ToLowerInvariant();
+            Aisling aisling = aislingTask.Result;
 
-            switch (format.Username.ToLower())
-            {
-                //ToDo: If name is set in database as 'asdf' it locks the account as a maintenance account. This can be used to ban players.
-                case "asdf":
-                    if (aisling.Result == null)
-                    {
-                        client.SendMessageBox(0x02, $"{{=q'{format.Username}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
-                        return;
-                    }
-                    client.SendMessageBox(0x02, "Maintenance Account, denied access");
-                    return;
-                //ToDo: If GM account, restrict that account based on IP address connecting to that account.
-                case "death":
-                    {
-                        if (aisling.Result == null)
-                        {
-                            client.SendMessageBox(0x02, $"{{=q'{format.Username}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
-                            return;
-                        }
-
-                        const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
-                        var ipLocal = IPAddress.Parse(gmIp);
-                        var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
-
-                        // Set IP check
-                        if (ip.Equals(ipLocal))
-                        {
-                            aisling.Result.LastAttemptIP = $"{ip}";
-                            aisling.Result.LastIP = $"{ip}";
-                            aisling.Result.PasswordAttempts = 0;
-                            SavePassword(aisling.Result);
-                            LoginAsAisling(client, aisling.Result);
-                            return;
-                        }
-
-                        // Loopback check
-                        if (ip.Equals(loopback))
-                        {
-                            aisling.Result.LastAttemptIP = $"{ip}";
-                            aisling.Result.LastIP = $"{ip}";
-                            aisling.Result.PasswordAttempts = 0;
-                            SavePassword(aisling.Result);
-                            LoginAsAisling(client, aisling.Result);
-                            return;
-                        }
-
-                        // Deny access if neither check 'true'
-                        client.SendMessageBox(0x02, "GM Account, denied access");
-                        return;
-                    }
-            }
-
-            if (aisling.Result != null)
-            {
-                // GM 'unlock' command is used -- This is set within your Server.Configurations
-                if (format.Password == ServerSetup.Instance.Unlock)
-                {
-                    aisling.Result.Hacked = false;
-                    aisling.Result.PasswordAttempts = 0;
-                    SavePassword(aisling.Result);
-                    ServerSetup.Logger($"{aisling.Result} has been unlocked.");
-                    client.SendMessageBox(0x02, $"{aisling.Result} has been restored.");
-                    return;
-                }
-
-                // Check if player brute force protection was activated - GM will need to unlock account
-                if (aisling.Result.Hacked)
-                {
-                    client.SendMessageBox(0x02, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
-                    return;
-                }
-
-                if (aisling.Result.Password != format.Password)
-                {
-                    if (aisling.Result.PasswordAttempts <= 9)
-                    {
-                        ServerSetup.Logger($"{aisling.Result} attempted an incorrect password.");
-                        aisling.Result.LastAttemptIP = $"{ip}";
-                        aisling.Result.PasswordAttempts += 1;
-                        SavePassword(aisling.Result);
-                        client.SendMessageBox(0x02, "Incorrect Information provided.");
-                        return;
-                    }
-
-                    ServerSetup.Logger($"{aisling.Result} was locked to protect their account.");
-                    client.SendMessageBox(0x02, "Hacking detected, the player has been locked.");
-                    aisling.Result.LastAttemptIP = $"{ip}";
-                    aisling.Result.Hacked = true;
-                    SavePassword(aisling.Result);
-                    return;
-                }
-            }
-            else
+            if (aisling == null)
             {
                 client.SendMessageBox(0x02, $"{{=q'{format.Username}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
                 return;
+            }
+
+            switch (usernameLower)
+            {
+                case "asdf":
+                    client.SendMessageBox(0x02, "Maintenance Account, denied access");
+                    return;
+                case "death":
+                {
+                    const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
+                    var ipLocal = IPAddress.Parse(gmIp);
+                    var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
+
+                    if (ip.Equals(ipLocal) || ip.Equals(loopback))
+                    {
+                        aisling.LastAttemptIP = ip.ToString();
+                        aisling.LastIP = ip.ToString();
+                        aisling.PasswordAttempts = 0;
+                        SavePassword(aisling);
+                        LoginAsAisling(client, aisling);
+                        return;
+                    }
+
+                    client.SendMessageBox(0x02, "GM Account, denied access");
+                    return;
+                }
+                default:
+                    // Other checks and actions
+                    PerformLoginChecksAndActions(client, aisling, format, ip);
+                    break;
             }
         }
         catch (Exception ex)
@@ -378,16 +318,64 @@ public class LoginServer : NetworkServer<LoginClient>
             ServerSetup.Logger(ex.Message, LogLevel.Error);
             ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
+        }
+    }
+
+    private void PerformLoginChecksAndActions(LoginClient client, Aisling aisling, ClientFormat03 format, IPAddress ip)
+    {
+        if (format.Password == ServerSetup.Instance.Unlock)
+        {
+            aisling.Hacked = false;
+            aisling.PasswordAttempts = 0;
+            SavePassword(aisling);
+            ServerSetup.Logger($"{aisling} has been unlocked.");
+            client.SendMessageBox(0x02, $"{aisling} has been restored.");
             return;
         }
 
+        if (aisling.Hacked)
+        {
+            client.SendMessageBox(0x02, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+            return;
+        }
+
+        if (aisling.Password != format.Password)
+        {
+            HandleIncorrectPassword(client, aisling, ip);
+            return;
+        }
+
+        LoginAndCleanup(client, aisling, ip);
+    }
+
+    private void HandleIncorrectPassword(LoginClient client, Aisling aisling, IPAddress ip)
+    {
+        if (aisling.PasswordAttempts <= 9)
+        {
+            ServerSetup.Logger($"{aisling} attempted an incorrect password.");
+            aisling.LastAttemptIP = ip.ToString();
+            aisling.PasswordAttempts += 1;
+            SavePassword(aisling);
+            client.SendMessageBox(0x02, "Incorrect Information provided.");
+        }
+        else
+        {
+            ServerSetup.Logger($"{aisling} was locked to protect their account.");
+            client.SendMessageBox(0x02, "Hacking detected, the player has been locked.");
+            aisling.LastAttemptIP = ip.ToString();
+            aisling.Hacked = true;
+            SavePassword(aisling);
+        }
+    }
+
+    private void LoginAndCleanup(LoginClient client, Aisling aisling, IPAddress ip)
+    {
         // This setting is for testing purposes, do not change it unless you are debugging
         if (ServerSetup.Instance.Config.MultiUserLoginCheck)
         {
             var aislings = ServerSetup.Instance.Game.Clients.Values.Where(i =>
                 i?.Aisling != null && i.Aisling.LoggedIn &&
-                string.Equals(i.Aisling.Username, format.Username, StringComparison.CurrentCultureIgnoreCase));
-
+                string.Equals(i.Aisling.Username, aisling.Username, StringComparison.CurrentCultureIgnoreCase));
             foreach (var obj in aislings)
             {
                 obj.Aisling?.Remove(true);
@@ -396,11 +384,11 @@ public class LoginServer : NetworkServer<LoginClient>
             }
         }
 
-        aisling.Result.LastAttemptIP = $"{ip}";
-        aisling.Result.LastIP = $"{ip}";
-        aisling.Result.PasswordAttempts = 0;
-        SavePassword(aisling.Result);
-        LoginAsAisling(client, aisling.Result);
+        aisling.LastAttemptIP = ip.ToString();
+        aisling.LastIP = ip.ToString();
+        aisling.PasswordAttempts = 0;
+        SavePassword(aisling);
+        LoginAsAisling(client, aisling);
     }
 
     /// <summary>
@@ -408,8 +396,7 @@ public class LoginServer : NetworkServer<LoginClient>
     /// </summary>
     private void LoginAsAisling(LoginClient client, Aisling aisling)
     {
-        if (client is not { Authorized: true }) return;
-        if (aisling.Username == null || aisling.Password == null) return;
+        if (client?.Authorized != true || aisling.Username == null || aisling.Password == null) return;
 
         if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(aisling.AreaId))
         {
@@ -417,12 +404,12 @@ public class LoginServer : NetworkServer<LoginClient>
             return;
         }
 
-        var nameSeed = $"{aisling.Username.ToLower()}{aisling.Serial}";
+        var nameSeed = $"{aisling.Username.ToLowerInvariant()}{aisling.Serial}";
         var redirect = new Redirect
         {
-            Serial = Convert.ToString(client.Serial),
+            Serial = client.Serial.ToString(),
             Salt = Encoding.UTF8.GetString(client.Encryption.Parameters.Salt),
-            Seed = Convert.ToString(client.Encryption.Parameters.Seed),
+            Seed = client.Encryption.Parameters.Seed.ToString(),
             Name = nameSeed
         };
 
