@@ -275,6 +275,11 @@ public class ServerSetup : IServerContext
         }
     }
 
+    /// <summary>
+    /// Game.Start starts the game server from GameServer.cs it then calls the Start method from
+    /// NetworkServer to enable the socket. _lobby.Start starts the lobby server from directly
+    /// calling NetworkServer to enable the socket.
+    /// </summary>
     public void StartServers()
     {
         try

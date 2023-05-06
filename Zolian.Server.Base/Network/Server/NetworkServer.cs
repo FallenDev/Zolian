@@ -20,6 +20,10 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
     private Socket _socket;
     private bool _listening;
 
+    protected IPAddress Address { get; }
+    public ConcurrentDictionary<int, TClient> Clients { get; }
+    protected ConcurrentDictionary<int, IPEndPoint> IpLookupConDict { get; }
+
     protected NetworkServer()
     {
         var type = typeof(NetworkServer<TClient>);
@@ -42,38 +46,37 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         }
     }
 
-    protected IPAddress Address { get; }
-    public ConcurrentDictionary<int, TClient> Clients { get; }
-    protected ConcurrentDictionary<int, IPEndPoint> IpLookupConDict { get; }
-
-    public void Abort()
+    // ToDo: Culprit Port Block
+    /*
+    $theCulpritPort="2615"
+    Get-NetTCPConnection -LocalPort $theCulpritPort -ErrorAction Ignore `
+    | Select-Object -Property  @{'Name' = 'ProcessName';'Expression'={(Get-Process -Id $_.OwningProcess).Name}} `
+    | Get-Unique `
+    | Stop-Process -Name {$_.ProcessName} -Force
+    */
+    public virtual void Start(int port)
     {
-        _listening = false;
+        if (_listening) return;
 
-        if (_socket != null)
+        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        BindSocket(port);
+        _socket.Listen(ServerSetup.Instance.Config?.ConnectionCapacity ?? 2048);
+        _listening = true;
+        _socket.BeginAccept(EndConnectClient, _socket);
+    }
+    
+    private void BindSocket(int port)
+    {
+        try
         {
-            try
-            {
-                _socket.Shutdown(SocketShutdown.Both);
-            }
-            finally
-            {
-                _socket.Close();
-            }
-
-            _socket = null;
+            _socket.Bind(new IPEndPoint(IPAddress.Any, port));
         }
-
-        lock (Clients)
+        catch (Exception e)
         {
-            foreach (var client in Clients.Values.Where(client => client != null))
-            {
-                ClientDisconnected(client);
-                RemoveClient(client);
-            }
+            ServerSetup.Logger("Winsock error: " + e);
         }
     }
-
+    
     private bool AddClient(TClient client)
     {
         if (!Clients.ContainsKey(client.Serial))
@@ -183,37 +186,6 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         if (client == null) return;
         if (Clients != null && Clients.ContainsKey(client.Serial))
             Clients.TryRemove(client.Serial, out _);
-    }
-
-    // ToDo: Culprit Port Block
-    /*
-    $theCulpritPort="2615"
-    Get-NetTCPConnection -LocalPort $theCulpritPort -ErrorAction Ignore `
-    | Select-Object -Property  @{'Name' = 'ProcessName';'Expression'={(Get-Process -Id $_.OwningProcess).Name}} `
-    | Get-Unique `
-    | Stop-Process -Name {$_.ProcessName} -Force
-    */
-    public virtual void Start(int port)
-    {
-        if (_listening) return;
-
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        BindSocket(port);
-        _socket.Listen(ServerSetup.Instance.Config?.ConnectionCapacity ?? 2048);
-        _listening = true;
-        _socket.BeginAccept(EndConnectClient, _socket);
-    }
-
-    private void BindSocket(int port)
-    {
-        try
-        {
-            _socket.Bind(new IPEndPoint(IPAddress.Any, port));
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger("Winsock error: " + e);
-        }
     }
 
     private void EndConnectClient(IAsyncResult result)
