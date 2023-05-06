@@ -16,7 +16,7 @@ namespace Darkages.Network.Server;
 
 public abstract partial class NetworkServer<TClient> : NetworkClient where TClient : NetworkClient, new()
 {
-    private readonly MethodInfo[] _handlers;
+    private readonly Dictionary<int, MethodInfo> _handlers;
     private Socket _socket;
     private bool _listening;
 
@@ -28,10 +28,18 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         Clients = new ConcurrentDictionary<int, TClient>();
         IpLookupConDict = new ConcurrentDictionary<int, IPEndPoint>();
 
-        _handlers = new MethodInfo[256];
+        _handlers = new Dictionary<int, MethodInfo>(256);
 
-        for (var i = 0; i < _handlers.Length; i++)
-            _handlers[i] = type.GetMethod($"Format{i:X2}Handler", BindingFlags.NonPublic | BindingFlags.Instance);
+        for (var i = 0; i < 256; i++)
+        {
+            var methodName = $"Format{i:X2}Handler";
+            var method = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (method != null)
+            {
+                _handlers.Add(i, method);
+            }
+        }
     }
 
     protected IPAddress Address { get; }
@@ -133,10 +141,13 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
             client.LastPacketFromClient = format.Command;
             client.Read(packet, format);
 
-            _handlers[format.Command]?.Invoke(this, new object[]
+            if (_handlers.TryGetValue(format.Command, out var handler))
             {
-                client, format
-            });
+                handler.Invoke(this, new object[]
+                {
+                    client, format
+                });
+            }
         }
         catch (Exception ex)
         {
