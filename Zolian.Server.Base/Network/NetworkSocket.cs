@@ -131,7 +131,7 @@ public sealed class NetworkSocket
 
     private static void ConfigureTcpSocket(Socket tcpSocket)
     {
-        var linger = new LingerOption(true, 30);
+        var linger = new LingerOption(true, 5);
 
         tcpSocket.NoDelay = true;
         tcpSocket.LingerState = linger;
