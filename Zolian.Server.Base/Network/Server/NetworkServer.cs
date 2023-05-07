@@ -108,8 +108,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         if (client.Serial == 0)
         {
             ServerSetup.Logger($"{ip!.Address} client never established.", LogLevel.Critical);
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectClient(client);
             return;
         }
 
@@ -160,8 +159,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
             ServerSetup.Logger("--------------------------------");
             ServerSetup.Logger(ex.TargetSite?.CallingConvention.ToString(), LogLevel.Critical);
             Crashes.TrackError(ex);
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectClient(client);
         }
     }
 

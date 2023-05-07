@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 
 using ServiceStack;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Numerics;
@@ -34,6 +35,7 @@ public class GameServer : NetworkServer<GameClient>
 {
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
+    private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     private ConcurrentDictionary<Type, GameServerComponent> _serverComponents;
     private DateTime _fastGameTime;
     private DateTime _normalGameTime;
@@ -49,6 +51,7 @@ public class GameServer : NetworkServer<GameClient>
 
     public GameServer(int capacity)
     {
+        SkillMapper();
         RegisterServerComponents();
     }
 
@@ -101,6 +104,409 @@ public class GameServer : NetworkServer<GameClient>
     }
 
     #region Game Engine
+
+    private static void SkillMapper()
+    {
+        _skillMap = new Dictionary<(Race race, Class path, Class pastClass), string>
+        {
+            {(Race.Human, Class.Berserker, Class.Berserker), "SClass1"},
+            {(Race.Human, Class.Berserker, Class.Defender), "SClass2"},
+            {(Race.Human, Class.Berserker, Class.Assassin), "SClass3"},
+            {(Race.Human, Class.Berserker, Class.Cleric), "SClass4"},
+            {(Race.Human, Class.Berserker, Class.Arcanus), "SClass5"},
+            {(Race.Human, Class.Berserker, Class.Monk), "SClass6"},
+            {(Race.Human, Class.Defender, Class.Berserker), "SClass7"},
+            {(Race.Human, Class.Defender, Class.Defender), "SClass8"},
+            {(Race.Human, Class.Defender, Class.Assassin), "SClass9"},
+            {(Race.Human, Class.Defender, Class.Cleric), "SClass10"},
+            {(Race.Human, Class.Defender, Class.Arcanus), "SClass11"},
+            {(Race.Human, Class.Defender, Class.Monk), "SClass12"},
+            {(Race.Human, Class.Assassin, Class.Berserker), "SClass13"},
+            {(Race.Human, Class.Assassin, Class.Defender), "SClass14"},
+            {(Race.Human, Class.Assassin, Class.Assassin), "SClass15"},
+            {(Race.Human, Class.Assassin, Class.Cleric), "SClass16"},
+            {(Race.Human, Class.Assassin, Class.Arcanus), "SClass17"},
+            {(Race.Human, Class.Assassin, Class.Monk), "SClass18"},
+            {(Race.Human, Class.Cleric, Class.Berserker), "SClass19"},
+            {(Race.Human, Class.Cleric, Class.Defender), "SClass20"},
+            {(Race.Human, Class.Cleric, Class.Assassin), "SClass21"},
+            {(Race.Human, Class.Cleric, Class.Cleric), "SClass22"},
+            {(Race.Human, Class.Cleric, Class.Arcanus), "SClass23"},
+            {(Race.Human, Class.Cleric, Class.Monk), "SClass24"},
+            {(Race.Human, Class.Arcanus, Class.Berserker), "SClass25"},
+            {(Race.Human, Class.Arcanus, Class.Defender), "SClass26"},
+            {(Race.Human, Class.Arcanus, Class.Assassin), "SClass27"},
+            {(Race.Human, Class.Arcanus, Class.Cleric), "SClass28"},
+            {(Race.Human, Class.Arcanus, Class.Arcanus), "SClass29"},
+            {(Race.Human, Class.Arcanus, Class.Monk), "SClass30"},
+            {(Race.Human, Class.Monk, Class.Berserker), "SClass31"},
+            {(Race.Human, Class.Monk, Class.Defender), "SClass32"},
+            {(Race.Human, Class.Monk, Class.Assassin), "SClass33"},
+            {(Race.Human, Class.Monk, Class.Cleric), "SClass34"},
+            {(Race.Human, Class.Monk, Class.Arcanus), "SClass35"},
+            {(Race.Human, Class.Monk, Class.Monk), "SClass36"},
+            {(Race.HalfElf, Class.Berserker, Class.Berserker), "SClass37"},
+            {(Race.HalfElf, Class.Berserker, Class.Defender), "SClass38"},
+            {(Race.HalfElf, Class.Berserker, Class.Assassin), "SClass39"},
+            {(Race.HalfElf, Class.Berserker, Class.Cleric), "SClass40"},
+            {(Race.HalfElf, Class.Berserker, Class.Arcanus), "SClass41"},
+            {(Race.HalfElf, Class.Berserker, Class.Monk), "SClass42"},
+            {(Race.HalfElf, Class.Defender, Class.Berserker), "SClass43"},
+            {(Race.HalfElf, Class.Defender, Class.Defender), "SClass44"},
+            {(Race.HalfElf, Class.Defender, Class.Assassin), "SClass45"},
+            {(Race.HalfElf, Class.Defender, Class.Cleric), "SClass46"},
+            {(Race.HalfElf, Class.Defender, Class.Arcanus), "SClass47"},
+            {(Race.HalfElf, Class.Defender, Class.Monk), "SClass48"},
+            {(Race.HalfElf, Class.Assassin, Class.Berserker), "SClass49"},
+            {(Race.HalfElf, Class.Assassin, Class.Defender), "SClass50"},
+            {(Race.HalfElf, Class.Assassin, Class.Assassin), "SClass51"},
+            {(Race.HalfElf, Class.Assassin, Class.Cleric), "SClass52"},
+            {(Race.HalfElf, Class.Assassin, Class.Arcanus), "SClass53"},
+            {(Race.HalfElf, Class.Assassin, Class.Monk), "SClass54"},
+            {(Race.HalfElf, Class.Cleric, Class.Berserker), "SClass55"},
+            {(Race.HalfElf, Class.Cleric, Class.Defender), "SClass56"},
+            {(Race.HalfElf, Class.Cleric, Class.Assassin), "SClass57"},
+            {(Race.HalfElf, Class.Cleric, Class.Cleric), "SClass58"},
+            {(Race.HalfElf, Class.Cleric, Class.Arcanus), "SClass59"},
+            {(Race.HalfElf, Class.Cleric, Class.Monk), "SClass60"},
+            {(Race.HalfElf, Class.Arcanus, Class.Berserker), "SClass61"},
+            {(Race.HalfElf, Class.Arcanus, Class.Defender), "SClass62"},
+            {(Race.HalfElf, Class.Arcanus, Class.Assassin), "SClass63"},
+            {(Race.HalfElf, Class.Arcanus, Class.Cleric), "SClass64"},
+            {(Race.HalfElf, Class.Arcanus, Class.Arcanus), "SClass65"},
+            {(Race.HalfElf, Class.Arcanus, Class.Monk), "SClass66"},
+            {(Race.HalfElf, Class.Monk, Class.Berserker), "SClass67"},
+            {(Race.HalfElf, Class.Monk, Class.Defender), "SClass68"},
+            {(Race.HalfElf, Class.Monk, Class.Assassin), "SClass69"},
+            {(Race.HalfElf, Class.Monk, Class.Cleric), "SClass70"},
+            {(Race.HalfElf, Class.Monk, Class.Arcanus), "SClass71"},
+            {(Race.HalfElf, Class.Monk, Class.Monk), "SClass72"},
+            {(Race.HighElf, Class.Berserker, Class.Berserker), "SClass73"},
+            {(Race.HighElf, Class.Berserker, Class.Defender), "SClass74"},
+            {(Race.HighElf, Class.Berserker, Class.Assassin), "SClass75"},
+            {(Race.HighElf, Class.Berserker, Class.Cleric), "SClass76"},
+            {(Race.HighElf, Class.Berserker, Class.Arcanus), "SClass77"},
+            {(Race.HighElf, Class.Berserker, Class.Monk), "SClass78"},
+            {(Race.HighElf, Class.Defender, Class.Berserker), "SClass79"},
+            {(Race.HighElf, Class.Defender, Class.Defender), "SClass80"},
+            {(Race.HighElf, Class.Defender, Class.Assassin), "SClass81"},
+            {(Race.HighElf, Class.Defender, Class.Cleric), "SClass82"},
+            {(Race.HighElf, Class.Defender, Class.Arcanus), "SClass83"},
+            {(Race.HighElf, Class.Defender, Class.Monk), "SClass84"},
+            {(Race.HighElf, Class.Assassin, Class.Berserker), "SClass85"},
+            {(Race.HighElf, Class.Assassin, Class.Defender), "SClass86"},
+            {(Race.HighElf, Class.Assassin, Class.Assassin), "SClass87"},
+            {(Race.HighElf, Class.Assassin, Class.Cleric), "SClass88"},
+            {(Race.HighElf, Class.Assassin, Class.Arcanus), "SClass89"},
+            {(Race.HighElf, Class.Assassin, Class.Monk), "SClass90"},
+            {(Race.HighElf, Class.Cleric, Class.Berserker), "SClass91"},
+            {(Race.HighElf, Class.Cleric, Class.Defender), "SClass92"},
+            {(Race.HighElf, Class.Cleric, Class.Assassin), "SClass93"},
+            {(Race.HighElf, Class.Cleric, Class.Cleric), "SClass94"},
+            {(Race.HighElf, Class.Cleric, Class.Arcanus), "SClass95"},
+            {(Race.HighElf, Class.Cleric, Class.Monk), "SClass96"},
+            {(Race.HighElf, Class.Arcanus, Class.Berserker), "SClass97"},
+            {(Race.HighElf, Class.Arcanus, Class.Defender), "SClass98"},
+            {(Race.HighElf, Class.Arcanus, Class.Assassin), "SClass99"},
+            {(Race.HighElf, Class.Arcanus, Class.Cleric), "SClass100"},
+            {(Race.HighElf, Class.Arcanus, Class.Arcanus), "SClass101"},
+            {(Race.HighElf, Class.Arcanus, Class.Monk), "SClass102"},
+            {(Race.HighElf, Class.Monk, Class.Berserker), "SClass103"},
+            {(Race.HighElf, Class.Monk, Class.Defender), "SClass104"},
+            {(Race.HighElf, Class.Monk, Class.Assassin), "SClass105"},
+            {(Race.HighElf, Class.Monk, Class.Cleric), "SClass106"},
+            {(Race.HighElf, Class.Monk, Class.Arcanus), "SClass107"},
+            {(Race.HighElf, Class.Monk, Class.Monk), "SClass108"},
+            {(Race.DarkElf, Class.Berserker, Class.Berserker), "SClass109"},
+            {(Race.DarkElf, Class.Berserker, Class.Defender), "SClass110"},
+            {(Race.DarkElf, Class.Berserker, Class.Assassin), "SClass111"},
+            {(Race.DarkElf, Class.Berserker, Class.Cleric), "SClass112"},
+            {(Race.DarkElf, Class.Berserker, Class.Arcanus), "SClass113"},
+            {(Race.DarkElf, Class.Berserker, Class.Monk), "SClass114"},
+            {(Race.DarkElf, Class.Defender, Class.Berserker), "SClass115"},
+            {(Race.DarkElf, Class.Defender, Class.Defender), "SClass116"},
+            {(Race.DarkElf, Class.Defender, Class.Assassin), "SClass117"},
+            {(Race.DarkElf, Class.Defender, Class.Cleric), "SClass118"},
+            {(Race.DarkElf, Class.Defender, Class.Arcanus), "SClass119"},
+            {(Race.DarkElf, Class.Defender, Class.Monk), "SClass120"},
+            {(Race.DarkElf, Class.Assassin, Class.Berserker), "SClass121"},
+            {(Race.DarkElf, Class.Assassin, Class.Defender), "SClass122"},
+            {(Race.DarkElf, Class.Assassin, Class.Assassin), "SClass123"},
+            {(Race.DarkElf, Class.Assassin, Class.Cleric), "SClass124"},
+            {(Race.DarkElf, Class.Assassin, Class.Arcanus), "SClass125"},
+            {(Race.DarkElf, Class.Assassin, Class.Monk), "SClass126"},
+            {(Race.DarkElf, Class.Cleric, Class.Berserker), "SClass127"},
+            {(Race.DarkElf, Class.Cleric, Class.Defender), "SClass128"},
+            {(Race.DarkElf, Class.Cleric, Class.Assassin), "SClass129"},
+            {(Race.DarkElf, Class.Cleric, Class.Cleric), "SClass130"},
+            {(Race.DarkElf, Class.Cleric, Class.Arcanus), "SClass131"},
+            {(Race.DarkElf, Class.Cleric, Class.Monk), "SClass132"},
+            {(Race.DarkElf, Class.Arcanus, Class.Berserker), "SClass133"},
+            {(Race.DarkElf, Class.Arcanus, Class.Defender), "SClass134"},
+            {(Race.DarkElf, Class.Arcanus, Class.Assassin), "SClass135"},
+            {(Race.DarkElf, Class.Arcanus, Class.Cleric), "SClass136"},
+            {(Race.DarkElf, Class.Arcanus, Class.Arcanus), "SClass137"},
+            {(Race.DarkElf, Class.Arcanus, Class.Monk), "SClass138"},
+            {(Race.DarkElf, Class.Monk, Class.Berserker), "SClass139"},
+            {(Race.DarkElf, Class.Monk, Class.Defender), "SClass140"},
+            {(Race.DarkElf, Class.Monk, Class.Assassin), "SClass141"},
+            {(Race.DarkElf, Class.Monk, Class.Cleric), "SClass142"},
+            {(Race.DarkElf, Class.Monk, Class.Arcanus), "SClass143"},
+            {(Race.DarkElf, Class.Monk, Class.Monk), "SClass144"},
+            {(Race.WoodElf, Class.Berserker, Class.Berserker), "SClass145"},
+            {(Race.WoodElf, Class.Berserker, Class.Defender), "SClass146"},
+            {(Race.WoodElf, Class.Berserker, Class.Assassin), "SClass147"},
+            {(Race.WoodElf, Class.Berserker, Class.Cleric), "SClass148"},
+            {(Race.WoodElf, Class.Berserker, Class.Arcanus), "SClass149"},
+            {(Race.WoodElf, Class.Berserker, Class.Monk), "SClass150"},
+            {(Race.WoodElf, Class.Defender, Class.Berserker), "SClass151"},
+            {(Race.WoodElf, Class.Defender, Class.Defender), "SClass152"},
+            {(Race.WoodElf, Class.Defender, Class.Assassin), "SClass153"},
+            {(Race.WoodElf, Class.Defender, Class.Cleric), "SClass154"},
+            {(Race.WoodElf, Class.Defender, Class.Arcanus), "SClass155"},
+            {(Race.WoodElf, Class.Defender, Class.Monk), "SClass156"},
+            {(Race.WoodElf, Class.Assassin, Class.Berserker), "SClass157"},
+            {(Race.WoodElf, Class.Assassin, Class.Defender), "SClass158"},
+            {(Race.WoodElf, Class.Assassin, Class.Assassin), "SClass159"},
+            {(Race.WoodElf, Class.Assassin, Class.Cleric), "SClass160"},
+            {(Race.WoodElf, Class.Assassin, Class.Arcanus), "SClass161"},
+            {(Race.WoodElf, Class.Assassin, Class.Monk), "SClass162"},
+            {(Race.WoodElf, Class.Cleric, Class.Berserker), "SClass163"},
+            {(Race.WoodElf, Class.Cleric, Class.Defender), "SClass164"},
+            {(Race.WoodElf, Class.Cleric, Class.Assassin), "SClass165"},
+            {(Race.WoodElf, Class.Cleric, Class.Cleric), "SClass166"},
+            {(Race.WoodElf, Class.Cleric, Class.Arcanus), "SClass167"},
+            {(Race.WoodElf, Class.Cleric, Class.Monk), "SClass168"},
+            {(Race.WoodElf, Class.Arcanus, Class.Berserker), "SClass169"},
+            {(Race.WoodElf, Class.Arcanus, Class.Defender), "SClass170"},
+            {(Race.WoodElf, Class.Arcanus, Class.Assassin), "SClass171"},
+            {(Race.WoodElf, Class.Arcanus, Class.Cleric), "SClass172"},
+            {(Race.WoodElf, Class.Arcanus, Class.Arcanus), "SClass173"},
+            {(Race.WoodElf, Class.Arcanus, Class.Monk), "SClass174"},
+            {(Race.WoodElf, Class.Monk, Class.Berserker), "SClass175"},
+            {(Race.WoodElf, Class.Monk, Class.Defender), "SClass176"},
+            {(Race.WoodElf, Class.Monk, Class.Assassin), "SClass177"},
+            {(Race.WoodElf, Class.Monk, Class.Cleric), "SClass178"},
+            {(Race.WoodElf, Class.Monk, Class.Arcanus), "SClass179"},
+            {(Race.WoodElf, Class.Monk, Class.Monk), "SClass180"},
+            {(Race.Orc, Class.Berserker, Class.Berserker), "SClass181"},
+            {(Race.Orc, Class.Berserker, Class.Defender), "SClass182"},
+            {(Race.Orc, Class.Berserker, Class.Assassin), "SClass183"},
+            {(Race.Orc, Class.Berserker, Class.Cleric), "SClass184"},
+            {(Race.Orc, Class.Berserker, Class.Arcanus), "SClass185"},
+            {(Race.Orc, Class.Berserker, Class.Monk), "SClass186"},
+            {(Race.Orc, Class.Defender, Class.Berserker), "SClass187"},
+            {(Race.Orc, Class.Defender, Class.Defender), "SClass188"},
+            {(Race.Orc, Class.Defender, Class.Assassin), "SClass189"},
+            {(Race.Orc, Class.Defender, Class.Cleric), "SClass190"},
+            {(Race.Orc, Class.Defender, Class.Arcanus), "SClass191"},
+            {(Race.Orc, Class.Defender, Class.Monk), "SClass192"},
+            {(Race.Orc, Class.Assassin, Class.Berserker), "SClass193"},
+            {(Race.Orc, Class.Assassin, Class.Defender), "SClass194"},
+            {(Race.Orc, Class.Assassin, Class.Assassin), "SClass195"},
+            {(Race.Orc, Class.Assassin, Class.Cleric), "SClass196"},
+            {(Race.Orc, Class.Assassin, Class.Arcanus), "SClass197"},
+            {(Race.Orc, Class.Assassin, Class.Monk), "SClass198"},
+            {(Race.Orc, Class.Cleric, Class.Berserker), "SClass199"},
+            {(Race.Orc, Class.Cleric, Class.Defender), "SClass200"},
+            {(Race.Orc, Class.Cleric, Class.Assassin), "SClass201"},
+            {(Race.Orc, Class.Cleric, Class.Cleric), "SClass202"},
+            {(Race.Orc, Class.Cleric, Class.Arcanus), "SClass203"},
+            {(Race.Orc, Class.Cleric, Class.Monk), "SClass204"},
+            {(Race.Orc, Class.Arcanus, Class.Berserker), "SClass205"},
+            {(Race.Orc, Class.Arcanus, Class.Defender), "SClass206"},
+            {(Race.Orc, Class.Arcanus, Class.Assassin), "SClass207"},
+            {(Race.Orc, Class.Arcanus, Class.Cleric), "SClass208"},
+            {(Race.Orc, Class.Arcanus, Class.Arcanus), "SClass209"},
+            {(Race.Orc, Class.Arcanus, Class.Monk), "SClass210"},
+            {(Race.Orc, Class.Monk, Class.Berserker), "SClass211"},
+            {(Race.Orc, Class.Monk, Class.Defender), "SClass212"},
+            {(Race.Orc, Class.Monk, Class.Assassin), "SClass213"},
+            {(Race.Orc, Class.Monk, Class.Cleric), "SClass214"},
+            {(Race.Orc, Class.Monk, Class.Arcanus), "SClass215"},
+            {(Race.Orc, Class.Monk, Class.Monk), "SClass216"},
+            {(Race.Dwarf, Class.Berserker, Class.Berserker), "SClass217"},
+            {(Race.Dwarf, Class.Berserker, Class.Defender), "SClass218"},
+            {(Race.Dwarf, Class.Berserker, Class.Assassin), "SClass219"},
+            {(Race.Dwarf, Class.Berserker, Class.Cleric), "SClass220"},
+            {(Race.Dwarf, Class.Berserker, Class.Arcanus), "SClass221"},
+            {(Race.Dwarf, Class.Berserker, Class.Monk), "SClass222"},
+            {(Race.Dwarf, Class.Defender, Class.Berserker), "SClass223"},
+            {(Race.Dwarf, Class.Defender, Class.Defender), "SClass224"},
+            {(Race.Dwarf, Class.Defender, Class.Assassin), "SClass225"},
+            {(Race.Dwarf, Class.Defender, Class.Cleric), "SClass226"},
+            {(Race.Dwarf, Class.Defender, Class.Arcanus), "SClass227"},
+            {(Race.Dwarf, Class.Defender, Class.Monk), "SClass228"},
+            {(Race.Dwarf, Class.Assassin, Class.Berserker), "SClass229"},
+            {(Race.Dwarf, Class.Assassin, Class.Defender), "SClass230"},
+            {(Race.Dwarf, Class.Assassin, Class.Assassin), "SClass231"},
+            {(Race.Dwarf, Class.Assassin, Class.Cleric), "SClass232"},
+            {(Race.Dwarf, Class.Assassin, Class.Arcanus), "SClass233"},
+            {(Race.Dwarf, Class.Assassin, Class.Monk), "SClass234"},
+            {(Race.Dwarf, Class.Cleric, Class.Berserker), "SClass235"},
+            {(Race.Dwarf, Class.Cleric, Class.Defender), "SClass236"},
+            {(Race.Dwarf, Class.Cleric, Class.Assassin), "SClass237"},
+            {(Race.Dwarf, Class.Cleric, Class.Cleric), "SClass238"},
+            {(Race.Dwarf, Class.Cleric, Class.Arcanus), "SClass239"},
+            {(Race.Dwarf, Class.Cleric, Class.Monk), "SClass240"},
+            {(Race.Dwarf, Class.Arcanus, Class.Berserker), "SClass241"},
+            {(Race.Dwarf, Class.Arcanus, Class.Defender), "SClass242"},
+            {(Race.Dwarf, Class.Arcanus, Class.Assassin), "SClass243"},
+            {(Race.Dwarf, Class.Arcanus, Class.Cleric), "SClass244"},
+            {(Race.Dwarf, Class.Arcanus, Class.Arcanus), "SClass245"},
+            {(Race.Dwarf, Class.Arcanus, Class.Monk), "SClass246"},
+            {(Race.Dwarf, Class.Monk, Class.Berserker), "SClass247"},
+            {(Race.Dwarf, Class.Monk, Class.Defender), "SClass248"},
+            {(Race.Dwarf, Class.Monk, Class.Assassin), "SClass249"},
+            {(Race.Dwarf, Class.Monk, Class.Cleric), "SClass250"},
+            {(Race.Dwarf, Class.Monk, Class.Arcanus), "SClass251"},
+            {(Race.Dwarf, Class.Monk, Class.Monk), "SClass252"},
+            {(Race.Halfling, Class.Berserker, Class.Berserker), "SClass253"},
+            {(Race.Halfling, Class.Berserker, Class.Defender), "SClass254"},
+            {(Race.Halfling, Class.Berserker, Class.Assassin), "SClass255"},
+            {(Race.Halfling, Class.Berserker, Class.Cleric), "SClass256"},
+            {(Race.Halfling, Class.Berserker, Class.Arcanus), "SClass257"},
+            {(Race.Halfling, Class.Berserker, Class.Monk), "SClass258"},
+            {(Race.Halfling, Class.Defender, Class.Berserker), "SClass259"},
+            {(Race.Halfling, Class.Defender, Class.Defender), "SClass260"},
+            {(Race.Halfling, Class.Defender, Class.Assassin), "SClass261"},
+            {(Race.Halfling, Class.Defender, Class.Cleric), "SClass262"},
+            {(Race.Halfling, Class.Defender, Class.Arcanus), "SClass263"},
+            {(Race.Halfling, Class.Defender, Class.Monk), "SClass264"},
+            {(Race.Halfling, Class.Assassin, Class.Berserker), "SClass265"},
+            {(Race.Halfling, Class.Assassin, Class.Defender), "SClass266"},
+            {(Race.Halfling, Class.Assassin, Class.Assassin), "SClass267"},
+            {(Race.Halfling, Class.Assassin, Class.Cleric), "SClass268"},
+            {(Race.Halfling, Class.Assassin, Class.Arcanus), "SClass269"},
+            {(Race.Halfling, Class.Assassin, Class.Monk), "SClass270"},
+            {(Race.Halfling, Class.Cleric, Class.Berserker), "SClass271"},
+            {(Race.Halfling, Class.Cleric, Class.Defender), "SClass272"},
+            {(Race.Halfling, Class.Cleric, Class.Assassin), "SClass273"},
+            {(Race.Halfling, Class.Cleric, Class.Cleric), "SClass274"},
+            {(Race.Halfling, Class.Cleric, Class.Arcanus), "SClass275"},
+            {(Race.Halfling, Class.Cleric, Class.Monk), "SClass276"},
+            {(Race.Halfling, Class.Arcanus, Class.Berserker), "SClass277"},
+            {(Race.Halfling, Class.Arcanus, Class.Defender), "SClass278"},
+            {(Race.Halfling, Class.Arcanus, Class.Assassin), "SClass279"},
+            {(Race.Halfling, Class.Arcanus, Class.Cleric), "SClass280"},
+            {(Race.Halfling, Class.Arcanus, Class.Arcanus), "SClass281"},
+            {(Race.Halfling, Class.Arcanus, Class.Monk), "SClass282"},
+            {(Race.Halfling, Class.Monk, Class.Berserker), "SClass283"},
+            {(Race.Halfling, Class.Monk, Class.Defender), "SClass284"},
+            {(Race.Halfling, Class.Monk, Class.Assassin), "SClass285"},
+            {(Race.Halfling, Class.Monk, Class.Cleric), "SClass286"},
+            {(Race.Halfling, Class.Monk, Class.Arcanus), "SClass287"},
+            {(Race.Halfling, Class.Monk, Class.Monk), "SClass288"},
+            {(Race.Dragonkin, Class.Berserker, Class.Berserker), "SClass289"},
+            {(Race.Dragonkin, Class.Berserker, Class.Defender), "SClass290"},
+            {(Race.Dragonkin, Class.Berserker, Class.Assassin), "SClass291"},
+            {(Race.Dragonkin, Class.Berserker, Class.Cleric), "SClass292"},
+            {(Race.Dragonkin, Class.Berserker, Class.Arcanus), "SClass293"},
+            {(Race.Dragonkin, Class.Berserker, Class.Monk), "SClass294"},
+            {(Race.Dragonkin, Class.Defender, Class.Berserker), "SClass295"},
+            {(Race.Dragonkin, Class.Defender, Class.Defender), "SClass296"},
+            {(Race.Dragonkin, Class.Defender, Class.Assassin), "SClass297"},
+            {(Race.Dragonkin, Class.Defender, Class.Cleric), "SClass298"},
+            {(Race.Dragonkin, Class.Defender, Class.Arcanus), "SClass299"},
+            {(Race.Dragonkin, Class.Defender, Class.Monk), "SClass300"},
+            {(Race.Dragonkin, Class.Assassin, Class.Berserker), "SClass301"},
+            {(Race.Dragonkin, Class.Assassin, Class.Defender), "SClass302"},
+            {(Race.Dragonkin, Class.Assassin, Class.Assassin), "SClass303"},
+            {(Race.Dragonkin, Class.Assassin, Class.Cleric), "SClass304"},
+            {(Race.Dragonkin, Class.Assassin, Class.Arcanus), "SClass305"},
+            {(Race.Dragonkin, Class.Assassin, Class.Monk), "SClass306"},
+            {(Race.Dragonkin, Class.Cleric, Class.Berserker), "SClass307"},
+            {(Race.Dragonkin, Class.Cleric, Class.Defender), "SClass308"},
+            {(Race.Dragonkin, Class.Cleric, Class.Assassin), "SClass309"},
+            {(Race.Dragonkin, Class.Cleric, Class.Cleric), "SClass310"},
+            {(Race.Dragonkin, Class.Cleric, Class.Arcanus), "SClass311"},
+            {(Race.Dragonkin, Class.Cleric, Class.Monk), "SClass312"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Berserker), "SClass313"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Defender), "SClass314"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Assassin), "SClass315"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Cleric), "SClass316"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Arcanus), "SClass317"},
+            {(Race.Dragonkin, Class.Arcanus, Class.Monk), "SClass318"},
+            {(Race.Dragonkin, Class.Monk, Class.Berserker), "SClass319"},
+            {(Race.Dragonkin, Class.Monk, Class.Defender), "SClass320"},
+            {(Race.Dragonkin, Class.Monk, Class.Assassin), "SClass321"},
+            {(Race.Dragonkin, Class.Monk, Class.Cleric), "SClass322"},
+            {(Race.Dragonkin, Class.Monk, Class.Arcanus), "SClass323"},
+            {(Race.Dragonkin, Class.Monk, Class.Monk), "SClass324"},
+            {(Race.HalfBeast, Class.Berserker, Class.Berserker), "SClass325"},
+            {(Race.HalfBeast, Class.Berserker, Class.Defender), "SClass326"},
+            {(Race.HalfBeast, Class.Berserker, Class.Assassin), "SClass327"},
+            {(Race.HalfBeast, Class.Berserker, Class.Cleric), "SClass328"},
+            {(Race.HalfBeast, Class.Berserker, Class.Arcanus), "SClass329"},
+            {(Race.HalfBeast, Class.Berserker, Class.Monk), "SClass330"},
+            {(Race.HalfBeast, Class.Defender, Class.Berserker), "SClass331"},
+            {(Race.HalfBeast, Class.Defender, Class.Defender), "SClass332"},
+            {(Race.HalfBeast, Class.Defender, Class.Assassin), "SClass333"},
+            {(Race.HalfBeast, Class.Defender, Class.Cleric), "SClass334"},
+            {(Race.HalfBeast, Class.Defender, Class.Arcanus), "SClass335"},
+            {(Race.HalfBeast, Class.Defender, Class.Monk), "SClass336"},
+            {(Race.HalfBeast, Class.Assassin, Class.Berserker), "SClass337"},
+            {(Race.HalfBeast, Class.Assassin, Class.Defender), "SClass338"},
+            {(Race.HalfBeast, Class.Assassin, Class.Assassin), "SClass339"},
+            {(Race.HalfBeast, Class.Assassin, Class.Cleric), "SClass340"},
+            {(Race.HalfBeast, Class.Assassin, Class.Arcanus), "SClass341"},
+            {(Race.HalfBeast, Class.Assassin, Class.Monk), "SClass342"},
+            {(Race.HalfBeast, Class.Cleric, Class.Berserker), "SClass343"},
+            {(Race.HalfBeast, Class.Cleric, Class.Defender), "SClass344"},
+            {(Race.HalfBeast, Class.Cleric, Class.Assassin), "SClass345"},
+            {(Race.HalfBeast, Class.Cleric, Class.Cleric), "SClass346"},
+            {(Race.HalfBeast, Class.Cleric, Class.Arcanus), "SClass347"},
+            {(Race.HalfBeast, Class.Cleric, Class.Monk), "SClass348"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Berserker), "SClass349"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Defender), "SClass350"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Assassin), "SClass351"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Cleric), "SClass352"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Arcanus), "SClass353"},
+            {(Race.HalfBeast, Class.Arcanus, Class.Monk), "SClass354"},
+            {(Race.HalfBeast, Class.Monk, Class.Berserker), "SClass355"},
+            {(Race.HalfBeast, Class.Monk, Class.Defender), "SClass356"},
+            {(Race.HalfBeast, Class.Monk, Class.Assassin), "SClass357"},
+            {(Race.HalfBeast, Class.Monk, Class.Cleric), "SClass358"},
+            {(Race.HalfBeast, Class.Monk, Class.Arcanus), "SClass359"},
+            {(Race.HalfBeast, Class.Monk, Class.Monk), "SClass360"},
+            {(Race.Merfolk, Class.Berserker, Class.Berserker), "SClass361"},
+            {(Race.Merfolk, Class.Berserker, Class.Defender), "SClass362"},
+            {(Race.Merfolk, Class.Berserker, Class.Assassin), "SClass363"},
+            {(Race.Merfolk, Class.Berserker, Class.Cleric), "SClass364"},
+            {(Race.Merfolk, Class.Berserker, Class.Arcanus), "SClass365"},
+            {(Race.Merfolk, Class.Berserker, Class.Monk), "SClass366"},
+            {(Race.Merfolk, Class.Defender, Class.Berserker), "SClass367"},
+            {(Race.Merfolk, Class.Defender, Class.Defender), "SClass368"},
+            {(Race.Merfolk, Class.Defender, Class.Assassin), "SClass369"},
+            {(Race.Merfolk, Class.Defender, Class.Cleric), "SClass370"},
+            {(Race.Merfolk, Class.Defender, Class.Arcanus), "SClass371"},
+            {(Race.Merfolk, Class.Defender, Class.Monk), "SClass372"},
+            {(Race.Merfolk, Class.Assassin, Class.Berserker), "SClass373"},
+            {(Race.Merfolk, Class.Assassin, Class.Defender), "SClass374"},
+            {(Race.Merfolk, Class.Assassin, Class.Assassin), "SClass375"},
+            {(Race.Merfolk, Class.Assassin, Class.Cleric), "SClass376"},
+            {(Race.Merfolk, Class.Assassin, Class.Arcanus), "SClass377"},
+            {(Race.Merfolk, Class.Assassin, Class.Monk), "SClass378"},
+            {(Race.Merfolk, Class.Cleric, Class.Berserker), "SClass379"},
+            {(Race.Merfolk, Class.Cleric, Class.Defender), "SClass380"},
+            {(Race.Merfolk, Class.Cleric, Class.Assassin), "SClass381"},
+            {(Race.Merfolk, Class.Cleric, Class.Cleric), "SClass382"},
+            {(Race.Merfolk, Class.Cleric, Class.Arcanus), "SClass383"},
+            {(Race.Merfolk, Class.Cleric, Class.Monk), "SClass384"},
+            {(Race.Merfolk, Class.Arcanus, Class.Berserker), "SClass385"},
+            {(Race.Merfolk, Class.Arcanus, Class.Defender), "SClass386"},
+            {(Race.Merfolk, Class.Arcanus, Class.Assassin), "SClass387"},
+            {(Race.Merfolk, Class.Arcanus, Class.Cleric), "SClass388"},
+            {(Race.Merfolk, Class.Arcanus, Class.Arcanus), "SClass389"},
+            {(Race.Merfolk, Class.Arcanus, Class.Monk), "SClass390"},
+            {(Race.Merfolk, Class.Monk, Class.Berserker), "SClass391"},
+            {(Race.Merfolk, Class.Monk, Class.Defender), "SClass392"},
+            {(Race.Merfolk, Class.Monk, Class.Assassin), "SClass393"},
+            {(Race.Merfolk, Class.Monk, Class.Cleric), "SClass394"},
+            {(Race.Merfolk, Class.Monk, Class.Arcanus), "SClass395"},
+            {(Race.Merfolk, Class.Monk, Class.Monk), "SClass396"}
+        };
+    }
 
     private async Task UpdateComponentsFast()
     {
@@ -219,20 +625,21 @@ public class GameServer : NetworkServer<GameClient>
 
     private void UpdateClients(TimeSpan elapsedTime)
     {
-        foreach (var client in Clients.Values.Where(client => client == null))
+        var players = Clients.Values;
+        
+        foreach (var client in players.Where(client => client == null))
         {
-            ClientDisconnected(client);
-            RemoveClient(client);
+            DisconnectAndRemoveClient(client);
         }
 
-        foreach (var client in Clients.Values.Where(client => client.Aisling != null))
+        foreach (var client in players.Where(client => client.Aisling != null))
         {
             try
             {
                 switch (client.IsWarping)
                 {
                     case false when !client.MapOpen:
-                        client?.Update(elapsedTime);
+                        client.Update(elapsedTime);
                         break;
                     case true:
                         break;
@@ -260,6 +667,9 @@ public class GameServer : NetworkServer<GameClient>
 
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
+        // Cache traps to reduce Select operation on each iteration
+        var traps = Trap.Traps.Values;
+
         foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
         {
             var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID);
@@ -290,7 +700,7 @@ public class GameServer : NetworkServer<GameClient>
                     script?.Update(elapsedTime);
                 }
 
-                foreach (var trap in Trap.Traps.Select(i => i.Value))
+                foreach (var trap in traps)
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
                         monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
@@ -2801,1189 +3211,7 @@ public class GameServer : NetworkServer<GameClient>
     private static string DecideOnSkillsToPull(IGameClient client)
     {
         if (client.Aisling == null) return null;
-
-        switch (client.Aisling.Race)
-        {
-            case Race.Human:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass1";
-                            case Class.Defender:
-                                return "SClass2";
-                            case Class.Assassin:
-                                return "SClass3";
-                            case Class.Cleric:
-                                return "SClass4";
-                            case Class.Arcanus:
-                                return "SClass5";
-                            case Class.Monk:
-                                return "SClass6";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass7";
-                            case Class.Defender:
-                                return "SClass8";
-                            case Class.Assassin:
-                                return "SClass9";
-                            case Class.Cleric:
-                                return "SClass10";
-                            case Class.Arcanus:
-                                return "SClass11";
-                            case Class.Monk:
-                                return "SClass12";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass13";
-                            case Class.Defender:
-                                return "SClass14";
-                            case Class.Assassin:
-                                return "SClass15";
-                            case Class.Cleric:
-                                return "SClass16";
-                            case Class.Arcanus:
-                                return "SClass17";
-                            case Class.Monk:
-                                return "SClass18";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass19";
-                            case Class.Defender:
-                                return "SClass20";
-                            case Class.Assassin:
-                                return "SClass21";
-                            case Class.Cleric:
-                                return "SClass22";
-                            case Class.Arcanus:
-                                return "SClass23";
-                            case Class.Monk:
-                                return "SClass24";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass25";
-                            case Class.Defender:
-                                return "SClass26";
-                            case Class.Assassin:
-                                return "SClass27";
-                            case Class.Cleric:
-                                return "SClass28";
-                            case Class.Arcanus:
-                                return "SClass29";
-                            case Class.Monk:
-                                return "SClass30";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass31";
-                            case Class.Defender:
-                                return "SClass32";
-                            case Class.Assassin:
-                                return "SClass33";
-                            case Class.Cleric:
-                                return "SClass34";
-                            case Class.Arcanus:
-                                return "SClass35";
-                            case Class.Monk:
-                                return "SClass36";
-                        }
-                        break;
-                }
-                break;
-            case Race.HalfElf:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass37";
-                            case Class.Defender:
-                                return "SClass38";
-                            case Class.Assassin:
-                                return "SClass39";
-                            case Class.Cleric:
-                                return "SClass40";
-                            case Class.Arcanus:
-                                return "SClass41";
-                            case Class.Monk:
-                                return "SClass42";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass43";
-                            case Class.Defender:
-                                return "SClass44";
-                            case Class.Assassin:
-                                return "SClass45";
-                            case Class.Cleric:
-                                return "SClass46";
-                            case Class.Arcanus:
-                                return "SClass47";
-                            case Class.Monk:
-                                return "SClass48";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass49";
-                            case Class.Defender:
-                                return "SClass50";
-                            case Class.Assassin:
-                                return "SClass51";
-                            case Class.Cleric:
-                                return "SClass52";
-                            case Class.Arcanus:
-                                return "SClass53";
-                            case Class.Monk:
-                                return "SClass54";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass55";
-                            case Class.Defender:
-                                return "SClass56";
-                            case Class.Assassin:
-                                return "SClass57";
-                            case Class.Cleric:
-                                return "SClass58";
-                            case Class.Arcanus:
-                                return "SClass59";
-                            case Class.Monk:
-                                return "SClass60";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass61";
-                            case Class.Defender:
-                                return "SClass62";
-                            case Class.Assassin:
-                                return "SClass63";
-                            case Class.Cleric:
-                                return "SClass64";
-                            case Class.Arcanus:
-                                return "SClass65";
-                            case Class.Monk:
-                                return "SClass66";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass67";
-                            case Class.Defender:
-                                return "SClass68";
-                            case Class.Assassin:
-                                return "SClass69";
-                            case Class.Cleric:
-                                return "SClass70";
-                            case Class.Arcanus:
-                                return "SClass71";
-                            case Class.Monk:
-                                return "SClass72";
-                        }
-                        break;
-                }
-                break;
-            case Race.HighElf:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass73";
-                            case Class.Defender:
-                                return "SClass74";
-                            case Class.Assassin:
-                                return "SClass75";
-                            case Class.Cleric:
-                                return "SClass76";
-                            case Class.Arcanus:
-                                return "SClass77";
-                            case Class.Monk:
-                                return "SClass78";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass79";
-                            case Class.Defender:
-                                return "SClass80";
-                            case Class.Assassin:
-                                return "SClass81";
-                            case Class.Cleric:
-                                return "SClass82";
-                            case Class.Arcanus:
-                                return "SClass83";
-                            case Class.Monk:
-                                return "SClass84";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass85";
-                            case Class.Defender:
-                                return "SClass86";
-                            case Class.Assassin:
-                                return "SClass87";
-                            case Class.Cleric:
-                                return "SClass88";
-                            case Class.Arcanus:
-                                return "SClass89";
-                            case Class.Monk:
-                                return "SClass90";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass91";
-                            case Class.Defender:
-                                return "SClass92";
-                            case Class.Assassin:
-                                return "SClass93";
-                            case Class.Cleric:
-                                return "SClass94";
-                            case Class.Arcanus:
-                                return "SClass95";
-                            case Class.Monk:
-                                return "SClass96";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass97";
-                            case Class.Defender:
-                                return "SClass98";
-                            case Class.Assassin:
-                                return "SClass99";
-                            case Class.Cleric:
-                                return "SClass100";
-                            case Class.Arcanus:
-                                return "SClass101";
-                            case Class.Monk:
-                                return "SClass102";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass103";
-                            case Class.Defender:
-                                return "SClass104";
-                            case Class.Assassin:
-                                return "SClass105";
-                            case Class.Cleric:
-                                return "SClass106";
-                            case Class.Arcanus:
-                                return "SClass107";
-                            case Class.Monk:
-                                return "SClass108";
-                        }
-                        break;
-                }
-                break;
-            case Race.DarkElf:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass109";
-                            case Class.Defender:
-                                return "SClass110";
-                            case Class.Assassin:
-                                return "SClass111";
-                            case Class.Cleric:
-                                return "SClass112";
-                            case Class.Arcanus:
-                                return "SClass113";
-                            case Class.Monk:
-                                return "SClass114";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass115";
-                            case Class.Defender:
-                                return "SClass116";
-                            case Class.Assassin:
-                                return "SClass117";
-                            case Class.Cleric:
-                                return "SClass118";
-                            case Class.Arcanus:
-                                return "SClass119";
-                            case Class.Monk:
-                                return "SClass120";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass121";
-                            case Class.Defender:
-                                return "SClass122";
-                            case Class.Assassin:
-                                return "SClass123";
-                            case Class.Cleric:
-                                return "SClass124";
-                            case Class.Arcanus:
-                                return "SClass125";
-                            case Class.Monk:
-                                return "SClass126";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass127";
-                            case Class.Defender:
-                                return "SClass128";
-                            case Class.Assassin:
-                                return "SClass129";
-                            case Class.Cleric:
-                                return "SClass130";
-                            case Class.Arcanus:
-                                return "SClass131";
-                            case Class.Monk:
-                                return "SClass132";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass133";
-                            case Class.Defender:
-                                return "SClass134";
-                            case Class.Assassin:
-                                return "SClass135";
-                            case Class.Cleric:
-                                return "SClass136";
-                            case Class.Arcanus:
-                                return "SClass137";
-                            case Class.Monk:
-                                return "SClass138";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass139";
-                            case Class.Defender:
-                                return "SClass140";
-                            case Class.Assassin:
-                                return "SClass141";
-                            case Class.Cleric:
-                                return "SClass142";
-                            case Class.Arcanus:
-                                return "SClass143";
-                            case Class.Monk:
-                                return "SClass144";
-                        }
-                        break;
-                }
-                break;
-            case Race.WoodElf:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass145";
-                            case Class.Defender:
-                                return "SClass146";
-                            case Class.Assassin:
-                                return "SClass147";
-                            case Class.Cleric:
-                                return "SClass148";
-                            case Class.Arcanus:
-                                return "SClass149";
-                            case Class.Monk:
-                                return "SClass150";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass151";
-                            case Class.Defender:
-                                return "SClass152";
-                            case Class.Assassin:
-                                return "SClass153";
-                            case Class.Cleric:
-                                return "SClass154";
-                            case Class.Arcanus:
-                                return "SClass155";
-                            case Class.Monk:
-                                return "SClass156";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass157";
-                            case Class.Defender:
-                                return "SClass158";
-                            case Class.Assassin:
-                                return "SClass159";
-                            case Class.Cleric:
-                                return "SClass160";
-                            case Class.Arcanus:
-                                return "SClass161";
-                            case Class.Monk:
-                                return "SClass162";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass163";
-                            case Class.Defender:
-                                return "SClass164";
-                            case Class.Assassin:
-                                return "SClass165";
-                            case Class.Cleric:
-                                return "SClass166";
-                            case Class.Arcanus:
-                                return "SClass167";
-                            case Class.Monk:
-                                return "SClass168";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass169";
-                            case Class.Defender:
-                                return "SClass170";
-                            case Class.Assassin:
-                                return "SClass171";
-                            case Class.Cleric:
-                                return "SClass172";
-                            case Class.Arcanus:
-                                return "SClass173";
-                            case Class.Monk:
-                                return "SClass174";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass175";
-                            case Class.Defender:
-                                return "SClass176";
-                            case Class.Assassin:
-                                return "SClass177";
-                            case Class.Cleric:
-                                return "SClass178";
-                            case Class.Arcanus:
-                                return "SClass179";
-                            case Class.Monk:
-                                return "SClass180";
-                        }
-                        break;
-                }
-                break;
-            case Race.Orc:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass181";
-                            case Class.Defender:
-                                return "SClass182";
-                            case Class.Assassin:
-                                return "SClass183";
-                            case Class.Cleric:
-                                return "SClass184";
-                            case Class.Arcanus:
-                                return "SClass185";
-                            case Class.Monk:
-                                return "SClass186";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass187";
-                            case Class.Defender:
-                                return "SClass188";
-                            case Class.Assassin:
-                                return "SClass189";
-                            case Class.Cleric:
-                                return "SClass190";
-                            case Class.Arcanus:
-                                return "SClass191";
-                            case Class.Monk:
-                                return "SClass192";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass193";
-                            case Class.Defender:
-                                return "SClass194";
-                            case Class.Assassin:
-                                return "SClass195";
-                            case Class.Cleric:
-                                return "SClass196";
-                            case Class.Arcanus:
-                                return "SClass197";
-                            case Class.Monk:
-                                return "SClass198";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass199";
-                            case Class.Defender:
-                                return "SClass200";
-                            case Class.Assassin:
-                                return "SClass201";
-                            case Class.Cleric:
-                                return "SClass202";
-                            case Class.Arcanus:
-                                return "SClass203";
-                            case Class.Monk:
-                                return "SClass204";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass205";
-                            case Class.Defender:
-                                return "SClass206";
-                            case Class.Assassin:
-                                return "SClass207";
-                            case Class.Cleric:
-                                return "SClass208";
-                            case Class.Arcanus:
-                                return "SClass209";
-                            case Class.Monk:
-                                return "SClass210";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass211";
-                            case Class.Defender:
-                                return "SClass212";
-                            case Class.Assassin:
-                                return "SClass213";
-                            case Class.Cleric:
-                                return "SClass214";
-                            case Class.Arcanus:
-                                return "SClass215";
-                            case Class.Monk:
-                                return "SClass216";
-                        }
-                        break;
-                }
-                break;
-            case Race.Dwarf:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass217";
-                            case Class.Defender:
-                                return "SClass218";
-                            case Class.Assassin:
-                                return "SClass219";
-                            case Class.Cleric:
-                                return "SClass220";
-                            case Class.Arcanus:
-                                return "SClass221";
-                            case Class.Monk:
-                                return "SClass222";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass223";
-                            case Class.Defender:
-                                return "SClass224";
-                            case Class.Assassin:
-                                return "SClass225";
-                            case Class.Cleric:
-                                return "SClass226";
-                            case Class.Arcanus:
-                                return "SClass227";
-                            case Class.Monk:
-                                return "SClass228";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass229";
-                            case Class.Defender:
-                                return "SClass230";
-                            case Class.Assassin:
-                                return "SClass231";
-                            case Class.Cleric:
-                                return "SClass232";
-                            case Class.Arcanus:
-                                return "SClass233";
-                            case Class.Monk:
-                                return "SClass234";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass235";
-                            case Class.Defender:
-                                return "SClass236";
-                            case Class.Assassin:
-                                return "SClass237";
-                            case Class.Cleric:
-                                return "SClass238";
-                            case Class.Arcanus:
-                                return "SClass239";
-                            case Class.Monk:
-                                return "SClass240";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass241";
-                            case Class.Defender:
-                                return "SClass242";
-                            case Class.Assassin:
-                                return "SClass243";
-                            case Class.Cleric:
-                                return "SClass244";
-                            case Class.Arcanus:
-                                return "SClass245";
-                            case Class.Monk:
-                                return "SClass246";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass247";
-                            case Class.Defender:
-                                return "SClass248";
-                            case Class.Assassin:
-                                return "SClass249";
-                            case Class.Cleric:
-                                return "SClass250";
-                            case Class.Arcanus:
-                                return "SClass251";
-                            case Class.Monk:
-                                return "SClass252";
-                        }
-                        break;
-                }
-                break;
-            case Race.Halfling:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass253";
-                            case Class.Defender:
-                                return "SClass254";
-                            case Class.Assassin:
-                                return "SClass255";
-                            case Class.Cleric:
-                                return "SClass256";
-                            case Class.Arcanus:
-                                return "SClass257";
-                            case Class.Monk:
-                                return "SClass258";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass259";
-                            case Class.Defender:
-                                return "SClass260";
-                            case Class.Assassin:
-                                return "SClass261";
-                            case Class.Cleric:
-                                return "SClass262";
-                            case Class.Arcanus:
-                                return "SClass263";
-                            case Class.Monk:
-                                return "SClass264";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass265";
-                            case Class.Defender:
-                                return "SClass266";
-                            case Class.Assassin:
-                                return "SClass267";
-                            case Class.Cleric:
-                                return "SClass268";
-                            case Class.Arcanus:
-                                return "SClass269";
-                            case Class.Monk:
-                                return "SClass270";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass271";
-                            case Class.Defender:
-                                return "SClass272";
-                            case Class.Assassin:
-                                return "SClass273";
-                            case Class.Cleric:
-                                return "SClass274";
-                            case Class.Arcanus:
-                                return "SClass275";
-                            case Class.Monk:
-                                return "SClass276";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass277";
-                            case Class.Defender:
-                                return "SClass278";
-                            case Class.Assassin:
-                                return "SClass279";
-                            case Class.Cleric:
-                                return "SClass280";
-                            case Class.Arcanus:
-                                return "SClass281";
-                            case Class.Monk:
-                                return "SClass282";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass283";
-                            case Class.Defender:
-                                return "SClass284";
-                            case Class.Assassin:
-                                return "SClass285";
-                            case Class.Cleric:
-                                return "SClass286";
-                            case Class.Arcanus:
-                                return "SClass287";
-                            case Class.Monk:
-                                return "SClass288";
-                        }
-                        break;
-                }
-                break;
-            case Race.Dragonkin:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass289";
-                            case Class.Defender:
-                                return "SClass290";
-                            case Class.Assassin:
-                                return "SClass291";
-                            case Class.Cleric:
-                                return "SClass292";
-                            case Class.Arcanus:
-                                return "SClass293";
-                            case Class.Monk:
-                                return "SClass294";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass295";
-                            case Class.Defender:
-                                return "SClass296";
-                            case Class.Assassin:
-                                return "SClass297";
-                            case Class.Cleric:
-                                return "SClass298";
-                            case Class.Arcanus:
-                                return "SClass299";
-                            case Class.Monk:
-                                return "SClass300";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass301";
-                            case Class.Defender:
-                                return "SClass302";
-                            case Class.Assassin:
-                                return "SClass303";
-                            case Class.Cleric:
-                                return "SClass304";
-                            case Class.Arcanus:
-                                return "SClass305";
-                            case Class.Monk:
-                                return "SClass306";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass307";
-                            case Class.Defender:
-                                return "SClass308";
-                            case Class.Assassin:
-                                return "SClass309";
-                            case Class.Cleric:
-                                return "SClass310";
-                            case Class.Arcanus:
-                                return "SClass311";
-                            case Class.Monk:
-                                return "SClass312";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass313";
-                            case Class.Defender:
-                                return "SClass314";
-                            case Class.Assassin:
-                                return "SClass315";
-                            case Class.Cleric:
-                                return "SClass316";
-                            case Class.Arcanus:
-                                return "SClass317";
-                            case Class.Monk:
-                                return "SClass318";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass319";
-                            case Class.Defender:
-                                return "SClass320";
-                            case Class.Assassin:
-                                return "SClass321";
-                            case Class.Cleric:
-                                return "SClass322";
-                            case Class.Arcanus:
-                                return "SClass323";
-                            case Class.Monk:
-                                return "SClass324";
-                        }
-                        break;
-                }
-                break;
-            case Race.HalfBeast:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass325";
-                            case Class.Defender:
-                                return "SClass326";
-                            case Class.Assassin:
-                                return "SClass327";
-                            case Class.Cleric:
-                                return "SClass328";
-                            case Class.Arcanus:
-                                return "SClass329";
-                            case Class.Monk:
-                                return "SClass330";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass331";
-                            case Class.Defender:
-                                return "SClass332";
-                            case Class.Assassin:
-                                return "SClass333";
-                            case Class.Cleric:
-                                return "SClass334";
-                            case Class.Arcanus:
-                                return "SClass335";
-                            case Class.Monk:
-                                return "SClass336";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass337";
-                            case Class.Defender:
-                                return "SClass338";
-                            case Class.Assassin:
-                                return "SClass339";
-                            case Class.Cleric:
-                                return "SClass340";
-                            case Class.Arcanus:
-                                return "SClass341";
-                            case Class.Monk:
-                                return "SClass342";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass343";
-                            case Class.Defender:
-                                return "SClass344";
-                            case Class.Assassin:
-                                return "SClass345";
-                            case Class.Cleric:
-                                return "SClass346";
-                            case Class.Arcanus:
-                                return "SClass347";
-                            case Class.Monk:
-                                return "SClass348";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass349";
-                            case Class.Defender:
-                                return "SClass350";
-                            case Class.Assassin:
-                                return "SClass351";
-                            case Class.Cleric:
-                                return "SClass352";
-                            case Class.Arcanus:
-                                return "SClass353";
-                            case Class.Monk:
-                                return "SClass354";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass355";
-                            case Class.Defender:
-                                return "SClass356";
-                            case Class.Assassin:
-                                return "SClass357";
-                            case Class.Cleric:
-                                return "SClass358";
-                            case Class.Arcanus:
-                                return "SClass359";
-                            case Class.Monk:
-                                return "SClass360";
-                        }
-                        break;
-                }
-                break;
-            case Race.Merfolk:
-                switch (client.Aisling.Path)
-                {
-                    case Class.Berserker:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass361";
-                            case Class.Defender:
-                                return "SClass362";
-                            case Class.Assassin:
-                                return "SClass363";
-                            case Class.Cleric:
-                                return "SClass364";
-                            case Class.Arcanus:
-                                return "SClass365";
-                            case Class.Monk:
-                                return "SClass366";
-                        }
-                        break;
-                    case Class.Defender:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass367";
-                            case Class.Defender:
-                                return "SClass368";
-                            case Class.Assassin:
-                                return "SClass369";
-                            case Class.Cleric:
-                                return "SClass370";
-                            case Class.Arcanus:
-                                return "SClass371";
-                            case Class.Monk:
-                                return "SClass372";
-                        }
-                        break;
-                    case Class.Assassin:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass373";
-                            case Class.Defender:
-                                return "SClass374";
-                            case Class.Assassin:
-                                return "SClass375";
-                            case Class.Cleric:
-                                return "SClass376";
-                            case Class.Arcanus:
-                                return "SClass377";
-                            case Class.Monk:
-                                return "SClass378";
-                        }
-                        break;
-                    case Class.Cleric:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass379";
-                            case Class.Defender:
-                                return "SClass380";
-                            case Class.Assassin:
-                                return "SClass381";
-                            case Class.Cleric:
-                                return "SClass382";
-                            case Class.Arcanus:
-                                return "SClass383";
-                            case Class.Monk:
-                                return "SClass384";
-                        }
-                        break;
-                    case Class.Arcanus:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass385";
-                            case Class.Defender:
-                                return "SClass386";
-                            case Class.Assassin:
-                                return "SClass387";
-                            case Class.Cleric:
-                                return "SClass388";
-                            case Class.Arcanus:
-                                return "SClass389";
-                            case Class.Monk:
-                                return "SClass390";
-                        }
-                        break;
-                    case Class.Monk:
-                        switch (client.Aisling.PastClass)
-                        {
-                            case Class.Berserker:
-                                return "SClass391";
-                            case Class.Defender:
-                                return "SClass392";
-                            case Class.Assassin:
-                                return "SClass393";
-                            case Class.Cleric:
-                                return "SClass394";
-                            case Class.Arcanus:
-                                return "SClass395";
-                            case Class.Monk:
-                                return "SClass396";
-                        }
-                        break;
-                }
-                break;
-        }
-
-        return null;
+        return _skillMap.TryGetValue((client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass), out var skillCode) ? skillCode : null;
     }
 
     /// <summary>
