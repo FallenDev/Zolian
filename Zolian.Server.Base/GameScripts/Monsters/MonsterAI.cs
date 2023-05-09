@@ -19,7 +19,6 @@ public class MonsterBaseIntelligence : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-    private Task<List<Vector2>> _path;
     private Sprite Target => Monster.Target;
 
     public MonsterBaseIntelligence(Monster monster, Area map) : base(monster, map)
@@ -280,7 +279,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
         try
         {
-            _path?.Result?.Clear();
+            Monster.Path?.Result?.Clear();
         }
         catch (Exception ex)
         {
@@ -495,7 +494,7 @@ public class MonsterBaseIntelligence : MonsterScript
                     // If the targets position does not match what is remembered, get a new path
                     if (_targetPos != _targetRememberedPos)
                     {
-                        _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                        Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
                         _targetRememberedPos = _targetPos;
                     }
                     
@@ -508,13 +507,13 @@ public class MonsterBaseIntelligence : MonsterScript
                         return;
                     }
 
-                    if (_path.Result.Count > 0)
+                    if (Monster.Path.Result.Count > 0)
                     {
-                        Monster.AStarPath(Monster, _path.Result);
-                        _path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path.Result);
+                        Monster.Path.Result.RemoveAt(0);
                     }
 
-                    if (_path.Result.Count != 0) return;
+                    if (Monster.Path.Result.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Target == null)
@@ -565,7 +564,6 @@ public class MonsterShadowSight : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-    private Task<List<Vector2>> _path;
     private Sprite Target => Monster.Target;
 
     public MonsterShadowSight(Monster monster, Area map) : base(monster, map)
@@ -826,7 +824,7 @@ public class MonsterShadowSight : MonsterScript
 
         try
         {
-            _path?.Result?.Clear();
+            Monster.Path?.Result?.Clear();
         }
         catch (Exception ex)
         {
@@ -1037,7 +1035,7 @@ public class MonsterShadowSight : MonsterScript
                     // If the targets position does not match what is remembered, get a new path
                     if (_targetPos != _targetRememberedPos)
                     {
-                        _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                        Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
                         _targetRememberedPos = _targetPos;
                     }
                     
@@ -1050,13 +1048,13 @@ public class MonsterShadowSight : MonsterScript
                         return;
                     }
 
-                    if (_path.Result.Count > 0)
+                    if (Monster.Path.Result.Count > 0)
                     {
-                        Monster.AStarPath(Monster, _path.Result);
-                        _path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path.Result);
+                        Monster.Path.Result.RemoveAt(0);
                     }
 
-                    if (_path.Result.Count != 0) return;
+                    if (Monster.Path.Result.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Target == null)
