@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Models;
@@ -298,15 +299,15 @@ public class Area : Map, IArea
         #endregion
 
         var currentNode = viewable[0];
-        path.Clear();
-        var aStar = SetPath(sprite, currentNode, path, start, viewable);
+        var aStar = SetPath(sprite, currentNode, start, viewable);
 
         return aStar;
     }
 
-    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, List<Vector2> path, Vector2 start, List<TileGrid> viewable)
+    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, Vector2 start, List<TileGrid> viewable)
     {
         var currentViewableStart = 0;
+        var path = new List<Vector2>();
 
         while (true)
         {
@@ -347,14 +348,15 @@ public class Area : Map, IArea
     private Action CheckNode(Sprite sprite)
     {
         var tempGrid = sprite.Map._tiles;
-        _masterGrid = new List<List<TileGrid>>();
+        _masterGrid = new List<List<TileGrid>>(tempGrid.Count);
 
         return delegate
         {
             for (var x = 0; x < tempGrid.Count; x++)
             {
-                _masterGrid.Add(new List<TileGrid>());
-                for (var y = 0; y < tempGrid.Count; y++)
+                var innerList = new List<TileGrid>(tempGrid[x].Count);
+
+                for (var y = 0; y < tempGrid[x].Count; y++)
                 {
                     var impassable = sprite.Map.IsAStarWall(sprite, x, y);
                     var filled = sprite.Map.IsAStarSprite(sprite, x, y);
@@ -370,89 +372,102 @@ public class Area : Map, IArea
                         cost = 999;
                     }
 
-                    _masterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
+                    innerList.Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
                 }
+
+                _masterGrid.Add(innerList);
             }
         };
     }
 
-    public void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable, ICollection<TileGrid> used)
+    public void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, List<TileGrid> viewable, ICollection<TileGrid> used)
     {
         TileGrid currentNode;
+        var currentViewableNode = viewable[0];
 
         //North
-        if (viewable[0].Pos.Y > 0 && viewable[0].Pos.Y < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1].Impassable)
+        if (currentViewableNode.Pos.Y > 0 && currentViewableNode.Pos.Y < masterGrid[0].Count && !masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y - 1].Impassable)
         {
-            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
+            currentNode = masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y - 1];
+            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
         }
 
         //East
-        if (viewable[0].Pos.X >= 0 && viewable[0].Pos.X + 1 < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y].Impassable)
+        if (currentViewableNode.Pos.X >= 0 && currentViewableNode.Pos.X + 1 < masterGrid.Count && !masterGrid[(int)currentViewableNode.Pos.X + 1][(int)currentViewableNode.Pos.Y].Impassable)
         {
-            currentNode = masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
+            currentNode = masterGrid[(int)currentViewableNode.Pos.X + 1][(int)currentViewableNode.Pos.Y];
+            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
         }
 
         //South
-        if (viewable[0].Pos.Y >= 0 && viewable[0].Pos.Y + 1 < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1].Impassable)
+        if (currentViewableNode.Pos.Y >= 0 && currentViewableNode.Pos.Y + 1 < masterGrid[0].Count && !masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y + 1].Impassable)
         {
-            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
+            currentNode = masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y + 1];
+            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
         }
 
         //West
-        if (viewable[0].Pos.X > 0 && viewable[0].Pos.X < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y].Impassable)
+        if (currentViewableNode.Pos.X > 0 && currentViewableNode.Pos.X < masterGrid.Count && !masterGrid[(int)currentViewableNode.Pos.X - 1][(int)currentViewableNode.Pos.Y].Impassable)
         {
-            currentNode = masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
+            currentNode = masterGrid[(int)currentViewableNode.Pos.X - 1][(int)currentViewableNode.Pos.Y];
+            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
         }
 
-        viewable[0].HasBeenUsed = true;
-        used.Add(viewable[0]);
+        currentViewableNode.HasBeenUsed = true;
+        used.Add(currentViewableNode);
         viewable.RemoveAt(0);
     }
 
-    public void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
+    public void SetAStarNode(List<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
     {
         var addedDist = nextNode.Cost * distanceMultiply;
 
         switch (nextNode.IsViewable)
         {
             case false when !nextNode.HasBeenUsed:
-            {
-                nextNode.SetNode(nextParent, d, d + addedDist);
-                nextNode.IsViewable = true;
-                SetAStarNodeInsert(viewable, nextNode);
-            }
-                break;
-            case true:
-            {
-                if (d < nextNode.FScore)
                 {
                     nextNode.SetNode(nextParent, d, d + addedDist);
+                    nextNode.IsViewable = true;
+                    SetAStarNodeInsert(viewable, nextNode);
                 }
-            }
+                break;
+            case true:
+                {
+                    if (d < nextNode.FScore)
+                    {
+                        nextNode.SetNode(nextParent, d, d + addedDist);
+                    }
+                }
                 break;
         }
     }
 
-    public void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode)
+    public void SetAStarNodeInsert(List<TileGrid> list, TileGrid newNode)
     {
-        var added = false;
-        for (var i = 0; i < list.Count; i++)
+        var comparer = new TileGridFScoreComparer();
+        var index = list.BinarySearch(newNode, comparer);
+
+        if (index < 0)
         {
-            if (!(list[i].FScore > newNode.FScore)) continue;
-            list.Insert(Math.Max(1, i), newNode);
-            added = true;
-            break;
+            // If the index is negative, it represents the bitwise complement of the next larger element in the list.
+            index = ~index;
         }
 
-        if (!added)
-        {
-            list.Add(newNode);
-        }
+        list.Insert(index, newNode);
     }
 
     #endregion
+}
+
+public class TileGridFScoreComparer : IComparer<TileGrid>
+{
+    public int Compare(TileGrid x, TileGrid y)
+    {
+        if (x == null || y == null)
+        {
+            throw new ArgumentNullException();
+        }
+
+        return x.FScore.CompareTo(y.FScore);
+    }
 }

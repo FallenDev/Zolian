@@ -26,7 +26,8 @@ public interface IArea
     bool ParseMapWalls(short lWall, short rWall);
     void Update(in TimeSpan elapsedTime);
     Task<List<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end);
-    void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable, ICollection<TileGrid> used);
-    void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply);
-    void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode);
+    void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, List<TileGrid> viewable,
+        ICollection<TileGrid> used);
+    void SetAStarNode(List<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply);
+    void SetAStarNodeInsert(List<TileGrid> list, TileGrid newNode);
 }

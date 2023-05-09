@@ -975,7 +975,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             var allowGhostWalk = this is Aisling { GameMaster: true };
 
-            if (this is Monster { Template: { } } monster)
+            if (this is Monster { Template: not null } monster)
             {
                 allowGhostWalk = monster.Template.IgnoreCollision;
                 if (monster.ThrownBack) return false;

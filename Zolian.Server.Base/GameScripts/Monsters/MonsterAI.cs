@@ -17,6 +17,7 @@ namespace Darkages.GameScripts.Monsters;
 public class MonsterBaseIntelligence : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
+    private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     private Task<List<Vector2>> _path;
     private Sprite Target => Monster.Target;
@@ -490,7 +491,14 @@ public class MonsterBaseIntelligence : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                    _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    
+                    // If the targets position does not match what is remembered, get a new path
+                    if (_targetPos != _targetRememberedPos)
+                    {
+                        _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                        _targetRememberedPos = _targetPos;
+                    }
+                    
                     if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
@@ -501,7 +509,10 @@ public class MonsterBaseIntelligence : MonsterScript
                     }
 
                     if (_path.Result.Count > 0)
+                    {
                         Monster.AStarPath(Monster, _path.Result);
+                        _path.Result.RemoveAt(0);
+                    }
 
                     if (_path.Result.Count != 0) return;
                     Monster.AStar = false;
@@ -552,6 +563,7 @@ public class MonsterBaseIntelligence : MonsterScript
 public class MonsterShadowSight : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
+    private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     private Task<List<Vector2>> _path;
     private Sprite Target => Monster.Target;
@@ -1021,7 +1033,14 @@ public class MonsterShadowSight : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                    _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    
+                    // If the targets position does not match what is remembered, get a new path
+                    if (_targetPos != _targetRememberedPos)
+                    {
+                        _path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                        _targetRememberedPos = _targetPos;
+                    }
+                    
                     if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
@@ -1032,7 +1051,10 @@ public class MonsterShadowSight : MonsterScript
                     }
 
                     if (_path.Result.Count > 0)
+                    {
                         Monster.AStarPath(Monster, _path.Result);
+                        _path.Result.RemoveAt(0);
+                    }
 
                     if (_path.Result.Count != 0) return;
                     Monster.AStar = false;
