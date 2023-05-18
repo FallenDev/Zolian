@@ -459,15 +459,20 @@ public class Area : Map, IArea
     #endregion
 }
 
+/// <summary>
+/// The TileGridFScoreComparer class implements the IComparerTileGrid interface, and the 'Compare' method is
+/// the implementation of that interface. It provides a way for 'BinarySearch' to compare the two TileGrid objects
+/// based on their 'FScore' property, which is necessary for the binary algorithm to work.
+/// </summary>
 public class TileGridFScoreComparer : IComparer<TileGrid>
 {
     public int Compare(TileGrid x, TileGrid y)
     {
-        if (x == null || y == null)
+        if (x == null)
         {
-            throw new ArgumentNullException();
+            return y == null ? 0 : -1;
         }
 
-        return x.FScore.CompareTo(y.FScore);
+        return y == null ? 1 : x.FScore.CompareTo(y.FScore);
     }
 }

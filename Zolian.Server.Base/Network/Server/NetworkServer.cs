@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Darkages.Common;
+using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Formats;
 
@@ -64,7 +65,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         _listening = true;
         _socket.BeginAccept(EndConnectClient, _socket);
     }
-    
+
     private void BindSocket(int port)
     {
         try
@@ -76,7 +77,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
             ServerSetup.Logger("Winsock error: " + e);
         }
     }
-    
+
     private bool AddClient(TClient client)
     {
         if (!Clients.ContainsKey(client.Serial))
@@ -114,33 +115,10 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
 
         try
         {
-            var now = DateTime.Now;
-            client.LastMessageFromClient = now;
+            var continuePacketRead = PacketTimeCheckAndContinue(client, format);
 
-            static DateTime AddTime(DateTime baseTime, TimeSpan duration) => baseTime.Add(duration);
+            if (!continuePacketRead) return;
 
-            var timeChecks = new Dictionary<int, Func<DateTime, bool>>
-            {
-                [0x0F] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) > client.LastPacket0X0FFromClient,
-                [0x13] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) > client.LastPacket0X13FromClient,
-                [0x1B] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) > client.LastPacket0X1BFromClient,
-                [0x1C] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) > client.LastPacket0X1CFromClient,
-                [0x2D] = t => AddTime(t, TimeSpan.FromSeconds(1)) > client.LastPacket0X2DFromClient,
-                [0x38] = t => AddTime(t, TimeSpan.FromMilliseconds(600)) > client.LastPacket0X38FromClient
-            };
-
-            if (client.LastPacketFromClient == format.Command && timeChecks.TryGetValue(format.Command, out var check) && check(client.LastMessageFromClient))
-            {
-                client.SetLastPacketTime(format.Command, now);
-                return;
-            }
-
-            client.SetLastPacketTime(format.Command, now);
-
-            if (format.Command != 0x45)
-                client.LastMessageFromClientNot0X45 = now;
-
-            client.LastPacketFromClient = format.Command;
             client.Read(packet, format);
 
             if (_handlers.TryGetValue(format.Command, out var handler))
@@ -161,6 +139,72 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
             Crashes.TrackError(ex);
             DisconnectClient(client);
         }
+    }
+
+    private bool PacketTimeCheckAndContinue(TClient client, INetworkFormat format)
+    {
+        var now = DateTime.Now;
+        client.LastMessageFromClient = now;
+
+        // Abstracted method to add TimeSpan to DateTime
+        static DateTime AddTime(DateTime baseTime, TimeSpan duration) => baseTime.Add(duration);
+
+        // A dictionary mapping packet types to time checks
+        var timeChecks = new Dictionary<int, Func<DateTime, bool>>
+        {
+            [0x0F] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) <= now,
+            [0x13] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) <= now,
+            [0x1B] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) <= now,
+            [0x1C] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) <= now,
+            [0x2D] = t => AddTime(t, TimeSpan.FromSeconds(1)) <= now,
+            [0x38] = t => AddTime(t, TimeSpan.FromMilliseconds(600)) <= now
+        };
+
+        // Setting packetTime for time-rated packets
+        var lastPacketTime = format.Command switch
+        {
+            0x0F => client.LastPacket0X0FFromClient,
+            0x13 => client.LastPacket0X13FromClient,
+            0x1B => client.LastPacket0X1BFromClient,
+            0x1C => client.LastPacket0X1CFromClient,
+            0x2D => client.LastPacket0X2DFromClient,
+            0x38 => client.LastPacket0X38FromClient,
+            _ => DateTime.MinValue
+        };
+
+        // Check to ensure packets are only processed which meet the time check requirement
+        if (timeChecks.TryGetValue(format.Command, out var check))
+        {
+            if (!check(lastPacketTime)) return false;
+            
+            switch (format.Command)
+            {
+                case 0x0F:
+                    client.LastPacket0X0FFromClient = now;
+                    break;
+                case 0x13:
+                    client.LastPacket0X13FromClient = now;
+                    break;
+                case 0x1B:
+                    client.LastPacket0X1BFromClient = now;
+                    break;
+                case 0x1C:
+                    client.LastPacket0X1CFromClient = now;
+                    break;
+                case 0x2D:
+                    client.LastPacket0X2DFromClient = now;
+                    break;
+                case 0x38:
+                    client.LastPacket0X38FromClient = now;
+                    break;
+            }
+        }
+
+        if (format.Command != 0x45)
+            client.LastMessageFromClientNot0X45 = now;
+
+        client.LastPacketFromClient = format.Command;
+        return true;
     }
 
     public virtual void ClientDisconnected(TClient client)
@@ -224,7 +268,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         }
     }
 
-    private static readonly HashSet<string> BogonIPs = new()
+    private readonly HashSet<string> _bogonIPs = new()
     {
         "0.0.0.0", "0.0.0.1", "0.0.0.2", "0.0.0.3", "0.0.0.4", "0.0.0.5", "0.0.0.6", "0.0.0.7", "0.0.0.8",
         "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7", "10.0.0.8",
@@ -254,14 +298,14 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         "224.0.0.0", "224.0.0.1", "224.0.0.2", "224.0.0.3"
     };
 
-    protected static bool BogonCheck(TClient client, string ip)
+    protected bool BogonCheck(TClient client, string ip)
     {
         if (client.Socket.RemoteEndPoint == null || ip == null) return true;
 
         // Add any banned player IPs to the BogonIPs HashSet
         // BogonIPs.Add("banned.player.ip");
 
-        return BogonIPs.Contains(ip);
+        return _bogonIPs.Contains(ip);
     }
 
     private void EndReceiveHeader(IAsyncResult result)
