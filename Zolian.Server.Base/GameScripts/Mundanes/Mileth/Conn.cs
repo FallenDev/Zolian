@@ -24,7 +24,10 @@ public class Conn : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -57,6 +60,8 @@ public class Conn : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         var potions = Random.Shared.Next(1, 4);
         var advExp = Random.Shared.Next(20000, 25000);

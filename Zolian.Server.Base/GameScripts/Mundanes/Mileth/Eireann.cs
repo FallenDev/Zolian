@@ -17,7 +17,10 @@ public class Eireann : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -48,6 +51,8 @@ public class Eireann : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         var gossip = Random.Shared.Next(1, 6);
 

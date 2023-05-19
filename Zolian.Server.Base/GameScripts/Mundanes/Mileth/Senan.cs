@@ -16,7 +16,10 @@ public class Senan : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -54,6 +57,8 @@ public class Senan : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         var exp = (uint)Random.Shared.Next(200000, 550000);
 

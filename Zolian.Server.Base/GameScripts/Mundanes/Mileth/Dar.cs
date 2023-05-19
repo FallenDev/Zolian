@@ -27,7 +27,10 @@ public class Dar : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -89,6 +92,8 @@ public class Dar : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         var darkThings = Random.Shared.Next(1, 12);
         var advExp = (uint)Random.Shared.Next(150000, 300000);

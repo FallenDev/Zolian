@@ -29,7 +29,10 @@ public class Keela : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -94,6 +97,8 @@ public class Keela : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         var assassinThings = Random.Shared.Next(1, 5);
         var countMon = Random.Shared.Next(6, 10);

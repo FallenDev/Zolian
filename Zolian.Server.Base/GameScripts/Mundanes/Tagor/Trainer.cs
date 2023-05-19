@@ -21,33 +21,36 @@ public class Trainer : MundaneScript
 
     public Trainer(GameServer server, Mundane mundane) : base(server, mundane)
     {
-        _dojoSpots = new List<Vector2>();
-        _dojoSpots.Add(new Vector2(12, 22));
-        _dojoSpots.Add(new Vector2(13, 21));
-        _dojoSpots.Add(new Vector2(14, 22));
-        _dojoSpots.Add(new Vector2(13, 23));
-
-        _dojoSpots.Add(new Vector2(12, 13));
-        _dojoSpots.Add(new Vector2(13, 12));
-        _dojoSpots.Add(new Vector2(14, 13));
-        _dojoSpots.Add(new Vector2(13, 14));
-
-        _dojoSpots.Add(new Vector2(22, 14));
-        _dojoSpots.Add(new Vector2(21, 13));
-        _dojoSpots.Add(new Vector2(23, 13));
-        _dojoSpots.Add(new Vector2(22, 13));
-
-        _dojoSpots.Add(new Vector2(22, 21));
-        _dojoSpots.Add(new Vector2(23, 22));
-        _dojoSpots.Add(new Vector2(22, 23));
-        _dojoSpots.Add(new Vector2(21, 22));
+        _dojoSpots = new List<Vector2>
+        {
+            new Vector2(12, 22),
+            new Vector2(13, 21),
+            new Vector2(14, 22),
+            new Vector2(13, 23),
+            new Vector2(12, 13),
+            new Vector2(13, 12),
+            new Vector2(14, 13),
+            new Vector2(13, 14),
+            new Vector2(22, 14),
+            new Vector2(21, 13),
+            new Vector2(23, 13),
+            new Vector2(22, 13),
+            new Vector2(22, 21),
+            new Vector2(23, 22),
+            new Vector2(22, 23),
+            new Vector2(21, 22)
+        };
     }
 
     public override void OnClick(GameServer server, GameClient client)
     {
         _skillList = ObtainSkillList(client);
         _spellList = ObtainSpellList(client);
-        TopMenu(client);
+
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -77,6 +80,8 @@ public class Trainer : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         switch (responseID)
         {

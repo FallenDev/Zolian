@@ -15,7 +15,10 @@ public class DefenderClass : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -45,6 +48,8 @@ public class DefenderClass : MundaneScript
             return;
         }
 
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        
         if (responseID is > 0x0001 and < 0x0003)
         {
             client.SendOptionsDialog(Mundane, "Our class protects and defends, when we wish to deal massive damage we rely on our mighty two-handed weapons.");

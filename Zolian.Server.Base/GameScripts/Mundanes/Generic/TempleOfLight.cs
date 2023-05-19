@@ -16,7 +16,10 @@ public class TempleOfLight : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (client.Aisling.Map.ID == 500)
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)

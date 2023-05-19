@@ -30,7 +30,10 @@ public class Neal : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
-        TopMenu(client);
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
     }
 
     public override void TopMenu(IGameClient client)
@@ -96,6 +99,8 @@ public class Neal : MundaneScript
             return;
         }
 
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+
         var warriorThings = Random.Shared.Next(1, 5);
         var countMon = Random.Shared.Next(6, 10);
         var advExp = (uint)Random.Shared.Next(20000, 25000);
@@ -125,842 +130,842 @@ public class Neal : MundaneScript
             #region Skills
 
             case 0x0001:
-            {
-                var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                var newSkills = _skillList.Except(learnedSkills).ToList();
-
-                newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                if (newSkills.Count > 0)
                 {
-                    client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003,
-                        newSkills.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                             || i.Prerequisites.ClassRequired == Class.Peasant));
-                }
-                else
-                {
-                    client.CloseDialog();
-                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
-                }
+                    var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+                    var newSkills = _skillList.Except(learnedSkills).ToList();
 
-                break;
-            }
-            case 0x0002:
-            {
-                client.SendSkillForgetDialog(Mundane,
-                    "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
-                break;
-            }
-            case 0x9000:
-            {
-                int.TryParse(args, out var idx);
+                    newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
-                if (idx is < 0 or > byte.MaxValue)
-                {
-                    client.SendMessage(0x02, "You don't quite have that skill.");
-                    client.CloseDialog();
-                }
-
-                client.Aisling.SkillBook.Remove((byte)idx, true);
-                client.Send(new ServerFormat2D((byte)idx));
-                client.LoadSkillBook();
-
-                client.SendSkillForgetDialog(Mundane,
-                    "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
-                break;
-            }
-            case 0x0003:
-            {
-                client.SendOptionsDialog(Mundane, "Are you sure you want to learn the method of " + args + "? \nLet me test if you're ready.", args,
-                    new OptionsDataItem(0x0006, $"What does {args} do?"),
-                    new OptionsDataItem(0x0004, "Learn"),
-                    new OptionsDataItem(0x0001, "No, thank you."));
-                break;
-            }
-            case 0x0004:
-            {
-                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                if (subject == null) return;
-
-                var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                {
-                    if (!result)
+                    if (newSkills.Count > 0)
                     {
-                        client.SendOptionsDialog(Mundane, msg, subject.Name);
+                        client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003,
+                            newSkills.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                                 || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                                 || i.Prerequisites.ClassRequired == Class.Peasant));
                     }
-                });
+                    else
+                    {
+                        client.CloseDialog();
+                        client.SendMessage(0x02, "I have nothing left to teach you, for now.");
+                    }
 
-                if (conditions)
-                {
-                    client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                        subject.Name,
-                        new OptionsDataItem(0x0005, "Yes."),
-                        new OptionsDataItem(0x0001, "I'll come back later."));
+                    break;
                 }
+            case 0x0002:
+                {
+                    client.SendSkillForgetDialog(Mundane,
+                        "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
+                    break;
+                }
+            case 0x9000:
+                {
+                    int.TryParse(args, out var idx);
 
-                break;
-            }
+                    if (idx is < 0 or > byte.MaxValue)
+                    {
+                        client.SendMessage(0x02, "You don't quite have that skill.");
+                        client.CloseDialog();
+                    }
+
+                    client.Aisling.SkillBook.Remove((byte)idx, true);
+                    client.Send(new ServerFormat2D((byte)idx));
+                    client.LoadSkillBook();
+
+                    client.SendSkillForgetDialog(Mundane,
+                        "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+                    break;
+                }
+            case 0x0003:
+                {
+                    client.SendOptionsDialog(Mundane, "Are you sure you want to learn the method of " + args + "? \nLet me test if you're ready.", args,
+                        new OptionsDataItem(0x0006, $"What does {args} do?"),
+                        new OptionsDataItem(0x0004, "Learn"),
+                        new OptionsDataItem(0x0001, "No, thank you."));
+                    break;
+                }
+            case 0x0004:
+                {
+                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                    if (subject == null) return;
+
+                    var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+                    {
+                        if (!result)
+                        {
+                            client.SendOptionsDialog(Mundane, msg, subject.Name);
+                        }
+                    });
+
+                    if (conditions)
+                    {
+                        client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                            subject.Name,
+                            new OptionsDataItem(0x0005, "Yes."),
+                            new OptionsDataItem(0x0001, "I'll come back later."));
+                    }
+
+                    break;
+                }
             case 0x0006:
-            {
-                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                if (subject == null) return;
+                {
+                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                    if (subject == null) return;
 
-                client.SendOptionsDialog(Mundane,
-                    $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                    subject.Name,
-                    new OptionsDataItem(0x0004, "Yes"),
-                    new OptionsDataItem(0x0001, "No"));
+                    client.SendOptionsDialog(Mundane,
+                        $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+                        subject.Name,
+                        new OptionsDataItem(0x0004, "Yes"),
+                        new OptionsDataItem(0x0001, "No"));
 
-                break;
-            }
+                    break;
+                }
             case 0x0005:
-            {
-                var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                if (subject == null) return;
+                {
+                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+                    if (subject == null) return;
 
-                client.SendAnimation(109, client.Aisling, Mundane);
-                client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
+                    client.SendAnimation(109, client.Aisling, Mundane);
+                    client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
-                break;
-            }
+                    break;
+                }
 
             #endregion
 
             #region Spells
 
             case 0x0010:
-            {
-                var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                var newSpells = _spellList.Except(learnedSpells).ToList();
-
-                newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                if (newSpells.Count > 0)
                 {
-                    client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012,
-                        newSpells.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                             || i.Prerequisites.ClassRequired == Class.Peasant));
-                }
-                else
-                {
-                    client.CloseDialog();
-                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
-                }
+                    var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+                    var newSpells = _spellList.Except(learnedSpells).ToList();
 
-                break;
-            }
-            case 0x0011:
-            {
-                client.SendSpellForgetDialog(Mundane, "A warrior's heart is vast, even we lose our way. \nBe warned, This cannot be undone.", 0x0800);
-                break;
-            }
-            case 0x0012:
-            {
-                client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
-                    new OptionsDataItem(0x0015, $"What does {args} do?"),
-                    new OptionsDataItem(0x0013, "Learn"),
-                    new OptionsDataItem(0x0010, "No, thank you."));
-                break;
-            }
-            case 0x0013:
-            {
-                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                if (subject == null) return;
+                    newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
-                var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                {
-                    if (!result)
+                    if (newSpells.Count > 0)
                     {
-                        client.SendOptionsDialog(Mundane, msg, subject.Name);
+                        client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012,
+                            newSpells.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                                 || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                                 || i.Prerequisites.ClassRequired == Class.Peasant));
                     }
-                });
+                    else
+                    {
+                        client.CloseDialog();
+                        client.SendMessage(0x02, "I have nothing left to teach you, for now.");
+                    }
 
-                if (conditions)
-                {
-                    client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                        subject.Name,
-                        new OptionsDataItem(0x0014, "Yes."),
-                        new OptionsDataItem(0x0010, "I'll come back later."));
+                    break;
                 }
+            case 0x0011:
+                {
+                    client.SendSpellForgetDialog(Mundane, "A warrior's heart is vast, even we lose our way. \nBe warned, This cannot be undone.", 0x0800);
+                    break;
+                }
+            case 0x0012:
+                {
+                    client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
+                        new OptionsDataItem(0x0015, $"What does {args} do?"),
+                        new OptionsDataItem(0x0013, "Learn"),
+                        new OptionsDataItem(0x0010, "No, thank you."));
+                    break;
+                }
+            case 0x0013:
+                {
+                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                    if (subject == null) return;
 
-                break;
-            }
+                    var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+                    {
+                        if (!result)
+                        {
+                            client.SendOptionsDialog(Mundane, msg, subject.Name);
+                        }
+                    });
+
+                    if (conditions)
+                    {
+                        client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                            subject.Name,
+                            new OptionsDataItem(0x0014, "Yes."),
+                            new OptionsDataItem(0x0010, "I'll come back later."));
+                    }
+
+                    break;
+                }
             case 0x0014:
-            {
-                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                if (subject == null) return;
-
-                client.SendAnimation(109, client.Aisling, Mundane);
-                client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
-
-                break;
-            }
-            case 0x0015:
-            {
-                var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                if (subject == null) return;
-
-                client.SendOptionsDialog(Mundane,
-                    $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                    subject.Name,
-                    new OptionsDataItem(0x0013, "Yes"),
-                    new OptionsDataItem(0x0010, "No"));
-
-                break;
-            }
-            case 0x0800:
-            {
-                int.TryParse(args, out var idx);
-
-                if (idx is < 0 or > byte.MaxValue)
                 {
-                    client.SendMessage(0x02, "I do not sense this spell within you any longer.");
-                    client.CloseDialog();
+                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                    if (subject == null) return;
+
+                    client.SendAnimation(109, client.Aisling, Mundane);
+                    client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
+
+                    break;
                 }
+            case 0x0015:
+                {
+                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+                    if (subject == null) return;
 
-                client.Aisling.SpellBook.Remove((byte)idx, true);
-                client.Send(new ServerFormat18((byte)idx));
-                client.LoadSpellBook();
+                    client.SendOptionsDialog(Mundane,
+                        $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+                        subject.Name,
+                        new OptionsDataItem(0x0013, "Yes"),
+                        new OptionsDataItem(0x0010, "No"));
 
-                client.SendSpellForgetDialog(Mundane, "It has been removed.\nRemember, This cannot be undone.", 0x0800);
-                break;
-            }
+                    break;
+                }
+            case 0x0800:
+                {
+                    int.TryParse(args, out var idx);
+
+                    if (idx is < 0 or > byte.MaxValue)
+                    {
+                        client.SendMessage(0x02, "I do not sense this spell within you any longer.");
+                        client.CloseDialog();
+                    }
+
+                    client.Aisling.SpellBook.Remove((byte)idx, true);
+                    client.Send(new ServerFormat18((byte)idx));
+                    client.LoadSpellBook();
+
+                    client.SendSpellForgetDialog(Mundane, "It has been removed.\nRemember, This cannot be undone.", 0x0800);
+                    break;
+                }
 
             #endregion
 
             case 0x0008:
-            {
-                client.SendOptionsDialog(Mundane, "When you're ready, I'll be here.");
-                break;
-            }
-            case 0x0009:
-            {
-                if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
                 {
-                    client.Aisling.QuestManager.NealKill = _kill;
-                    client.Aisling.QuestManager.NealCount = countMon;
+                    client.SendOptionsDialog(Mundane, "When you're ready, I'll be here.");
+                    break;
                 }
+            case 0x0009:
+                {
+                    if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
+                    {
+                        client.Aisling.QuestManager.NealKill = _kill;
+                        client.Aisling.QuestManager.NealCount = countMon;
+                    }
 
-                client.SendOptionsDialog(Mundane, $"Make it back with your limbs intact.\n{{=qKill: {countMon}, {_kill}'s");
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, $"Make it back with your limbs intact.\n{{=qKill: {countMon}, {_kill}'s");
+                    break;
+                }
 
             #region A Warrior's Trial
 
             case 0x000A:
-            {
-                var options = new List<OptionsDataItem>
+                {
+                    var options = new List<OptionsDataItem>
                 {
                     new (0x0009, "Sure."),
                     new (0x0008, "Not right now.")
                 };
 
-                client.SendOptionsDialog(Mundane, $"This trial will test your might against a foe of my choosing.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, $"This trial will test your might against a foe of my choosing.", options.ToArray());
+                    break;
+                }
             case 0x000B:
-            {
-                if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
                 {
-                    if (client.Aisling.Path == Class.Berserker)
+                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
                     {
-                        if (client.Aisling.QuestManager.Neal == 0)
+                        if (client.Aisling.Path == Class.Berserker)
                         {
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(8000);
-                            client.SendMessage(0x03, "You've gained 8,000 experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
-                                new OptionsDataItem(0x000A, "Yes."),
-                                new OptionsDataItem(0x0008, "I'll come back later."));
-
-                            break;
-                        }
-
-                        if (client.Aisling.QuestManager.Neal == 1)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp);
-                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 2)
+                            if (client.Aisling.QuestManager.Neal == 0)
                             {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Aid)"
-                                };
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(8000);
+                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
+                                    new OptionsDataItem(0x000A, "Yes."),
+                                    new OptionsDataItem(0x0008, "I'll come back later."));
 
-                                client.Aisling.LegendBook.AddLegend(item, client);
+                                break;
                             }
 
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.Path == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 0)
-                        {
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(8000);
-                            client.SendMessage(0x03, "You've gained 8,000 experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
-                                new OptionsDataItem(0x000A, "Yes."),
-                                new OptionsDataItem(0x0008, "I'll come back later."));
-
-                            break;
-                        }
-
-                        if (client.Aisling.QuestManager.Neal == 1)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp);
-                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 2)
+                            if (client.Aisling.QuestManager.Neal == 1)
                             {
-                                var item = new Legend.LegendItem
+                                var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp);
+                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 2)
                                 {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Rescue)"
-                                };
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Aid)"
+                                    };
 
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
 
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Berserker)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 0)
-                        {
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(8000);
-                            client.SendMessage(0x03, "You've gained 8,000 experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
-                                new OptionsDataItem(0x000A, "Yes."),
-                                new OptionsDataItem(0x0008, "I'll come back later."));
-
-                            break;
-                        }
-
-                        if (client.Aisling.QuestManager.Neal == 1)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp);
-                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 2)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Aid)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 0)
-                        {
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(8000);
-                            client.SendMessage(0x03, "You've gained 8,000 experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
-                                new OptionsDataItem(0x000A, "Yes."),
-                                new OptionsDataItem(0x0008, "I'll come back later."));
-
-                            break;
-                        }
-
-                        if (client.Aisling.QuestManager.Neal == 1)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp);
-                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 2)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Rescue)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
+                                break;
                             }
                         }
+
+                        if (client.Aisling.Path == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 0)
+                            {
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(8000);
+                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
+                                    new OptionsDataItem(0x000A, "Yes."),
+                                    new OptionsDataItem(0x0008, "I'll come back later."));
+
+                                break;
+                            }
+
+                            if (client.Aisling.QuestManager.Neal == 1)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp);
+                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 2)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Rescue)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Berserker)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 0)
+                            {
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(8000);
+                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
+                                    new OptionsDataItem(0x000A, "Yes."),
+                                    new OptionsDataItem(0x0008, "I'll come back later."));
+
+                                break;
+                            }
+
+                            if (client.Aisling.QuestManager.Neal == 1)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp);
+                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 2)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Aid)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 0)
+                            {
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(8000);
+                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
+                                    new OptionsDataItem(0x000A, "Yes."),
+                                    new OptionsDataItem(0x0008, "I'll come back later."));
+
+                                break;
+                            }
+
+                            if (client.Aisling.QuestManager.Neal == 1)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp);
+                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 2)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Rescue)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+                            }
+                        }
                     }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.NealKill}");
+                    }
+
+                    break;
                 }
-                else
-                {
-                    client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.NealKill}");
-                }
-
-                break;
-            }
 
             #endregion
 
             #region Advanced Training
 
             case 0x000C:
-            {
-                var options = new List<OptionsDataItem>
+                {
+                    var options = new List<OptionsDataItem>
                 {
                     new (0x0016, "Sure."),
                     new (0x0008, "Not right now.")
                 };
 
-                client.SendOptionsDialog(Mundane, $"This trial is more advanced and will let me know if you're ready for the next phase.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, $"This trial is more advanced and will let me know if you're ready for the next phase.", options.ToArray());
+                    break;
+                }
             case 0x000D:
-            {
-                if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
                 {
-                    if (client.Aisling.Path == Class.Berserker)
+                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
                     {
-                        if (client.Aisling.QuestManager.Neal == 2)
+                        if (client.Aisling.Path == Class.Berserker)
                         {
-                            var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp2);
-                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 3)
+                            if (client.Aisling.QuestManager.Neal == 2)
                             {
-                                var item = new Legend.LegendItem
+                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp2);
+                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 3)
                                 {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Lullaby Strike)"
-                                };
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Lullaby Strike)"
+                                    };
 
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
 
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.Path == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 2)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp2);
-                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 3)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Raise Threat)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Berserker)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 2)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp2);
-                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 3)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Lullaby Strike)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 2)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp2);
-                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 3)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Raise Threat)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
+                                break;
                             }
                         }
+
+                        if (client.Aisling.Path == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 2)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp2);
+                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 3)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Raise Threat)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Berserker)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 2)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp2);
+                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 3)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Lullaby Strike)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 2)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp2);
+                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 3)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Raise Threat)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+                            }
+                        }
                     }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.NealKill}");
+                    }
+
+                    break;
                 }
-                else
-                {
-                    client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate more of these creatures: {{=q{client.Aisling.QuestManager.NealKill}");
-                }
-
-                break;
-            }
 
             #endregion
 
             #region Turbulent Combat
 
             case 0x000E:
-            {
-                var options = new List<OptionsDataItem>
+                {
+                    var options = new List<OptionsDataItem>
                 {
                     new (0x0017, "Sure."),
                     new (0x0008, "Not right now.")
                 };
 
-                client.SendOptionsDialog(Mundane, $"This is your final trial. If you pass, I'll teach you something special.\nFor your trial I want you to kill {{=q5 {{=bWraith's{{=a.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, $"This is your final trial. If you pass, I'll teach you something special.\nFor your trial I want you to kill {{=q5 {{=bWraith's{{=a.", options.ToArray());
 
-                break;
-            }
+                    break;
+                }
             case 0x000F:
-            {
-                if (client.Aisling.HasKilled("Wraith", 5) || client.Aisling.GameMaster)
                 {
-                    if (client.Aisling.Path == Class.Berserker)
+                    if (client.Aisling.HasKilled("Wraith", 5) || client.Aisling.GameMaster)
                     {
-                        if (client.Aisling.QuestManager.Neal == 3)
+                        if (client.Aisling.Path == Class.Berserker)
                         {
-                            var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp3);
-                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 4)
+                            if (client.Aisling.QuestManager.Neal == 3)
                             {
-                                var item = new Legend.LegendItem
+                                var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp3);
+                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 4)
                                 {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Desolate)"
-                                };
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Desolate)"
+                                    };
 
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
 
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
+                                if (client.Aisling.QuestManager.Neal == 4)
                                 {
-                                    Category = "Adventure",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Yellow,
-                                    Icon = (byte)LegendIcon.Victory,
-                                    Value = "Finished Neal's Training"
-                                };
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Adventure",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Yellow,
+                                        Icon = (byte)LegendIcon.Victory,
+                                        Value = "Finished Neal's Training"
+                                    };
 
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
 
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.Path == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 3)
-                        {
-                            var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
-                            if (spell) client.LoadSpellBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp3);
-                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Spell",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Peony,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Defensive Stance)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Adventure",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Yellow,
-                                    Icon = (byte)LegendIcon.Victory,
-                                    Value = "Finished Neal's Training"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Berserker)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 3)
-                        {
-                            var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
-                            if (skill) client.LoadSkillBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp3);
-                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Skill",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Pink,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Desolate)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Adventure",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Yellow,
-                                    Icon = (byte)LegendIcon.Victory,
-                                    Value = "Finished Neal's Training"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (client.Aisling.PastClass == Class.Defender)
-                    {
-                        if (client.Aisling.QuestManager.Neal == 3)
-                        {
-                            var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
-                            if (spell) client.LoadSpellBook();
-                            client.Aisling.QuestManager.Neal++;
-                            client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
-                            client.Aisling.QuestManager.NealKill = null;
-                            client.Aisling.QuestManager.NealCount = 0;
-                            client.GiveExp(advExp3);
-                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
-                            client.SendStats(StatusFlags.StructC);
-                            client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Spell",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Peony,
-                                    Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Neal's Training (Defensive Stance)"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
-                            }
-
-                            if (client.Aisling.QuestManager.Neal == 4)
-                            {
-                                var item = new Legend.LegendItem
-                                {
-                                    Category = "Adventure",
-                                    Time = DateTime.Now,
-                                    Color = LegendColor.Yellow,
-                                    Icon = (byte)LegendIcon.Victory,
-                                    Value = "Finished Neal's Training"
-                                };
-
-                                client.Aisling.LegendBook.AddLegend(item, client);
+                                break;
                             }
                         }
+
+                        if (client.Aisling.Path == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 3)
+                            {
+                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
+                                if (spell) client.LoadSpellBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp3);
+                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Spell",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Peony,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Defensive Stance)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Adventure",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Yellow,
+                                        Icon = (byte)LegendIcon.Victory,
+                                        Value = "Finished Neal's Training"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Berserker)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 3)
+                            {
+                                var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
+                                if (skill) client.LoadSkillBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp3);
+                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Skill",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Pink,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Desolate)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Adventure",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Yellow,
+                                        Icon = (byte)LegendIcon.Victory,
+                                        Value = "Finished Neal's Training"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (client.Aisling.PastClass == Class.Defender)
+                        {
+                            if (client.Aisling.QuestManager.Neal == 3)
+                            {
+                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
+                                if (spell) client.LoadSpellBook();
+                                client.Aisling.QuestManager.Neal++;
+                                client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                                client.Aisling.QuestManager.NealKill = null;
+                                client.Aisling.QuestManager.NealCount = 0;
+                                client.GiveExp(advExp3);
+                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                client.SendStats(StatusFlags.StructC);
+                                client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Spell",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Peony,
+                                        Icon = (byte)LegendIcon.Warrior,
+                                        Value = "Neal's Training (Defensive Stance)"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+
+                                if (client.Aisling.QuestManager.Neal == 4)
+                                {
+                                    var item = new Legend.LegendItem
+                                    {
+                                        Category = "Adventure",
+                                        Time = DateTime.Now,
+                                        Color = LegendColor.Yellow,
+                                        Icon = (byte)LegendIcon.Victory,
+                                        Value = "Finished Neal's Training"
+                                    };
+
+                                    client.Aisling.LegendBook.AddLegend(item, client);
+                                }
+                            }
+                        }
                     }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate a {{=bWraith {{=athen come see me.");
+                    }
+
+                    break;
                 }
-                else
-                {
-                    client.SendOptionsDialog(Mundane, $"You have not finished your task, eliminate a {{=bWraith {{=athen come see me.");
-                }
-
-                break;
-            }
 
             #endregion
 
             case 0x0016:
-            {
-                if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
                 {
-                    client.Aisling.QuestManager.NealKill = _advKill;
-                    client.Aisling.QuestManager.NealCount = countMon;
-                }
+                    if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
+                    {
+                        client.Aisling.QuestManager.NealKill = _advKill;
+                        client.Aisling.QuestManager.NealCount = countMon;
+                    }
 
-                client.SendOptionsDialog(Mundane, $"Make it back, head held high!\n{{=qKill: {countMon}, {_advKill}'s");
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, $"Make it back, head held high!\n{{=qKill: {countMon}, {_advKill}'s");
+                    break;
+                }
             case 0x0017:
-            {
-                if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
                 {
-                    client.Aisling.QuestManager.NealKill = "Wraith";
-                    client.Aisling.QuestManager.NealCount = 5;
-                }
+                    if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
+                    {
+                        client.Aisling.QuestManager.NealKill = "Wraith";
+                        client.Aisling.QuestManager.NealCount = 5;
+                    }
 
-                client.SendOptionsDialog(Mundane, $"Becareful out there.\n{{=qKill: {client.Aisling.QuestManager.NealCount}, {client.Aisling.QuestManager.NealKill}'s");
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, $"Becareful out there.\n{{=qKill: {client.Aisling.QuestManager.NealCount}, {client.Aisling.QuestManager.NealKill}'s");
+                    break;
+                }
         }
     }
 

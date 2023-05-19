@@ -13,7 +13,13 @@ public class Aerith : MundaneScript
 {
     public Aerith(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client) => TopMenu(client);
+    public override void OnClick(GameServer server, GameClient client)
+    {
+        if (Mundane.WithinEarShotOf(client.Aisling))
+        {
+            TopMenu(client);
+        }
+    }
 
     public override void TopMenu(IGameClient client)
     {
@@ -41,6 +47,8 @@ public class Aerith : MundaneScript
             client.Dispose();
             return;
         }
+
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         switch (responseID)
         {
