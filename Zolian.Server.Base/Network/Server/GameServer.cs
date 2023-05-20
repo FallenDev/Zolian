@@ -670,9 +670,9 @@ public class GameServer : NetworkServer<GameClient>
         // Cache traps to reduce Select operation on each iteration
         var traps = Trap.Traps.Values;
 
-        foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
+        Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
         {
-            var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID);
+            var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID).ToList();
 
             foreach (var (_, monster) in updateList)
             {
@@ -684,21 +684,17 @@ public class GameServer : NetworkServer<GameClient>
                     UpdateKillCounters(monster);
                     monster.Skulled = true;
 
-                    foreach (var script in monster.Scripts.Values.Where(_ => monster.Target?.Client != null))
+                    if (monster.Target?.Client != null)
                     {
-                        script?.OnDeath(monster.Target.Client);
+                        monster.Scripts.Values.First().OnDeath(monster.Target.Client);
                     }
-
-                    foreach (var script in monster.Scripts.Values.Where(_ => monster.Target?.Client == null))
+                    else
                     {
-                        script?.OnDeath();
+                        monster.Scripts.Values.First().OnDeath();
                     }
                 }
 
-                foreach (var script in monster.Scripts.Values)
-                {
-                    script?.Update(elapsedTime);
-                }
+                monster.Scripts.Values.First().Update(elapsedTime);
 
                 foreach (var trap in traps)
                 {
@@ -713,7 +709,7 @@ public class GameServer : NetworkServer<GameClient>
                 monster.UpdateDebuffs(elapsedTime);
                 monster.LastUpdated = DateTime.Now;
             }
-        }
+        });
     }
 
     private static void UpdateKillCounters(Monster monster)
