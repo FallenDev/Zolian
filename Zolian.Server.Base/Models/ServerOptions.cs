@@ -6,4 +6,5 @@ public class ServerOptions
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public string ServerIp { get; set; }
+    public string InternalIp { get; set; }
 }

@@ -45,6 +45,7 @@ public class ServerSetup : IServerContext
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
+    public string InternalAddress { get; set; }
     public ConcurrentDictionary<int, byte> EncryptKeyConDict { get; set; }
     public List<Metafile> GlobalMetaCache { get; set; }
 
@@ -79,6 +80,7 @@ public class ServerSetup : IServerContext
         StoragePath = ServerOptions.Value.Location;
         KeyCode = ServerOptions.Value.KeyCode;
         Unlock = ServerOptions.Value.Unlock;
+        InternalAddress = ServerOptions.Value.InternalIp;
     }
 
     public static void Logger(string logMessage, LogLevel logLevel = LogLevel.Information)

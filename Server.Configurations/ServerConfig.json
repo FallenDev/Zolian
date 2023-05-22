@@ -10,7 +10,9 @@
     "Unlock": "unlock",
     // Set this address to your external facing IP if you're hosting
     // Default: 127.0.0.1 -- leave as-is if you're developing and not publically hosting
-    "ServerIp": "127.0.0.1"
+    "ServerIp": "127.0.0.1",
+    // Set this address internally as a static IP behind your router, this will allow you to restrict Admin access
+    "InternalIp": "192.168.50.1"
   },
   "Editor": {
     "Location": "Z:\\Zolian\\Data",

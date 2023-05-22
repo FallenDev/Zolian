@@ -58,4 +58,5 @@ public interface IServerContext
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
+    public string InternalAddress { get; set; }
 }

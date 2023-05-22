@@ -290,7 +290,7 @@ public class LoginServer : NetworkServer<LoginClient>
                     return;
                 case "death":
                 {
-                    const string gmIp = "192.168.50.1"; // If connecting within your own network, set as an internal IP
+                    var gmIp = ServerSetup.Instance.InternalAddress;
                     var ipLocal = IPAddress.Parse(gmIp);
                     var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
 
