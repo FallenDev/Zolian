@@ -275,7 +275,7 @@ public class LoginServer : NetworkServer<LoginClient>
         {
             aislingTask = StorageManager.AislingBucket.CheckPassword(format.Username);
             var usernameLower = format.Username.ToLowerInvariant();
-            Aisling aisling = aislingTask.Result;
+            var aisling = aislingTask.Result;
 
             if (aisling == null)
             {
@@ -353,6 +353,7 @@ public class LoginServer : NetworkServer<LoginClient>
         if (aisling.PasswordAttempts <= 9)
         {
             ServerSetup.Logger($"{aisling} attempted an incorrect password.");
+            aisling.LastIP = ip.ToString();
             aisling.LastAttemptIP = ip.ToString();
             aisling.PasswordAttempts += 1;
             SavePassword(aisling);
@@ -362,6 +363,7 @@ public class LoginServer : NetworkServer<LoginClient>
         {
             ServerSetup.Logger($"{aisling} was locked to protect their account.");
             client.SendMessageBox(0x02, "Hacking detected, the player has been locked.");
+            aisling.LastIP = ip.ToString();
             aisling.LastAttemptIP = ip.ToString();
             aisling.Hacked = true;
             SavePassword(aisling);
@@ -525,11 +527,15 @@ public class LoginServer : NetworkServer<LoginClient>
             return;
         }
 
+        var ip = client.ClientIP.Address;
+
         if (aisling.Result.Password != format.Password)
         {
             if (aisling.Result.PasswordAttempts <= 9)
             {
                 ServerSetup.Logger($"{aisling.Result} attempted an incorrect password.");
+                aisling.Result.LastIP = ip.ToString();
+                aisling.Result.LastAttemptIP = ip.ToString();
                 aisling.Result.PasswordAttempts += 1;
                 SavePassword(aisling.Result);
                 client.SendMessageBox(0x02, "Incorrect Information provided.");
@@ -538,6 +544,8 @@ public class LoginServer : NetworkServer<LoginClient>
 
             ServerSetup.Logger($"{aisling.Result} was locked to protect their account.");
             client.SendMessageBox(0x02, "Hacking detected, the player has been locked.");
+            aisling.Result.LastIP = ip.ToString();
+            aisling.Result.LastAttemptIP = ip.ToString();
             aisling.Result.Hacked = true;
             SavePassword(aisling.Result);
             return;
@@ -550,6 +558,8 @@ public class LoginServer : NetworkServer<LoginClient>
         }
 
         aisling.Result.Password = format.NewPassword;
+        aisling.Result.LastIP = ip.ToString();
+        aisling.Result.LastAttemptIP = ip.ToString();
         SavePassword(aisling.Result);
 
         client.SendMessageBox(0x00, "");
