@@ -18,6 +18,12 @@ public class Dar : MundaneScript
     private string _retrieveAdv;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
+    private bool _0X0A;
+    private bool _0X0B;
+    private bool _0X0C;
+    private bool _0X0D;
+    private bool _0X0E;
+    private bool _0X0F;
 
     public Dar(GameServer server, Mundane mundane) : base(server, mundane)
     {
@@ -27,6 +33,8 @@ public class Dar : MundaneScript
 
     public override void OnClick(GameServer server, GameClient client)
     {
+        base.OnClick(server, client);
+
         if (Mundane.WithinEarShotOf(client.Aisling))
         {
             TopMenu(client);
@@ -42,12 +50,15 @@ public class Dar : MundaneScript
             switch (client.Aisling.QuestManager.Dar)
             {
                 case <= 7:
+                    _0X0B = true;
                     options.Add(new(0x0B, $"{{=cIs this what you're looking for{{=a?"));
                     break;
                 case 8 when client.Aisling.Level >= 23 || client.Aisling.GameMaster:
+                    _0X0D = true;
                     options.Add(new(0x0D, $"{{=cIs this what you're looking for{{=a?"));
                     break;
                 case 9 when client.Aisling.Level >= 34 || client.Aisling.GameMaster:
+                    _0X0F = true;
                     options.Add(new(0x0F, $"{{=cIs this what you're looking for{{=a?"));
                     break;
             }
@@ -71,12 +82,15 @@ public class Dar : MundaneScript
             switch (client.Aisling.QuestManager.Dar)
             {
                 case <= 7 when client.Aisling.Level <= 22 || client.Aisling.GameMaster:
+                    _0X0A = true;
                     options.Add(new(0x0A, "Dark Things"));
                     break;
                 case 8 when client.Aisling.Level is <= 33 and >= 23 || client.Aisling.GameMaster:
+                    _0X0C = true;
                     options.Add(new(0x0C, "Darker Things"));
                     break;
                 case 9 when client.Aisling.Level is <= 50 and >= 34 || client.Aisling.GameMaster:
+                    _0X0D = true;
                     options.Add(new(0x0E, "Things that bump in the Twilight"));
                     break;
             }
@@ -85,9 +99,15 @@ public class Dar : MundaneScript
         client.SendOptionsDialog(Mundane, "Looking into the darker things is what I like to do, how may I help you?", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameServer server, GameClient client, ushort responseId, string args)
     {
         if (client.Aisling.Map.ID != Mundane.Map.ID)
+        {
+            client.Dispose();
+            return;
+        }
+
+        if (OnClickCheck == 0)
         {
             client.Dispose();
             return;
@@ -130,7 +150,7 @@ public class Dar : MundaneScript
             _ => _retrieve
         };
 
-        switch (responseID)
+        switch (responseId)
         {
             #region Skills
 
@@ -366,6 +386,7 @@ public class Dar : MundaneScript
 
             case 10:
             {
+                if (!_0X0A) return;
                 var options = new List<OptionsDataItem>
                 {
                     new (0x09, "Sure."),
@@ -377,6 +398,7 @@ public class Dar : MundaneScript
             }
             case 11:
             {
+                if (!_0X0B) return;
                 if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
                 {
                     client.Aisling.QuestManager.Dar++;
@@ -401,6 +423,7 @@ public class Dar : MundaneScript
 
             case 12:
             {
+                if (!_0X0C) return;
                 var options = new List<OptionsDataItem>
                 {
                     new (0x09, "Sure."),
@@ -412,6 +435,7 @@ public class Dar : MundaneScript
             }
             case 13:
             {
+                if (!_0X0D) return;
                 if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
                 {
                     client.Aisling.QuestManager.Dar++;
@@ -437,6 +461,7 @@ public class Dar : MundaneScript
 
             case 14:
             {
+                if (!_0X0E) return;
                 var options = new List<OptionsDataItem>
                 {
                     new (0x09, "Sure."),
@@ -448,6 +473,7 @@ public class Dar : MundaneScript
             }
             case 15:
             {
+                if (!_0X0F) return;
                 if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
                 {
                     client.Aisling.QuestManager.Dar++;
