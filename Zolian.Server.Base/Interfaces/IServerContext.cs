@@ -20,7 +20,6 @@ public interface IServerContext
     void Startup();
     void LoadAndCacheStorage(bool contentOnly);
     void EmptyCacheCollectors();
-    void LoadWorldMapTemplates();
     void BindTemplates();
     void CacheCommunityAssets();
     void LoadMetaDatabase();

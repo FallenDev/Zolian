@@ -134,21 +134,21 @@ public class ServerSetup : IServerContext
         {
             EmptyCacheCollectors();
             AreaStorage.Instance.CacheFromDatabase();
-            StorageManager.NationBucket.CacheFromDatabase(new NationTemplate());
-            StorageManager.SkillBucket.CacheFromDatabase(new SkillTemplate());
-            StorageManager.SpellBucket.CacheFromDatabase(new SpellTemplate());
-            StorageManager.ItemBucket.CacheFromDatabase(new ItemTemplate());
-            StorageManager.MonsterBucket.CacheFromDatabase(new MonsterTemplate());
-            StorageManager.MundaneBucket.CacheFromDatabase(new MundaneTemplate());
-            StorageManager.WarpBucket.CacheFromDatabase(new WarpTemplate());
+            DatabaseLoad.CacheFromDatabase(new NationTemplate());
+            DatabaseLoad.CacheFromDatabase(new SkillTemplate());
+            DatabaseLoad.CacheFromDatabase(new SpellTemplate());
+            DatabaseLoad.CacheFromDatabase(new ItemTemplate());
+            DatabaseLoad.CacheFromDatabase(new MonsterTemplate());
+            DatabaseLoad.CacheFromDatabase(new MundaneTemplate());
+            DatabaseLoad.CacheFromDatabase(new WarpTemplate());
+            DatabaseLoad.CacheFromDatabase(new WorldMapTemplate());
 
-            LoadWorldMapTemplates();
             CacheCommunityAssets();
 
             if (contentOnly) return;
 
             BindTemplates();
-            // If decompiling templates, comment out LoadMetaDatabase();
+            // ToDo: If decompiling templates, comment out LoadMetaDatabase();
             LoadMetaDatabase();
             //MetafileManager.DecompileTemplates();
             LoadExtensions();
@@ -174,12 +174,6 @@ public class ServerSetup : IServerContext
     }
 
     #region Template Building
-
-    public void LoadWorldMapTemplates()
-    {
-        StorageManager.WorldMapBucket.CacheFromStorage();
-        Logger($"World Map Templates: {GlobalWorldMapTemplateCache.Count}");
-    }
 
     public void BindTemplates()
     {

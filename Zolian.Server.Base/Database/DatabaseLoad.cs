@@ -12,89 +12,42 @@ using ServiceStack;
 
 namespace Darkages.Database;
 
-public class DatabaseLoad<T> where T : Template, new()
+public abstract class DatabaseLoad
 {
-    private readonly string _storagePath;
-    private const string ConnectionString = "Data Source=.;Initial Catalog=Zolian;Integrated Security=True;Encrypt=False";
+    private const string ZolianConn = "Data Source=.;Initial Catalog=Zolian;Integrated Security=True;Encrypt=False";
+    private const string ZolianAbilitiesConn = "Data Source=.;Initial Catalog=ZolianAbilities;Integrated Security=True;Encrypt=False";
+    private const string ZolianMapsConn = "Data Source=.;Initial Catalog=ZolianMaps;Integrated Security=True;Encrypt=False";
+    private const string ZolianMonstersConn = "Data Source=.;Initial Catalog=ZolianMonsters;Integrated Security=True;Encrypt=False";
+    private const string ZolianMundanesConn = "Data Source=.;Initial Catalog=ZolianMundanes;Integrated Security=True;Encrypt=False";
+    private const string ZolianWorldMapsConn = "Data Source=.;Initial Catalog=ZolianWorldMaps;Integrated Security=True;Encrypt=False";
 
-    public DatabaseLoad()
-    {
-        var tmp = new T();
-        _storagePath = $@"{ServerSetup.Instance.StoragePath}\templates";
-        _storagePath = Path.Combine(_storagePath, "%");
-
-        switch (tmp)
-        {
-            case WorldMapTemplate:
-                // Z:\Zolian\Data\templates\WorldMaps
-                _storagePath = _storagePath.Replace("%", "WorldMaps");
-                break;
-        }
-
-        _storagePath = _storagePath.ToLower();
-    }
-
-    public void CacheFromStorage()
-    {
-        var tmp = new T();
-        var assetNames = Directory.GetFiles(_storagePath, "*.json", SearchOption.TopDirectoryOnly);
-
-        if (assetNames.Length == 0) return;
-
-        foreach (var obj in assetNames)
-        {
-            switch (tmp)
-            {
-                case WorldMapTemplate _:
-                {
-                    var template = Load<WorldMapTemplate>(Path.GetFileNameWithoutExtension(obj));
-                    if (template != null)
-                        ServerSetup.Instance.GlobalWorldMapTemplateCache[template.FieldNumber] = template;
-                    break;
-                }
-            }
-        }
-    }
-
-    private TD Load<TD>(string name, string fixedPath = null) where TD : class, new()
-    {
-        var path = fixedPath ?? Path.Combine(_storagePath, $"{name.ToLower()}.json");
-
-        if (!File.Exists(path)) return null;
-
-        using var openStream = File.OpenRead(path);
-        using var s = File.OpenRead(path);
-        using var f = new StreamReader(s);
-        var content = f.ReadToEnd();
-        var obj = StorageManager.Deserialize<TD>(content);
-
-        return obj;
-    }
-
-    public void CacheFromDatabase(Template temp)
+    public static void CacheFromDatabase(Template temp)
     {
         switch (temp)
         {
             case NationTemplate _:
-                Nations(ConnectionString);
+                Nations(ZolianMapsConn);
                 break;
             case WarpTemplate _:
-                Warps(ConnectionString);
+                Warps(ZolianMapsConn);
                 break;
             case ItemTemplate _:
-                Items(ConnectionString);
+                Items(ZolianConn);
                 break;
             case MonsterTemplate _:
-                Monsters(ConnectionString);
+                Monsters(ZolianMonstersConn);
                 break;
             case MundaneTemplate _:
-                Mundanes(ConnectionString);
+                Mundanes(ZolianMundanesConn);
                 break;
             case SkillTemplate _:
-                Abilities(ConnectionString, 1);
+                Abilities(ZolianAbilitiesConn, 1);
                 break;
             case SpellTemplate _:
-                Abilities(ConnectionString, 2);
+                Abilities(ZolianAbilitiesConn, 2);
+                break;
+            case WorldMapTemplate _:
+                WorldMaps(ZolianWorldMapsConn);
                 break;
         }
     }
@@ -138,7 +91,7 @@ public class DatabaseLoad<T> where T : Template, new()
             ServerSetup.Logger(e.ToString());
         }
 
-        ServerSetup.Logger($"Nation Templates: {ServerSetup.Instance.GlobalNationTemplateCache.Count.ToString()}");
+        ServerSetup.Logger($"Nation Templates: {ServerSetup.Instance.GlobalNationTemplateCache.Count}");
     }
 
     private static void Warps(string conn)
@@ -283,7 +236,7 @@ public class DatabaseLoad<T> where T : Template, new()
             ServerSetup.Logger(e.ToString());
         }
 
-        ServerSetup.Logger($"Warp Templates: {ServerSetup.Instance.GlobalWarpTemplateCache.Count.ToString()}");
+        ServerSetup.Logger($"Warp Templates: {ServerSetup.Instance.GlobalWarpTemplateCache.Count}");
     }
 
     private static void Items(string conn)
@@ -321,7 +274,7 @@ public class DatabaseLoad<T> where T : Template, new()
             Crashes.TrackError(e);
         }
 
-        ServerSetup.Logger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count.ToString()}");
+        ServerSetup.Logger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count}");
     }
 
     private static void Monsters(string conn)
@@ -341,7 +294,7 @@ public class DatabaseLoad<T> where T : Template, new()
             Crashes.TrackError(e);
         }
 
-        ServerSetup.Logger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count.ToString()}");
+        ServerSetup.Logger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count}");
     }
 
     private static void Mundanes(string conn)
@@ -361,7 +314,7 @@ public class DatabaseLoad<T> where T : Template, new()
             Crashes.TrackError(e);
         }
 
-        ServerSetup.Logger($"Mundane Templates: {ServerSetup.Instance.GlobalMundaneTemplateCache.Count.ToString()}");
+        ServerSetup.Logger($"Mundane Templates: {ServerSetup.Instance.GlobalMundaneTemplateCache.Count}");
     }
 
     private static void Abilities(string conn, int num)
@@ -371,12 +324,12 @@ public class DatabaseLoad<T> where T : Template, new()
             if (num == 1)
             {
                 SkillStorage.CacheFromDatabase(conn);
-                ServerSetup.Logger($"Skill Templates: {ServerSetup.Instance.GlobalSkillTemplateCache.Count.ToString()}");
+                ServerSetup.Logger($"Skill Templates: {ServerSetup.Instance.GlobalSkillTemplateCache.Count}");
             }
             else
             {
                 SpellStorage.CacheFromDatabase(conn);
-                ServerSetup.Logger($"Spell Templates: {ServerSetup.Instance.GlobalSpellTemplateCache.Count.ToString()}");
+                ServerSetup.Logger($"Spell Templates: {ServerSetup.Instance.GlobalSpellTemplateCache.Count}");
             }
         }
         catch (Exception e)
@@ -384,5 +337,25 @@ public class DatabaseLoad<T> where T : Template, new()
             ServerSetup.Logger(e.ToString());
             Crashes.TrackError(e);
         }
+    }
+
+    private static void WorldMaps(string conn)
+    {
+        try
+        {
+            string[] dbTables = { "CorruptedLorule", "FallsPassageWay", "Hyrule", "Lorule", "MinesPassageWay", "NorthernWaterWay", "TemuairSea" };
+
+            foreach (var table in dbTables)
+            {
+                WorldMapStorage.CacheFromDatabase(conn, table);
+            }
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
+
+        ServerSetup.Logger($"World Map Templates: {ServerSetup.Instance.GlobalWorldMapTemplateCache.Count}");
     }
 }

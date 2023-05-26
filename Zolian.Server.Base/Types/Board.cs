@@ -63,7 +63,7 @@ public class Board : NetworkFormat
 
         using var s = File.OpenRead(path);
         using var f = new StreamReader(s);
-        return JsonConvert.DeserializeObject<Board>(f.ReadToEnd(), StorageManager.Settings);
+        return JsonConvert.DeserializeObject<Board>(f.ReadToEnd(), Settings);
     }
 
     public static Board LoadFromFile(string path)
@@ -72,15 +72,23 @@ public class Board : NetworkFormat
 
         using var s = File.OpenRead(path);
         using var f = new StreamReader(s);
-        return JsonConvert.DeserializeObject<Board>(f.ReadToEnd(), StorageManager.Settings);
+        return JsonConvert.DeserializeObject<Board>(f.ReadToEnd(), Settings);
     }
 
     public void Save(string key)
     {
         var path = Path.Combine(StoragePath, $"{key}\\{Subject}.json");
-        var objString = JsonConvert.SerializeObject(this, StorageManager.Settings);
+        var objString = JsonConvert.SerializeObject(this, Settings);
         File.WriteAllText(path, objString);
     }
+
+    private static readonly JsonSerializerSettings Settings = new()
+    {
+        TypeNameHandling = TypeNameHandling.None,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+        Formatting = Formatting.Indented,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    };
 
     public override void Serialize(NetworkPacketReader reader)
     {

@@ -133,9 +133,17 @@ public class ObjectManager : IObjectManager
 
     public T PersonalMailJsonConvert<T>(object source)
     {
-        var serialized = JsonConvert.SerializeObject(source, Formatting.Indented, StorageManager.Settings);
-        return JsonConvert.DeserializeObject<T>(serialized, StorageManager.Settings);
+        var serialized = JsonConvert.SerializeObject(source, Formatting.Indented, Settings);
+        return JsonConvert.DeserializeObject<T>(serialized, Settings);
     }
+
+    private static readonly JsonSerializerSettings Settings = new()
+    {
+        TypeNameHandling = TypeNameHandling.None,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+        Formatting = Formatting.Indented,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+    };
 
     public Aisling GetAislingForMailDeliveryMessage(string name)
     {
