@@ -1,4 +1,4 @@
-# Zolian - Kingdom of Chaos  
+# Zolian - Kingdom of Ashes  
 [![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
 ![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
 [![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
@@ -17,12 +17,13 @@ C# .NET 7 & SQL Server 2022
 Hades, Formally known as Lorule was the original basis of this infrastructure.
 - wren; Project located here: https://github.com/wren11/DarkAges-Lorule-Server   
 
-Hybrasyl, helped with multiple packet formations   
+Hybrasyl and Chaos, helped with multiple packet formations   
 - Team Hybrasyl: https://github.com/hybrasyl   
-
+- Team Chaos: https://github.com/Sichii/Chaos-Server   
+  
 Other teams, apart of the Discord DA Community Developers Group
 - Special Mentions: Team Legends, Team FoT
-
+  
 # Zolian
 Server is a custom implementation of the doomvas emulator. Most of the mechanics featured, are derived from other popular mmorpgs. Here you can explore, create, and test ideas out. Or host your own private server for learning purposes. I hope you enjoy exploring this source!
 
