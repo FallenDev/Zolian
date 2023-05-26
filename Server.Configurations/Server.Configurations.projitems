@@ -22,7 +22,6 @@
     <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Maps.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Nations.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Warps.Table.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.WorldMaps.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.Abel.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.EasternWoods.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\dbo.EnchantedGarden.Table.sql" />
@@ -122,5 +121,8 @@
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponDefender.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponMonk.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponPeasant.Table.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)ZolianWorldMaps\" />
   </ItemGroup>
 </Project>
