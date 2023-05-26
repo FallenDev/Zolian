@@ -92,6 +92,7 @@
     <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SkillToPlayer.StoredProcedure.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SpellToPlayer.StoredProcedure.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.WithdrawItemList.StoredProcedure.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianWorldMaps\WorldMaps.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorArcanus.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorAssassin.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.ArmorBerserker.Table.sql" />
@@ -121,8 +122,5 @@
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponDefender.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponMonk.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)Zolian\dbo.WeaponPeasant.Table.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)ZolianWorldMaps\" />
   </ItemGroup>
 </Project>
