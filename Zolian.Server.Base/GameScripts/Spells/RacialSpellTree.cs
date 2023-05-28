@@ -279,7 +279,7 @@ public class DestructiveForce : SpellScript
             _target = Spell.SpellReflect(_target, sprite);
             if (_target is Monster monster)
             {
-                if (monster.Template.MonsterRace == MonsterRace.Dummy) continue;
+                if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
                 monster.ThrownBack = true;
             }
             

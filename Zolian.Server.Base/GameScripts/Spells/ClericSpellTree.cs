@@ -1143,7 +1143,7 @@ public class Turn_Undead : SpellScript
 
         foreach (var monster in aisling.MonstersNearby())
         {
-            if (monster.Template.MonsterRace != MonsterRace.Undead) continue;
+            if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 101) continue;
             _spellMethod.ElementalOnUse(sprite, target, _spell, 30);
             _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
@@ -1207,7 +1207,7 @@ public class Turn_Critter : SpellScript
 
         foreach (var monster in aisling.MonstersNearby())
         {
-            if (monster.Template.MonsterRace is not (MonsterRace.Insect or MonsterRace.Rodent)) continue;
+            if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 101) continue;
             _spellMethod.ElementalOnUse(sprite, target, _spell, 30);
             _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
@@ -1271,7 +1271,7 @@ public class Turn_Greater_Undead : SpellScript
 
         foreach (var monster in aisling.MonstersNearby())
         {
-            if (monster.Template.MonsterRace != MonsterRace.Undead) continue;
+            if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 251) continue;
             _spellMethod.ElementalOnUse(sprite, target, _spell, 50);
             _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
@@ -1335,7 +1335,7 @@ public class Turn_Greater_Critter : SpellScript
 
         foreach (var monster in aisling.MonstersNearby())
         {
-            if (monster.Template.MonsterRace is not (MonsterRace.Insect or MonsterRace.Rodent)) continue;
+            if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 251) continue;
             _spellMethod.ElementalOnUse(sprite, target, _spell, 50);
             _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
