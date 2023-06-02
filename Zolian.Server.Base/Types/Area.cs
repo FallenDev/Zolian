@@ -150,67 +150,55 @@ public class Area : Map, IArea
 
     public bool OnLoaded()
     {
-        var delete = false;
-
         lock (ServerSetup.SyncLock)
         {
             TileContent = new TileContent[Cols, Rows];
             ObjectGrid = new TileGrid[Cols, Rows];
 
-            using (var stream = new MemoryStream(Data))
+            using var stream = new MemoryStream(Data);
+            using var reader = new BinaryReader(stream);
+
+            try
             {
-                using var reader = new BinaryReader(stream);
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                try
+                for (var y = 0; y < Rows; y++)
                 {
-                    reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                    _tiles.Add(new List<TileGrid>());
 
-                    for (var y = 0; y < Rows; y++)
+                    for (var x = 0; x < Cols; x++)
                     {
-                        _tiles.Add(new List<TileGrid>());
+                        _tiles[y].Add(new TileGrid(x));
+                        ObjectGrid[x, y] = new TileGrid(this, x, y);
 
-                        for (var x = 0; x < Cols; x++)
+                        reader.BaseStream.Seek(2, SeekOrigin.Current);
+
+                        if (reader.BaseStream.Position < reader.BaseStream.Length)
                         {
-                            _tiles[y].Add(new TileGrid(x));
-                            ObjectGrid[x, y] = new TileGrid(this, x, y);
+                            var a = reader.ReadInt16();
+                            var b = reader.ReadInt16();
 
-                            reader.BaseStream.Seek(2, SeekOrigin.Current);
-
-                            if (reader.BaseStream.Position < reader.BaseStream.Length)
-                            {
-                                var a = reader.ReadInt16();
-                                var b = reader.ReadInt16();
-
-                                if (ParseMapWalls(a, b))
-                                    TileContent[x, y] = Enums.TileContent.Wall;
-                                else
-                                    TileContent[x, y] = Enums.TileContent.None;
-                            }
-                            else
-                            {
+                            if (ParseMapWalls(a, b))
                                 TileContent[x, y] = Enums.TileContent.Wall;
-                            }
+                            else
+                                TileContent[x, y] = Enums.TileContent.None;
+                        }
+                        else
+                        {
+                            TileContent[x, y] = Enums.TileContent.Wall;
                         }
                     }
+                }
 
-                    Ready = true;
-                }
-                catch (Exception ex)
-                {
-                    ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
-                    ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
-                    Crashes.TrackError(ex);
-
-                    delete = true;
-                }
-                finally
-                {
-                    reader.Close();
-                    stream.Close();
-                }
+                Ready = true;
             }
-
-            if (!delete) return true;
+            catch (Exception ex)
+            {
+                ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
+                ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
+                Crashes.TrackError(ex);
+                return false;
+            }
         }
 
         return Ready;

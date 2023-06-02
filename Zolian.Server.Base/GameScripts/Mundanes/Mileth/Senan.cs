@@ -28,7 +28,7 @@ public class Senan : MundaneScript
 
         switch (client.Aisling.QuestManager.CryptTerror)
         {
-            case false when (client.Aisling.Level >= 6 && client.Aisling.Level <= 22):
+            case false when (client.Aisling.Level >= 20 && client.Aisling.Level <= 40):
                 options.Add(new (0x06, "{=qTerror of the Crypt"));
                 break;
             case true when (!client.Aisling.QuestManager.CryptTerrorSlayed):

@@ -148,15 +148,12 @@ public sealed class Monster : Sprite
 
         var nodeX = pathList[0].X;
         var nodeY = pathList[0].Y;
-        var monsterLocation = new Vector2(monster.X, monster.Y);
-        var targetLocation = new Vector2(monster.Target.X, monster.Target.Y);
 
         // Check if path became blocked, if so recalculate path
         if (Map.IsWall((int)nodeX, (int)nodeY) || Map.IsAStarSprite(this, (int)nodeX, (int)nodeY))
         {
-            monster.Path = Map.GetPath(monster, monsterLocation, targetLocation);
-            nodeX = monster.Path.Result[0].X;
-            nodeY = monster.Path.Result[0].Y;
+            Wander();
+            return;
         }
 
         WalkTo((int)nodeX, (int)nodeY);

@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Infrastructure;
@@ -6,6 +7,7 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 
@@ -46,100 +48,90 @@ public class CreateMonster : MonsterCreateScript
             CurrentMapId = _map.ID
         };
 
-        if (_monsterTemplate.SpellScripts != null)
-            foreach (var spellScriptStr in _monsterTemplate.SpellScripts.Where(spellScriptStr => !string.IsNullOrWhiteSpace(spellScriptStr)))
-                LoadSpellScript(spellScriptStr, obj);
-
-        if (_monsterTemplate.SkillScripts != null)
-            foreach (var skillScriptStr in _monsterTemplate.SkillScripts.Where(skillScriptStr => !string.IsNullOrWhiteSpace(skillScriptStr)))
-                LoadSkillScript(skillScriptStr, obj);
-
-        if (_monsterTemplate.AbilityScripts != null)
-            foreach (var abilityScriptStr in _monsterTemplate.AbilityScripts.Where(abilityScriptStr => !string.IsNullOrWhiteSpace(abilityScriptStr)))
-                LoadAbilityScript(abilityScriptStr, obj);
+        MonsterSkillSet(obj);
 
         switch (obj.Template.Level)
         {
             case <= 9:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 100);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 80);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 100);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 80);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 90:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 800);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 800);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 150:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1300);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1300);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 200:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 250:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 300:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 350:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 400:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 450:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
             case <= 500:
-            {
-                var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 20000);
-                obj.BaseHp = monsterHp;
-                var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
-                obj.BaseMp = monsterMp;
-                break;
-            }
+                {
+                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 20000);
+                    obj.BaseHp = monsterHp;
+                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
+                    obj.BaseMp = monsterMp;
+                    break;
+                }
         }
 
         MonsterSize(obj);
@@ -210,6 +202,125 @@ public class CreateMonster : MonsterCreateScript
             : _monsterTemplate.Image;
 
         return obj;
+    }
+
+    private void MonsterSkillSet(Monster obj)
+    {
+        switch (_monsterTemplate.MonsterRace)
+        {
+            case MonsterRace.Aberration:
+                MonsterExtensions.AberrationSet(obj);
+                break;
+            case MonsterRace.Animal:
+                MonsterExtensions.AnimalSet(obj);
+                break;
+            case MonsterRace.Aquatic:
+                MonsterExtensions.AquaticSet(obj);
+                break;
+            case MonsterRace.Beast:
+                MonsterExtensions.BeastSet(obj);
+                break;
+            case MonsterRace.Celestial:
+                MonsterExtensions.CelestialSet(obj);
+                break;
+            case MonsterRace.Contruct:
+                MonsterExtensions.ContructSet(obj);
+                break;
+            case MonsterRace.Demon:
+                MonsterExtensions.DemonSet(obj);
+                break;
+            case MonsterRace.Dragon:
+                MonsterExtensions.DragonSet(obj);
+                break;
+            case MonsterRace.Elemental:
+                MonsterExtensions.ElementalSet(obj);
+                break;
+            case MonsterRace.Fairy:
+                MonsterExtensions.FairySet(obj);
+                break;
+            case MonsterRace.Fiend:
+                MonsterExtensions.FiendSet(obj);
+                break;
+            case MonsterRace.Fungi:
+                MonsterExtensions.FungiSet(obj);
+                break;
+            case MonsterRace.Gargoyle:
+                MonsterExtensions.GargoyleSet(obj);
+                break;
+            case MonsterRace.Giant:
+                MonsterExtensions.GiantSet(obj);
+                break;
+            case MonsterRace.Goblin:
+                MonsterExtensions.GoblinSet(obj);
+                break;
+            case MonsterRace.Grimlok:
+                MonsterExtensions.GrimlokSet(obj);
+                break;
+            case MonsterRace.Humanoid:
+                MonsterExtensions.HumanoidSet(obj);
+                break;
+            case MonsterRace.Insect:
+                MonsterExtensions.InsectSet(obj);
+                break;
+            case MonsterRace.Kobold:
+                MonsterExtensions.KoboldSet(obj);
+                break;
+            case MonsterRace.Magical:
+                MonsterExtensions.MagicalSet(obj);
+                break;
+            case MonsterRace.Mukul:
+                MonsterExtensions.MukulSet(obj);
+                break;
+            case MonsterRace.Ooze:
+                MonsterExtensions.OozeSet(obj);
+                break;
+            case MonsterRace.Orc:
+                MonsterExtensions.OrcSet(obj);
+                break;
+            case MonsterRace.Plant:
+                MonsterExtensions.PlantSet(obj);
+                break;
+            case MonsterRace.Reptile:
+                MonsterExtensions.ReptileSet(obj);
+                break;
+            case MonsterRace.Robotic:
+                MonsterExtensions.RoboticSet(obj);
+                break;
+            case MonsterRace.Shadow:
+                MonsterExtensions.ShadowSet(obj);
+                break;
+            case MonsterRace.Rodent:
+                MonsterExtensions.RodentSet(obj);
+                break;
+            case MonsterRace.Undead:
+                MonsterExtensions.UndeadSet(obj);
+                break;
+            case MonsterRace.Dummy:
+            case MonsterRace.Inanimate:
+            case MonsterRace.LowerBeing:
+            case MonsterRace.HigherBeing:
+                break;
+        }
+
+        MonsterExtensions.Assails(obj);
+        MonsterExtensions.BasicAbilities(obj);
+        MonsterExtensions.BeagSpells(obj);
+        MonsterExtensions.NormalSpells(obj);
+        MonsterExtensions.MorSpells(obj);
+        MonsterExtensions.ArdSpells(obj);
+        MonsterExtensions.MasterSpells(obj);
+
+        if (_monsterTemplate.SkillScripts != null)
+            foreach (var skillScriptStr in _monsterTemplate.SkillScripts.Where(skillScriptStr => !string.IsNullOrWhiteSpace(skillScriptStr)))
+                LoadSkillScript(skillScriptStr, obj);
+
+        if (_monsterTemplate.AbilityScripts != null)
+            foreach (var abilityScriptStr in _monsterTemplate.AbilityScripts.Where(abilityScriptStr => !string.IsNullOrWhiteSpace(abilityScriptStr)))
+                LoadAbilityScript(abilityScriptStr, obj);
+
+        if (_monsterTemplate.SpellScripts == null) return;
+        foreach (var spellScriptStr in _monsterTemplate.SpellScripts.Where(spellScriptStr => !string.IsNullOrWhiteSpace(spellScriptStr)))
+            LoadSpellScript(spellScriptStr, obj);
     }
 
     private static void MonsterSize(Monster obj)

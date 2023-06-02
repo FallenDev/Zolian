@@ -99,21 +99,9 @@ public static class MonsterStorage
                 var loot = reader["LootType"].ConvertTo<LootQualifer>();
                 var offEle = reader["OffenseElement"].ConvertTo<ElementManager.Element>();
                 var defEle = reader["DefenseElement"].ConvertTo<ElementManager.Element>();
-                var skill1 = reader["AssailOne"].ToString();
-                var skill2 = reader["AssailTwo"].ToString();
-                var skill3 = reader["AssailThree"].ToString();
-                var skill4 = reader["AssailFour"].ToString();
-                var skill5 = reader["AssailFive"].ToString();
-                var spell1 = reader["SpellOne"].ToString();
-                var spell2 = reader["SpellTwo"].ToString();
-                var spell3 = reader["SpellThree"].ToString();
-                var spell4 = reader["SpellFour"].ToString();
-                var spell5 = reader["SpellFive"].ToString();
-                var ability1 = reader["AbilityOne"].ToString();
-                var ability2 = reader["AbilityTwo"].ToString();
-                var ability3 = reader["AbilityThree"].ToString();
-                var ability4 = reader["AbilityFour"].ToString();
-                var ability5 = reader["AbilityFive"].ToString();
+                var skill = reader["SpecialSkill"].ToString();
+                var ability = reader["SpecialAbility"].ToString();
+                var spell = reader["SpecialSpell"].ToString();
 
                 if (drop1 != null)
                     temp.Drops.Add(drop1);
@@ -164,36 +152,12 @@ public static class MonsterStorage
                 temp.SkillScripts = new List<string>();
                 temp.SpellScripts = new List<string>();
                 temp.AbilityScripts = new List<string>();
-                if (skill1 != null)
-                    temp.SkillScripts.Add(skill1);
-                if (skill2 != null)
-                    temp.SkillScripts.Add(skill2);
-                if (skill3 != null)
-                    temp.SkillScripts.Add(skill3);
-                if (skill4 != null)
-                    temp.SkillScripts.Add(skill4);
-                if (skill5 != null)
-                    temp.SkillScripts.Add(skill5);
-                if (spell1 != null)
-                    temp.SpellScripts.Add(spell1);
-                if (spell2 != null)
-                    temp.SpellScripts.Add(spell2);
-                if (spell3 != null)
-                    temp.SpellScripts.Add(spell3);
-                if (spell4 != null)
-                    temp.SpellScripts.Add(spell4);
-                if (spell5 != null)
-                    temp.SpellScripts.Add(spell5);
-                if (ability1 != null)
-                    temp.AbilityScripts.Add(ability1);
-                if (ability2 != null)
-                    temp.AbilityScripts.Add(ability2);
-                if (ability3 != null)
-                    temp.AbilityScripts.Add(ability3);
-                if (ability4 != null)
-                    temp.AbilityScripts.Add(ability4);
-                if (ability5 != null)
-                    temp.AbilityScripts.Add(ability5);
+                if (skill != null)
+                    temp.SkillScripts.Add(skill);
+                if (ability != null)
+                    temp.AbilityScripts.Add(ability);
+                if (spell != null)
+                    temp.SpellScripts.Add(spell);
 
                 if (temp.Name == null) continue;
                 ServerSetup.Instance.GlobalMonsterTemplateCache[temp.Name] = temp;
