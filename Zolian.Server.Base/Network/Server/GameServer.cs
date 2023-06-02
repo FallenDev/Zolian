@@ -626,7 +626,7 @@ public class GameServer : NetworkServer<GameClient>
     private void UpdateClients(TimeSpan elapsedTime)
     {
         var players = Clients.Values;
-        
+
         foreach (var client in players.Where(client => client == null))
         {
             DisconnectAndRemoveClient(client);
@@ -670,9 +670,9 @@ public class GameServer : NetworkServer<GameClient>
         // Cache traps to reduce Select operation on each iteration
         var traps = Trap.Traps.Values;
 
-        Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
+        foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
         {
-            var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID).ToList();
+            var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID);
 
             foreach (var (_, monster) in updateList)
             {
@@ -709,7 +709,7 @@ public class GameServer : NetworkServer<GameClient>
                 monster.UpdateDebuffs(elapsedTime);
                 monster.LastUpdated = DateTime.Now;
             }
-        });
+        }
     }
 
     private static void UpdateKillCounters(Monster monster)
