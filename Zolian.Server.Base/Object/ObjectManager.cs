@@ -1,5 +1,4 @@
-﻿using Darkages.Database;
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 using Darkages.Types;
 
 using Newtonsoft.Json;

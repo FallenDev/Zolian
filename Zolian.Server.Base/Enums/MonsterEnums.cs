@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-using Darkages.Common;
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 
 namespace Darkages.Enums;
 
@@ -87,15 +84,28 @@ public static class MonsterExtensions
     /// </summary>
     public static void Assails(Monster monster)
     {
-        var skillList = new[]
+        var skillList = monster.Template.Level switch
         {
-            "Assail", "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught", "Thrust", "Wallop",
-            "Assault", "Clobber", "Slash", "Bite", "Claw", "Head Butt", "Mule Kick", "Stomp", "Tail Slap"
+            <= 11 => new List<string>
+            {
+                "Assail", "Onslaught", "Assault", "Clobber", "Bite", "Claw"
+            },
+            > 11 and <= 50 => new List<string>
+            {
+                "Assail", "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
+                "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
+            },
+            _ => new List<string>
+            {
+                "Assail", "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
+                "Thrust", "Wallop", "Assault", "Clobber", "Slash", "Bite", "Claw",
+                "Head Butt", "Mule Kick", "Stomp", "Tail Slap"
+            }
         };
 
         var skillCount = Math.Round(monster.Level / 20d) + 2;
         skillCount = Math.Min(skillCount, 12); // Max 12 skills regardless of level
-        var randomIndices = Enumerable.Range(0, skillList.Length).ToList();
+        var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
 
         for (var i = 0; i < skillCount; i++)
         {
@@ -122,17 +132,46 @@ public static class MonsterExtensions
     /// </summary>
     public static void BasicAbilities(Monster monster)
     {
-        var skillList = new[]
+        if (monster.Template.Level <= 11) return;
+
+        var skillList = monster.Template.Level switch
         {
-            "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Kelberoth Strike", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-            "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Crasher", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
-            "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
-            "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
+            <= 25 => new List<string>
+            {
+                "Stab", "Dual Slice", "Wind Slice", "Wind Blade",
+            },
+            > 25 and <= 60 => new List<string>
+            {
+                "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice",
+                "Desolate", "Dual Slice", "Rush", "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance", "Bite'n Shake", "Howl'n Call", "Death From Above",
+                "Pounce", "Roll Over", "Corrosive Touch"
+            },
+            > 60 and <= 75 => new List<string>
+            {
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
+                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge", 
+                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", 
+                "Swallow Whole", "Tentacle", "Corrosive Touch"
+            },
+            > 75 and <= 120 => new List<string>
+            {
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
+                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
+                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
+                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
+            },
+            _ => new List<string>
+            {
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Kelberoth Strike", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
+                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Crasher", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
+                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
+                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
+            }
         };
 
         var skillCount = Math.Round(monster.Level / 30d) + 2;
         skillCount = Math.Min(skillCount, 10); // Max 10 abilities regardless of level
-        var randomIndices = Enumerable.Range(0, skillList.Length).ToList();
+        var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
 
         for (var i = 0; i < skillCount; i++)
         {
@@ -160,8 +199,8 @@ public static class MonsterExtensions
     {
         switch (monster.Template.Level)
         {
-            case < 9:
-            case > 30:
+            case < 11:
+            case > 35:
                 return;
         }
 
@@ -200,8 +239,8 @@ public static class MonsterExtensions
     {
         switch (monster.Template.Level)
         {
-            case <= 30:
-            case > 60:
+            case <= 35:
+            case > 65:
                 return;
         }
 
@@ -240,8 +279,8 @@ public static class MonsterExtensions
     {
         switch (monster.Template.Level)
         {
-            case <= 60:
-            case > 90:
+            case <= 65:
+            case > 95:
                 return;
         }
 
@@ -280,7 +319,7 @@ public static class MonsterExtensions
     {
         switch (monster.Template.Level)
         {
-            case <= 90:
+            case <= 95:
             case > 120:
                 return;
         }

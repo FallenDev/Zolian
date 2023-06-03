@@ -458,7 +458,11 @@ public class Fas_Spiorad : SpellScript
         _spellMethod = new GlobalSpellMethods();
     }
 
-    public override void OnFailed(Sprite sprite, Sprite target) { }
+    public override void OnFailed(Sprite sprite, Sprite target)
+    {
+        if (sprite is Aisling aisling)
+            aisling.Client.SendMessage(0x02, $"Your body is too weak.");
+    }
 
     public override void OnSuccess(Sprite sprite, Sprite target) { }
 
@@ -470,7 +474,16 @@ public class Fas_Spiorad : SpellScript
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+        var healthCheck = (int)(target.MaximumHp * 0.33);
+
+        if (healthCheck > 0)
+        {
+            _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+        }
+        else
+        {
+            OnFailed(sprite, target);
+        }
     }
 }
 

@@ -1,6 +1,5 @@
 ﻿using Darkages.Network;
 using Newtonsoft.Json;
-using Darkages.Database;
 using Darkages.Network.Client;
 using Darkages.Network.Formats;
 
