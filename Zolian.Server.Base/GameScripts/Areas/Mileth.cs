@@ -84,6 +84,13 @@ public class Mileth : AreaScript
                 scriptObj.Value?.OnClick(client.Aisling.Client.Server, client.Aisling.Client);
                 return;
             }
+            case "Succibi Hair":
+            {
+                const string script = "Tormented Voice";
+                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
+                scriptObj.Value?.OnClick(client.Aisling.Client.Server, client.Aisling.Client);
+                return;
+            }
         }
 
         var weapon = client.Aisling.Level switch
