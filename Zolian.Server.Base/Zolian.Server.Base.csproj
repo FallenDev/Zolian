@@ -10,6 +10,7 @@
 		<SelfContained>false</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<TieredPGO>true</TieredPGO>
+		<ErrorReport>send</ErrorReport>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,7 +18,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 		<WarningLevel>4</WarningLevel>
-		<DebugType>full</DebugType>
+		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 	</PropertyGroup>
 
@@ -26,6 +27,7 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 		<WarningLevel>4</WarningLevel>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>
