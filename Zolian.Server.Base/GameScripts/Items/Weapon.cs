@@ -124,8 +124,6 @@ public class Weapon : ItemScript
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        Item.ApplyModifiers(client);
-
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
@@ -173,8 +171,6 @@ public class Weapon : ItemScript
         }
 
         client.Aisling.UsingTwoHanded = false;
-
-        Item.RemoveModifiers(client);
 
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {

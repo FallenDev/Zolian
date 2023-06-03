@@ -29,8 +29,6 @@ public class Boot : ItemScript
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        Item.ApplyModifiers(client);
-
         client.Aisling.BootsImg = (byte)Item.Image;
         client.Aisling.BootColor = (byte)Item.Template.Color;
     }
@@ -44,7 +42,5 @@ public class Boot : ItemScript
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.BootsImg = byte.MinValue;
-
-        Item.RemoveModifiers(client);
     }
 }

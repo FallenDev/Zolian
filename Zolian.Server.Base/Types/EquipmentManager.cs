@@ -222,7 +222,11 @@ public class EquipmentManager
         }
 
         var item = Equipment[displaySlot].Item;
-        if (item != null) item.Equipped = true;
+        if (item != null)
+        {
+            item.Equipped = true;
+            item.ReapplyItemModifiers(Client);
+        }
 
         Client.SendStats(StatusFlags.MultiStat);
         Client.UpdateDisplay();
@@ -252,6 +256,8 @@ public class EquipmentManager
         OnEquipmentRemoved((byte)displaySlot);
         Client.Aisling.Show(Scope.Self, new ServerFormat38((byte)displaySlot));
         Equipment[displaySlot] = null;
+        var item = new Item();
+        item.ReapplyItemModifiers(Client);
     }
 
     private async void AddToAislingDb(ISprite aisling, Item item, int slot)

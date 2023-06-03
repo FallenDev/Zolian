@@ -53,12 +53,12 @@ public interface IItem : ISprite
     void AddToAislingDb(ISprite aisling);
     void DeleteFromAislingDb();
     void DeleteFromAislingDbEquipped();
-    void ApplyModifiers(GameClient client);
+    void ReapplyItemModifiers(GameClient client);
     void RemoveModifiers(GameClient client);
-    void StatModifiersCalc(GameClient client, bool isPositive);
-    void SpellLines(GameClient client, bool isPositive);
-    void ItemVarianceCalc(GameClient client, bool isPositive);
-    void WeaponVarianceCalc(GameClient client, bool isPositive);
-    void QualityVarianceCalc(GameClient client, bool isPositive);
+    void StatModifiersCalc(GameClient client, Item equipment);
+    void SpellLines(GameClient client);
+    void ItemVarianceCalc(GameClient client, Item equipment);
+    void WeaponVarianceCalc(GameClient client, Item equipment);
+    void QualityVarianceCalc(GameClient client, Item equipment);
     void UpdateSpellSlot(GameClient client, byte slot);
 }

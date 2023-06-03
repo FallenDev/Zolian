@@ -769,26 +769,34 @@ public sealed class Item : Sprite, IItem
         }
     }
 
-    public void ApplyModifiers(GameClient client)
+    /// <summary>
+    /// Removes all item bonuses, then reapplies them on item change
+    /// </summary>
+    public void ReapplyItemModifiers(GameClient client)
     {
         if (client?.Aisling == null) return;
 
         try
         {
-            StatModifiersCalc(client, true);
+            // Removes modifiers
+            RemoveModifiers(client);
 
-            if (!Template.Enchantable)
+            // Recalculates Spell Lines
+            SpellLines(client);
+
+            foreach (var equipment in client.Aisling.EquipmentManager.Equipment)
             {
-                client.SendStats(StatusFlags.MultiStat);
-                var armor = client.Aisling.Ac.ToString();
-                var regenNoEnchant = client.Aisling.Regen.ToString();
-                client.SendMessage(0x03, $"{{=sAC{{=c: {{=a{armor}{{=c, {{=sRegen{{=c: {{=a{regenNoEnchant}");
-                return;
-            }
+                if (equipment.Value == null) continue;
 
-            ItemVarianceCalc(client, true);
-            WeaponVarianceCalc(client, true);
-            QualityVarianceCalc(client, true);
+                // Reapplies Stat modifiers
+                StatModifiersCalc(client, equipment.Value.Item);
+
+                if (!equipment.Value.Item.Template.Enchantable) continue;
+
+                ItemVarianceCalc(client, equipment.Value.Item);
+                WeaponVarianceCalc(client, equipment.Value.Item);
+                QualityVarianceCalc(client, equipment.Value.Item);
+            }
         }
         catch (Exception e)
         {
@@ -797,7 +805,6 @@ public sealed class Item : Sprite, IItem
             Crashes.TrackError(e);
         }
 
-        client.SendStats(StatusFlags.MultiStat);
         var ac = client.Aisling.Ac.ToString();
         var regen = client.Aisling.Regen.ToString();
         client.SendMessage(0x03, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
@@ -806,760 +813,188 @@ public sealed class Item : Sprite, IItem
     public void RemoveModifiers(GameClient client)
     {
         if (client?.Aisling == null) return;
+        client.Aisling.BonusAc = 0;
+        client.Aisling.BonusMr = 0;
+        client.Aisling.BonusRegen = 0;
 
-        try
+        client.Aisling.BonusHp = 0;
+        client.Aisling.BonusMp = 0;
+
+        client.Aisling.BonusStr = 0;
+        client.Aisling.BonusInt = 0;
+        client.Aisling.BonusWis = 0;
+        client.Aisling.BonusCon = 0;
+        client.Aisling.BonusDex = 0;
+
+        client.Aisling.BonusHit = 0;
+        client.Aisling.BonusDmg = 0;
+
+        client.Aisling.Spikes = 0;
+        client.Aisling.Bleeding = 0;
+        client.Aisling.Rending = 0;
+        client.Aisling.Aegis = 0;
+        client.Aisling.Reaping = 0;
+        client.Aisling.Vampirism = 0;
+        client.Aisling.Haste = 0;
+        client.Aisling.Gust = 0;
+        client.Aisling.Quake = 0;
+        client.Aisling.Rain = 0;
+        client.Aisling.Flame = 0;
+        client.Aisling.Dusk = 0;
+        client.Aisling.Dawn = 0;
+    }
+
+    public void StatModifiersCalc(GameClient client, Item equipment)
+    {
+        client.Aisling.BonusAc += equipment.Template.AcModifer;
+        client.Aisling.BonusMr += (byte)equipment.Template.MrModifer;
+        client.Aisling.BonusHp += equipment.Template.HealthModifer;
+        client.Aisling.BonusMp += equipment.Template.ManaModifer;
+        client.Aisling.BonusRegen += equipment.Template.RegenModifer;
+        client.Aisling.BonusStr += equipment.Template.StrModifer;
+        client.Aisling.BonusInt += equipment.Template.IntModifer;
+        client.Aisling.BonusWis += equipment.Template.WisModifer;
+        client.Aisling.BonusCon += equipment.Template.ConModifer;
+        client.Aisling.BonusDex += equipment.Template.DexModifer;
+        client.Aisling.BonusHit += (byte)equipment.Template.HitModifer;
+        client.Aisling.BonusDmg += (byte)equipment.Template.DmgModifer;
+    }
+
+    public void SpellLines(GameClient client)
+    {
+        for (var i = 0; i < client.Aisling.SpellBook.Spells.Count; i++)
         {
-            StatModifiersCalc(client, false);
+            var spell = client.Aisling.SpellBook.FindInSlot(i);
 
-            if (!Template.Enchantable)
+            if (spell?.Template == null) continue;
+            spell.Lines = spell.Template.BaseLines;
+
+            // Calculate Spell lines from off-hand first
+            if (client.Aisling.EquipmentManager.Equipment[3]?.Item != null)
             {
-                client.SendStats(StatusFlags.MultiStat);
-                return;
+                var offHand = client.Aisling.EquipmentManager.Equipment[3].Item;
+                var op = offHand.Template.IsPositiveSpellLines;
+
+                if (op != 0)
+                {
+                    switch (op)
+                    {
+                        case 1:
+                            spell.Lines += offHand.Template.SpellLinesModifier;
+                            break;
+                        case 2:
+                            spell.Lines -= offHand.Template.SpellLinesModifier;
+                            break;
+                    }
+                }
             }
 
-            ItemVarianceCalc(client, false);
-            WeaponVarianceCalc(client, false);
-            QualityVarianceCalc(client, false);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-
-        client.SendStats(StatusFlags.MultiStat);
-    }
-
-    public void StatModifiersCalc(GameClient client, bool isPositive)
-    {
-        if (Template.EquipmentSlot is 1 or 3)
-            SpellLines(client, isPositive);
-
-        switch (isPositive)
-        {
-            case true:
+            // Calculate Spell lines from weapon second
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item != null)
             {
-                if (Template.AcModifer != 0)
-                {
-                    client.Aisling.BonusAc += Template.AcModifer;
-                    client.SendStats(StatusFlags.StructD);
-                }
+                var weapon = client.Aisling.EquipmentManager.Equipment[1].Item;
+                var op = weapon.Template.IsPositiveSpellLines;
 
-                if (Template.MrModifer != 0)
+                if (op != 0)
                 {
-                    client.Aisling.BonusMr += (byte)Template.MrModifer;
-                }
-
-                if (Template.HealthModifer != 0)
-                {
-                    client.Aisling.BonusHp += Template.HealthModifer;
-                }
-
-                if (Template.ManaModifer != 0)
-                {
-                    client.Aisling.BonusMp += Template.ManaModifer;
-                }
-
-                if (Template.RegenModifer != 0)
-                {
-                    client.Aisling.BonusRegen += Template.RegenModifer;
-                }
-
-                if (Template.StrModifer != 0)
-                {
-                    client.Aisling.BonusStr += Template.StrModifer;
-                }
-
-                if (Template.IntModifer != 0)
-                {
-                    client.Aisling.BonusInt += Template.IntModifer;
-                }
-
-                if (Template.WisModifer != 0)
-                {
-                    client.Aisling.BonusWis += Template.WisModifer;
-                }
-
-                if (Template.ConModifer != 0)
-                {
-                    client.Aisling.BonusCon += Template.ConModifer;
-                }
-
-                if (Template.DexModifer != 0)
-                {
-                    client.Aisling.BonusDex += Template.DexModifer;
-                }
-
-                if (Template.HitModifer != 0)
-                {
-                    client.Aisling.BonusHit += (byte)Template.HitModifer;
-                }
-
-                if (Template.DmgModifer != 0)
-                {
-                    client.Aisling.BonusDmg += (byte)Template.DmgModifer;
+                    switch (op)
+                    {
+                        case 1:
+                            spell.Lines += weapon.Template.SpellLinesModifier;
+                            break;
+                        case 2:
+                            spell.Lines -= weapon.Template.SpellLinesModifier;
+                            break;
+                    }
                 }
             }
-                break;
-            case false:
-            {
-                if (Template.AcModifer != 0)
-                {
-                    client.Aisling.BonusAc -= Template.AcModifer;
-                    client.SendStats(StatusFlags.StructD);
-                }
 
-                if (Template.MrModifer != 0)
-                {
-                    client.Aisling.BonusMr -= (byte)Template.MrModifer;
-                }
+            if (spell.Lines > spell.Template.MaxLines)
+                spell.Lines = spell.Template.MaxLines;
 
-                if (Template.HealthModifer != 0)
-                {
-                    client.Aisling.BonusHp -= Template.HealthModifer;
-                }
-
-                if (Template.ManaModifer != 0)
-                {
-                    client.Aisling.BonusMp -= Template.ManaModifer;
-                }
-
-                if (Template.RegenModifer != 0)
-                {
-                    client.Aisling.BonusRegen -= Template.RegenModifer;
-                }
-
-                if (Template.StrModifer != 0)
-                {
-                    client.Aisling.BonusStr -= Template.StrModifer;
-                }
-
-                if (Template.IntModifer != 0)
-                {
-                    client.Aisling.BonusInt -= Template.IntModifer;
-                }
-
-                if (Template.WisModifer != 0)
-                {
-                    client.Aisling.BonusWis -= Template.WisModifer;
-                }
-
-                if (Template.ConModifer != 0)
-                {
-                    client.Aisling.BonusCon -= Template.ConModifer;
-                }
-
-                if (Template.DexModifer != 0)
-                {
-                    client.Aisling.BonusDex -= Template.DexModifer;
-                }
-
-                if (Template.HitModifer != 0)
-                {
-                    client.Aisling.BonusHit -= (byte)Template.HitModifer;
-                }
-
-                if (Template.DmgModifer != 0)
-                {
-                    client.Aisling.BonusDmg -= (byte)Template.DmgModifer;
-                }
-            }
-                break;
+            UpdateSpellSlot(client, spell.Slot);
         }
     }
 
-    public void SpellLines(GameClient client, bool isPositive)
+    public void ItemVarianceCalc(GameClient client, Item equipment)
     {
-        switch (isPositive)
+        Dictionary<Variance, Action<GameClient>> varianceActions = new()
         {
-            case true:
-                for (var i = 0; i < client.Aisling.SpellBook.Spells.Count; i++)
-                {
-                    var spell = client.Aisling.SpellBook.FindInSlot(i);
+            {Variance.Embunement, c => c.Aisling.BonusHit += 5},
+            {Variance.Blessing, c => c.Aisling.BonusDmg += 2},
+            {Variance.Mana, c => c.Aisling.BonusMp += 250},
+            {Variance.Gramail, c => c.Aisling.BonusMr += 10},
+            {Variance.Deoch, c => { c.Aisling.BonusRegen += 10; c.Aisling.BonusAc -= 2; }},
+            {Variance.Ceannlaidir, c => c.Aisling.BonusStr += 1},
+            {Variance.Cail, c => c.Aisling.BonusCon += 1},
+            {Variance.Fiosachd, c => c.Aisling.BonusDex += 1},
+            {Variance.Glioca, c => c.Aisling.BonusWis += 1},
+            {Variance.Luathas, c => c.Aisling.BonusInt += 1},
+            {Variance.Sgrios, c => { c.Aisling.BonusStr += 2; c.Aisling.BonusAc += 1; c.Aisling.BonusRegen -= 10; }},
+            {Variance.Reinforcement, c => { c.Aisling.BonusAc += 1; c.Aisling.BonusHp += 250; }},
+            {Variance.Spikes, c => c.Aisling.Spikes += 1}
+        };
 
-                    if (spell?.Template == null) continue;
-                    spell.Lines = spell.Template.BaseLines;
-
-                    // Calculate Spell lines from off-hand first
-                    if (client.Aisling.EquipmentManager.Equipment[3]?.Item != null)
-                    {
-                        var offHand = client.Aisling.EquipmentManager.Equipment[3].Item;
-                        var op = offHand.Template.IsPositiveSpellLines;
-
-                        if (op != 0)
-                        {
-                            switch (op)
-                            {
-                                case 1:
-                                    spell.Lines += Template.SpellLinesModifier;
-                                    break;
-                                case 2:
-                                    spell.Lines -= Template.SpellLinesModifier;
-                                    break;
-                            }
-                        }
-                    }
-
-                    // Calculate Spell lines from weapon second
-                    if (client.Aisling.EquipmentManager.Equipment[1]?.Item != null)
-                    {
-                        var weapon = client.Aisling.EquipmentManager.Equipment[1].Item;
-                        var op = weapon.Template.IsPositiveSpellLines;
-
-                        if (op != 0)
-                        {
-                            switch (op)
-                            {
-                                case 1:
-                                    spell.Lines += Template.SpellLinesModifier;
-                                    break;
-                                case 2:
-                                    spell.Lines -= Template.SpellLinesModifier;
-                                    break;
-                            }
-                        }
-                    }
-
-                    if (spell.Lines > spell.Template.MaxLines)
-                        spell.Lines = spell.Template.MaxLines;
-
-                    UpdateSpellSlot(client, spell.Slot);
-                }
-                break;
-            case false:
-                for (var i = 0; i < client.Aisling.SpellBook.Spells.Count; i++)
-                {
-                    var spell = client.Aisling.SpellBook.FindInSlot(i);
-
-                    if (spell?.Template == null) continue;
-                    spell.Lines = spell.Template.BaseLines;
-
-                    // Calculate Spell lines from off-hand first
-                    if (client.Aisling.EquipmentManager.Equipment[3]?.Item != null)
-                    {
-                        var offHand = client.Aisling.EquipmentManager.Equipment[3].Item;
-
-                        if (offHand.ItemId != ItemId)
-                        {
-                            var op = offHand.Template.IsPositiveSpellLines;
-
-                            if (op != 0)
-                            {
-                                switch (op)
-                                {
-                                    case 1:
-                                        spell.Lines += Template.SpellLinesModifier;
-                                        break;
-                                    case 2:
-                                        spell.Lines -= Template.SpellLinesModifier;
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
-                    // Calculate Spell lines from weapon second
-                    if (client.Aisling.EquipmentManager.Equipment[1]?.Item != null)
-                    {
-                        var weapon = client.Aisling.EquipmentManager.Equipment[1].Item;
-
-                        if (weapon.ItemId != ItemId)
-                        {
-                            var op = weapon.Template.IsPositiveSpellLines;
-
-                            if (op != 0)
-                            {
-                                switch (op)
-                                {
-                                    case 1:
-                                        spell.Lines += Template.SpellLinesModifier;
-                                        break;
-                                    case 2:
-                                        spell.Lines -= Template.SpellLinesModifier;
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (spell.Lines > spell.Template.MaxLines)
-                        spell.Lines = spell.Template.MaxLines;
-
-                    UpdateSpellSlot(client, spell.Slot);
-                }
-                break;
+        if (varianceActions.TryGetValue(equipment.ItemVariance, out var action))
+        {
+            action(client);
         }
     }
 
-    public void ItemVarianceCalc(GameClient client, bool isPositive)
+    public void WeaponVarianceCalc(GameClient client, Item equipment)
     {
-        switch (isPositive)
+        Dictionary<WeaponVariance, Action<GameClient>> varianceActions = new()
         {
-            case true:
-                switch (ItemVariance)
-                {
-                    case Variance.None:
-                        break;
-                    case Variance.Embunement:
-                        client.Aisling.BonusHit += 5;
-                        break;
-                    case Variance.Blessing:
-                        client.Aisling.BonusDmg += 2;
-                        break;
-                    case Variance.Mana:
-                        client.Aisling.BonusMp += 250;
-                        break;
-                    case Variance.Gramail:
-                        client.Aisling.BonusMr += 10;
-                        break;
-                    case Variance.Deoch:
-                        client.Aisling.BonusRegen += 10;
-                        client.Aisling.BonusAc -= 2;
-                        break;
-                    case Variance.Ceannlaidir:
-                        client.Aisling.BonusStr += 1;
-                        break;
-                    case Variance.Cail:
-                        client.Aisling.BonusCon += 1;
-                        break;
-                    case Variance.Fiosachd:
-                        client.Aisling.BonusDex += 1;
-                        break;
-                    case Variance.Glioca:
-                        client.Aisling.BonusWis += 1;
-                        break;
-                    case Variance.Luathas:
-                        client.Aisling.BonusInt += 1;
-                        break;
-                    case Variance.Sgrios:
-                        client.Aisling.BonusStr += 2;
-                        client.Aisling.BonusAc += 1;
-                        client.Aisling.BonusRegen -= 10;
-                        break;
-                    case Variance.Reinforcement:
-                        client.Aisling.BonusAc += 1;
-                        client.Aisling.BonusHp += 250;
-                        break;
-                    case Variance.Spikes:
-                        client.Aisling.Spikes += 1;
-                        break;
-                }
-                break;
-            case false:
-                switch (ItemVariance)
-                {
-                    case Variance.None:
-                        break;
-                    case Variance.Embunement:
-                        client.Aisling.BonusHit -= 5;
-                        break;
-                    case Variance.Blessing:
-                        client.Aisling.BonusDmg -= 2;
-                        break;
-                    case Variance.Mana:
-                        client.Aisling.BonusMp -= 250;
-                        break;
-                    case Variance.Gramail:
-                        client.Aisling.BonusMr -= 10;
-                        break;
-                    case Variance.Deoch:
-                        client.Aisling.BonusRegen -= 10;
-                        client.Aisling.BonusAc += 2;
-                        break;
-                    case Variance.Ceannlaidir:
-                        client.Aisling.BonusStr -= 1;
-                        break;
-                    case Variance.Cail:
-                        client.Aisling.BonusCon -= 1;
-                        break;
-                    case Variance.Fiosachd:
-                        client.Aisling.BonusDex -= 1;
-                        break;
-                    case Variance.Glioca:
-                        client.Aisling.BonusWis -= 1;
-                        break;
-                    case Variance.Luathas:
-                        client.Aisling.BonusInt -= 1;
-                        break;
-                    case Variance.Sgrios:
-                        client.Aisling.BonusStr -= 2;
-                        client.Aisling.BonusAc -= 1;
-                        client.Aisling.BonusRegen += 10;
-                        break;
-                    case Variance.Reinforcement:
-                        client.Aisling.BonusAc -= 1;
-                        client.Aisling.BonusHp -= 250;
-                        break;
-                    case Variance.Spikes:
-                        client.Aisling.Spikes -= 1;
-                        break;
-                }
-                break;
+            {WeaponVariance.Bleeding, c => c.Aisling.Bleeding += 1},
+            {WeaponVariance.Rending, c => c.Aisling.Rending += 1},
+            {WeaponVariance.Aegis, c => c.Aisling.Aegis += 1},
+            {WeaponVariance.Reaping, c => c.Aisling.Reaping += 1},
+            {WeaponVariance.Vampirism, c => c.Aisling.Vampirism += 1},
+            {WeaponVariance.Haste, c => c.Aisling.Haste += 1},
+            {WeaponVariance.Gust, c => c.Aisling.Gust += 1},
+            {WeaponVariance.Quake, c => c.Aisling.Quake += 1},
+            {WeaponVariance.Rain, c => c.Aisling.Rain += 1},
+            {WeaponVariance.Flame, c => c.Aisling.Flame += 1},
+            {WeaponVariance.Dusk, c => c.Aisling.Dusk += 1},
+            {WeaponVariance.Dawn, c => c.Aisling.Dawn += 1},
+        };
+
+        if (varianceActions.TryGetValue(equipment.WeapVariance, out var action))
+        {
+            action(client);
         }
     }
 
-    public void WeaponVarianceCalc(GameClient client, bool isPositive)
+    public void QualityVarianceCalc(GameClient client, Item equipment)
     {
-        switch (isPositive)
+        Dictionary<Quality, QualityBonus> qualityBonuses = new()
         {
-            case true:
-                switch (WeapVariance)
-                {
-                    case WeaponVariance.None:
-                        break;
-                    case WeaponVariance.Bleeding:
-                        client.Aisling.Bleeding += 1;
-                        break;
-                    case WeaponVariance.Rending:
-                        client.Aisling.Rending += 1;
-                        break;
-                    case WeaponVariance.Aegis:
-                        client.Aisling.Aegis += 1;
-                        break;
-                    case WeaponVariance.Reaping:
-                        client.Aisling.Reaping += 1;
-                        break;
-                    case WeaponVariance.Vampirism:
-                        client.Aisling.Vampirism += 1;
-                        break;
-                    case WeaponVariance.Haste:
-                        client.Aisling.Haste += 1;
-                        break;
-                    case WeaponVariance.Gust:
-                        client.Aisling.Gust += 1;
-                        break;
-                    case WeaponVariance.Quake:
-                        client.Aisling.Quake += 1;
-                        break;
-                    case WeaponVariance.Rain:
-                        client.Aisling.Rain += 1;
-                        break;
-                    case WeaponVariance.Flame:
-                        client.Aisling.Flame += 1;
-                        break;
-                    case WeaponVariance.Dusk:
-                        client.Aisling.Dusk += 1;
-                        break;
-                    case WeaponVariance.Dawn:
-                        client.Aisling.Dawn += 1;
-                        break;
-                }
-                break;
-            case false:
-                switch (WeapVariance)
-                {
-                    case WeaponVariance.None:
-                        break;
-                    case WeaponVariance.Bleeding:
-                        client.Aisling.Bleeding -= 1;
-                        break;
-                    case WeaponVariance.Rending:
-                        client.Aisling.Rending -= 1;
-                        break;
-                    case WeaponVariance.Aegis:
-                        client.Aisling.Aegis -= 1;
-                        break;
-                    case WeaponVariance.Reaping:
-                        client.Aisling.Reaping -= 1;
-                        break;
-                    case WeaponVariance.Vampirism:
-                        client.Aisling.Vampirism -= 1;
-                        break;
-                    case WeaponVariance.Haste:
-                        client.Aisling.Haste -= 1;
-                        break;
-                    case WeaponVariance.Gust:
-                        client.Aisling.Gust -= 1;
-                        break;
-                    case WeaponVariance.Quake:
-                        client.Aisling.Quake -= 1;
-                        break;
-                    case WeaponVariance.Rain:
-                        client.Aisling.Rain -= 1;
-                        break;
-                    case WeaponVariance.Flame:
-                        client.Aisling.Flame -= 1;
-                        break;
-                    case WeaponVariance.Dusk:
-                        client.Aisling.Dusk -= 1;
-                        break;
-                    case WeaponVariance.Dawn:
-                        client.Aisling.Dawn -= 1;
-                        break;
-                }
-                break;
-        }
+            {Quality.Damaged, new QualityBonus(0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0)},
+            {Quality.Common, new QualityBonus(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
+            {Quality.Uncommon, new QualityBonus(1, 1, 1, 1, 1, 1, 0, 0, 0, 100, 0, 0)},
+            {Quality.Rare, new QualityBonus(1, 1, 1, 1, 1, 2, 5, 1, 5, 500, 100, 0)},
+            {Quality.Epic, new QualityBonus(2, 2, 2, 2, 2, 2, 10, 1, 5, 750, 250, 5)},
+            {Quality.Legendary, new QualityBonus(3, 3, 3, 3, 3, 15, 20, 2, 10, 1000, 500, 10)},
+            {Quality.Forsaken, new QualityBonus(4, 4, 4, 4, 4, 20, 25, 3, 10, 1500, 1000, 20)},
+            {Quality.Mythic, new QualityBonus(5, 5, 5, 5, 5, 25, 30, 5, 20, 2500, 2000, 40)}
+        };
+
+        if (!qualityBonuses.TryGetValue(equipment.ItemQuality, out var bonus)) return;
+
+        client.Aisling.BonusStr += bonus.Str;
+        client.Aisling.BonusInt += bonus.Int;
+        client.Aisling.BonusWis += bonus.Wis;
+        client.Aisling.BonusCon += bonus.Con;
+        client.Aisling.BonusDex += bonus.Dex;
+        client.Aisling.BonusDmg += (byte)bonus.Dmg;
+        client.Aisling.BonusHit += (byte)bonus.Hit;
+        client.Aisling.BonusAc += bonus.Ac;
+        client.Aisling.BonusMr += (byte)bonus.Mr;
+        client.Aisling.BonusHp += bonus.Hp;
+        client.Aisling.BonusMp += bonus.Mp;
+        client.Aisling.BonusRegen += bonus.Regen;
     }
 
-    public void QualityVarianceCalc(GameClient client, bool isPositive)
-    {
-        switch (isPositive)
-        {
-            case true:
-                switch (ItemQuality)
-                {
-                    case Quality.Damaged:
-                        client.Aisling.BonusStr += 0;
-                        client.Aisling.BonusInt += 0;
-                        client.Aisling.BonusWis += 0;
-                        client.Aisling.BonusCon += 0;
-                        client.Aisling.BonusDex += 0;
-                        client.Aisling.BonusDmg += 0;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc -= 2;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 0;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Common:
-                        client.Aisling.BonusStr += 0;
-                        client.Aisling.BonusInt += 0;
-                        client.Aisling.BonusWis += 0;
-                        client.Aisling.BonusCon += 0;
-                        client.Aisling.BonusDex += 0;
-                        client.Aisling.BonusDmg += 0;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc += 0;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 0;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Uncommon:
-                        client.Aisling.BonusStr += 1;
-                        client.Aisling.BonusInt += 1;
-                        client.Aisling.BonusWis += 1;
-                        client.Aisling.BonusCon += 1;
-                        client.Aisling.BonusDex += 1;
-                        client.Aisling.BonusDmg += 1;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc += 0;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 100;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Rare:
-                        client.Aisling.BonusStr += 1;
-                        client.Aisling.BonusInt += 1;
-                        client.Aisling.BonusWis += 1;
-                        client.Aisling.BonusCon += 1;
-                        client.Aisling.BonusDex += 1;
-                        client.Aisling.BonusDmg += 2;
-                        client.Aisling.BonusHit += 5;
-                        client.Aisling.BonusAc += 1;
-                        client.Aisling.BonusMr += 5;
-                        client.Aisling.BonusHp += 500;
-                        client.Aisling.BonusMp += 100;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Epic:
-                        client.Aisling.BonusStr += 2;
-                        client.Aisling.BonusInt += 2;
-                        client.Aisling.BonusWis += 2;
-                        client.Aisling.BonusCon += 2;
-                        client.Aisling.BonusDex += 2;
-                        client.Aisling.BonusDmg += 2;
-                        client.Aisling.BonusHit += 10;
-                        client.Aisling.BonusAc += 1;
-                        client.Aisling.BonusMr += 5;
-                        client.Aisling.BonusHp += 750;
-                        client.Aisling.BonusMp += 250;
-                        client.Aisling.BonusRegen += 5;
-                        break;
-                    case Quality.Legendary:
-                        client.Aisling.BonusStr += 3;
-                        client.Aisling.BonusInt += 3;
-                        client.Aisling.BonusWis += 3;
-                        client.Aisling.BonusCon += 3;
-                        client.Aisling.BonusDex += 3;
-                        client.Aisling.BonusDmg += 15;
-                        client.Aisling.BonusHit += 20;
-                        client.Aisling.BonusAc += 2;
-                        client.Aisling.BonusMr += 10;
-                        client.Aisling.BonusHp += 1000;
-                        client.Aisling.BonusMp += 500;
-                        client.Aisling.BonusRegen += 10;
-                        break;
-                    case Quality.Forsaken:
-                        client.Aisling.BonusStr += 4;
-                        client.Aisling.BonusInt += 4;
-                        client.Aisling.BonusWis += 4;
-                        client.Aisling.BonusCon += 4;
-                        client.Aisling.BonusDex += 4;
-                        client.Aisling.BonusDmg += 20;
-                        client.Aisling.BonusHit += 25;
-                        client.Aisling.BonusAc += 3;
-                        client.Aisling.BonusMr += 10;
-                        client.Aisling.BonusHp += 1500;
-                        client.Aisling.BonusMp += 1000;
-                        client.Aisling.BonusRegen += 20;
-                        break;
-                    case Quality.Mythic:
-                        client.Aisling.BonusStr += 5;
-                        client.Aisling.BonusInt += 5;
-                        client.Aisling.BonusWis += 5;
-                        client.Aisling.BonusCon += 5;
-                        client.Aisling.BonusDex += 5;
-                        client.Aisling.BonusDmg += 25;
-                        client.Aisling.BonusHit += 30;
-                        client.Aisling.BonusAc += 5;
-                        client.Aisling.BonusMr += 20;
-                        client.Aisling.BonusHp += 2500;
-                        client.Aisling.BonusMp += 2000;
-                        client.Aisling.BonusRegen += 40;
-                        break;
-                    default:
-                        client.Aisling.BonusStr += 0;
-                        client.Aisling.BonusInt += 0;
-                        client.Aisling.BonusWis += 0;
-                        client.Aisling.BonusCon += 0;
-                        client.Aisling.BonusDex += 0;
-                        client.Aisling.BonusDmg += 0;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc += 0;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 0;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                }
-                break;
-            case false:
-                switch (ItemQuality)
-                {
-                    case Quality.Damaged:
-                        client.Aisling.BonusStr += 0;
-                        client.Aisling.BonusInt += 0;
-                        client.Aisling.BonusWis += 0;
-                        client.Aisling.BonusCon += 0;
-                        client.Aisling.BonusDex += 0;
-                        client.Aisling.BonusDmg += 0;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc += 2;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 0;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Common:
-                        client.Aisling.BonusStr += 0;
-                        client.Aisling.BonusInt += 0;
-                        client.Aisling.BonusWis += 0;
-                        client.Aisling.BonusCon += 0;
-                        client.Aisling.BonusDex += 0;
-                        client.Aisling.BonusDmg += 0;
-                        client.Aisling.BonusHit += 0;
-                        client.Aisling.BonusAc += 0;
-                        client.Aisling.BonusMr += 0;
-                        client.Aisling.BonusHp += 0;
-                        client.Aisling.BonusMp += 0;
-                        client.Aisling.BonusRegen += 0;
-                        break;
-                    case Quality.Uncommon:
-                        client.Aisling.BonusStr -= 1;
-                        client.Aisling.BonusInt -= 1;
-                        client.Aisling.BonusWis -= 1;
-                        client.Aisling.BonusCon -= 1;
-                        client.Aisling.BonusDex -= 1;
-                        client.Aisling.BonusDmg -= 1;
-                        client.Aisling.BonusHit -= 0;
-                        client.Aisling.BonusAc -= 0;
-                        client.Aisling.BonusMr -= 0;
-                        client.Aisling.BonusHp -= 100;
-                        client.Aisling.BonusMp -= 0;
-                        client.Aisling.BonusRegen -= 0;
-                        break;
-                    case Quality.Rare:
-                        client.Aisling.BonusStr -= 1;
-                        client.Aisling.BonusInt -= 1;
-                        client.Aisling.BonusWis -= 1;
-                        client.Aisling.BonusCon -= 1;
-                        client.Aisling.BonusDex -= 1;
-                        client.Aisling.BonusDmg -= 2;
-                        client.Aisling.BonusHit -= 5;
-                        client.Aisling.BonusAc -= 1;
-                        client.Aisling.BonusMr -= 5;
-                        client.Aisling.BonusHp -= 500;
-                        client.Aisling.BonusMp -= 100;
-                        client.Aisling.BonusRegen -= 0;
-                        break;
-                    case Quality.Epic:
-                        client.Aisling.BonusStr -= 2;
-                        client.Aisling.BonusInt -= 2;
-                        client.Aisling.BonusWis -= 2;
-                        client.Aisling.BonusCon -= 2;
-                        client.Aisling.BonusDex -= 2;
-                        client.Aisling.BonusDmg -= 2;
-                        client.Aisling.BonusHit -= 10;
-                        client.Aisling.BonusAc -= 1;
-                        client.Aisling.BonusMr -= 5;
-                        client.Aisling.BonusHp -= 750;
-                        client.Aisling.BonusMp -= 250;
-                        client.Aisling.BonusRegen -= 5;
-                        break;
-                    case Quality.Legendary:
-                        client.Aisling.BonusStr -= 3;
-                        client.Aisling.BonusInt -= 3;
-                        client.Aisling.BonusWis -= 3;
-                        client.Aisling.BonusCon -= 3;
-                        client.Aisling.BonusDex -= 3;
-                        client.Aisling.BonusDmg -= 15;
-                        client.Aisling.BonusHit -= 20;
-                        client.Aisling.BonusAc -= 2;
-                        client.Aisling.BonusMr -= 10;
-                        client.Aisling.BonusHp -= 1000;
-                        client.Aisling.BonusMp -= 500;
-                        client.Aisling.BonusRegen -= 10;
-                        break;
-                    case Quality.Forsaken:
-                        client.Aisling.BonusStr -= 4;
-                        client.Aisling.BonusInt -= 4;
-                        client.Aisling.BonusWis -= 4;
-                        client.Aisling.BonusCon -= 4;
-                        client.Aisling.BonusDex -= 4;
-                        client.Aisling.BonusDmg -= 20;
-                        client.Aisling.BonusHit -= 25;
-                        client.Aisling.BonusAc -= 3;
-                        client.Aisling.BonusMr -= 10;
-                        client.Aisling.BonusHp -= 1500;
-                        client.Aisling.BonusMp -= 1000;
-                        client.Aisling.BonusRegen -= 20;
-                        break;
-                    case Quality.Mythic:
-                        client.Aisling.BonusStr -= 5;
-                        client.Aisling.BonusInt -= 5;
-                        client.Aisling.BonusWis -= 5;
-                        client.Aisling.BonusCon -= 5;
-                        client.Aisling.BonusDex -= 5;
-                        client.Aisling.BonusDmg -= 25;
-                        client.Aisling.BonusHit -= 30;
-                        client.Aisling.BonusAc -= 5;
-                        client.Aisling.BonusMr -= 20;
-                        client.Aisling.BonusHp -= 2500;
-                        client.Aisling.BonusMp -= 2000;
-                        client.Aisling.BonusRegen -= 40;
-                        break;
-                    default:
-                        client.Aisling.BonusStr -= 0;
-                        client.Aisling.BonusInt -= 0;
-                        client.Aisling.BonusWis -= 0;
-                        client.Aisling.BonusCon -= 0;
-                        client.Aisling.BonusDex -= 0;
-                        client.Aisling.BonusDmg -= 0;
-                        client.Aisling.BonusHit -= 0;
-                        client.Aisling.BonusAc -= 0;
-                        client.Aisling.BonusMr -= 0;
-                        client.Aisling.BonusHp -= 0;
-                        client.Aisling.BonusMp -= 0;
-                        client.Aisling.BonusRegen -= 0;
-                        break;
-                }
-                break;
-        }
-    }
 
     public void UpdateSpellSlot(GameClient client, byte slot)
     {
@@ -1570,5 +1005,37 @@ public sealed class Item : Sprite, IItem
         a.Slot = slot;
         client.Aisling.SpellBook.Set(a);
         client.Send(new ServerFormat17(a));
+    }
+}
+
+public class QualityBonus
+{
+    public int Str { get; }
+    public int Int { get; }
+    public int Wis { get; }
+    public int Con { get; }
+    public int Dex { get; }
+    public int Dmg { get; }
+    public int Hit { get; }
+    public int Ac { get; }
+    public int Mr { get; }
+    public int Hp { get; }
+    public int Mp { get; }
+    public int Regen { get; }
+
+    public QualityBonus(int _str, int _int, int _wis, int _con, int _dex, int dmg, int hit, int ac, int mr, int hp, int mp, int regen)
+    {
+        Str = _str;
+        Int = _int;
+        Wis = _wis;
+        Con = _con;
+        Dex = _dex;
+        Dmg = dmg;
+        Hit = hit;
+        Ac = ac;
+        Mr = mr;
+        Hp = hp;
+        Mp = mp;
+        Regen = regen;
     }
 }

@@ -80,8 +80,6 @@ public class Shield : ItemScript
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        Item.ApplyModifiers(client);
-
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
@@ -120,8 +118,6 @@ public class Shield : ItemScript
             aisling.SecondaryOffensiveElement = ElementManager.Element.None;
             aisling.SecondaryDefensiveElement = ElementManager.Element.None;
         }
-
-        Item.RemoveModifiers(client);
 
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {

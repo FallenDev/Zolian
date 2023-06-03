@@ -29,8 +29,6 @@ public class Armor : ItemScript
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        Item.ApplyModifiers(client);
-
         client.Aisling.Pants = (byte)(Item.Template.HasPants ? 1 : 0);
         client.Aisling.ArmorImg = Item.Image;
     }
@@ -45,7 +43,5 @@ public class Armor : ItemScript
 
         client.Aisling.Pants = byte.MinValue;
         client.Aisling.ArmorImg = ushort.MinValue;
-
-        Item.RemoveModifiers(client);
     }
 }

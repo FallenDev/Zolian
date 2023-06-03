@@ -9,16 +9,7 @@ public class Earring : ItemScript
 {
     public Earring(Item item) : base(item) { }
 
-    public override void Equipped(Sprite sprite, byte displaySlot)
-    {
-        if (sprite == null) return;
-        if (Item?.Template == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
-
-        Item.ApplyModifiers(client);
-    }
+    public override void Equipped(Sprite sprite, byte displaySlot) { }
 
     public override void OnUse(Sprite sprite, byte slot)
     {
@@ -32,14 +23,5 @@ public class Earring : ItemScript
             client.Aisling.EquipmentManager.Add(Item.Template.EquipmentSlot, Item);
     }
 
-    public override void UnEquipped(Sprite sprite, byte displaySlot)
-    {
-        if (sprite == null) return;
-        if (Item?.Template == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
-
-        Item.RemoveModifiers(client);
-    }
+    public override void UnEquipped(Sprite sprite, byte displaySlot) { }
 }

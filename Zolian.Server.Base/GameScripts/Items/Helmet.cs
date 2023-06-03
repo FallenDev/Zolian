@@ -29,8 +29,6 @@ public class Helmet : ItemScript
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        Item.ApplyModifiers(client);
-
         client.Aisling.HelmetImg = Item.Image;
     }
 
@@ -43,7 +41,5 @@ public class Helmet : ItemScript
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.HelmetImg = ushort.MinValue;
-
-        Item.RemoveModifiers(client);
     }
 }

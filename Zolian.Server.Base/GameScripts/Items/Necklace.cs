@@ -25,27 +25,21 @@ public class Necklace : ItemScript
     {
         if (sprite == null) return;
         if (Item?.Template == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        if (sprite is not Aisling) return;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.OffenseElement = Item.Template.OffenseElement;
-
-        Item.ApplyModifiers(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
     {
         if (sprite == null) return;
         if (Item?.Template == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        if (sprite is not Aisling) return;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.OffenseElement = ElementManager.Element.None;
-
-        Item.RemoveModifiers(client);
     }
 }
