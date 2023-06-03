@@ -43,9 +43,9 @@ public class GameServer : NetworkServer<GameClient>
     private TimeSpan _clientGameTimeSpan;
     private TimeSpan _abilityGameTimeSpan;
     public byte CurrentEncryptKey;
-    private const int FastGameSpeed = 40;
-    private const int NormalGameSpeed = 80;
-    private const int SlowGameSpeed = 120;
+    private const int FastGameSpeed = 20;
+    private const int NormalGameSpeed = 40;
+    private const int SlowGameSpeed = 80;
     private const int AbilityGameSpeed = 500;
 
     public GameServer(int capacity)

@@ -10,7 +10,7 @@ namespace Darkages.Network.GameServer.Components;
 
 public class ObjectComponent : GameServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(50));
+    private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
 
     public ObjectComponent(Server.GameServer server) : base(server) { }
 

@@ -432,35 +432,20 @@ public class Area : Map, IArea
 
     public void SetAStarNodeInsert(List<TileGrid> list, TileGrid newNode)
     {
-        var comparer = new TileGridFScoreComparer();
-        var index = list.BinarySearch(newNode, comparer);
-
-        if (index < 0)
+        var added = false;
+        for (var i = 0; i < list.Count; i++)
         {
-            // If the index is negative, it represents the bitwise complement of the next larger element in the list.
-            index = ~index;
+            if (!(list[i].FScore > newNode.FScore)) continue;
+            list.Insert(Math.Max(1, i), newNode);
+            added = true;
+            break;
         }
 
-        list.Insert(index, newNode);
+        if (!added)
+        {
+            list.Add(newNode);
+        }
     }
 
     #endregion
-}
-
-/// <summary>
-/// The TileGridFScoreComparer class implements the IComparerTileGrid interface, and the 'Compare' method is
-/// the implementation of that interface. It provides a way for 'BinarySearch' to compare the two TileGrid objects
-/// based on their 'FScore' property, which is necessary for the binary algorithm to work.
-/// </summary>
-public class TileGridFScoreComparer : IComparer<TileGrid>
-{
-    public int Compare(TileGrid x, TileGrid y)
-    {
-        if (x == null)
-        {
-            return y == null ? 0 : -1;
-        }
-
-        return y == null ? 1 : x.FScore.CompareTo(y.FScore);
-    }
 }

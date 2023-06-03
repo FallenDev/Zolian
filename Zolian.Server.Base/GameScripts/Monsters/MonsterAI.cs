@@ -17,7 +17,6 @@ namespace Darkages.GameScripts.Monsters;
 public class MonsterBaseIntelligence : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
-    private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     private Sprite Target => Monster.Target;
 
@@ -490,14 +489,8 @@ public class MonsterBaseIntelligence : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                    
-                    // If the targets position does not match what is remembered, get a new path
-                    if (_targetPos != _targetRememberedPos)
-                    {
-                        Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-                        _targetRememberedPos = _targetPos;
-                    }
-                    
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+
                     if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
@@ -562,7 +555,6 @@ public class MonsterBaseIntelligence : MonsterScript
 public class MonsterShadowSight : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
-    private Vector2 _targetRememberedPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     private Sprite Target => Monster.Target;
 
@@ -1031,14 +1023,8 @@ public class MonsterShadowSight : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                    
-                    // If the targets position does not match what is remembered, get a new path
-                    if (_targetPos != _targetRememberedPos)
-                    {
-                        Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-                        _targetRememberedPos = _targetPos;
-                    }
-                    
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+
                     if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
