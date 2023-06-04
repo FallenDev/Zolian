@@ -17,8 +17,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ZolianAbilities\Abilities.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Maps.Table.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Nations.Table.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianMaps\dbo.Warps.Table.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMonsters\Monsters.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianMundanes\Mundanes.sql" />
     <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\PlayersDatabaseBuild.sql" />
