@@ -20,7 +20,7 @@ public class PlayerRegenerationComponent : GameServerComponent
     private static void UpdatePlayerRegeneration()
     {
         if (!ServerSetup.Instance.Running || ServerSetup.Instance.Game.Clients == null) return;
-        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: { } }))
+        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: not null }))
         {
             if (!client.Aisling.LoggedIn) continue;
             if (client.Aisling.RegenTimerDisabled) continue;
@@ -30,43 +30,48 @@ public class PlayerRegenerationComponent : GameServerComponent
             if (client.Aisling.CurrentHp == client.Aisling.MaximumHp &&
                 client.Aisling.CurrentMp == client.Aisling.MaximumMp) continue;
 
-            if (client.Aisling.CurrentHp > client.Aisling.MaximumHp)
+            lock (client.SyncClient)
             {
-                client.Aisling.CurrentHp = client.Aisling.MaximumHp;
-                client.SendStats(StatusFlags.Health);
+                if (client.Aisling.CurrentHp > client.Aisling.MaximumHp)
+                {
+                    client.Aisling.CurrentHp = client.Aisling.MaximumHp;
+                    client.SendStats(StatusFlags.Health);
+                }
+
+                if (client.Aisling.CurrentMp > client.Aisling.MaximumMp)
+                {
+                    client.Aisling.CurrentMp = client.Aisling.MaximumMp;
+                    client.SendStats(StatusFlags.Health);
+                }
+
+                if (client.Aisling.Path == Class.Peasant | client.Aisling.GameMaster)
+                {
+                    client.Aisling.Recover();
+                }
+
+                if (client.Aisling.CurrentMp < 1) client.Aisling.CurrentMp = 1;
+
+                var hpRegenSeed = HpRegenSoftCap(client);
+                var mpRegenSeed = MpRegenSoftCap(client);
+                var hpHardCap = Math.Abs(client.Aisling.BaseHp / 3.00);
+                var mpHardCap = Math.Abs(client.Aisling.BaseMp / 3.00);
+                var performedRegen = false;
+
+                if (client.Aisling.CurrentHp < client.Aisling.MaximumHp)
+                {
+                    RegenHpCalculator(client, hpRegenSeed, hpHardCap);
+                    performedRegen = true;
+                }
+
+                if (client.Aisling.CurrentMp < client.Aisling.MaximumMp)
+                {
+                    RegenMpCalculator(client, mpRegenSeed, mpHardCap);
+                    performedRegen = true;
+                }
+
+                if (performedRegen)
+                    client.SendStats(StatusFlags.Health);
             }
-
-            if (client.Aisling.CurrentMp > client.Aisling.MaximumMp)
-            {
-                client.Aisling.CurrentMp = client.Aisling.MaximumMp;
-                client.SendStats(StatusFlags.Health);
-            }
-
-            if (client.Aisling.Path == Class.Peasant | client.Aisling.GameMaster)
-            {
-                client.Aisling.Recover();
-            }
-
-            var hpRegenSeed = HpRegenSoftCap(client);
-            var mpRegenSeed = MpRegenSoftCap(client);
-            var hpHardCap = Math.Abs(client.Aisling.BaseHp / 3.00);
-            var mpHardCap = Math.Abs(client.Aisling.BaseMp / 3.00);
-            var performedRegen = false;
-
-            if (client.Aisling.CurrentHp < client.Aisling.MaximumHp)
-            {
-                RegenHpCalculator(client, hpRegenSeed, hpHardCap);
-                performedRegen = true;
-            }
-
-            if (client.Aisling.CurrentMp < client.Aisling.MaximumMp)
-            {
-                RegenMpCalculator(client, mpRegenSeed, mpHardCap);
-                performedRegen = true;
-            }
-
-            if (performedRegen)
-                client.SendStats(StatusFlags.Health);
         }
     }
 
