@@ -419,7 +419,7 @@ public class ClassChooser : MundaneScript
         _spellSwitch = Spell.GiveTo(client.Aisling, "Detect", 1);
         _spellSwitch = Spell.GiveTo(client.Aisling, "Healing Winds", 1);
         _spellSwitch = Spell.GiveTo(client.Aisling, "Forestall", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Raise Ally", 1);
+        _spellSwitch = Spell.GiveTo(client.Aisling, "Hell Grasp", 1);
         _spellSwitch = Spell.GiveTo(client.Aisling, "Ao Puinsein", 1);
         _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Cradh", 1);
         _spellSwitch = Spell.GiveTo(client.Aisling, "Cradh", 1);

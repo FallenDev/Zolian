@@ -823,7 +823,7 @@ public class Forsaken : MundaneScript
         Spell.GiveTo(client.Aisling, "Detect", 1);
         Spell.GiveTo(client.Aisling, "Healing Winds", 1);
         Spell.GiveTo(client.Aisling, "Forestall", 1);
-        Spell.GiveTo(client.Aisling, "Raise Ally", 1);
+        Spell.GiveTo(client.Aisling, "Hell Grasp", 1);
         Spell.GiveTo(client.Aisling, "Ao Puinsein", 1);
         Spell.GiveTo(client.Aisling, "Beag Cradh", 1);
         Spell.GiveTo(client.Aisling, "Cradh", 1);

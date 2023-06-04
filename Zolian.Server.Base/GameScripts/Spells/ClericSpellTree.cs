@@ -1021,9 +1021,9 @@ public class Forestall : SpellScript
 }
 
 /// <summary>
-/// Raise Ally: Pull ally to the realm of the living, shortly after death
+/// Hell Grasp: Pull ally to the realm of the living
 /// </summary>
-[Script("Raise Ally")]
+[Script("Hell Grasp")]
 public class Raise_Ally : SpellScript
 {
     private readonly Spell _spell;
@@ -1050,7 +1050,7 @@ public class Raise_Ally : SpellScript
             foreach (var deadPartyMember in aisling.PartyMembers.Where(m => m is { Dead: true }))
             {
                 deadPartyMember.Client.Revive();
-                deadPartyMember.Client.SendMessage(0x02, "I was saved.");
+                deadPartyMember.Client.SendMessage(0x02, "I live again.");
                 deadPartyMember.Client.SendStats(StatusFlags.MultiStat);
                 deadPartyMember.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
                 Task.Delay(350).ContinueWith(ct => { deadPartyMember.Client.Aisling.Animate(304); });
@@ -1084,11 +1084,11 @@ public class Raise_Ally : SpellScript
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= _spell.Template.ManaCost;
+            aisling.CurrentMp = 0;
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendMessage(0x02, "Not enough ether to perform such a divine task.");
             return;
         }
 

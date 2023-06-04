@@ -421,7 +421,7 @@ public static class MonsterExtensions
     public static void BeastSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Beast)) return;
-        var skillList = new List<string> { "Bite", "Claw", "Slash" };
+        var skillList = new List<string> { "Bite", "Claw" };
         var abilityList = new List<string> { "Bite'n Shake", "Pounce", "Poison Talon" };
         var spellList = new List<string> { "Asgall" };
         monster.Template.SkillScripts.AddRange(skillList);
@@ -549,7 +549,7 @@ public static class MonsterExtensions
     public static void GrimlokSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Grimlok)) return;
-        var skillList = new List<string> { "Wallop", "Slash" };
+        var skillList = new List<string> { "Wallop", "Clobber" };
         var abilityList = new List<string> { "Dual Slice", "Wind Blade" };
         var spellList = new List<string> { "Silence" };
         monster.Template.SkillScripts.AddRange(skillList);
@@ -596,7 +596,7 @@ public static class MonsterExtensions
     public static void MukulSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Mukul)) return;
-        var skillList = new List<string> { "Slash", "Mule Kick", "Onslaught" };
+        var skillList = new List<string> { "Clobber", "Mule Kick", "Onslaught" };
         var abilityList = new List<string> { "Krane Kick", "Wolf Fang Fist", "Flurry", "Desolate" };
         var spellList = new List<string> { "Perfect Defense" };
         monster.Template.SkillScripts.AddRange(skillList);
@@ -618,7 +618,7 @@ public static class MonsterExtensions
     public static void OrcSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Orc)) return;
-        var skillList = new List<string> { "Slash", "Thrash" };
+        var skillList = new List<string> { "Clobber", "Thrash" };
         var abilityList = new List<string> { "Titan's Cleave", "Corrosive Touch" };
         var spellList = new List<string> { "Asgall" };
         monster.Template.SkillScripts.AddRange(skillList);
