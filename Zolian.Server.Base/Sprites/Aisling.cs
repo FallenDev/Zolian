@@ -71,7 +71,7 @@ public sealed class Aisling : Player, IAisling
     }
 
     public bool Loading { get; set; }
-    public int DamageCounter { get; set; }
+    public long DamageCounter { get; set; }
     public uint ThreatMeter { get; set; }
     public ReactorTemplate ActiveReactor { get; set; }
     public DialogSequence ActiveSequence { get; set; }

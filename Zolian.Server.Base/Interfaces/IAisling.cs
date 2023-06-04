@@ -13,7 +13,7 @@ namespace Darkages.Interfaces;
 public interface IAisling : ISprite
 {
     bool Loading { get; set; }
-    int DamageCounter { get; set; }
+    long DamageCounter { get; set; }
     uint ThreatMeter { get; set; }
     ReactorTemplate ActiveReactor { get; set; }
     DialogSequence ActiveSequence { get; set; }

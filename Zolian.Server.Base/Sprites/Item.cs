@@ -776,33 +776,36 @@ public sealed class Item : Sprite, IItem
     {
         if (client?.Aisling == null) return;
 
-        try
+        lock (client.SyncClient)
         {
-            // Removes modifiers
-            RemoveModifiers(client);
-
-            // Recalculates Spell Lines
-            SpellLines(client);
-
-            foreach (var equipment in client.Aisling.EquipmentManager.Equipment)
+            try
             {
-                if (equipment.Value == null) continue;
+                // Removes modifiers
+                RemoveModifiers(client);
 
-                // Reapplies Stat modifiers
-                StatModifiersCalc(client, equipment.Value.Item);
+                // Recalculates Spell Lines
+                SpellLines(client);
 
-                if (!equipment.Value.Item.Template.Enchantable) continue;
+                foreach (var equipment in client.Aisling.EquipmentManager.Equipment)
+                {
+                    if (equipment.Value == null) continue;
 
-                ItemVarianceCalc(client, equipment.Value.Item);
-                WeaponVarianceCalc(client, equipment.Value.Item);
-                QualityVarianceCalc(client, equipment.Value.Item);
+                    // Reapplies Stat modifiers
+                    StatModifiersCalc(client, equipment.Value.Item);
+
+                    if (!equipment.Value.Item.Template.Enchantable) continue;
+
+                    ItemVarianceCalc(client, equipment.Value.Item);
+                    WeaponVarianceCalc(client, equipment.Value.Item);
+                    QualityVarianceCalc(client, equipment.Value.Item);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
         }
 
         var ac = client.Aisling.Ac.ToString();

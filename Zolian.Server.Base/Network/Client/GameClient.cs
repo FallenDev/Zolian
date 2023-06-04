@@ -31,7 +31,7 @@ public partial class GameClient : NetworkClient
     public bool MapUpdating;
     public readonly GameServerTimer SkillSpellTimer;
     private readonly GameServerTimer _dayDreamingTimer;
-    private readonly object _syncClient = new();
+    public readonly object SyncClient = new();
 
     public GameClient()
     {
@@ -171,7 +171,7 @@ public partial class GameClient : NetworkClient
             client.SendMessage(0x02, "I'll need to repair this before I can use it again");
             return false;
         }
-            
+
         // Level check
         if (client.Aisling.ExpLevel < item.Template.LevelRequired)
         {
@@ -1024,7 +1024,11 @@ public partial class GameClient : NetworkClient
 
             var script = equipment.Item.Scripts.Values.FirstOrDefault();
             script?.Equipped(Aisling, equipment.Item.Slot);
+
         }
+
+        var item = new Item();
+        item.ReapplyItemModifiers(this);
     }
 
     public void LoadBank()
@@ -1303,37 +1307,37 @@ public partial class GameClient : NetworkClient
                 break;
 
             case Scope.NearbyAislings:
-            {
-                foreach (var obj in nearby)
-                    obj.Client.SendMessage(type, text);
-            }
+                {
+                    foreach (var obj in nearby)
+                        obj.Client.SendMessage(type, text);
+                }
                 break;
 
             case Scope.NearbyAislingsExludingSelf:
-            {
-                foreach (var obj in nearby)
                 {
-                    if (obj.Serial == Aisling.Serial)
-                        continue;
+                    foreach (var obj in nearby)
+                    {
+                        if (obj.Serial == Aisling.Serial)
+                            continue;
 
-                    obj.Client.SendMessage(type, text);
+                        obj.Client.SendMessage(type, text);
+                    }
                 }
-            }
                 break;
 
             case Scope.AislingsOnSameMap:
-            {
-                foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
-                    obj.Client.SendMessage(type, text);
-            }
+                {
+                    foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
+                        obj.Client.SendMessage(type, text);
+                }
                 break;
 
             case Scope.All:
-            {
-                var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
-                foreach (var obj in allAislings.Where(n => n.LoggedIn))
-                    obj.Client.SendMessage(type, text);
-            }
+                {
+                    var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
+                    foreach (var obj in allAislings.Where(n => n.LoggedIn))
+                        obj.Client.SendMessage(type, text);
+                }
                 break;
         }
     }
@@ -1692,7 +1696,7 @@ public partial class GameClient : NetworkClient
 
     public void UpdateStatusBarAndThreat(TimeSpan elapsedTime)
     {
-        lock (_syncClient)
+        lock (SyncClient)
         {
             Aisling.UpdateBuffs(elapsedTime);
             Aisling.UpdateDebuffs(elapsedTime);
@@ -1854,7 +1858,7 @@ public partial class GameClient : NetworkClient
             cmd.Parameters.Add("@DiscoveredId", SqlDbType.Int).Value = discovered;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = Aisling.Serial;
             cmd.Parameters.Add("@MapId", SqlDbType.Int).Value = Aisling.CurrentMapId;
-                
+
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
             sConn.Close();
