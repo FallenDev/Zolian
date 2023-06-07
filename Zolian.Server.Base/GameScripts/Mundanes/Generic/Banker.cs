@@ -19,16 +19,16 @@ public class Banker : MundaneScript
 
     public Banker(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         client.Aisling.Client.LoadBank();
         Refresh(client);
 
@@ -103,7 +103,7 @@ public class Banker : MundaneScript
         {
             Refresh(client);
             client.PendingBankedSession.TempGold = money;
-            OnResponse(client.Server, client, 0x02, null);
+            OnResponse(client, 0x02, null);
         }
         else
         {
@@ -111,15 +111,9 @@ public class Banker : MundaneScript
         }
     }
 
-    public override async void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override async void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         client.Aisling.Client.LoadBank();
 
@@ -256,7 +250,7 @@ public class Banker : MundaneScript
                 // Object Handling
                 if (string.IsNullOrEmpty(args))
                 {
-                    OnClick(server, client);
+                    OnClick(client, Mundane.Serial);
                     return;
                 }
 
@@ -280,7 +274,7 @@ public class Banker : MundaneScript
                                 Type = 0x03
                             });
 
-                            OnClick(server, client);
+                            OnClick(client, Mundane.Serial);
                             return;
                         }
                     }
@@ -310,7 +304,7 @@ public class Banker : MundaneScript
                             Type = 0x03
                         });
 
-                        OnClick(server, client);
+                        OnClick(client, Mundane.Serial);
                         return;
                     }
 
@@ -325,7 +319,7 @@ public class Banker : MundaneScript
                                 Type = 0x03
                             });
 
-                            OnClick(server, client);
+                            OnClick(client, Mundane.Serial);
                             return;
                         }
                     }
@@ -356,11 +350,11 @@ public class Banker : MundaneScript
                         }
 
                         client.SendStats(StatusFlags.WeightMoney);
-                        OnClick(server, client);
+                        OnClick(client, Mundane.Serial);
                     }
                     else
                     {
-                        OnClick(server, client);
+                        OnClick(client, Mundane.Serial);
                     }
                 }
             }
@@ -380,7 +374,7 @@ public class Banker : MundaneScript
                 _bank.WithdrawGold(client, client.PendingBankedSession.TempGold);
                 client.PendingBankedSession.WithdrawGold = false;
                 client.SendMessage(0x0C, $"{{=aYou withdrew {{=c{client.PendingBankedSession.TempGold}{{=a coins out of {{=q{client.Aisling.BankedGold}{{=a currently banked.");
-                OnClick(server, client);
+                OnClick(client, Mundane.Serial);
             }
                 break;
             case 0x07:
@@ -471,7 +465,7 @@ public class Banker : MundaneScript
                     });
 
                     client.PendingBankedSession.DepositStackedItem = false;
-                    OnClick(server, client);
+                    OnClick(client, Mundane.Serial);
                 }
             }
                 break;
@@ -502,7 +496,7 @@ public class Banker : MundaneScript
 
                 if (client.PendingBankedSession.SelectedItem == null)
                 {
-                    OnClick(server, client);
+                    OnClick(client, Mundane.Serial);
                     return;
                 }
 
@@ -528,11 +522,11 @@ public class Banker : MundaneScript
                             });
 
                             client.SendStats(StatusFlags.WeightMoney);
-                            OnClick(server, client);
+                            OnClick(client, Mundane.Serial);
                         }
                         else
                         {
-                            OnClick(server, client);
+                            OnClick(client, Mundane.Serial);
                         }
                         break;
                     }
@@ -546,7 +540,7 @@ public class Banker : MundaneScript
 
             case 0x52:
             {
-                OnClick(server, client);
+                OnClick(client, Mundane.Serial);
             }
                 break;
             default:
@@ -563,7 +557,7 @@ public class Banker : MundaneScript
         client.Aisling.GoldPoints -= cost;
         client.Aisling.BankManager.UpdatePlayersWeight(client);
         client.SendStats(StatusFlags.WeightMoney);
-        OnClick(Server, client);
+        OnClick(client, Mundane.Serial);
     }
 
     private void DepositMenu(GameClient client)
@@ -572,7 +566,7 @@ public class Banker : MundaneScript
             client.Send(new ServerFormat2F(Mundane, "We'll take care of your possessions.",
                 new BankingData(0x08, client.Aisling.Inventory.BankList)));
         else
-            OnClick(Server, client);
+            OnClick(client, Mundane.Serial);
     }
 
     private void WithDrawMenu(GameClient client)
@@ -581,7 +575,7 @@ public class Banker : MundaneScript
             client.Send(new ServerFormat2F(Mundane, "What would you like back?",
                 new WithdrawBankData(0x0A, client.Aisling.BankManager)));
         else
-            OnClick(Server, client);
+            OnClick(client, Mundane.Serial);
     }
 
     private static void Refresh(IGameClient client)

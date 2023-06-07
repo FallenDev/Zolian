@@ -18,16 +18,16 @@ public class Callum : MundaneScript
 
     public Callum(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new (0x0001, "Detail"),
@@ -37,15 +37,9 @@ public class Callum : MundaneScript
         client.SendOptionsDialog(Mundane, "*cleans glass* Need something?", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {
@@ -233,7 +227,7 @@ public class Callum : MundaneScript
         if (item.Template.CanStack || !item.Template.Enchantable) return;
         if (item.OriginalQuality is Item.Quality.Common or Item.Quality.Damaged)
         {
-            OnResponse(client.Server, client, 0x0500, item.InventorySlot.ToString());
+            OnResponse(client, 0x0500, item.InventorySlot.ToString());
         }
     }
 }

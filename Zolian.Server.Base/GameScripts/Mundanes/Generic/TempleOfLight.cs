@@ -14,16 +14,20 @@ public class TempleOfLight : MundaneScript
 {
     public TempleOfLight(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        client.EntryCheck = serial;
+
         if (client.Aisling.Map.ID == 500)
         {
             TopMenu(client);
         }
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new(0x01, "Approach the Temple"),
@@ -33,8 +37,14 @@ public class TempleOfLight : MundaneScript
         client.SendOptionsDialog(Mundane, "Cleansing such an item here? Very well, do you wish to visit the temple?", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         if (client.Aisling.Map.ID != 500)
         {
             client.Dispose();

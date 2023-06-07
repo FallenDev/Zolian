@@ -13,13 +13,16 @@ public class Hybrasyl : MundaneScript
 {
     public Hybrasyl(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new(0x01, "Refine"),
@@ -30,8 +33,14 @@ public class Hybrasyl : MundaneScript
         client.SendOptionsDialog(Mundane, $"Stone smithing level: {client.Aisling.QuestManager.StoneSmithing} ", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         var contains = false;
 
         foreach (var item in client.Aisling.Inventory.Items.Values)
@@ -40,7 +49,11 @@ public class Hybrasyl : MundaneScript
             if (item.Template.Name == "Raw Hybrasyl") contains = true;
         }
 
-        if (contains == false) return;
+        if (contains == false)
+        {
+            client.CloseDialog();
+            return;
+        }
 
         switch (responseID)
         {

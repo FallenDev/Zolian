@@ -15,16 +15,16 @@ public class Eireann : MundaneScript
 {
     public Eireann(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
 
         switch (client.Aisling.QuestManager.EternalLove)
@@ -44,15 +44,9 @@ public class Eireann : MundaneScript
         client.SendOptionsDialog(Mundane, "Greetings Adventurer, care for some mead?", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         var gossip = Random.Shared.Next(1, 6);
 
@@ -322,7 +316,7 @@ public class Eireann : MundaneScript
         if (item == null) return;
         if (item.Template.Flags.FlagIsSet(ItemFlags.Sellable))
         {
-            OnResponse(client.Server, client, 0x0500, item.InventorySlot.ToString());
+            OnResponse(client, 0x0500, item.InventorySlot.ToString());
         }
     }
 }

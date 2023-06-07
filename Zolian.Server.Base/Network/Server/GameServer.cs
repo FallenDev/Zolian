@@ -746,7 +746,7 @@ public class GameServer : NetworkServer<GameClient>
                 {
                     const string script = "Nadia";
                     var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                    scriptObj.Value?.OnResponse(aisling.Client.Server, aisling.Client, 0x01, null);
+                    scriptObj.Value?.OnResponse(aisling.Client, 0x01, null);
 
                     return;
                 }
@@ -765,7 +765,7 @@ public class GameServer : NetworkServer<GameClient>
                 {
                     const string script = "Nadia";
                     var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                    scriptObj.Value?.OnResponse(aisling.Client.Server, aisling.Client, 0x03, null);
+                    scriptObj.Value?.OnResponse(aisling.Client, 0x03, null);
 
                     return;
                 }
@@ -1299,7 +1299,7 @@ public class GameServer : NetworkServer<GameClient>
             if (npc?.Scripts is null) continue;
 
             foreach (var script in npc.Scripts.Values)
-                script?.OnGossip(this, client, format.Text);
+                script?.OnGossip(client, format.Text);
         }
 
         foreach (var action in playerMap.Scripts.Values)
@@ -1614,8 +1614,8 @@ public class GameServer : NetworkServer<GameClient>
             return;
         }
 
-        user.SendMessage(0x00, string.Format(CultureInfo.CurrentCulture, "{0}: {1}", client.Aisling.Username, format.Message));
-        client.SendMessage(0x00, string.Format(CultureInfo.CurrentCulture, "{0}> {1}", user.Aisling.Username, format.Message));
+        user.SendMessage(0x00, string.Format("{0}: {1}", client.Aisling.Username, format.Message));
+        client.SendMessage(0x00, string.Format("{0}> {1}", user.Aisling.Username, format.Message));
     }
 
     /// <summary>
@@ -2233,33 +2233,11 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format39Handler(GameClient client, ClientFormat39 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
-
-        CancelIfCasting(client);
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
-
-        if (!client.Aisling.CanCast || !client.Aisling.CanAttack)
-        {
-            client.Interrupt();
-            return;
-        }
-
-        var npcs = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == format.Serial);
-
-        foreach (var npc in npcs)
-        {
-            if (npc.Value?.Template?.ScriptKey == null) continue;
-
-            var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == npc.Value.Template.Name);
-            scriptObj.Value?.OnResponse(this, client, format.Step, format.Args);
-        }
+        if (!CanInteract(client)) return;
+        ServerSetup.Instance.GlobalMundaneCache.TryGetValue(format.Serial, out var npc);
+        if (npc?.Template.Name == null) return;
+        ServerSetup.Instance.GlobalMundaneScriptCache.TryGetValue($"{npc.Template.Name}", out var scriptObj);
+        scriptObj?.OnResponse(client, format.Step, format.Args);
     }
 
     /// <summary>
@@ -2302,7 +2280,7 @@ public class GameServer : NetworkServer<GameClient>
                 if (npc.Value?.Template?.ScriptKey == null) continue;
 
                 var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == npc.Value.Template.Name);
-                scriptObj.Value?.OnResponse(this, client, format.Step, format.Input);
+                scriptObj.Value?.OnResponse(client, format.Step, format.Input);
                 return;
             }
         }
@@ -2342,7 +2320,7 @@ public class GameServer : NetworkServer<GameClient>
         }
         else
         {
-            client.DlgSession?.Callback?.Invoke(this, client, format.Step, format.Input ?? string.Empty);
+            client.DlgSession?.Callback?.Invoke(client, format.Step, format.Input ?? string.Empty);
         }
     }
 
@@ -2569,7 +2547,7 @@ public class GameServer : NetworkServer<GameClient>
             client.Interrupt();
             return;
         }
-
+        
         var skill = client.Aisling.SkillBook.GetSkills(i => i.Slot == format.Index).FirstOrDefault();
         if (skill?.Template == null || skill.Scripts == null) return;
 
@@ -2634,7 +2612,7 @@ public class GameServer : NetworkServer<GameClient>
         {
             script.OnMapClick(client, format.X, format.Y);
         }
-
+        
         if (client.Aisling.Skulled)
         {
             client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
@@ -2643,8 +2621,8 @@ public class GameServer : NetworkServer<GameClient>
         }
 
         if (format.Serial == ServerSetup.Instance.Config.HelperMenuId &&
-            ServerSetup.Instance.GlobalMundaneTemplateCache.ContainsKey(ServerSetup.Instance.Config
-                .HelperMenuTemplateKey))
+            ServerSetup.Instance.GlobalMundaneTemplateCache.TryGetValue(ServerSetup.Instance.Config
+                .HelperMenuTemplateKey, out var value))
         {
             if (!client.Aisling.CanCast || !client.Aisling.CanAttack) return;
 
@@ -2653,11 +2631,10 @@ public class GameServer : NetworkServer<GameClient>
             var helper = new UserHelper(this, new Mundane
             {
                 Serial = ServerSetup.Instance.Config.HelperMenuId,
-                Template = ServerSetup.Instance.GlobalMundaneTemplateCache[
-                    ServerSetup.Instance.Config.HelperMenuTemplateKey]
+                Template = value
             });
 
-            helper.OnClick(this, client);
+            helper.OnClick(client, format.Serial);
             return;
         }
 
@@ -2686,7 +2663,7 @@ public class GameServer : NetworkServer<GameClient>
                 var scripts = npc.Scripts?.Values;
                 if (scripts != null)
                     foreach (var script in scripts)
-                        script.OnClick(this, client);
+                        script.OnClick(client, format.Serial);
                 isNpc = true;
             }
 
@@ -3465,5 +3442,34 @@ public class GameServer : NetworkServer<GameClient>
         aisling.BankManager ??= new Bank();
         aisling.EquipmentManager ??= new EquipmentManager(aisling.Client);
         aisling.QuestManager ??= new Quests();
+    }
+
+    /// <summary>
+    /// Reduces code redundancy by combining many Interaction checks into a method with boolean handlers
+    /// </summary>
+    /// <param name="cancelCasting">Set to false to allow casting</param>
+    /// <param name="deathCheck">Set to false if not checking if the player is dead</param>
+    /// <param name="cantCastOrAttack">Set to false if not checking attacking/casting</param>
+    /// <returns></returns>
+    private bool CanInteract(GameClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
+    {
+        if (client?.Aisling == null) return false;
+        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return false;
+
+        if (cancelCasting)
+            CancelIfCasting(client);
+
+        if (deathCheck)
+            if (client.Aisling.Skulled)
+            {
+                client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
+                client.Interrupt();
+                return false;
+            }
+
+        if (!cantCastOrAttack) return true;
+        if (client.Aisling.CanCast && client.Aisling.CanAttack) return true;
+        client.Interrupt();
+        return false;
     }
 }

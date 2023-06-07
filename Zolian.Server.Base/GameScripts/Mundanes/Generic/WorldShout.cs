@@ -13,17 +13,21 @@ public class WorldShout : MundaneScript
 {
     public WorldShout(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new (0x0001, "World Announce"),
         };
+
         client.SendOptionsDialog(Mundane, "What do you wish to announce?", options.ToArray());
 
         client.DlgSession ??= new DialogSession(client.Aisling, Mundane.Serial)
@@ -32,8 +36,14 @@ public class WorldShout : MundaneScript
         };
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         if (!string.IsNullOrEmpty(args))
         {
             foreach (var m in GetObjects<Aisling>(null, n => n.LoggedIn))

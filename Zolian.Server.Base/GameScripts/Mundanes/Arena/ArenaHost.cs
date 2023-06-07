@@ -14,16 +14,16 @@ public class ArenaHost : MundaneScript
 {
     public ArenaHost(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        client.EntryCheck = serial;
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new(0x01, "Enter North"),
@@ -36,15 +36,19 @@ public class ArenaHost : MundaneScript
         client.SendOptionsDialog(Mundane, "Beyond this point, some fight for honor; others glory. Are you sure you're up for that? ", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         if (client.Aisling.Map.ID != 5232)
         {
             client.Dispose();
             return;
         }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         switch (responseID)
         {

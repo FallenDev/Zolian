@@ -79,16 +79,26 @@ public class Mileth : AreaScript
                 return;
             case "Succubus Hair":
             {
-                const string script = "Hallowed Voice";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Aisling.Client.Server, client.Aisling.Client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Temple of Light", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Succibi Hair":
             {
-                const string script = "Tormented Voice";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Aisling.Client.Server, client.Aisling.Client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Temple of Void", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
         }

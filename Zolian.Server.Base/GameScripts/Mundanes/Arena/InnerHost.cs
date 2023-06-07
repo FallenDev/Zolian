@@ -17,16 +17,16 @@ public class InnerHost : MundaneScript
 
     public InnerHost(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new(0x09, "{=qRepair All Items"),
@@ -44,15 +44,9 @@ public class InnerHost : MundaneScript
         client.SendOptionsDialog(Mundane, "How can I help you? ", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {

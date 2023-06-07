@@ -13,16 +13,16 @@ public class Cloud : MundaneScript
 {
     public Cloud(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
         var expFraction = int.MaxValue / client.Aisling.BaseHp;
         var apFraction = int.MaxValue * 0.10;
@@ -40,15 +40,9 @@ public class Cloud : MundaneScript
         client.SendOptionsDialog(Mundane, "I can help you transpose your experience with your health.", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {

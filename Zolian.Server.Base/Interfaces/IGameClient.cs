@@ -46,6 +46,7 @@ public interface IGameClient
     bool WasUpdatingMapRecently { get; }
     Position LastKnownPosition { get; set; }
     int MapClicks { get; set; }
+    int EntryCheck { get; set; }
 
     GameClient AislingToGhostForm();
     void BuildSettings();

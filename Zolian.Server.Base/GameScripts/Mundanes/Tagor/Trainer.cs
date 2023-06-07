@@ -23,38 +23,37 @@ public class Trainer : MundaneScript
     {
         _dojoSpots = new List<Vector2>
         {
-            new Vector2(12, 22),
-            new Vector2(13, 21),
-            new Vector2(14, 22),
-            new Vector2(13, 23),
-            new Vector2(12, 13),
-            new Vector2(13, 12),
-            new Vector2(14, 13),
-            new Vector2(13, 14),
-            new Vector2(22, 14),
-            new Vector2(21, 13),
-            new Vector2(23, 13),
-            new Vector2(22, 13),
-            new Vector2(22, 21),
-            new Vector2(23, 22),
-            new Vector2(22, 23),
-            new Vector2(21, 22)
+            new(12, 22),
+            new(13, 21),
+            new(14, 22),
+            new(13, 23),
+            new(12, 13),
+            new(13, 12),
+            new(14, 13),
+            new(13, 14),
+            new(22, 14),
+            new(21, 13),
+            new(23, 13),
+            new(22, 13),
+            new(22, 21),
+            new(23, 22),
+            new(22, 23),
+            new(21, 22)
         };
     }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        base.OnClick(client, serial);
         _skillList = ObtainSkillList(client);
         _spellList = ObtainSpellList(client);
-
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
 
         if (_skillList.Count > 0)
@@ -73,15 +72,9 @@ public class Trainer : MundaneScript
         client.SendOptionsDialog(Mundane, "Here to train? Let's get started.", options.ToArray());
     }
 
-    public override async void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override async void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {

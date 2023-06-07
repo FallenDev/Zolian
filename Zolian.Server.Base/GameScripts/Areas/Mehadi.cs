@@ -15,9 +15,15 @@ public class Mehadi : AreaScript
         if (client == null) return;
         if (client.Aisling.QuestManager.SwampAccess) return;
 
-        const string script = " Shreek";
-        var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-        scriptObj.Value?.OnClick(client.Server, client);
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+        {
+            if (npc.Value.Scripts is null) continue;
+            if (npc.Value.Scripts.TryGetValue("Shreek", out var scriptObj))
+            {
+                scriptObj.OnClick(client, npc.Value.Serial);
+            }
+        }
+
         client.TransitionToMap(3071, new Position(3, 7));
     }
 
@@ -28,9 +34,15 @@ public class Mehadi : AreaScript
         if (client.Aisling.Map.ID == 3071) return;
         client.CloseDialog();
 
-        const string script = " Shreek";
-        var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-        scriptObj.Value?.OnClick(client.Server, client);
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+        {
+            if (npc.Value.Scripts is null) continue;
+            if (npc.Value.Scripts.TryGetValue("Shreek Warn", out var scriptObj))
+            {
+                scriptObj.OnClick(client, npc.Value.Serial);
+            }
+        }
+
         client.TransitionToMap(3071, new Position(3, 7));
     }
 }

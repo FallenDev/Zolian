@@ -16,16 +16,16 @@ public class DungeonShop : MundaneScript
 {
     public DungeonShop(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             //new (0x01, "Dungeon Rumors"),
@@ -36,15 +36,9 @@ public class DungeonShop : MundaneScript
         client.SendOptionsDialog(Mundane, "Greetings Adventurer, look no further.\nI have exactly what you're looking for.\nAll items purchased have a quality range of (Common => Rare)", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {
@@ -296,7 +290,7 @@ public class DungeonShop : MundaneScript
         if (item == null) return;
         if (item.Template.Flags.FlagIsSet(ItemFlags.Sellable))
         {
-            OnResponse(client.Server, client, 0x0500, item.InventorySlot.ToString());
+            OnResponse(client, 0x0500, item.InventorySlot.ToString());
         }
     }
 }

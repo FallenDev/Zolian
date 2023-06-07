@@ -28,51 +28,86 @@ public class Consumable : ItemScript
             }
             case "Zolian Guide":
             {
-                const string script = "Guide";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Dark Iron":
             {
-                const string script = "Dark Iron";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Copper":
             {
-                const string script = "Copper";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Copper", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Obsidian":
             {
-                const string script = "Obsidian";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Cobalt Steel":
             {
-                const string script = "Cobalt Steel";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Hybrasyl":
             {
-                const string script = "Hybrasyl";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
             case "Raw Talos":
             {
-                const string script = "Talos";
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
-                scriptObj.Value?.OnClick(client.Server, client);
+                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                {
+                    if (npc.Value.Scripts is null) continue;
+                    if (npc.Value.Scripts.TryGetValue("Talos", out var scriptObj))
+                    {
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                    }
+                }
                 return;
             }
         }

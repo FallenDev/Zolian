@@ -11,14 +11,25 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Quest Helper")]
 public class QuestHelper : MundaneScript
 {
-    public QuestHelper(GameServer server, Mundane mundane) : base(server, mundane) { }
+    private readonly int _entryCheck;
 
-    public override void OnClick(GameServer server, GameClient client) { }
-
-    public override void TopMenu(IGameClient client) => client.CloseDialog();
-
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public QuestHelper(GameServer server, Mundane mundane) : base(server, mundane)
     {
+        _entryCheck = mundane.Serial;
+    }
+
+    public override void OnClick(GameClient client, int serial) { }
+
+    protected override void TopMenu(IGameClient client) => client.CloseDialog();
+
+    public override void OnResponse(GameClient client, ushort responseID, string args)
+    {
+        if (Mundane.Serial != _entryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         switch (responseID)
         {
             case 1:

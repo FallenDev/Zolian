@@ -12,13 +12,16 @@ public class Guide : MundaneScript
 {
     public Guide(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>
         {
             new(0x01, "Basics"),
@@ -31,8 +34,14 @@ public class Guide : MundaneScript
         client.SendOptionsDialog(Mundane, "This documentation is meant to be a guide for terminology and mechanics within Zolian.", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+            return;
+        }
+
         switch (responseID)
         {
             case 1:

@@ -17,16 +17,16 @@ public class RaceChooser : MundaneScript
     private SubClassDragonkin _dragonkin = SubClassDragonkin.Red;
     public RaceChooser(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         if (client.Aisling.Path == Class.Peasant && client.Aisling.Race == Race.UnDecided)
         {
             var options = new List<OptionsDataItem>
@@ -45,15 +45,9 @@ public class RaceChooser : MundaneScript
         }
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {
@@ -256,32 +250,32 @@ public class RaceChooser : MundaneScript
             case 0x12:
                 client.Aisling.RaceSkill = "Slash";
                 client.Aisling.RaceSpell = null;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x13:
                 client.Aisling.RaceSkill = "Adrenaline";
                 client.Aisling.RaceSpell = null;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x14:
                 client.Aisling.RaceSkill = null;
                 client.Aisling.RaceSpell = "Caltrops";
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x15:
                 client.Aisling.RaceSkill = null;
                 client.Aisling.RaceSpell = "Calming Voice";
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x16:
                 client.Aisling.RaceSkill = "Atlantean Weapon";
                 client.Aisling.RaceSpell = null;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x17:
                 client.Aisling.RaceSkill = "Elemental Bane";
                 client.Aisling.RaceSpell = null;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x1E:
                 _chosenRace = Race.Dragonkin;
@@ -321,43 +315,43 @@ public class RaceChooser : MundaneScript
                 break;
             case 0x20:
                 _dragonkin = SubClassDragonkin.Red;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x21:
                 _dragonkin = SubClassDragonkin.Blue;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x22:
                 _dragonkin = SubClassDragonkin.Green;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x23:
                 _dragonkin = SubClassDragonkin.Black;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x24:
                 _dragonkin = SubClassDragonkin.White;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x25:
                 _dragonkin = SubClassDragonkin.Brass;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x26:
                 _dragonkin = SubClassDragonkin.Bronze;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x27:
                 _dragonkin = SubClassDragonkin.Copper;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x28:
                 _dragonkin = SubClassDragonkin.Gold;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x29:
                 _dragonkin = SubClassDragonkin.Silver;
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x2A:
                 client.SendOptionsDialog(Mundane, $"{{=aAh {{=cHigh-Elf{{=a, wielder of magic, which spell will you choose then?\n" +
@@ -372,17 +366,17 @@ public class RaceChooser : MundaneScript
             case 0x2B:
                 client.Aisling.RaceSkill = null;
                 client.Aisling.RaceSpell = "Destructive Force";
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x2C:
                 client.Aisling.RaceSkill = null;
                 client.Aisling.RaceSpell = "Elemental Bolt";
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x2D:
                 client.Aisling.RaceSkill = null;
                 client.Aisling.RaceSpell = "Magic Missile";
-                OnResponse(server, client, 0x10, string.Empty);
+                OnResponse(client, 0x10, string.Empty);
                 break;
         }
     }

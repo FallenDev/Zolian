@@ -28,16 +28,16 @@ public class Neal : MundaneScript
         _spellList = ObtainSpellList();
     }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
 
         if (!client.Aisling.QuestManager.NealKill.IsNullOrEmpty() || client.Aisling.GameMaster)
@@ -91,15 +91,9 @@ public class Neal : MundaneScript
                 : "Hail, let's get to work.", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         var warriorThings = Random.Shared.Next(1, 5);
         var countMon = Random.Shared.Next(6, 10);
@@ -967,31 +961,5 @@ public class Neal : MundaneScript
                     break;
                 }
         }
-    }
-
-    private List<SkillTemplate> ObtainSkillList()
-    {
-        var skills = ServerSetup.Instance.GlobalSkillTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-        var possibleSkillTemplates = new List<SkillTemplate>();
-
-        foreach (var (key, value) in skills)
-        {
-            possibleSkillTemplates.Add(value);
-        }
-
-        return possibleSkillTemplates;
-    }
-
-    private List<SpellTemplate> ObtainSpellList()
-    {
-        var spells = ServerSetup.Instance.GlobalSpellTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-        var possibleSpellTemplates = new List<SpellTemplate>();
-
-        foreach (var (key, value) in spells)
-        {
-            possibleSpellTemplates.Add(value);
-        }
-
-        return possibleSpellTemplates;
     }
 }

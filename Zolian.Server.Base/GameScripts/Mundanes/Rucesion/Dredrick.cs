@@ -21,16 +21,16 @@ public class Dredrick : MundaneScript
         _spellList = ObtainSpellList();
     }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
 
         if (_skillList.Count > 0)
@@ -52,15 +52,9 @@ public class Dredrick : MundaneScript
                 : "Ah, adventurer.", options.ToArray());
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {
@@ -272,31 +266,5 @@ public class Dredrick : MundaneScript
 
             #endregion
         }
-    }
-
-    private List<SkillTemplate> ObtainSkillList()
-    {
-        var skills = ServerSetup.Instance.GlobalSkillTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-        var possibleSkillTemplates = new List<SkillTemplate>();
-
-        foreach (var (key, value) in skills)
-        {
-            possibleSkillTemplates.Add(value);
-        }
-
-        return possibleSkillTemplates;
-    }
-
-    private List<SpellTemplate> ObtainSpellList()
-    {
-        var spells = ServerSetup.Instance.GlobalSpellTemplateCache.Where(i => i.Value.NpcKey.ToLowerInvariant().Equals(Mundane.Template.Name.ToLowerInvariant())).ToArray();
-        var possibleSpellTemplates = new List<SpellTemplate>();
-
-        foreach (var (key, value) in spells)
-        {
-            possibleSpellTemplates.Add(value);
-        }
-
-        return possibleSpellTemplates;
     }
 }

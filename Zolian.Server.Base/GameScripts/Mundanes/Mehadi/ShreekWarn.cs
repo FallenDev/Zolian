@@ -11,19 +11,24 @@ public class ShreekWarn : MundaneScript
 {
     public ShreekWarn(GameServer server, Mundane mundane) : base(server, mundane) => Mundane = mundane;
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
         client.SendOptionsDialog(Mundane, "What are you doing in my swamp? Alright, get out of here. All of you. Move it. Let's go.");
         client.SendMessage(0x03, "What are you doing in my swamp?");
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args) { }
+    public override void OnResponse(GameClient client, ushort responseID, string args)
+    {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+        }
+    }
 }

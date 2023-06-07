@@ -38,6 +38,7 @@ public partial class GameClient : NetworkClient
         SkillSpellTimer = new GameServerTimer(TimeSpan.FromSeconds(1));
         _dayDreamingTimer = new GameServerTimer(TimeSpan.FromSeconds(5));
         ObjectHandlers = new ObjectManager();
+        EntryCheck = 0;
     }
 
     private SemaphoreSlim CreateLock { get; } = new(1, 1);
@@ -144,6 +145,7 @@ public partial class GameClient : NetworkClient
     public WorldPortal PendingNode { get; set; }
     public Position LastKnownPosition { get; set; }
     public int MapClicks { get; set; }
+    public int EntryCheck { get; set; }
 
     public void BuildSettings()
     {

@@ -13,13 +13,16 @@ public class UserHelper : MundaneScript
 {
     public UserHelper(GameServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
+        client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var playerStr = client.Aisling.BonusStr.ToString();
         var playerInt = client.Aisling.BonusInt.ToString();
         var playerWis = client.Aisling.BonusWis.ToString();
@@ -61,7 +64,13 @@ public class UserHelper : MundaneScript
                                  $"{{=uQuake{{=c: {{=a{playerQuake}{{=c, {{=uRain{{=c: {{=a{playerRain}, {{=uFlame{{=c: {{=a{playerFlame}{{=c, {{=uDusk{{=c: {{=a{playerDusk}{{=c, {{=uDawn{{=c: {{=a{playerDawn}");
     }
 
-    public override void OnResponse(GameServer server, GameClient client, ushort responseID, string args) { }
+    public override void OnResponse(GameClient client, ushort responseID, string args)
+    {
+        if (Mundane.Serial != client.EntryCheck)
+        {
+            client.CloseDialog();
+        }
+    }
 
     private static string ColorCodeLatency(TimeSpan time)
     {

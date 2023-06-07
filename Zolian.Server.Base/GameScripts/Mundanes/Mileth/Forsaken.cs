@@ -54,16 +54,16 @@ public class Forsaken : MundaneScript
         {Class.Monk, "Mor Dion"}
     };
 
-    public override void OnClick(GameServer server, GameClient client)
+    public override void OnClick(GameClient client, int serial)
     {
-        if (Mundane.WithinEarShotOf(client.Aisling))
-        {
-            TopMenu(client);
-        }
+        base.OnClick(client, serial);
+        TopMenu(client);
     }
 
-    public override void TopMenu(IGameClient client)
+    protected override void TopMenu(IGameClient client)
     {
+        base.TopMenu(client);
+
         var options = new List<OptionsDataItem>();
 
         if (client.Aisling.Stage == ClassStage.Class)
@@ -99,15 +99,9 @@ public class Forsaken : MundaneScript
         options.Add(new OptionsDataItem(0x05, "Nothing for now"));
     }
 
-    public override async void OnResponse(GameServer server, GameClient client, ushort responseID, string args)
+    public override async void OnResponse(GameClient client, ushort responseID, string args)
     {
-        if (client.Aisling.Map.ID != Mundane.Map.ID)
-        {
-            client.Dispose();
-            return;
-        }
-
-        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
+        if (!AuthenticateUser(client)) return;
 
         switch (responseID)
         {

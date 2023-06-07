@@ -13,8 +13,8 @@ public static class ShopMethods
     public static IEnumerable<ItemTemplate> BuyFromStoreInventory(Mundane mundane)
     {
         var defaultBag = mundane.Template.DefaultMerchantStock.Select(i =>
-            ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(i)
-                ? ServerSetup.Instance.GlobalItemTemplateCache[i]
+            ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(i, out var value)
+                ? value
                 : null);
 
         return ServerSetup.Instance.GlobalItemTemplateCache.Values.Where(i => i.NpcKey == mundane.Template.Name)
