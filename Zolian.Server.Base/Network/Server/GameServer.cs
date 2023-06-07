@@ -820,9 +820,15 @@ public class GameServer : NetworkServer<GameClient>
         if (client is not { Authenticated: true }) return;
         if (client.MapUpdating && client.Aisling.CurrentMapId != ServerSetup.Instance.Config.TransitionZone) return;
 
-        client.MapUpdating = true;
-        SendMapData(client);
-        client.MapUpdating = false;
+        try
+        {
+            client.MapUpdating = true;
+            SendMapData(client);
+        }
+        finally
+        {
+            client.MapUpdating = false;
+        }
     }
 
     private static void SendMapData(GameClient client)
@@ -924,8 +930,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format07Handler(GameClient client, ClientFormat07 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead())
         {
@@ -1179,7 +1184,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format0BHandler(GameClient client, ClientFormat0B format)
     {
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         LeaveGame(client, format);
     }
 
@@ -1217,8 +1222,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format0DHandler(GameClient client, ClientFormat0D format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
 
         switch (format.IgnoreType)
@@ -1316,17 +1320,9 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format0FHandler(GameClient client, ClientFormat0F format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead()) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
 
         var spellReq = client.Aisling.SpellBook.GetSpells(i => i != null && i.Slot == format.Index).FirstOrDefault();
 
@@ -1366,7 +1362,7 @@ public class GameServer : NetworkServer<GameClient>
 
         await EnterGame(client, format);
 
-        if (client.Server.Clients.Values.Count <= 2000) return;
+        if (client.Server.Clients.Values.Count <= 500) return;
         client.SendMessage(0x08, $"Server Capacity Reached: {client.Server.Clients.Values.Count} \n Thank you, please come back later.");
         ClientDisconnected(client);
         RemoveClient(client);
@@ -1532,8 +1528,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format18Handler(GameClient client, ClientFormat18 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.IsRefreshing) return;
 
@@ -1623,7 +1618,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format1BHandler(GameClient client, ClientFormat1B format)
     {
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (client.Aisling.GameSettings == null) return;
 
         var settingKeys = client.Aisling.GameSettings.ToArray();
@@ -1770,16 +1765,8 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format24Handler(GameClient client, ClientFormat24 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.CanAttack) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
 
         if (client.Aisling.GoldPoints >= format.GoldAmount)
         {
@@ -1804,7 +1791,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format29Handler(GameClient client, ClientFormat29 format)
     {
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
 
         client.Send(new ServerFormat4B(format.ID, 0));
         client.Send(new ServerFormat4B(format.ID, 1, format.ItemSlot));
@@ -1877,16 +1864,8 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format2AHandler(GameClient client, ClientFormat2A format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.LoggedIn) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
 
         var result = new List<Sprite>();
         var listA = client.Aisling.GetObjects<Monster>(client.Aisling.Map, i => i != null && i.WithinRangeOf(client.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
@@ -1982,8 +1961,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format2EHandler(GameClient client, ClientFormat2E format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.IsRefreshing) return;
         if (client.Aisling.IsDead()) return;
@@ -2235,7 +2213,13 @@ public class GameServer : NetworkServer<GameClient>
     {
         if (!CanInteract(client)) return;
         ServerSetup.Instance.GlobalMundaneCache.TryGetValue(format.Serial, out var npc);
-        if (npc?.Template.Name == null) return;
+        if (npc == null) return;
+        if (client.EntryCheck != npc.Serial)
+        {
+            client.CloseDialog();
+            return;
+        }
+        
         ServerSetup.Instance.GlobalMundaneScriptCache.TryGetValue($"{npc.Template.Name}", out var scriptObj);
         scriptObj?.OnResponse(client, format.Step, format.Args);
     }
@@ -2245,21 +2229,10 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format3AHandler(GameClient client, ClientFormat3A format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
-
-        CancelIfCasting(client);
-
-        if (client.Aisling.Skulled)
+        if (!CanInteract(client)) return;
+        if (client.EntryCheck != format.Serial)
         {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
-
-        if (!client.Aisling.CanCast || !client.Aisling.CanAttack)
-        {
-            client.Interrupt();
+            client.CloseDialog();
             return;
         }
 
@@ -2329,14 +2302,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format3BHandler(GameClient client, ClientFormat3B format)
     {
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
+        if (!CanInteract(client, false, true, false)) return;
 
         if (format.Type == 0x01)
         {
@@ -2531,16 +2497,8 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format3EHandler(GameClient client, ClientFormat3E format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
         if (client.Aisling.IsDead()) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
 
         if (!client.Aisling.CanAttack)
         {
@@ -2605,19 +2563,11 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format43Handler(GameClient client, ClientFormat43 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, true, false)) return;
 
         foreach (var script in client.Aisling.Map.Scripts.Values)
         {
             script.OnMapClick(client, format.X, format.Y);
-        }
-        
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
         }
 
         if (format.Serial == ServerSetup.Instance.Config.HelperMenuId &&
@@ -2686,20 +2636,9 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format44Handler(GameClient client, ClientFormat44 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.Dead) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
-
-        if (!client.Aisling.CanCast || !client.Aisling.CanAttack) return;
-
         if (client.Aisling.EquipmentManager.Equipment.ContainsKey(format.Slot))
             client.Aisling.EquipmentManager?.RemoveFromExisting(format.Slot);
     }
@@ -2727,20 +2666,9 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format47Handler(GameClient client, ClientFormat47 format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.IsRefreshing) return;
-        CancelIfCasting(client);
-
-        if (!client.Aisling.CanCast || !client.Aisling.CanAttack) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
 
         var attribute = (Stat)format.Stat;
 
@@ -2842,15 +2770,7 @@ public class GameServer : NetworkServer<GameClient>
     protected override void Format4AHandler(GameClient client, ClientFormat4A format)
     {
         if (format == null) return;
-        if (client == null || !client.Aisling.LoggedIn) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
-
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            client.Interrupt();
-            return;
-        }
+        if (!CanInteract(client, false, true, false)) return;
 
         var trader = ObjectHandlers.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals((int)format.Id));
         var player = client.Aisling;
@@ -3061,8 +2981,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format4DHandler(GameClient client, ClientFormat4D format)
     {
-        if (client?.Aisling == null) return;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
+        if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead()) return;
 
@@ -3117,8 +3036,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format4FHandler(GameClient client, ClientFormat4F format)
     {
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return;
-
+        if (!CanInteract(client, false, false, false)) return;
         client.Aisling.ProfileMessage = format.Words;
         client.Aisling.PictureData = format.Image;
     }
@@ -3451,7 +3369,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <param name="deathCheck">Set to false if not checking if the player is dead</param>
     /// <param name="cantCastOrAttack">Set to false if not checking attacking/casting</param>
     /// <returns></returns>
-    private bool CanInteract(GameClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
+    private static bool CanInteract(GameClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
     {
         if (client?.Aisling == null) return false;
         if (client is not ({ Authenticated: true } and { EncryptPass: true })) return false;
