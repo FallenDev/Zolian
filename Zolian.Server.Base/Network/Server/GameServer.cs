@@ -668,46 +668,40 @@ public class GameServer : NetworkServer<GameClient>
     {
         // Cache traps to reduce Select operation on each iteration
         var traps = Trap.Traps.Values;
+        var updateList = ServerSetup.Instance.GlobalMonsterCache;
 
-        foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
+        foreach (var (_, monster) in updateList)
         {
-            var updateList = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Value.Map.ID == area.ID);
-
-            foreach (var (_, monster) in updateList)
+            if (monster?.Scripts == null) continue;
+            if (monster.CurrentHp <= 0)
             {
-                if (monster == null) continue;
-                if (monster.Map.ID != area.ID) continue;
-                if (monster.Scripts == null) continue;
-                if (monster.CurrentHp <= 0)
+                UpdateKillCounters(monster);
+                monster.Skulled = true;
+
+                if (monster.Target?.Client != null)
                 {
-                    UpdateKillCounters(monster);
-                    monster.Skulled = true;
-
-                    if (monster.Target?.Client != null)
-                    {
-                        monster.Scripts.Values.First().OnDeath(monster.Target.Client);
-                    }
-                    else
-                    {
-                        monster.Scripts.Values.First().OnDeath();
-                    }
+                    monster.Scripts.Values.First().OnDeath(monster.Target.Client);
                 }
-
-                monster.Scripts.Values.First().Update(elapsedTime);
-
-                foreach (var trap in traps)
+                else
                 {
-                    if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                        monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
-
-                    var triggered = Trap.Activate(trap, monster);
-                    if (triggered) break;
+                    monster.Scripts.Values.First().OnDeath();
                 }
-
-                monster.UpdateBuffs(elapsedTime);
-                monster.UpdateDebuffs(elapsedTime);
-                monster.LastUpdated = DateTime.Now;
             }
+
+            monster.Scripts.Values.First().Update(elapsedTime);
+
+            foreach (var trap in traps)
+            {
+                if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
+                    monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
+
+                var triggered = Trap.Activate(trap, monster);
+                if (triggered) break;
+            }
+
+            monster.UpdateBuffs(elapsedTime);
+            monster.UpdateDebuffs(elapsedTime);
+            monster.LastUpdated = DateTime.Now;
         }
     }
 
@@ -777,33 +771,19 @@ public class GameServer : NetworkServer<GameClient>
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
     {
-        foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
+        foreach (var (_, mundane) in ServerSetup.Instance.GlobalMundaneCache)
         {
-            var updateList = ServerSetup.Instance.GlobalMundaneCache.Where(m => m.Value.Map.ID == area.ID);
-
-            foreach (var (_, mundane) in updateList)
-            {
-                if (mundane == null) continue;
-                if (mundane.Map.ID != area.ID) continue;
-
-                mundane.Update(elapsedTime);
-                mundane.LastUpdated = DateTime.Now;
-            }
+            if (mundane == null) continue;
+            mundane.Update(elapsedTime);
+            mundane.LastUpdated = DateTime.Now;
         }
     }
 
     private static void UpdateMaps(TimeSpan elapsedTime)
     {
-        HashSet<Area> tmpAreas;
-
-        lock (ServerSetup.SyncLock)
+        foreach (var (_, map) in ServerSetup.Instance.GlobalMapCache)
         {
-            tmpAreas = new HashSet<Area>(ServerSetup.Instance.GlobalMapCache.Values);
-        }
-
-        foreach (var map in tmpAreas)
-        {
-            map.Update(elapsedTime);
+            map?.Update(elapsedTime);
         }
     }
 
@@ -2219,7 +2199,7 @@ public class GameServer : NetworkServer<GameClient>
             client.CloseDialog();
             return;
         }
-        
+
         ServerSetup.Instance.GlobalMundaneScriptCache.TryGetValue($"{npc.Template.Name}", out var scriptObj);
         scriptObj?.OnResponse(client, format.Step, format.Args);
     }
@@ -2505,7 +2485,7 @@ public class GameServer : NetworkServer<GameClient>
             client.Interrupt();
             return;
         }
-        
+
         var skill = client.Aisling.SkillBook.GetSkills(i => i.Slot == format.Index).FirstOrDefault();
         if (skill?.Template == null || skill.Scripts == null) return;
 
