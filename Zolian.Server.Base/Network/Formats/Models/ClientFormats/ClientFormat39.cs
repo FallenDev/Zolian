@@ -27,7 +27,7 @@ public class ClientFormat39 : NetworkFormat
         if (!reader.GetCanRead()) return;
         var length = reader.ReadByte();
 
-        // Step correlates directly to the mundane script and needs to correlate to remove skills/spells
+        // ToDo: Step correlates directly to the mundane script and needs to correlate to remove skills/spells
         if (Step is 0x0500 or 0x0800 or 0x9000)
         {
             Args = Convert.ToString(length);

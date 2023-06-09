@@ -98,7 +98,7 @@ public class EquipmentManager
             if (item.ItemQuality != Item.Quality.Damaged)
             {
                 item.ItemQuality = Item.Quality.Damaged;
-                RemoveFromExisting(item.Slot, true);
+                RemoveFromExisting(item.Slot);
                 Client.SendMessage(0x02, $"{item.Template.Name} has been damaged.");
             }
             else
@@ -190,7 +190,7 @@ public class EquipmentManager
         if (item.Durability > item.MaxDurability)
             item.MaxDurability = item.Durability;
 
-        var p10 = Math.Abs(item.Durability * 100 / item.MaxDurability);
+        var p10 = item.Durability * 100 / item.MaxDurability;
 
         if (item.Warnings is not { Length: > 0 }) return;
 
@@ -198,13 +198,19 @@ public class EquipmentManager
         {
             case <= 10 when !item.Warnings[0]:
                 Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
                 item.Warnings[0] = true;
                 break;
             case <= 30 and > 10 when !item.Warnings[1]:
                 Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
                 item.Warnings[1] = true;
                 break;
             case <= 50 and > 30 when !item.Warnings[2]:
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
+                Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
                 Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
                 item.Warnings[2] = true;
                 break;

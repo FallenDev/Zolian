@@ -28,47 +28,5 @@
     <None Include="$(MSBuildThisFileDirectory)sotp.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.AddLegendMark.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.BankItemSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.BankItemSaveStacked.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.BuffSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.CheckIfItemExists.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.CheckIfPlayerExists.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.CheckIfPlayerHashExists.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.DeBuffSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.FoundMap.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.IgnoredSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.InsertBuff.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.InsertDeBuff.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.InsertQuests.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.InventorySave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.ItemToBank.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.ItemToEquipped.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.ItemToInventory.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PasswordSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerCreation.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerQuestSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerQuickSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerSave.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerSaveSkills.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerSaveSpells.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.PlayerSecurity.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectBanked.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectBuffs.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectBuffsCheck.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectDeBuffs.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectDeBuffsCheck.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectDiscoveredMaps.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectEquipped.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectIgnoredPlayers.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectInventory.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectLegends.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectPlayer.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectQuests.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectSkills.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SelectSpells.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SkillToPlayer.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.SpellToPlayer.StoredProcedure.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\StoredProcedures\dbo.WithdrawItemList.StoredProcedure.sql" />
   </ItemGroup>
 </Project>
