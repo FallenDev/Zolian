@@ -50,89 +50,35 @@ public class CreateMonster : MonsterCreateScript
 
         MonsterSkillSet(obj);
 
-        switch (obj.Template.Level)
+        // Initialize the dictionary with the maximum level as the key and the hpMultiplier and mpMultiplier as the value
+        var levelMultipliers = new SortedDictionary<int, (int hpMultiplier, int mpMultiplier)>
         {
-            case <= 9:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 100);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 80);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 90:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 800);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 150:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1300);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 200:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 1500);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 250:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 2000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 300:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 4000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 350:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 6000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 400:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 8000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 450:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 10000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-            case <= 500:
-                {
-                    var monsterHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 20000);
-                    obj.BaseHp = monsterHp;
-                    var monsterMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * 15000);
-                    obj.BaseMp = monsterMp;
-                    break;
-                }
-        }
+            { 9, (115, 80)},
+            { 19, (150, 100)},
+            { 29, (200, 120)},
+            { 39, (300, 150)},
+            { 49, (400, 210)},
+            { 59, (500, 350)},
+            { 69, (600, 400)},
+            { 79, (700, 550)},
+            { 89, (800, 700) },
+            { 99, (900, 750)},
+            { 119, (1000, 800) },
+            { 150, (1500, 1300) },
+            { 200, (2000, 1500) },
+            { 250, (4000, 2000) },
+            { 300, (6000, 4000) },
+            { 350, (8000, 6000) },
+            { 400, (10000, 8000) },
+            { 450, (15000, 10000) },
+            { int.MaxValue, (20000, 15000) } // default case for level > 450
+        };
+
+        // Find the first multiplier where the level is less than or equal to the key
+        var (hpMultiplier, mpMultiplier) = levelMultipliers.First(x => obj.Template.Level <= x.Key).Value;
+
+        obj.BaseHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * hpMultiplier);
+        obj.BaseMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * mpMultiplier);
 
         MonsterSize(obj);
         MonsterArmorClass(obj);
