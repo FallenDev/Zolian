@@ -722,108 +722,31 @@ public class Forsaken : MundaneScript
 
     private static void Berserker(IGameClient client)
     {
-        Skill.GiveTo(client.Aisling, "Wind Slice", 1);
-        Skill.GiveTo(client.Aisling, "Dual Slice", 1);
-        Skill.GiveTo(client.Aisling, "Blitz", 1);
-        Skill.GiveTo(client.Aisling, "Crasher", 1);
-        Skill.GiveTo(client.Aisling, "Sever", 1);
-        Skill.GiveTo(client.Aisling, "Titan's Cleave", 1);
-        Skill.GiveTo(client.Aisling, "Retribution", 1);
-        Skill.GiveTo(client.Aisling, "Rush", 1);
-
-        Skill.GiveTo(client.Aisling, "Onslaught", 1); //keep
-        Skill.GiveTo(client.Aisling, "Clobber x2", 1);
-        Skill.GiveTo(client.Aisling, "Wallop", 1);
-        Skill.GiveTo(client.Aisling, "Thrust", 1);
-
-        Spell.GiveTo(client.Aisling, "Asgall", 1);
-        Spell.GiveTo(client.Aisling, "Perfect Defense", 1);
-
+        Skill.GiveTo(client.Aisling, "Onslaught", 1);
         client.LoadSkillBook();
-        client.LoadSpellBook();
     }
 
     private static void Defender(IGameClient client)
     {
-        Skill.GiveTo(client.Aisling, "Wind Blade", 1); //keep
-        Skill.GiveTo(client.Aisling, "Beag Suain", 1);
-        Skill.GiveTo(client.Aisling, "Charge", 1);
-        Skill.GiveTo(client.Aisling, "Execute", 1);
-        Skill.GiveTo(client.Aisling, "Titan's Cleave", 1);
-        Skill.GiveTo(client.Aisling, "Beag Suain Ia Gar", 1);
-        Skill.GiveTo(client.Aisling, "Sneak Attack", 1);
-
-        Skill.GiveTo(client.Aisling, "Assault", 1); //keep
-        Skill.GiveTo(client.Aisling, "Clobber", 1);
-        Skill.GiveTo(client.Aisling, "Wallop", 1);
-
-        Spell.GiveTo(client.Aisling, "Asgall", 1);
-        Spell.GiveTo(client.Aisling, "Perfect Defense", 1);
-        Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
-
+        Skill.GiveTo(client.Aisling, "Assault", 1);
         client.LoadSkillBook();
-        client.LoadSpellBook();
     }
 
     private static void Assassin(IGameClient client)
     {
         Skill.GiveTo(client.Aisling, "Stab", 1);
-        Skill.GiveTo(client.Aisling, "Stab Twice", 1);
-        Skill.GiveTo(client.Aisling, "Stab'n Twist", 1);
-        Skill.GiveTo(client.Aisling, "Sneak Attack", 1);
-        Skill.GiveTo(client.Aisling, "Flurry", 1);
-        Skill.GiveTo(client.Aisling, "Double-Edged Dance", 1);
-        Skill.GiveTo(client.Aisling, "Ebb'n Flow", 1);
-
-        Skill.GiveTo(client.Aisling, "Aim", 1);
-        Skill.GiveTo(client.Aisling, "Throw", 1);
-
-        Spell.GiveTo(client.Aisling, "Poison Tipped Trap", 1);
-        Spell.GiveTo(client.Aisling, "Snare Trap", 1);
-        Spell.GiveTo(client.Aisling, "Needle Trap", 1);
-        Spell.GiveTo(client.Aisling, "Stiletto Trap", 1);
-        Spell.GiveTo(client.Aisling, "Hiraishin", 1);
-        Spell.GiveTo(client.Aisling, "Shunshin", 1);
-
         client.LoadSkillBook();
-        client.LoadSpellBook();
     }
 
     private static void Monk(IGameClient client)
     {
-        Skill.GiveTo(client.Aisling, "Ambush", 1);
-        Skill.GiveTo(client.Aisling, "Knife Hand Strike", 1);
-        Skill.GiveTo(client.Aisling, "Palm Heel Strike", 1);
-        Skill.GiveTo(client.Aisling, "Hammer Twist", 1);
-        Skill.GiveTo(client.Aisling, "Cross Body Punch", 1);
-        Skill.GiveTo(client.Aisling, "Wolf Fang Fist", 1);
-        Skill.GiveTo(client.Aisling, "Hurricane Kick", 1);
-        Skill.GiveTo(client.Aisling, "Kelberoth Strike", 1);
-        Skill.GiveTo(client.Aisling, "Krane Kick", 1);
-
         Skill.GiveTo(client.Aisling, "Punch", 1);
-        Skill.GiveTo(client.Aisling, "Double Punch", 1);
-
-        Spell.GiveTo(client.Aisling, "Dion", 1);
-
         client.LoadSkillBook();
-        client.LoadSpellBook();
     }
 
     private static void Cleric(IGameClient client)
     {
-        Spell.GiveTo(client.Aisling, "Spectral Shield", 1);
-        Spell.GiveTo(client.Aisling, "Dark Chain", 1);
-        Spell.GiveTo(client.Aisling, "Detect", 1);
-        Spell.GiveTo(client.Aisling, "Healing Winds", 1);
-        Spell.GiveTo(client.Aisling, "Forestall", 1);
-        Spell.GiveTo(client.Aisling, "Hell Grasp", 1);
-        Spell.GiveTo(client.Aisling, "Ao Puinsein", 1);
-        Spell.GiveTo(client.Aisling, "Beag Cradh", 1);
-        Spell.GiveTo(client.Aisling, "Cradh", 1);
-        Spell.GiveTo(client.Aisling, "Mor Cradh", 1);
-        Spell.GiveTo(client.Aisling, "Ard Cradh", 1);
-
+        Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
         client.LoadSpellBook();
     }
 
@@ -835,36 +758,6 @@ public class Forsaken : MundaneScript
         Spell.GiveTo(client.Aisling, "Beag Srad", 1);
         Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
         Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
-
-        Spell.GiveTo(client.Aisling, "Athar", 1);
-        Spell.GiveTo(client.Aisling, "Creag", 1);
-        Spell.GiveTo(client.Aisling, "Sal", 1);
-        Spell.GiveTo(client.Aisling, "Srad", 1);
-        Spell.GiveTo(client.Aisling, "Dorcha", 1);
-        Spell.GiveTo(client.Aisling, "Eadrom", 1);
-
-        Spell.GiveTo(client.Aisling, "Mor Athar", 1);
-        Spell.GiveTo(client.Aisling, "Mor Creag", 1);
-        Spell.GiveTo(client.Aisling, "Mor Sal", 1);
-        Spell.GiveTo(client.Aisling, "Mor Srad", 1);
-        Spell.GiveTo(client.Aisling, "Mor Dorcha", 1);
-        Spell.GiveTo(client.Aisling, "Mor Eadrom", 1);
-
-        Spell.GiveTo(client.Aisling, "Ard Athar", 1);
-        Spell.GiveTo(client.Aisling, "Ard Creag", 1);
-        Spell.GiveTo(client.Aisling, "Ard Sal", 1);
-        Spell.GiveTo(client.Aisling, "Ard Srad", 1);
-        Spell.GiveTo(client.Aisling, "Ard Dorcha", 1);
-        Spell.GiveTo(client.Aisling, "Ard Eadrom", 1);
-
-        Spell.GiveTo(client.Aisling, "Puinsein", 1);
-        Spell.GiveTo(client.Aisling, "Mor Puinsein", 1);
-        Spell.GiveTo(client.Aisling, "Ard Puinsein", 1);
-
-        Spell.GiveTo(client.Aisling, "Fas Nadur", 1);
-        Spell.GiveTo(client.Aisling, "Mor Fas Nadur", 1);
-        Spell.GiveTo(client.Aisling, "Ard Fas Nadur", 1);
-
         client.LoadSpellBook();
     }
 }

@@ -13,9 +13,6 @@ namespace Darkages.GameScripts.Mundanes.Tutorial;
 [Script("Class Chooser")]
 public class ClassChooser : MundaneScript
 {
-    private bool _skillSwitch;
-    private bool _spellSwitch;
-
     public ClassChooser(GameServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(GameClient client, int serial)
@@ -119,7 +116,6 @@ public class ClassChooser : MundaneScript
             }
 
             var path = ClassStrings.ClassValue(client.Aisling.Path);
-            var race = ClassStrings.RaceValue(client.Aisling.Race);
 
             if (path != "Peasant")
             {
@@ -162,9 +158,8 @@ public class ClassChooser : MundaneScript
         client.CloseDialog();
         client.Aisling.QuestManager.TutorialCompleted = true;
         client.Aisling.PastClass = client.Aisling.Path;
-
-        if (_skillSwitch) client.LoadSkillBook();
-        if (_spellSwitch) client.LoadSpellBook();
+        client.LoadSkillBook();
+        client.LoadSpellBook();
         client.LoadEquipment();
         client.SendStats(StatusFlags.StructA);
         client.UpdateDisplay();
@@ -176,22 +171,7 @@ public class ClassChooser : MundaneScript
 
     private void Berzerker(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Wind Slice", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Dual Slice", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Blitz", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Crasher", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Sever", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Titan's Cleave", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Retribution", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Rush", 1);
-
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Onslaught", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Clobber x2", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Wallop", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Thrust", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Asgall", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Perfect Defense", 1);
+        Skill.GiveTo(client.Aisling, "Onslaught", 1);
 
         var item = new Item();
         item = item.Create(client.Aisling,
@@ -234,20 +214,7 @@ public class ClassChooser : MundaneScript
 
     private void Defender(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Wind Blade", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Beag Suain", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Charge", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Execute", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Titan's Cleave", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Beag Suain Ia Gar", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Sneak Attack", 1);
-
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Assault", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Clobber", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Wallop", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Asgall", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Perfect Defense", 1);
+        Skill.GiveTo(client.Aisling, "Assault", 1);
 
         var item = new Item();
         item = item.Create(client.Aisling, client.Aisling.Gender == Gender.Female
@@ -293,24 +260,8 @@ public class ClassChooser : MundaneScript
 
     private void Assassin(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Stab", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Stab Twice", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Stab'n Twist", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Sneak Attack", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Flurry", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Double-Edged Dance", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Ebb'n Flow", 1);
-
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Aim", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Throw", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Poison Tipped Trap", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Snare Trap", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Needle Trap", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Stiletto Trap", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Hiraishin", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Shunshin", 1);
-
+        Skill.GiveTo(client.Aisling, "Stab", 1);
+        
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
@@ -352,20 +303,7 @@ public class ClassChooser : MundaneScript
 
     private void Monk(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Ambush", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Knife Hand Strike", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Palm Heel Strike", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Hammer Twist", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Cross Body Punch", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Wolf Fang Fist", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Hurricane Kick", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Kelberoth Strike", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Krane Kick", 1);
-
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Punch", 1);
-        _skillSwitch = Skill.GiveTo(client.Aisling, "Double Punch", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Dion", 1);
+        Skill.GiveTo(client.Aisling, "Punch", 1);
 
         var item = new Item();
         item = item.Create(client.Aisling,
@@ -408,17 +346,7 @@ public class ClassChooser : MundaneScript
 
     private void Cleric(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Spectral Shield", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Dark Chain", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Detect", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Healing Winds", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Forestall", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Hell Grasp", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ao Puinsein", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Cradh", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Cradh", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Cradh", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Cradh", 1);
+        Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
 
         var item = new Item();
         item = item.Create(client.Aisling,
@@ -461,43 +389,12 @@ public class ClassChooser : MundaneScript
 
     private void Arcanus(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Athar", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Creag", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Sal", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Srad", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Athar", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Creag", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Sal", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Srad", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Dorcha", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Eadrom", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Athar", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Creag", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Sal", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Srad", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Dorcha", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Eadrom", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Athar", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Creag", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Sal", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Srad", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Dorcha", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Eadrom", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Puinsein", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Puinsein", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Puinsein", 1);
-
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Fas Nadur", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Mor Fas Nadur", 1);
-        _spellSwitch = Spell.GiveTo(client.Aisling, "Ard Fas Nadur", 1);
-
-        // Vampiric Touch (Assail that takes hp)
+        Spell.GiveTo(client.Aisling, "Beag Athar", 1);
+        Spell.GiveTo(client.Aisling, "Beag Creag", 1);
+        Spell.GiveTo(client.Aisling, "Beag Sal", 1);
+        Spell.GiveTo(client.Aisling, "Beag Srad", 1);
+        Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
+        Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
 
         var item = new Item();
         item = item.Create(client.Aisling,
