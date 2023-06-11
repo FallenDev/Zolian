@@ -23,19 +23,11 @@ public class Aerith : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
-        var expFraction = int.MaxValue / client.Aisling.BaseMp;
-        var apFraction = int.MaxValue * 0.10;
-
-        if (client.Aisling.ExpTotal >= expFraction)
+        var options = new List<OptionsDataItem>
         {
-            options.Add(new(0x01, "Dedicate experience"));
-        }
-
-        if (client.Aisling.AbpTotal >= apFraction)
-        {
-            options.Add(new(0x02, "Dedicate ability"));
-        }
+            new(0x01, "Dedicate experience"),
+            new(0x02, "Dedicate ability")
+        };
 
         client.SendOptionsDialog(Mundane, "Let's see if we can transpose your experience to mana.", options.ToArray());
     }
@@ -64,6 +56,12 @@ public class Aerith : MundaneScript
             }
             case 0x02:
             {
+                var options = new List<OptionsDataItem>
+                {
+                    new(0x00, "{=bSecond thought")
+                };
+
+                client.SendOptionsDialog(Mundane, "Close your eyes, focus, now let's attempt the conversion.", options.ToArray());
                 break;
             }
             case 0x03:
