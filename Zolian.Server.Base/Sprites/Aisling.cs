@@ -36,7 +36,7 @@ public sealed class Aisling : Player, IAisling
         true => 999,
         false => (uint)(ExpLevel / 2 + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer)
     };
-        
+
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");

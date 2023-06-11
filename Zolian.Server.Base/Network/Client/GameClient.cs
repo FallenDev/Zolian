@@ -476,7 +476,7 @@ public partial class GameClient : NetworkClient
                 {
                     SkillId = skill.SkillId,
                     Icon = skill.Template.Icon,
-                    Level = 100, // ToDo: Remove for Beta
+                    Level = skill.Level, 
                     Slot = skill.Slot,
                     SkillName = skill.SkillName,
                     Uses = skill.Uses,
@@ -531,7 +531,7 @@ public partial class GameClient : NetworkClient
                 {
                     SpellId = spell.SpellId,
                     Icon = spell.Template.Icon,
-                    Level = 100, // ToDo: Remove for Beta
+                    Level = spell.Level,
                     Slot = spell.Slot,
                     SpellName = spell.SpellName,
                     Casts = spell.Casts,

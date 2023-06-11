@@ -91,6 +91,25 @@ public class CreateMonster : MonsterCreateScript
         obj.CurrentHp = obj.MaximumHp;
         obj.CurrentMp = obj.MaximumMp;
 
+        SetElementalAlignment(obj);
+        SetWalkEnabled(obj);
+        SetMood(obj);
+        SetSpawn(obj);
+
+        if (obj.Map.IsAStarWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
+        if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
+
+        obj.AbandonedDate = DateTime.Now;
+
+        obj.Image = _monsterTemplate.ImageVarience > 0
+            ? (ushort)Random.Shared.Next(_monsterTemplate.Image, _monsterTemplate.Image + _monsterTemplate.ImageVarience)
+            : _monsterTemplate.Image;
+
+        return obj;
+    }
+
+    private void SetElementalAlignment(Monster obj)
+    {
         switch (obj.Template.ElementType)
         {
             case ElementQualifer.Random:
@@ -105,14 +124,24 @@ public class CreateMonster : MonsterCreateScript
                 obj.OffenseElement = ElementManager.Element.None;
                 break;
         }
+    }
 
-        if ((_monsterTemplate.PathQualifer & PathQualifer.Wander) == PathQualifer.Wander)
+    private void SetWalkEnabled(Monster obj)
+    {
+        var pathQualifier = _monsterTemplate.PathQualifer;
+    
+        if ((pathQualifier & PathQualifer.Wander) == PathQualifer.Wander || (pathQualifier & PathQualifer.Patrol) == PathQualifer.Patrol)
+        {
             obj.WalkEnabled = true;
-        else if ((_monsterTemplate.PathQualifer & PathQualifer.Fixed) == PathQualifer.Fixed)
+        }
+        else if ((pathQualifier & PathQualifer.Fixed) == PathQualifer.Fixed)
+        {
             obj.WalkEnabled = false;
-        else if ((_monsterTemplate.PathQualifer & PathQualifer.Patrol) == PathQualifer.Patrol)
-            obj.WalkEnabled = true;
+        }
+    }
 
+    private void SetMood(Monster obj)
+    {
         if (_monsterTemplate.MoodType.MoodFlagIsSet(MoodQualifer.Aggressive) || _monsterTemplate.MoodType.MoodFlagIsSet(MoodQualifer.VeryAggressive))
         {
             obj.Aggressive = true;
@@ -126,7 +155,10 @@ public class CreateMonster : MonsterCreateScript
         {
             obj.Aggressive = false;
         }
+    }
 
+    private void SetSpawn(Monster obj)
+    {
         if (_monsterTemplate.SpawnType == SpawnQualifer.Random)
         {
             var x = Generator.GenerateMapLocation(_map.Rows);
@@ -137,115 +169,47 @@ public class CreateMonster : MonsterCreateScript
         {
             obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
         }
-
-        if (obj.Map.IsAStarWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
-        if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
-
-        obj.AbandonedDate = DateTime.Now;
-
-        obj.Image = _monsterTemplate.ImageVarience > 0
-            ? (ushort)Random.Shared.Next(_monsterTemplate.Image, _monsterTemplate.Image + _monsterTemplate.ImageVarience)
-            : _monsterTemplate.Image;
-
-        return obj;
     }
 
     private void MonsterSkillSet(Monster obj)
     {
-        switch (_monsterTemplate.MonsterRace)
+        var monsterRaceActions = new Dictionary<MonsterRace, Action<Monster>>
         {
-            case MonsterRace.Aberration:
-                MonsterExtensions.AberrationSet(obj);
-                break;
-            case MonsterRace.Animal:
-                MonsterExtensions.AnimalSet(obj);
-                break;
-            case MonsterRace.Aquatic:
-                MonsterExtensions.AquaticSet(obj);
-                break;
-            case MonsterRace.Beast:
-                MonsterExtensions.BeastSet(obj);
-                break;
-            case MonsterRace.Celestial:
-                MonsterExtensions.CelestialSet(obj);
-                break;
-            case MonsterRace.Contruct:
-                MonsterExtensions.ContructSet(obj);
-                break;
-            case MonsterRace.Demon:
-                MonsterExtensions.DemonSet(obj);
-                break;
-            case MonsterRace.Dragon:
-                MonsterExtensions.DragonSet(obj);
-                break;
-            case MonsterRace.Elemental:
-                MonsterExtensions.ElementalSet(obj);
-                break;
-            case MonsterRace.Fairy:
-                MonsterExtensions.FairySet(obj);
-                break;
-            case MonsterRace.Fiend:
-                MonsterExtensions.FiendSet(obj);
-                break;
-            case MonsterRace.Fungi:
-                MonsterExtensions.FungiSet(obj);
-                break;
-            case MonsterRace.Gargoyle:
-                MonsterExtensions.GargoyleSet(obj);
-                break;
-            case MonsterRace.Giant:
-                MonsterExtensions.GiantSet(obj);
-                break;
-            case MonsterRace.Goblin:
-                MonsterExtensions.GoblinSet(obj);
-                break;
-            case MonsterRace.Grimlok:
-                MonsterExtensions.GrimlokSet(obj);
-                break;
-            case MonsterRace.Humanoid:
-                MonsterExtensions.HumanoidSet(obj);
-                break;
-            case MonsterRace.Insect:
-                MonsterExtensions.InsectSet(obj);
-                break;
-            case MonsterRace.Kobold:
-                MonsterExtensions.KoboldSet(obj);
-                break;
-            case MonsterRace.Magical:
-                MonsterExtensions.MagicalSet(obj);
-                break;
-            case MonsterRace.Mukul:
-                MonsterExtensions.MukulSet(obj);
-                break;
-            case MonsterRace.Ooze:
-                MonsterExtensions.OozeSet(obj);
-                break;
-            case MonsterRace.Orc:
-                MonsterExtensions.OrcSet(obj);
-                break;
-            case MonsterRace.Plant:
-                MonsterExtensions.PlantSet(obj);
-                break;
-            case MonsterRace.Reptile:
-                MonsterExtensions.ReptileSet(obj);
-                break;
-            case MonsterRace.Robotic:
-                MonsterExtensions.RoboticSet(obj);
-                break;
-            case MonsterRace.Shadow:
-                MonsterExtensions.ShadowSet(obj);
-                break;
-            case MonsterRace.Rodent:
-                MonsterExtensions.RodentSet(obj);
-                break;
-            case MonsterRace.Undead:
-                MonsterExtensions.UndeadSet(obj);
-                break;
-            case MonsterRace.Dummy:
-            case MonsterRace.Inanimate:
-            case MonsterRace.LowerBeing:
-            case MonsterRace.HigherBeing:
-                break;
+            [MonsterRace.Aberration] = MonsterExtensions.AberrationSet,
+            [MonsterRace.Animal] = MonsterExtensions.AnimalSet,
+            [MonsterRace.Aquatic] = MonsterExtensions.AquaticSet,
+            [MonsterRace.Beast] = MonsterExtensions.BeastSet,
+            [MonsterRace.Celestial] = MonsterExtensions.CelestialSet,
+            [MonsterRace.Contruct] = MonsterExtensions.ContructSet,
+            [MonsterRace.Demon] = MonsterExtensions.DemonSet,
+            [MonsterRace.Dragon] = MonsterExtensions.DragonSet,
+            [MonsterRace.Elemental] = MonsterExtensions.ElementalSet,
+            [MonsterRace.Fairy] = MonsterExtensions.FairySet,
+            [MonsterRace.Fiend] = MonsterExtensions.FiendSet,
+            [MonsterRace.Fungi] = MonsterExtensions.FungiSet,
+            [MonsterRace.Gargoyle] = MonsterExtensions.GargoyleSet,
+            [MonsterRace.Giant] = MonsterExtensions.GiantSet,
+            [MonsterRace.Goblin] = MonsterExtensions.GoblinSet,
+            [MonsterRace.Grimlok] = MonsterExtensions.GrimlokSet,
+            [MonsterRace.Humanoid] = MonsterExtensions.HumanoidSet,
+            [MonsterRace.Insect] = MonsterExtensions.InsectSet,
+            [MonsterRace.Kobold] = MonsterExtensions.KoboldSet,
+            [MonsterRace.Magical] = MonsterExtensions.MagicalSet,
+            [MonsterRace.Mukul] = MonsterExtensions.MukulSet,
+            [MonsterRace.Ooze] = MonsterExtensions.OozeSet,
+            [MonsterRace.Orc] = MonsterExtensions.OrcSet,
+            [MonsterRace.Plant] = MonsterExtensions.PlantSet,
+            [MonsterRace.Reptile] = MonsterExtensions.ReptileSet,
+            [MonsterRace.Robotic] = MonsterExtensions.RoboticSet,
+            [MonsterRace.Shadow] = MonsterExtensions.ShadowSet,
+            [MonsterRace.Rodent] = MonsterExtensions.RodentSet,
+            [MonsterRace.Undead] = MonsterExtensions.UndeadSet,
+            // Dummy, Inanimate, LowerBeing, HigherBeing have no set action, so they are omitted here
+        };
+
+        if (monsterRaceActions.TryGetValue(_monsterTemplate.MonsterRace, out var raceAction))
+        {
+            raceAction(obj);
         }
 
         MonsterExtensions.Assails(obj);
@@ -283,7 +247,7 @@ public class CreateMonster : MonsterCreateScript
                 <= 100 and > 85 => obj.Size = "Large",
                 _ => obj.Size = "Lessor"
             },
-            <= 98 and >= 12 => sizeRand switch
+            <= 98 => sizeRand switch
             {
                 <= 10 => obj.Size = "Lessor",
                 <= 30 and > 10 => obj.Size = "Small",
@@ -309,90 +273,98 @@ public class CreateMonster : MonsterCreateScript
 
     private static void MonsterArmorClass(Monster obj)
     {
-        obj.BonusAc = obj.Template.Level switch
+        // Initialize the dictionary with the maximum level as the key and the range of armor class as the value
+        var levelArmorClassRange = new SortedDictionary<int, (int start, int end)>
         {
-            >= 1 and <= 3 => Generator.GenerateDeterminedNumberRange(1, 4),
-            >= 4 and <= 7 => Generator.GenerateDeterminedNumberRange(5, 7),
-            >= 8 and <= 11 => Generator.GenerateDeterminedNumberRange(8, 13),
-            >= 12 and <= 17 => Generator.GenerateDeterminedNumberRange(14, 18),
-            >= 18 and <= 24 => Generator.GenerateDeterminedNumberRange(19, 26),
-            >= 25 and <= 31 => Generator.GenerateDeterminedNumberRange(27, 35),
-            >= 32 and <= 37 => Generator.GenerateDeterminedNumberRange(36, 45),
-            >= 38 and <= 44 => Generator.GenerateDeterminedNumberRange(46, 52),
-            >= 45 and <= 51 => Generator.GenerateDeterminedNumberRange(53, 59),
-            >= 52 and <= 57 => Generator.GenerateDeterminedNumberRange(60, 66),
-            >= 58 and <= 64 => Generator.GenerateDeterminedNumberRange(67, 74),
-            >= 65 and <= 71 => Generator.GenerateDeterminedNumberRange(75, 79),
-            >= 72 and <= 77 => Generator.GenerateDeterminedNumberRange(80, 86),
-            >= 78 and <= 84 => Generator.GenerateDeterminedNumberRange(87, 94),
-            >= 85 and <= 91 => Generator.GenerateDeterminedNumberRange(95, 99),
-            >= 92 and <= 97 => Generator.GenerateDeterminedNumberRange(100, 110),
-            >= 98 and <= 104 => Generator.GenerateDeterminedNumberRange(110, 125),
-            >= 105 and <= 110 => Generator.GenerateDeterminedNumberRange(120, 135),
-            >= 111 and <= 116 => Generator.GenerateDeterminedNumberRange(130, 145),
-            >= 117 and <= 123 => Generator.GenerateDeterminedNumberRange(140, 155),
-            >= 124 and <= 129 => Generator.GenerateDeterminedNumberRange(150, 165),
-            >= 130 and <= 135 => Generator.GenerateDeterminedNumberRange(160, 175),
-            >= 136 and <= 140 => Generator.GenerateDeterminedNumberRange(160, 185),
-            >= 141 and <= 144 => Generator.GenerateDeterminedNumberRange(180, 195),
-            >= 145 and <= 149 => Generator.GenerateDeterminedNumberRange(190, 205),
-            >= 150 and <= 155 => Generator.GenerateDeterminedNumberRange(190, 210),
-            >= 156 and <= 160 => Generator.GenerateDeterminedNumberRange(190, 220),
-            >= 161 and <= 164 => Generator.GenerateDeterminedNumberRange(200, 230),
-            >= 165 and <= 169 => Generator.GenerateDeterminedNumberRange(200, 240),
-            >= 170 and <= 175 => Generator.GenerateDeterminedNumberRange(200, 250),
-            >= 176 and <= 180 => Generator.GenerateDeterminedNumberRange(210, 260),
-            >= 181 and <= 184 => Generator.GenerateDeterminedNumberRange(220, 270),
-            >= 185 and <= 190 => Generator.GenerateDeterminedNumberRange(230, 280),
-            >= 191 and <= 194 => Generator.GenerateDeterminedNumberRange(240, 290),
-            >= 195 and <= 200 => Generator.GenerateDeterminedNumberRange(250, 300),
-            >= 201 => Generator.GenerateDeterminedNumberRange(260, 330),
-            _ => obj.BonusAc
+            { 3, (1, 4) },
+            { 7, (5, 7) },
+            { 11, (8, 13) },
+            { 17, (14, 18) },
+            { 24, (19, 26) },
+            { 31, (27, 35) },
+            { 37, (36, 45) },
+            { 44, (46, 52) },
+            { 51, (53, 59) },
+            { 57, (60, 66) },
+            { 64, (67, 74) },
+            { 71, (75, 79) },
+            { 77, (80, 86) },
+            { 84, (87, 94) },
+            { 91, (95, 99) },
+            { 97, (100, 110) },
+            { 104, (110, 125) },
+            { 110, (120, 135) },
+            { 116, (130, 145) },
+            { 123, (140, 155) },
+            { 129, (150, 165) },
+            { 135, (160, 175) },
+            { 140, (160, 185) },
+            { 144, (180, 195) },
+            { 149, (190, 205) },
+            { 155, (190, 210) },
+            { 160, (190, 220) },
+            { 164, (200, 230) },
+            { 169, (200, 240) },
+            { 175, (200, 250) },
+            { 180, (210, 260) },
+            { 184, (220, 270) },
+            { 190, (230, 280) },
+            { 194, (240, 290) },
+            { 200, (250, 300) },
+            { int.MaxValue, (260, 330) } // default case for level > 200
         };
+
+        // Find the first range where the level is less than or equal to the key
+        var (start, end) = levelArmorClassRange.First(x => obj.Template.Level <= x.Key).Value;
+
+        obj.BonusAc = Generator.GenerateDeterminedNumberRange(start, end);
     }
 
     private static void MonsterExperience(Monster obj)
     {
-        obj.Experience = obj.Template.Level switch
+        var levelExperienceRange = new SortedDictionary<int, (int start, int end)>
         {
-            >= 1 and <= 3 => (uint)Generator.GenerateDeterminedNumberRange(200, 600),
-            >= 4 and <= 7 => (uint)Generator.GenerateDeterminedNumberRange(600, 1500),
-            >= 8 and <= 11 => (uint)Generator.GenerateDeterminedNumberRange(5000, 15000),
-            >= 12 and <= 17 => (uint)Generator.GenerateDeterminedNumberRange(9000, 17000),
-            >= 18 and <= 24 => (uint)Generator.GenerateDeterminedNumberRange(15000, 24000),
-            >= 25 and <= 31 => (uint)Generator.GenerateDeterminedNumberRange(17000, 35000),
-            >= 32 and <= 37 => (uint)Generator.GenerateDeterminedNumberRange(24000, 50000),
-            >= 38 and <= 44 => (uint)Generator.GenerateDeterminedNumberRange(35000, 58000),
-            >= 45 and <= 51 => (uint)Generator.GenerateDeterminedNumberRange(52000, 65000),
-            >= 52 and <= 57 => (uint)Generator.GenerateDeterminedNumberRange(60000, 90000),
-            >= 58 and <= 64 => (uint)Generator.GenerateDeterminedNumberRange(74000, 108000),
-            >= 65 and <= 71 => (uint)Generator.GenerateDeterminedNumberRange(94000, 120000),
-            >= 72 and <= 77 => (uint)Generator.GenerateDeterminedNumberRange(110000, 134000),
-            >= 78 and <= 84 => (uint)Generator.GenerateDeterminedNumberRange(125000, 150000),
-            >= 85 and <= 91 => (uint)Generator.GenerateDeterminedNumberRange(138000, 165000),
-            >= 92 and <= 97 => (uint)Generator.GenerateDeterminedNumberRange(250000, 295000),
-            >= 98 and <= 104 => (uint)Generator.GenerateDeterminedNumberRange(290000, 345000),
-            >= 105 and <= 110 => (uint)Generator.GenerateDeterminedNumberRange(350000, 467000),
-            >= 111 and <= 116 => (uint)Generator.GenerateDeterminedNumberRange(400000, 535000),
-            >= 117 and <= 123 => (uint)Generator.GenerateDeterminedNumberRange(615000, 750000),
-            >= 124 and <= 129 => (uint)Generator.GenerateDeterminedNumberRange(775000, 890000),
-            >= 130 and <= 135 => (uint)Generator.GenerateDeterminedNumberRange(910000, 1200000),
-            >= 136 and <= 140 => (uint)Generator.GenerateDeterminedNumberRange(1000000, 1300000),
-            >= 141 and <= 144 => (uint)Generator.GenerateDeterminedNumberRange(1250000, 1390000),
-            >= 145 and <= 149 => (uint)Generator.GenerateDeterminedNumberRange(1375000, 1450000),
-            >= 150 and <= 155 => (uint)Generator.GenerateDeterminedNumberRange(1400000, 1600000),
-            >= 156 and <= 160 => (uint)Generator.GenerateDeterminedNumberRange(1500000, 1700000),
-            >= 161 and <= 164 => (uint)Generator.GenerateDeterminedNumberRange(1600000, 1800000),
-            >= 165 and <= 169 => (uint)Generator.GenerateDeterminedNumberRange(1700000, 1900000),
-            >= 170 and <= 175 => (uint)Generator.GenerateDeterminedNumberRange(1800000, 2000000),
-            >= 176 and <= 180 => (uint)Generator.GenerateDeterminedNumberRange(1900000, 2100000),
-            >= 181 and <= 184 => (uint)Generator.GenerateDeterminedNumberRange(2200000, 2499999),
-            >= 185 and <= 190 => (uint)Generator.GenerateDeterminedNumberRange(2500000, 2899999),
-            >= 191 and <= 194 => (uint)Generator.GenerateDeterminedNumberRange(2900000, 3499999),
-            >= 195 and <= 200 => (uint)Generator.GenerateDeterminedNumberRange(3500000, 3899999),
-            >= 201 => (uint)Generator.GenerateDeterminedNumberRange(3900000, 4200000),
-            _ => (uint)Generator.GenerateDeterminedNumberRange(200, 600)
+            { 3, (200, 600) },
+            { 7, (600, 1500) },
+            { 11, (5000, 15000) },
+            { 17, (9000, 17000) },
+            { 24, (15000, 24000) },
+            { 31, (17000, 35000) },
+            { 37, (24000, 50000) },
+            { 44, (35000, 58000) },
+            { 51, (52000, 65000) },
+            { 57, (60000, 90000) },
+            { 64, (74000, 108000) },
+            { 71, (94000, 120000) },
+            { 77, (110000, 134000) },
+            { 84, (125000, 150000) },
+            { 91, (138000, 165000) },
+            { 97, (250000, 295000) },
+            { 104, (290000, 345000) },
+            { 110, (350000, 467000) },
+            { 116, (400000, 535000) },
+            { 123, (615000, 750000) },
+            { 129, (775000, 890000) },
+            { 135, (910000, 1200000) },
+            { 140, (1000000, 1300000) },
+            { 144, (1250000, 1390000) },
+            { 149, (1375000, 1450000) },
+            { 155, (1400000, 1600000) },
+            { 160, (1500000, 1700000) },
+            { 164, (1600000, 1800000) },
+            { 169, (1700000, 1900000) },
+            { 175, (1800000, 2000000) },
+            { 180, (1900000, 2100000) },
+            { 184, (2200000, 2499999) },
+            { 190, (2500000, 2899999) },
+            { 194, (2900000, 3499999) },
+            { 200, (3500000, 3899999) },
+            { int.MaxValue, (3900000, 4200000) } // default case for level > 200
         };
+
+        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+
+        obj.Experience = (uint)Generator.GenerateDeterminedNumberRange(start, end);
     }
 
     private static void MonsterElementalAlignment(Sprite obj)
@@ -426,7 +398,7 @@ public class CreateMonster : MonsterCreateScript
                     _ => obj.DefenseElement
                 };
                 break;
-            case <= 98 and >= 12:
+            case <= 98:
                 obj.OffenseElement = offRand switch
                 {
                     <= 20 => ElementManager.Element.Wind,
@@ -482,58 +454,67 @@ public class CreateMonster : MonsterCreateScript
 
         MonsterStartingStats(obj);
 
-        switch (obj.Size)
+        var sizeStats = new Dictionary<string, Action<Monster>>
         {
-            case "Lessor":
-                obj._Con -= statGen1;
-                obj._Str -= statGen1;
-                obj._Dex -= statGen1;
-                break;
-            case "Small":
-                obj._Con -= statGen1;
-                obj._Str -= statGen1;
-                obj._Dex += statGen2;
-                break;
-            case "Medium":
-                obj._Con += statGen2;
-                obj._Str += statGen2;
-                obj._Dex += statGen2;
-                break;
-            case "Large":
-                obj._Con += statGen3;
-                obj._Str += statGen2;
-                obj._Dex -= statGen1;
-                obj.BonusHp += (int)(obj.MaximumHp * 0.012);
-                obj.Experience += (uint)(obj.Experience * 0.02);
-                break;
-            case "Great":
-                obj._Con += statGen3;
-                obj._Str += statGen3;
-                obj._Dex -= statGen2;
-                obj.BonusHp += (int)(obj.MaximumHp * 0.024);
-                obj.Experience += (uint)(obj.Experience * 0.06);
-                break;
-            case "Colossal":
-                obj._Con += statGen3;
-                obj._Str += statGen3;
-                obj._Dex += statGen3;
-                obj.BonusHp += (int)(obj.MaximumHp * 0.036);
-                obj.Experience += (uint)(obj.Experience * 0.10);
-                break;
-            case "Deity":
-                obj._Con += statGen4;
-                obj._Str += statGen4;
-                obj._Dex += statGen4;
-                obj.BonusHp += (int)(obj.MaximumHp * 0.048);
-                obj.Experience += (uint)(obj.Experience * 0.15);
-                break;
-            default:
-                obj.Size = "Lessor";
-                obj._Con -= statGen1;
-                obj._Str -= statGen1;
-                obj._Dex -= statGen1;
-                break;
+            ["Lessor"] = monster =>
+            {
+                monster._Con -= statGen1;
+                monster._Str -= statGen1;
+                monster._Dex -= statGen1;
+            },
+            ["Small"] = monster =>
+            {
+                monster._Con -= statGen1;
+                monster._Str -= statGen1;
+                monster._Dex += statGen2;
+            },
+            ["Medium"] = monster =>
+            {
+                monster._Con += statGen2;
+                monster._Str += statGen2;
+                monster._Dex += statGen2;
+            },
+            ["Large"] = monster =>
+            {
+                monster._Con += statGen3;
+                monster._Str += statGen2;
+                monster._Dex -= statGen1;
+                monster.BonusHp += (int)(monster.MaximumHp * 0.012);
+                monster.Experience += (uint)(monster.Experience * 0.02);
+            },
+            ["Great"] = monster =>
+            {
+                monster._Con += statGen3;
+                monster._Str += statGen3;
+                monster._Dex -= statGen2;
+                monster.BonusHp += (int)(monster.MaximumHp * 0.024);
+                monster.Experience += (uint)(monster.Experience * 0.06);
+            },
+            ["Colossal"] = monster =>
+            {
+                monster._Con += statGen3;
+                monster._Str += statGen3;
+                monster._Dex += statGen3;
+                monster.BonusHp += (int)(monster.MaximumHp * 0.036);
+                monster.Experience += (uint)(monster.Experience * 0.10);
+            },
+            ["Deity"] = monster =>
+            {
+                monster._Con += statGen4;
+                monster._Str += statGen4;
+                monster._Dex += statGen4;
+                monster.BonusHp += (int)(monster.MaximumHp * 0.048);
+                monster.Experience += (uint)(monster.Experience * 0.15);
+            },
+        };
+
+        if (!sizeStats.TryGetValue(obj.Size, out var statAdjustment))
+        {
+            obj.Size = "Lessor";
+            statAdjustment = sizeStats[obj.Size];
         }
+
+        statAdjustment(obj);
 
         obj._Hit = (byte)(obj._Dex * 0.2);
         obj.BonusHit = (byte)(10 * (obj.Template.Level / 12));
@@ -542,180 +523,195 @@ public class CreateMonster : MonsterCreateScript
 
     private static void MonsterStartingStats(Monster obj)
     {
-        for (var i = 0; i < 5; i++)
+        var levelStatsRange = new SortedDictionary<int, (int start, int end)>
         {
-            var x = obj.Template.Level switch
-            {
-                >= 1 and <= 3 => Generator.GenerateDeterminedNumberRange(1, 8),
-                >= 4 and <= 7 => Generator.GenerateDeterminedNumberRange(5, 10),
-                >= 8 and <= 11 => Generator.GenerateDeterminedNumberRange(8, 15),
-                >= 12 and <= 17 => Generator.GenerateDeterminedNumberRange(10, 20),
-                >= 18 and <= 24 => Generator.GenerateDeterminedNumberRange(10, 25),
-                >= 25 and <= 31 => Generator.GenerateDeterminedNumberRange(10, 35),
-                >= 32 and <= 37 => Generator.GenerateDeterminedNumberRange(30, 48),
-                >= 38 and <= 44 => Generator.GenerateDeterminedNumberRange(30, 57),
-                >= 45 and <= 51 => Generator.GenerateDeterminedNumberRange(30, 66),
-                >= 52 and <= 57 => Generator.GenerateDeterminedNumberRange(60, 75),
-                >= 58 and <= 64 => Generator.GenerateDeterminedNumberRange(60, 80),
-                >= 65 and <= 71 => Generator.GenerateDeterminedNumberRange(60, 85),
-                >= 72 and <= 77 => Generator.GenerateDeterminedNumberRange(80, 94),
-                >= 78 and <= 84 => Generator.GenerateDeterminedNumberRange(80, 102),
-                >= 85 and <= 91 => Generator.GenerateDeterminedNumberRange(80, 109),
-                >= 92 and <= 97 => Generator.GenerateDeterminedNumberRange(80, 122),
-                >= 98 and <= 104 => Generator.GenerateDeterminedNumberRange(90, 130),
-                >= 105 and <= 110 => Generator.GenerateDeterminedNumberRange(90, 140),
-                >= 111 and <= 116 => Generator.GenerateDeterminedNumberRange(90, 150),
-                >= 117 and <= 123 => Generator.GenerateDeterminedNumberRange(90, 160),
-                >= 124 and <= 129 => Generator.GenerateDeterminedNumberRange(90, 170),
-                >= 130 and <= 135 => Generator.GenerateDeterminedNumberRange(90, 180),
-                >= 136 and <= 140 => Generator.GenerateDeterminedNumberRange(90, 190),
-                >= 141 and <= 144 => Generator.GenerateDeterminedNumberRange(100, 200),
-                >= 145 and <= 149 => Generator.GenerateDeterminedNumberRange(100, 205),
-                >= 150 and <= 155 => Generator.GenerateDeterminedNumberRange(100, 210),
-                >= 156 and <= 160 => Generator.GenerateDeterminedNumberRange(125, 220),
-                >= 161 and <= 164 => Generator.GenerateDeterminedNumberRange(125, 230),
-                >= 165 and <= 169 => Generator.GenerateDeterminedNumberRange(125, 240),
-                >= 170 and <= 175 => Generator.GenerateDeterminedNumberRange(125, 250),
-                >= 176 and <= 180 => Generator.GenerateDeterminedNumberRange(125, 260),
-                >= 181 and <= 184 => Generator.GenerateDeterminedNumberRange(125, 270),
-                >= 185 and <= 190 => Generator.GenerateDeterminedNumberRange(125, 280),
-                >= 191 and <= 194 => Generator.GenerateDeterminedNumberRange(125, 290),
-                >= 195 and <= 200 => Generator.GenerateDeterminedNumberRange(150, 300),
-                >= 201 => Generator.GenerateDeterminedNumberRange(150, 330),
-                _ => Generator.GenerateDeterminedNumberRange(1, 4)
-            };
+            { 3, (1, 5) },
+            { 7, (5, 10) },
+            { 11, (8, 15) },
+            { 17, (10, 20) },
+            { 24, (10, 25) },
+            { 31, (10, 35) },
+            { 37, (30, 48) },
+            { 44, (30, 57) },
+            { 51, (30, 66) },
+            { 57, (60, 75) },
+            { 64, (60, 80) },
+            { 71, (60, 85) },
+            { 77, (80, 94) },
+            { 84, (80, 102) },
+            { 91, (80, 109) },
+            { 97, (80, 122) },
+            { 104, (90, 130) },
+            { 110, (90, 140) },
+            { 116, (90, 150) },
+            { 123, (90, 160) },
+            { 129, (90, 170) },
+            { 135, (90, 180) },
+            { 140, (90, 190) },
+            { 144, (100, 200) },
+            { 149, (100, 205) },
+            { 155, (100, 210) },
+            { 160, (125, 220) },
+            { 164, (125, 230) },
+            { 169, (125, 240) },
+            { 175, (125, 250) },
+            { 180, (125, 260) },
+            { 184, (125, 270) },
+            { 190, (125, 280) },
+            { 194, (125, 290) },
+            { 200, (150, 300) },
+            { int.MaxValue, (150, 330) } // default case for level > 200
+        };
 
-            switch (i)
-            {
-                case 0:
-                    obj._Str = x;
-                    break;
-                case 1:
-                    obj._Int = x;
-                    break;
-                case 2:
-                    obj._Wis = x;
-                    break;
-                case 3:
-                    obj._Con = x;
-                    break;
-                case 4:
-                    obj._Dex = x;
-                    break;
-            }
+        var statsToUpdate = new List<Action<int>>
+        {
+            x => obj._Str = x,
+            x => obj._Int = x,
+            x => obj._Wis = x,
+            x => obj._Con = x,
+            x => obj._Dex = x
+        };
+
+        foreach (var updateStat in statsToUpdate)
+        {
+            var (start, end) = levelStatsRange.First(x => obj.Template.Level <= x.Key).Value;
+            updateStat(Generator.GenerateDeterminedNumberRange(start, end));
         }
     }
 
     private static void MonsterStatBoostOnPrimary(Monster obj)
     {
+        if (obj.Level <= 20) return;
+
         var stat = Generator.RandomEnumValue<PrimaryStat>();
-
-        switch (stat)
-        {
-            case PrimaryStat.STR:
-                obj.BonusStr += (byte)(obj._Str * 1.2);
-                obj.BonusDmg += (byte)(obj._Dmg * 1.2);
-                break;
-
-            case PrimaryStat.INT:
-                obj.BonusInt += (byte)(obj._Int * 1.2);
-                obj.BonusMr += (byte)(obj._Mr * 1.2);
-                break;
-
-            case PrimaryStat.WIS:
-                obj.BonusWis += (byte)(obj._Wis * 1.2);
-                obj.BonusMp += (int)(obj.BaseMp * 1.2);
-                break;
-
-            case PrimaryStat.CON:
-                obj.BonusCon += (byte)(obj._Con * 1.2);
-                obj.BonusHp += (int)(obj.BaseHp * 1.2);
-                break;
-
-            case PrimaryStat.DEX:
-                obj.BonusDex += (byte)(obj._Dex * 1.2);
-                obj.BonusHit += (byte)(obj._Hit * 1.2);
-                break;
-        }
-
         obj.MajorAttribute = stat;
+
+        var primaryStatBoosts = new Dictionary<PrimaryStat, Action<Monster>>
+        {
+            [PrimaryStat.STR] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 1.2);
+                monster.BonusDmg += (byte)(monster._Dmg * 1.2);
+            },
+            [PrimaryStat.INT] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 1.2);
+                monster.BonusMr += (byte)(monster._Mr * 1.2);
+            },
+            [PrimaryStat.WIS] = monster =>
+            {
+                monster.BonusWis += (byte)(monster._Wis * 1.2);
+                monster.BonusMp += (int)(monster.BaseMp * 1.2);
+            },
+            [PrimaryStat.CON] = monster =>
+            {
+                monster.BonusCon += (byte)(monster._Con * 1.2);
+                monster.BonusHp += (int)(monster.BaseHp * 1.2);
+            },
+            [PrimaryStat.DEX] = monster =>
+            {
+                monster.BonusDex += (byte)(monster._Dex * 1.2);
+                monster.BonusHit += (byte)(monster._Hit * 1.2);
+            }
+        };
+
+        if (primaryStatBoosts.TryGetValue(stat, out var boostAction))
+        {
+            boostAction(obj);
+        }
     }
 
     private static void MonsterStatBoostOnType(Monster obj)
     {
-        switch (obj.Template.MonsterType)
+        if (obj.Level <= 20) return;
+
+        var monsterTypeBoosts = new Dictionary<MonsterType, Action<Monster>>
         {
-            case MonsterType.None:
-                break;
-            case MonsterType.Physical:
-                obj.BonusStr += (byte)(obj._Str * 1.2);
-                obj.BonusDex += (byte)(obj._Dex * 1.2);
-                obj.BonusDmg += (byte)(obj._Dmg * 1.2);
-                obj.BonusHp += (int)(obj.MaximumHp * 0.012);
-                break;
-            case MonsterType.Magical:
-                obj.BonusInt += (byte)(obj._Int * 1.2);
-                obj.BonusWis += (byte)(obj._Wis * 1.2);
-                obj.BonusMr += (byte)(obj._Mr * 1.2);
-                break;
-            case MonsterType.GodlyStr:
-                obj.BonusStr += (byte)(obj._Str * 5);
-                obj.BonusDex += (byte)(obj._Dex * 2.4);
-                obj.BonusDmg += (byte)(obj._Dmg * 5);
-                break;
-            case MonsterType.GodlyInt:
-                obj.BonusInt += (byte)(obj._Int * 5);
-                obj.BonusWis += (byte)(obj._Wis * 2.4);
-                obj.BonusMr += (byte)(obj._Mr * 5);
-                break;
-            case MonsterType.GodlyWis:
-                obj.BonusWis += (byte)(obj._Wis * 5);
-                obj.BonusMp += obj.BaseMp * 5;
-                break;
-            case MonsterType.GodlyCon:
-                obj.BonusCon += (byte)(obj._Con * 5);
-                obj.BonusHp += obj.BaseHp * 5;
-                break;
-            case MonsterType.GodlyDex:
-                obj.BonusDex += (byte)(obj._Dex * 5);
-                obj.BonusHit += (byte)(obj._Hit * 5);
-                obj.BonusDmg += (byte)(obj._Dmg * 5);
-                break;
-            case MonsterType.Above99P:
-                obj.BonusStr += (byte)(obj._Str * 5);
-                obj.BonusDex += (byte)(obj._Dex * 5);
-                obj.BonusDmg += (byte)(obj._Dmg * 5);
-                obj.BonusHp += (int)(obj.MaximumHp * 0.03);
-                break;
-            case MonsterType.Above99M:
-                obj.BonusInt += (byte)(obj._Int * 5);
-                obj.BonusWis += (byte)(obj._Wis * 5);
-                obj.BonusMr += (byte)(obj._Mr * 5);
-                break;
-            case MonsterType.Forsaken:
-                obj.BonusStr += (byte)(obj._Str * 8);
-                obj.BonusInt += (byte)(obj._Int * 8);
-                obj.BonusWis += (byte)(obj._Wis * 8);
-                obj.BonusCon += (byte)(obj._Con * 8);
-                obj.BonusDex += (byte)(obj._Dex * 8);
-                obj.BonusMr += (byte)(obj._Mr * 5);
-                obj.BonusHit += (byte)(obj._Hit * 3);
-                obj.BonusDmg += (byte)(obj._Dmg * 3);
-                obj.BonusHp += obj.BaseHp * 4;
-                obj.BonusMp += obj.BaseMp * 4;
-                break;
-            case MonsterType.Boss:
-                obj.BonusStr += (byte)(obj._Str * 13);
-                obj.BonusInt += (byte)(obj._Int * 13);
-                obj.BonusWis += (byte)(obj._Wis * 13);
-                obj.BonusCon += (byte)(obj._Con * 13);
-                obj.BonusDex += (byte)(obj._Dex * 13);
-                obj.BonusMr += (byte)(obj._Mr * 9);
-                obj.BonusHit += (byte)(obj._Hit * 5);
-                obj.BonusDmg += (byte)(obj._Dmg * 5);
-                obj.BonusHp += obj.BaseHp * 15;
-                obj.BonusMp += obj.BaseMp * 8;
-                break;
+            [MonsterType.Physical] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 1.2);
+                monster.BonusDex += (byte)(monster._Dex * 1.2);
+                monster.BonusDmg += (byte)(monster._Dmg * 1.2);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.012);
+            },
+            [MonsterType.Magical] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 1.2);
+                monster.BonusWis += (byte)(monster._Wis * 1.2);
+                monster.BonusMr += (byte)(monster._Mr * 1.2);
+            },
+            [MonsterType.GodlyStr] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 5);
+                monster.BonusDex += (byte)(monster._Dex * 2.4);
+                monster.BonusDmg += (byte)(monster._Dmg * 5);
+            },
+            [MonsterType.GodlyInt] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 5);
+                monster.BonusWis += (byte)(monster._Wis * 2.4);
+                monster.BonusMr += (byte)(monster._Mr * 5);
+            },
+            [MonsterType.GodlyWis] = monster =>
+            {
+                monster.BonusWis += (byte)(monster._Wis * 5);
+                monster.BonusMp += monster.BaseMp * 5;
+            },
+            [MonsterType.GodlyCon] = monster =>
+            {
+                monster.BonusCon += (byte)(monster._Con * 5);
+                monster.BonusHp += monster.BaseHp * 5;
+            },
+            [MonsterType.GodlyDex] = monster =>
+            {
+                monster.BonusDex += (byte)(monster._Dex * 5);
+                monster.BonusHit += (byte)(monster._Hit * 5);
+                monster.BonusDmg += (byte)(monster._Dmg * 5);
+            },
+            [MonsterType.Above99P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 5);
+                monster.BonusDex += (byte)(monster._Dex * 5);
+                monster.BonusDmg += (byte)(monster._Dmg * 5);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.03);
+            },
+            [MonsterType.Above99M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 5);
+                monster.BonusWis += (byte)(monster._Wis * 5);
+                monster.BonusMr += (byte)(monster._Mr * 5);
+            },
+            [MonsterType.Forsaken] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 8);
+                monster.BonusInt += (byte)(monster._Int * 8);
+                monster.BonusWis += (byte)(monster._Wis * 8);
+                monster.BonusCon += (byte)(monster._Con * 8);
+                monster.BonusDex += (byte)(monster._Dex * 8);
+                monster.BonusMr += (byte)(monster._Mr * 5);
+                monster.BonusHit += (byte)(monster._Hit * 3);
+                monster.BonusDmg += (byte)(monster._Dmg * 3);
+                monster.BonusHp += monster.BaseHp * 4;
+                monster.BonusMp += monster.BaseMp * 4;
+            },
+            [MonsterType.Boss] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 13);
+                monster.BonusInt += (byte)(monster._Int * 13);
+                monster.BonusWis += (byte)(monster._Wis * 13);
+                monster.BonusCon += (byte)(monster._Con * 13);
+                monster.BonusDex += (byte)(monster._Dex * 13);
+                monster.BonusMr += (byte)(monster._Mr * 9);
+                monster.BonusHit += (byte)(monster._Hit * 5);
+                monster.BonusDmg += (byte)(monster._Dmg * 5);
+                monster.BonusHp += monster.BaseHp * 15;
+                monster.BonusMp += monster.BaseMp * 8;
+            },
+        };
+
+        if (monsterTypeBoosts.TryGetValue(obj.Template.MonsterType, out var boostAction))
+        {
+            boostAction(obj);
         }
     }
 
