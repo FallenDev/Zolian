@@ -204,7 +204,7 @@
     // This check sets the current client that should be used
     // Zolian Default: 910 
     // 7.18 Default: 718
-    "ClientVersion": 910,
+    "ClientVersion": 911,
 
     // Messages
     // Forces the client to send a clear message every set seconds

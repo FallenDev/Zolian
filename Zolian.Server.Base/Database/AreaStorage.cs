@@ -60,7 +60,10 @@ public record AreaStorage : IAreaStorage
 
                 if (!string.IsNullOrEmpty(temp.ScriptKey))
                 {
-                    temp.Scripts = ScriptManager.Load<AreaScript>(temp.ScriptKey, temp);
+                    var scriptToType = ScriptManager.Load<AreaScript>(temp.ScriptKey, temp);
+                    var scriptFoundGetValue = scriptToType.TryGetValue(temp.ScriptKey, out var script);
+                    if (scriptFoundGetValue)
+                        temp.Script = new Tuple<string, AreaScript>(temp.ScriptKey, script);
                 }
 
                 ServerSetup.Instance.GlobalMapCache[temp.ID] = temp;

@@ -1,6 +1,10 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Database;
+using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Templates;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.Types;
 
@@ -26,6 +30,8 @@ public class PortalSession : IPortalSession
     {
         if (client.MapOpen) return;
 
+        //GenerateFieldMap();
+
         if (ServerSetup.Instance.GlobalWorldMapTemplateCache.TryGetValue(client.Aisling.World, out var worldMap))
         {
             if (worldMap.Portals.Any(ports => !ServerSetup.Instance.GlobalMapCache.ContainsKey(ports.Destination.AreaID)))
@@ -37,4 +43,10 @@ public class PortalSession : IPortalSession
 
         client.Send(new ServerFormat2E(client.Aisling));
     }
+
+    //public void GenerateFieldMap()
+    //{
+    //    ServerSetup.Instance.GlobalWorldMapTemplateCache = new ConcurrentDictionary<int, WorldMapTemplate>();
+    //    DatabaseLoad.CacheFromDatabase(new WorldMapTemplate());
+    //}
 }

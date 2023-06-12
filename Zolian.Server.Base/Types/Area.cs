@@ -8,6 +8,7 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
+using ServiceStack;
 
 namespace Darkages.Types;
 
@@ -23,7 +24,7 @@ public class Area : Map, IArea
     public int MiningNodes { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }
     public TileContent[,] TileContent { get; set; }
-    public ConcurrentDictionary<string, AreaScript> Scripts { get; set; } = new();
+    public Tuple<string, AreaScript> Script { get; set; }
     public string FilePath { get; set; }
 
     public Vector2 GetPosFromLoc(Vector2 location)
@@ -220,11 +221,8 @@ public class Area : Map, IArea
 
     public void Update(in TimeSpan elapsedTime)
     {
-        if (Scripts == null) return;
-        foreach (var script in Scripts.Values)
-        {
-            script.Update(elapsedTime);
-        }
+        if (Script.Item1.IsNullOrEmpty()) return;
+        Script.Item2.Update(elapsedTime);
     }
 
     #region A* (A Star)

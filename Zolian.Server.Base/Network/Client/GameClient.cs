@@ -297,11 +297,8 @@ public partial class GameClient : NetworkClient
 
         Aisling.Remove(update, delete);
 
-        if (Aisling.LastMapId != Aisling.CurrentMapId && Aisling.Map.Scripts.Any())
-            foreach (var script in Aisling.Map.Scripts.Values)
-            {
-                script.OnMapExit(this);
-            }
+        if (Aisling.LastMapId != Aisling.CurrentMapId && Aisling.Map.Script.Item2 != null)
+            Aisling.Map.Script.Item2.OnMapExit(this);
 
         Aisling.View.Clear();
         return this;
@@ -1208,12 +1205,13 @@ public partial class GameClient : NetworkClient
 
         Send(cluster.ToArray());
 
-        if (Aisling.Map is not { Scripts: null }) return this;
+        if (Aisling.Map is not { Script.Item1: null }) return this;
 
-        if (!string.IsNullOrEmpty(Aisling.Map.ScriptKey))
-        {
-            Aisling.Map.Scripts = ScriptManager.Load<AreaScript>(Aisling.Map.ScriptKey, Aisling.Map);
-        }
+        if (string.IsNullOrEmpty(Aisling.Map.ScriptKey)) return this;
+        var scriptToType = ScriptManager.Load<AreaScript>(Aisling.Map.ScriptKey, Aisling.Map);
+        var scriptFoundGetValue = scriptToType.TryGetValue(Aisling.Map.ScriptKey, out var script);
+        if (scriptFoundGetValue)
+            Aisling.Map.Script = new Tuple<string, AreaScript>(Aisling.Map.ScriptKey, script);
 
         return this;
     }
@@ -1771,11 +1769,7 @@ public partial class GameClient : NetworkClient
 
         Aisling.Client.LastMapUpdated = DateTime.Now;
         Aisling.Client.LastLocationSent = DateTime.Now;
-
-        foreach (var script in Aisling.Map.Scripts.Values)
-        {
-            script.OnMapEnter(this);
-        }
+        Aisling.Map.Script.Item2.OnMapEnter(this);
 
         return this;
     }

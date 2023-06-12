@@ -343,7 +343,7 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = { "CorruptedLorule", "FallsPassageWay", "Hyrule", "Lorule", "MinesPassageWay", "NorthernWaterWay", "TemuairSea" };
+            string[] dbTables = { "Hyrule", "Lorule", "HiddenValley", "HighSeas" };
 
             foreach (var table in dbTables)
             {

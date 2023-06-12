@@ -12,7 +12,7 @@ public interface IArea
     int MiningNodes { get; set; }
     TileGrid[,] ObjectGrid { get; set; }
     TileContent[,] TileContent { get; set; }
-    ConcurrentDictionary<string, AreaScript> Scripts { get; set; }
+    Tuple<string, AreaScript> Script { get; set; }
     string FilePath { get; set; }
 
     Vector2 GetPosFromLoc(Vector2 location);

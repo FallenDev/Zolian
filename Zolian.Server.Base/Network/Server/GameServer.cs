@@ -877,23 +877,19 @@ public class GameServer : NetworkServer<GameClient>
 
             CheckWarpTransitions(client);
 
-            if (client.Aisling.Map == null || !client.Aisling.Map.Scripts.Any()) return;
+            if (client.Aisling.Map?.Script.Item2 == null) return;
 
-            foreach (var script in client.Aisling.Map.Scripts.Values)
+            client.Aisling.Map.Script.Item2.OnPlayerWalk(client, client.Aisling.LastPosition, client.Aisling.Position);
+            if (!client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) return;
+
+            foreach (var trap in Trap.Traps.Select(i => i.Value))
             {
-                script.OnPlayerWalk(client, client.Aisling.LastPosition, client.Aisling.Position);
+                if (trap?.Owner == null || trap.Owner.Serial == client.Aisling.Serial ||
+                    client.Aisling.X != trap.Location.X ||
+                    client.Aisling.Y != trap.Location.Y) continue;
 
-                if (!client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
-
-                foreach (var trap in Trap.Traps.Select(i => i.Value))
-                {
-                    if (trap?.Owner == null || trap.Owner.Serial == client.Aisling.Serial ||
-                        client.Aisling.X != trap.Location.X ||
-                        client.Aisling.Y != trap.Location.Y) continue;
-
-                    var triggered = Trap.Activate(trap, client.Aisling);
-                    if (triggered) break;
-                }
+                var triggered = Trap.Activate(trap, client.Aisling);
+                if (triggered) break;
             }
         }
         else
@@ -1144,13 +1140,9 @@ public class GameServer : NetworkServer<GameClient>
         client.SendStats(StatusFlags.WeightMoney);
 
         if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
-            if (client.Aisling.Map != null && client.Aisling.Map.Scripts.Any())
-            {
-                foreach (var script in client.Aisling.Map.Scripts.Values)
-                {
-                    script.OnItemDropped(client, item, itemPosition);
-                }
-            }
+        {
+            client.Aisling.Map?.Script.Item2?.OnItemDropped(client, item, itemPosition);
+        }
 
         if (item.Scripts == null) return;
         foreach (var itemScript in (item.Scripts.Values))
@@ -1286,10 +1278,7 @@ public class GameServer : NetworkServer<GameClient>
                 script?.OnGossip(client, format.Text);
         }
 
-        foreach (var action in playerMap.Scripts.Values)
-        {
-            action?.OnGossip(client, format.Text);
-        }
+        playerMap.Script.Item2.OnGossip(client, format.Text);
 
         var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(client.Aisling.Username));
         client.Aisling.Show(Scope.DefinedAislings, response, playersToShowList);
@@ -2545,10 +2534,7 @@ public class GameServer : NetworkServer<GameClient>
     {
         if (!CanInteract(client, false, true, false)) return;
 
-        foreach (var script in client.Aisling.Map.Scripts.Values)
-        {
-            script.OnMapClick(client, format.X, format.Y);
-        }
+        client.Aisling.Map.Script.Item2.OnMapClick(client, format.X, format.Y);
 
         if (format.Serial == ServerSetup.Instance.Config.HelperMenuId &&
             ServerSetup.Instance.GlobalMundaneTemplateCache.TryGetValue(ServerSetup.Instance.Config
