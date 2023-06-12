@@ -66,7 +66,7 @@ public class Assail : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -107,7 +107,8 @@ public class Assail : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -236,7 +237,7 @@ public class Assault : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -277,7 +278,8 @@ public class Assault : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -406,7 +408,7 @@ public class Onslaught : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -447,7 +449,8 @@ public class Onslaught : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -576,7 +579,7 @@ public class Clobber : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -617,7 +620,8 @@ public class Clobber : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -746,7 +750,7 @@ public class ClobberX2 : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -787,7 +791,8 @@ public class ClobberX2 : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -962,7 +967,8 @@ public class Thrust : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -1091,7 +1097,7 @@ public class Wallop : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -1132,7 +1138,8 @@ public class Wallop : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -1262,7 +1269,7 @@ public class Thrash : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -1303,7 +1310,8 @@ public class Thrash : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -1431,7 +1439,7 @@ public class Punch : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -1472,7 +1480,8 @@ public class Punch : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -1599,7 +1608,7 @@ public class DoublePunch : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront().First();
+        var enemy = client.Aisling.DamageableGetInFront().FirstOrDefault();
 
         if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
@@ -1640,7 +1649,8 @@ public class DoublePunch : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -1835,7 +1845,8 @@ public class Throw : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2029,7 +2040,8 @@ public class Aim : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2210,7 +2222,8 @@ public class TwoHandedAttack : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2389,7 +2402,8 @@ public class Kobudo : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2568,7 +2582,8 @@ public class AdvancedStaffTraining : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2750,7 +2765,8 @@ public class DualWield : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
@@ -2934,7 +2950,8 @@ public class Ambidextrous : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront().First();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
             if (enemy.Serial == sprite.Serial) return;
             if (!enemy.Attackable) return;
 
