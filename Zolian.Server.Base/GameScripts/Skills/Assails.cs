@@ -7,13 +7,13 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;
 
-// Aisling Str * 2 | Monster Str * 3, Dex * 1.2
+// Aisling Str * 2 | Monster Str * 2, Dex * 1.2
 [Script("Assail")]
 public class Assail : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -66,31 +66,24 @@ public class Assail : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -114,7 +107,9 @@ public class Assail : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -123,29 +118,28 @@ public class Assail : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -158,7 +152,7 @@ public class Assail : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -168,13 +162,13 @@ public class Assail : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str * 3;
+            var dmg = damageMonster.Str * 2;
             dmg += (int)(damageMonster.Dex * 1.2);
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -183,13 +177,13 @@ public class Assail : SkillScript
     }
 }
 
-// Aisling Str * 2.5 | Monster Str * 3, Dex * 1.2
+// Aisling Str * 2.5 | Monster Str * 2.5, Dex * 1.2
 [Script("Assault")]
 public class Assault : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -242,31 +236,24 @@ public class Assault : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -290,7 +277,9 @@ public class Assault : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -299,29 +288,28 @@ public class Assault : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -334,7 +322,7 @@ public class Assault : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -344,13 +332,13 @@ public class Assault : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str * 3;
+            var dmg = (int)(damageMonster.Str * 2.5);
             dmg += (int)(damageMonster.Dex * 1.2);
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -359,13 +347,13 @@ public class Assault : SkillScript
     }
 }
 
-// Aisling Dex * 2.5 | Monster Dex * 3, Str * 1.2
+// Aisling Dex * 2.5 | Monster Dex * 2.5, Str * 1.2
 [Script("Onslaught")]
 public class Onslaught : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -418,31 +406,24 @@ public class Onslaught : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -466,7 +447,9 @@ public class Onslaught : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -475,29 +458,28 @@ public class Onslaught : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -510,7 +492,7 @@ public class Onslaught : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -521,12 +503,12 @@ public class Onslaught : SkillScript
             if (sprite is not Monster damageMonster) return 0;
 
             var dmg = (int)(damageMonster.Str * 1.2);
-            dmg += damageMonster.Dex * 3;
+            dmg += (int)(damageMonster.Dex * 2.5);
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -541,7 +523,7 @@ public class Clobber : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -594,31 +576,24 @@ public class Clobber : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -642,7 +617,9 @@ public class Clobber : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -651,29 +628,28 @@ public class Clobber : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -686,7 +662,7 @@ public class Clobber : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -702,7 +678,7 @@ public class Clobber : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -717,7 +693,7 @@ public class ClobberX2 : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -770,31 +746,24 @@ public class ClobberX2 : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -818,7 +787,9 @@ public class ClobberX2 : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -827,29 +798,28 @@ public class ClobberX2 : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -862,7 +832,7 @@ public class ClobberX2 : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -878,7 +848,7 @@ public class ClobberX2 : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -893,7 +863,7 @@ public class Thrust : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -992,7 +962,9 @@ public class Thrust : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(2);
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1001,29 +973,28 @@ public class Thrust : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1036,7 +1007,7 @@ public class Thrust : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1052,7 +1023,7 @@ public class Thrust : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1067,7 +1038,7 @@ public class Wallop : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1120,31 +1091,24 @@ public class Wallop : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -1168,7 +1132,9 @@ public class Wallop : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1177,29 +1143,28 @@ public class Wallop : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1213,7 +1178,7 @@ public class Wallop : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1229,7 +1194,7 @@ public class Wallop : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1244,7 +1209,7 @@ public class Thrash : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1297,31 +1262,24 @@ public class Thrash : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(sprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -1345,7 +1303,9 @@ public class Thrash : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1354,29 +1314,28 @@ public class Thrash : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1390,7 +1349,7 @@ public class Thrash : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1406,7 +1365,7 @@ public class Thrash : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1421,7 +1380,7 @@ public class Punch : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1472,32 +1431,24 @@ public class Punch : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
-            if (_target == null) continue;
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(damageDealingSprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -1521,7 +1472,9 @@ public class Punch : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1530,29 +1483,28 @@ public class Punch : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1565,7 +1517,7 @@ public class Punch : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1581,7 +1533,7 @@ public class Punch : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1596,7 +1548,7 @@ public class DoublePunch : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1647,33 +1599,24 @@ public class DoublePunch : SkillScript
             Speed = 20
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
+        var enemy = client.Aisling.DamageableGetInFront().First();
 
-        if (enemy.Count == 0)
+        if (enemy == null || enemy.Serial == client.Aisling.Serial || !enemy.Attackable)
         {
             _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
             OnFailed(damageDealingSprite);
             return;
         }
 
-        foreach (var i in enemy.Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
-            if (_target == null) continue;
+        _target = Skill.Reflect(enemy, damageDealingSprite, _skill);
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+        _skillMethod.Train(client, _skill);
 
-            var dmgCalc = DamageCalc(damageDealingSprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            damageDealingSprite.Animate(387);
-            _crit = false;
-        }
+        if (!_crit) return;
+        damageDealingSprite.Animate(387);
+        _crit = false;
 
         damageDealingSprite.Show(Scope.NearbyAislings, action);
     }
@@ -1697,7 +1640,9 @@ public class DoublePunch : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1706,29 +1651,28 @@ public class DoublePunch : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1741,7 +1685,7 @@ public class DoublePunch : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1757,7 +1701,7 @@ public class DoublePunch : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1766,13 +1710,13 @@ public class DoublePunch : SkillScript
     }
 }
 
-// Aisling Dex * 5, * Distance | Monster Str * 3, Dex * 2
+// Aisling Dex * 5, * Distance Max 6 | Monster Dex * 4, * Distance Max 4
 [Script("Throw")]
 public class Throw : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1891,7 +1835,9 @@ public class Throw : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(3);
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -1900,42 +1846,41 @@ public class Throw : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
 
             var imp = 10 + _skill.Level;
-            var dmg = client.Aisling.Dex * 5 * damageDealingAisling.Position.DistanceFrom(_target.Position);
+            var dmg = client.Aisling.Dex * 5 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 6);
 
             dmg += dmg * imp / 100;
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1945,13 +1890,12 @@ public class Throw : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str * 3;
-            dmg += (int)(damageMonster.Dex * 2);
+            var dmg = damageMonster.Dex * 4 * Math.Max(damageMonster.Position.DistanceFrom(_target.Position), 4);
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -1960,13 +1904,13 @@ public class Throw : SkillScript
     }
 }
 
-// Aisling Str * 2, Dex * 4, * Distance (Max 5) | Monster Str * 3, Dex * 5
+// Aisling Str * 2, Dex * 4, * Distance (Max 5) | Monster Str * 3, Dex * 3, * Distance (Max 3)
 [Script("Aim")]
 public class Aim : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -2085,7 +2029,9 @@ public class Aim : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(3);
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2094,42 +2040,41 @@ public class Aim : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
 
             var imp = 10 + _skill.Level;
-            var dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 4 * damageDealingAisling.Position.DistanceFrom(_target.Position);
+            var dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 4 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 5);
 
             dmg += dmg * imp / 100;
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2139,13 +2084,12 @@ public class Aim : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str * 3;
-            dmg += damageMonster.Dex * 5;
+            var dmg = damageMonster.Str * 3 + damageMonster.Dex * 3 * Math.Max(damageMonster.Position.DistanceFrom(_target.Position), 3);
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2155,16 +2099,16 @@ public class Aim : SkillScript
 }
 
 [Script("Two-Handed Attack")]
-public class Two_Handed_Attack : SkillScript
+public class TwoHandedAttack : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Two_Handed_Attack(Skill skill) : base(skill)
+    public TwoHandedAttack(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -2266,7 +2210,9 @@ public class Two_Handed_Attack : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2275,29 +2221,28 @@ public class Two_Handed_Attack : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2310,7 +2255,7 @@ public class Two_Handed_Attack : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2325,7 +2270,7 @@ public class Two_Handed_Attack : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2339,7 +2284,7 @@ public class Kobudo : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -2444,7 +2389,9 @@ public class Kobudo : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2453,29 +2400,28 @@ public class Kobudo : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2488,7 +2434,7 @@ public class Kobudo : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2503,7 +2449,7 @@ public class Kobudo : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2517,7 +2463,7 @@ public class AdvancedStaffTraining : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -2622,7 +2568,9 @@ public class AdvancedStaffTraining : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2631,29 +2579,28 @@ public class AdvancedStaffTraining : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2666,7 +2613,7 @@ public class AdvancedStaffTraining : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2681,7 +2628,7 @@ public class AdvancedStaffTraining : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2695,7 +2642,7 @@ public class DualWield : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -2803,7 +2750,9 @@ public class DualWield : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2812,29 +2761,28 @@ public class DualWield : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2847,7 +2795,7 @@ public class DualWield : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2857,12 +2805,12 @@ public class DualWield : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str;
+            var dmg = damageMonster.Dex;
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -2876,7 +2824,7 @@ public class Ambidextrous : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
+    private const int CritDmg = 2;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -2986,7 +2934,9 @@ public class Ambidextrous : SkillScript
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront();
+            var enemy = sprite.MonsterGetInFront().First();
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
 
             var action = new ServerFormat1A
             {
@@ -2995,29 +2945,28 @@ public class Ambidextrous : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            _target = Skill.Reflect(enemy, sprite, _skill);
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
+            var dmgCalc = DamageCalc(sprite);
 
-                var dmgCalc = DamageCalc(sprite);
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
 
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
 
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-            }
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -3030,7 +2979,7 @@ public class Ambidextrous : SkillScript
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 
@@ -3040,12 +2989,12 @@ public class Ambidextrous : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
 
-            var dmg = damageMonster.Str;
+            var dmg = damageMonster.Dex;
 
             var critRoll = Generator.RandNumGen100();
             {
                 if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
+                dmg *= CritDmg;
                 _crit = true;
             }
 

@@ -169,8 +169,8 @@ public static class MonsterExtensions
             }
         };
 
-        var skillCount = Math.Round(monster.Level / 30d) + 2;
-        skillCount = Math.Min(skillCount, 10); // Max 10 abilities regardless of level
+        var skillCount = Math.Round(monster.Level / 30d) + 1;
+        skillCount = Math.Min(skillCount, 5); // Max 5 abilities regardless of level
         var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
 
         for (var i = 0; i < skillCount; i++)
