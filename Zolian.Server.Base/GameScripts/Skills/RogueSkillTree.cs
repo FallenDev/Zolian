@@ -14,7 +14,6 @@ public class Stab : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -132,46 +131,33 @@ public class Stab : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 3;
-
+            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 3;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Str * 2;
+            dmg = damageMonster.Str * 2;
             dmg += damageMonster.Dex * 3;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -180,7 +166,6 @@ public class Stab_Twice : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -299,46 +284,33 @@ public class Stab_Twice : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Str * 1 + client.Aisling.Dex * 3;
-
+            dmg = client.Aisling.Str * 1 + client.Aisling.Dex * 3;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Str * 1;
+            dmg = damageMonster.Str * 1;
             dmg += damageMonster.Dex * 3;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -347,7 +319,6 @@ public class Stab_and_Twist : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -469,46 +440,33 @@ public class Stab_and_Twist : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 5;
-
+            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 5;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Str * 2;
+            dmg = damageMonster.Str * 2;
             dmg += damageMonster.Dex * 5;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -584,7 +542,6 @@ public class Flurry : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -708,46 +665,33 @@ public class Flurry : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Dex * 2 + client.Aisling.Int * 1;
-
+            dmg = client.Aisling.Dex * 2 + client.Aisling.Int * 1;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Dex * 2;
+            dmg = damageMonster.Dex * 2;
             dmg += damageMonster.Int * 1;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -885,7 +829,6 @@ public class Double_Edged_Dance : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -998,46 +941,33 @@ public class Double_Edged_Dance : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Dex * 7 + client.Aisling.Str * 2;
-
+            dmg = client.Aisling.Dex * 7 + client.Aisling.Str * 2;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Str * 2;
+            dmg = damageMonster.Str * 2;
             dmg += damageMonster.Dex * 7;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -1046,7 +976,6 @@ public class Ebb_and_Flow : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CritDmg = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -1159,46 +1088,33 @@ public class Ebb_and_Flow : SkillScript
                                 _skill.Template.TargetAnimation, 0, 100));
 
                 sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) continue;
+                sprite.Animate(387);
             }
         }
     }
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 50 + _skill.Level;
-            var dmg = client.Aisling.Con * 4 + client.Aisling.Dex * 8;
-
+            dmg = client.Aisling.Con * 4 + client.Aisling.Dex * 8;
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Con * 4;
+            dmg = damageMonster.Con * 4;
             dmg += damageMonster.Dex * 8;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CritDmg;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
@@ -1207,7 +1123,6 @@ public class Shadow_Step : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 2;
     private bool _crit;
     private IList<Sprite> _enemyList;
     private bool _success;
@@ -1295,22 +1210,24 @@ public class Shadow_Step : SkillScript
 
     private int DamageCalc(Sprite sprite)
     {
-        if (sprite is not Aisling damageDealingAisling) return 0;
-        var client = damageDealingAisling.Client;
-
-        var imp = _skill.Level * 2;
-        var dmg = client.Aisling.Int * 2 + client.Aisling.Dex * 5;
-
-        dmg += dmg * imp / 100;
-
-        var critRoll = Generator.RandNumGen100();
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
         {
-            if (critRoll < 95) return dmg;
-            dmg *= CRIT_DMG;
-            _crit = true;
+            var client = damageDealingAisling.Client;
+            var imp = _skill.Level * 2;
+            dmg = client.Aisling.Int * 2 + client.Aisling.Dex * 5;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Int * 2 + damageMonster.Dex * 5;
         }
 
-        return dmg;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 
     private void Target(Sprite sprite)

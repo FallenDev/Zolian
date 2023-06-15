@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 
-using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
@@ -14,7 +13,6 @@ public class Flame_Thrower : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
-    private const int CRIT_DMG = 3;
     private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
@@ -119,7 +117,7 @@ public class Flame_Thrower : SkillScript
         _crit = false;
     }
 
-    public override void OnUse(Sprite sprite)
+    public override async void OnUse(Sprite sprite)
     {
         if (!_skill.CanUseZeroLineAbility) return;
 
@@ -144,6 +142,54 @@ public class Flame_Thrower : SkillScript
                 OnFailed(aisling);
             }
         }
+        else
+        {
+            var enemy = sprite.MonsterGetInFront(5);
+
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            if (enemy.Count == 0) return;
+            await SendAnimations(sprite, enemy);
+
+            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
+            {
+                _target = i;
+
+                if (_target.SpellReflect)
+                {
+                    _target.Animate(184);
+                    if (_target is Aisling)
+                        _target.Client.SendMessage(0x02, $"You reflected {_skill.Template.Name}.");
+
+                    _target = Spell.SpellReflect(_target, sprite);
+                }
+
+                if (_target.SpellNegate)
+                {
+                    _target.Animate(64);
+                    if (_target is Aisling)
+                        _target.Client.SendMessage(0x02, $"You deflected {_skill.Template.Name}.");
+
+                    continue;
+                }
+
+                var dmgCalc = DamageCalc(sprite);
+                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, _skill);
+
+                if (_skill.Template.TargetAnimation > 0)
+                    if (_target is Monster or Mundane or Aisling)
+                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+
+                sprite.Show(Scope.NearbyAislings, action);
+                if (!_crit) return;
+                sprite.Animate(387);
+            }
+        }
     }
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
@@ -160,39 +206,24 @@ public class Flame_Thrower : SkillScript
 
     private int DamageCalc(Sprite sprite)
     {
+        _crit = false;
+        int dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-
             var imp = 10 + _skill.Level;
-            var dmg = client.Aisling.Int * 3 + client.Aisling.Wis * 3 / damageDealingAisling.Position.DistanceFrom(_target.Position);
-
+            dmg = client.Aisling.Int * 3 + client.Aisling.Wis * 3 / damageDealingAisling.Position.DistanceFrom(_target.Position);
             dmg += dmg * imp / 100;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
-                _crit = true;
-            }
-
-            return dmg;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-
-            var dmg = damageMonster.Int * 3;
+            dmg = damageMonster.Int * 3;
             dmg += damageMonster.Wis * 5;
-
-            var critRoll = Generator.RandNumGen100();
-            {
-                if (critRoll < 95) return dmg;
-                dmg *= CRIT_DMG;
-                _crit = true;
-            }
-
-            return dmg;
         }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }

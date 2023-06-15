@@ -17,4 +17,5 @@ public interface IGlobalSkillMethods
     bool OnUse(Aisling aisling, Skill skill);
     int Thrown(IGameClient client, Skill skill, bool crit);
     void FailedAttempt(GameClient client, Aisling aisling, Skill skill, ServerFormat1A action);
+    (bool, int) OnCrit(int dmg);
 }

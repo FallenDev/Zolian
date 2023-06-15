@@ -101,7 +101,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
             aisling.Client.Aisling.Show(Scope.NearbyAislings, action);
         }
-            
+
         buff.OnApplied(target, buff);
     }
 
@@ -179,5 +179,13 @@ public class GlobalSkillMethods : IGlobalSkillMethods
     {
         aisling.Show(Scope.NearbyAislings, new ServerFormat19(skill.Template.Sound));
         client.Aisling.Show(Scope.NearbyAislings, action);
+    }
+
+    public (bool, int) OnCrit(int dmg)
+    {
+        var critRoll = Generator.RandNumGen100();
+        if (critRoll < 99) return (false, dmg);
+        dmg *= 2;
+        return (true, dmg);
     }
 }
