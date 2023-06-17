@@ -17,7 +17,6 @@ public class SpellTemplate : Template
     public int Cooldown { get; set; }
     public byte Sound { get; set; }
     public PostQualifier PostQualifiers { get; set; }
-    public double LevelRate { get; set; }
     public LearningPredicate Prerequisites { get; set; }
     public List<LearningPredicate> LearningRequirements { get; } = new();
     public ElementManager.Element ElementalProperty { get; set; }
@@ -73,7 +72,6 @@ public static class SpellStorage
                 var pane = reader["Pane"].ConvertTo<Pane>();
                 var sound = (int)reader["Sound"];
                 var post = reader["PostAttribute"].ConvertTo<PostQualifier>();
-                var levelRate = (decimal)reader["LevelRate"];
                 var predicateId = (int)reader["PredicateId"];
                 var element = reader["Element"].ConvertTo<ElementManager.Element>();
                 var targetAnim = (int)reader["TargetAnimation"];
@@ -87,7 +85,6 @@ public static class SpellStorage
                 temp.Cooldown = (int)reader["Cooldown"];
                 temp.Sound = (byte)sound;
                 temp.PostQualifiers = post;
-                temp.LevelRate = (double)levelRate;
 
                 #region LearningPredicate
 

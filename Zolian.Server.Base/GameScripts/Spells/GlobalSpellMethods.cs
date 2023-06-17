@@ -40,23 +40,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         }
     }
 
-    public void Train(IGameClient client, Spell spell)
-    {
-        var trainPoint = Generator.RandNumGen100();
-
-        switch (trainPoint)
-        {
-            case <= 5:
-                break;
-            case <= 98 and >= 6:
-                client.TrainSpell(spell);
-                break;
-            case <= 100 and >= 99:
-                client.TrainSpell(spell);
-                client.TrainSpell(spell);
-                break;
-        };
-    }
+    public void Train(IGameClient client, Spell spell) => client.TrainSpell(spell);
 
     public long WeaponDamageElementalProc(Sprite sprite, int weaponProc)
     {
@@ -121,13 +105,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
-            var client = aisling.Client;
             var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
             dmg = AislingSpellDamageCalc(sprite, dmg, spell, exp);
 
             aisling.Cast(spell, target);
             target.ApplyElementalSpellDamage(aisling, dmg, spell.Template.ElementalProperty, spell);
-            Train(client, spell);
         }
         else
         {
@@ -193,6 +175,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
@@ -284,7 +267,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
-            var client = aisling.Client;
 
             aisling.Cast(spell, target);
 
@@ -294,7 +276,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
 
             debuff.OnApplied(target, debuff);
-            Train(client, spell);
         }
         else
         {
@@ -450,6 +431,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
@@ -559,7 +541,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
-            var client = aisling.Client;
 
             aisling.Cast(spell, target);
 
@@ -569,7 +550,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
 
             buff.OnApplied(target, buff);
-            Train(client, spell);
         }
         else
         {
@@ -600,6 +580,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {

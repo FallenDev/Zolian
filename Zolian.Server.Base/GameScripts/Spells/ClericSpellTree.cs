@@ -287,8 +287,6 @@ public class Detect : SpellScript
                                                  $"{{=aRace:{{=s{monster.Template.MonsterRace} {{=aFortitude:{{=s{monster.Fortitude} {{=aReflex:{{=s{monster.Reflex} {{=aWill:{{=s{monster.Will}");
                 break;
         }
-
-        _spellMethod.Train(client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -298,6 +296,7 @@ public class Detect : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -406,8 +405,6 @@ public class Heal_Minor : SpellScript
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendStats(StatusFlags.Health);
-
-            _spellMethod.Train(client, _spell);
         }
         else
         {
@@ -428,6 +425,7 @@ public class Heal_Minor : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -519,8 +517,6 @@ public class Heal_Major : SpellScript
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendStats(StatusFlags.Health);
-
-            _spellMethod.Train(client, _spell);
         }
         else
         {
@@ -541,6 +537,7 @@ public class Heal_Major : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -632,8 +629,6 @@ public class Heal_Critical : SpellScript
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendStats(StatusFlags.Health);
-
-            _spellMethod.Train(client, _spell);
         }
         else
         {
@@ -654,6 +649,7 @@ public class Heal_Critical : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -756,8 +752,6 @@ public class Dire_Aid : SpellScript
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendStats(StatusFlags.Health);
-
-            _spellMethod.Train(client, _spell);
         }
         else
         {
@@ -778,6 +772,7 @@ public class Dire_Aid : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -889,8 +884,6 @@ public class Healing_Winds : SpellScript
             aisling.Show(Scope.NearbyAislings, healthBar);
             aisling.Client.SendStats(StatusFlags.Health);
         }
-
-        _spellMethod.Train(client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -900,6 +893,7 @@ public class Healing_Winds : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -985,8 +979,6 @@ public class Forestall : SpellScript
                 savedAisling.Client.Revive();
             }
         }
-
-        _spellMethod.Train(client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -994,6 +986,7 @@ public class Forestall : SpellScript
         if (!_spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        _spellMethod.Train(client, _spell);
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
@@ -1058,8 +1051,6 @@ public class Raise_Ally : SpellScript
             }
         }
 
-        _spellMethod.Train(client, _spell);
-
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.Snow))
         {
             Task.Delay(30000).ContinueWith(ct =>
@@ -1081,6 +1072,7 @@ public class Raise_Ally : SpellScript
         if (!_spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        _spellMethod.Train(client, _spell);
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
@@ -1150,8 +1142,6 @@ public class Turn_Undead : SpellScript
             monster.Target = null;
             monster.Aggressive = false;
         }
-
-        _spellMethod.Train(aisling.Client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -1161,6 +1151,7 @@ public class Turn_Undead : SpellScript
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
+        _spellMethod.Train(client, _spell);
         var success = _spellMethod.Execute(client, _spell);
 
         if (success)
@@ -1214,8 +1205,6 @@ public class Turn_Critter : SpellScript
             monster.Target = null;
             monster.Aggressive = false;
         }
-
-        _spellMethod.Train(aisling.Client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -1225,6 +1214,7 @@ public class Turn_Critter : SpellScript
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
+        _spellMethod.Train(client, _spell);
         var success = _spellMethod.Execute(client, _spell);
 
         if (success)
@@ -1278,8 +1268,6 @@ public class Turn_Greater_Undead : SpellScript
             monster.Target = null;
             monster.Aggressive = false;
         }
-
-        _spellMethod.Train(aisling.Client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -1289,6 +1277,7 @@ public class Turn_Greater_Undead : SpellScript
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
+        _spellMethod.Train(client, _spell);
         var success = _spellMethod.Execute(client, _spell);
 
         if (success)
@@ -1342,8 +1331,6 @@ public class Turn_Greater_Critter : SpellScript
             monster.Target = null;
             monster.Aggressive = false;
         }
-
-        _spellMethod.Train(aisling.Client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -1353,6 +1340,7 @@ public class Turn_Greater_Critter : SpellScript
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
+        _spellMethod.Train(client, _spell);
         var success = _spellMethod.Execute(client, _spell);
 
         if (success)
@@ -1434,6 +1422,7 @@ public class AoPuinsein : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -1544,6 +1533,7 @@ public class AoDall : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -1654,6 +1644,7 @@ public class AoBeagCradh : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -1764,6 +1755,7 @@ public class AoCradh : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -1874,6 +1866,7 @@ public class AoMorCradh : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -1984,6 +1977,7 @@ public class AoArdCradh : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -2094,6 +2088,7 @@ public class AoSuain : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {

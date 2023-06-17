@@ -355,7 +355,6 @@ public class Elemental_Bolt : SpellScript
 
         aisling.Cast(_spell, target);
         target.ApplyElementalSpellDamage(aisling, dmg, randomEle, _spell);
-        _spellMethod.Train(client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -383,6 +382,7 @@ public class Elemental_Bolt : SpellScript
 
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        _spellMethod.Train(client, _spell);
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {

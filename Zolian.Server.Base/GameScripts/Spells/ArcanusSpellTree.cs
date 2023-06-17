@@ -45,8 +45,6 @@ public class Mor_Strioch_Pian_Gar : SpellScript
             client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_spell.Template.TargetAnimation, targetObj.Pos));
             targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, _spell);
         }
-
-        _spellMethod.Train(client, _spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -54,7 +52,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         if (!_spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-
+        _spellMethod.Train(client, _spell);
         var manaLoss = (int)(aisling.MaximumMp * .33);
         var healthLoss = (int)(aisling.MaximumHp * .33);
         var healthBoundsCheck = aisling.CurrentHp - healthLoss;

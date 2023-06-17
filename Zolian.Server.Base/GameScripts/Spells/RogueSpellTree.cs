@@ -304,7 +304,6 @@ public class Hiraishin : SpellScript
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-        _spellMethod.Train(client, _spell);
 
         client.Aisling.Show(Scope.NearbyAislings, action);
         target.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
@@ -317,6 +316,7 @@ public class Hiraishin : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {
@@ -449,7 +449,6 @@ public class Shunshin : SpellScript
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-        _spellMethod.Train(client, _spell);
 
         client.Aisling.Show(Scope.NearbyAislings, action);
         target.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
@@ -462,6 +461,7 @@ public class Shunshin : SpellScript
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+            _spellMethod.Train(client, _spell);
 
             if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
             {

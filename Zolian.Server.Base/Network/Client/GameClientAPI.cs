@@ -542,11 +542,25 @@ public partial class GameClient : IGameClient
     public void TrainSpell(Spell spell)
     {
         if (spell.Level >= spell.Template.MaxLevel) return;
-        var toImprove = spell.Template.LevelRate;
-        if (!(spell.Casts++ >= toImprove)) return;
 
-        spell.Level++;
-        spell.Casts = 0;
+        var levelUpRand = Generator.RandomNumPercentGen();
+        if (spell.Casts >= 40)
+            levelUpRand += 0.1;
+
+        switch (levelUpRand)
+        {
+            case <= 0.93:
+                return;
+            case <= 0.98:
+                spell.Level++;
+                spell.Casts = 0;
+                break;
+            case <= 0.99:
+                spell.Level++;
+                spell.Level++;
+                spell.Casts = 0;
+                break;
+        }
 
         Send(new ServerFormat17(spell));
         spell.CurrentCooldown = spell.Template.Cooldown;

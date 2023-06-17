@@ -35,7 +35,6 @@ public class ao_sith : SpellScript
         {
             var client = (sprite as Aisling).Client;
 
-            client.TrainSpell(Spell);
             client.SendMessage(0x02, $"you cast {Spell.Template.Name}");
 
             var action = new ServerFormat1A
@@ -96,8 +95,10 @@ public class ao_sith : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (sprite is Aisling)
+        if (sprite is Aisling aisling)
         {
+            aisling.Client.TrainSpell(Spell);
+
             if (sprite.CurrentMp - Spell.Template.ManaCost > 0)
                 sprite.CurrentMp -= Spell.Template.ManaCost;
 
