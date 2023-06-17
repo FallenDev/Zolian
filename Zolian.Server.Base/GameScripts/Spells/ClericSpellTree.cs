@@ -364,7 +364,7 @@ public class Detect : SpellScript
 }
 
 /// <summary>
-/// Heal Minor Wounds: Heals 10% of target's health
+/// Heal Minor Wounds: Heals 15% of target's health
 /// </summary>
 [Script("Heal Minor Wounds")]
 public class Heal_Minor : SpellScript
@@ -389,7 +389,7 @@ public class Heal_Minor : SpellScript
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
-            var healBase = target.BaseHp * 0.10;
+            var healBase = target.MaximumHp * 0.15;
 
             target.CurrentHp += (int)healBase;
             if (target.CurrentHp > target.MaximumHp)
@@ -476,7 +476,7 @@ public class Heal_Minor : SpellScript
 }
 
 /// <summary>
-/// Heal Major Wounds: Heals 25% of target's health
+/// Heal Major Wounds: Heals 30% of target's health
 /// </summary>
 [Script("Heal Major Wounds")]
 public class Heal_Major : SpellScript
@@ -501,7 +501,7 @@ public class Heal_Major : SpellScript
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
-            var healBase = target.BaseHp * 0.25;
+            var healBase = target.MaximumHp * 0.30;
 
             target.CurrentHp += (int)healBase;
             if (target.CurrentHp > target.MaximumHp)
@@ -588,7 +588,7 @@ public class Heal_Major : SpellScript
 }
 
 /// <summary>
-/// Heal Critical Wounds: Heals 45% of target's health
+/// Heal Critical Wounds: Heals 65% of target's health
 /// </summary>
 [Script("Heal Critical Wounds")]
 public class Heal_Critical : SpellScript
@@ -613,7 +613,7 @@ public class Heal_Critical : SpellScript
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
-            var healBase = target.BaseHp * 0.45;
+            var healBase = target.MaximumHp * 0.65;
 
             target.CurrentHp += (int)healBase;
             if (target.CurrentHp > target.MaximumHp)
@@ -726,7 +726,7 @@ public class Dire_Aid : SpellScript
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
-            var healBase = target.BaseHp * 0.70;
+            var healBase = target.MaximumHp * 0.80;
 
             target.CurrentHp += (int)healBase;
             if (target.CurrentHp > target.MaximumHp)
@@ -842,12 +842,11 @@ public class Healing_Winds : SpellScript
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
 
         aisling.Cast(_spell, target);
         aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
-        var healBase = aisling.CurrentHp * 0.20;
+        var healBase = aisling.MaximumHp * 0.25;
 
         if (aisling.GroupId != 0)
         {

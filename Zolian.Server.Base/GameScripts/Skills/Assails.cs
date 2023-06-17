@@ -30,9 +30,6 @@ public class Assail : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -183,9 +180,6 @@ public class Assault : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -336,9 +330,6 @@ public class Onslaught : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -490,9 +481,6 @@ public class Clobber : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -643,9 +631,6 @@ public class ClobberX2 : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -796,9 +781,6 @@ public class Thrust : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -954,9 +936,6 @@ public class Wallop : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -1108,9 +1087,6 @@ public class Thrash : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -1564,9 +1540,6 @@ public class Throw : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -1917,9 +1890,6 @@ public class TwoHandedAttack : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2081,9 +2051,6 @@ public class Kobudo : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2243,9 +2210,6 @@ public class AdvancedStaffTraining : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2405,9 +2369,6 @@ public class DualWield : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2570,9 +2531,6 @@ public class Ambidextrous : SkillScript
         {
             case Aisling damageDealingAisling:
                 {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost bearing and missed...");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2707,6 +2665,316 @@ public class Ambidextrous : SkillScript
         {
             if (sprite is not Monster damageMonster) return 0;
             dmg = damageMonster.Dex;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+// Aisling Str * 7, Dex * 1 | Monster Str * 7, Dex * 1
+[Script("Long Strike")]
+public class LongStrike : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public LongStrike(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        switch (sprite)
+        {
+            case Aisling damageDealingAisling:
+                {
+                    if (_target == null) return;
+                    if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
+                        damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+
+                    break;
+                }
+            case Monster damageDealingMonster:
+                {
+                    var client = damageDealingMonster.Client;
+
+                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+
+                    break;
+                }
+        }
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingSprite) return;
+        var client = damageDealingSprite.Client;
+        damageDealingSprite.ActionUsed = "Long Strike";
+
+        var action = new ServerFormat1A
+        {
+            Serial = client.Aisling.Serial,
+            Number = (byte)(client.Aisling.Path == Class.Defender
+                ? client.Aisling.UsingTwoHanded ? 0x81 : 0x01
+                : 0x01),
+            Speed = 20
+        };
+
+        var enemy = client.Aisling.DamageableGetInFront(3);
+
+        if (enemy.Count == 0)
+        {
+            _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
+            OnFailed(damageDealingSprite);
+            return;
+        }
+
+        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
+        {
+            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+
+            var dmgCalc = DamageCalc(sprite);
+
+            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+
+            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+
+            _skillMethod.Train(client, _skill);
+
+            if (!_crit) continue;
+            damageDealingSprite.Animate(387);
+            _crit = false;
+        }
+
+        damageDealingSprite.Show(Scope.NearbyAislings, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, _skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
+
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            _target = Skill.Reflect(enemy, sprite, _skill);
+
+            var dmgCalc = DamageCalc(sprite);
+
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
+
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
+
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
+        }
+    }
+
+    private int DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 7 + client.Aisling.Dex * 1;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 7 + damageMonster.Dex * 1;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+// Aisling Str * 2, Dex * 2, Int * 2  | Monster Str * 2, Dex * 2, Int * 2
+[Script("Divine Thrust")]
+public class DivineThrust : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public DivineThrust(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        switch (sprite)
+        {
+            case Aisling damageDealingAisling:
+                {
+                    if (_target == null) return;
+                    if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
+                        damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+
+                    break;
+                }
+            case Monster damageDealingMonster:
+                {
+                    var client = damageDealingMonster.Client;
+
+                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+
+                    break;
+                }
+        }
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingSprite) return;
+        var client = damageDealingSprite.Client;
+        damageDealingSprite.ActionUsed = "Divine Thrust";
+
+        var action = new ServerFormat1A
+        {
+            Serial = client.Aisling.Serial,
+            Number = 0x01,
+            Speed = 20
+        };
+
+        var enemy = client.Aisling.DamageableGetInFront(3);
+
+        if (enemy.Count == 0)
+        {
+            _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
+            OnFailed(damageDealingSprite);
+            return;
+        }
+
+        foreach (var i in enemy.Where(i => client.Aisling.Serial != i.Serial).Where(i => i.Attackable))
+        {
+            _target = Skill.Reflect(i, damageDealingSprite, _skill);
+
+            var dmgCalc = DamageCalc(sprite);
+
+            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
+
+            damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
+
+            _skillMethod.Train(client, _skill);
+
+            if (!_crit) continue;
+            damageDealingSprite.Animate(387);
+            _crit = false;
+        }
+
+        damageDealingSprite.Show(Scope.NearbyAislings, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, _skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (enemy == null) return;
+            if (enemy.Serial == sprite.Serial) return;
+            if (!enemy.Attackable) return;
+
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            _target = Skill.Reflect(enemy, sprite, _skill);
+
+            var dmgCalc = DamageCalc(sprite);
+
+            _target.ApplyDamage(sprite, dmgCalc, _skill);
+
+            if (_skill.Template.TargetAnimation > 0)
+                if (_target is Monster or Mundane or Aisling)
+                    sprite.Show(Scope.NearbyAislings,
+                        new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
+                            _skill.Template.TargetAnimation, 0, 100));
+
+            sprite.Show(Scope.NearbyAislings, action);
+            if (!_crit) return;
+            sprite.Animate(387);
+        }
+    }
+
+    private int DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 2 + client.Aisling.Int * 2 + client.Aisling.Dex * 2;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 2 + damageMonster.Int * 2 + damageMonster.Dex * 2;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
