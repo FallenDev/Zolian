@@ -113,6 +113,7 @@ public class Calming_Voice : SpellScript
         }
 
         var client = aisling.Client;
+        _spellMethod.Train(aisling.Client, _spell);
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
@@ -181,8 +182,10 @@ public class Stone_Skin : SpellScript
         if (!sprite.CanCast) return;
         if (target.Immunity)
         {
-            target.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
-            _spellMethod.SpellOnFailed(sprite, target, _spell);
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            return;
         }
 
         _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
@@ -241,6 +244,7 @@ public class DestructiveForce : SpellScript
         }
 
         var client = aisling.Client;
+        _spellMethod.Train(aisling.Client, _spell);
 
         if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
@@ -348,7 +352,6 @@ public class Elemental_Bolt : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         if (target == null) return;
-        var client = aisling.Client;
         var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
         dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, _spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
@@ -456,6 +459,8 @@ public class Magic_Missile : SpellScript
     {
         if (sprite is not Aisling playerAction) return;
         playerAction.ActionUsed = "Magic Missile";
+        _spellMethod.Train(playerAction.Client, _spell);
+
         var targetList = playerAction.MonstersNearby().ToList();
         var count = targetList.Count();
 

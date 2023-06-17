@@ -30,10 +30,12 @@ public class Spectral_Shield : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+
         if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -65,8 +67,9 @@ public class Aite : SpellScript
     {
         if (target.HasBuff("Aite") || target.HasBuff("Dia Aite"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -98,8 +101,9 @@ public class Mor_Dion : SpellScript
     {
         if (target.Immunity)
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -191,7 +195,13 @@ public class Pramh : SpellScript
         if (target.HasDebuff("Frozen"))
             target.RemoveDebuff("Frozen");
 
-        if (target.HasDebuff("Sleep")) return;
+        if (target.HasDebuff("Sleep"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            return;
+        };
 
         _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
     }
@@ -384,8 +394,6 @@ public class Heal_Minor : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
@@ -496,8 +504,6 @@ public class Heal_Major : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
@@ -608,8 +614,6 @@ public class Heal_Critical : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
@@ -721,8 +725,6 @@ public class Dire_Aid : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
             aisling.Cast(_spell, target);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
@@ -963,8 +965,6 @@ public class Forestall : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         if (target is not Aisling savedAisling) return;
-        var client = aisling.Client;
-
         aisling.Cast(_spell, target);
         aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 
@@ -1032,8 +1032,6 @@ public class Raise_Ally : SpellScript
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
         aisling.Cast(_spell, target);
         aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
 

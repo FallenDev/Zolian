@@ -29,8 +29,9 @@ public class Dion : SpellScript
     {
         if (target.Immunity)
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 

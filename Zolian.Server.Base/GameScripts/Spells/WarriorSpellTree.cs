@@ -35,8 +35,9 @@ public class Asgall : SpellScript
 
         if (sprite.HasBuff("Asgall"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Already reflecting skills.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -72,8 +73,9 @@ public class Defensive_Stance : SpellScript
 
         if (sprite.HasBuff("Defensive Stance"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You're already alert..");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -111,8 +113,9 @@ public class Perfect_Defense : SpellScript
 
         if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A similar spell has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
             return;
         }
 

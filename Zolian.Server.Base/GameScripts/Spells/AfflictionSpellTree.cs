@@ -31,15 +31,17 @@ public class Ard_Fas_Nadur : SpellScript
 
         if (target.HasDebuff("Ard Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Mor Fas Nadur") || target.HasDebuff("Fas Nadur") || target.HasDebuff("Beag Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -71,15 +73,17 @@ public class Ard_Cradh : SpellScript
 
         if (target.HasDebuff("Ard Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Mor Cradh") || target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -111,15 +115,17 @@ public class Ard_Puinsein : SpellScript
 
         if (target.HasDebuff("Ard Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Mor Puinsein") || target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -155,22 +161,25 @@ public class Mor_Fas_Nadur : SpellScript
 
         if (target.HasDebuff("Ard Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Mor Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Fas Nadur") || target.HasDebuff("Beag Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -202,22 +211,25 @@ public class Mor_Cradh : SpellScript
 
         if (target.HasDebuff("Ard Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Mor Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -249,22 +261,25 @@ public class Mor_Puinsein : SpellScript
 
         if (target.HasDebuff("Ard Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Mor Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -300,22 +315,25 @@ public class Fas_Nadur : SpellScript
 
         if (target.HasDebuff("Ard Fas Nadur") || target.HasDebuff("Mor Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Beag Fas Nadur"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -347,22 +365,25 @@ public class Cradh : SpellScript
 
         if (target.HasDebuff("Ard Cradh") || target.HasDebuff("Mor Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Beag Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -394,22 +415,25 @@ public class Puinsein : SpellScript
 
         if (target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
         if (target.HasDebuff("Beag Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
             return;
         }
 
@@ -439,7 +463,13 @@ public class Blind : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Blind";
 
-        if (target.HasDebuff("Blind")) return;
+        if (target.HasDebuff("Blind"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            return;
+        };
 
         _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
     }
@@ -470,6 +500,8 @@ public class Fas_Spiorad : SpellScript
     {
         if (target.HasDebuff("Fas Spiorad"))
         {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
             target.Client.SendMessage(0x03, "Your body is too weak.");
             return;
         }
@@ -515,15 +547,17 @@ public class Beag_Cradh : SpellScript
 
         if (target.HasDebuff("Ard Cradh") || target.HasDebuff("Mor Cradh") || target.HasDebuff("Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Beag Cradh"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
@@ -555,15 +589,17 @@ public class Beag_Puinsein : SpellScript
 
         if (target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein") || target.HasDebuff("Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
             return;
         }
 
         if (target.HasDebuff("Beag Puinsein"))
         {
-            if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
             return;
         }
 
