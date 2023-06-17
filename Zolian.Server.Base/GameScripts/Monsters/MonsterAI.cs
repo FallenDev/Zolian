@@ -302,7 +302,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
         if (Monster.Aggressive)
         {
-            var targets = GetObjects(Map, i => i.WithinRangeOf(Monster), Get.MonsterDamage);
+            var targets = GetObjects(Map, i => i.WithinEarShotOf(Monster), Get.MonsterDamage);
 
             foreach (var target in targets)
             {
@@ -837,7 +837,7 @@ public class MonsterShadowSight : MonsterScript
 
         if (Monster.Aggressive)
         {
-            var targets = GetObjects(Map, i => i.WithinRangeOf(Monster), Get.MonsterDamage);
+            var targets = GetObjects(Map, i => i.WithinEarShotOf(Monster), Get.MonsterDamage);
 
             foreach (var target in targets)
             {

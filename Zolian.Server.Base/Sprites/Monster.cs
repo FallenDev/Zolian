@@ -12,7 +12,7 @@ namespace Darkages.Sprites;
 
 public sealed class Monster : Sprite
 {
-    public Task<List<Vector2>> Path;
+    public Task<IList<Vector2>> Path;
 
     public Monster()
     {

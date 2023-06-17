@@ -227,7 +227,7 @@ public class Area : Map, IArea
 
     #region A* (A Star)
 
-    public async Task<List<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end)
+    public async Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end)
     {
         var path = new List<Vector2>();
 
@@ -244,7 +244,7 @@ public class Area : Map, IArea
         }
 
         if (sprite.Target.Map.ID != sprite.Map.ID) return path;
-        if (!sprite.WithinRangeOf(sprite.Target)) return path;
+        if (!sprite.WithinEarShotOf(sprite.Target)) return path;
         if (start == Vector2.Zero) return path;
         if (end == Vector2.Zero) return path;
 
@@ -285,15 +285,13 @@ public class Area : Map, IArea
         #endregion
 
         var currentNode = viewable[0];
-        var aStar = SetPath(sprite, currentNode, start, viewable);
-
-        return aStar;
+        path.Clear();
+        return SetPath(sprite, currentNode, path, start, viewable);
     }
 
-    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, Vector2 start, List<TileGrid> viewable)
+    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, List<Vector2> path, Vector2 start, List<TileGrid> viewable)
     {
         var currentViewableStart = 0;
-        var path = new List<Vector2>();
 
         while (true)
         {
@@ -334,15 +332,15 @@ public class Area : Map, IArea
     private Action CheckNode(Sprite sprite)
     {
         var tempGrid = sprite.Map._tiles;
-        _masterGrid = new List<List<TileGrid>>(tempGrid.Count);
+        _masterGrid = new List<List<TileGrid>>();
 
         return delegate
         {
             for (var x = 0; x < tempGrid.Count; x++)
             {
-                var innerList = new List<TileGrid>(tempGrid[x].Count);
+                _masterGrid.Add(new List<TileGrid>());
 
-                for (var y = 0; y < tempGrid[x].Count; y++)
+                for (var y = 0; y < tempGrid.Count; y++)
                 {
                     var impassable = sprite.Map.IsAStarWall(sprite, x, y);
                     var filled = sprite.Map.IsAStarSprite(sprite, x, y);
@@ -358,53 +356,50 @@ public class Area : Map, IArea
                         cost = 999;
                     }
 
-                    innerList.Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
+                    _masterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
                 }
-
-                _masterGrid.Add(innerList);
             }
         };
     }
 
-    public void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, List<TileGrid> viewable, ICollection<TileGrid> used)
+    public void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable, ICollection<TileGrid> used)
     {
         TileGrid currentNode;
-        var currentViewableNode = viewable[0];
 
         //North
-        if (currentViewableNode.Pos.Y > 0 && currentViewableNode.Pos.Y < masterGrid[0].Count && !masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y - 1].Impassable)
+        if (viewable[0].Pos.Y > 0 && viewable[0].Pos.Y < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1].Impassable)
         {
-            currentNode = masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y - 1];
-            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
+            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1];
+            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
         }
 
         //East
-        if (currentViewableNode.Pos.X >= 0 && currentViewableNode.Pos.X + 1 < masterGrid.Count && !masterGrid[(int)currentViewableNode.Pos.X + 1][(int)currentViewableNode.Pos.Y].Impassable)
+        if (viewable[0].Pos.X >= 0 && viewable[0].Pos.X + 1 < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y].Impassable)
         {
-            currentNode = masterGrid[(int)currentViewableNode.Pos.X + 1][(int)currentViewableNode.Pos.Y];
-            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
+            currentNode = masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y];
+            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
         }
 
         //South
-        if (currentViewableNode.Pos.Y >= 0 && currentViewableNode.Pos.Y + 1 < masterGrid[0].Count && !masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y + 1].Impassable)
+        if (viewable[0].Pos.Y >= 0 && viewable[0].Pos.Y + 1 < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1].Impassable)
         {
-            currentNode = masterGrid[(int)currentViewableNode.Pos.X][(int)currentViewableNode.Pos.Y + 1];
-            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
+            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1];
+            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
         }
 
         //West
-        if (currentViewableNode.Pos.X > 0 && currentViewableNode.Pos.X < masterGrid.Count && !masterGrid[(int)currentViewableNode.Pos.X - 1][(int)currentViewableNode.Pos.Y].Impassable)
+        if (viewable[0].Pos.X > 0 && viewable[0].Pos.X < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y].Impassable)
         {
-            currentNode = masterGrid[(int)currentViewableNode.Pos.X - 1][(int)currentViewableNode.Pos.Y];
-            SetAStarNode(viewable, currentNode, new Vector2(currentViewableNode.Pos.X, currentViewableNode.Pos.Y), currentViewableNode.CurrentDist, 1);
+            currentNode = masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y];
+            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
         }
 
-        currentViewableNode.HasBeenUsed = true;
-        used.Add(currentViewableNode);
+        viewable[0].HasBeenUsed = true;
+        used.Add(viewable[0]);
         viewable.RemoveAt(0);
     }
 
-    public void SetAStarNode(List<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
+    public void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
     {
         var addedDist = nextNode.Cost * distanceMultiply;
 
@@ -428,7 +423,7 @@ public class Area : Map, IArea
         }
     }
 
-    public void SetAStarNodeInsert(List<TileGrid> list, TileGrid newNode)
+    public void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode)
     {
         var added = false;
         for (var i = 0; i < list.Count; i++)

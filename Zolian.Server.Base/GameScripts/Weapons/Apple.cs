@@ -15,7 +15,7 @@ public class Apple : WeaponScript
         if (sprite is not Aisling damageDealingSprite) return;
         damageDealingSprite.ActionUsed = "Rotten Apple";
 
-        var enemy = damageDealingSprite.DamageableGetAwayInFront(5).FirstOrDefault();
+        var enemy = damageDealingSprite.DamageableGetAwayInFront(4).FirstOrDefault();
 
         switch (enemy)
         {
@@ -34,6 +34,9 @@ public class Apple : WeaponScript
         };
 
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
+
+        // Rotten debuff
+        dmg /= 2;
             
         damageDealingSprite.Show(Scope.NearbyAislings, animation);
         enemy.ApplyDamage(damageDealingSprite, dmg, null);
