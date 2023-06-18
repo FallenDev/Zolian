@@ -12,47 +12,37 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Forsaken")]
 public class Forsaken : MundaneScript
 {
+    private readonly SortedDictionary<Class, (int str, int intel, int wis, int con, int dex, int hp, int mp)> _advancedClassing = new()
+    {
+        { Class.Berserker, (5, 5, 5, 30, 40, 628, 428) },
+        { Class.Defender, (50, 5, 5, 5, 5, 628, 428) },
+        { Class.Assassin, (5, 5, 5, 5, 40, 428, 728) },
+        { Class.Cleric, (5, 40, 5, 30, 5, 628, 528) },
+        { Class.Arcanus, (5, 50, 5, 5, 5, 328, 828) },
+        { Class.Monk, (5, 5, 5, 40, 30, 528, 528) }
+    };
+
+    private readonly SortedDictionary<Class, (int hp, int mp, string classItem, string abilityReq)> _mastering = new()
+    {
+        { Class.Berserker, (7500, 5500, "Ceannlaidir's Tamed Sword", "Titan's Cleave") },
+        { Class.Defender, (10000, 5000, "Ceannlaidir's Enchanted Sword", "Perfect Defense") },
+        { Class.Assassin, (7000, 6000, "Fiosachd's Lost Flute", "Hiraishin") },
+        { Class.Cleric, (8000, 5750, "Glioca's Secret", "Disintegrate") },
+        { Class.Arcanus, (5500, 9000, "Luathas's Lost Relic", "Tabhair De Eadrom") },
+        { Class.Monk, (8000, 8000, "Cail's Hourglass", "Mor Dion") }
+    };
+
+    private readonly SortedDictionary<Class, (int str, int intel, int wis, int con, int dex, string abilityReq)> _forsaking = new()
+    {
+        { Class.Berserker, (500, 500, 500, 500, 500, "") },
+        { Class.Defender, (500, 500, 500, 500, 500, "") },
+        { Class.Assassin, (500, 500, 500, 500, 500, "") },
+        { Class.Cleric, (500, 500, 500, 500, 500, "") },
+        { Class.Arcanus, (500, 500, 500, 500, 500, "") },
+        { Class.Monk, (500, 500, 500, 500, 500, "") }
+    };
+
     public Forsaken(GameServer server, Mundane mundane) : base(server, mundane) { }
-
-    private Dictionary<Class, int> HPReqs = new()
-    {
-        {Class.Berserker, 8500},
-        {Class.Defender, 10000},
-        {Class.Assassin, 7000},
-        {Class.Cleric, 6000},
-        {Class.Arcanus, 5500},
-        {Class.Monk, 9500}
-    };
-
-    private Dictionary<Class, int> MPReqs = new()
-    {
-        {Class.Berserker, 5500},
-        {Class.Defender, 6000},
-        {Class.Assassin, 7000},
-        {Class.Cleric, 9500},
-        {Class.Arcanus, 10000},
-        {Class.Monk, 8500}
-    };
-
-    private Dictionary<Class, string> ItemsReqs = new()
-    {
-        {Class.Defender, "Ceannlaidir's Enchanted Sword"},
-        {Class.Cleric, "Glioca's Secret"},
-        {Class.Assassin, "Fiosachd's Lost Flute"},
-        {Class.Berserker, "Ceannlaidir's Tamed Sword"},
-        {Class.Arcanus, "Luathas's Lost Relic"},
-        {Class.Monk, "Cail's Hourglass"}
-    };
-
-    private Dictionary<Class, string> MaxSkillReqs = new()
-    {
-        {Class.Defender, "Perfect Form"},
-        {Class.Cleric, "Disintegrate"},
-        {Class.Assassin, "Behind Jester"},
-        {Class.Berserker, "Titan's Cleave"},
-        {Class.Arcanus, "Tabhair De Eadrom"},
-        {Class.Monk, "Mor Dion"}
-    };
 
     public override void OnClick(GameClient client, int serial)
     {
@@ -110,7 +100,7 @@ public class Forsaken : MundaneScript
             {
                 var options = new List<OptionsDataItem>
                 {
-                    new (0x05, "I am ready"),
+                    new (0x011, "I am ready"),
                     new (0x05, "No")
                 };
 
@@ -165,10 +155,10 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                var (str, intel, wis, con, dex, abilityReq) = _forsaking.First(x => client.Aisling.Path <= x.Key).Value;
+
                 client.SendOptionsDialog(Mundane,
-                    $"To master the class of {{=b{client.Aisling.Path}{{=a,\nI require the item {{=q{ItemsReqs[client.Aisling.Path]}{{=a.\n" +
-                    $"You must also have at least {{=q{HPReqs[client.Aisling.Path]} {{=aHealth and {{=q{MPReqs[client.Aisling.Path]} {{=aMana.\n" +
-                    $"Finally, You must have mastered this discipline {{=q{MaxSkillReqs[client.Aisling.Path]}{{=a.",
+                    $"The forsaking happens when one reaches their Zenith. After such an event happens, you move as if you're a tier above others",
                     options.ToArray());
             }
                 break;
@@ -182,13 +172,15 @@ public class Forsaken : MundaneScript
             {
                 var options = new List<OptionsDataItem>
                 {
-                    new (0x03, "{=bTest of Vitality")
+                    new (0x03, "{=bAttempt")
                 };
 
+                var (hp, mp, classItem, abilityReq) = _mastering.First(x => client.Aisling.Path <= x.Key).Value;
+
                 client.SendOptionsDialog(Mundane,
-                    $"To master the class of {{=b{client.Aisling.Path}{{=a,\nI require the item {{=q{ItemsReqs[client.Aisling.Path]}{{=a.\n" +
-                    $"You must also have at least {{=q{HPReqs[client.Aisling.Path]} {{=aHealth and {{=q{MPReqs[client.Aisling.Path]} {{=aMana.\n" +
-                    $"Finally, You must have mastered this discipline {{=q{MaxSkillReqs[client.Aisling.Path]}{{=a.",
+                    $"To master the class of {{=b{client.Aisling.Path}{{=a,\nI require the item {{=q{classItem}{{=a.\n" +
+                    $"You must also have at least {{=q{hp} {{=aHealth and {{=q{mp} {{=aMana.\n" +
+                    $"Finally, You must have mastered this discipline {{=q{abilityReq}{{=a.",
                     options.ToArray());
             }
                 break;
@@ -200,6 +192,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qBerserker Requirements:\n" +
                                          "{=aDexterity:{=q 40\n" +
                                          "{=aConstitution:{=q 30\n" +
@@ -219,6 +212,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qDefender Requirements:\n" +
                                          "{=aStrength:{=q 50\n" +
                                          "{=bSacrifice:\n" +
@@ -237,6 +231,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qAssassin Requirements:\n" +
                                          "{=aDexterity:{=q 40\n" +
                                          "{=bSacrifice:\n" +
@@ -255,6 +250,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qCleric Requirements:\n" +
                                          "{=aIntelligence:{=q 40\n" +
                                          "{=aConstitution:{=q 30\n" +
@@ -274,6 +270,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qArcanus Requirements:\n" +
                                          "{=aIntelligence:{=q 50\n" +
                                          "{=bSacrifice:\n" +
@@ -292,6 +289,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
+                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qMonk Requirements:\n" +
                                          "{=aConstitution:{=q 40\n" +
                                          "{=aDexterity:{=q 30\n" +
@@ -305,11 +303,13 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0210:
             {
-                if (client.Aisling._Dex >= 40)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Dex >= dex)
                 {
-                    if (client.Aisling._Con >= 30)
+                    if (client.Aisling._Con >= con)
                     {
-                        if (client.Aisling.BaseHp >= 650 && client.Aisling.BaseMp >= 450)
+                        if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                         {
                             client.Aisling.BaseHp -= 500;
                             client.Aisling.BaseMp -= 300;
@@ -369,9 +369,11 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0220:
             {
-                if (client.Aisling._Str >= 50)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Str >= str)
                 {
-                    if (client.Aisling.BaseHp >= 650 && client.Aisling.BaseMp >= 450)
+                    if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                     {
                         client.Aisling.BaseHp -= 500;
                         client.Aisling.BaseMp -= 300;
@@ -422,9 +424,11 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0230:
             {
-                if (client.Aisling._Dex >= 40)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Dex >= dex)
                 {
-                    if (client.Aisling.BaseHp >= 450 && client.Aisling.BaseMp >= 750)
+                    if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                     {
                         client.Aisling.BaseHp -= 300;
                         client.Aisling.BaseMp -= 600;
@@ -475,11 +479,13 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0240:
             {
-                if (client.Aisling._Int >= 40)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Int >= intel)
                 {
-                    if (client.Aisling._Con >= 30)
+                    if (client.Aisling._Con >= con)
                     {
-                        if (client.Aisling.BaseHp >= 650 && client.Aisling.BaseMp >= 550)
+                        if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                         {
                             client.Aisling.BaseHp -= 500;
                             client.Aisling.BaseMp -= 400;
@@ -539,9 +545,11 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0250:
             {
-                if (client.Aisling._Int >= 50)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Int >= intel)
                 {
-                    if (client.Aisling.BaseHp >= 350 && client.Aisling.BaseMp >= 850)
+                    if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                     {
                         client.Aisling.BaseHp -= 200;
                         client.Aisling.BaseMp -= 700;
@@ -592,11 +600,13 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0260:
             {
-                if (client.Aisling._Con >= 40)
+                var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => client.Aisling.Path <= x.Key).Value;
+
+                if (client.Aisling._Con >= con)
                 {
-                    if (client.Aisling._Dex >= 30)
+                    if (client.Aisling._Dex >= dex)
                     {
-                        if (client.Aisling.BaseHp >= 550 && client.Aisling.BaseMp >= 550)
+                        if (client.Aisling.BaseHp >= hp && client.Aisling.BaseMp >= mp)
                         {
                             client.Aisling.BaseHp -= 400;
                             client.Aisling.BaseMp -= 400;
