@@ -160,6 +160,49 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         return Attempt(client, skill);
     }
 
+    public void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, ServerFormat1A action)
+    {
+        var target = enemy;
+
+        // Damage
+        target = Skill.Reflect(target, attacker, skill);
+
+        if (dmg > 0)
+            target.ApplyDamage(attacker, dmg, skill);
+
+        // Training
+        if (attacker is Aisling aisling)
+            Train(aisling.Client, skill);
+
+        // Animation
+        attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
+        attacker.Show(Scope.NearbyAislings, action);
+        skill.LastUsedSkill = DateTime.Now;
+        if (!crit) return;
+        attacker.Animate(387);
+    }
+
+    public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit)
+    {
+        var target = enemy;
+
+        // Damage
+        target = Skill.Reflect(target, attacker, skill);
+
+        if (dmg > 0)
+            target.ApplyDamage(attacker, dmg, skill);
+
+        // Training
+        if (attacker is Aisling aisling)
+            Train(aisling.Client, skill);
+
+        // Animation
+        attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
+        skill.LastUsedSkill = DateTime.Now;
+        if (!crit) return;
+        attacker.Animate(387);
+    }
+
     public int Thrown(IGameClient client, Skill skill, bool crit)
     {
         if (client.Aisling.EquipmentManager.Equipment[1].Item?.Template.Group is not ("Glaives" or "Shuriken" or "Daggers" or "Bows")) return 10015;
@@ -175,10 +218,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         // 10006,7,8 = ice arrows, 10003,4,5 = fire arrows
     }
 
-    public void FailedAttempt(GameClient client, Aisling aisling, Skill skill, ServerFormat1A action)
+    public void FailedAttempt(Sprite sprite, Skill skill, ServerFormat1A action)
     {
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(skill.Template.Sound));
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        sprite.Show(Scope.NearbyAislings, new ServerFormat19(skill.Template.Sound));
+        sprite.Show(Scope.NearbyAislings, action);
     }
 
     public (bool, int) OnCrit(int dmg)

@@ -2189,21 +2189,17 @@ public class GameServer : NetworkServer<GameClient>
             return;
         }
 
-        ServerSetup.Instance.GlobalMundaneScriptCache.TryGetValue($"{npc.Template.Name}", out var scriptObj);
-        scriptObj?.OnResponse(client, format.Step, format.Args);
+        var script = npc.Scripts.FirstOrDefault();
+        script.Value.OnResponse(client, format.Step, format.Args);
     }
 
+    // ToDo: Investigate Mundane Lag & Non-Responsiveness
     /// <summary>
     /// NPC Input Response -- Story Building, Send 3A after OnResponse
     /// </summary>
     protected override void Format3AHandler(GameClient client, ClientFormat3A format)
     {
         if (!CanInteract(client)) return;
-        if (client.EntryCheck != format.Serial)
-        {
-            client.CloseDialog();
-            return;
-        }
 
         if (format.Step == 0 && format.ScriptId == ushort.MaxValue)
         {
@@ -2215,55 +2211,56 @@ public class GameServer : NetworkServer<GameClient>
 
         if (objId is > 0 and < int.MaxValue)
         {
-            var npcs = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == format.Serial);
-
-            foreach (var npc in npcs)
+            ServerSetup.Instance.GlobalMundaneCache.TryGetValue((int)format.Serial, out var npc);
+            if (npc == null) return;
+            if (client.EntryCheck != npc.Serial)
             {
-                if (npc.Value?.Template?.ScriptKey == null) continue;
-
-                var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == npc.Value.Template.Name);
-                scriptObj.Value?.OnResponse(client, format.Step, format.Input);
+                client.CloseDialog();
                 return;
             }
+
+            var script = npc.Scripts.FirstOrDefault();
+            script.Value.OnResponse(client, format.Step, format.Input);
+            //return;
         }
 
-        if (format.ScriptId == ushort.MaxValue)
-        {
-            if (client.Aisling.ActiveReactor?.Decorators == null)
-                return;
+        //if (format.ScriptId == ushort.MaxValue)
+        //{
+        //    if (client.Aisling.ActiveReactor?.Decorators == null)
+        //        return;
 
-            switch (format.Step)
-            {
-                case 0:
-                    foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
-                        script.OnClose(client.Aisling);
-                    break;
+        //    switch (format.Step)
+        //    {
+        //        case 0:
+        //            foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
+        //                script.OnClose(client.Aisling);
+        //            break;
 
-                case 255:
-                    foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
-                        script.OnBack(client.Aisling);
-                    break;
+        //        case 255:
+        //            foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
+        //                script.OnBack(client.Aisling);
+        //            break;
 
-                case 0xFFFF:
-                    foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
-                        script.OnBack(client.Aisling);
-                    break;
+        //        case 0xFFFF:
+        //            foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
+        //                script.OnBack(client.Aisling);
+        //            break;
 
-                case 2:
-                    foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
-                        script.OnClose(client.Aisling);
-                    break;
+        //        case 2:
+        //            foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
+        //                script.OnClose(client.Aisling);
+        //            break;
 
-                case 1:
-                    foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
-                        script.OnNext(client.Aisling);
-                    break;
-            }
-        }
-        else
-        {
-            client.DlgSession?.Callback?.Invoke(client, format.Step, format.Input ?? string.Empty);
-        }
+        //        case 1:
+        //            foreach (var script in client.Aisling.ActiveReactor.Decorators.Values)
+        //                script.OnNext(client.Aisling);
+        //            break;
+        //    }
+        //}
+        //else
+        //{
+        //    client.DlgSession?.Callback?.Invoke(client, format.Step, format.Input ?? string.Empty);
+        //}
     }
 
     /// <summary>

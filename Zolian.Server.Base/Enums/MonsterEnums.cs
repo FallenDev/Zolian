@@ -103,7 +103,7 @@ public static class MonsterExtensions
             }
         };
 
-        var skillCount = Math.Round(monster.Level / 20d) + 2;
+        var skillCount = Math.Round(monster.Level / 30d) + 1;
         skillCount = Math.Min(skillCount, 12); // Max 12 skills regardless of level
         var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
 

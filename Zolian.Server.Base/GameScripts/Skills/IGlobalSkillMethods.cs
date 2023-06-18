@@ -1,5 +1,4 @@
 ﻿using Darkages.Interfaces;
-using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -15,7 +14,9 @@ public interface IGlobalSkillMethods
     void Step(Sprite sprite, int savedXStep, int savedYStep);
     void Train(IGameClient client, Skill skill);
     bool OnUse(Aisling aisling, Skill skill);
+    void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, ServerFormat1A action);
+    void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit);
     int Thrown(IGameClient client, Skill skill, bool crit);
-    void FailedAttempt(GameClient client, Aisling aisling, Skill skill, ServerFormat1A action);
+    void FailedAttempt(Sprite sprite, Skill skill, ServerFormat1A action);
     (bool, int) OnCrit(int dmg);
 }

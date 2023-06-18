@@ -291,6 +291,32 @@ public class Mor_Puinsein : SpellScript
 
 #region Normal
 
+[Script("Silence")]
+public class Silence : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Debuff _debuff = new debuff_Silence();
+    private readonly GlobalSpellMethods _spellMethod;
+
+    public Silence(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite is Aisling playerAction)
+            playerAction.ActionUsed = "Silence";
+
+        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+    }
+}
+
 [Script("Fas Nadur")]
 public class Fas_Nadur : SpellScript
 {

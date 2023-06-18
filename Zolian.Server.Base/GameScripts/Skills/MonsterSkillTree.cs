@@ -1,5 +1,4 @@
-﻿using Darkages.Common;
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
@@ -8,9 +7,8 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;
 
-// Assassin Skills
-[Script("Stab")]
-public class Stab : SkillScript
+[Script("Bite")]
+public class Bite : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
@@ -18,7 +16,7 @@ public class Stab : SkillScript
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Stab(Skill skill) : base(skill)
+    public Bite(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -33,15 +31,15 @@ public class Stab : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Stab";
+        aisling.ActionUsed = "Bite";
 
         var action = new ServerFormat1A
         {
             Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x86
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
                 : 0x01),
-            Speed = 25
+            Speed = 20
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -55,9 +53,6 @@ public class Stab : SkillScript
         }
         
         var dmgCalc = DamageCalc(sprite);
-        if (aisling.Invisible)
-            dmgCalc *= 2;
-
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
 
@@ -109,15 +104,14 @@ public class Stab : SkillScript
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 3;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 2;
-            dmg += damageMonster.Dex * 3;
+            dmg = damageMonster.Str;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
@@ -126,8 +120,8 @@ public class Stab : SkillScript
     }
 }
 
-[Script("Stab Twice")]
-public class Stab_Twice : SkillScript
+[Script("Bite'n Shake")]
+public class BiteAndShake : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
@@ -135,7 +129,7 @@ public class Stab_Twice : SkillScript
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Stab_Twice(Skill skill) : base(skill)
+    public BiteAndShake(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -150,15 +144,15 @@ public class Stab_Twice : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Stab Twice";
+        aisling.ActionUsed = "Bite'n Shake";
 
         var action = new ServerFormat1A
         {
             Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x87
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
                 : 0x01),
-            Speed = 25
+            Speed = 20
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -172,10 +166,6 @@ public class Stab_Twice : SkillScript
         }
         
         var dmgCalc = DamageCalc(sprite);
-        if (aisling.Invisible)
-            dmgCalc *= 2;
-
-        _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
 
@@ -215,8 +205,12 @@ public class Stab_Twice : SkillScript
                 return;
             }
 
+            var debuff = new debuff_beagsuain();
+
+            if (!_target.HasDebuff(debuff.Name)) 
+                debuff.OnApplied(_target, debuff);
+
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccessWithoutAction(_target, sprite, _skill, dmgCalc, _crit);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -228,15 +222,14 @@ public class Stab_Twice : SkillScript
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Str * 1 + client.Aisling.Dex * 3;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 4 + client.Aisling.Dex * 4;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 1;
-            dmg += damageMonster.Dex * 3;
+            dmg = damageMonster.Str * 4 + damageMonster.Dex * 4;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
@@ -245,8 +238,8 @@ public class Stab_Twice : SkillScript
     }
 }
 
-[Script("Stab'n Twist")]
-public class Stab_and_Twist : SkillScript
+[Script("Corrosive Touch")]
+public class CorrosiveTouch : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
@@ -254,7 +247,7 @@ public class Stab_and_Twist : SkillScript
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Stab_and_Twist(Skill skill) : base(skill)
+    public CorrosiveTouch(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -269,20 +262,20 @@ public class Stab_and_Twist : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Stab'n Twist";
+        aisling.ActionUsed = "Corrosive Touch";
 
         var action = new ServerFormat1A
         {
             Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x86
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
                 : 0x01),
-            Speed = 25
+            Speed = 20
         };
 
-        var enemy = aisling.DamageableGetInFront();
+        var enemy = _skillMethod.GetInCone(aisling);
 
-        if (enemy.Count == 0)
+        if (enemy.Length == 0)
         {
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
@@ -293,12 +286,9 @@ public class Stab_and_Twist : SkillScript
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            if (aisling.Invisible)
-                dmgCalc *= 2;
-
             var debuff = new debuff_rend();
 
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
+            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Rend")) 
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));
@@ -345,7 +335,7 @@ public class Stab_and_Twist : SkillScript
                 return;
             }
 
-            var debuff = new debuff_hurricane();
+            var debuff = new debuff_rend();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
                 debuff.OnApplied(_target, debuff);
@@ -366,14 +356,13 @@ public class Stab_and_Twist : SkillScript
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 5;
+            dmg = client.Aisling.Str * 2 + client.Aisling.Con * 2;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 2;
-            dmg += damageMonster.Dex * 5;
+            dmg = damageMonster.Str * 2 + damageMonster.Con * 2;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
@@ -382,14 +371,16 @@ public class Stab_and_Twist : SkillScript
     }
 }
 
-[Script("Sneak")]
-public class Sneak : SkillScript
+[Script("Stomp")]
+public class Stomp : SkillScript
 {
     private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Sneak(Skill skill) : base(skill)
+    public Stomp(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -397,43 +388,36 @@ public class Sneak : SkillScript
 
     public override void OnFailed(Sprite sprite)
     {
-        if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-        client.SendMessage(0x02, "Failed to blend in.");
+        if (_target is not { Alive: true }) return;
+        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
     {
-        switch (sprite)
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Stomp";
+
+        var action = new ServerFormat1A
         {
-            case Aisling aisling:
-                {
-                    var action = new ServerFormat1A
-                    {
-                        Serial = aisling.Serial,
-                        Number = 0x06,
-                        Speed = 30
-                    };
+            Serial = aisling.Serial,
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
+                : 0x01),
+            Speed = 20
+        };
 
-                    if (aisling.Dead || aisling.Invisible)
-                    {
-                        _skillMethod.FailedAttempt(aisling, _skill, action);
-                        OnFailed(aisling);
-                        return;
-                    }
+        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+        _target = enemy;
 
-                    var buff = new buff_hide();
-                    buff.OnApplied(aisling, buff);
-                    _skillMethod.Train(aisling.Client, _skill);
-                    aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
-                    break;
-                }
-            case Monster monster:
-                {
-                    // ToDo: Add logic so monsters can hide here
-                    break;
-                }
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
+            return;
         }
+        
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
 
     public override void OnUse(Sprite sprite)
@@ -455,13 +439,53 @@ public class Sneak : SkillScript
         }
         else
         {
-            OnSuccess(sprite);
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            _target = enemy;
+
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(sprite, _skill, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
+    }
+
+    private int DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 3;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 3;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 
-[Script("Flurry")]
-public class Flurry : SkillScript
+[Script("Head Butt")]
+public class HeadButt : SkillScript
 {
     private readonly Skill _skill;
     private Sprite _target;
@@ -469,7 +493,7 @@ public class Flurry : SkillScript
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
-    public Flurry(Skill skill) : base(skill)
+    public HeadButt(Skill skill) : base(skill)
     {
         _skill = skill;
         _skillMethod = new GlobalSkillMethods();
@@ -484,15 +508,241 @@ public class Flurry : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Flurry";
+        aisling.ActionUsed = "Head Butt";
 
         var action = new ServerFormat1A
         {
             Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x87
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
                 : 0x01),
-            Speed = 25
+            Speed = 20
+        };
+
+        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
+            return;
+        }
+        
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, _skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            _target = enemy;
+
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(sprite, _skill, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
+        }
+    }
+
+    private int DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 4;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 2 + damageMonster.Dex * 4;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Claw")]
+public class Claw : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public Claw(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Claw";
+
+        var action = new ServerFormat1A
+        {
+            Serial = aisling.Serial,
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
+                : 0x01),
+            Speed = 20
+        };
+
+        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
+            return;
+        }
+        
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, _skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var action = new ServerFormat1A
+            {
+                Serial = sprite.Serial,
+                Number = 0x01,
+                Speed = 30
+            };
+
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            _target = enemy;
+
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(sprite, _skill, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
+        }
+    }
+
+    private int DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        int dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Dex * 5;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Dex * 5;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Mule Kick")]
+public class MuleKick : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public MuleKick(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Mule Kick";
+
+        var action = new ServerFormat1A
+        {
+            Serial = aisling.Serial,
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
+                : 0x01),
+            Speed = 20
         };
 
         var enemy = _skillMethod.GetInCone(aisling);
@@ -508,12 +758,6 @@ public class Flurry : SkillScript
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            if (aisling.Invisible)
-                dmgCalc *= 2;
-
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
@@ -539,8 +783,6 @@ public class Flurry : SkillScript
         }
         else
         {
-            var enemy = _skillMethod.GetInCone(sprite);
-
             var action = new ServerFormat1A
             {
                 Serial = sprite.Serial,
@@ -548,294 +790,18 @@ public class Flurry : SkillScript
                 Speed = 30
             };
 
-            if (enemy == null) return;
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            _target = enemy;
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
             {
-                _target = Skill.Reflect(i, sprite, _skill);
-
-                var dmgCalc = DamageCalc(sprite);
-
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-                if (!_crit) continue;
-                sprite.Animate(387);
-            }
-        }
-    }
-
-    private int DamageCalc(Sprite sprite)
-    {
-        _crit = false;
-        int dmg;
-        if (sprite is Aisling damageDealingAisling)
-        {
-            var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Dex * 2 + client.Aisling.Int * 1;
-            dmg += dmg * imp / 100;
-        }
-        else
-        {
-            if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Dex * 2;
-            dmg += damageMonster.Int * 1;
-        }
-
-        var critCheck = _skillMethod.OnCrit(dmg);
-        _crit = critCheck.Item1;
-        return critCheck.Item2;
-    }
-}
-
-[Script("Entice")]
-public class Enticed : SkillScript
-{
-    private readonly Skill _skill;
-    private bool _success;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Enticed(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
-
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendMessage(0x02, "... What?");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
-    }
-
-    public override void OnSuccess(Sprite sprite)
-    {
-        if (sprite is not Aisling damageDealingSprite) return;
-        var client = damageDealingSprite.Client;
-        damageDealingSprite.ActionUsed = "Enticed";
-
-        var enemy = client.Aisling.DamageableGetInFront();
-
-        if (enemy == null)
-        {
-            OnFailed(damageDealingSprite);
-            return;
-        }
-
-        if (enemy.Count == 0)
-        {
-            OnFailed(damageDealingSprite);
-            return;
-        }
-
-        if (enemy.First() is Aisling { EnticeImmunity: true } charmImmCheck)
-        {
-            charmImmCheck.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = charmImmCheck.Serial,
-                Text = "Not interested!",
-                Type = 0x03
-            });
-
-            charmImmCheck.Client.SendMessage(0x03, "{=qYou are immune to Entice");
-            return;
-        }
-
-        foreach (var i in enemy.Where(i => i.Attackable))
-        {
-            var target = Skill.Reflect(i, damageDealingSprite, _skill);
-            if (target == null) continue;
-
-            if (target.HasDebuff("Beag Suain"))
-                target.RemoveDebuff("Beag Suain");
-            if (target.HasDebuff("Frozen"))
-                target.RemoveDebuff("Frozen");
-
-            var debuff = new debuff_charmed();
-            {
-                if (target.HasDebuff(debuff.Name))
-                    target.RemoveDebuff(debuff.Name);
-
-                _skillMethod.ApplyPhysicalDebuff(client, debuff, target, _skill);
+                _skillMethod.FailedAttempt(sprite, _skill, action);
+                OnFailed(sprite);
+                return;
             }
 
-            _skillMethod.Train(client, _skill);
-        }
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!_skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = _skillMethod.OnUse(aisling, _skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            var target = sprite.Target;
-
-            switch (target)
-            {
-                case null:
-                    return;
-                case Aisling damageDealingTarget:
-                    {
-                        if (damageDealingTarget.EnticeImmunity)
-                        {
-                            damageDealingTarget.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = damageDealingTarget.Serial,
-                                Text = "Not interested!",
-                                Type = 0x03
-                            });
-
-                            damageDealingTarget.Client.SendMessage(0x03, "{=qYou are immune to Entice");
-                            return;
-                        }
-
-                        var debuff = new debuff_charmed();
-                        {
-                            if (!damageDealingTarget.HasDebuff(debuff.Name))
-                                _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);
-                        }
-                        break;
-                    }
-            }
-        }
-    }
-}
-
-[Script("Double-Edged Dance")]
-public class Double_Edged_Dance : SkillScript
-{
-    private readonly Skill _skill;
-    private Sprite _target;
-    private bool _crit;
-    private bool _success;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Double_Edged_Dance(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
-
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-    }
-
-    public override void OnSuccess(Sprite sprite)
-    {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Double-Edged Dance";
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x86
-                : 0x01),
-            Speed = 25
-        };
-
-        var enemy = aisling.GetInFrontToSide();
-        var enemyBehind = aisling.DamageableGetBehind(2);
-        enemy.AddRange(enemyBehind);
-
-        if (enemy.Count == 0)
-        {
-            _skillMethod.FailedAttempt(aisling, _skill, action);
-            OnFailed(aisling);
-            return;
-        }
-
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = i;
             var dmgCalc = DamageCalc(sprite);
-            if (aisling.Invisible)
-                dmgCalc *= 2;
-
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
-        }
-
-        aisling.Show(Scope.NearbyAislings, action);
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!_skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = _skillMethod.OnUse(aisling, _skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            var enemy = sprite.GetInFrontToSide(2);
-            var enemyBehind = sprite.DamageableGetBehind(2);
-            enemy.AddRange(enemyBehind);
-
-            var action = new ServerFormat1A
-            {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
-            };
-
-            if (enemy.Count == 0) return;
-
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
-
-                var dmgCalc = DamageCalc(sprite);
-
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-                if (!_crit) continue;
-                sprite.Animate(387);
-            }
+            _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
 
@@ -846,269 +812,18 @@ public class Double_Edged_Dance : SkillScript
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Dex * 7 + client.Aisling.Str * 2;
+            var imp = 10 + _skill.Level;
+            dmg = client.Aisling.Str * 6;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 2;
-            dmg += damageMonster.Dex * 7;
+            dmg = damageMonster.Str * 6;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
-    }
-}
-
-[Script("Ebb'n Flow")]
-public class Ebb_and_Flow : SkillScript
-{
-    private readonly Skill _skill;
-    private Sprite _target;
-    private bool _crit;
-    private bool _success;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Ebb_and_Flow(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
-
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-    }
-
-    public override void OnSuccess(Sprite sprite)
-    {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Ebb'n Flow";
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Assassin
-                ? 0x86
-                : 0x01),
-            Speed = 25
-        };
-
-        var enemy = aisling.DamageableGetInFront(3);
-        var enemyBehind = aisling.DamageableGetBehind(3);
-        enemy.AddRange(enemyBehind);
-
-        if (enemy.Count == 0)
-        {
-            _skillMethod.FailedAttempt(aisling, _skill, action);
-            OnFailed(aisling);
-            return;
-        }
-
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
-        {
-            _target = i;
-            var dmgCalc = DamageCalc(sprite);
-            if (aisling.Invisible)
-                dmgCalc *= 2;
-
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
-        }
-
-        aisling.Show(Scope.NearbyAislings, action);
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!_skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = _skillMethod.OnUse(aisling, _skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            var enemy = sprite.GetAllInFront(3);
-            var enemyBehind = sprite.DamageableGetBehind(3);
-            enemy.AddRange(enemyBehind);
-
-            var action = new ServerFormat1A
-            {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
-            };
-
-            if (enemy.Count == 0) return;
-
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
-            {
-                _target = Skill.Reflect(i, sprite, _skill);
-
-                var dmgCalc = DamageCalc(sprite);
-
-                _target.ApplyDamage(sprite, dmgCalc, _skill);
-
-                if (_skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings,
-                            new ServerFormat29((uint)sprite.Serial, (uint)_target.Serial,
-                                _skill.Template.TargetAnimation, 0, 100));
-
-                sprite.Show(Scope.NearbyAislings, action);
-                if (!_crit) continue;
-                sprite.Animate(387);
-            }
-        }
-    }
-
-    private int DamageCalc(Sprite sprite)
-    {
-        _crit = false;
-        int dmg;
-        if (sprite is Aisling damageDealingAisling)
-        {
-            var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
-            dmg = client.Aisling.Con * 4 + client.Aisling.Dex * 8;
-            dmg += dmg * imp / 100;
-        }
-        else
-        {
-            if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Con * 4;
-            dmg += damageMonster.Dex * 8;
-        }
-
-        var critCheck = _skillMethod.OnCrit(dmg);
-        _crit = critCheck.Item1;
-        return critCheck.Item2;
-    }
-}
-
-[Script("Shadow Step")]
-public class Shadow_Step : SkillScript
-{
-    private readonly Skill _skill;
-    private Sprite _target;
-    private bool _crit;
-    private IList<Sprite> _enemyList;
-    private bool _success;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Shadow_Step(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
-
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-    }
-
-    public override void OnSuccess(Sprite sprite)
-    {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Shadow Step";
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = 0x82,
-            Speed = 20
-        };
-
-        var targetPos = aisling.GetFromAllSidesEmpty(aisling, _target);
-
-        if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
-        {
-            _skillMethod.FailedAttempt(aisling, _skill, action);
-            OnFailed(aisling);
-            return;
-        }
-
-        var oldPos = aisling.Pos;
-        aisling.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(63, oldPos));
-
-        var dmgCalc = DamageCalc(aisling);
-        if (aisling.Invisible)
-            dmgCalc *= 2;
-        _skillMethod.Step(aisling, targetPos.X, targetPos.Y);
-        aisling.Facing(_target.X, _target.Y, out var direction);
-        aisling.Direction = (byte)direction;
-        aisling.Turn();
-        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!_skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
-
-        Target(aisling);
-    }
-
-    private int DamageCalc(Sprite sprite)
-    {
-        _crit = false;
-        int dmg;
-        if (sprite is Aisling damageDealingAisling)
-        {
-            var client = damageDealingAisling.Client;
-            var imp = _skill.Level * 2;
-            dmg = client.Aisling.Int * 2 + client.Aisling.Dex * 5;
-            dmg += dmg * imp / 100;
-        }
-        else
-        {
-            if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Int * 2 + damageMonster.Dex * 5;
-        }
-
-        var critCheck = _skillMethod.OnCrit(dmg);
-        _crit = critCheck.Item1;
-        return critCheck.Item2;
-    }
-
-    private void Target(Sprite sprite)
-    {
-        if (sprite is not Aisling damageDealingSprite) return;
-        var client = damageDealingSprite.Client;
-
-        _enemyList = client.Aisling.DamageableGetInFront();
-        _target = _enemyList.FirstOrDefault();
-
-        if (_target == null)
-        {
-            OnFailed(damageDealingSprite);
-        }
-        else
-        {
-            _success = _skillMethod.OnUse(damageDealingSprite, _skill);
-
-            if (_success)
-            {
-                OnSuccess(damageDealingSprite);
-            }
-            else
-            {
-                OnFailed(damageDealingSprite);
-            }
-        }
     }
 }

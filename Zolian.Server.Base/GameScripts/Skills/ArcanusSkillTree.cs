@@ -26,64 +26,45 @@ public class Flame_Thrower : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        switch (sprite)
-        {
-            case Aisling damageDealingAisling:
-                {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendMessage(0x02, "You've lost focus.");
-                    if (_target == null) return;
-                    if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
-                        damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-
-                    break;
-                }
-            case Monster damageDealingMonster:
-                {
-                    var client = damageDealingMonster.Client;
-
-                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-
-                    break;
-                }
-        }
+        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override async void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling damageDealingSprite) return;
-        var client = damageDealingSprite.Client;
-        damageDealingSprite.ActionUsed = "Flame Thrower";
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        aisling.ActionUsed = "Flame Thrower";
 
-        if (damageDealingSprite.CurrentMp - 300 > 0)
+        var action = new ServerFormat1A
         {
-            damageDealingSprite.CurrentMp -= 300;
+            Serial = aisling.Serial,
+            Number = 0x06,
+            Speed = 40
+        };
+
+        if (aisling.CurrentMp - 300 > 0)
+        {
+            aisling.CurrentMp -= 300;
         }
         else
         {
             client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
             return;
         }
 
         var enemy = client.Aisling.DamageableGetInFront(6);
-        var action = new ServerFormat1A
-        {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
-        };
+        _target = enemy.FirstOrDefault();
 
-        if (enemy.Count == 0)
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
-            OnFailed(damageDealingSprite);
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
             return;
         }
 
-        await SendAnimations(damageDealingSprite, enemy);
-
-        _target = enemy.First();
+        await SendAnimations(aisling, enemy);
 
         if (_target.SpellReflect)
         {
@@ -107,14 +88,9 @@ public class Flame_Thrower : SkillScript
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _target.ApplyElementalSkillDamage(damageDealingSprite, dmgCalc, ElementManager.Element.Fire, _skill);
-        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-        _skill.LastUsedSkill = DateTime.Now;
-        _skillMethod.Train(client, _skill);
-        damageDealingSprite.Show(Scope.NearbyAislings, action);
-        if (!_crit) return;
-        damageDealingSprite.Animate(387);
-        _crit = false;
+        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, _skill);
+        aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+        _skillMethod.OnSuccess(_target, aisling, _skill, 0, false, action);
     }
 
     public override async void OnUse(Sprite sprite)

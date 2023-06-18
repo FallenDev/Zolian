@@ -140,35 +140,33 @@ public class Smite : SkillScript
 
     public override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling damageDealingSprite) return;
-        var client = damageDealingSprite.Client;
-        damageDealingSprite.ActionUsed = "Smite";
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Smite";
 
         var action = new ServerFormat1A
         {
-            Serial = client.Aisling.Serial,
-            Number = (byte)(client.Aisling.Path == Class.Defender
-                ? client.Aisling.UsingTwoHanded ? 0x81 : 0x01
+            Serial = aisling.Serial,
+            Number = (byte)(aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded ? 0x81 : 0x01
                 : 0x01),
             Speed = 20
         };
 
-        var enemy = client.Aisling.GetHorizontalInFront();
-        enemy.AddRange(client.Aisling.GetInFrontToSide());
+        var enemy = aisling.GetHorizontalInFront();
+        enemy.AddRange(aisling.GetInFrontToSide());
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(client, damageDealingSprite, _skill, action);
-            OnFailed(damageDealingSprite);
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
             return;
         }
 
-        foreach (var i in enemy.Where(i => i.Attackable))
+        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
-            _target = Skill.Reflect(i, damageDealingSprite, _skill);
-            if (_target == null) continue;
+            _target = i;
 
-            if (_target is not Aisling)
+            if (_target is Monster)
             {
                 if (_target.HasDebuff("Beag Suain"))
                     _target.RemoveDebuff("Beag Suain");
@@ -178,23 +176,15 @@ public class Smite : SkillScript
                     if (_target.HasDebuff(debuff.Name))
                         _target.RemoveDebuff(debuff.Name);
 
-                    _skillMethod.ApplyPhysicalDebuff(client, debuff, _target, _skill);
+                    _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
                 }
             }
 
-            var dmgCalc = DamageCalc(damageDealingSprite);
-
-            _target.ApplyDamage(damageDealingSprite, dmgCalc, _skill);
-
-            damageDealingSprite.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos));
-            _skillMethod.Train(client, _skill);
-
-            if (!_crit) continue;
-            client.Aisling.Animate(387);
-            _crit = false;
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.Show(Scope.NearbyAislings, action);
     }
 
     public override void OnUse(Sprite sprite)
@@ -222,13 +212,21 @@ public class Smite : SkillScript
             {
                 case null:
                     return;
-                case Aisling damageDealingTarget:
+                case Aisling player:
                     {
+                        if (_target.HasDebuff("Beag Suain"))
+                            _target.RemoveDebuff("Beag Suain");
+
                         var debuff = new debuff_frozen();
                         {
-                            if (!damageDealingTarget.HasDebuff(debuff.Name))
-                                _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);
+                            if (_target.HasDebuff(debuff.Name))
+                                _target.RemoveDebuff(debuff.Name);
+
+                            _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, _target, _skill);
                         }
+
+                        var dmgCalc = DamageCalc(sprite);
+                        _skillMethod.OnSuccessWithoutAction(_target, sprite, _skill, dmgCalc, _crit);
                         break;
                     }
             }
