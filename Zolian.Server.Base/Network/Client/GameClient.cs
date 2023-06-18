@@ -1122,7 +1122,10 @@ public partial class GameClient : NetworkClient
             {
                 if (!i.Template.Flags.FlagIsSet(ItemFlags.Stackable))
                 {
-                    Aisling.EquipmentManager.RemoveFromInventory(i, i.Template.CarryWeight > 0);
+                    for (var j = 0; j < retainer.AmountRequired; j++)
+                    {
+                        Aisling.EquipmentManager.RemoveFromInventory(i, i.Template.CarryWeight > 0);
+                    }
                     break;
                 }
 

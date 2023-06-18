@@ -13,6 +13,33 @@ namespace Darkages.GameScripts.Areas;
 [Script("Mileth")]
 public class Mileth : AreaScript
 {
+    private readonly SortedDictionary<int, List<string>> _ceannlaidirWeaponDictionary = new()
+    {
+        { 7, new List<string> { "Loures Saber", "Holy Hermes", "Center Shuriken", "Centered Dagger", "Magus Ares" } },
+        { 11, new List<string> { "Claidheamh", "Holy Diana", "Blessed Dagger", "Magus Zeus" } },
+        { 22, new List<string> { "Battle Sword", "Blossom Shuriken", "Moon Dagger", "Ether Wand" } },
+        { 33, new List<string> { "Masquerade", "Razor Claws", "Wood Axe" } },
+        { 44, new List<string> { "Primitive Spear", "Nunchucks", "Scimitar", "Luminous Dagger" } },
+        { 55, new List<string> { "Long Sword", "Luminous Shuriken", "Sun Dagger" } },
+        { 66, new List<string> { "Spiked Club", "Metal Chain", "Lotus Dagger" } },
+        { 77, new List<string> { "Emerald", "Sun Shuriken" } },
+        { 88, new List<string> { "Metal Club", "Gladius", "Chain Mace", "Skiv", "Balanced Shuriken" } },
+        { 99, new List<string> { "Stone Axe", "Gold Kindjal", "Blood Bane", "Blood Skiv" } },
+        { 120, new List<string> { "Scythe", "Golden Dragon Buster Blade", "Desert Skiv" } },
+    };
+
+    private readonly SortedDictionary<Item.Quality, int> _qualityLuckModifiers = new()
+    {
+        { Item.Quality.Damaged, 0 },
+        { Item.Quality.Common, 0 },
+        { Item.Quality.Uncommon, 1 },
+        { Item.Quality.Rare, 3 },
+        { Item.Quality.Epic, 5 },
+        { Item.Quality.Legendary, 50 },
+        { Item.Quality.Forsaken, 75 },
+        { Item.Quality.Mythic, 99 }
+    };
+
     public Mileth(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
     public override void OnMapEnter(GameClient client) { }
@@ -40,36 +67,9 @@ public class Mileth : AreaScript
 
         if (loop == 0) loop = 1;
 
-        switch (itemDropped.ItemQuality)
+        if (_qualityLuckModifiers.TryGetValue(itemDropped.ItemQuality, out var qualityLuck))
         {
-            case Item.Quality.Damaged:
-                client.SendMessage(0x02, "The altar consumes the damaged item, nothing happens.");
-                itemDropped.Remove();
-                return;
-            case Item.Quality.Common:
-                luck += 0;
-                break;
-            case Item.Quality.Uncommon:
-                luck += 1;
-                break;
-            case Item.Quality.Rare:
-                luck += 3;
-                break;
-            case Item.Quality.Epic:
-                luck += 5;
-                break;
-            case Item.Quality.Legendary:
-                luck += 50;
-                break;
-            case Item.Quality.Forsaken:
-                luck += 75;
-                break;
-            case Item.Quality.Mythic:
-                luck += 99;
-                break;
-            default:
-                luck += 0;
-                break;
+            luck += qualityLuck;
         }
 
         switch (itemDropped.DisplayName)
@@ -103,20 +103,12 @@ public class Mileth : AreaScript
             }
         }
 
-        var weapon = client.Aisling.Level switch
+        var weapons = new List<string> { "Stick" };
+        foreach (var kvp in _ceannlaidirWeaponDictionary.Where(kvp => client.Aisling.Level >= kvp.Key))
         {
-            >= 7 and <= 10 => "Loures Saber",
-            >= 11 and <= 21 => "Broad Sword",
-            >= 22 and <= 32 => "Templar",
-            >= 33 and <= 43 => "Bramble",
-            >= 44 and <= 54 => "Scimitar",
-            >= 55 and <= 65 => "Stilla",
-            >= 66 and <= 76 => "Talgonite Axe",
-            >= 77 and <= 87 => "Chain Mace",
-            >= 88 and <= 98 => "Kindjal",
-            >= 99 => "Stone Axe",
-            _ => "Stick"
-        };
+            weapons.AddRange(kvp.Value);
+        }
+        var weapon = weapons[Random.Shared.Next(weapons.Count)];
 
         for (var i = 0; i < loop; i++)
         {
@@ -132,7 +124,9 @@ public class Mileth : AreaScript
                 case >= 95:
                     item = new Item();
                     client.SendMessage(0x02, "You hear Ceannlaidir's voice as a weapon manifests before you.");
-                    item = item.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache[weapon], ShopMethods.DungeonHighQuality(), variance, wVariance);
+                    ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
+                    if (ceanWeapon != null)
+                        item = item.Create(client.Aisling, ceanWeapon, ShopMethods.DungeonHighQuality(), variance, wVariance);
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(83); });
                     break;
                 case >= 75 and < 95:
@@ -168,7 +162,9 @@ public class Mileth : AreaScript
                 case >= 0 and < 12:
                     item = new Item();
                     client.SendMessage(0x02, "Glioca manifests before you, then quickly tucks a potion in your bag.");
-                    item = item.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Ard Ioc Deum"]);
+                    ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue("Ard Ioc Deum", out var potion);
+                    if (potion != null)
+                        item = item.Create(client.Aisling, potion);
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(5); });
                     break;
             }
