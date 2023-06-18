@@ -49,6 +49,7 @@ public class CreateMonster : MonsterCreateScript
             CurrentMapId = _map.ID
         };
 
+        LoadSkillScript("Assail", obj);
         MonsterSkillSet(obj);
 
         // Initialize the dictionary with the maximum level as the key and the hpMultiplier and mpMultiplier as the value
@@ -802,16 +803,16 @@ public class CreateMonster : MonsterCreateScript
         {
             <= 11 => new List<string>
             {
-                "Assail", "Onslaught", "Assault", "Clobber", "Bite", "Claw"
+                "Onslaught", "Assault", "Clobber", "Bite", "Claw"
             },
             > 11 and <= 50 => new List<string>
             {
-                "Assail", "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
+                "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
                 "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
             },
             _ => new List<string>
             {
-                "Assail", "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
+                "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
                 "Thrust", "Wallop", "Assault", "Clobber", "Slash", "Bite", "Claw",
                 "Head Butt", "Mule Kick", "Stomp", "Tail Slap"
             }
