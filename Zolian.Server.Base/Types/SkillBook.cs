@@ -46,7 +46,7 @@ public class SkillBook : ObjectManager
         if (Skills.ContainsKey(slot))
             ret = Skills[slot];
 
-        return ret is { Template: { } } ? ret : null;
+        return ret is { Template: not null } ? ret : null;
     }
 
     public IEnumerable<Skill> GetSkills(Predicate<Skill> predicate) => Skills.Values.Where(i => i != null && predicate(i)).ToArray();

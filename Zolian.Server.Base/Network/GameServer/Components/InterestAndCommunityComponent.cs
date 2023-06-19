@@ -27,7 +27,7 @@ public class InterestAndCommunityComponent : GameServerComponent
     {
         if (!ServerSetup.Instance.Running || ServerSetup.Instance.Game.Clients == null) return;
 
-        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: { } }))
+        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: not null }))
         {
             if (!client.Aisling.LoggedIn) continue;
             if (client.Aisling.BankManager == null) continue;

@@ -136,7 +136,7 @@ public class Debuff : IDebuff
             await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
 
-            foreach (var deBuff in aisling.Debuffs.Values.Where(i => i is { Name: { } }))
+            foreach (var deBuff in aisling.Debuffs.Values.Where(i => i is { Name: not null }))
             {
                 var cmd = new SqlCommand("DeBuffSave", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;

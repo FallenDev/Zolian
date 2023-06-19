@@ -130,7 +130,7 @@ public class Buff : IBuff
             await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
 
-            foreach (var buff in aisling.Buffs.Values.Where(i => i is { Name: { } }))
+            foreach (var buff in aisling.Buffs.Values.Where(i => i is { Name: not null }))
             {
                 var cmd = new SqlCommand("BuffSave", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;

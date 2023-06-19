@@ -21,7 +21,7 @@ public class Inventory : ObjectManager, IInventory
         for (var i = 0; i < Length; i++) Items[i + 1] = null;
     }
 
-    public IEnumerable<byte> BankList => (Items.Where(i => i.Value is {Template: { }} && i.Value.Template.Flags.FlagIsSet(ItemFlags.Bankable))).Select(i => i.Value.InventorySlot);
+    public IEnumerable<byte> BankList => (Items.Where(i => i.Value is {Template: not null } && i.Value.Template.Flags.FlagIsSet(ItemFlags.Bankable))).Select(i => i.Value.InventorySlot);
 
     public int TotalItems => Items.Count;
         

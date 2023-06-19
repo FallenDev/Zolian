@@ -21,7 +21,7 @@ public class ObjectComponent : GameServerComponent
 
     private void UpdateObjects()
     {
-        var connectedUsers = Server.Clients.Values.Where(i => i is { Aisling: { }, SerialSent: true }).Select(i => i.Aisling).ToArray();
+        var connectedUsers = Server.Clients.Values.Where(i => i is { Aisling: not null, SerialSent: true }).Select(i => i.Aisling).ToArray();
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
 
         foreach (var user in readyLoggedIn)
@@ -44,9 +44,9 @@ public class ObjectComponent : GameServerComponent
         if (!user.LoggedIn || !user.Map.Ready) return;
         if (!user.Client.SerialSent) return;
 
-        var objects = user.GetObjects(user.Map, selector => selector is { }, ObjectManager.Get.All).ToArray();
-        var objectsInView = objects.Where(s => s is { } && s.WithinRangeOf(user)).ToArray();
-        var objectsNotInView = objects.Where(s => s is { } && !s.WithinRangeOf(user)).ToArray();
+        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToArray();
+        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToArray();
+        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToArray();
 
         RemoveObjects(user, objectsNotInView);
         AddObjects(payload, user, objectsInView);

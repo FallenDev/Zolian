@@ -391,7 +391,7 @@ public partial class GameClient : NetworkClient
             var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
             var aislingEquipped = Aisling.EquipmentManager.Equipment;
 
-            foreach (var item in itemList.Where(s => s is { Name: { } }))
+            foreach (var item in itemList.Where(s => s is { Name: not null }))
             {
                 if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
 
@@ -459,7 +459,7 @@ public partial class GameClient : NetworkClient
             sConn.Open();
             var skillList = sConn.Query<Skill>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
 
-            foreach (var skill in skillList.Where(s => s is { SkillName: { } }))
+            foreach (var skill in skillList.Where(s => s is { SkillName: not null }))
             {
                 if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(skill.SkillName)) continue;
 
@@ -514,7 +514,7 @@ public partial class GameClient : NetworkClient
             sConn.Open();
             var spellList = sConn.Query<Spell>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
 
-            foreach (var spell in spellList.Where(s => s is { SpellName: { } }))
+            foreach (var spell in spellList.Where(s => s is { SpellName: not null }))
             {
                 if (!ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey(spell.SpellName)) continue;
 
@@ -680,7 +680,7 @@ public partial class GameClient : NetworkClient
             var buffs = sConn.Query<Buff>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
             var orderedBuffs = buffs.OrderBy(b => b.TimeLeft);
 
-            foreach (var buffDb in orderedBuffs.Where(s => s is { Name: { } }))
+            foreach (var buffDb in orderedBuffs.Where(s => s is { Name: not null }))
             {
                 var buffCheck = false;
                 Buff buffFromCache = null;
@@ -740,7 +740,7 @@ public partial class GameClient : NetworkClient
             var deBuffs = sConn.Query<Debuff>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
             var orderedDebuffs = deBuffs.OrderBy(d => d.TimeLeft);
 
-            foreach (var deBuffDb in orderedDebuffs.Where(s => s is { Name: { } }))
+            foreach (var deBuffDb in orderedDebuffs.Where(s => s is { Name: not null }))
             {
                 var debuffCheck = false;
                 Debuff debuffFromCache = null;

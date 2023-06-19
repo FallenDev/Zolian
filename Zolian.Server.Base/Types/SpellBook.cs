@@ -46,7 +46,7 @@ public class SpellBook : ObjectManager
         if (Spells.ContainsKey(slot))
             ret = Spells[slot];
 
-        return ret is { Template: { } } ? ret : null;
+        return ret is { Template: not null } ? ret : null;
     }
 
     public IEnumerable<Spell> GetSpells(Predicate<Spell> predicate) => Spells.Values.Where(i => i != null && predicate(i)).ToArray();

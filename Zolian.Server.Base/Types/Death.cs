@@ -37,7 +37,7 @@ public class Death
 
     private void ReapInventory()
     {
-        var batch = Owner.Inventory.Items.Select(i => i.Value).Where(i => i != null).Where(i => i is { Template: { } }).ToList();
+        var batch = Owner.Inventory.Items.Select(i => i.Value).Where(i => i != null).Where(i => i is { Template: not null }).ToList();
 
         foreach (var obj in batch)
         {
@@ -92,7 +92,7 @@ public class Death
 
     private void ReapEquipment()
     {
-        var batch = Owner.EquipmentManager.Equipment.Select(i => i.Value).Where(i => i != null).Where(i => i is { Item.Template: { } }).ToList();
+        var batch = Owner.EquipmentManager.Equipment.Select(i => i.Value).Where(i => i != null).Where(i => i is { Item.Template: not null }).ToList();
 
         foreach (var obj in batch)
         {
