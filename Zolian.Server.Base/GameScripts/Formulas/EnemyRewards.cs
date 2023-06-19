@@ -134,7 +134,7 @@ public class EnemyRewards : RewardScript
         var x = player.Position.X - 2;
         var y = player.Position.Y - 2;
         var pos = new Position(x, y);
-        item.Release(player, pos);
+        item.Release(player, pos, false);
         player.Client.SendStats(StatusFlags.All);
         Task.Delay(2500).ContinueWith(ct =>
         {
@@ -237,7 +237,7 @@ public class EnemyRewards : RewardScript
 
         foreach (var item in randEquipItems)
         {
-            item.Release(_monster, _monster.Position);
+            item.Release(_monster, _monster.Position, false);
             if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
             {
                 Task.Delay(100).ContinueWith(ct =>

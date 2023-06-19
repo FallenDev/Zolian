@@ -112,7 +112,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
-            item.Release(Monster, Monster.Position);
+            item.Release(Monster, Monster.Position, false);
             item.AddObject(item);
 
             foreach (var player in item.AislingsNearby())
@@ -650,7 +650,7 @@ public class MonsterShadowSight : MonsterScript
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
-            item.Release(Monster, Monster.Position);
+            item.Release(Monster, Monster.Position, false);
             item.AddObject(item);
 
             foreach (var player in item.AislingsNearby())

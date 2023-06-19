@@ -60,7 +60,7 @@ public class Trap
         }
 
         item = item.TrapCreate(obj, itemTemplate);
-        item.Release(obj, pos);
+        item.Release(obj, pos, false);
 
         var id = Generator.GenerateNumber();
 

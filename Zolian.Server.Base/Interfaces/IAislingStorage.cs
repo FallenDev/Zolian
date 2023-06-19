@@ -18,10 +18,12 @@ public interface IAislingStorage
     /// Save method used to store properties that rarely change
     /// </summary>
     Task<bool> Save(Aisling obj);
-    bool SaveSkills(Aisling obj, SqlConnection connection);
-    bool SaveSpells(Aisling obj, SqlConnection connection);
+    Task<bool> SaveSkills(Aisling obj, SqlConnection connection);
+    Task<bool> SaveSpells(Aisling obj, SqlConnection connection);
+    Task<bool> SaveInventory(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, uint serial);
     Task<Aisling> CheckPassword(string name);
+    Task<bool> CheckIfInventoryItemExists(int itemSerial, int playerSerial);
     Task Create(Aisling obj);
 }

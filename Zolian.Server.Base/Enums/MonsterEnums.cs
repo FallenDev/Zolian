@@ -1,6 +1,4 @@
-﻿using Darkages.Sprites;
-
-namespace Darkages.Enums;
+﻿namespace Darkages.Enums;
 
 public enum MonsterEnums
 {

@@ -49,10 +49,7 @@ public interface IItem : ISprite
     bool CanCarry(Sprite sprite);
     bool GiveTo(Sprite sprite, bool checkWeight = true);
     void Release(Sprite owner, Position position, bool delete = true);
-    void ReleaseFromEquipped(Sprite owner, Position position, bool delete = true);
-    void AddToAislingDb(ISprite aisling);
     void DeleteFromAislingDb();
-    void DeleteFromAislingDbEquipped();
     void ReapplyItemModifiers(GameClient client);
     void RemoveModifiers(GameClient client);
     void StatModifiersCalc(GameClient client, Item equipment);

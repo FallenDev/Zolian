@@ -1,7 +1,4 @@
-﻿using System;
-using System.Numerics;
-
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.Network.Formats.Models.ServerFormats;

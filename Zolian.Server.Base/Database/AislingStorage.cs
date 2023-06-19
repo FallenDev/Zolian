@@ -6,8 +6,6 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -118,11 +116,11 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var connection = ConnectToDatabase(ConnectionString);
-            var connectionSkills = ConnectToDatabase(ConnectionString);
-            var connectionSpells = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuickSave", connection);
-            var skills = SaveSkills(obj, connectionSkills);
-            var spells = SaveSpells(obj, connectionSpells);
+            var skills = await SaveSkills(obj, connection);
+            var spells = await SaveSpells(obj, connection);
+            var inventory = await SaveInventory(obj, connection);
+            //await SaveEquipment(obj, connection);
 
             #region Parameters
 
@@ -204,10 +202,12 @@ public record AislingStorage : Sql, IAislingStorage
 
             ExecuteAndCloseConnection(cmd, connection);
 
-            if (skills && spells) return;
-
-            ServerSetup.Logger($"Skills or Spells did not save correctly. {obj.Username}", LogLevel.Error);
-            Analytics.TrackEvent($"Skills or Spells did not save correctly. {obj.Username}");
+            if (skills == false)
+                obj.Client.SendMessage(0x03, "Issue with skills save. (Code: Morning Star)");
+            if (spells == false)
+                obj.Client.SendMessage(0x03, "Issue with spells save. (Code: New Dawn)");
+            if (inventory == false)
+                obj.Client.SendMessage(0x03, "Issue with inventory save. (Code: Dying Light)");
         }
         catch (SqlException e)
         {
@@ -346,13 +346,13 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
-    public bool SaveSkills(Aisling obj, SqlConnection connection)
+    public async Task<bool> SaveSkills(Aisling obj, SqlConnection connection)
     {
         if (obj?.SkillBook == null) return false;
 
         try
         {
-            foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: { } }))
+            foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSkills", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
@@ -361,10 +361,8 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
                 cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = skill.Uses;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync();
             }
-
-            connection.Close();
         }
         catch (SqlException e)
         {
@@ -389,13 +387,13 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
-    public bool SaveSpells(Aisling obj, SqlConnection connection)
+    public async Task<bool> SaveSpells(Aisling obj, SqlConnection connection)
     {
         if (obj?.SpellBook == null) return false;
 
         try
         {
-            foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: { } }))
+            foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSpells", connection);
                 cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
@@ -404,10 +402,8 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
                 cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = skill.Casts;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync();
             }
-
-            connection.Close();
         }
         catch (SqlException e)
         {
@@ -432,6 +428,64 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
+    public async Task<bool> SaveInventory(Aisling obj, SqlConnection connection)
+    {
+        if (obj?.Inventory == null) return false;
+        var rows = 0;
+
+        try
+        {
+            foreach (var item in obj.Inventory.Items.Values.Where(i => i is not null))
+            {
+                var updateIfExists = await CheckIfInventoryItemExists(item.ItemId, obj.Serial);
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "InventoryUpdate" : "InventoryInsert", connection);
+                var color = ItemColors.ItemColorsToInt(item.Template.Color);
+                var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
+                var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
+                var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
+                var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+
+                cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = item.ItemId;
+                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
+                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
+                cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
+                cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
+                cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
+                cmd.Parameters.Add("@Identified", SqlDbType.Bit).Value = item.Identified;
+                cmd.Parameters.Add("@ItemVariance", SqlDbType.VarChar).Value = itemVariance;
+                cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
+                cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
+                cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
+                cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
+                cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
+                cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
+                await cmd.ExecuteNonQueryAsync();
+                rows++;
+            }
+        }
+        catch (SqlException e)
+        {
+            if (e.Message.Contains("PK__Players"))
+            {
+                obj.Client.SendMessage(0x03, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
+                Crashes.TrackError(e);
+                return false;
+            }
+
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+
+        return rows >= 1;
+    }
+
     public async Task<bool> CheckIfPlayerExists(string name)
     {
         try
@@ -440,16 +494,21 @@ public record AislingStorage : Sql, IAislingStorage
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
             var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
 
             while (reader.Read())
             {
                 var userName = reader["Username"].ToString();
                 if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
-                return string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase);
+                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    userFound = true;
+                }
             }
 
             reader.Close();
             sConn.Close();
+            return userFound;
         }
         catch (SqlException e)
         {
@@ -536,6 +595,44 @@ public record AislingStorage : Sql, IAislingStorage
         }
 
         return aisling;
+    }
+
+    public async Task<bool> CheckIfInventoryItemExists(int itemSerial, int playerSerial)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
+            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
+            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = playerSerial;
+            var reader = await cmd.ExecuteReaderAsync();
+            var itemFound = false;
+
+            while (reader.Read())
+            {
+                var dbId = (int)reader["ItemId"];
+                if (itemSerial != dbId) continue;
+                itemFound = true;
+            }
+
+            reader.Close();
+            sConn.Close();
+            return itemFound;
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+
+        return false;
     }
 
     public async Task Create(Aisling obj)

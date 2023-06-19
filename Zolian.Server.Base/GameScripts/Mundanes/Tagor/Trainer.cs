@@ -8,7 +8,6 @@ using Darkages.Types;
 
 using System.Numerics;
 using Darkages.Common;
-using Darkages.Enums;
 
 namespace Darkages.GameScripts.Mundanes.Tagor;
 

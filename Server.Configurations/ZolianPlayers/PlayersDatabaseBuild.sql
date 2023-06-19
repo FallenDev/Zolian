@@ -44,10 +44,10 @@ DROP PROCEDURE [dbo].[PlayerQuickSave]
 DROP PROCEDURE [dbo].[PlayerQuestSave]
 DROP PROCEDURE [dbo].[PlayerCreation]
 DROP PROCEDURE [dbo].[PasswordSave]
-DROP PROCEDURE [dbo].[ItemToInventory]
 DROP PROCEDURE [dbo].[ItemToEquipped]
 DROP PROCEDURE [dbo].[ItemToBank]
-DROP PROCEDURE [dbo].[InventorySave]
+DROP PROCEDURE [dbo].[InventoryUpdate]
+DROP PROCEDURE [dbo].[InventoryInsert]
 DROP PROCEDURE [dbo].[InsertQuests]
 DROP PROCEDURE [dbo].[InsertDeBuff]
 DROP PROCEDURE [dbo].[InsertBuff]
@@ -57,6 +57,7 @@ DROP PROCEDURE [dbo].[DeBuffSave]
 DROP PROCEDURE [dbo].[CheckIfPlayerHashExists]
 DROP PROCEDURE [dbo].[CheckIfPlayerExists]
 DROP PROCEDURE [dbo].[CheckIfItemExists]
+DROP PROCEDURE [dbo].[CheckIfInventoryItemExists]
 DROP PROCEDURE [dbo].[BuffSave]
 DROP PROCEDURE [dbo].[BankItemSaveStacked]
 DROP PROCEDURE [dbo].[BankItemSave]
@@ -346,6 +347,7 @@ CREATE TABLE PlayersIgnoreList
 	[PlayerIgnored] VARCHAR(12) NOT NULL,
 )
 
+-- AddLegendMark
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -360,9 +362,9 @@ BEGIN
 	([LegendId], [Serial], [Category], [Time], [Color], [Icon], [Value])
     VALUES	(@LegendId, @Serial, @Category, @Time, @Color, @Icon, @Value);
 END
-
 GO
 
+-- BankItemSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -389,9 +391,9 @@ BEGIN
 	[Stackable] = @CanStack	
     WHERE  Serial = @Serial AND ItemId = @ItemId;
 END
-
 GO
 
+-- BankItemSaveStacked
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -418,9 +420,9 @@ BEGIN
 	[Stackable] = @CanStack	
     WHERE  Serial = @Serial AND [Name] = @Name;
 END
-
 GO
 
+-- BuffSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -435,9 +437,26 @@ BEGIN
 	[TimeLeft] = @TimeLeft
     WHERE  Serial = @Serial AND [Name] = @Name;
 END
-
 GO
 
+-- CheckIfInventoryItemExists
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[CheckIfInventoryItemExists]
+@ItemId INT, @Serial INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT *
+    FROM   ZolianPlayers.dbo.PlayersInventory
+    WHERE  [ItemId] = @ItemId
+           AND Serial = @Serial;
+END
+GO
+
+-- CheckIfItemExists
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -450,6 +469,7 @@ BEGIN
 END
 GO
 
+-- CheckIfPlayerExists
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -462,6 +482,7 @@ BEGIN
 END
 GO
 
+-- CheckIfPlayerHashExists
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -474,6 +495,7 @@ BEGIN
 END
 GO
 
+-- DeBuffSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -488,9 +510,9 @@ BEGIN
 	[TimeLeft] = @TimeLeft
     WHERE  Serial = @Serial AND [Name] = @Name;
 END
-
 GO
 
+-- FoundMap
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -503,9 +525,9 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersDiscoveredMaps] ([DiscoveredId], [Serial], [MapId])
     VALUES (@DiscoveredId, @Serial, @MapId);
 END
-
 GO
 
+-- IgnoredSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -518,9 +540,9 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersIgnoreList] ([Id], [Serial], [PlayerIgnored])
     VALUES (@Id, @Serial, @PlayerIgnored);
 END
-
 GO
 
+-- InsertBuff
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -533,9 +555,9 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersBuffs] ([BuffId], [Serial], [Name], [TimeLeft])
     VALUES	(@BuffId, @Serial, @Name, @TimeLeft);
 END
-
 GO
 
+-- InsertDeBuff
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -548,9 +570,9 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersDeBuffs] ([DebuffId], [Serial], [Name], [TimeLeft])
     VALUES	(@DebuffId, @Serial, @Name, @TimeLeft);
 END
-
 GO
 
+-- InsertQuests
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -563,39 +585,54 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([QuestId], [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount])
     VALUES                                            (@QuestId, @Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount);
 END
-
 GO
 
+-- InventoryInsert
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[InventorySave]
-@ItemId INT, @Name VARCHAR(45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
+CREATE PROCEDURE [dbo].[InventoryInsert]
+@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT  INTO [ZolianPlayers].[dbo].[PlayersInventory] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [InventorySlot], [Stacks], [Enchantable])
+    VALUES                                               (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @InventorySlot, @Stacks, @Enchantable);
+END
+GO
+
+-- InventoryUpdate
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[InventoryUpdate]
+@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
 AS
 BEGIN
     SET NOCOUNT ON;
     UPDATE [ZolianPlayers].[dbo].[PlayersInventory]
-    SET    [ItemId] = @ItemId,
-	[Name] = @Name,
-	[Serial] = @Serial,
-	[Color] = @Color,
-	[Cursed] = @Cursed,
-	[Durability] = @Durability,
-	[Identified] = @Identified,
-	[ItemVariance] = @ItemVariance,
-	[WeapVariance] = @WeapVariance,
-	[ItemQuality] = @ItemQuality,
-	[OriginalQuality] = @OriginalQuality,
-	[InventorySlot] = @InventorySlot,
-	[Stacks] = @Stacks,
-	[Enchantable] = @Enchantable
-    WHERE  Serial = @Serial AND ItemId = @ItemId;
+    SET    [ItemId]          = @ItemId,
+           [Name]            = @Name,
+           [Serial]          = @Serial,
+           [Color]           = @Color,
+           [Cursed]          = @Cursed,
+           [Durability]      = @Durability,
+           [Identified]      = @Identified,
+           [ItemVariance]    = @ItemVariance,
+           [WeapVariance]    = @WeapVariance,
+           [ItemQuality]     = @ItemQuality,
+           [OriginalQuality] = @OriginalQuality,
+           [InventorySlot]   = @InventorySlot,
+           [Stacks]          = @Stacks,
+           [Enchantable]     = @Enchantable
+    WHERE  Serial = @Serial
+           AND ItemId = @ItemId;
 END
-
 GO
 
+-- ItemToBank
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -612,9 +649,9 @@ BEGIN
 	@Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, 
 	@Stacks, @Enchantable, @CanStack);
 END
-
 GO
 
+-- ItemToEquipped
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -630,27 +667,9 @@ BEGIN
     VALUES (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality,
 	@Slot, @Stacks, @Enchantable);
 END
-
 GO
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemToInventory]
-@ItemId INT, @Name VARCHAR(45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersInventory] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified],
-	[ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [InventorySlot], [Stacks], [Enchantable])
-    VALUES (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality,
-	@InventorySlot, @Stacks, @Enchantable);
-END
-
-GO
-
+-- PasswordSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -668,9 +687,9 @@ BEGIN
            [LastAttemptIP]    = @LastAttemptIP
     WHERE  Username = @Name;
 END
-
 GO
 
+-- PlayerCreation
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -683,9 +702,9 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[Players] ([Serial], [Created], [Username], [Password], [PasswordAttempts], [Hacked], [LoggedIn], [LastLogged], [X], [Y], [CurrentMapId], [OffenseElement], [DefenseElement], [SecondaryOffensiveElement], [SecondaryDefensiveElement], [Direction], [CurrentHp], [BaseHp], [CurrentMp], [BaseMp], [_ac], [_Regen], [_Dmg], [_Hit], [_Mr], [_Str], [_Int], [_Wis], [_Con], [_Dex], [_Luck], [AbpLevel], [AbpNext], [AbpTotal], [ExpLevel], [ExpNext], [ExpTotal], [Stage], [Path], [PastClass], [Race], [Afflictions], [Gender], [HairColor], [HairStyle], [OldColor], [OldStyle], [NameColor], [ProfileMessage], [Nation], [Clan], [ClanRank], [ClanTitle], [AnimalForm], [MonsterForm], [ActiveStatus], [Flags], [CurrentWeight], [World], [Lantern], [Invisible], [Resting], [FireImmunity], [WaterImmunity], [WindImmunity], [EarthImmunity], [LightImmunity], [DarkImmunity], [PoisonImmunity], [EnticeImmunity], [PartyStatus], [RaceSkill], [RaceSpell], [GameMaster], [ArenaHost], [Developer], [Ranger], [Knight], [GoldPoints], [StatPoints], [GamePoints], [BankedGold], [ArmorImg], [HelmetImg], [ShieldImg], [WeaponImg], [BootsImg], [HeadAccessory1Img], [HeadAccessory2Img], [OverCoatImg], [BootColor], [OverCoatColor], [Pants], [Aegis], [Bleeding], [Spikes], [Rending], [Reaping], [Vampirism], [Haste], [Gust], [Quake], [Rain], [Flame], [Dusk], [Dawn])
     VALUES                                      (@Serial, @Created, @UserName, @Password, '0', 'False', 'False', @LastLogged, '7', '23', '7000', 'None', 'None', 'None', 'None', '0', @CurrentHp, @BaseHp, @CurrentMp, @BaseMp, '0', '0', '0', '0', '0', '5', '5', '5', '5', '5', '0', '0', '0', '0', '1', '600', '0', 'Class', 'Peasant', 'Peasant', 'UnDecided', 'Normal', @Gender, @HairColor, @HairStyle, @HairColor, @HairStyle, '1', '', 'Mileth', '', '', '', 'None', '0', 'Awake', 'Normal', '0', '0', '0', 'False', 'Standing', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'AcceptingRequests', '', '', 'False', 'False', 'False', 'False', 'False', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
 END
-
 GO
 
+-- PlayerQuestSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -724,9 +743,9 @@ BEGIN
            [SwampCount]              = @SwampCount
     WHERE  Serial = @Serial;
 END
-
 GO
 
+-- PlayerQuickSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -811,9 +830,9 @@ BEGIN
            [Dawn]                      = @Dawn
     WHERE  Username = @Name;
 END
-
 GO
 
+-- PlayerSave
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -855,14 +874,13 @@ BEGIN
            [Knight]         = @Knight
     WHERE  Username = @Name;
 END
-
 GO
 
+-- PlayerSaveSkills
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
 CREATE PROCEDURE [dbo].[PlayerSaveSkills]
 @Serial INT, @Level INT, @Slot INT, @Skill VARCHAR (30), @Uses INT, @Cooldown INT
 AS
@@ -877,14 +895,13 @@ BEGIN
     WHERE  Serial = @Serial
            AND SkillName = @Skill;
 END
-
 GO
 
+-- PlayerSaveSpells
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
 CREATE PROCEDURE [dbo].[PlayerSaveSpells]
 @Serial INT, @Level INT, @Slot INT, @Spell VARCHAR (30), @Casts INT, @Cooldown INT
 AS
@@ -899,9 +916,9 @@ BEGIN
     WHERE  Serial = @Serial
            AND SpellName = @Spell;
 END
-
 GO
 
+-- PlayerSecurity
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -914,6 +931,7 @@ BEGIN
 END
 GO
 
+-- SelectBanked
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -926,6 +944,7 @@ BEGIN
 END
 GO
 
+-- SelectBuffs
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -938,6 +957,7 @@ BEGIN
 END
 GO
 
+-- SelectBuffsCheck
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -950,6 +970,7 @@ BEGIN
 END
 GO
 
+-- SelectDeBuffs
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -962,6 +983,7 @@ BEGIN
 END
 GO
 
+-- SelectDeBuffsCheck
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -974,6 +996,7 @@ BEGIN
 END
 GO
 
+-- SelectDiscoveredMaps
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -986,6 +1009,7 @@ BEGIN
 END
 GO
 
+-- SelectEquipped
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -998,6 +1022,7 @@ BEGIN
 END
 GO
 
+-- SelectIgnoredPlayers
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1010,6 +1035,7 @@ BEGIN
 END
 GO
 
+-- SelectInventory
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1022,6 +1048,7 @@ BEGIN
 END
 GO
 
+-- SelectLegends
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1034,6 +1061,7 @@ BEGIN
 END
 GO
 
+-- SelectPlayer
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1151,9 +1179,9 @@ BEGIN
     FROM   [ZolianPlayers].[dbo].[Players]
     WHERE  Username = @Name;
 END
-
 GO
 
+-- SelectQuests
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1195,6 +1223,7 @@ BEGIN
 END
 GO
 
+-- SelectSkills
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1207,6 +1236,7 @@ BEGIN
 END
 GO
 
+-- SelectSpells
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1219,6 +1249,7 @@ BEGIN
 END
 GO
 
+-- SkillToPlayer
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1235,6 +1266,7 @@ BEGIN
 END
 GO
 
+-- SpellToPlayer
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1251,6 +1283,7 @@ BEGIN
 END
 GO
 
+-- WithdrawItemList
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

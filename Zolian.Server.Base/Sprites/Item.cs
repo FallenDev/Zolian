@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Data;
 using System.Numerics;
 
 using Dapper;
@@ -97,7 +96,6 @@ public sealed class Item : Sprite, IItem
         Runic
     }
 
-    private SemaphoreSlim CreateLock { get; } = new(1, 1);
     public Sprite[] AuthenticatedAislings { get; set; }
     public byte Color { get; set; }
     public bool Cursed { get; set; }
@@ -461,23 +459,14 @@ public sealed class Item : Sprite, IItem
                 {
                     return item.ItemQuality = Quality.Rare;
                 }
-
                 break;
-            case >= 31 and <= 60:
-                if (item.ItemQuality is Quality.Mythic or Quality.Forsaken or Quality.Legendary)
-                {
-                    return item.ItemQuality = Quality.Epic;
-                }
-
-                break;
-            case >= 61 and <= 98:
+            case <= 98:
                 if (item.ItemQuality is Quality.Mythic or Quality.Forsaken)
                 {
                     return item.ItemQuality = Quality.Legendary;
                 }
-
                 break;
-            case >= 99 and <= 249:
+            case <= 125:
                 if (item.ItemQuality is Quality.Mythic)
                 {
                     return item.ItemQuality = Quality.Forsaken;
@@ -542,7 +531,7 @@ public sealed class Item : Sprite, IItem
             if (numStacks <= 0)
                 numStacks = 1;
 
-            var item = aisling.Inventory.Items.Values.FirstOrDefault(i => i != null && i.Template.Name == Template.Name && i.Stacks + numStacks < i.Template.MaxStack);
+            var item = aisling.Inventory.Items.Values.FirstOrDefault(i => i != null && i.Template.Name == Template.Name && i.Stacks + numStacks <= i.Template.MaxStack);
 
             if (item != null)
             {
@@ -571,7 +560,6 @@ public sealed class Item : Sprite, IItem
             aisling.Client.Send(new ServerFormat10(InventorySlot));
             aisling.Inventory.Set(this);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
-            AddToAislingDb(aisling);
             aisling.Inventory.UpdatePlayersWeight(aisling.Client);
             aisling.Client?.SendStats(StatusFlags.WeightMoney);
 
@@ -597,7 +585,6 @@ public sealed class Item : Sprite, IItem
 
             aisling.Inventory.Set(this);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
-            AddToAislingDb(aisling);
             aisling.Inventory.UpdatePlayersWeight(aisling.Client);
             aisling.Client?.SendStats(StatusFlags.WeightMoney);
 
@@ -624,97 +611,12 @@ public sealed class Item : Sprite, IItem
         }
 
         Serial = Generator.GenerateNumber();
-        ItemId = Generator.GenerateNumber();
+        //ItemId = Generator.GenerateNumber();
 
         AddObject(this);
 
         if (owner is Aisling player)
             ShowTo(player);
-    }
-
-    public void ReleaseFromEquipped(Sprite owner, Position position, bool delete = true)
-    {
-        Pos = new Vector2(position.X, position.Y);
-
-        var readyTime = DateTime.Now;
-        CurrentMapId = owner.CurrentMapId;
-        AbandonedDate = readyTime;
-
-        if (owner is Aisling)
-        {
-            AuthenticatedAislings = Array.Empty<Sprite>();
-            Cursed = false;
-            if (delete) DeleteFromAislingDbEquipped();
-        }
-
-        Serial = Generator.GenerateNumber();
-        ItemId = Generator.GenerateNumber();
-
-        AddObject(this);
-
-        if (owner is Aisling player)
-            ShowTo(player);
-    }
-
-    public async void AddToAislingDb(ISprite aisling)
-    {
-        await CreateLock.WaitAsync().ConfigureAwait(false);
-
-        try
-        {
-            await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            var cmd = new SqlCommand("ItemToInventory", sConn);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            var color = ItemColors.ItemColorsToInt(Template.Color);
-            var quality = ItemEnumConverters.QualityToString(ItemQuality);
-            var orgQuality = ItemEnumConverters.QualityToString(OriginalQuality);
-            var itemVariance = ItemEnumConverters.ArmorVarianceToString(ItemVariance);
-            var weapVariance = ItemEnumConverters.WeaponVarianceToString(WeapVariance);
-
-            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = ItemId;
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = Template.Name;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
-            cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
-            cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = Cursed;
-            cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = Durability;
-            cmd.Parameters.Add("@Identified", SqlDbType.Bit).Value = Identified;
-            cmd.Parameters.Add("@ItemVariance", SqlDbType.VarChar).Value = itemVariance;
-            cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
-            cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
-            cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
-            cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = InventorySlot;
-            cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = Stacks;
-            cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = Enchantable;
-
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                aisling.Client.SendMessage(0x03, "Item did not save correctly. Contact GM");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        finally
-        {
-            CreateLock.Release();
-        }
     }
 
     public void DeleteFromAislingDb()
@@ -726,32 +628,6 @@ public sealed class Item : Sprite, IItem
             var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
             const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersInventory WHERE ItemId = @ItemId";
-            sConn.Execute(cmd, new { ItemId });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-    }
-
-    public void DeleteFromAislingDbEquipped()
-    {
-        if (ItemId == 0) return;
-
-        try
-        {
-            var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersEquipped WHERE ItemId = @ItemId";
             sConn.Execute(cmd, new { ItemId });
             sConn.Close();
         }

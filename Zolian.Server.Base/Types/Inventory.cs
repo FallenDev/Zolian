@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Data;
-using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -10,10 +8,6 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
 
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-
 namespace Darkages.Types;
 
 public class Inventory : ObjectManager, IInventory
@@ -21,7 +15,6 @@ public class Inventory : ObjectManager, IInventory
     private const int Length = 59;
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
-    private SemaphoreSlim SaveLock { get; } = new(1, 1);
 
     public Inventory()
     {
@@ -185,7 +178,6 @@ public class Inventory : ObjectManager, IInventory
 
     public void UpdateSlot(GameClient client, Item item)
     {
-        UpdateInventory(client.Aisling);
         item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
         if (!string.IsNullOrEmpty(item.Template.WeaponScript))
             item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
@@ -218,75 +210,6 @@ public class Inventory : ObjectManager, IInventory
             if (equipment.Value?.Slot == 0) continue;
             if (equipment.Value?.Item == null) continue;
             client.Aisling.CurrentWeight += equipment.Value.Item.Template.CarryWeight;
-        }
-    }
-
-    public async void UpdateInventory(Aisling obj)
-    {
-        if (obj?.Inventory == null) return;
-
-        await SaveLock.WaitAsync().ConfigureAwait(false);
-
-        try
-        {
-            await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-
-            foreach (var item in obj.Inventory.Items.Values.Where(i => i != null && i.InventorySlot != 0))
-            {
-                var cmd = new SqlCommand("InventorySave", sConn);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                var color = ItemColors.ItemColorsToInt(item.Template.Color);
-                var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
-                var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
-                var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
-                var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-
-                cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = item.ItemId;
-                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
-                cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
-                cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
-                cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
-                cmd.Parameters.Add("@Identified", SqlDbType.Bit).Value = item.Identified;
-                cmd.Parameters.Add("@ItemVariance", SqlDbType.VarChar).Value = itemVariance;
-                cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
-                cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
-                cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
-                cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
-                cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
-                cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
-
-                cmd.CommandTimeout = 5;
-                cmd.ExecuteNonQuery();
-            }
-
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendMessage(0x03, "Your inventory did not save. Contact GM (Code: DeadSea)");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        finally
-        {
-            SaveLock.Release();
-            UpdatePlayersWeight(obj.Client);
         }
     }
 }

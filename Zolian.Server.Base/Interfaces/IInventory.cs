@@ -21,5 +21,4 @@ public interface IInventory
     void Set(Item s);
     void UpdateSlot(GameClient client, Item item);
     void UpdatePlayersWeight(GameClient client);
-    void UpdateInventory(Aisling obj);
 }
