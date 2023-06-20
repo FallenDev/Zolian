@@ -957,6 +957,8 @@ public class Fire_Breath : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);
@@ -1133,6 +1135,8 @@ public class Bubble_Burst : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);
@@ -1310,6 +1314,8 @@ public class Icy_Blast : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);
@@ -1817,6 +1823,8 @@ public class Silent_Siren : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);
@@ -2174,6 +2182,8 @@ public class Toxic_Breath : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);

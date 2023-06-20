@@ -212,4 +212,40 @@ public class Inventory : ObjectManager, IInventory
             client.Aisling.CurrentWeight += equipment.Value.Item.Template.CarryWeight;
         }
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not Inventory inv) return false;
+        return Equals(Items.Values, inv.Items.Values) && Equals(Items.Keys, inv.Items.Keys);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hash = 17;
+            hash = hash * 23 + Items.Values.GetHashCode();
+            return hash * 23 + Items.Keys.GetHashCode();
+        }
+    }
+}
+
+public class InventoryComparer : IEqualityComparer<Inventory>
+{
+    public bool Equals(Inventory x, Inventory y)
+    {
+        if (x == null || y == null) return false;
+        if (ReferenceEquals(x, y)) return true;
+        return Equals(x.Items.Values, y.Items.Values) && Equals(x.Items.Keys, y.Items.Keys);
+    }
+
+    public int GetHashCode(Inventory obj)
+    {
+        unchecked
+        {
+            var hash = 17;
+            hash = hash * 23 + obj.Items.Values.GetHashCode();
+            return hash * 23 + obj.Items.Keys.GetHashCode();
+        }
+    }
 }
