@@ -645,7 +645,7 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExistsElsewhere", sConn);
             cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
