@@ -56,9 +56,8 @@ public class Flame_Thrower : SkillScript
         }
 
         var enemy = client.Aisling.DamageableGetInFront(6);
-        _target = enemy.FirstOrDefault();
 
-        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        if (enemy.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
@@ -66,6 +65,16 @@ public class Flame_Thrower : SkillScript
         }
 
         await SendAnimations(aisling, enemy);
+
+        // enemy.Count = 0 verified that there is an enemy
+        _target = enemy.First();
+
+        if (_target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, _skill, action);
+            OnFailed(aisling);
+            return;
+        }
 
         if (_target.SpellReflect)
         {

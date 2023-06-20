@@ -531,13 +531,13 @@ public partial class GameClient : IGameClient
 
         switch (levelUpRand)
         {
-            case <= 0.94:
+            case <= 0.99:
                 return;
             case <= 0.995:
                 skill.Level++;
                 skill.Uses = 0;
                 break;
-            case <= 0.999:
+            case <= 1:
                 skill.Level++;
                 skill.Level++;
                 skill.Uses = 0;
@@ -570,7 +570,7 @@ public partial class GameClient : IGameClient
                 spell.Level++;
                 spell.Casts = 0;
                 break;
-            case <= 0.99:
+            case <= 1:
                 spell.Level++;
                 spell.Level++;
                 spell.Casts = 0;

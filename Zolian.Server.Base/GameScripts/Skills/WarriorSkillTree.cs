@@ -1947,7 +1947,7 @@ public class Retribution : SkillScript
             return;
         }
 
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+        foreach (var i in enemy.Where(i => i != null && aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);

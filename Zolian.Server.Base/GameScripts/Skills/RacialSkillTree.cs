@@ -1994,6 +1994,8 @@ public class Poison_Talon : SkillScript
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
+                _target = i;
+
                 if (_target.SpellReflect)
                 {
                     _target.Animate(184);

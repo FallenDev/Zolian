@@ -799,7 +799,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.AislingDamage);
     private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.MonsterDamage);
     public bool WithinRangeOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity, checkMap);
-    public bool WithinEarShotOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, 20, checkMap);
+    public bool WithinEarShotOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, 16, checkMap);
     private bool WithinRangeOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
     public bool WithinRangeOf(Sprite other, int distance, bool checkMap = true)
