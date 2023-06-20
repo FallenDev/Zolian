@@ -438,7 +438,12 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var item in obj.Inventory.Items.Values.Where(i => i is not null))
             {
                 var updateIfExists = await CheckIfInventoryItemExists(item.ItemId, obj.Serial);
+                var checkIfAnotherPlayerHas = await CheckIfInventoryItemExistsElsewhere(item.ItemId);
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "InventoryUpdate" : "InventoryInsert", connection);
+
+                if (!updateIfExists && checkIfAnotherPlayerHas)
+                    item.ItemId = Generator.GenerateNumber();
+
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
                 var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
                 var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
@@ -605,6 +610,43 @@ public record AislingStorage : Sql, IAislingStorage
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
             cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = playerSerial;
+            var reader = await cmd.ExecuteReaderAsync();
+            var itemFound = false;
+
+            while (reader.Read())
+            {
+                var dbId = (int)reader["ItemId"];
+                if (itemSerial != dbId) continue;
+                itemFound = true;
+            }
+
+            reader.Close();
+            sConn.Close();
+            return itemFound;
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+
+        return false;
+    }
+
+    public async Task<bool> CheckIfInventoryItemExistsElsewhere(int itemSerial)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
+            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
 
