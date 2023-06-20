@@ -71,7 +71,7 @@ public class Defensive_Stance : SpellScript
             return;
         };
 
-        if (sprite.HasBuff("Defensive Stance"))
+        if (sprite.HasBuff("Defensive Stance") || target.HasBuff("Spectral Shield"))
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);

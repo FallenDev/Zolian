@@ -524,17 +524,32 @@ public partial class GameClient : IGameClient
     public void TrainSkill(Skill skill)
     {
         if (skill.Level >= skill.Template.MaxLevel) return;
-        var toImprove = skill.Template.LevelRate;
-        if (skill.Uses++ < toImprove) return;
 
-        skill.Level++;
-        skill.Uses = 0;
+        var levelUpRand = Generator.RandomNumPercentGen();
+        if (skill.Uses >= 200)
+            levelUpRand += 0.1;
+
+        switch (levelUpRand)
+        {
+            case <= 0.94:
+                return;
+            case <= 0.995:
+                skill.Level++;
+                skill.Uses = 0;
+                break;
+            case <= 0.999:
+                skill.Level++;
+                skill.Level++;
+                skill.Uses = 0;
+                break;
+        }
 
         Send(new ServerFormat2C(skill.Slot, skill.Icon, skill.Name));
-        Aisling.UsedSkill(skill);
+        skill.CurrentCooldown = skill.Template.Cooldown;
+        Aisling.Client.Send(new ServerFormat3F(1, skill.Slot, skill.CurrentCooldown));
 
         SendMessage(0x02,
-            skill.Level == 100
+            skill.Level >= 100
                 ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", skill.Template.Name)
                 : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", skill.Template.Name, skill.Level));
     }
@@ -567,7 +582,7 @@ public partial class GameClient : IGameClient
         Aisling.Client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
 
         SendMessage(0x02,
-            spell.Level == 100
+            spell.Level >= 100
                 ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", spell.Template.Name)
                 : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", spell.Template.Name, spell.Level));
     }

@@ -27,7 +27,8 @@ public class Ambush : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -232,7 +233,8 @@ public class KnifeHandStrike : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -344,7 +346,8 @@ public class PalmHeelStrike : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -463,7 +466,8 @@ public class HammerTwist : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -580,7 +584,8 @@ public class CrossBodyPunch : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -698,7 +703,8 @@ public class HurricaneKick : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -828,7 +834,8 @@ public class Kelberoth_Strike : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -928,7 +935,8 @@ public class Krane_Kick : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1112,7 +1120,8 @@ public class EmberStrike : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)

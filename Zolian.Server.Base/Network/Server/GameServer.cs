@@ -1782,15 +1782,15 @@ public class GameServer : NetworkServer<GameClient>
                         var item = client.Aisling.Inventory.Items[format.ItemSlot];
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
                         script?.OnItemDropped(client, item);
-
                         break;
                     }
                 case Mundane mundane:
                     {
                         var script = mundane.Scripts.Values.First();
                         var item = client.Aisling.Inventory.Items[format.ItemSlot];
+                        client.EntryCheck = mundane.Serial;
+                        mundane.Bypass = true;
                         script?.OnItemDropped(client, item);
-
                         break;
                     }
                 case Aisling aisling:
@@ -1821,7 +1821,6 @@ public class GameServer : NetworkServer<GameClient>
                             client.Aisling.ThrewHealingPot = true;
                             client.Aisling.ReviveFromAfar(aisling);
                         }
-
                         break;
                     }
             }

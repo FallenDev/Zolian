@@ -25,7 +25,8 @@ public class Bite : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -138,7 +139,8 @@ public class BiteAndShake : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -256,7 +258,8 @@ public class CorrosiveTouch : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -389,7 +392,8 @@ public class Stomp : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -502,7 +506,8 @@ public class HeadButt : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -615,7 +620,8 @@ public class Claw : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -728,7 +734,8 @@ public class MuleKick : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)

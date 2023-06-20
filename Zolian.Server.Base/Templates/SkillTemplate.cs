@@ -16,7 +16,6 @@ public class SkillTemplate : Template
     public int Cooldown { get; set; }
     public byte Sound { get; set; }
     public PostQualifier PostQualifiers { get; set; }
-    public double LevelRate { get; set; }
     public LearningPredicate Prerequisites { get; set; }
     public List<LearningPredicate> LearningRequirements { get; } = new();
     public ushort TargetAnimation { get; set; }
@@ -55,7 +54,6 @@ public static class SkillStorage
                 var pane = reader["Pane"].ConvertTo<Pane>();
                 var sound = (int)reader["Sound"];
                 var post = reader["PostAttribute"].ConvertTo<PostQualifier>();
-                var levelRate = (decimal)reader["LevelRate"];
                 var predicateId = (int)reader["PredicateId"];
                 var targetAnim = (int)reader["TargetAnimation"];
                 var missAnim = (int)reader["MissAnimation"];
@@ -67,7 +65,6 @@ public static class SkillStorage
                 temp.Cooldown = (int)reader["Cooldown"];
                 temp.Sound = (byte)sound;
                 temp.PostQualifiers = post;
-                temp.LevelRate = (double)levelRate;
 
                 #region LearningPredicate
 

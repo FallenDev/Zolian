@@ -107,7 +107,8 @@ public class Archery : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -360,7 +361,8 @@ public class Slash : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -855,7 +857,8 @@ public class Fire_Breath : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1030,7 +1033,8 @@ public class Bubble_Burst : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1206,7 +1210,8 @@ public class Icy_Blast : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1382,7 +1387,8 @@ public class Earthly_Delights : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1530,7 +1536,8 @@ public class Heavenly_Gaze : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1711,7 +1718,8 @@ public class Silent_Siren : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1887,7 +1895,8 @@ public class Poison_Talon : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2063,7 +2072,8 @@ public class Toxic_Breath : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
 
     public override void OnSuccess(Sprite sprite)

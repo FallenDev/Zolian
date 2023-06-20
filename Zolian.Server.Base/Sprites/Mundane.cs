@@ -21,6 +21,7 @@ public sealed class Mundane : Sprite
     private Position CurrentWaypoint => Template.Waypoints[_waypointIndex];
     public ConcurrentDictionary<string, MundaneScript> Scripts { get; private set; }
     public MundaneTemplate Template { get; init; }
+    public bool Bypass { get; set; }
 
     public Mundane()
     {

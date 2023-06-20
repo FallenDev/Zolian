@@ -47,6 +47,7 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
     {
         // Ensure the user did not spoof their way to the OnResponse
         if (Mundane.Serial != client.EntryCheck) return false;
+        if (Mundane.Bypass) _onClickCheck = 1;
 
         // If user is not on the same map, disconnect them
         if (client.Aisling.Map.ID != Mundane.Map.ID)
