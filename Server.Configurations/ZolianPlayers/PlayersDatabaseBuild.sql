@@ -371,7 +371,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[BankItemSave]
 @ItemId INT, @Name VARCHAR(45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT
+@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -388,7 +388,8 @@ BEGIN
 	[OriginalQuality] = @OriginalQuality,
 	[Stacks] = @Stacks,
 	[Enchantable] = @Enchantable,
-	[Stackable] = @CanStack	
+	[Stackable] = @CanStack,
+    [Tarnished] = @Tarnished
     WHERE  Serial = @Serial AND ItemId = @ItemId;
 END
 GO
@@ -400,7 +401,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[BankItemSaveStacked]
 @ItemId INT, @Name VARCHAR(45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT
+@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -417,7 +418,8 @@ BEGIN
 	[OriginalQuality] = @OriginalQuality,
 	[Stacks] = @Stacks,
 	[Enchantable] = @Enchantable,
-	[Stackable] = @CanStack	
+	[Stackable] = @CanStack,
+    [Tarnished] = @Tarnished
     WHERE  Serial = @Serial AND [Name] = @Name;
 END
 GO
@@ -593,12 +595,12 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InventoryInsert]
-@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
+@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersInventory] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [InventorySlot], [Stacks], [Enchantable])
-    VALUES                                               (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @InventorySlot, @Stacks, @Enchantable);
+    INSERT  INTO [ZolianPlayers].[dbo].[PlayersInventory] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [InventorySlot], [Stacks], [Enchantable], [Tarnished])
+    VALUES                                               (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @InventorySlot, @Stacks, @Enchantable, @Tarnished);
 END
 GO
 
@@ -608,7 +610,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InventoryUpdate]
-@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT
+@ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15), @WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -626,7 +628,8 @@ BEGIN
            [OriginalQuality] = @OriginalQuality,
            [InventorySlot]   = @InventorySlot,
            [Stacks]          = @Stacks,
-           [Enchantable]     = @Enchantable
+           [Enchantable]     = @Enchantable,
+           [Tarnished]       = @Tarnished
     WHERE  Serial = @Serial
            AND ItemId = @ItemId;
 END
@@ -639,15 +642,15 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[ItemToBank]
 @ItemId INT, @Name VARCHAR (45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @CanStack BIT
+@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersBanked] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability],
-	[Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Stacks], [Enchantable], [Stackable])
+	[Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Stacks], [Enchantable], [Stackable], [Tarnished])
     VALUES	(@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, 
 	@Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, 
-	@Stacks, @Enchantable, @CanStack);
+	@Stacks, @Enchantable, @CanStack, @Tarnished);
 END
 GO
 
@@ -658,14 +661,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[ItemToEquipped]
 @ItemId INT, @Name VARCHAR(45), @Serial INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Slot INT, @Stacks INT, @Enchantable BIT
+@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Slot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersEquipped] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified],
-	[ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Slot], [Stacks], [Enchantable])
+	[ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Slot], [Stacks], [Enchantable], [Tarnished])
     VALUES (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality,
-	@Slot, @Stacks, @Enchantable);
+	@Slot, @Stacks, @Enchantable, @Tarnished);
 END
 GO
 

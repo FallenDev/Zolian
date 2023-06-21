@@ -110,6 +110,7 @@ public sealed class Item : Sprite, IItem
     public ushort Image { get; init; }
     public Variance ItemVariance { get; set; }
     public WeaponVariance WeapVariance { get; set; }
+    public bool Tarnished { get; set; }
     public Quality ItemQuality { get; set; }
     public Quality OriginalQuality { get; set; }
     public int ItemId { get; set; }
@@ -138,6 +139,9 @@ public sealed class Item : Sprite, IItem
             Quality.Mythic => "{=fMythic",
             _ => ""
         };
+
+        if (Tarnished)
+            colorCode = "{=jTarnished ";
 
         if (!Enchantable) return Template.Name;
         if (ItemVariance != Variance.None && ItemQuality != Quality.Common)
@@ -183,6 +187,9 @@ public sealed class Item : Sprite, IItem
             Quality.Mythic => "Mythic ",
             _ => ""
         };
+
+        if (Tarnished)
+            colorCode = "Tarnished ";
 
         if (!Enchantable) return Template.Name;
         if (ItemVariance != Variance.None && ItemQuality != Quality.Common)
@@ -846,6 +853,8 @@ public sealed class Item : Sprite, IItem
 
     public void QualityVarianceCalc(GameClient client, Item equipment)
     {
+        if (Tarnished) return;
+
         Dictionary<Quality, QualityBonus> qualityBonuses = new()
         {
             {Quality.Damaged, new QualityBonus(0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0)},

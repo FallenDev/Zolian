@@ -51,7 +51,7 @@ public class Death
             {
                 var duraLost = obj.Durability * 10 / 100;
 
-                if (obj.Durability >= duraLost)
+                if (obj.Durability > duraLost)
                 {
                     obj.Durability -= duraLost;
                 }
@@ -59,14 +59,8 @@ public class Death
                 {
                     obj.Durability = 0;
                 }
-
-                if (obj.Template.Flags.FlagIsSet(ItemFlags.Perishable))
-                {
-                    if (obj.ItemQuality != Item.Quality.Damaged)
-                    {
-                        obj.ItemQuality -= 1;
-                    }
-                }
+                
+                obj.Tarnished = true;
             }
 
             Owner.EquipmentManager.RemoveFromInventory(obj, true);
@@ -116,10 +110,12 @@ public class Death
             if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.PerishIFEquipped) ||
                 obj.Item.Template.Flags.FlagIsSet(ItemFlags.Perishable))
             {
-                if (obj.Item.ItemQuality != Item.Quality.Damaged)
+                if (obj.Item.ItemQuality == Item.Quality.Damaged)
                 {
-                    obj.Item.ItemQuality -= 1;
+                    obj.Item.Remove();
                 }
+
+                obj.Item.Tarnished = true;
             }
 
             Owner.EquipmentManager.RemoveFromExisting(obj.Slot, false);

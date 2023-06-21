@@ -8,7 +8,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 
 public static class ShopMethods
 {
-    public static Item ItemDetail { get; set; }
+    public static Item ItemDetail { get; private set; }
 
     public static IEnumerable<ItemTemplate> BuyFromStoreInventory(Mundane mundane)
     {

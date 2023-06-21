@@ -151,6 +151,7 @@ public class Bank : IBank
             cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
             cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
             cmd.Parameters.Add("@CanStack", SqlDbType.Bit).Value = item.Template.CanStack;
+            cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
 
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
@@ -217,6 +218,7 @@ public class Bank : IBank
                 cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
                 cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
                 cmd.Parameters.Add("@CanStack", SqlDbType.Bit).Value = item.Template.CanStack;
+                cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
 
                 cmd.CommandTimeout = 5;
                 cmd.ExecuteNonQuery();
@@ -250,6 +252,7 @@ public class Bank : IBank
                 cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
                 cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
                 cmd.Parameters.Add("@CanStack", SqlDbType.Bit).Value = item.Template.CanStack;
+                cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
 
                 cmd.CommandTimeout = 5;
                 cmd.ExecuteNonQuery();

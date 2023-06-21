@@ -418,6 +418,7 @@ public partial class GameClient : NetworkClient
                     ItemVariance = item.ItemVariance,
                     WeapVariance = item.WeapVariance,
                     Enchantable = item.Template.Enchantable,
+                    Tarnished = item.Tarnished,
                     Color = color
                 };
 
@@ -615,6 +616,7 @@ public partial class GameClient : NetworkClient
                     ItemVariance = item.ItemVariance,
                     WeapVariance = item.WeapVariance,
                     Enchantable = item.Template.Enchantable,
+                    Tarnished = item.Tarnished,
                     Color = color
                 };
 

@@ -464,6 +464,7 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
                 cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
                 cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
+                cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
                 await cmd.ExecuteNonQueryAsync();
                 rows++;
             }

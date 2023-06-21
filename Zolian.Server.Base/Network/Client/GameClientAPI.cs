@@ -604,6 +604,7 @@ public partial class GameClient : IGameClient
                 var item = inventory.Value;
                 if (item.Template == null) continue;
                 item.ItemQuality = item.OriginalQuality == Item.Quality.Damaged ? Item.Quality.Common : item.OriginalQuality;
+                item.Tarnished = false;
                 ItemQualityVariance.ItemDurability(item, item.ItemQuality);
                 Aisling.Inventory.UpdateSlot(Aisling.Client, item);
             }
@@ -614,9 +615,13 @@ public partial class GameClient : IGameClient
             var item = value.Item;
             if (item.Template == null) continue;
             item.ItemQuality = item.OriginalQuality == Item.Quality.Damaged ? Item.Quality.Common : item.OriginalQuality;
+            item.Tarnished = false;
             ItemQualityVariance.ItemDurability(item, item.ItemQuality);
             Aisling.Client.Send(new ServerFormat37(item, (byte)key));
         }
+
+        var reapplyMods = new Item();
+        reapplyMods.ReapplyItemModifiers(Aisling.Client);
 
         SendStats(StatusFlags.All);
     }

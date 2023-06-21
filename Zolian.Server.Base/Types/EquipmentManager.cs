@@ -297,6 +297,7 @@ public class EquipmentManager
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = slot;
             cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
             cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
+            cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
 
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();

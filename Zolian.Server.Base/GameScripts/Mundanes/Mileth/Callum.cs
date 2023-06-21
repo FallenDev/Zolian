@@ -65,7 +65,7 @@ public class Callum : MundaneScript
 
                 if (qualitySort.Count == 0)
                 {
-                    client.SendOptionsDialog(Mundane, "Your inventory currently does not have any items that I can detail for you.");
+                    client.SendOptionsDialog(Mundane, "Your backpack doesn't have any items that I can detail for you.");
                 }
                 else
                 {
