@@ -152,7 +152,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         // A dictionary mapping packet types to time checks
         var timeChecks = new Dictionary<int, Func<DateTime, bool>>
         {
-            [0x0F] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) <= now,
+            [0x0F] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) <= now,
             [0x13] = t => AddTime(t, TimeSpan.FromMilliseconds(500)) <= now,
             [0x1B] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) <= now,
             [0x1C] = t => AddTime(t, TimeSpan.FromMilliseconds(250)) <= now,

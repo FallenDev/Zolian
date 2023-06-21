@@ -348,6 +348,8 @@ public partial class GameClient : IGameClient
         player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
         player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
         player.ExpLevel++;
+        player.CurrentHp = player.MaximumHp;
+        player.CurrentMp = player.MaximumMp;
 
         player.Client.SendMessage(0x03, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
         player.Show(Scope.NearbyAislings, new ServerFormat29((uint)player.Serial, (uint)player.Serial, 0x004F, 0x004F, 64));
