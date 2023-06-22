@@ -284,25 +284,25 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
     public EncryptionType GetClientEncryptionType(byte opCode) =>
         opCode switch
         {
-            0 => EncryptionType.None,
-            16 => EncryptionType.None,
-            72 => EncryptionType.None,
-            2 => EncryptionType.Normal,
-            3 => EncryptionType.Normal,
-            4 => EncryptionType.Normal,
-            11 => EncryptionType.Normal,
-            38 => EncryptionType.Normal,
-            45 => EncryptionType.Normal,
-            58 => EncryptionType.Normal,
-            66 => EncryptionType.Normal,
-            67 => EncryptionType.Normal,
-            75 => EncryptionType.Normal,
-            87 => EncryptionType.Normal,
-            98 => EncryptionType.Normal,
-            104 => EncryptionType.Normal,
-            113 => EncryptionType.Normal,
-            115 => EncryptionType.Normal,
-            123 => EncryptionType.Normal,
+            0x00 => EncryptionType.None,
+            0x10 => EncryptionType.None,
+            0x48 => EncryptionType.None,
+            0x02 => EncryptionType.Normal,
+            0x03 => EncryptionType.Normal,
+            0x04 => EncryptionType.Normal,
+            0x0B => EncryptionType.Normal,
+            0x26 => EncryptionType.Normal,
+            0x2D => EncryptionType.Normal,
+            0x3A => EncryptionType.Normal,
+            0x42 => EncryptionType.Normal,
+            0x43 => EncryptionType.Normal,
+            0x4B => EncryptionType.Normal,
+            0x57 => EncryptionType.Normal,
+            0x62 => EncryptionType.Normal,
+            0x68 => EncryptionType.Normal,
+            0x71 => EncryptionType.Normal,
+            0x73 => EncryptionType.Normal,
+            0x7B => EncryptionType.Normal,
             _ => EncryptionType.Md5
         };
 
@@ -315,49 +315,54 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
     public EncryptionType ServerEncryptionType(byte opCode) =>
         opCode switch
         {
-            0 => EncryptionType.None,
-            3 => EncryptionType.None,
-            64 => EncryptionType.None,
-            126 => EncryptionType.None,
-            1 => EncryptionType.Normal,
-            2 => EncryptionType.Normal,
-            10 => EncryptionType.Normal,
-            86 => EncryptionType.Normal,
-            96 => EncryptionType.Normal,
-            98 => EncryptionType.Normal,
-            102 => EncryptionType.Normal,
-            111 => EncryptionType.Normal,
+            0x00 => EncryptionType.None,
+            0x03 => EncryptionType.None,
+            0x40 => EncryptionType.None,
+            0x7E => EncryptionType.None,
+            0x01 => EncryptionType.Normal,
+            0x02 => EncryptionType.Normal,
+            0x0A => EncryptionType.Normal,
+            0x56 => EncryptionType.Normal,
+            0x60 => EncryptionType.Normal,
+            0x62 => EncryptionType.Normal,
+            0x66 => EncryptionType.Normal,
+            0x6F => EncryptionType.Normal,
             _ => EncryptionType.Md5
         };
 
     #endregion
 
-    public void Transform(NetworkPacket packet)
-    {
-        try
-        {
-            Parallel.For(0, packet.Data.Length, delegate (int i)
-            {
-                var mod = (i / Salt.Length) & 0xFF;
+    //public void Transform(NetworkPacket packet)
+    //{
+    //    try
+    //    {
+    //        Parallel.For(0, packet.Data.Length, delegate (int i)
+    //        {
+    //            var mod = (i / Salt.Length) & 0xFF;
 
-                packet.Data[i] ^= (byte)(
-                    Salt[i % Salt.Length] ^
-                    SaltTree[Seed][packet.Ordinal] ^
-                    SaltTree[Seed][mod]);
+    //            packet.Data[i] ^= (byte)(
+    //                Salt[i % Salt.Length] ^
+    //                SaltTree[Seed][packet.Ordinal] ^
+    //                SaltTree[Seed][mod]);
 
-                if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Seed][packet.Ordinal];
-            });
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.ToString());
-            Crashes.TrackError(e);
-        }
-    }
+    //            if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Seed][packet.Ordinal];
+    //        });
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        ServerSetup.Logger(e.ToString());
+    //        Crashes.TrackError(e);
+    //    }
+    //}
 
     public byte[] GenerateKey(ushort a, byte b)
     {
-        throw new NotImplementedException();
+        var key = new byte[9];
+
+        for (var i = 0; i < 9; i++)
+            key[i] = KeySalts[(i * (9 * i + b * b) + a) % KeySalts.Count];
+
+        return key;
     }
 
     /// <summary>
