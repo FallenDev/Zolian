@@ -14,7 +14,7 @@ public class ServerFormat00 : NetworkFormat
     }
 
     public uint Hash { get; init; }
-    public SecurityParameters Parameters { get; init; }
+    public SecurityProvider Parameters { get; init; }
     public byte Type { get; init; }
 
     public override void Serialize(NetworkPacketReader reader) { }

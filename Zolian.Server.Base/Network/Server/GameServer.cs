@@ -27,6 +27,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Models;
+using Darkages.Network.Security;
 
 namespace Darkages.Network.Server;
 
@@ -1342,7 +1343,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     private async Task EnterGame(GameClient client, ClientFormat10 format)
     {
-        client.Encryption.Parameters = format.Parameters;
+        SecurityProvider.Instance = format.Parameters;
         client.Server = this;
         var serialString = string.Concat(format.Name.Where(char.IsDigit));
 
@@ -3217,8 +3218,8 @@ public class GameServer : NetworkServer<GameClient>
         var redirect = new Redirect
         {
             Serial = Convert.ToString(client.Serial, CultureInfo.CurrentCulture),
-            Salt = Encoding.UTF8.GetString(client.Encryption.Parameters.Salt),
-            Seed = Convert.ToString(client.Encryption.Parameters.Seed, CultureInfo.CurrentCulture),
+            Salt = Encoding.UTF8.GetString(SecurityProvider.Instance.Salt),
+            Seed = Convert.ToString(SecurityProvider.Instance.Seed, CultureInfo.CurrentCulture),
             Name = nameSeed,
             Type = "2"
         };

@@ -23,14 +23,12 @@ public static class Crc16Provider
         16050, 3793, 7920
     }.ToImmutableArray();
 
-    public static ushort Generate16(IReadOnlyList<byte> data) => Generate16(data, 0, data.Count);
-
-    private static ushort Generate16(IReadOnlyList<byte> data, int index, int length)
+    public static ushort Generate16(ReadOnlySpan<byte> data)
     {
         uint checkSum = 0;
 
-        for (var i = 0; i < length; ++i)
-            checkSum = (ushort)(data[index + i] ^ checkSum << 8 ^ SaltTable16[(int)(checkSum >> 8)]);
+        foreach (var t in data)
+            checkSum = (ushort)(t ^ (checkSum << 8) ^ SaltTable16[(int)(checkSum >> 8)]);
 
         return (ushort)checkSum;
     }

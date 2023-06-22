@@ -10,6 +10,7 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ClientFormats;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Security;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -91,7 +92,7 @@ public class LoginServer : NetworkServer<LoginClient>
             {
                 Type = 0x00,
                 Hash = MServerTable.Hash,
-                Parameters = client.Encryption.Parameters
+                Parameters = SecurityProvider.Instance
             });
         }
     }
@@ -410,8 +411,8 @@ public class LoginServer : NetworkServer<LoginClient>
         var redirect = new Redirect
         {
             Serial = client.Serial.ToString(),
-            Salt = Encoding.UTF8.GetString(client.Encryption.Parameters.Salt),
-            Seed = client.Encryption.Parameters.Seed.ToString(),
+            Salt = Encoding.UTF8.GetString(SecurityProvider.Instance.Salt),
+            Seed = SecurityProvider.Instance.Seed.ToString(),
             Name = nameSeed
         };
 
@@ -495,7 +496,7 @@ public class LoginServer : NetworkServer<LoginClient>
     /// </summary>
     protected override Task Format10Handler(LoginClient client, ClientFormat10 format)
     {
-        client.Encryption.Parameters = format.Parameters;
+        SecurityProvider.Instance = format.Parameters;
         client.Send(new ServerFormat60
         {
             Type = 0x00,
@@ -592,8 +593,8 @@ public class LoginServer : NetworkServer<LoginClient>
             var redirect = new Redirect
             {
                 Serial = Convert.ToString(client.Serial),
-                Salt = Encoding.UTF8.GetString(client.Encryption.Parameters.Salt),
-                Seed = Convert.ToString(client.Encryption.Parameters.Seed),
+                Salt = Encoding.UTF8.GetString(SecurityProvider.Instance.Salt),
+                Seed = Convert.ToString(SecurityProvider.Instance.Seed),
                 Name = "socket[" + client.Serial + "]"
             };
 

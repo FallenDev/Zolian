@@ -1,10 +1,16 @@
 ﻿using System.Collections.Immutable;
+using System.Security.Cryptography;
+using System.Text;
+using Darkages.Interfaces;
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Security;
 
-public sealed class SecurityProvider
+[Serializable]
+public sealed class SecurityProvider : IFormattableNetwork
 {
+    public static SecurityProvider Instance { get; set; }
+    private readonly IReadOnlyList<byte> KeySalts;
     private static readonly ImmutableArray<ImmutableArray<byte>> SaltTree = new[]
     {
         new byte[]
@@ -148,14 +154,23 @@ public sealed class SecurityProvider
         }.ToImmutableArray()
     }.ToImmutableArray();
 
+    public byte[] Salt { get; set; } 
+    public byte Seed { get; set; }
+
     public SecurityProvider()
-        : this(SecurityParameters.Default)
     {
+        Instance = this;
+        Seed = 0;
+        Salt = "NexonInc."u8.ToArray();
+        KeySalts = string.IsNullOrEmpty(string.Empty) ? new byte[1024] : GenerateKeySalts(string.Empty);
     }
 
-    private SecurityProvider(SecurityParameters parameters) => Parameters = parameters;
-
-    public SecurityParameters Parameters { get; set; }
+    public SecurityProvider(byte seed, byte[] salt, string? keySaltSeed = null)
+    {
+        Seed = seed;
+        Salt = salt;
+        KeySalts = string.IsNullOrEmpty(keySaltSeed) ? new byte[1024] : GenerateKeySalts(keySaltSeed);
+    }
 
     public void Transform(NetworkPacket packet)
     {
@@ -163,14 +178,14 @@ public sealed class SecurityProvider
         {
             Parallel.For(0, packet.Data.Length, delegate(int i)
             {
-                var mod = (i / Parameters.Salt.Length) & 0xFF;
+                var mod = (i / Salt.Length) & 0xFF;
 
                 packet.Data[i] ^= (byte) (
-                    Parameters.Salt[i % Parameters.Salt.Length] ^
-                    SaltTree[Parameters.Seed][packet.Ordinal] ^
-                    SaltTree[Parameters.Seed][mod]);
+                    Salt[i % Salt.Length] ^
+                    SaltTree[Seed][packet.Ordinal] ^
+                    SaltTree[Seed][mod]);
 
-                if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Parameters.Seed][packet.Ordinal];
+                if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Seed][packet.Ordinal];
             });
         }
         catch (Exception e)
@@ -178,5 +193,35 @@ public sealed class SecurityProvider
             ServerSetup.Logger(e.ToString());
             Crashes.TrackError(e);
         }
+    }
+
+    /// <summary>
+    /// Used for encrypting/decrypting MD5
+    /// </summary>
+    private byte[] GenerateKeySalts(string seed)
+    {
+        var saltTable = GetMd5Hash(GetMd5Hash(seed));
+
+        for (var i = 0; i < 31; i++)
+            saltTable += GetMd5Hash(saltTable);
+
+        return Encoding.ASCII.GetBytes(saltTable);
+    }
+
+    private static string GetMd5Hash(string value) => BitConverter.ToString(MD5.HashData(Encoding.ASCII.GetBytes(value)))
+            .Replace("-", string.Empty)
+            .ToLower();
+
+    public void Serialize(NetworkPacketReader reader)
+    {
+        Seed = reader.ReadByte();
+        Salt = reader.ReadBytes(reader.ReadByte());
+    }
+
+    public void Serialize(NetworkPacketWriter writer)
+    {
+        writer.Write(Seed);
+        writer.Write((byte) Salt.Length);
+        writer.Write(Salt);
     }
 }

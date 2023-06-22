@@ -14,11 +14,11 @@ public class ClientFormat10 : NetworkFormat
     }
 
     public string Name { get; private set; }
-    public SecurityParameters Parameters { get; private set; }
+    public SecurityProvider Parameters { get; private set; }
 
     public override void Serialize(NetworkPacketReader reader)
     {
-        Parameters = reader.ReadObject<SecurityParameters>();
+        Parameters = reader.ReadObject<SecurityProvider>();
         Name = reader.ReadStringA();
     }
 

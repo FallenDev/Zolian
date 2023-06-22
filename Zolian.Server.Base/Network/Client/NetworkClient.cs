@@ -16,14 +16,13 @@ public abstract class NetworkClient : IDisposable
         SendLock = new SemaphoreSlim(1, 1);
         Reader = new NetworkPacketReader();
         Writer = new NetworkPacketWriter();
-        Encryption = new SecurityProvider();
+        SecurityProvider.Instance = new SecurityProvider();
     }
 
     public int Serial { get; set; }
     private SemaphoreSlim ReceiveLock { get; }
     private SemaphoreSlim SendLock { get; }
     public event EventHandler OnDisconnected;
-    public SecurityProvider Encryption { get; }
     private byte Ordinal { get; set; }
     public bool MapOpen { get; set; }
     private NetworkPacketReader Reader { get; set; }
@@ -70,7 +69,7 @@ public abstract class NetworkClient : IDisposable
                 ServerSetup.Logger($"Server: 0x{packetOpCodeToString} = {packet}");
 
             if (format.Encrypted)
-                Encryption.Transform(packet);
+                SecurityProvider.Instance.Transform(packet);
 
             var buffer = packet.ToArray();
             if (buffer.Length <= 0x0) return;
@@ -122,7 +121,7 @@ public abstract class NetworkClient : IDisposable
                     ServerSetup.Logger($"Server: 0x{packetOpCodeToString} = {packet}");
 
                 if (format.Encrypted)
-                    Encryption.Transform(packet);
+                    SecurityProvider.Instance.Transform(packet);
 
                 var buffer = packet.ToArray();
                 if (buffer.Length <= 0x0) return;
@@ -166,7 +165,7 @@ public abstract class NetworkClient : IDisposable
             var packet = data.ToPacket();
             if (packet == null) return;
 
-            Encryption.Transform(packet);
+            SecurityProvider.Instance.Transform(packet);
 
             var buffer = packet.ToArray();
 
@@ -208,7 +207,7 @@ public abstract class NetworkClient : IDisposable
             {
                 case true:
                 {
-                    Encryption.Transform(packet);
+                    SecurityProvider.Instance.Transform(packet);
 
                     // ToDo: Client to Server Logger
                     if (ServerSetup.Instance.Config.LogServerPackets)

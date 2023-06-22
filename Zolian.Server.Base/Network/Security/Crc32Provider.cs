@@ -37,16 +37,13 @@ public static class Crc32Provider
         3272380065U, 1510334235U, 755167117U
     }.ToImmutableArray();
 
-    public static uint Generate32(IEnumerable<byte> fileData)
+    public static uint Generate32(ReadOnlySpan<byte> data)
     {
-        var hash = uint.MaxValue;
+        var checkSum = uint.MaxValue;
 
-        foreach (var t in fileData)
-        {
-            var data = (byte)(t ^ hash & 0xFF);
-            hash = SaltTable32[data] ^ hash >> 0x8;
-        }
+        foreach (var t in data)
+            checkSum = (checkSum >> 8) ^ SaltTable32[(int)((checkSum & byte.MaxValue) ^ t)];
 
-        return ~hash;
+        return ~checkSum;
     }
 }
