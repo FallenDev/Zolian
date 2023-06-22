@@ -30,7 +30,7 @@ public class Tornado : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
@@ -55,7 +55,7 @@ public class Landslide : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
@@ -80,7 +80,7 @@ public class Monsoon : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
@@ -105,7 +105,7 @@ public class Eruption : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
@@ -130,7 +130,7 @@ public class Twilight : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
@@ -155,7 +155,7 @@ public class Sanctified : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 200);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
     }
 }
 
