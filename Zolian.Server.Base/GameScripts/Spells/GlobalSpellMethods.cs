@@ -51,11 +51,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         var levelBuff = level switch
         {
-            >= 0 and <= 29 => 1,
-            >= 30 and <= 49 => 1.2,
-            >= 50 and <= 69 => 1.4,
-            >= 70 and <= 98 => 1.8,
-            >= 99 => 2
+            <= 29 => 1,
+            <= 49 => 1.2,
+            <= 69 => 1.4,
+            <= 98 => 1.8,
+            _ => 2
         };
 
         dmg += (int)levelBuff * dmg;
@@ -146,14 +146,15 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                     .Client.SendAnimation(115, target, aisling);
                 break;
             case Monster:
-                (sprite.Target as Aisling)?.Client
-                    .SendAnimation(115, sprite, target);
+                if (sprite.Target is Aisling player)
+                    player.Client.SendAnimation(115, sprite, target);
                 break;
         }
     }
 
     public void ElementalOnUse(Sprite sprite, Sprite target, Spell spell, double exp = 1)
     {
+        if (target == null) return;
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
@@ -175,11 +176,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= spell.Template.ManaCost;
+                Train(client, spell);
             }
             else
             {
@@ -196,9 +197,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
                 return;
             }
-
-            if (aisling.CurrentMp < 0)
-                aisling.CurrentMp = 0;
 
             var mR = Generator.RandNumGen100();
 
@@ -230,6 +228,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 sprite.CurrentMp -= spell.Template.ManaCost;
             }
+            else
+            {
+                SpellOnFailed(sprite, target, spell);
+                return;
+            }
 
             if (target.SpellReflect)
             {
@@ -248,9 +251,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
                 return;
             }
-
-            if (sprite.CurrentMp < 0)
-                sprite.CurrentMp = 0;
 
             var rand = Generator.RandNumGen100();
             {
@@ -410,6 +410,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
     public void AfflictionOnUse(Sprite sprite, Sprite target, Spell spell, Debuff debuff)
     {
+        if (target == null) return;
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
@@ -431,11 +432,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= spell.Template.ManaCost;
+                Train(client, spell);
             }
             else
             {
@@ -452,9 +453,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
                 return;
             }
-
-            if (aisling.CurrentMp < 0)
-                aisling.CurrentMp = 0;
 
             var mR = Generator.RandNumGen100();
 
@@ -492,6 +490,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
                 sprite.CurrentMp -= spell.Template.ManaCost;
+            }
+            else
+            {
+                SpellOnFailed(sprite, target, spell);
+                return;
             }
 
             if (target.SpellReflect)
@@ -570,6 +573,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
     public void EnhancementOnUse(Sprite sprite, Sprite target, Spell spell, Buff buff)
     {
+        if (target == null) return;
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
@@ -580,11 +584,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            Train(client, spell);
 
             if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= spell.Template.ManaCost;
+                Train(client, spell);
             }
             else
             {
@@ -592,27 +596,13 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 return;
             }
 
-            if (aisling.CurrentMp < 0)
-                aisling.CurrentMp = 0;
-
-            var success = Execute(client, spell);
-
-            if (success)
+            if (client.Aisling.Invisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                if (client.Aisling.Invisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
-                {
-                    client.Aisling.Invisible = false;
-                    client.UpdateDisplay();
-                }
-
-                EnhancementOnSuccess(sprite, target, spell, buff);
-            }
-            else
-            {
-                SpellOnFailed(aisling, target, spell);
+                client.Aisling.Invisible = false;
+                client.UpdateDisplay();
             }
 
-
+            EnhancementOnSuccess(sprite, target, spell, buff);
             client.SendStats(StatusFlags.StructB);
         }
         else
@@ -621,9 +611,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 sprite.CurrentMp -= spell.Template.ManaCost;
             }
-
-            if (sprite.CurrentMp < 0)
-                sprite.CurrentMp = 0;
+            else
+            {
+                SpellOnFailed(sprite, target, spell);
+                return;
+            }
 
             EnhancementOnSuccess(sprite, target, spell, buff);
         }

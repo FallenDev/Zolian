@@ -906,12 +906,12 @@ public class CreateMonster : MonsterCreateScript
     /// <summary>
     /// Give beag spells randomly depending on their level
     /// </summary>
-    public void BeagSpells(Monster monster)
+    private void BeagSpells(Monster monster)
     {
         switch (monster.Template.Level)
         {
             case < 11:
-            case > 35:
+            case > 20:
                 return;
         }
 
@@ -945,12 +945,12 @@ public class CreateMonster : MonsterCreateScript
     /// <summary>
     /// Give normal spells randomly depending on their level
     /// </summary>
-    public void NormalSpells(Monster monster)
+    private void NormalSpells(Monster monster)
     {
         switch (monster.Template.Level)
         {
-            case <= 35:
-            case > 65:
+            case <= 20:
+            case > 50:
                 return;
         }
 
@@ -984,12 +984,12 @@ public class CreateMonster : MonsterCreateScript
     /// <summary>
     /// Give mor spells randomly depending on their level
     /// </summary>
-    public void MorSpells(Monster monster)
+    private void MorSpells(Monster monster)
     {
         switch (monster.Template.Level)
         {
-            case <= 65:
-            case > 95:
+            case <= 50:
+            case > 80:
                 return;
         }
 
@@ -1023,11 +1023,11 @@ public class CreateMonster : MonsterCreateScript
     /// <summary>
     /// Give ard spells randomly depending on their level
     /// </summary>
-    public void ArdSpells(Monster monster)
+    private void ArdSpells(Monster monster)
     {
         switch (monster.Template.Level)
         {
-            case <= 95:
+            case <= 80:
             case > 120:
                 return;
         }
@@ -1062,7 +1062,7 @@ public class CreateMonster : MonsterCreateScript
     /// <summary>
     /// Give master spells randomly depending on their level
     /// </summary>
-    public void MasterSpells(Monster monster)
+    private void MasterSpells(Monster monster)
     {
         if (monster.Template.Level <= 120) return;
 
