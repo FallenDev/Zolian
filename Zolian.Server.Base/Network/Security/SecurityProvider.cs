@@ -1,13 +1,16 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
+
+using Darkages.Enums;
 using Darkages.Interfaces;
+
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Security;
 
 [Serializable]
-public sealed class SecurityProvider : IFormattableNetwork
+public sealed class SecurityProvider : IFormattableNetwork, ICrypto
 {
     public static SecurityProvider Instance { get; set; }
     private readonly IReadOnlyList<byte> KeySalts;
@@ -154,7 +157,8 @@ public sealed class SecurityProvider : IFormattableNetwork
         }.ToImmutableArray()
     }.ToImmutableArray();
 
-    public byte[] Salt { get; set; } 
+    private IReadOnlyList<byte> Salts => SaltTree[Seed];
+    public byte[] Salt { get; set; }
     public byte Seed { get; set; }
 
     public SecurityProvider()
@@ -172,15 +176,171 @@ public sealed class SecurityProvider : IFormattableNetwork
         KeySalts = string.IsNullOrEmpty(keySaltSeed) ? new byte[1024] : GenerateKeySalts(keySaltSeed);
     }
 
+    #region Client
+
+    public bool ShouldOpCodeClientBeEncrypted(byte opCode) => GetClientEncryptionType(opCode) != EncryptionType.None;
+
+    public void Decrypt(ref Span<byte> buffer, byte opCode, byte sequence)
+    {
+        var length = buffer.Length - 7;
+        IReadOnlyList<byte> thisKey;
+        var a = (ushort)(((buffer[length + 6] << 8) | buffer[length + 4]) ^ 29808);
+        var b = (byte)(buffer[length + 5] ^ 35);
+        var type = GetClientEncryptionType(opCode);
+
+        switch (type)
+        {
+            case EncryptionType.Normal:
+                length--;
+                thisKey = Salt;
+
+                break;
+            case EncryptionType.Md5:
+                length -= 2;
+                thisKey = GenerateKey(a, b);
+
+                break;
+            default:
+                return;
+        }
+
+        for (var i = 0; i < length; ++i)
+        {
+            var index = (byte)(i / Salt.Length);
+            buffer[i] ^= (byte)(Salts[index] ^ thisKey[i % thisKey.Count]);
+
+            if (index != sequence)
+                buffer[i] ^= Salts[sequence];
+        }
+
+        var slice = buffer[..length];
+        //overwrite ref
+        buffer = slice;
+
+        if (opCode is 57 or 58)
+            DecryptDialog(ref buffer);
+    }
+
+    public void DecryptDialog(ref Span<byte> buffer)
+    {
+        var num1 = (byte)(buffer[1] ^ (uint)(byte)(buffer[0] - 45U));
+        var num2 = (byte)(num1 + 114U);
+        var num3 = (byte)(num1 + 40U);
+
+        buffer[2] ^= num2;
+        buffer[3] ^= (byte)(num2 + 1);
+        var num4 = (buffer[2] << 8) | buffer[3];
+
+        for (var index = 0; index < num4; index++)
+            buffer[4 + index] ^= (byte)(num3 + index);
+
+        var slice = buffer[6..];
+
+        //overwrite ref
+        buffer = slice;
+    }
+
+    public void Encrypt(ref Span<byte> buffer, byte opCode, byte sequence)
+    {
+        IReadOnlyList<byte> thisKey;
+        var a = (ushort)Random.Shared.Next(256, ushort.MaxValue);
+        var b = (byte)Random.Shared.Next(100, byte.MaxValue);
+        var type = ServerEncryptionType(opCode);
+
+        switch (type)
+        {
+            case EncryptionType.Normal:
+                thisKey = Salt;
+
+                break;
+            case EncryptionType.Md5:
+                thisKey = GenerateKey(a, b);
+
+                break;
+            default:
+                return;
+        }
+
+        for (var i = 0; i < buffer.Length; i++)
+        {
+            var index = (byte)(i / Salt.Length);
+            buffer[i] ^= (byte)(Salts[index] ^ thisKey[i % thisKey.Count]);
+
+            if (index != sequence)
+                buffer[i] ^= Salts[sequence];
+        }
+
+        var newBuffer = new Span<byte>(new byte[buffer.Length + 3]);
+        buffer.CopyTo(newBuffer);
+
+        newBuffer[^3] = (byte)((byte)a ^ 116);
+        newBuffer[^2] = (byte)(b ^ 36U);
+        newBuffer[^1] = (byte)((byte)(a >> 8) ^ 100);
+
+        //overwrite ref
+        buffer = newBuffer;
+    }
+
+    public EncryptionType GetClientEncryptionType(byte opCode) =>
+        opCode switch
+        {
+            0 => EncryptionType.None,
+            16 => EncryptionType.None,
+            72 => EncryptionType.None,
+            2 => EncryptionType.Normal,
+            3 => EncryptionType.Normal,
+            4 => EncryptionType.Normal,
+            11 => EncryptionType.Normal,
+            38 => EncryptionType.Normal,
+            45 => EncryptionType.Normal,
+            58 => EncryptionType.Normal,
+            66 => EncryptionType.Normal,
+            67 => EncryptionType.Normal,
+            75 => EncryptionType.Normal,
+            87 => EncryptionType.Normal,
+            98 => EncryptionType.Normal,
+            104 => EncryptionType.Normal,
+            113 => EncryptionType.Normal,
+            115 => EncryptionType.Normal,
+            123 => EncryptionType.Normal,
+            _ => EncryptionType.Md5
+        };
+
+    #endregion
+
+    #region Server
+
+    public bool ShouldOpCodeServerBeEncrypted(byte opCode) => ServerEncryptionType(opCode) != EncryptionType.None;
+
+    public EncryptionType ServerEncryptionType(byte opCode) =>
+        opCode switch
+        {
+            0 => EncryptionType.None,
+            3 => EncryptionType.None,
+            64 => EncryptionType.None,
+            126 => EncryptionType.None,
+            1 => EncryptionType.Normal,
+            2 => EncryptionType.Normal,
+            10 => EncryptionType.Normal,
+            86 => EncryptionType.Normal,
+            96 => EncryptionType.Normal,
+            98 => EncryptionType.Normal,
+            102 => EncryptionType.Normal,
+            111 => EncryptionType.Normal,
+            _ => EncryptionType.Md5
+        };
+
+    #endregion
+
     public void Transform(NetworkPacket packet)
     {
         try
         {
-            Parallel.For(0, packet.Data.Length, delegate(int i)
+            Parallel.For(0, packet.Data.Length, delegate (int i)
             {
                 var mod = (i / Salt.Length) & 0xFF;
 
-                packet.Data[i] ^= (byte) (
+                packet.Data[i] ^= (byte)(
                     Salt[i % Salt.Length] ^
                     SaltTree[Seed][packet.Ordinal] ^
                     SaltTree[Seed][mod]);
@@ -195,10 +355,15 @@ public sealed class SecurityProvider : IFormattableNetwork
         }
     }
 
+    public byte[] GenerateKey(ushort a, byte b)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Used for encrypting/decrypting MD5
     /// </summary>
-    private byte[] GenerateKeySalts(string seed)
+    public byte[] GenerateKeySalts(string seed)
     {
         var saltTable = GetMd5Hash(GetMd5Hash(seed));
 
@@ -208,7 +373,7 @@ public sealed class SecurityProvider : IFormattableNetwork
         return Encoding.ASCII.GetBytes(saltTable);
     }
 
-    private static string GetMd5Hash(string value) => BitConverter.ToString(MD5.HashData(Encoding.ASCII.GetBytes(value)))
+    public string GetMd5Hash(string value) => BitConverter.ToString(MD5.HashData(Encoding.ASCII.GetBytes(value)))
             .Replace("-", string.Empty)
             .ToLower();
 
@@ -221,7 +386,7 @@ public sealed class SecurityProvider : IFormattableNetwork
     public void Serialize(NetworkPacketWriter writer)
     {
         writer.Write(Seed);
-        writer.Write((byte) Salt.Length);
+        writer.Write((byte)Salt.Length);
         writer.Write(Salt);
     }
 }
