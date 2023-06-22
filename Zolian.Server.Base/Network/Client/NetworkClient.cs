@@ -62,7 +62,7 @@ public abstract class NetworkClient : IDisposable
             var packet = Writer.ToPacket();
 
             if (packet == null) return;
-            var packetOpCodeToString = $"{packet.Command:X2}";
+            var packetOpCodeToString = $"{packet.OpCode:X2}";
 
             // ToDo: Server to Client Logger
             if (ServerSetup.Instance.Config.LogClientPackets)
@@ -114,7 +114,7 @@ public abstract class NetworkClient : IDisposable
                 var packet = Writer.ToPacket();
 
                 if (packet == null) return;
-                var packetOpCodeToString = $"{packet.Command:X2}";
+                var packetOpCodeToString = $"{packet.OpCode:X2}";
 
                 // ToDo: Server to Client Logger
                 if (ServerSetup.Instance.Config.LogClientPackets)
@@ -211,7 +211,7 @@ public abstract class NetworkClient : IDisposable
 
                     // ToDo: Client to Server Logger
                     if (ServerSetup.Instance.Config.LogServerPackets)
-                        ServerSetup.Logger($"Client: 0x{packet.Command:X2} = {packet}");
+                        ServerSetup.Logger($"Client: 0x{packet.OpCode:X2} = {packet}");
 
                     if (format.Command is 0x39 or 0x3A)
                     {

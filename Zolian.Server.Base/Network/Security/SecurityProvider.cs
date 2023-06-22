@@ -332,28 +332,28 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
 
     #endregion
 
-    //public void Transform(NetworkPacket packet)
-    //{
-    //    try
-    //    {
-    //        Parallel.For(0, packet.Data.Length, delegate (int i)
-    //        {
-    //            var mod = (i / Salt.Length) & 0xFF;
+    public void Transform(NetworkPacket packet)
+    {
+        try
+        {
+            Parallel.For(0, packet.Data.Length, delegate (int i)
+            {
+                var mod = (i / Salt.Length) & 0xFF;
 
-    //            packet.Data[i] ^= (byte)(
-    //                Salt[i % Salt.Length] ^
-    //                SaltTree[Seed][packet.Ordinal] ^
-    //                SaltTree[Seed][mod]);
+                packet.Data[i] ^= (byte)(
+                    Salt[i % Salt.Length] ^
+                    SaltTree[Seed][packet.Sequence] ^
+                    SaltTree[Seed][mod]);
 
-    //            if (packet.Ordinal == mod) packet.Data[i] ^= SaltTree[Seed][packet.Ordinal];
-    //        });
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        ServerSetup.Logger(e.ToString());
-    //        Crashes.TrackError(e);
-    //    }
-    //}
+                if (packet.Sequence == mod) packet.Data[i] ^= SaltTree[Seed][packet.Sequence];
+            });
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
+    }
 
     public byte[] GenerateKey(ushort a, byte b)
     {

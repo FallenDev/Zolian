@@ -17,7 +17,7 @@ public class NetworkPacketReader
 
         if (Position == -1)
         {
-            b = Packet.Ordinal;
+            b = Packet.Sequence;
         }
         else
         {

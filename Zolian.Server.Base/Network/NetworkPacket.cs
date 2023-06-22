@@ -8,12 +8,12 @@ public class NetworkPacket
     {
         if (!raw)
         {
-            Command = array[0];
+            OpCode = array[0];
 
-            if (Command == byte.MaxValue)
+            if (OpCode == byte.MaxValue)
                 return;
 
-            Ordinal = array[1];
+            Sequence = array[1];
             Data = count - 2 > 0 ? new byte[count - 0x2] : new byte[count];
 
             if (Data.Length > 0)
@@ -27,9 +27,9 @@ public class NetworkPacket
         }
     }
 
-    public byte Command { get; }
+    public byte OpCode { get; }
     public byte[] Data { get; }
-    public byte Ordinal { get; }
+    public byte Sequence { get; }
 
     public byte[] ToArray()
     {
@@ -38,8 +38,8 @@ public class NetworkPacket
         buffer[0] = 0xAA;
         buffer[1] = (byte) ((Data.Length + 2) >> 8);
         buffer[2] = (byte) (Data.Length + 2);
-        buffer[3] = Command;
-        buffer[4] = Ordinal;
+        buffer[3] = OpCode;
+        buffer[4] = Sequence;
 
         for (var i = 0; i < Data.Length; i++)
             buffer[i + 5] = Data[i];
@@ -50,8 +50,8 @@ public class NetworkPacket
     public override string ToString()
     {
         return string.Format(CultureInfo.CurrentCulture, "{0:X2} {1:X2} {2}",
-            Command,
-            Ordinal,
+            OpCode,
+            Sequence,
             BitConverter.ToString(Data).Replace('-', ' '));
     }
 }

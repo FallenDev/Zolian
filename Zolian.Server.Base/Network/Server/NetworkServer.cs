@@ -101,7 +101,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
     private void ClientDataReceived(TClient client, NetworkPacket packet)
     {
         if (client is null) return;
-        var format = NetworkFormatManager.GetClientFormat(packet.Command);
+        var format = NetworkFormatManager.GetClientFormat(packet.OpCode);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
         if (format is null || !Clients.ContainsKey(client.Serial) || (client.MapOpen && format.Command is not (63 or 69))) return;
