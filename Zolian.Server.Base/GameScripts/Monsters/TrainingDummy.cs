@@ -68,6 +68,8 @@ public class TrainingDummy : MonsterScript
             if (debuff != null)
                 Monster.Buffs.TryRemove(debuff.Name, out _);
         }
+
+        Monster.BonusAc = 0;
     }
 
     public override void OnSkulled(GameClient client) => Monster.Animate(49);
