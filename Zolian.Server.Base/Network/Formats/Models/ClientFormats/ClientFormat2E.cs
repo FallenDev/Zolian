@@ -8,7 +8,7 @@ public class ClientFormat2E : NetworkFormat
     public ClientFormat2E()
     {
         Encrypted = true;
-        Command = 0x2E;
+        OpCode = 0x2E;
     }
 
     public string Name { get; private set; }

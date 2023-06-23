@@ -8,7 +8,7 @@ public class ClientFormat1C : NetworkFormat
     public ClientFormat1C()
     {
         Encrypted = true;
-        Command = 0x1C;
+        OpCode = 0x1C;
     }
 
     public byte Index { get; private set; }

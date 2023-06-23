@@ -8,7 +8,7 @@ public class ClientFormat11 : NetworkFormat
     public ClientFormat11()
     {
         Encrypted = true;
-        Command = 0x11;
+        OpCode = 0x11;
     }
 
     public byte Direction { get; private set; }

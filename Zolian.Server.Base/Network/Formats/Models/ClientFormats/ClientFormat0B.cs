@@ -8,7 +8,7 @@ public class ClientFormat0B : NetworkFormat
     public ClientFormat0B()
     {
         Encrypted = true;
-        Command = 0x0B;
+        OpCode = 0x0B;
     }
 
     public byte Type { get; private set; }

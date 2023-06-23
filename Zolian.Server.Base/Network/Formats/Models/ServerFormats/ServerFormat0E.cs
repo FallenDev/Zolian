@@ -13,7 +13,7 @@ public class ServerFormat0E : NetworkFormat
     private ServerFormat0E()
     {
         Encrypted = true;
-        Command = 0x0E;
+        OpCode = 0x0E;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

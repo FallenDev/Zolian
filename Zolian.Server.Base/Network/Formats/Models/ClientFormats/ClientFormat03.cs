@@ -8,7 +8,7 @@ public class ClientFormat03 : NetworkFormat
     public ClientFormat03()
     {
         Encrypted = true;
-        Command = 0x03;
+        OpCode = 0x03;
     }
 
     public string Password { get; private set; }

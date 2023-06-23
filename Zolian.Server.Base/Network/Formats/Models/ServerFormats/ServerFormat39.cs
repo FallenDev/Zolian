@@ -16,7 +16,7 @@ public class ServerFormat39 : NetworkFormat
     private ServerFormat39()
     {
         Encrypted = true;
-        Command = 0x39;
+        OpCode = 0x39;
     }
 
     private Aisling Aisling { get; }

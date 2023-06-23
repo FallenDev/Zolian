@@ -104,7 +104,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         var format = NetworkFormatManager.GetClientFormat(packet.OpCode);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
-        if (format is null || !Clients.ContainsKey(client.Serial) || (client.MapOpen && format.Command is not (63 or 69))) return;
+        if (format is null || !Clients.ContainsKey(client.Serial) || (client.MapOpen && format.OpCode is not (63 or 69))) return;
 
         if (client.Serial == 0)
         {
@@ -121,7 +121,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
 
             client.Read(packet, format);
 
-            if (_handlers.TryGetValue(format.Command, out var handler))
+            if (_handlers.TryGetValue(format.OpCode, out var handler))
             {
                 handler.Invoke(this, new object[]
                 {
@@ -161,7 +161,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         };
 
         // Setting packetTime for time-rated packets
-        var lastPacketTime = format.Command switch
+        var lastPacketTime = format.OpCode switch
         {
             0x0F => client.LastPacket0X0FFromClient,
             0x13 => client.LastPacket0X13FromClient,
@@ -173,11 +173,11 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         };
 
         // Check to ensure packets are only processed which meet the time check requirement
-        if (timeChecks.TryGetValue(format.Command, out var check))
+        if (timeChecks.TryGetValue(format.OpCode, out var check))
         {
             if (!check(lastPacketTime)) return false;
             
-            switch (format.Command)
+            switch (format.OpCode)
             {
                 case 0x0F:
                     client.LastPacket0X0FFromClient = now;
@@ -200,10 +200,10 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
             }
         }
 
-        if (format.Command != 0x45)
+        if (format.OpCode != 0x45)
             client.LastMessageFromClientNot0X45 = now;
 
-        client.LastPacketFromClient = format.Command;
+        client.LastPacketFromClient = format.OpCode;
         return true;
     }
 

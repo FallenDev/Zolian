@@ -8,7 +8,7 @@ public class ClientFormat06 : NetworkFormat
     public ClientFormat06()
     {
         Encrypted = true;
-        Command = 0x06;
+        OpCode = 0x06;
     }
 
     public byte Direction { get; private set; }

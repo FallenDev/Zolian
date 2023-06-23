@@ -11,7 +11,7 @@ public class ServerFormat38 : NetworkFormat
     private ServerFormat38()
     {
         Encrypted = true;
-        Command = 0x38;
+        OpCode = 0x38;
     }
 
     private byte Slot { get; }

@@ -8,7 +8,7 @@ public class ServerFormat50 : NetworkFormat
     public ServerFormat50()
     {
         Encrypted = true;
-        Command = 0x50;
+        OpCode = 0x50;
     }
 
     public bool IsInitial { get; set; }

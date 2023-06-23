@@ -8,7 +8,7 @@ public class ClientFormat19 : NetworkFormat
     public ClientFormat19()
     {
         Encrypted = true;
-        Command = 0x19;
+        OpCode = 0x19;
     }
 
     public string Message { get; private set; }

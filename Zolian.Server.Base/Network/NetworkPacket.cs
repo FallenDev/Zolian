@@ -30,6 +30,7 @@ public class NetworkPacket
     public byte OpCode { get; }
     public byte[] Data { get; }
     public byte Sequence { get; }
+    public bool IsEncrypted { get; set; }
 
     public byte[] ToArray()
     {
@@ -45,6 +46,26 @@ public class NetworkPacket
             buffer[i + 5] = Data[i];
 
         return buffer;
+    }
+
+    public Span<byte> ToSpan()
+    {
+        //the length of the packet after the length portion of the header plus the packet tail (determined by encryption type)
+        var resultLength = Data.Length + (IsEncrypted ? 5 : 4) - 3;
+
+        var resultBuffer = new Span<byte>(new byte[resultLength + 3])
+        {
+            //write packet header
+            [0] = 0xAA,
+            [1] = (byte)(resultLength / 256),
+            [2] = (byte)(resultLength % 256),
+            [3] = (byte)OpCode,
+            [4] = Sequence
+        };
+
+        Data.CopyTo(resultBuffer[^Data.Length..]);
+
+        return resultBuffer;
     }
 
     public override string ToString()

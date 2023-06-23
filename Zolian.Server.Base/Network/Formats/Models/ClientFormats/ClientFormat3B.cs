@@ -10,7 +10,7 @@ public class ClientFormat3B : NetworkFormat
     public ClientFormat3B()
     {
         Encrypted = true;
-        Command = 0x3B;
+        OpCode = 0x3B;
     }
 
     public ushort BoardIndex { get; private set; }

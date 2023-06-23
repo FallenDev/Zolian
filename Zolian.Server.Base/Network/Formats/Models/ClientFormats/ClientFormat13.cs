@@ -8,7 +8,7 @@ public class ClientFormat13 : NetworkFormat
     public ClientFormat13()
     {
         Encrypted = true;
-        Command = 0x13;
+        OpCode = 0x13;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

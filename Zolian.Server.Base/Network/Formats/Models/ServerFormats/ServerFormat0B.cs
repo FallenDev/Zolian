@@ -19,7 +19,7 @@ public class ServerFormat0B : NetworkFormat
     private ServerFormat0B()
     {
         Encrypted = true;
-        Command = 0x0B;
+        OpCode = 0x0B;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

@@ -17,7 +17,7 @@ public class ServerFormat20 : NetworkFormat
     public ServerFormat20()
     {
         Encrypted = true;
-        Command = 0x20;
+        OpCode = 0x20;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

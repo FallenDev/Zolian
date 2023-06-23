@@ -165,7 +165,7 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
     {
         Instance = this;
         Seed = 0;
-        Salt = "NexonInc."u8.ToArray();
+        Salt = "UrkcnItnI"u8.ToArray();
         KeySalts = string.IsNullOrEmpty(string.Empty) ? new byte[1024] : GenerateKeySalts(string.Empty);
     }
 
@@ -180,8 +180,9 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
 
     public bool ShouldOpCodeClientBeEncrypted(byte opCode) => GetClientEncryptionType(opCode) != EncryptionType.None;
 
-    public void Decrypt(ref Span<byte> buffer, byte opCode, byte sequence)
+    public void Decrypt(NetworkPacket packet, byte opCode, byte sequence)
     {
+        var buffer = packet.ToSpan();
         var length = buffer.Length - 7;
         IReadOnlyList<byte> thisKey;
         var a = (ushort)(((buffer[length + 6] << 8) | buffer[length + 4]) ^ 29808);
@@ -217,7 +218,7 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
         //overwrite ref
         buffer = slice;
 
-        if (opCode is 57 or 58)
+        if (opCode is 0x39 or 0x3A)
             DecryptDialog(ref buffer);
     }
 
@@ -240,8 +241,9 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
         buffer = slice;
     }
 
-    public void Encrypt(ref Span<byte> buffer, byte opCode, byte sequence)
+    public void Encrypt(NetworkPacket packet, byte opCode, byte sequence)
     {
+        var buffer = packet.ToSpan();
         IReadOnlyList<byte> thisKey;
         var a = (ushort)Random.Shared.Next(256, ushort.MaxValue);
         var b = (byte)Random.Shared.Next(100, byte.MaxValue);
@@ -332,28 +334,28 @@ public sealed class SecurityProvider : IFormattableNetwork, ICrypto
 
     #endregion
 
-    public void Transform(NetworkPacket packet)
-    {
-        try
-        {
-            Parallel.For(0, packet.Data.Length, delegate (int i)
-            {
-                var mod = (i / Salt.Length) & 0xFF;
+    //public void Transform(NetworkPacket packet)
+    //{
+    //    try
+    //    {
+    //        Parallel.For(0, packet.Data.Length, delegate (int i)
+    //        {
+    //            var mod = (i / Salt.Length) & 0xFF;
 
-                packet.Data[i] ^= (byte)(
-                    Salt[i % Salt.Length] ^
-                    SaltTree[Seed][packet.Sequence] ^
-                    SaltTree[Seed][mod]);
+    //            packet.Data[i] ^= (byte)(
+    //                Salt[i % Salt.Length] ^
+    //                SaltTree[Seed][packet.Sequence] ^
+    //                SaltTree[Seed][mod]);
 
-                if (packet.Sequence == mod) packet.Data[i] ^= SaltTree[Seed][packet.Sequence];
-            });
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.ToString());
-            Crashes.TrackError(e);
-        }
-    }
+    //            if (packet.Sequence == mod) packet.Data[i] ^= SaltTree[Seed][packet.Sequence];
+    //        });
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        ServerSetup.Logger(e.ToString());
+    //        Crashes.TrackError(e);
+    //    }
+    //}
 
     public byte[] GenerateKey(ushort a, byte b)
     {

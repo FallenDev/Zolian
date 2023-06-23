@@ -8,7 +8,7 @@ public class ServerFormat06 : NetworkFormat
     public ServerFormat06()
     {
         Encrypted = true;
-        Command = 0x06;
+        OpCode = 0x06;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

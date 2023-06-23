@@ -8,7 +8,7 @@ public class ClientFormat08 : NetworkFormat
     public ClientFormat08()
     {
         Encrypted = true;
-        Command = 0x08;
+        OpCode = 0x08;
     }
 
     public int ItemAmount { get; private set; }

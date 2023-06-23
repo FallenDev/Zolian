@@ -12,7 +12,7 @@ public class ClientFormat0F : NetworkFormat
     public ClientFormat0F()
     {
         Encrypted = true;
-        Command = 0x0F;
+        OpCode = 0x0F;
     }
 
     public string Data { get; private set; }

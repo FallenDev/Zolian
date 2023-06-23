@@ -10,7 +10,7 @@ public class ClientFormat10 : NetworkFormat
     public ClientFormat10()
     {
         Encrypted = false;
-        Command = 0x10;
+        OpCode = 0x10;
     }
 
     public string Name { get; private set; }

@@ -13,7 +13,7 @@ public class ServerFormat15 : NetworkFormat
     private ServerFormat15()
     {
         Encrypted = true;
-        Command = 0x15;
+        OpCode = 0x15;
     }
 
     private Area Area { get; }

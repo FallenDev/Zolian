@@ -10,7 +10,7 @@ public class ClientFormat39 : NetworkFormat
     public ClientFormat39()
     {
         Encrypted = true;
-        Command = 0x39;
+        OpCode = 0x39;
     }
 
     public string Args { get; private set; }

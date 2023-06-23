@@ -8,7 +8,7 @@ public class ClientFormat3E : NetworkFormat
     public ClientFormat3E()
     {
         Encrypted = true;
-        Command = 0x3E;
+        OpCode = 0x3E;
     }
 
     public byte Index { get; private set; }

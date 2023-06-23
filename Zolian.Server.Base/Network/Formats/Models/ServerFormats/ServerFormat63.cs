@@ -10,7 +10,7 @@ public class ServerFormat63 : NetworkFormat
     public ServerFormat63()
     {
         Encrypted = true;
-        Command = 0x63;
+        OpCode = 0x63;
     }
 
     private string Username { get; }

@@ -15,7 +15,7 @@ public class ClientFormat0E : NetworkFormat
     public ClientFormat0E()
     {
         Encrypted = true;
-        Command = 0x0E;
+        OpCode = 0x0E;
     }
 
     public string Text { get; private set; }

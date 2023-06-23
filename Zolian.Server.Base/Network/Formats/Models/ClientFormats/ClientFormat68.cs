@@ -8,7 +8,7 @@ public class ClientFormat68 : NetworkFormat
     public ClientFormat68()
     {
         Encrypted = true;
-        Command = 0x68;
+        OpCode = 0x68;
     }
 
     private byte Type { get; set; }

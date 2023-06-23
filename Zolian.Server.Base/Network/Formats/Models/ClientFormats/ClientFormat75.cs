@@ -8,7 +8,7 @@ public class ClientFormat75 : NetworkFormat
     public ClientFormat75()
     {
         Encrypted = true;
-        Command = 0x75;
+        OpCode = 0x75;
     }
 
     public uint ServerTick;

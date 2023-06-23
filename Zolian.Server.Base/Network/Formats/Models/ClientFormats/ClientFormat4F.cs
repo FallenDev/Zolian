@@ -8,7 +8,7 @@ public class ClientFormat4F : NetworkFormat
     public ClientFormat4F()
     {
         Encrypted = true;
-        Command = 0x4F;
+        OpCode = 0x4F;
     }
 
     private ushort Count { get; set; }

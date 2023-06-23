@@ -8,7 +8,7 @@ public class ClientFormat4D : NetworkFormat
     public ClientFormat4D()
     {
         Encrypted = true;
-        Command = 0x4D;
+        OpCode = 0x4D;
     }
 
     public byte Lines { get; private set; }

@@ -19,7 +19,7 @@ public class ServerFormat08 : NetworkFormat
     private ServerFormat08()
     {
         Encrypted = true;
-        Command = 0x08;
+        OpCode = 0x08;
     }
 
     private Aisling Aisling { get; }

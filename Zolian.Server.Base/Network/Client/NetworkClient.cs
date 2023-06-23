@@ -23,7 +23,7 @@ public abstract class NetworkClient : IDisposable
     private SemaphoreSlim ReceiveLock { get; }
     private SemaphoreSlim SendLock { get; }
     public event EventHandler OnDisconnected;
-    private byte Ordinal { get; set; }
+    private byte Sequence { get; set; }
     public bool MapOpen { get; set; }
     private NetworkPacketReader Reader { get; set; }
     private NetworkPacketWriter Writer { get; set; }
@@ -45,17 +45,18 @@ public abstract class NetworkClient : IDisposable
     public async void Send(NetworkFormat format)
     {
         if (!Socket.Connected) return;
-        if (MapOpen && format.Command is not 59) return;
+        if (MapOpen && format.OpCode is not 59) return;
 
         await SendLock.WaitAsync().ConfigureAwait(false);
 
         try
         {
             Writer = new NetworkPacketWriter();
-            Writer.Write(format.Command);
+            Writer.Write(format.OpCode);
+            var isEncrypted = SecurityProvider.Instance.ShouldOpCodeServerBeEncrypted(format.OpCode);
 
-            if (format.Encrypted)
-                Writer.Write(Ordinal++);
+            if (isEncrypted)
+                Writer.Write(Sequence++);
 
             format.Serialize(Writer);
 
@@ -68,8 +69,9 @@ public abstract class NetworkClient : IDisposable
             if (ServerSetup.Instance.Config.LogClientPackets)
                 ServerSetup.Logger($"Server: 0x{packetOpCodeToString} = {packet}");
 
-            if (format.Encrypted)
-                SecurityProvider.Instance.Transform(packet);
+            if (isEncrypted)
+                SecurityProvider.Instance.Encrypt(packet, format.OpCode, Sequence);
+                //SecurityProvider.Instance.Transform(packet);
 
             var buffer = packet.ToArray();
             if (buffer.Length <= 0x0) return;
@@ -95,7 +97,7 @@ public abstract class NetworkClient : IDisposable
     public async void Send(params NetworkFormat[] formats)
     {
         if (!Socket.Connected) return;
-        if (formats.Any(format => MapOpen && format.Command is not 59)) return;
+        if (formats.Any(format => MapOpen && format.OpCode is not 59)) return;
 
         await SendLock.WaitAsync().ConfigureAwait(false);
 
@@ -104,10 +106,11 @@ public abstract class NetworkClient : IDisposable
             foreach (var format in formats)
             {
                 Writer = new NetworkPacketWriter();
-                Writer.Write(format.Command);
+                Writer.Write(format.OpCode);
+                var isEncrypted = SecurityProvider.Instance.ShouldOpCodeServerBeEncrypted(format.OpCode);
 
-                if (format.Encrypted)
-                    Writer.Write(Ordinal++);
+                if (isEncrypted)
+                    Writer.Write(Sequence++);
 
                 format.Serialize(Writer);
 
@@ -120,8 +123,9 @@ public abstract class NetworkClient : IDisposable
                 if (ServerSetup.Instance.Config.LogClientPackets)
                     ServerSetup.Logger($"Server: 0x{packetOpCodeToString} = {packet}");
 
-                if (format.Encrypted)
-                    SecurityProvider.Instance.Transform(packet);
+                if (isEncrypted)
+                    SecurityProvider.Instance.Encrypt(packet, format.OpCode, Sequence);
+                    //SecurityProvider.Instance.Transform(packet);
 
                 var buffer = packet.ToArray();
                 if (buffer.Length <= 0x0) return;
@@ -165,7 +169,8 @@ public abstract class NetworkClient : IDisposable
             var packet = data.ToPacket();
             if (packet == null) return;
 
-            SecurityProvider.Instance.Transform(packet);
+            SecurityProvider.Instance.Encrypt(packet, packet.OpCode, Sequence);
+            //SecurityProvider.Instance.Transform(packet);
 
             var buffer = packet.ToArray();
 
@@ -202,26 +207,28 @@ public abstract class NetworkClient : IDisposable
         try
         {
             Reader = new NetworkPacketReader();
+            packet.IsEncrypted = SecurityProvider.Instance.ShouldOpCodeClientBeEncrypted(format.OpCode);
 
-            switch (format.Encrypted)
+            switch (packet.IsEncrypted)
             {
                 case true:
                 {
-                    SecurityProvider.Instance.Transform(packet);
+                    //SecurityProvider.Instance.Transform(packet);
+                    SecurityProvider.Instance.Decrypt(packet, format.OpCode, Sequence);
 
                     // ToDo: Client to Server Logger
                     if (ServerSetup.Instance.Config.LogServerPackets)
                         ServerSetup.Logger($"Client: 0x{packet.OpCode:X2} = {packet}");
 
-                    if (format.Command is 0x39 or 0x3A)
-                    {
-                        TransFormDialog(packet);
-                        Reader.Position = 0x6;
-                    }
-                    else
-                    {
+                    //if (format.OpCode is 0x39 or 0x3A)
+                    //{
+                    //    TransFormDialog(packet);
+                    //    Reader.Position = 0x6;
+                    //}
+                    //else
+                    //{
                         Reader.Position = 0x0;
-                    }
+                    //}
 
                     break;
                 }
@@ -244,21 +251,21 @@ public abstract class NetworkClient : IDisposable
         }
     }
         
-    private static void TransFormDialog(NetworkPacket value)
-    {
-        if (value.Data.Length > 0x2) value.Data[0x2] ^= (byte)(P(value) + 0x73);
-        if (value.Data.Length > 0x3) value.Data[0x3] ^= (byte)(P(value) + 0x73);
-        if (value.Data.Length > 0x4) value.Data[0x4] ^= (byte)(P(value) + 0x28);
-        if (value.Data.Length > 0x5) value.Data[0x5] ^= (byte)(P(value) + 0x29);
+    //private static void TransFormDialog(NetworkPacket value)
+    //{
+    //    if (value.Data.Length > 0x2) value.Data[0x2] ^= (byte)(P(value) + 0x73);
+    //    if (value.Data.Length > 0x3) value.Data[0x3] ^= (byte)(P(value) + 0x73);
+    //    if (value.Data.Length > 0x4) value.Data[0x4] ^= (byte)(P(value) + 0x28);
+    //    if (value.Data.Length > 0x5) value.Data[0x5] ^= (byte)(P(value) + 0x29);
 
-        for (var i = value.Data.Length - 0x6 - 0x1; i >= 0x0; i--)
-        {
-            var index = i + 0x6;
+    //    for (var i = value.Data.Length - 0x6 - 0x1; i >= 0x0; i--)
+    //    {
+    //        var index = i + 0x6;
 
-            if (index >= 0x0 && value.Data.Length > index)
-                value.Data[index] ^= (byte)(((byte)(P(value) + 0x28) + i + 0x2) % 0x100);
-        }
-    }
+    //        if (index >= 0x0 && value.Data.Length > index)
+    //            value.Data[index] ^= (byte)(((byte)(P(value) + 0x28) + i + 0x2) % 0x100);
+    //    }
+    //}
 
     private static byte P(NetworkPacket value) => (byte)(value.Data[0x1] ^ (byte)(value.Data[0x0] - 0x2D));
 

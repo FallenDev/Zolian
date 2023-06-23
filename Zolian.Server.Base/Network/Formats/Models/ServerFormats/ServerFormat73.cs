@@ -8,7 +8,7 @@ public class ServerFormat73 : NetworkFormat
     public ServerFormat73()
     {
         Encrypted = true;
-        Command = 0x73;
+        OpCode = 0x73;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

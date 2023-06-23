@@ -10,7 +10,7 @@ public class ClientFormat44 : NetworkFormat
     public ClientFormat44()
     {
         Encrypted = true;
-        Command = 0x44;
+        OpCode = 0x44;
     }
 
     public override void Serialize(NetworkPacketReader reader) => Slot = reader.ReadByte();

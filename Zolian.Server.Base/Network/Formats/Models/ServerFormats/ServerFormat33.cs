@@ -8,7 +8,7 @@ public class ServerFormat33 : NetworkFormat
     private ServerFormat33()
     {
         Encrypted = true;
-        Command = 0x33;
+        OpCode = 0x33;
     }
 
     /// <summary>

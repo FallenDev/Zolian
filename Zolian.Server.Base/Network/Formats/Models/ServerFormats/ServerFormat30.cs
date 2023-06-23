@@ -90,7 +90,7 @@ public class ServerFormat30 : NetworkFormat
     public ServerFormat30()
     {
         Encrypted = true;
-        Command = 0x30;
+        OpCode = 0x30;
     }
 
     protected ServerFormat30(GameClient gameClient) : this() => _client = gameClient;

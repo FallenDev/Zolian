@@ -13,7 +13,7 @@ public class ClientFormat32 : NetworkFormat
     public ClientFormat32()
     {
         Encrypted = true;
-        Command = 0x32;
+        OpCode = 0x32;
     }
 
     public override void Serialize(NetworkPacketReader reader)

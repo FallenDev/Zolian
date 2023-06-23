@@ -13,7 +13,7 @@ public class ServerFormat60 : NetworkFormat
     public ServerFormat60()
     {
         Encrypted = true;
-        Command = 0x60;
+        OpCode = 0x60;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

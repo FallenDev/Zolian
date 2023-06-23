@@ -8,7 +8,7 @@ public class ServerFormat3B : NetworkFormat
     public ServerFormat3B()
     {
         Encrypted = true;
-        Command = 0x3B;
+        OpCode = 0x3B;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

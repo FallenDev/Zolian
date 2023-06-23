@@ -21,7 +21,7 @@ public class ServerFormat2C : NetworkFormat
 
     private ServerFormat2C()
     {
-        Command = 0x2C;
+        OpCode = 0x2C;
         Encrypted = true;
     }
 

@@ -11,7 +11,7 @@ public class ClientFormat57 : NetworkFormat
     public ClientFormat57()
     {
         Encrypted = true;
-        Command = 0x57;
+        OpCode = 0x57;
     }
 
     public override void Serialize(NetworkPacketReader reader)

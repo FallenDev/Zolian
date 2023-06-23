@@ -18,7 +18,7 @@ public class ServerFormat37 : NetworkFormat
     private ServerFormat37()
     {
         Encrypted = true;
-        Command = 0x37;
+        OpCode = 0x37;
     }
 
     private byte EquipmentSlot { get; }

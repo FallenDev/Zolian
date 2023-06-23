@@ -7,7 +7,7 @@ public abstract class BoardDescriptors : NetworkFormat
 {
     public BoardDescriptors()
     {
-        Command = 0x31;
+        OpCode = 0x31;
         Encrypted = true;
     }
 }

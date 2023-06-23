@@ -32,7 +32,7 @@ public class ServerFormat42 : NetworkFormat
     private ServerFormat42()
     {
         Encrypted = true;
-        Command = 0x42;
+        OpCode = 0x42;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

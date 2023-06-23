@@ -25,7 +25,7 @@ public class ServerFormat2F : NetworkFormat
 
     private ServerFormat2F()
     {
-        Command = 0x2F;
+        OpCode = 0x2F;
         Encrypted = true;
     }
 
@@ -232,7 +232,7 @@ public class PopupFormat : NetworkFormat
 
     private PopupFormat()
     {
-        Command = 0x2F;
+        OpCode = 0x2F;
         Encrypted = true;
     }
 

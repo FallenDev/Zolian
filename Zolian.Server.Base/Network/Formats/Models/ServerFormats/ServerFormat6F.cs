@@ -16,7 +16,7 @@ public class ServerFormat6F : NetworkFormat
     public ServerFormat6F()
     {
         Encrypted = true;
-        Command = 0x6F;
+        OpCode = 0x6F;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

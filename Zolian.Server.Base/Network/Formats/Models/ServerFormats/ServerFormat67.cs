@@ -10,7 +10,7 @@ public class ServerFormat67 : NetworkFormat
     public ServerFormat67()
     {
         Encrypted = true;
-        Command = 0x67;
+        OpCode = 0x67;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

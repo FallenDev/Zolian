@@ -10,7 +10,7 @@ public class ClientFormat1B : NetworkFormat
     public ClientFormat1B()
     {
         Encrypted = true;
-        Command = 0x1B;
+        OpCode = 0x1B;
     }
 
     public override void Serialize(NetworkPacketReader reader) => Index = reader.ReadByte();

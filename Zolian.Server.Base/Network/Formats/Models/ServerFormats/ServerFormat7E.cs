@@ -11,7 +11,7 @@ public class ServerFormat7E : NetworkFormat
     public ServerFormat7E()
     {
         Encrypted = false;
-        Command = 0x7E;
+        OpCode = 0x7E;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

@@ -13,7 +13,7 @@ public class ServerFormat18 : NetworkFormat
     private ServerFormat18()
     {
         Encrypted = true;
-        Command = 0x18;
+        OpCode = 0x18;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

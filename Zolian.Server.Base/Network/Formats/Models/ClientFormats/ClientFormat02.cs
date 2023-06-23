@@ -11,7 +11,7 @@ public class ClientFormat02 : NetworkFormat
     public ClientFormat02()
     {
         Encrypted = true;
-        Command = 0x02;
+        OpCode = 0x02;
     }
 
     public override void Serialize(NetworkPacketReader reader)

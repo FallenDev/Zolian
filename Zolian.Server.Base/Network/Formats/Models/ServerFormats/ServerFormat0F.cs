@@ -13,7 +13,7 @@ public class ServerFormat0F : NetworkFormat
     private ServerFormat0F()
     {
         Encrypted = true;
-        Command = 0x0F;
+        OpCode = 0x0F;
     }
 
     private Item Item { get; }

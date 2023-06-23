@@ -8,7 +8,7 @@ public class ServerFormat49 : NetworkFormat
     public ServerFormat49()
     {
         Encrypted = true;
-        Command = 0x49;
+        OpCode = 0x49;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

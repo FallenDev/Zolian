@@ -24,7 +24,7 @@ public class ServerFormat19 : NetworkFormat
     private ServerFormat19()
     {
         Encrypted = true;
-        Command = 0x19;
+        OpCode = 0x19;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

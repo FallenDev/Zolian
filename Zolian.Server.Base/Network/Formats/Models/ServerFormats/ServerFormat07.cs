@@ -13,7 +13,7 @@ public class ServerFormat07 : NetworkFormat
     public ServerFormat07(IEnumerable<Sprite> objectsToAdd)
     {
         Encrypted = true;
-        Command = 0x07;
+        OpCode = 0x07;
         _sprites = new List<Sprite>(objectsToAdd);
     }
 

@@ -17,7 +17,7 @@ public class ServerFormat04 : NetworkFormat
     private ServerFormat04()
     {
         Encrypted = true;
-        Command = 0x04;
+        OpCode = 0x04;
     }
 
     private ushort X { get; }

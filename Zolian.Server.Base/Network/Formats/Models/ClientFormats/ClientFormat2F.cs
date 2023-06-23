@@ -8,7 +8,7 @@ public class ClientFormat2F : NetworkFormat
     public ClientFormat2F()
     {
         Encrypted = true;
-        Command = 0x2F;
+        OpCode = 0x2F;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

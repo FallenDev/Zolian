@@ -8,7 +8,7 @@ public class ClientFormat04 : NetworkFormat
     public ClientFormat04()
     {
         Encrypted = true;
-        Command = 0x04;
+        OpCode = 0x04;
     }
 
     public byte Gender { get; private set; }

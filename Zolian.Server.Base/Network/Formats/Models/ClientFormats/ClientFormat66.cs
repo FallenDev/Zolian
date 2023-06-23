@@ -8,7 +8,7 @@ public class ClientFormat66 : NetworkFormat
     public ClientFormat66()
     {
         Encrypted = true;
-        Command = 0x66;
+        OpCode = 0x66;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

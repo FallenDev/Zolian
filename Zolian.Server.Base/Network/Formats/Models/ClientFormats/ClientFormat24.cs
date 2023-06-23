@@ -8,7 +8,7 @@ public class ClientFormat24 : NetworkFormat
     public ClientFormat24()
     {
         Encrypted = true;
-        Command = 0x24;
+        OpCode = 0x24;
     }
 
     public uint GoldAmount { get; private set; }

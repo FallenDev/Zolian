@@ -20,7 +20,7 @@ public class Board : NetworkFormat
     public Board()
     {
         Encrypted = true;
-        Command = 0x31;
+        OpCode = 0x31;
     }
 
     public Board(string name, ushort index, bool isMail = false)

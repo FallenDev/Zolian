@@ -12,7 +12,7 @@ public class ServerFormat0D : NetworkFormat
     public ServerFormat0D()
     {
         Encrypted = true;
-        Command = 0x0D;
+        OpCode = 0x0D;
     }
 
     public enum MsgType : byte

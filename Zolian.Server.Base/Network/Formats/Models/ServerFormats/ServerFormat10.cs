@@ -11,7 +11,7 @@ public class ServerFormat10 : NetworkFormat
     private ServerFormat10()
     {
         Encrypted = true;
-        Command = 0x10;
+        OpCode = 0x10;
     }
 
     private byte Slot { get; }

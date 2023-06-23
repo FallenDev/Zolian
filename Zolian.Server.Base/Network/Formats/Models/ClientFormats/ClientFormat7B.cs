@@ -8,7 +8,7 @@ public class ClientFormat7B : NetworkFormat
     public ClientFormat7B()
     {
         Encrypted = true;
-        Command = 0x7B;
+        OpCode = 0x7B;
     }
 
     public string Name { get; private set; }

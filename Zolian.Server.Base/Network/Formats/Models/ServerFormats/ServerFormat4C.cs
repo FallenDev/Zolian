@@ -8,7 +8,7 @@ public class ServerFormat4C : NetworkFormat
     public ServerFormat4C()
     {
         Encrypted = true;
-        Command = 0x4C;
+        OpCode = 0x4C;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

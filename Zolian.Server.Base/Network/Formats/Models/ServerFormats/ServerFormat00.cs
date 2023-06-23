@@ -10,7 +10,7 @@ public class ServerFormat00 : NetworkFormat
     public ServerFormat00()
     {
         Encrypted = false;
-        Command = 0x00;
+        OpCode = 0x00;
     }
 
     public uint Hash { get; init; }
@@ -21,8 +21,8 @@ public class ServerFormat00 : NetworkFormat
 
     public override void Serialize(NetworkPacketWriter writer)
     {
-        writer.Write(Type);
-        writer.Write(Hash);
+        writer.Write(Parameters.Salt);
+        writer.Write(Parameters.Seed);
         writer.Write(Parameters);
     }
 }

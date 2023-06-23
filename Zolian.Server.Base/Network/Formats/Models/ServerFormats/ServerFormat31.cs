@@ -8,7 +8,7 @@ public class ServerFormat31 : NetworkFormat
     public ServerFormat31()
     {
         Encrypted = true;
-        Command = 0x31;
+        OpCode = 0x31;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

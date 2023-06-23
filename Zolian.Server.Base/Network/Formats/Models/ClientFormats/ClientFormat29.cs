@@ -11,7 +11,7 @@ public class ClientFormat29 : NetworkFormat
     public ClientFormat29()
     {
         Encrypted = true;
-        Command = 0x29;
+        OpCode = 0x29;
     }
 
     public override void Serialize(NetworkPacketReader reader)

@@ -10,7 +10,7 @@ public class ServerFormat66 : NetworkFormat
     public ServerFormat66()
     {
         Encrypted = true;
-        Command = 0x66;
+        OpCode = 0x66;
     }
 
     private static string Text => "https://classicrpgcharacter.nexon.com/service/ConfirmGameUser.aspx?id=%s&pw=%s&mainCode=2&subCode=0";

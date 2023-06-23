@@ -8,7 +8,7 @@ public class ClientFormat4B : NetworkFormat
     public ClientFormat4B()
     {
         Encrypted = true;
-        Command = 0x4B;
+        OpCode = 0x4B;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

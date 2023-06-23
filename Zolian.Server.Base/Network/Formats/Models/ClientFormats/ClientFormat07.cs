@@ -10,7 +10,7 @@ public class ClientFormat07 : NetworkFormat
     public ClientFormat07()
     {
         Encrypted = true;
-        Command = 0x07;
+        OpCode = 0x07;
     }
 
     private byte PickupType { get; set; }

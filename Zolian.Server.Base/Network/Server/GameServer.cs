@@ -1887,7 +1887,7 @@ public class GameServer : NetworkServer<GameClient>
                         {
                             Id = (uint)client.Aisling.Serial,
                             Type = byte.MinValue,
-                            Command = 74
+                            OpCode = 74
                         };
 
                         var format4ASender = new ClientFormat4A
@@ -1895,7 +1895,7 @@ public class GameServer : NetworkServer<GameClient>
                             Gold = format.Gold,
                             Id = format.ID,
                             Type = 0x03,
-                            Command = 74
+                            OpCode = 74
                         };
 
                         Format4AHandler(aisling.Client, format4AReceiver);

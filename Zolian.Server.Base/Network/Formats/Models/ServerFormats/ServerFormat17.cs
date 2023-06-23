@@ -13,7 +13,7 @@ public class ServerFormat17 : NetworkFormat
     private ServerFormat17()
     {
         Encrypted = true;
-        Command = 0x17;
+        OpCode = 0x17;
     }
 
     private Spell Spell { get; }

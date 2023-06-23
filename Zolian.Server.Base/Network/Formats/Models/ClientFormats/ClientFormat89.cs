@@ -8,7 +8,7 @@ public class ClientFormat89 : NetworkFormat
     public ClientFormat89()
     {
         Encrypted = true;
-        Command = 0x89;
+        OpCode = 0x89;
     }
 
     private ushort DisplayMask { get; set; }

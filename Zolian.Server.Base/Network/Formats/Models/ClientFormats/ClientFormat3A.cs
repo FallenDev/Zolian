@@ -8,7 +8,7 @@ public class ClientFormat3A : NetworkFormat
     public ClientFormat3A()
     {
         Encrypted = true;
-        Command = 0x3A;
+        OpCode = 0x3A;
     }
 
     public string Input { get; private set; }

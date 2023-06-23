@@ -14,7 +14,7 @@ public class ServerFormat34 : NetworkFormat
     public ServerFormat34(Aisling aisling)
     {
         Encrypted = true;
-        Command = 0x34;
+        OpCode = 0x34;
         _aisling = aisling;
     }
 

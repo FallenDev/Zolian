@@ -12,7 +12,7 @@ public class ServerFormat2D : NetworkFormat
 
     private ServerFormat2D()
     {
-        Command = 0x2D;
+        OpCode = 0x2D;
         Encrypted = true;
     }
 

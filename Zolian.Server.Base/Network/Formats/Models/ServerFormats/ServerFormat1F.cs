@@ -10,7 +10,7 @@ public class ServerFormat1F : NetworkFormat
     public ServerFormat1F()
     {
         Encrypted = true;
-        Command = 0x1F;
+        OpCode = 0x1F;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

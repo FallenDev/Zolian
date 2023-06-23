@@ -22,7 +22,7 @@ public class ServerFormat1A : NetworkFormat
     public ServerFormat1A()
     {
         Encrypted = true;
-        Command = 0x1A;
+        OpCode = 0x1A;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

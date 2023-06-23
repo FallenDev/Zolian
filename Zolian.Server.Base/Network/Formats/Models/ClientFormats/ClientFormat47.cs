@@ -8,7 +8,7 @@ public class ClientFormat47 : NetworkFormat
     public ClientFormat47()
     {
         Encrypted = true;
-        Command = 0x47;
+        OpCode = 0x47;
     }
 
     public byte Stat { get; private set; }

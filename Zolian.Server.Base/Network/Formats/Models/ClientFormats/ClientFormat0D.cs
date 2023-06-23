@@ -18,7 +18,7 @@ public class ClientFormat0D : NetworkFormat
     public ClientFormat0D()
     {
         Encrypted = true;
-        Command = 0x0D;
+        OpCode = 0x0D;
     }
 
     public override void Serialize(NetworkPacketReader reader)

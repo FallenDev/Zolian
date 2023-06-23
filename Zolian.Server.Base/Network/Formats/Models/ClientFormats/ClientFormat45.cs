@@ -8,7 +8,7 @@ public class ClientFormat45 : NetworkFormat
     public ClientFormat45()
     {
         Encrypted = true;
-        Command = 0x45;
+        OpCode = 0x45;
     }
 
     public DateTime Ping { get; private set; }

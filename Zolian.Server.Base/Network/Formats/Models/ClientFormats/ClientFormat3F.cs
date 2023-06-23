@@ -10,7 +10,7 @@ public class ClientFormat3F : NetworkFormat
     public ClientFormat3F()
     {
         Encrypted = true;
-        Command = 0x3F;
+        OpCode = 0x3F;
     }
 
     public override void Serialize(NetworkPacketReader reader) => Index = reader.ReadInt32();

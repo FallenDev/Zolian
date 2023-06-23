@@ -14,7 +14,7 @@ public class ServerFormat05 : NetworkFormat
     private ServerFormat05()
     {
         Encrypted = true;
-        Command = 0x05;
+        OpCode = 0x05;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

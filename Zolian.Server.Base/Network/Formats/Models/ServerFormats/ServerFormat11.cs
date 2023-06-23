@@ -11,7 +11,7 @@ public class ServerFormat11 : NetworkFormat
     public ServerFormat11()
     {
         Encrypted = true;
-        Command = 0x11;
+        OpCode = 0x11;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

@@ -8,7 +8,7 @@ public class ServerFormat22 : NetworkFormat
     public ServerFormat22()
     {
         Encrypted = true;
-        Command = 0x22;
+        OpCode = 0x22;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

@@ -14,7 +14,7 @@ public class ServerFormat2E : NetworkFormat
 
     private ServerFormat2E()
     {
-        Command = 0x2E;
+        OpCode = 0x2E;
         Encrypted = true;
     }
 

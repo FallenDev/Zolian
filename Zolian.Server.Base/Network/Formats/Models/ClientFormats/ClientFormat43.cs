@@ -11,7 +11,7 @@ public class ClientFormat43 : NetworkFormat
     public ClientFormat43()
     {
         Encrypted = true;
-        Command = 0x43;
+        OpCode = 0x43;
     }
 
     public short X { get; private set; }

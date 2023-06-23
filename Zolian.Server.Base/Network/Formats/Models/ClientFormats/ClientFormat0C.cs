@@ -8,7 +8,7 @@ public class ClientFormat0C : NetworkFormat
     public ClientFormat0C()
     {
         Encrypted = true;
-        Command = 0x0C;
+        OpCode = 0x0C;
     }
 
     public override void Serialize(NetworkPacketReader reader) => reader.ReadUInt32();

@@ -10,7 +10,7 @@ public class ServerFormat02 : NetworkFormat
     public ServerFormat02(byte code, string text)
     {
         Encrypted = true;
-        Command = 0x02;
+        OpCode = 0x02;
         Code = code;
         Text = text;
     }

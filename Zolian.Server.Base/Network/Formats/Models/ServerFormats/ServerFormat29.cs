@@ -38,7 +38,7 @@ public class ServerFormat29 : NetworkFormat
     public ServerFormat29()
     {
         Encrypted = true;
-        Command = 0x29;
+        OpCode = 0x29;
     }
 
     public ServerFormat29(uint casterSerial, uint targetSerial, ushort casterEffect, ushort targetEffect, short speed) : this()

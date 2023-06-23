@@ -14,7 +14,7 @@ public class ServerFormat36 : NetworkFormat
     public ServerFormat36(GameClient client)
     {
         Encrypted = true;
-        Command = 0x36;
+        OpCode = 0x36;
         _client = client;
     }
 

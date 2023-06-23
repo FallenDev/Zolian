@@ -10,7 +10,7 @@ public class ClientFormat79 : NetworkFormat
     public ClientFormat79()
     {
         Encrypted = true;
-        Command = 0x79;
+        OpCode = 0x79;
     }
 
     public ActivityStatus Status { get; private set; }

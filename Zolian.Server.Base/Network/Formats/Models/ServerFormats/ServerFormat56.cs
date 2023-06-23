@@ -11,7 +11,7 @@ public class ServerFormat56 : NetworkFormat
     public ServerFormat56()
     {
         Encrypted = true;
-        Command = 0x56;
+        OpCode = 0x56;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

@@ -8,7 +8,7 @@ public class ClientFormat26 : NetworkFormat
     public ClientFormat26()
     {
         Encrypted = true;
-        Command = 0x26;
+        OpCode = 0x26;
     }
 
     public string NewPassword { get; set; }

@@ -14,7 +14,7 @@ public class ServerFormat32 : NetworkFormat
     public ServerFormat32()
     {
         Encrypted = true;
-        Command = 0x32;
+        OpCode = 0x32;
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ public class ClientFormat18 : NetworkFormat
     public ClientFormat18()
     {
         Encrypted = true;
-        Command = 0x18;
+        OpCode = 0x18;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

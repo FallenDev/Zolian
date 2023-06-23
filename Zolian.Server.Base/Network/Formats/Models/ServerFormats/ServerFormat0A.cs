@@ -35,7 +35,7 @@ public class ServerFormat0A : NetworkFormat
     private ServerFormat0A()
     {
         Encrypted = true;
-        Command = 0x0A;
+        OpCode = 0x0A;
     }
 
     private string Text { get; }

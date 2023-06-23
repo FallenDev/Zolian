@@ -19,7 +19,7 @@ public class ServerFormat3A : NetworkFormat
     private ServerFormat3A()
     {
         Encrypted = true;
-        Command = 0x3A;
+        OpCode = 0x3A;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

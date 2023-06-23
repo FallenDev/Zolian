@@ -18,7 +18,7 @@ public class ServerFormat4B : NetworkFormat
     private ServerFormat4B()
     {
         Encrypted = true;
-        Command = 0x4B;
+        OpCode = 0x4B;
     }
 
     private byte ItemSlot { get; }

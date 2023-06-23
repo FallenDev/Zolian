@@ -7,7 +7,7 @@ public class ServerFormat58 : NetworkFormat
     /// </summary>
     public ServerFormat58()
     {
-        Command = 0x58;
+        OpCode = 0x58;
         Encrypted = true;
     }
 

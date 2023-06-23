@@ -11,7 +11,7 @@ public class ServerFormat3C : NetworkFormat
     public ServerFormat3C()
     {
         Encrypted = true;
-        Command = 0x3C;
+        OpCode = 0x3C;
     }
 
     public override void Serialize(NetworkPacketReader reader) { }

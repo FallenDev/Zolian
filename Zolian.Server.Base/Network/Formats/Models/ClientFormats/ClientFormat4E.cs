@@ -8,7 +8,7 @@ public class ClientFormat4E : NetworkFormat
     public ClientFormat4E()
     {
         Encrypted = true;
-        Command = 0x4E;
+        OpCode = 0x4E;
     }
 
     public string Message { get; private set; }

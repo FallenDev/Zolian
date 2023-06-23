@@ -8,7 +8,7 @@ public class ClientFormat4A : NetworkFormat
     public ClientFormat4A()
     {
         Encrypted = true;
-        Command = 0x4A;
+        OpCode = 0x4A;
     }
 
     public uint Gold { get; set; }
