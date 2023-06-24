@@ -1678,7 +1678,7 @@ public class debuff_blind : Debuff
             InsertDebuff(aisling, debuff);
         }
 
-        affected.SendAnimation(391, affected, affected);
+        affected.SendAnimation(114, affected, affected);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)

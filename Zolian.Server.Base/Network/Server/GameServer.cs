@@ -2611,7 +2611,6 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format45Handler(GameClient client, ClientFormat45 format)
     {
-        if (client is not { Authenticated: true }) return;
         if (format.Second != 0x14)
         {
             client.SendMessage(0x02, "Issue with your network, please reconnect.");
@@ -3335,7 +3334,7 @@ public class GameServer : NetworkServer<GameClient>
     private static bool CanInteract(GameClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
     {
         if (client?.Aisling == null) return false;
-        if (client is not ({ Authenticated: true } and { EncryptPass: true })) return false;
+        if (client is not ({ Authenticated: true }/* and { EncryptPass: true }*/)) return false;
 
         if (cancelCasting)
             CancelIfCasting(client);
