@@ -3214,6 +3214,9 @@ public class GameServer : NetworkServer<GameClient>
     private async void ExitGame(GameClient client)
     {
         if (client.Aisling is null) return;
+        
+        ServerSetup.Logger($"{client.LastPacketFromServer:X2} - Last packet from server.");
+        ServerSetup.Logger($"{client.LastPacketFromClient:X2} - Last pakcet from client.");
         var nameSeed = $"{client.Aisling.Username.ToLower()}{client.Aisling.Serial}";
         var redirect = new Redirect
         {
@@ -3239,8 +3242,6 @@ public class GameServer : NetworkServer<GameClient>
 
         client.Send(new ServerFormat02(0x00, ""));
         RemoveClient(client);
-        ServerSetup.Logger($"{client.Server.LastPacketFromServer} - Last packet from server.");
-        ServerSetup.Logger($"{client.Server.LastPacketFromClient} - Last pakcet from client.");
         ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
         client.Dispose();
     }

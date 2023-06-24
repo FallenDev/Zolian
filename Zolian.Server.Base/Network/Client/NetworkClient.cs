@@ -38,7 +38,7 @@ public abstract class NetworkClient : IDisposable
     public DateTime LastPacket0X2DFromClient { get; set; } // Request Profile Limiter
     public DateTime LastPacket0X38FromClient { get; set; } // User F5 Limiter
     public byte LastPacketFromClient { get; set; }
-    protected byte LastPacketFromServer { get; private set; }
+    public byte LastPacketFromServer { get; private set; }
 
     /// <summary>
     /// Send method for single packets
