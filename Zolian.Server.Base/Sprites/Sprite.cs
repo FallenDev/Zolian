@@ -38,7 +38,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") || HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool SpellReflect => HasBuff("Deireas Faileas");
-    public bool SpellNegate => HasBuff("Perfect Defense");
+    public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
     public bool SkillReflect => HasBuff("Asgall");
     public bool IsBleeding => HasDebuff("Bleeding");
     public bool IsBlind => HasDebuff("Blind");

@@ -38,6 +38,7 @@ public abstract class NetworkClient : IDisposable
     public DateTime LastPacket0X2DFromClient { get; set; } // Request Profile Limiter
     public DateTime LastPacket0X38FromClient { get; set; } // User F5 Limiter
     public byte LastPacketFromClient { get; set; }
+    protected byte LastPacketFromServer { get; private set; }
 
     /// <summary>
     /// Send method for single packets
@@ -75,6 +76,7 @@ public abstract class NetworkClient : IDisposable
             if (buffer.Length <= 0x0) return;
 
             if (!Socket.Connected) return;
+            LastPacketFromServer = packet.Command;
             var ar = Socket.BeginSend(buffer, 0x0, buffer.Length, SocketFlags.None, SendCompleted, Socket);
             ar?.AsyncWaitHandle.WaitOne();
         }
@@ -127,6 +129,7 @@ public abstract class NetworkClient : IDisposable
                 if (buffer.Length <= 0x0) return;
 
                 if (!Socket.Connected) return;
+                LastPacketFromServer = packet.Command;
                 var ar = Socket.BeginSend(buffer, 0x0, buffer.Length, SocketFlags.None, SendCompleted, Socket);
                 ar?.AsyncWaitHandle.WaitOne();
             }
@@ -172,6 +175,7 @@ public abstract class NetworkClient : IDisposable
             try
             {
                 if (!Socket.Connected) return;
+                LastPacketFromServer = packet.Command;
                 Socket.SendAsync(buffer, SocketFlags.None);
             }
             catch (SocketException ex)

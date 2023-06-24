@@ -3239,6 +3239,8 @@ public class GameServer : NetworkServer<GameClient>
 
         client.Send(new ServerFormat02(0x00, ""));
         RemoveClient(client);
+        ServerSetup.Logger($"{client.Server.LastPacketFromServer} - Last packet from server.");
+        ServerSetup.Logger($"{client.Server.LastPacketFromClient} - Last pakcet from client.");
         ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
         client.Dispose();
     }

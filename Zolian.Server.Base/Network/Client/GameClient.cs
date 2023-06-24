@@ -1590,7 +1590,7 @@ public partial class GameClient : NetworkClient
         }
 
         // Lag disconnector and routine update for client
-        VariableLagDisconnector(45);
+        VariableLagDisconnector(10);
         DoUpdate(elapsedTime);
     }
 
@@ -1623,6 +1623,7 @@ public partial class GameClient : NetworkClient
     {
         var readyTime = DateTime.Now;
 
+        if (Aisling.GameMaster) return;
         if (!((readyTime - LastMessageFromClient).TotalSeconds > delay)) return;
         Aisling?.Remove(true);
         Server.ClientDisconnected(this);
