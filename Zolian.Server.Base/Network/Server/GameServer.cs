@@ -2611,6 +2611,7 @@ public class GameServer : NetworkServer<GameClient>
     /// </summary>
     protected override void Format45Handler(GameClient client, ClientFormat45 format)
     {
+        if (client is not { Authenticated: true }) return;
         if (format.Second != 0x14)
         {
             client.SendMessage(0x02, "Issue with your network, please reconnect.");
