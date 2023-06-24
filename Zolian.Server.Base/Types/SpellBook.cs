@@ -43,8 +43,8 @@ public class SpellBook : ObjectManager
     {
         Spell ret = null;
 
-        if (Spells.ContainsKey(slot))
-            ret = Spells[slot];
+        if (Spells.TryGetValue(slot, out var spell))
+            ret = spell;
 
         return ret is { Template: not null } ? ret : null;
     }
