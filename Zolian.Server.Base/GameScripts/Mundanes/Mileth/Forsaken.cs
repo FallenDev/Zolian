@@ -178,7 +178,7 @@ public class Forsaken : MundaneScript
                 {
                     var options = new List<OptionsDataItem>
                 {
-                    new (0x03, "{=bAttempt")
+                    new (0x05, "{=bI'm sorry not now")
                 };
 
                     var (hp, mp, classItem, abilityReq) = _mastering.First(x => client.Aisling.Path <= x.Key).Value;
