@@ -18,7 +18,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
         if (skill.Level == 100)
         {
-            return success >= 5;
+            return success >= 2;
         }
 
         return success switch
@@ -126,23 +126,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         damageDealingSprite.Client.LastMovement = DateTime.Now;
     }
 
-    public void Train(IGameClient client, Skill skill)
-    {
-        var trainPoint = Generator.RandNumGen100();
-
-        switch (trainPoint)
-        {
-            case <= 5:
-                break;
-            case <= 98 and >= 6:
-                client.TrainSkill(skill);
-                break;
-            case <= 100 and >= 99:
-                client.TrainSkill(skill);
-                client.TrainSkill(skill);
-                break;
-        };
-    }
+    public void Train(IGameClient client, Skill skill) => client.TrainSkill(skill);
 
     public bool OnUse(Aisling aisling, Skill skill)
     {

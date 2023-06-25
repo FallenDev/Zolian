@@ -969,7 +969,7 @@ public partial class GameClient : NetworkClient
 
             if (skill.CurrentCooldown < skill.Template.Cooldown && skill.CurrentCooldown != 0)
             {
-                Aisling.UsedSkill(skill);
+                Send(new ServerFormat3F(1, skill.Slot, skill.CurrentCooldown));
             }
 
             Skill.AttachScript(skill);

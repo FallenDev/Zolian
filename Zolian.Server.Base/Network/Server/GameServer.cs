@@ -2479,14 +2479,16 @@ public class GameServer : NetworkServer<GameClient>
 
         skill.InUse = true;
 
-        if (skill.ZeroLineTimer.Update(client.Server._abilityGameTimeSpan)) return;
-        skill.ZeroLineTimer.Delay = client.Server._abilityGameTimeSpan + TimeSpan.FromMilliseconds(500);
+        if (skill.Template.Cooldown == 0)
+        {
+            if (skill.ZeroLineTimer.Update(client.Server._abilityGameTimeSpan)) return;
+            skill.ZeroLineTimer.Delay = client.Server._abilityGameTimeSpan + TimeSpan.FromMilliseconds(500);
+        }
 
         var script = skill.Scripts.Values.First();
         script?.OnUse(client.Aisling);
 
         skill.InUse = false;
-        skill.CurrentCooldown = skill.Template.Cooldown;
     }
 
     /// <summary>
@@ -3186,6 +3188,8 @@ public class GameServer : NetworkServer<GameClient>
             if (client.Server.Clients.IsEmpty) return;
             if (client.Server.Clients.Values.Count == 0) return;
             if (!client.Server.Clients.Values.Contains(client)) return;
+            ServerSetup.Logger($"{client.LastPacketFromServer:X2} - Last packet from server.");
+            ServerSetup.Logger($"{client.LastPacketFromClient:X2} - Last pakcet from client.");
 
             if (type == 0)
             {
@@ -3215,8 +3219,6 @@ public class GameServer : NetworkServer<GameClient>
     {
         if (client.Aisling is null) return;
         
-        ServerSetup.Logger($"{client.LastPacketFromServer:X2} - Last packet from server.");
-        ServerSetup.Logger($"{client.LastPacketFromClient:X2} - Last pakcet from client.");
         var nameSeed = $"{client.Aisling.Username.ToLower()}{client.Aisling.Serial}";
         var redirect = new Redirect
         {

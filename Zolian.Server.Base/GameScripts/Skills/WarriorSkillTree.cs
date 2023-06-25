@@ -1062,55 +1062,51 @@ public class Rush : SkillScript
     private void Target(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        _success = _skillMethod.OnUse(aisling, _skill);
 
-        var action = new ServerFormat1A
+        if (_success)
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x82,
-            Speed = 20
-        };
-
-        _enemyList = client.Aisling.DamageableGetInFront(3);
-        _target = _enemyList.FirstOrDefault();
-        _target = Skill.Reflect(_target, sprite, _skill);
-
-        if (_target == null)
-        {
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(3, aisling);
-            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
-
-            if (mapCheck != aisling.Map.ID) return;
-            if (!(wallPos > 0)) OnFailed(aisling);
-
-            if (aisling.Position != wallPosition)
+            var client = aisling.Client;
+            var action = new ServerFormat1A
             {
-                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+                Serial = client.Aisling.Serial,
+                Number = 0x82,
+                Speed = 20
+            };
+
+            _enemyList = client.Aisling.DamageableGetInFront(3);
+            _target = _enemyList.FirstOrDefault();
+
+            if (_target == null)
+            {
+                var mapCheck = aisling.Map.ID;
+                var wallPosition = aisling.GetPendingChargePosition(3, aisling);
+                var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+
+                if (mapCheck != aisling.Map.ID) return;
+                if (!(wallPos > 0)) OnFailed(aisling);
+
+                if (aisling.Position != wallPosition)
+                {
+                    _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+                }
+
+                if (wallPos <= 2)
+                {
+                    var stunned = new debuff_beagsuain();
+                    stunned.OnApplied(aisling, stunned);
+                    aisling.Animate(208);
+                }
+
+                client.Aisling.Show(Scope.NearbyAislings, action);
+                return;
             }
 
-            if (wallPos <= 2)
-            {
-                var stunned = new debuff_beagsuain();
-                stunned.OnApplied(aisling, stunned);
-                aisling.Animate(208);
-            }
-
-            aisling.UsedSkill(_skill);
-            client.Aisling.Show(Scope.NearbyAislings, action);
+            OnSuccess(aisling);
         }
         else
         {
-            _success = _skillMethod.OnUse(aisling, _skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
     }
 }
@@ -1398,7 +1394,7 @@ public class Beag_Suain : SkillScript
 
             _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
         }
-        
+
         _skillMethod.OnSuccess(_target, aisling, _skill, 0, false, action);
     }
 
@@ -1712,55 +1708,51 @@ public class Charge : SkillScript
     private void Target(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        _success = _skillMethod.OnUse(aisling, _skill);
 
-        var action = new ServerFormat1A
+        if (_success)
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x82,
-            Speed = 20
-        };
-
-        _enemyList = client.Aisling.DamageableGetInFront(7);
-        _target = _enemyList.FirstOrDefault();
-        _target = Skill.Reflect(_target, sprite, _skill);
-
-        if (_target == null)
-        {
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(7, aisling);
-            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
-
-            if (mapCheck != aisling.Map.ID) return;
-            if (!(wallPos > 0)) OnFailed(aisling);
-
-            if (aisling.Position != wallPosition)
+            var client = aisling.Client;
+            var action = new ServerFormat1A
             {
-                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+                Serial = client.Aisling.Serial,
+                Number = 0x82,
+                Speed = 20
+            };
+
+            _enemyList = client.Aisling.DamageableGetInFront(7);
+            _target = _enemyList.FirstOrDefault();
+
+            if (_target == null)
+            {
+                var mapCheck = aisling.Map.ID;
+                var wallPosition = aisling.GetPendingChargePosition(7, aisling);
+                var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+
+                if (mapCheck != aisling.Map.ID) return;
+                if (!(wallPos > 0)) OnFailed(aisling);
+
+                if (aisling.Position != wallPosition)
+                {
+                    _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+                }
+
+                if (wallPos <= 6)
+                {
+                    var stunned = new debuff_beagsuain();
+                    stunned.OnApplied(aisling, stunned);
+                    aisling.Animate(208);
+                }
+
+                client.Aisling.Show(Scope.NearbyAislings, action);
+                return;
             }
 
-            if (wallPos <= 6)
-            {
-                var stunned = new debuff_beagsuain();
-                stunned.OnApplied(aisling, stunned);
-                aisling.Animate(208);
-            }
-
-            aisling.UsedSkill(_skill);
-            client.Aisling.Show(Scope.NearbyAislings, action);
+            OnSuccess(aisling);
         }
         else
         {
-            _success = _skillMethod.OnUse(aisling, _skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
     }
 }
@@ -1816,7 +1808,7 @@ public class Titans_Cleave : SkillScript
             var dmgCalc = DamageCalc(aisling);
             var debuff = new debuff_rend();
 
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));
@@ -1865,7 +1857,7 @@ public class Titans_Cleave : SkillScript
 
             var debuff = new debuff_rend();
 
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));
@@ -1952,7 +1944,7 @@ public class Retribution : SkillScript
             _target = i;
             var dmgCalc = DamageCalc(sprite);
             var debuff = new debuff_rend();
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));

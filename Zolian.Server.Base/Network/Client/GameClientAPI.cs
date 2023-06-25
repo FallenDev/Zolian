@@ -547,8 +547,6 @@ public partial class GameClient : IGameClient
         }
 
         Send(new ServerFormat2C(skill.Slot, skill.Icon, skill.Name));
-        skill.CurrentCooldown = skill.Template.Cooldown;
-        Aisling.Client.Send(new ServerFormat3F(1, skill.Slot, skill.CurrentCooldown));
 
         SendMessage(0x02,
             skill.Level >= 100
@@ -580,8 +578,6 @@ public partial class GameClient : IGameClient
         }
 
         Send(new ServerFormat17(spell));
-        spell.CurrentCooldown = spell.Template.Cooldown;
-        Aisling.Client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
 
         SendMessage(0x02,
             spell.Level >= 100

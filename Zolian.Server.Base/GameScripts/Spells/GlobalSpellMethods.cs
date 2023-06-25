@@ -19,7 +19,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (spell.Level == 100)
         {
-            return success >= 3;
+            return success >= 2;
         }
 
         return success switch
