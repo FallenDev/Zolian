@@ -351,12 +351,6 @@ public sealed class Aisling : Player, IAisling
 
     public void CastSpell(Spell spell, CastInfo info)
     {
-        if (spell.InUse)
-        {
-            Client.SendMessage(0x03, "Currently casting a similar spell");
-            return;
-        }
-
         if (info != null)
         {
             if (!string.IsNullOrEmpty(info.Data))
@@ -378,7 +372,11 @@ public sealed class Aisling : Player, IAisling
                 }
                 else
                 {
-                    if (spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget) return;
+                    if (spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)
+                    {
+                        Client.SpellCastInfo = null;
+                        return;
+                    }
 
                     spell.InUse = true;
 
@@ -394,10 +392,12 @@ public sealed class Aisling : Player, IAisling
             else
             {
                 Client.SendMessage(0x03, "Issue casting spell; Code: Crocodile");
+                Client.SpellCastInfo = null;
             }
         }
 
         Client.Aisling.IsCastingSpell = false;
+        Client.SpellCastInfo = null;
     }
 
     public void FinishExchange()

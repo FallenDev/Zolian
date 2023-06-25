@@ -122,7 +122,7 @@ public partial class GameClient : NetworkClient
         }
     }
 
-    public readonly Stack<CastInfo> CastStack = new();
+    public CastInfo SpellCastInfo { get; set; }
     public DateTime LastAssail { get; set; }
     public DateTime LastClientRefresh { get; set; }
     public DateTime LastWarp { get; set; }
@@ -227,7 +227,6 @@ public partial class GameClient : NetworkClient
     public void DoUpdate(TimeSpan elapsedTime)
     {
         PreventMultiLogging();
-        DispatchCasts();
         HandleBadTrades();
         DeathStatusCheck();
         UpdateStatusBarAndThreat(elapsedTime);
@@ -1628,45 +1627,6 @@ public partial class GameClient : NetworkClient
         Aisling?.Remove(true);
         Server.ClientDisconnected(this);
         Server.RemoveClient(this);
-    }
-
-    public void DispatchCasts()
-    {
-        if (!CastStack.Any()) return;
-        if (CastStack.Count == 0) return;
-
-        for (var i = 0; i < CastStack.Count; i++)
-        {
-            CastStack.TryPeek(out var stack);
-            if (stack == null) continue;
-
-            var spell = Aisling.SpellBook.GetSpells(i => i.Slot == stack.Slot).First();
-            if (spell == null) continue;
-
-            if (stack.Target == 0 && spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)
-            {
-                if (CastStack.Count <= 0) return;
-                CastStack.TryPop(out _);
-                continue;
-            }
-
-            if (!spell.Ready)
-            {
-                try
-                {
-                    if (CastStack.Count <= 0) return;
-                    CastStack.TryPop(out _);
-                    continue;
-                }
-                catch
-                {
-                    return;
-                }
-            }
-
-            CastStack.TryPop(out var info);
-            Aisling.CastSpell(spell, info);
-        }
     }
 
     public GameClient UpdateDisplay(bool excludeSelf = false)

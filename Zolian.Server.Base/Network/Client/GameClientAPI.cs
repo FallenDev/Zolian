@@ -547,6 +547,7 @@ public partial class GameClient : IGameClient
         }
 
         Send(new ServerFormat2C(skill.Slot, skill.Icon, skill.Name));
+        skill.CurrentCooldown = 0;
 
         SendMessage(0x02,
             skill.Level >= 100
@@ -578,6 +579,7 @@ public partial class GameClient : IGameClient
         }
 
         Send(new ServerFormat17(spell));
+        spell.CurrentCooldown = 0;
 
         SendMessage(0x02,
             spell.Level >= 100

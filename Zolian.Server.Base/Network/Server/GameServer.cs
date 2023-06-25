@@ -1286,6 +1286,31 @@ public class GameServer : NetworkServer<GameClient>
     }
 
     /// <summary>
+    /// Spell Use - Begin Casting if spell has Lines 
+    /// </summary>
+    protected override void Format4DHandler(GameClient client, ClientFormat4D format)
+    {
+        if (!CanInteract(client, false, false, false)) return;
+        if (!client.Aisling.LoggedIn) return;
+        if (client.Aisling.IsDead()) return;
+
+        client.Aisling.IsCastingSpell = true;
+        var lines = format.Lines;
+
+        if (lines <= 0)
+        {
+            CancelIfCasting(client);
+            return;
+        }
+
+        client.SpellCastInfo ??= new CastInfo
+        {
+            SpellLines = lines,
+            Started = DateTime.Now
+        };
+    }
+
+    /// <summary>
     /// Spell Use
     /// </summary>
     protected override void Format0FHandler(GameClient client, ClientFormat0F format)
@@ -1306,20 +1331,26 @@ public class GameServer : NetworkServer<GameClient>
                 return;
             }
 
-        var info = new CastInfo
+        if (client.SpellCastInfo is null)
         {
-            Slot = format.Index,
-            Target = format.Serial,
-            Position = format.Point,
-            Data = format.Data,
-        };
-
-        info.Position ??= new Position(client.Aisling.X, client.Aisling.Y);
-
-        lock (client.CastStack)
-        {
-            client.CastStack?.Push(info);
+            client.SpellCastInfo = new CastInfo
+            {
+                Slot = format.Index,
+                Target = format.Serial,
+                Position = format.Point,
+                Data = format.Data,
+            };
         }
+        else
+        {
+            client.SpellCastInfo.Slot = format.Index;
+            client.SpellCastInfo.Target = format.Serial;
+            client.SpellCastInfo.Position = format.Point;
+            client.SpellCastInfo.Data = format.Data;
+        }
+
+        client.SpellCastInfo.Position ??= new Position(client.Aisling.X, client.Aisling.Y);
+        client.Aisling.CastSpell(spellReq, client.SpellCastInfo);
     }
 
     /// <summary>
@@ -2942,33 +2973,6 @@ public class GameServer : NetworkServer<GameClient>
     }
 
     /// <summary>
-    /// Begin Casting - Spell Lines
-    /// </summary>
-    protected override void Format4DHandler(GameClient client, ClientFormat4D format)
-    {
-        if (!CanInteract(client, false, false, false)) return;
-        if (!client.Aisling.LoggedIn) return;
-        if (client.Aisling.IsDead()) return;
-
-        client.Aisling.IsCastingSpell = true;
-
-        var lines = format.Lines;
-
-        if (lines <= 0)
-        {
-            CancelIfCasting(client);
-            return;
-        }
-
-        if (!client.CastStack.Any()) return;
-        var info = client.CastStack.Peek();
-
-        if (info == null) return;
-        info.SpellLines = lines;
-        info.Started = DateTime.Now;
-    }
-
-    /// <summary>
     /// Skill / Spell Lines - Chant Message
     /// </summary>
     protected override void Format4EHandler(GameClient client, ClientFormat4E format)
@@ -3085,7 +3089,6 @@ public class GameServer : NetworkServer<GameClient>
         if (client.Aisling.IsCastingSpell)
             client.Send(new ServerFormat48());
 
-        client.CastStack.Clear();
         client.Aisling.IsCastingSpell = false;
     }
 

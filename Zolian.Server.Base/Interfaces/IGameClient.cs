@@ -23,6 +23,7 @@ public interface IGameClient
     bool IsEquipping { get; }
     bool IsMoving { get; }
     bool IsWarping { get; }
+    CastInfo SpellCastInfo { get; set; }
     DateTime LastAssail { get; set; }
     DateTime LastClientRefresh { get; set; }
     Item LastItemDropped { get; set; }
@@ -152,7 +153,6 @@ public interface IGameClient
     void PassEncryption();
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);
-    void DispatchCasts();
     GameClient UpdateDisplay(bool excludeSelf);
     void UpdateStatusBarAndThreat(TimeSpan elapsedTime);
     void UpdateSkillSpellCooldown(TimeSpan elapsedTime);
