@@ -41,6 +41,16 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         {
             if (targetObj.Serial == aisling.Serial) continue;
 
+            if (target.SpellNegate)
+            {
+                target.Animate(64);
+                client.SendMessage(0x02, "Your spell has been deflected!");
+                if (target is Aisling)
+                    target.Client.SendMessage(0x02, $"You deflected {_spell.Template.Name}.");
+
+                continue;
+            }
+
             aisling.Cast(_spell, target);
             client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_spell.Template.TargetAnimation, targetObj.Pos));
             targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, _spell);
@@ -73,16 +83,6 @@ public class Mor_Strioch_Pian_Gar : SpellScript
             aisling.CurrentMp = 0;
         if (aisling.CurrentHp < 0)
             aisling.CurrentHp = 1;
-
-        if (target.SpellNegate)
-        {
-            target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
-            if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You deflected {_spell.Template.Name}.");
-
-            return;
-        }
 
         var mR = Generator.RandNumGen100();
 

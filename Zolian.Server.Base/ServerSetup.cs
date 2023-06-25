@@ -34,8 +34,6 @@ public class ServerSetup : IServerContext
     public static IOptions<ServerOptions> ServerOptions;
     private static LoginServer _lobby;
 
-    #region Properties
-
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
     public GameServer Game { get; set; }
@@ -64,14 +62,12 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
     public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = new();
     public ConcurrentDictionary<string, List<Board>> GlobalBoardCache { get; set; } = new();
-    public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
     public ConcurrentDictionary<string, MonsterScript> GlobalMonsterScriptCache { get; set; } = new();
-    public ConcurrentDictionary<int, Monster> GlobalMonsterCache { get; set; } = new();
     public ConcurrentDictionary<string, MundaneScript> GlobalMundaneScriptCache { get; set; } = new();
+    public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
+    public ConcurrentDictionary<int, Monster> GlobalMonsterCache { get; set; } = new();
     public ConcurrentDictionary<int, Mundane> GlobalMundaneCache { get; set; } = new();
     public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = new();
-
-    #endregion
 
     public ServerSetup(IOptions<ServerOptions> options)
     {
