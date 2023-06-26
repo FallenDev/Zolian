@@ -165,13 +165,6 @@ public sealed class SecurityProvider : IFormattableNetwork
         KeySalts = string.IsNullOrEmpty(string.Empty) ? new byte[1024] : GenerateKeySalts(string.Empty);
     }
 
-    public SecurityProvider(byte seed, byte[] salt, string? keySaltSeed = null)
-    {
-        Seed = seed;
-        Salt = salt;
-        KeySalts = string.IsNullOrEmpty(keySaltSeed) ? new byte[1024] : GenerateKeySalts(keySaltSeed);
-    }
-
     public void Transform(NetworkPacket packet)
     {
         try

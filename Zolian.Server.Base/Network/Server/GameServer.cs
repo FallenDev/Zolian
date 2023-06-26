@@ -3191,8 +3191,10 @@ public class GameServer : NetworkServer<GameClient>
             if (client.Server.Clients.IsEmpty) return;
             if (client.Server.Clients.Values.Count == 0) return;
             if (!client.Server.Clients.Values.Contains(client)) return;
-            ServerSetup.Logger($"{client.LastPacketFromServer:X2} - Last packet from server.");
-            ServerSetup.Logger($"{client.LastPacketFromClient:X2} - Last pakcet from client.");
+            if (ServerSetup.Instance.Config.LogServerPackets)
+                ServerSetup.Logger($"{client.LastPacketFromServer:X2} - Last packet from server.");
+            if (ServerSetup.Instance.Config.LogClientPackets)
+                ServerSetup.Logger($"{client.LastPacketFromClient:X2} - Last pakcet from client.");
 
             if (type == 0)
             {

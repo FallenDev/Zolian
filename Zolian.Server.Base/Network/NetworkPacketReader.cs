@@ -9,7 +9,7 @@ public class NetworkPacketReader
 {
     public NetworkPacket Packet;
     public int Position;
-    private readonly Encoding _encoding = Encoding.GetEncoding(949);
+    private readonly Encoding _encoding = Encoding.GetEncoding(0x3B5);
 
     public byte ReadByte()
     {
@@ -52,7 +52,13 @@ public class NetworkPacketReader
 
     public Position ReadPosition()
     {
-        return new Position(ReadUInt16(), ReadUInt16());
+        var pos = new Position
+        {
+            X = ReadUInt16(),
+            Y = ReadUInt16()
+        };
+
+        return pos;
     }
 
     public string ReadStringA()

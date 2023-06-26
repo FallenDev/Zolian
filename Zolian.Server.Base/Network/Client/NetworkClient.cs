@@ -103,9 +103,11 @@ public abstract class NetworkClient : IDisposable
 
         try
         {
+            Writer = new NetworkPacketWriter();
+
             foreach (var format in formats)
             {
-                Writer = new NetworkPacketWriter();
+                Writer.Position = 0x0;
                 Writer.Write(format.Command);
 
                 if (format.Encrypted)
@@ -236,6 +238,7 @@ public abstract class NetworkClient : IDisposable
 
             Reader.Packet = packet;
             format.Serialize(Reader);
+            Reader.Position = -0x1;
         }
         catch
         {

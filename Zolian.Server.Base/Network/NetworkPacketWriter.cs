@@ -1,51 +1,33 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using Darkages.Interfaces;
-using Darkages.Types;
 
 namespace Darkages.Network;
 
 public class NetworkPacketWriter
 {
-    private int _position;
-    private readonly Encoding _encoding = Encoding.GetEncoding(949);
+    internal int Position;
+    private readonly Encoding _encoding = Encoding.GetEncoding(0x3B5);
     private readonly byte[] _buffer;
 
-    public NetworkPacketWriter()
-    {
-        _buffer = new byte[0xFFFF];
-    }
+    public NetworkPacketWriter() => _buffer = new byte[0x50000];
 
-    public NetworkPacket ToPacket()
-    {
-        return _position > 0 ? new NetworkPacket(_buffer, _position) : null;
-    }
+    public NetworkPacket ToPacket() => Position > 0 ? new NetworkPacket(_buffer, Position) : null;
 
-    public void Write(bool value)
-    {
-        Write((byte)(value ? 1 : 0));
-    }
+    public void Write(bool value) => Write((byte)(value ? 1 : 0));
 
-    public void Write(byte value)
-    {
-        _buffer[_position++] = value;
-    }
+    public void Write(byte value) => _buffer[Position++] = value;
 
     public void Write(byte[] value)
     {
-        Array.Copy(value, 0, _buffer, _position, value.Length);
-        _position += value.Length;
+        Array.Copy(value, 0, _buffer, Position, value.Length);
+        Position += value.Length;
     }
 
-    public void Write(sbyte value)
-    {
-        _buffer[_position++] = (byte)value;
-    }
+    public void Write(sbyte value) => _buffer[Position++] = (byte)value;
 
-    public void Write(short value)
-    {
-        Write((ushort)value);
-    }
+    public void Write(short value) => Write((ushort)value);
 
     public void Write(ushort value)
     {
@@ -53,10 +35,7 @@ public class NetworkPacketWriter
         Write((byte)value);
     }
 
-    public void Write(int value)
-    {
-        Write((uint)value);
-    }
+    public void Write(int value) => Write((uint)value);
 
     public void Write(uint value)
     {
@@ -64,23 +43,7 @@ public class NetworkPacketWriter
         Write((ushort)value);
     }
 
-    public void WritePos16(Position pos)
-    {
-        Write((ushort)pos.X);
-        Write((ushort)pos.Y);
-    }
-
-    public void WritePos8(Position pos)
-    {
-        Write((byte)pos.X);
-        Write((byte)pos.Y);
-    }
-
-    public void Write<T>(T value)
-        where T : IFormattableNetwork
-    {
-        value.Serialize(this);
-    }
+    public void Write<T>(T value) where T : IFormattableNetwork => value.Serialize(this);
 
     public void Write(IPEndPoint endPoint)
     {
@@ -93,28 +56,29 @@ public class NetworkPacketWriter
         Write((ushort)endPoint.Port);
     }
 
-    public void WriteString(string value)
-    {
-        _encoding.GetBytes(value, 0, value.Length, _buffer, _position);
-        _position += _encoding.GetByteCount(value);
-    }
-
     public void WriteAscii(string value)
     {
-        Encoding.ASCII.GetBytes(value, 0, value.Length, _buffer, _position);
-        _position += Encoding.ASCII.GetByteCount(value);
+        Encoding.ASCII.GetBytes(value, 0, value.Length, _buffer, Position);
+        Position += Encoding.ASCII.GetByteCount(value);
+    }
+
+    public void WriteString(string value)
+    {
+        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
+        Position += _encoding.GetByteCount(value);
     }
 
     public void WriteStringA(string value)
     {
-        if (value == null) return;
+        if (value == null) 
+            return;
         var count = _encoding.GetByteCount(value);
 
         Write((byte)count);
 
-        _encoding.GetBytes(value, 0, value.Length, _buffer, _position);
+        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
 
-        _position += count;
+        Position += count;
     }
 
     public void WriteStringB(string value)
@@ -123,7 +87,7 @@ public class NetworkPacketWriter
 
         Write((ushort)count);
 
-        _encoding.GetBytes(value, 0, value.Length, _buffer, _position);
-        _position += count;
+        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
+        Position += count;
     }
 }

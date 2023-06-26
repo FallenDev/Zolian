@@ -5,94 +5,94 @@ namespace Darkages.Interfaces;
 
 public interface IServerConstants
 {
-    bool AssailsCancelSpells { get; }
-    string BadRequestMessage { get; }
-    double BehindDamageMod { get; }
-    bool CancelCastingWhenWalking { get; }
-    bool CancelWalkingIfRefreshing { get; }
-    bool CanMoveDuringReap { get; }
-    string CantAttack { get; }
-    string CantCarryMoreMsg { get; }
-    string CantDoThat { get; }
-    string CantDropItemMsg { get; }
-    string CantUseThat { get; }
-    int ClickLootDistance { get; }
-    int ClientVersion { get; }
-    string ConAddedMessage { get; }
-    int ConnectionCapacity { get; }
-    string CursedItemMessage { get; }
-    int DeathHPPenalty { get; }
-    int DeathMap { get; }
-    int DeathMapX { get; }
-    int DeathMapY { get; }
-    string DeathReapingMessage { get; }
-    uint DefaultItemDurability { get; }
-    uint DefaultItemValue { get; }
-    string[] DevModeExemptions { get; }
-    string DexAddedMessage { get; }
-    IEnumerable<string> GameMasters { get; }
-    double GlobalBaseSkillDelay { get; }
-    double GlobalSpawnTimer { get; }
+    bool AssailsCancelSpells { get; set; }
+    string BadRequestMessage { get; set; }
+    double BehindDamageMod { get; set; }
+    bool CancelCastingWhenWalking { get; set; }
+    bool CancelWalkingIfRefreshing { get; set; }
+    bool CanMoveDuringReap { get; set; }
+    string CantAttack { get; set; }
+    string CantCarryMoreMsg { get; set; }
+    string CantDoThat { get; set; }
+    string CantDropItemMsg { get; set; }
+    string CantUseThat { get; set; }
+    int ClickLootDistance { get; set; }
+    int ClientVersion { get; set; }
+    string ConAddedMessage { get; set; }
+    int ConnectionCapacity { get; set; }
+    string CursedItemMessage { get; set; }
+    int DeathHPPenalty { get; set; }
+    int DeathMap { get; set; }
+    int DeathMapX { get; set; }
+    int DeathMapY { get; set; }
+    string DeathReapingMessage { get; set; }
+    uint DefaultItemDurability { get; set; }
+    uint DefaultItemValue { get; set; }
+    string[] DevModeExemptions { get; set; }
+    string DexAddedMessage { get; set; }
+    IEnumerable<string> GameMasters { get; set; }
+    double GlobalBaseSkillDelay { get; set; }
+    double GlobalSpawnTimer { get; set; }
     double GroupExpBonus { get; set; }
-    string GroupRequestDeclinedMsg { get; }
-    int HelperMenuId { get; }
-    string HelperMenuTemplateKey { get; }
-    int HpGainFactor { get; }
-    string IntAddedMessage { get; }
-    string ItemNotRequiredMsg { get; }
-    string LevelUpMessage { get; }
-    string AbilityUpMessage { get; }
-    bool LogClientPackets { get; }
-    int LOGIN_PORT { get; }
-    bool LogServerPackets { get; }
-    int MaxCarryGold { get; }
-    int MaxHP { get; }
-    string MerchantCancelMessage { get; }
-    string MerchantConfirmMessage { get; }
-    string MerchantRefuseTradeMessage { get; }
-    string MerchantStackErrorMessage { get; }
-    string MerchantTradeCompletedMessage { get; }
-    double MessageClearInterval { get; }
-    int MinimumHp { get; }
-    int MpGainFactor { get; }
-    bool MultiUserLoginCheck { get; }
-    double MundaneRespawnInterval { get; }
-    double NationReturnHours { get; }
-    string NoManaMessage { get; }
-    string NotEnoughGoldToDropMsg { get; }
-    double PingInterval { get; }
-    int PlayerLevelCap { get; }
-    string ReapMessage { get; }
-    string ReapMessageDuringAction { get; }
-    int RefreshRate { get; }
-    int SaveRate { get; }
-    int SERVER_PORT { get; }
-    string SERVER_TITLE { get; }
-    string ServerWelcomeMessage { get; }
-    List<GameSetting> Settings { get; }
-    string SomethingWentWrong { get; }
-    string SpellFailedMessage { get; }
-    int StartingMap { get; }
-    Position StartingPosition { get; }
-    int StatCap { get; }
-    int StatsPerLevel { get; }
-    string StrAddedMessage { get; }
-    string ToWeakToLift { get; }
-    short TransitionPointX { get; }
-    short TransitionPointY { get; }
-    int TransitionZone { get; }
-    string UserDroppedGoldMsg { get; }
-    int VeryNearByProximity { get; }
-    int WarpCheckRate { get; }
-    double WeightIncreaseModifer { get; }
-    string WisAddedMessage { get; }
-    int WithinRangeProximity { get; }
-    string YouDroppedGoldMsg { get; }
-    double AiteDamageReductionMod { get; }
-    int BaseDamageMod { get; }
-    string ACFormulaScript { get; }
-    string ElementTableScript { get; }
-    string MonsterRewardScript { get; }
-    string BaseDamageScript { get; }
-    string MonsterCreationScript { get; }
+    string GroupRequestDeclinedMsg { get; set; }
+    int HelperMenuId { get; set; }
+    string HelperMenuTemplateKey { get; set; }
+    int HpGainFactor { get; set; }
+    string IntAddedMessage { get; set; }
+    string ItemNotRequiredMsg { get; set; }
+    string LevelUpMessage { get; set; }
+    string AbilityUpMessage { get; set; }
+    bool LogClientPackets { get; set; }
+    int LOGIN_PORT { get; set; }
+    bool LogServerPackets { get; set; }
+    int MaxCarryGold { get; set; }
+    int MaxHP { get; set; }
+    string MerchantCancelMessage { get; set; }
+    string MerchantConfirmMessage { get; set; }
+    string MerchantRefuseTradeMessage { get; set; }
+    string MerchantStackErrorMessage { get; set; }
+    string MerchantTradeCompletedMessage { get; set; }
+    double MessageClearInterval { get; set; }
+    int MinimumHp { get; set; }
+    int MpGainFactor { get; set; }
+    bool MultiUserLoginCheck { get; set; }
+    double MundaneRespawnInterval { get; set; }
+    double NationReturnHours { get; set; }
+    string NoManaMessage { get; set; }
+    string NotEnoughGoldToDropMsg { get; set; }
+    double PingInterval { get; set; }
+    int PlayerLevelCap { get; set; }
+    string ReapMessage { get; set; }
+    string ReapMessageDuringAction { get; set; }
+    int RefreshRate { get; set; }
+    int SaveRate { get; set; }
+    int SERVER_PORT { get; set; }
+    string SERVER_TITLE { get; set; }
+    string ServerWelcomeMessage { get; set; }
+    List<GameSetting> Settings { get; set; }
+    string SomethingWentWrong { get; set; }
+    string SpellFailedMessage { get; set; }
+    int StartingMap { get; set; }
+    Position StartingPosition { get; set; }
+    int StatCap { get; set; }
+    int StatsPerLevel { get; set; }
+    string StrAddedMessage { get; set; }
+    string ToWeakToLift { get; set; }
+    short TransitionPointX { get; set; }
+    short TransitionPointY { get; set; }
+    int TransitionZone { get; set; }
+    string UserDroppedGoldMsg { get; set; }
+    int VeryNearByProximity { get; set; }
+    int WarpCheckRate { get; set; }
+    double WeightIncreaseModifer { get; set; }
+    string WisAddedMessage { get; set; }
+    int WithinRangeProximity { get; set; }
+    string YouDroppedGoldMsg { get; set; }
+    double AiteDamageReductionMod { get; set; }
+    int BaseDamageMod { get; set; }
+    string ACFormulaScript { get; set; }
+    string ElementTableScript { get; set; }
+    string MonsterRewardScript { get; set; }
+    string BaseDamageScript { get; set; }
+    string MonsterCreationScript { get; set; }
 }
