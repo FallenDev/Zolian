@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using Darkages.Interfaces;
 
@@ -7,25 +6,29 @@ namespace Darkages.Network;
 
 public class NetworkPacketWriter
 {
-    internal int Position;
     private readonly Encoding _encoding = Encoding.GetEncoding(0x3B5);
-    private readonly byte[] _buffer;
+    private readonly MemoryStream _buffer;
+    
+    public long Position
+    {
+        get => _buffer.Position;
+        set => _buffer.Position = value;
+    }
 
-    public NetworkPacketWriter() => _buffer = new byte[0x50000];
+    public NetworkPacketWriter() => _buffer = new MemoryStream(ushort.MaxValue);
 
-    public NetworkPacket ToPacket() => Position > 0 ? new NetworkPacket(_buffer, Position) : null;
+    public NetworkPacket ToPacket() => _buffer.Position > 0 ? new NetworkPacket(_buffer.ToArray(), (int)_buffer.Position) : null;
 
     public void Write(bool value) => Write((byte)(value ? 1 : 0));
 
-    public void Write(byte value) => _buffer[Position++] = value;
+    public void Write(byte value) => _buffer.WriteByte(value);
 
     public void Write(byte[] value)
     {
-        Array.Copy(value, 0, _buffer, Position, value.Length);
-        Position += value.Length;
+        _buffer.Write(value, 0, value.Length);
     }
 
-    public void Write(sbyte value) => _buffer[Position++] = (byte)value;
+    public void Write(sbyte value) => _buffer.WriteByte((byte)value);
 
     public void Write(short value) => Write((ushort)value);
 
@@ -58,36 +61,29 @@ public class NetworkPacketWriter
 
     public void WriteAscii(string value)
     {
-        Encoding.ASCII.GetBytes(value, 0, value.Length, _buffer, Position);
-        Position += Encoding.ASCII.GetByteCount(value);
+        var bytes = Encoding.ASCII.GetBytes(value);
+        _buffer.Write(bytes, 0, bytes.Length);
     }
 
     public void WriteString(string value)
     {
-        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
-        Position += _encoding.GetByteCount(value);
+        var bytes = _encoding.GetBytes(value);
+        _buffer.Write(bytes, 0, bytes.Length);
     }
 
     public void WriteStringA(string value)
     {
         if (value == null) 
             return;
-        var count = _encoding.GetByteCount(value);
-
-        Write((byte)count);
-
-        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
-
-        Position += count;
+        var bytes = _encoding.GetBytes(value);
+        Write((byte)bytes.Length);
+        _buffer.Write(bytes, 0, bytes.Length);
     }
 
     public void WriteStringB(string value)
     {
-        var count = _encoding.GetByteCount(value);
-
-        Write((ushort)count);
-
-        _encoding.GetBytes(value, 0, value.Length, _buffer, Position);
-        Position += count;
+        var bytes = _encoding.GetBytes(value);
+        Write((ushort)bytes.Length);
+        _buffer.Write(bytes, 0, bytes.Length);
     }
 }
