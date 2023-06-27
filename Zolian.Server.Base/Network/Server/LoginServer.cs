@@ -598,6 +598,8 @@ public class LoginServer : NetworkServer<LoginClient>
                 Name = "socket[" + client.Serial + "]"
             };
 
+
+
             client.Send(new ServerFormat03
             {
                 CalledFromMethod = true,
@@ -614,6 +616,8 @@ public class LoginServer : NetworkServer<LoginClient>
             });
         }
     }
+
+
 
     /// <summary>
     /// Nexon Verification

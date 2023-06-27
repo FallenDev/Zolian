@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zolian.GameServer", "Zolian.GameServer\Zolian.GameServer.csproj", "{4275224B-1A23-4334-9DF6-6F746F34A8A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zolian.GameServer", "Zolian.GameServer\Zolian.GameServer.csproj", "{4275224B-1A23-4334-9DF6-6F746F34A8A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zolian.Server.Base", "Zolian.Server.Base\Zolian.Server.Base.csproj", "{F2A7E04E-65A8-44A6-A642-01C8F4A6149C}"
 EndProject
@@ -12,6 +12,30 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZolianTest", "ZolianTest\ZolianTest.csproj", "{2B209986-7A39-4646-A97E-E8A853FE86AC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zolian.AlwaysOn", "Zolian.AlwaysOn\Zolian.AlwaysOn.csproj", "{398955D1-BAB0-4495-A672-966371167D76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Networking", "..\Chaos-Server\Chaos.Networking\Chaos.Networking.csproj", "{B56165FD-F26F-4F2F-AA0C-98FDB537A677}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Networking.Abstractions", "..\Chaos-Server\Chaos.Networking.Abstractions\Chaos.Networking.Abstractions.csproj", "{07F33CCE-3CDA-4A0F-82CD-036D96E53F50}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Packets", "..\Chaos-Server\Chaos.Packets\Chaos.Packets.csproj", "{470B6FC9-6FE0-4491-AF4B-458907C3C797}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Packets.Abstractions", "..\Chaos-Server\Chaos.Packets.Abstractions\Chaos.Packets.Abstractions.csproj", "{59382AB2-124D-45DE-A442-55235D741B0E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.IO", "..\Chaos-Server\Chaos.IO\Chaos.IO.csproj", "{45767E6D-798E-4692-BDB6-58665AC851EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Cryptography", "..\Chaos-Server\Chaos.Cryptography\Chaos.Cryptography.csproj", "{9BEFBF7C-B83F-4E26-9359-C4722028A4C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Cryptography.Abstractions", "..\Chaos-Server\Chaos.Cryptography.Abstractions\Chaos.Cryptography.Abstractions.csproj", "{64816139-294A-4031-948C-593338C893E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Common", "..\Chaos-Server\Chaos.Common\Chaos.Common.csproj", "{00FB40E3-7CCC-4DC9-A47B-268BFFBA6541}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Common.Abstractions", "..\Chaos-Server\Chaos.Common.Abstractions\Chaos.Common.Abstractions.csproj", "{96BD430B-48DE-4AA6-9960-CAD19435CF76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Extensions.Common", "..\Chaos-Server\Chaos.Extensions.Common\Chaos.Extensions.Common.csproj", "{5872A34C-2506-405F-842E-204C316BD8D2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Geometry", "..\Chaos-Server\Chaos.Geometry\Chaos.Geometry.csproj", "{C2A82981-EB29-407E-AC32-9E19D51C5E2A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Geometry.Abstractions", "..\Chaos-Server\Chaos.Geometry.Abstractions\Chaos.Geometry.Abstractions.csproj", "{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +59,54 @@ Global
 		{398955D1-BAB0-4495-A672-966371167D76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{398955D1-BAB0-4495-A672-966371167D76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{398955D1-BAB0-4495-A672-966371167D76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B56165FD-F26F-4F2F-AA0C-98FDB537A677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B56165FD-F26F-4F2F-AA0C-98FDB537A677}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B56165FD-F26F-4F2F-AA0C-98FDB537A677}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B56165FD-F26F-4F2F-AA0C-98FDB537A677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07F33CCE-3CDA-4A0F-82CD-036D96E53F50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07F33CCE-3CDA-4A0F-82CD-036D96E53F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07F33CCE-3CDA-4A0F-82CD-036D96E53F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07F33CCE-3CDA-4A0F-82CD-036D96E53F50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{470B6FC9-6FE0-4491-AF4B-458907C3C797}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{470B6FC9-6FE0-4491-AF4B-458907C3C797}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{470B6FC9-6FE0-4491-AF4B-458907C3C797}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{470B6FC9-6FE0-4491-AF4B-458907C3C797}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59382AB2-124D-45DE-A442-55235D741B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59382AB2-124D-45DE-A442-55235D741B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59382AB2-124D-45DE-A442-55235D741B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59382AB2-124D-45DE-A442-55235D741B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45767E6D-798E-4692-BDB6-58665AC851EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45767E6D-798E-4692-BDB6-58665AC851EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45767E6D-798E-4692-BDB6-58665AC851EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45767E6D-798E-4692-BDB6-58665AC851EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BEFBF7C-B83F-4E26-9359-C4722028A4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BEFBF7C-B83F-4E26-9359-C4722028A4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BEFBF7C-B83F-4E26-9359-C4722028A4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BEFBF7C-B83F-4E26-9359-C4722028A4C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64816139-294A-4031-948C-593338C893E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64816139-294A-4031-948C-593338C893E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64816139-294A-4031-948C-593338C893E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64816139-294A-4031-948C-593338C893E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00FB40E3-7CCC-4DC9-A47B-268BFFBA6541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00FB40E3-7CCC-4DC9-A47B-268BFFBA6541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00FB40E3-7CCC-4DC9-A47B-268BFFBA6541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00FB40E3-7CCC-4DC9-A47B-268BFFBA6541}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96BD430B-48DE-4AA6-9960-CAD19435CF76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96BD430B-48DE-4AA6-9960-CAD19435CF76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96BD430B-48DE-4AA6-9960-CAD19435CF76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96BD430B-48DE-4AA6-9960-CAD19435CF76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5872A34C-2506-405F-842E-204C316BD8D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5872A34C-2506-405F-842E-204C316BD8D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5872A34C-2506-405F-842E-204C316BD8D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5872A34C-2506-405F-842E-204C316BD8D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2A82981-EB29-407E-AC32-9E19D51C5E2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2A82981-EB29-407E-AC32-9E19D51C5E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2A82981-EB29-407E-AC32-9E19D51C5E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2A82981-EB29-407E-AC32-9E19D51C5E2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

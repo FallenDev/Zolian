@@ -97,9 +97,9 @@ public class MetafileManager
         Metafiles.Add(metaFile);
     }
 
-    public static Metafile GetMetaFile(string name) => Metafiles.Find(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    public Metafile GetMetaFile(string name) => Metafiles.Find(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-    public static MetafileCollection GetMetaFiles() => Metafiles;
+    public MetafileCollection GetMetaFiles() => Metafiles;
 
     protected static void CompileTemplate(Metafile metaFile)
     {

@@ -43,6 +43,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Chaos-Server\Chaos.Networking\Chaos.Networking.csproj" />
 		<ProjectReference Include="..\Zolian.Server.Base\Zolian.Server.Base.csproj" />
 	</ItemGroup>
 

@@ -37,7 +37,7 @@ public class SpellTemplate : Template
 
     public enum SpellUseType : byte
     {
-        Unusable = 0,
+        None = 0,
         Prompt = 1,
         ChooseTarget = 2,
         FourDigit = 3,

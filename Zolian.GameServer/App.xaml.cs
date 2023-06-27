@@ -6,6 +6,10 @@ using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 
+using Chaos.Extensions.DependencyInjection;
+using Chaos.Networking;
+using Chaos.Networking.Abstractions;
+using Chaos.Networking.Entities;
 using Darkages;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
@@ -17,6 +21,7 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -64,7 +69,7 @@ public partial class App
         {
             var config = builder.Build();
             var constants = config.GetSection("ServerConfig").Get<ServerConstants>();
-            var serviceProvider = new ServiceCollection()
+            var serviceCollection = new ServiceCollection()
                 .AddOptions()
                 .AddSingleton(providers)
                 .AddSingleton<ILoggerFactory>(sc =>
@@ -81,9 +86,12 @@ public partial class App
                 .Configure<ServerOptions>(config.GetSection("Content"))
                 .AddSingleton<IServerConstants, ServerConstants>(_ => constants)
                 .AddSingleton<IServerContext, ServerSetup>()
-                .AddSingleton<IServer, Server>()
-                .BuildServiceProvider();
-
+                .AddSingleton<IServer, Server>();
+            serviceCollection.AddCryptography();
+            serviceCollection.AddPacketSerializer();
+            serviceCollection.AddSingleton<IRedirectManager, RedirectManager>();
+            serviceCollection.AddSingleton<IClientRegistry<T>, ClientRegistry<T>>();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
         }
         catch (Exception exception)
