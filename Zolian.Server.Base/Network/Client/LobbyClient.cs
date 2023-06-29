@@ -6,12 +6,13 @@ using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Darkages.Meta;
+using Darkages.Network.Client.Abstractions;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Client
 {
-    public class LobbyClient : SocketClientBase
+    public class LobbyClient : SocketClientBase, ILobbyClient
     {
         private readonly ILobbyServer<LobbyClient> _server;
 

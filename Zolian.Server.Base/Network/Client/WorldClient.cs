@@ -17,6 +17,7 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client.Abstractions;
 using BodyColor = Chaos.Common.Definitions.BodyColor;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Gender = Chaos.Common.Definitions.Gender;
@@ -26,7 +27,7 @@ using BodySprite = Chaos.Common.Definitions.BodySprite;
 
 namespace Darkages.Network.Client
 {
-    public class WorldClient : SocketClientBase
+    public class WorldClient : SocketClientBase, IWorldClient
     {
         private readonly IWorldServer<WorldClient> _server;
         public Aisling Aisling { get; set; }
@@ -707,13 +708,7 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
-        public void SendNotepad(
-            byte identifier,
-            NotepadType type,
-            byte height,
-            byte width,
-            string? message
-        )
+        public void SendNotepad(byte identifier, NotepadType type, byte height, byte width, string? message)
         {
             var args = new NotepadArgs
             {

@@ -12,6 +12,7 @@ using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
 using Chaos.Services.Factories.Abstractions;
 using Chaos.Services.Servers.Options;
+using Darkages.Network.Client.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
