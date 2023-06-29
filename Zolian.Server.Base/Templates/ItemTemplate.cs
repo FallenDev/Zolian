@@ -76,7 +76,7 @@ public class ItemTemplate : Template
 
         if (Gender == 0)
         {
-            Gender = Gender.Both;
+            Gender = Gender.Unisex;
         }
 
         return new[]
@@ -87,14 +87,14 @@ public class ItemTemplate : Template
 
             Gender switch
             {
-                Gender.Both => category,
+                Gender.Unisex => category,
                 Gender.Female => category,
                 Gender.Male => category,
                 _ => category
             },
             Gender switch
             {
-                Gender.Both => category,
+                Gender.Unisex => category,
                 Gender.Female => category,
                 Gender.Male => category,
                 _ => category

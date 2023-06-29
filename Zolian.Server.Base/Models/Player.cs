@@ -73,8 +73,16 @@ public class Player : Sprite
     public uint ShieldImg { get; set; }
     public uint WeaponImg { get; set; }
     public uint BootsImg { get; set; }
-    public uint HeadAccessory1Img { get; set; }
-    public uint HeadAccessory2Img { get; set; }
+    public uint HeadAccessoryImg { get; set; }
+    public uint Accessory1Img { get; set; }
+    public uint Accessory2Img { get; set; }
+    public uint Accessory3Img { get; set; }
+    public uint Accessory1Color { get; set; }
+    public uint Accessory2Color { get; set; }
+    public uint Accessory3Color { get; set; }
+    public byte BodyColor { get; set; }
+    public byte BodySprite { get; set; }
+    public byte FaceSprite { get; set; }
     public uint OverCoatImg { get; set; }
     public byte BootColor { get; set; }
     public byte OverCoatColor { get; set; }

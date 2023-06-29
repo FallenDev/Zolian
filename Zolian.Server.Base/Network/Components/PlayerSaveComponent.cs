@@ -1,7 +1,7 @@
 ﻿using Darkages.Database;
 using Darkages.Infrastructure;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class PlayerSaveComponent : GameServerComponent
 {
@@ -27,7 +27,7 @@ public class PlayerSaveComponent : GameServerComponent
             await StorageManager.AislingBucket.QuickSave(client.Aisling);
 
             var readyTime = DateTime.Now;
-            if ((readyTime - client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate) 
+            if ((readyTime - client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate)
                 await client.Save();
         }
     }

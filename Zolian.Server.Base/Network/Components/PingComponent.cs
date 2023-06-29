@@ -1,7 +1,7 @@
 ﻿using Darkages.Infrastructure;
 using Darkages.Network.Formats.Models.ServerFormats;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class PingComponent : GameServerComponent
 {

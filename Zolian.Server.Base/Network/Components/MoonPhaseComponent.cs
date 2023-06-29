@@ -3,7 +3,7 @@ using Darkages.Infrastructure;
 using ServiceStack;
 using SunCalcNet;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class MoonPhaseComponent : GameServerComponent
 {

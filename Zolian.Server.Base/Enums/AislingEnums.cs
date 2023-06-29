@@ -1,11 +1,63 @@
 ﻿namespace Darkages.Enums;
 
-public enum Gender : byte
+public enum BodySprite : byte
 {
     Male = 0x10,
     Female = 0x20,
-    Invisible = 0x50,
-    Both = 255
+    MaleGhost = 0x30,
+    FemaleGhost = 0x40,
+    MaleInvis = 0x50,
+    FemaleInvis = 0x60,
+    MaleJester = 0x70,
+    MaleHead = 0x80,
+    FemaleHead = 0x90,
+    BlankMale = 0xA0,
+    BlankFemale = 0xB0
+}
+
+[Flags]
+public enum Gender : byte
+{
+    Male = 1,
+    Female = 2,
+    Unisex = Male | Female
+}
+
+public enum BodyColor : byte
+{
+    White = 0,
+    Pale = 1,
+    Brown = 2,
+    Green = 3,
+    Yellow = 4,
+    Tan = 5,
+    Grey = 6,
+    LightBlue = 7,
+    Orange = 8,
+    Purple = 9
+}
+
+public enum ListColor : byte
+{
+    Brown = 0xA7,
+    DarkGray = 0xB7,
+    Gray = 0x17,
+    Green = 0x80,
+    None = 0x00,
+    Orange = 0x97,
+    Red = 0x04,
+    Tan = 0x30,
+    Teal = 0x01,
+    White = 0x90,
+    Clan = 0x54,
+    Me = 0x70
+}
+
+public enum LanternSize : byte
+{
+    None = 0,
+    Small = 1,
+    Large = 2
 }
 
 public enum RestPosition : byte

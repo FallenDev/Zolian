@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Data;
 using System.Numerics;
-
+using Chaos.Common.Definitions;
 using Dapper;
 
 using Darkages.Common;
@@ -22,10 +22,13 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using EquipmentSlot = Darkages.Models.EquipmentSlot;
+using Gender = Darkages.Enums.Gender;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Network.Client;
 
-public partial class GameClient : NetworkClient
+public partial class GameClient : WorldClient
 {
     public readonly ObjectManager ObjectHandlers;
     public bool MapUpdating;
@@ -197,14 +200,14 @@ public partial class GameClient : NetworkClient
                 // Current class check
                 if (item.Template.Class != client.Aisling.Path)
                 {
-                    client.SendMessage(0x02, "This doesn't quite fit me.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "This doesn't quite fit me.");
                     return false;
                 }
             }
         }
 
         // Gender neutral check
-        if (item.Template.Gender == Gender.Both)
+        if (item.Template.Gender == )
         {
             return true;
         }

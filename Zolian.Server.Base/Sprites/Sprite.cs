@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
@@ -18,6 +19,7 @@ using Darkages.Scripting;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Sprites;
 
@@ -2095,7 +2097,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         else if (buff.TimeLeft.IntIsWithin(121, short.MaxValue))
             colorInt = (byte)StatusBarColor.White;
 
-        aisling.Client.Send(new ServerFormat3A(buff.Icon, colorInt));
+        aisling.Client.SendEffect((EffectColor)colorInt, buff.Icon);
     }
 
     public void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime)
@@ -2122,7 +2124,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         else if (debuff.TimeLeft.IntIsWithin(121, short.MaxValue))
             colorInt = (byte)StatusBarColor.White;
 
-        aisling.Client.Send(new ServerFormat3A(debuff.Icon, colorInt));
+        aisling.Client.SendEffect((EffectColor)colorInt, debuff.Icon);
     }
 
     private bool CanUpdate()

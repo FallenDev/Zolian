@@ -6,8 +6,6 @@ using Darkages.Network.Client;
 using Darkages.Network.Formats;
 using Darkages.Network.Formats.Models.ClientFormats;
 using Darkages.Network.Formats.Models.ServerFormats;
-using Darkages.Network.GameServer;
-using Darkages.Network.GameServer.Components;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -28,6 +26,7 @@ using System.Text;
 using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Models;
 using Darkages.Network.Security;
+using Darkages.Network.Components;
 
 namespace Darkages.Network.Server;
 

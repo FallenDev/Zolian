@@ -10,14 +10,10 @@ public static class ServerPacketEx
     public static ServerPacket FromData(ServerOpCode opCode, Encoding encoding, params byte[] data)
     {
         var packet = new ServerPacket(opCode);
-
-        if (data.Length > 0)
-        {
-            var writer = new SpanWriter(encoding, data.Length);
-            writer.WriteBytes(data);
-            packet.Buffer = writer.ToSpan();
-        }
-
+        if (data.Length <= 0) return packet;
+        var writer = new SpanWriter(encoding, data.Length);
+        writer.WriteBytes(data);
+        packet.Buffer = writer.ToSpan();
         return packet;
     }
 }

@@ -31,22 +31,6 @@ public class ServerFormat36 : NetworkFormat
         Guild = 0x88
     }
 
-    public enum ListColor : byte
-    {
-        Brown = 0xA7,
-        DarkGray = 0xB7,
-        Gray = 0x17,
-        Green = 0x80,
-        None = 0x00,
-        Orange = 0x97,
-        Red = 0x04,
-        Tan = 0x30,
-        Teal = 0x01,
-        White = 0x90,
-        Clan = 0x54,
-        Me = 0x70
-    }
-
     public enum StatusIcon : byte
     {
         None,

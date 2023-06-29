@@ -4,7 +4,7 @@ using Darkages.Interfaces;
 
 using Microsoft.AppCenter.Crashes;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class PlayerRegenerationComponent : GameServerComponent
 {

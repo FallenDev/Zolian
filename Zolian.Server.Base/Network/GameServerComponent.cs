@@ -1,4 +1,4 @@
-﻿namespace Darkages.Network.GameServer;
+﻿namespace Darkages.Network;
 
 public abstract class GameServerComponent
 {

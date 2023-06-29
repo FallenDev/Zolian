@@ -8,7 +8,7 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class MonolithComponent : GameServerComponent
 {

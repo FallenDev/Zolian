@@ -6,7 +6,7 @@ using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.Network.GameServer.Components;
+namespace Darkages.Network.Components;
 
 public class ObjectComponent : GameServerComponent
 {
@@ -100,7 +100,7 @@ public class ObjectComponent : GameServerComponent
             {
                 var valueCollection = monster.Scripts?.Values;
 
-                if (monster.Template != null && (monster.Map != null))
+                if (monster.Template != null && monster.Map != null)
                     Monster.InitScripting(monster.Template, monster.Map, monster);
 
                 if (valueCollection != null && valueCollection.Any())
