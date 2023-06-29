@@ -7,5 +7,5 @@ namespace Darkages.Network.Client.Abstractions;
 public interface ILobbyClient : ISocketClient
 {
     void SendConnectionInfo(uint serverTableCheckSum);
-    void SendServerTable(MServerTable serverTable);
+    void SendServerTable(byte[] serverTableData);
 }

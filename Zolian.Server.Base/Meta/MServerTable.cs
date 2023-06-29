@@ -3,7 +3,6 @@
 using Darkages.Compression;
 using Darkages.IO;
 using Darkages.Models;
-using Darkages.Network.Security;
 
 namespace Darkages.Meta;
 
@@ -35,11 +34,11 @@ public class MServerTable : CompressableObject
 
                 using (var stream = new MemoryStream())
                 {
-                    result.Save(stream);
+                    result!.Save(stream);
                     result.InflatedData = stream.ToArray();
                 }
 
-                result.Hash = Crc32Provider.Generate32(result.InflatedData);
+                result.Hash = Chaos.Cryptography.Crc.Generate32(result.InflatedData);
                 result.Compress();
             }
         }
@@ -53,48 +52,43 @@ public class MServerTable : CompressableObject
 
     protected override void Load(MemoryStream stream)
     {
-        using (var reader = new BufferReader(stream))
+        using var reader = new BufferReader(stream);
+        var count = reader.ReadByte();
+
+        for (var i = 0; i < count; i++)
         {
-            var count = reader.ReadByte();
-
-            for (var i = 0; i < count; i++)
+            var server = new MServer
             {
-                var server = new MServer
-                {
-                    Guid = reader.ReadByte(),
-                    Address = reader.ReadIpAddress(),
-                    Port = reader.ReadUInt16()
-                };
+                Guid = reader.ReadByte(),
+                Address = reader.ReadIpAddress(),
+                Port = reader.ReadUInt16()
+            };
 
-                var text = reader.ReadString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var text = reader.ReadString().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-                server.Name = text[0];
-                server.Description = text[1];
+            server.Name = text[0];
+            server.Description = text[1];
 
-                var id = reader.ReadByte();
+            var id = reader.ReadByte();
 
-                Servers.Add(server);
-            }
+            Servers.Add(server);
         }
     }
 
     public override Stream Save(MemoryStream stream)
     {
-        using (var writer = new BufferWriter(stream))
+        using var writer = new BufferWriter(stream);
+        writer.Write((byte)Servers.Count);
+
+        foreach (var server in Servers)
         {
-            writer.Write(
-                (byte)Servers.Count);
-
-            foreach (var server in Servers)
-            {
-                writer.Write(server.Guid);
-                writer.Write(server.Address);
-                writer.Write(server.Port);
-                writer.Write(server.Name + ";" + server.Description);
-                writer.Write(server.ID);
-            }
-
-            return writer.BaseStream;
+            writer.Write(server.Guid);
+            writer.Write(server.Address);
+            writer.Write(server.Port);
+            writer.Write(server.Name + ";" + server.Description);
+            writer.Write(server.ID);
         }
+
+        return writer.BaseStream;
     }
 }

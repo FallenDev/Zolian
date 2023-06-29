@@ -65,7 +65,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         ValueTask InnerOnServerTableRequest(ILobbyClient localClient, ServerTableRequestArgs localArgs)
         {
-            (var serverTableRequestType, var serverId) = localArgs;
+            var (serverTableRequestType, serverId) = localArgs;
 
             switch (serverTableRequestType)
             {
@@ -92,7 +92,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                     break;
                 case ServerTableRequestType.RequestTable:
-                    client.SendServerTable(ServerTable);
+                    client.SendServerTable(ServerTable.Data);
 
                     break;
                 default:
@@ -110,15 +110,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     public override ValueTask HandlePacketAsync(ILobbyClient client, in ClientPacket packet)
     {
         var handler = ClientHandlers[(byte)packet.OpCode];
-
         return handler?.Invoke(client, in packet) ?? default;
     }
 
     protected override void IndexHandlers()
     {
-        if (ClientHandlers == null!)
-            return;
-
         base.IndexHandlers();
 
         ClientHandlers[(byte)ClientOpCode.ConnectionInfoRequest] = OnConnectionInfoRequest;
@@ -152,7 +148,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         }
 
         client.OnDisconnected += OnDisconnect;
-
         client.BeginReceive();
         client.SendAcceptConnection();
     }

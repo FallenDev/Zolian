@@ -34,11 +34,11 @@ namespace Darkages.Network.Client
             return _server.HandlePacketAsync(this, in packet);
         }
 
-        public void SendServerTable(MServerTable serverTable)
+        public void SendServerTable(byte[] serverTableData)
         {
             var args = new ServerTableArgs
             {
-                ServerTable = serverTable.Data
+                ServerTable = serverTableData
             };
 
             Send(args);
