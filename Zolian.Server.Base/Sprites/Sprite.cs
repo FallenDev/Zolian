@@ -11,7 +11,6 @@ using Darkages.GameScripts.Spells;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Object;

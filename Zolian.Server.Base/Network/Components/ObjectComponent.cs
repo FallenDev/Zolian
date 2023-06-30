@@ -2,6 +2,7 @@
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -12,7 +13,7 @@ public class ObjectComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
 
-    public ObjectComponent(Server.GameServer server) : base(server) { }
+    public ObjectComponent(GameServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {

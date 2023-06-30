@@ -1,6 +1,4 @@
-﻿using Darkages.Network.Security;
-
-namespace Darkages.Network.Formats.Models.ClientFormats;
+﻿namespace Darkages.Network.Formats.Models.ClientFormats;
 
 public class ClientFormat10 : NetworkFormat
 {

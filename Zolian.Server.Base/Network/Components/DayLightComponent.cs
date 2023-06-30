@@ -1,5 +1,6 @@
 ﻿using Darkages.Infrastructure;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
@@ -8,7 +9,7 @@ public class DayLightComponent : GameServerComponent
     private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(20.0f));
     private byte _shade;
 
-    public DayLightComponent(Server.GameServer server) : base(server) { }
+    public DayLightComponent(GameServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {

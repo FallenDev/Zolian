@@ -7,14 +7,12 @@ using System.Windows;
 using System.Windows.Threading;
 
 using Chaos.Extensions.DependencyInjection;
-using Chaos.Networking;
-using Chaos.Networking.Abstractions;
-using Chaos.Networking.Entities;
 using Darkages;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
-
+using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
@@ -89,8 +87,9 @@ public partial class App
                 .AddSingleton<IServer, Server>();
             serviceCollection.AddCryptography();
             serviceCollection.AddPacketSerializer();
-            serviceCollection.AddSingleton<IRedirectManager, RedirectManager>();
-            serviceCollection.AddSingleton<IClientRegistry<T>, ClientRegistry<T>>();
+            serviceCollection.AddTransient<IClientFactory<LobbyClient>, ClientFactory<LobbyClient>>();
+            serviceCollection.AddTransient<IClientFactory<LoginClient>, ClientFactory<LoginClient>>();
+            serviceCollection.AddTransient<IClientFactory<WorldClient>, ClientFactory<WorldClient>>();
             var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
         }

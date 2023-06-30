@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 
 using Darkages.Infrastructure;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
@@ -9,7 +10,7 @@ public class InterestAndCommunityComponent : GameServerComponent
     private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(45));
     private readonly GameServerTimer _interest = new(TimeSpan.FromMinutes(30));
 
-    public InterestAndCommunityComponent(Server.GameServer server) : base(server) { }
+    public InterestAndCommunityComponent(GameServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {

@@ -1,6 +1,5 @@
 ﻿using Darkages.Enums;
 using Darkages.Interfaces;
-using Darkages.Network.Security;
 using Darkages.Scripting;
 using Darkages.Types;
 

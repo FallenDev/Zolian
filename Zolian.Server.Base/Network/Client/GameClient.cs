@@ -11,8 +11,8 @@ using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Formulas;
 using Darkages.Infrastructure;
 using Darkages.Models;
-using Darkages.Network.Formats;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -23,7 +23,6 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
-using Gender = Darkages.Enums.Gender;
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Network.Client;
@@ -142,7 +141,7 @@ public partial class GameClient : WorldClient
     public PendingBuy PendingBuySessions { get; set; }
     public PendingSell PendingItemSessions { get; set; }
     public PendingBanked PendingBankedSession { get; set; }
-    public Server.GameServer Server { get; set; }
+    public GameServer Server { get; set; }
     public bool ShouldUpdateMap { get; set; }
     public DateTime LastNodeClicked { get; set; }
     public WorldPortal PendingNode { get; set; }
@@ -290,7 +289,7 @@ public partial class GameClient : WorldClient
 
     public void Interrupt()
     {
-        Network.Server.GameServer.CancelIfCasting(this);
+        GameServer.CancelIfCasting(this);
         SendLocation();
     }
 

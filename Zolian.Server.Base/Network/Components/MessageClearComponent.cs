@@ -1,11 +1,12 @@
 ﻿using Darkages.Infrastructure;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class MessageClearComponent : GameServerComponent
 {
-    public MessageClearComponent(Server.GameServer server) : base(server)
+    public MessageClearComponent(GameServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MessageClearInterval));
     }

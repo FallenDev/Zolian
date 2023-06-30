@@ -5,7 +5,6 @@ using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
-using Darkages.Network;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Templates;
 using Darkages.Types;

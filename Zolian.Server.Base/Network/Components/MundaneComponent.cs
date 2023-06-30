@@ -1,11 +1,12 @@
 ﻿using Darkages.Infrastructure;
+using Darkages.Network.Server;
 using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
 public class MundaneComponent : GameServerComponent
 {
-    public MundaneComponent(Server.GameServer server) : base(server)
+    public MundaneComponent(GameServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MundaneRespawnInterval));
     }

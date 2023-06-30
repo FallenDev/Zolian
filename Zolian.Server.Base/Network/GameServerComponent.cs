@@ -1,8 +1,10 @@
-﻿namespace Darkages.Network;
+﻿using Darkages.Network.Server;
+
+namespace Darkages.Network;
 
 public abstract class GameServerComponent
 {
-    protected GameServerComponent(Server.GameServer server) => Server = server;
-    protected Server.GameServer Server { get; }
+    protected GameServerComponent(GameServer server) => Server = server;
+    protected GameServer Server { get; }
     protected internal abstract void Update(TimeSpan elapsedTime);
 }

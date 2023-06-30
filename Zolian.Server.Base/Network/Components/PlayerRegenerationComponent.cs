@@ -1,7 +1,7 @@
 ﻿using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
-
+using Darkages.Network.Server;
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
@@ -10,7 +10,7 @@ public class PlayerRegenerationComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(1));
 
-    public PlayerRegenerationComponent(Server.GameServer server) : base(server) { }
+    public PlayerRegenerationComponent(GameServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {

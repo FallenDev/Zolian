@@ -1,6 +1,4 @@
-﻿using Darkages.Network;
-
-namespace Darkages.Interfaces;
+﻿namespace Darkages.Interfaces;
 
 public interface INetworkFormat
 {

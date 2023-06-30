@@ -1,11 +1,12 @@
 ﻿using Darkages.Infrastructure;
 using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class PingComponent : GameServerComponent
 {
-    public PingComponent(Server.GameServer server) : base(server)
+    public PingComponent(GameServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromMilliseconds(7000));
     }

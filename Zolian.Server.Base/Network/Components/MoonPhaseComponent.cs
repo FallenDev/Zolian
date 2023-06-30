@@ -1,5 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Infrastructure;
+using Darkages.Network.Server;
 using ServiceStack;
 using SunCalcNet;
 
@@ -10,7 +11,7 @@ public class MoonPhaseComponent : GameServerComponent
     private readonly GameServerTimer _timer = new(TimeSpan.FromHours(2.0f));
     private double _dayStored;
 
-    public MoonPhaseComponent(Server.GameServer server) : base(server)
+    public MoonPhaseComponent(GameServer server) : base(server)
     {
         _dayStored = DateTime.Today.Day;
     }

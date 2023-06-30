@@ -1,9 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using Darkages.Network.Formats;
 using Darkages.Network.Formats.Models.ServerFormats;
-using Darkages.Network.Security;
-
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Client;

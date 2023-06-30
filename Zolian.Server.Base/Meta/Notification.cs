@@ -1,6 +1,5 @@
 ﻿using Darkages.Common;
 using Darkages.Compression;
-using Darkages.Network.Security;
 
 namespace Darkages.Meta;
 

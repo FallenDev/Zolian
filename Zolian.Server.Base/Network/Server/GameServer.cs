@@ -1,9 +1,17 @@
-﻿using Darkages.Common;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
+using System.Net;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
+using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
+using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats;
+using Darkages.Network.Components;
 using Darkages.Network.Formats.Models.ClientFormats;
 using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Object;
@@ -11,22 +19,10 @@ using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Systems;
 using Darkages.Types;
-
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
 using ServiceStack;
-using System.Collections.Concurrent;
-using System.Globalization;
-using System.Net;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
-using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Models;
-using Darkages.Network.Security;
-using Darkages.Network.Components;
 
 namespace Darkages.Network.Server;
 
@@ -1145,7 +1141,7 @@ public class GameServer : NetworkServer<GameClient>
         }
 
         if (item.Scripts == null) return;
-        foreach (var itemScript in (item.Scripts.Values))
+        foreach (var itemScript in item.Scripts.Values)
         {
             itemScript?.OnDropped(client.Aisling, new Position(format.X, format.Y), client.Aisling.Map);
         }

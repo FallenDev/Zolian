@@ -1,7 +1,4 @@
-﻿using Darkages.Network;
-using Darkages.Network.Formats;
-
-namespace Darkages.Types;
+﻿namespace Darkages.Types;
 
 public abstract class BoardDescriptors : NetworkFormat
 {

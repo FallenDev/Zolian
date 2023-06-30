@@ -2,6 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Infrastructure;
+using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
@@ -14,7 +15,7 @@ public class MonolithComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer;
 
-    public MonolithComponent(Server.GameServer server) : base(server)
+    public MonolithComponent(GameServer server) : base(server)
     {
         _timer = new GameServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalSpawnTimer));
     }

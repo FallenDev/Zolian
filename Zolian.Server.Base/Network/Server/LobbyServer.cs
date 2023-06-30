@@ -1,48 +1,38 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
-using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
 using Chaos.Networking.Entities.Client;
+using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
-using Chaos.Services.Factories.Abstractions;
-using Chaos.Services.Servers.Options;
+using Darkages.Meta;
+using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Chaos.Services.Servers;
+namespace Darkages.Network.Server;
 
 public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
 {
-    private readonly IClientProvider ClientProvider;
-    private readonly ServerTable ServerTable;
-    private new LobbyOptions Options { get; }
+    private readonly IClientFactory<LobbyClient> ClientProvider;
+    private readonly MServerTable ServerTable;
 
     public LobbyServer(
-        IClientRegistry<ILobbyClient> clientRegistry,
-        IClientProvider clientProvider,
+        IClientFactory<LobbyClient> clientProvider,
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
-        IOptions<LobbyOptions> options,
-        ILogger<LobbyServer> logger
-    )
-        : base(
-            redirectManager,
-            packetSerializer,
-            clientRegistry,
-            options,
-            logger)
+        IClientRegistry<ILobbyClient> lobbyRegistry,
+        ILogger<LobbyServer> logger,
+        IOptions<ServerOptions> options
+    ) : base(redirectManager, packetSerializer, lobbyRegistry, options, logger)
     {
-        Options = options.Value;
         ClientProvider = clientProvider;
-        ServerTable = new ServerTable(Options.Servers);
-
+        ServerTable  = MServerTable.FromFile("MServerTable.xml");
         IndexHandlers();
     }
 
@@ -51,7 +41,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         ValueTask InnerOnConnectionInfoRequest(ILobbyClient localClient)
         {
-            localClient.SendConnectionInfo(ServerTable.CheckSum);
+            localClient.SendConnectionInfo(ServerTable.Hash);
 
             return default;
         }
@@ -66,34 +56,16 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ValueTask InnerOnServerTableRequest(ILobbyClient localClient, ServerTableRequestArgs localArgs)
         {
             var (serverTableRequestType, serverId) = localArgs;
-
             switch (serverTableRequestType)
             {
                 case ServerTableRequestType.ServerId:
-                    if (ServerTable.Servers.TryGetValue(serverId!.Value, out var serverInfo))
-                    {
-                        var redirect = new Redirect(
-                            EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                            serverInfo,
-                            ServerType.Login,
-                            client.Crypto.Key,
-                            client.Crypto.Seed);
-
-                        RedirectManager.Add(redirect);
-
-                        Logger.LogDebug(
-                            "Redirecting {@ClientIp} to {@ServerIp}",
-                            client.RemoteIp.ToString(),
-                            serverInfo.Address.ToString());
-
-                        client.SendRedirect(redirect);
-                    } else
-                        throw new InvalidOperationException($"Server id \"{serverId}\" requested, but does not exist.");
-
+                    var connectInfo = new IPEndPoint(ServerTable.Servers[0].Address, ServerTable.Servers[0].Port);
+                    var redirect = new Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ConnectionInfo{Address = connectInfo.Address, Port = connectInfo.Port}, 
+                        ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                    localClient.SendRedirect(redirect);
                     break;
                 case ServerTableRequestType.RequestTable:
-                    client.SendServerTable(ServerTable.Data);
-
+                    localClient.SendServerTable(ServerTable.Data);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -125,29 +97,12 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
+        // ToDo Copy over OldLoginServer "ClientConnected"
+
+
 
         serverSocket.BeginAccept(OnConnection, serverSocket);
-
-        var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        Logger.LogDebug("Incoming connection from {@Ip}", ip!.ToString());
-
-        var client = ClientProvider.CreateClient<ILobbyClient>(clientSocket);
-        Logger.LogDebug("Connection established with {@ClientIp}", client.RemoteIp.ToString());
-
-        if (!ClientRegistry.TryAdd(client))
-        {
-            var stackTrace = new StackTrace(true).ToString();
-
-            Logger.WithProperty(client.Id)
-                  .WithProperty(stackTrace)
-                  .LogError("Somehow, two clients got the same id");
-
-            client.Disconnect();
-
-            return;
-        }
-
-        client.OnDisconnected += OnDisconnect;
+        var client = ClientProvider.CreateClient(clientSocket);
         client.BeginReceive();
         client.SendAcceptConnection();
     }

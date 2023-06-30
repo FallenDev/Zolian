@@ -3,12 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
 using Darkages.Common;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats;
-
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
@@ -104,7 +101,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         var format = NetworkFormatManager.GetClientFormat(packet.OpCode);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
-        if (format is null || !Clients.ContainsKey(client.Serial) || (client.MapOpen && format.OpCode is not (63 or 69))) return;
+        if (format is null || !Clients.ContainsKey(client.Serial) || client.MapOpen && format.OpCode is not (63 or 69)) return;
 
         if (client.Serial == 0)
         {
@@ -176,7 +173,7 @@ public abstract partial class NetworkServer<TClient> : NetworkClient where TClie
         if (timeChecks.TryGetValue(format.OpCode, out var check))
         {
             if (!check(lastPacketTime)) return false;
-            
+
             switch (format.OpCode)
             {
                 case 0x0F:

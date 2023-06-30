@@ -1,7 +1,5 @@
-﻿using Darkages.Network;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Darkages.Network.Client;
-using Darkages.Network.Formats;
 
 namespace Darkages.Types;
 

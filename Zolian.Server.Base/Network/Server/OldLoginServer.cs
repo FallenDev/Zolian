@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Meta;
@@ -10,18 +9,13 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Formats.Models.ClientFormats;
 using Darkages.Network.Formats.Models.ServerFormats;
-using Darkages.Network.Security;
 using Darkages.Sprites;
 using Darkages.Types;
-
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
 using Newtonsoft.Json;
-
 using RestSharp;
-
 using ServiceStack;
 
 namespace Darkages.Network.Server;
@@ -290,24 +284,24 @@ public class OldLoginServer : NetworkServer<LoginClient>
                     client.SendMessageBox(0x02, "Maintenance Account, denied access");
                     return;
                 case "death":
-                {
-                    var gmIp = ServerSetup.Instance.InternalAddress;
-                    var ipLocal = IPAddress.Parse(gmIp);
-                    var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
-
-                    if (ip.Equals(ipLocal) || ip.Equals(loopback))
                     {
-                        aisling.LastAttemptIP = ip.ToString();
-                        aisling.LastIP = ip.ToString();
-                        aisling.PasswordAttempts = 0;
-                        SavePassword(aisling);
-                        LoginAsAisling(client, aisling);
+                        var gmIp = ServerSetup.Instance.InternalAddress;
+                        var ipLocal = IPAddress.Parse(gmIp);
+                        var loopback = IPAddress.Parse(ServerSetup.Instance.IpAddress.ToString());
+
+                        if (ip.Equals(ipLocal) || ip.Equals(loopback))
+                        {
+                            aisling.LastAttemptIP = ip.ToString();
+                            aisling.LastIP = ip.ToString();
+                            aisling.PasswordAttempts = 0;
+                            SavePassword(aisling);
+                            LoginAsAisling(client, aisling);
+                            return;
+                        }
+
+                        client.SendMessageBox(0x02, "GM Account, denied access");
                         return;
                     }
-
-                    client.SendMessageBox(0x02, "GM Account, denied access");
-                    return;
-                }
                 default:
                     // Other checks and actions
                     PerformLoginChecksAndActions(client, aisling, format, ip);
