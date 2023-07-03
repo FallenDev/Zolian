@@ -1,4 +1,5 @@
 ﻿using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Types;
 
 namespace Darkages.Infrastructure;
@@ -87,6 +88,7 @@ public class ServerConstants : IServerConstants
     public IEnumerable<string> GameMasters { get; set; }
     public string[] DevModeExemptions { get; set; }
     public List<GameSetting> Settings { get; set; }
+    public ReservedRedirectInfo[] ReservedRedirects { get; set; } = Array.Empty<ReservedRedirectInfo>();
 
     // Check Packet 00
     public int ClientVersion { get; set; }

@@ -24,7 +24,6 @@ public class ServerSetup : IServerContext
 {
     public static ServerSetup Instance { get; private set; }
     public static readonly object SyncLock = new();
-    public static readonly ConcurrentDictionary<int, string> Redirects = new();
     private static Board[] _huntingToL = new Board[1];
     private static Board[] _trashTalk = new Board[1];
     private static Board[] _arenaUpdates = new Board[1];
@@ -32,7 +31,7 @@ public class ServerSetup : IServerContext
     private static Board[] _serverUpdates = new Board[1];
     private static ILogger<ServerSetup> _log;
     public static IOptions<ServerOptions> ServerOptions;
-    private static LoginServer _lobby;
+    private static LobbyServer _lobby;
 
     #region Properties
 
@@ -282,7 +281,7 @@ public class ServerSetup : IServerContext
         {
             Game = new GameServer(Config.ConnectionCapacity);
             Game.Start(Config.SERVER_PORT);
-            _lobby = new LoginServer();
+            _lobby = new LobbyServer();
             _lobby.Start(Config.LOGIN_PORT);
 
             Console.ForegroundColor = ConsoleColor.Green;

@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -7,65 +10,60 @@ using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
 using Chaos.Networking.Entities.Client;
+using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
+using Darkages.Database;
+using Darkages.Meta;
+using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
+using Darkages.Sprites;
+using Darkages.Types;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Network.Server;
 
 public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginClient>
 {
-    private readonly IAccessManager AccessManager;
-    private readonly IAsyncStore<Aisling> AislingStore;
-    private readonly ISimpleCacheProvider CacheProvider;
-    private readonly IClientProvider ClientProvider;
-    private readonly IMetaDataStore MetaDataStore;
-    private readonly Notice Notice;
+    private readonly IClientFactory<LoginClient> _clientProvider;
+    private readonly Notification _notification;
     public ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
-    private new LoginOptions Options { get; }
 
     public LoginServer(
-        IAsyncStore<Aisling> aislingStore,
         IClientRegistry<ILoginClient> clientRegistry,
-        IClientProvider clientProvider,
-        ISimpleCacheProvider cacheProvider,
+        IClientFactory<LoginClient> clientProvider,
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
-        IOptions<LoginOptions> options,
-        ILogger<LoginServer> logger,
-        IMetaDataStore metaDataStore,
-        IAccessManager accessManager
+        IOptions<Chaos.Networking.Options.ServerOptions> options,
+        ILogger<LoginServer> logger
     )
-        : base(
-            redirectManager,
-            packetSerializer,
-            clientRegistry,
-            options,
-            logger)
+        : base(redirectManager, packetSerializer, clientRegistry, options, logger)
     {
-        Options = options.Value;
-        AislingStore = aislingStore;
-        ClientProvider = clientProvider;
-        CacheProvider = cacheProvider;
-        MetaDataStore = metaDataStore;
-        AccessManager = accessManager;
-        Notice = new Notice(options.Value.NoticeMessage);
+        _clientProvider = clientProvider;
+        _notification = Notification.FromFile("Notification.txt");
         CreateCharRequests = new ConcurrentDictionary<uint, CreateCharRequestArgs>();
 
         IndexHandlers();
     }
 
     #region OnHandlers
+
+    /// <summary>
+    /// 0x57 - Server Table & Redirect
+    /// </summary>
     public ValueTask OnClientRedirected(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in packet);
 
         ValueTask InnerOnclientRedirect(ILoginClient localClient, ClientRedirectedArgs localArgs)
         {
-            var reservedRedirect = Options.ReservedRedirects
+            var reservedRedirect = ServerSetup.Instance.Config.ReservedRedirects
                                           .FirstOrDefault(rr => (rr.Id == localArgs.Id) && rr.Name.EqualsI(localArgs.Name));
 
             if (reservedRedirect != null)
@@ -75,7 +73,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                       .LogDebug("Received external redirect {@RedirectID}", reservedRedirect.Id);
 
                 localClient.Crypto = new Crypto(localArgs.Seed, localArgs.Key, string.Empty);
-                localClient.SendLoginNotice(false, Notice);
+                localClient.SendLoginNotice(false, _notification);
             } else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
                 Logger.WithProperty(localClient)
@@ -83,13 +81,14 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                       .LogDebug("Received internal redirect {@RedirectId}", redirect.Id);
 
                 localClient.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
-                localClient.SendLoginNotice(false, Notice);
+                localClient.SendLoginNotice(false, _notification);
             } else
             {
                 Logger.WithProperty(localClient)
                       .WithProperty(localArgs)
                       .LogWarning("{@ClientIp} tried to redirect with invalid redirect details", localClient.RemoteIp.ToString());
-
+                ServerSetup.Logger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
+                Analytics.TrackEvent($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 localClient.Disconnect();
             }
 
@@ -99,6 +98,9 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, args, InnerOnclientRedirect);
     }
 
+    /// <summary>
+    /// 0x04 - Create New Player from Template
+    /// </summary>
     public ValueTask OnCreateCharFinalize(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<CreateCharFinalizeArgs>(in packet);
@@ -107,23 +109,33 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         {
             if (CreateCharRequests.TryGetValue(localClient.Id, out var requestArgs))
             {
-                (var hairStyle, var gender, var hairColor) = localArgs;
+                var (hairStyle, gender, hairColor) = localArgs;
+                var readyTime = DateTime.Now;
+                var maximumHp = Random.Shared.Next(128, 165);
+                var maximumMp = Random.Shared.Next(30, 45);
+                var user = new Aisling
+                {
+                    Created = readyTime,
+                    Username = requestArgs.Name,
+                    Password = requestArgs.Password,
+                    LastLogged = readyTime,
+                    CurrentHp = maximumHp,
+                    BaseHp = maximumHp,
+                    CurrentMp = maximumMp,
+                    BaseMp = maximumMp,
+                    Gender = (Gender)gender,
+                    HairColor = (byte)hairColor,
+                    HairStyle = hairStyle,
+                    SkillBook = new SkillBook(),
+                    SpellBook = new SpellBook(),
+                    Inventory = new Inventory(),
+                    BankManager = new Bank(),
+                    EquipmentManager = new EquipmentManager(null)
+                };
 
-                var mapInstanceCache = CacheProvider.GetCache<MapInstance>();
-                var startingMap = mapInstanceCache.Get(Options.StartingMapInstanceId);
+                await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
 
-                var user = new Aisling(
-                    requestArgs.Name,
-                    gender,
-                    hairStyle,
-                    hairColor,
-                    startingMap,
-                    Options.StartingPoint);
-
-                await AislingStore.SaveAsync(user);
-
-                Logger.WithProperty(localClient)
-                      .LogDebug("New character created with name {@Name}", user.Name);
+                Logger.WithProperty(localClient).LogDebug("New character created with name {@Name}", user.Username);
 
                 localClient.SendLoginMessage(LoginMessageType.Confirm);
             } else
@@ -133,27 +145,25 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, args, InnerOnCreateCharFinalize);
     }
 
+    /// <summary>
+    /// 0x02 - Character Creation Checks
+    /// </summary>
     public ValueTask OnCreateCharRequest(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<CreateCharRequestArgs>(in packet);
 
         async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharRequestArgs localArgs)
         {
-            var result = await AccessManager.SaveNewCredentialsAsync(localClient.RemoteIp, localArgs.Name, localArgs.Password);
+            var result = await ValidateUsernameAndPassword(localClient, localArgs.Name, localArgs.Password);
 
-            if (result.Success)
+            if (result)
             {
                 CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
                 localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
             } else
             {
-                Logger.WithProperty(localClient)
-                      .LogDebug(
-                          "Failed to create character with name {@Name} for reason {@Reason}",
-                          localArgs.Name,
-                          result.FailureMessage);
-
-                localClient.SendLoginMessage(GetLoginMessageType(result.Code), result.FailureMessage);
+                ServerSetup.Logger($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
+                Analytics.TrackEvent($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
             }
         }
 
@@ -164,7 +174,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
     {
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
-            localClient.SendLoginControls(LoginControlsType.Homepage, "https://www.darkages.com");
+            localClient.SendLoginControls(LoginControlsType.Homepage, "https://www.ZolianAoC.com");
 
             return default;
         }
@@ -172,23 +182,25 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, InnerOnHomepageRequest);
     }
 
+    /// <summary>
+    /// 0x03 - Player Login and Redirect
+    /// </summary>
     public ValueTask OnLogin(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
 
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
-            (var name, var password) = localArgs;
+            var (name, password) = localArgs;
+            var result = await StorageManager.AislingBucket.CheckPassword(name);
 
-            var result = await AccessManager.ValidateCredentialsAsync(localClient.RemoteIp, name, password);
-
-            if (!result.Success)
+            if (result == null)
             {
                 Logger.WithProperty(localClient)
                       .WithProperty(password)
-                      .LogDebug("Failed to validate credentials for {@Name} for reason {@Reason}", name, result.FailureMessage);
+                      .LogDebug("Player does not exist {@Name}.", name);
 
-                localClient.SendLoginMessage(LoginMessageType.WrongPassword, result.FailureMessage);
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
 
                 return;
             }
@@ -196,18 +208,67 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
             Logger.WithProperty(client)
                   .LogDebug("Validated credentials for {@Name}", name);
 
+            var maintCheck = name.ToLowerInvariant();
+
+            var connInfo = new ConnectionInfo
+            {
+                Address = IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp),
+                HostName = "Zolian",
+                Port = ServerSetup.Instance.Config.SERVER_PORT
+            };
+
             var redirect = new Redirect(
                 EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                Options.WorldRedirect,
+                connInfo,
                 ServerType.World,
                 localClient.Crypto.Key,
                 localClient.Crypto.Seed,
                 name);
 
+            switch (maintCheck)
+            {
+                case "asdf":
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Maintenance Account, denied access");
+                    return;
+                case "death":
+                {
+                    var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
+
+                    if (localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                    {
+                        result.LastAttemptIP = ipLocal.ToString();
+                        result.LastIP = ipLocal.ToString();
+                        if (result.Password == ServerSetup.Instance.Unlock)
+                            result.PasswordAttempts = 0;
+                        await SavePassword(result);
+                        RedirectManager.Add(redirect);
+                        localClient.SendLoginMessage(LoginMessageType.Confirm);
+                        localClient.SendRedirect(redirect);
+                        return;
+                    }
+
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
+                    return;
+                }
+                default:
+                    result.LastAttemptIP = localClient.RemoteIp.ToString();
+                    result.LastIP = localClient.RemoteIp.ToString();
+                    if (result.Password == ServerSetup.Instance.Unlock)
+                        result.PasswordAttempts = 0;
+                    await SavePassword(result);
+                    break;
+            }
+
+            if (result.Hacked)
+            {
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+                return;
+            }
+
             Logger.LogDebug(
                 "Redirecting {@ClientIp} to {@ServerIp}",
                 localClient.RemoteIp.ToString(),
-                Options.WorldRedirect.Address.ToString());
+                connInfo.Address.ToString());
 
             RedirectManager.Add(redirect);
             localClient.SendLoginMessage(LoginMessageType.Confirm);
@@ -217,15 +278,18 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, args, InnerOnLogin);
     }
 
+    /// <summary>
+    /// 0x7B - Metadata Load
+    /// </summary>
     public ValueTask OnMetaDataRequest(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in packet);
 
         ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
-            (var metadataRequestType, var name) = localArgs;
+            var (metadataRequestType, name) = localArgs;
 
-            localClient.SendMetaData(metadataRequestType, MetaDataStore, name);
+            localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
 
             return default;
         }
@@ -233,11 +297,14 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, args, InnerOnMetaDataRequest);
     }
 
+    /// <summary>
+    /// 0x4B - Notification Load
+    /// </summary>
     public ValueTask OnNoticeRequest(ILoginClient client, in ClientPacket packet)
     {
         ValueTask InnerOnNoticeRequest(ILoginClient localClient)
         {
-            localClient.SendLoginNotice(true, Notice);
+            localClient.SendLoginNotice(true, _notification);
 
             return default;
         }
@@ -245,32 +312,62 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return ExecuteHandler(client, InnerOnNoticeRequest);
     }
 
+    /// <summary>
+    /// 0x26 - Change Password
+    /// </summary>
     public ValueTask OnPasswordChange(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
 
         async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
-            (var name, var currentPassword, var newPassword) = localArgs;
+            var (name, currentPassword, newPassword) = localArgs;
+            var aisling = StorageManager.AislingBucket.CheckPassword(name);
 
-            var result = await AccessManager.ChangePasswordAsync(
-                localClient.RemoteIp,
-                name,
-                currentPassword,
-                newPassword);
-
-            if (!result.Success)
+            if (aisling.Result == null)
             {
-                Logger.WithProperty(client)
-                      .LogInformation(
-                          "Failed to change password for aisling {@AislingName} for reason {@Reason}",
-                          name,
-                          result.FailureMessage);
-
-                localClient.SendLoginMessage(GetLoginMessageType(result.Code), result.FailureMessage);
-
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Player does not exist");
                 return;
             }
+
+            if (aisling.Result.Hacked)
+            {
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+                return;
+            }
+
+            if (aisling.Result.Password != currentPassword)
+            {
+                if (aisling.Result.PasswordAttempts <= 9)
+                {
+                    ServerSetup.Logger($"{aisling.Result} attempted an incorrect password.");
+                    aisling.Result.LastIP = localClient.RemoteIp.ToString();
+                    aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
+                    aisling.Result.PasswordAttempts += 1;
+                    await SavePassword(aisling.Result);
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Incorrect Information provided.");
+                    return;
+                }
+
+                ServerSetup.Logger($"{aisling.Result} was locked to protect their account.");
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
+                aisling.Result.LastIP = localClient.RemoteIp.ToString();
+                aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
+                aisling.Result.Hacked = true;
+                await SavePassword(aisling.Result);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
+            {
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
+                return;
+            }
+
+            aisling.Result.Password = newPassword;
+            aisling.Result.LastIP = localClient.RemoteIp.ToString();
+            aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
+            await SavePassword(aisling.Result);
 
             Logger.WithProperty(client)
                   .LogInformation("Changed password for aisling {@AislingName}", name);
@@ -278,9 +375,11 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
         return ExecuteHandler(client, args, InnerOnPasswordChange);
     }
+
     #endregion
 
     #region Connection / Handler
+
     public override ValueTask HandlePacketAsync(ILoginClient client, in ClientPacket packet)
     {
         var handler = ClientHandlers[(byte)packet.OpCode];
@@ -290,8 +389,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
     protected override void IndexHandlers()
     {
-        if (ClientHandlers == null!)
-            return;
+        if (ClientHandlers == null!) return;
 
         base.IndexHandlers();
 
@@ -328,16 +426,9 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
     {
         var ipAddress = ((IPEndPoint)clientSocket.RemoteEndPoint!).Address;
 
-        if (!await AccessManager.ShouldAllowAsync(ipAddress))
-        {
-            Logger.LogDebug("Rejected connection from {@Ip}", ipAddress.ToString());
+        //ToDo: Access restriction - Add-in checks
 
-            await clientSocket.DisconnectAsync(false);
-
-            return;
-        }
-
-        var client = ClientProvider.CreateClient<ILoginClient>(clientSocket);
+        var client = _clientProvider.CreateClient(clientSocket);
 
         Logger.LogDebug("Connection established with {@ClientIp}", client.RemoteIp.ToString());
 
@@ -363,17 +454,51 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         ClientRegistry.TryRemove(client.Id, out _);
     }
 
-    private LoginMessageType GetLoginMessageType(CredentialValidationResult.FailureCode code) => code switch
+    private async Task<bool> SavePassword(Aisling aisling)
     {
-        CredentialValidationResult.FailureCode.InvalidUsername    => LoginMessageType.ClearNameMessage,
-        CredentialValidationResult.FailureCode.InvalidPassword    => LoginMessageType.ClearPswdMessage,
-        CredentialValidationResult.FailureCode.PasswordTooLong    => LoginMessageType.ClearPswdMessage,
-        CredentialValidationResult.FailureCode.PasswordTooShort   => LoginMessageType.ClearPswdMessage,
-        CredentialValidationResult.FailureCode.UsernameTooLong    => LoginMessageType.ClearNameMessage,
-        CredentialValidationResult.FailureCode.UsernameTooShort   => LoginMessageType.ClearNameMessage,
-        CredentialValidationResult.FailureCode.UsernameNotAllowed => LoginMessageType.ClearNameMessage,
-        CredentialValidationResult.FailureCode.TooManyAttempts    => LoginMessageType.ClearPswdMessage,
-        _                                                         => throw new ArgumentOutOfRangeException()
-    };
+        if (aisling == null) return false;
+
+        try
+        {
+            await StorageManager.AislingBucket.PasswordSave(aisling);
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)
+    {
+        var aisling = await StorageManager.AislingBucket.CheckIfPlayerExists(name);
+        var regex = new Regex("(?:[^a-z]|(?<=['\"])s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+        if (aisling == false)
+        {
+            if (regex.IsMatch(name))
+            {
+                Analytics.TrackEvent($"Player attempted to create an unsupported username. {name} \n {client.Id}");
+                client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unsupported username, please try again.");
+                return false;
+            }
+
+            if (name.Length is < 3 or > 12)
+            {
+                client.SendLoginMessage(LoginMessageType.ClearNameMessage, "{=eYour {=qUserName {=emust be within 3 to 12 characters in length.");
+                return false;
+            }
+
+            if (password.Length > 5) return true;
+            client.SendLoginMessage(LoginMessageType.ClearPswdMessage, "{=eYour {=qPassword {=edoes not meet the minimum requirement of 6 characters.");
+            return false;
+        }
+
+        client.SendLoginMessage(LoginMessageType.Confirm, "Character already exists.");
+        return false;
+    }
     #endregion
 }

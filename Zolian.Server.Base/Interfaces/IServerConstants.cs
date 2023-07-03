@@ -1,4 +1,5 @@
 ﻿using Darkages.Infrastructure;
+using Darkages.Models;
 using Darkages.Types;
 
 namespace Darkages.Interfaces;
@@ -70,6 +71,7 @@ public interface IServerConstants
     string SERVER_TITLE { get; }
     string ServerWelcomeMessage { get; }
     List<GameSetting> Settings { get; }
+    public ReservedRedirectInfo[] ReservedRedirects { get; }
     string SomethingWentWrong { get; }
     string SpellFailedMessage { get; }
     int StartingMap { get; }

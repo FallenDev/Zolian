@@ -162,11 +162,10 @@
     // Checks whether or not a user is already logged in
     // Default: true
     "MultiUserLoginCheck": true,
-    // Interval for Ping checks, also used with a built in security and increasing/decreasing this value could cause
-    // performance impacts and connectivity issues
+    // Interval for Ping checks
     // Default: 7.0 (7 seconds)
     "PingInterval": 7.0,
-    // Default Ports for the server -- Do not recommend changing these values
+    // Default Ports for the server
     // Default: 2615
     "SERVER_PORT": 2615,
     // Default: 2610
@@ -200,10 +199,16 @@
       }
     ],
 
+    // Redirects
+    "ReservedRedirects": [
+      {
+        "Id": 1,
+        "Name": "Zolian Alpha"
+      }
+    ],
+
     // Check Packet 00
     // This check sets the current client that should be used
-    // Zolian Default: 910 
-    // 7.18 Default: 718
     "ClientVersion": 741,
 
     // Messages
