@@ -54,7 +54,7 @@ public class Blink : SkillScript
         damageDealingSprite.ActionUsed = "Blink";
         if (map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
         {
-            client.SendMessage(0x03, "This does not work here");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "This does not work here");
             return;
         }
 

@@ -90,7 +90,7 @@ public class Buff : IBuff
             var cmd = new SqlCommand("InsertBuff", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var buffId = Generator.GenerateNumber();
+            var buffId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var buffNameReplaced = buff.Name;
 
             cmd.Parameters.Add("@BuffId", SqlDbType.Int).Value = buffId;
@@ -106,7 +106,7 @@ public class Buff : IBuff
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.Client.SendMessage(0x03, "Issue saving buff. Error: Velcro");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving buff. Error: Velcro");
                 Crashes.TrackError(e);
                 return;
             }

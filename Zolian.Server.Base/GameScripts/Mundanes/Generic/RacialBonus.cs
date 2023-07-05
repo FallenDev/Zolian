@@ -249,7 +249,7 @@ public static class RacialBonus
         var item = new Legend.LegendItem
         {
             Category = "Race",
-            Time = DateTime.Now,
+            Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,
             Value = $"Racial Origins: {race}"
@@ -267,7 +267,7 @@ public static class RacialBonus
         var item = new Legend.LegendItem
         {
             Category = "Race",
-            Time = DateTime.Now,
+            Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,
             Value = $"Racial Origins: {race} - {subRace}"

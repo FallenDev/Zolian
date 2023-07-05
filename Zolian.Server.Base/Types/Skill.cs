@@ -42,7 +42,7 @@ public class Skill
     {
         get
         {
-            var readyTime = DateTime.Now;
+            var readyTime = DateTime.UtcNow;
             return readyTime - LastUsedSkill > new TimeSpan(0, 0, 0, 0, 500);
         }
     }
@@ -57,7 +57,7 @@ public class Skill
 
     public static Skill Create(int slot, SkillTemplate skillTemplate)
     {
-        var skillID = Generator.GenerateNumber();
+        var skillID = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         var obj = new Skill
         {
             Template = skillTemplate,
@@ -101,7 +101,7 @@ public class Skill
             var cmd = new SqlCommand("SkillToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var skillId = Generator.GenerateNumber();
+            var skillId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var skillNameReplaced = skill.Template.ScriptName;
 
             cmd.Parameters.Add("@SkillId", SqlDbType.Int).Value = skillId;
@@ -121,7 +121,7 @@ public class Skill
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
-                client.SendMessage(0x03, "Issue saving skill on issue. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -171,7 +171,7 @@ public class Skill
             var cmd = new SqlCommand("SkillToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var skillId = Generator.GenerateNumber();
+            var skillId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var skillNameReplaced = skill.Template.ScriptName;
 
             cmd.Parameters.Add("@SkillId", SqlDbType.Int).Value = skillId;
@@ -191,7 +191,7 @@ public class Skill
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
-                aisling.Client.SendMessage(0x03, "Issue saving skill on issue. Contact GM");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -228,7 +228,7 @@ public class Skill
         (damageDealingSprite, enemy) = (enemy, damageDealingSprite);
         enemy.Animate(27);
         if (damageDealingSprite is Aisling)
-            damageDealingSprite.Client.SendMessage(0x03, $"You deflected {skill.Template.Name}.");
+            damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
 
         return enemy;
     }

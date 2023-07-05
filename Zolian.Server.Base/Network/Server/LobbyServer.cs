@@ -45,9 +45,12 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         _clientProvider = clientProvider;
         _serverTable = MServerTable.FromFile("MServerTable.xml");
         IndexHandlers();
+
     }
 
     #region OnHandlers
+
+
     public ValueTask OnConnectionInfoRequest(ILobbyClient client, in ClientPacket _)
     {
         ValueTask InnerOnConnectionInfoRequest(ILobbyClient localClient)

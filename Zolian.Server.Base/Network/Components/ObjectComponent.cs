@@ -1,7 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Infrastructure;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
@@ -13,7 +12,7 @@ public class ObjectComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
 
-    public ObjectComponent(GameServer server) : base(server) { }
+    public ObjectComponent(WorldServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
@@ -22,7 +21,7 @@ public class ObjectComponent : GameServerComponent
 
     private void UpdateObjects()
     {
-        var connectedUsers = Server.Clients.Values.Where(i => i is { Aisling: not null, SerialSent: true }).Select(i => i.Aisling).ToArray();
+        var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
 
         foreach (var user in readyLoggedIn)
@@ -54,7 +53,7 @@ public class ObjectComponent : GameServerComponent
 
         if (payload.Count <= 0) return;
         payload.Reverse();
-        user.Show(Scope.Self, new ServerFormat07(payload));
+        user.Client.SendVisibleEntities(payload);
     }
 
     private static void RemoveObjects(Aisling client, Sprite[] objectsToRemove)

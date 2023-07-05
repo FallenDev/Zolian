@@ -528,7 +528,7 @@ public class Fas_Spiorad : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            target.Client.SendMessage(0x03, "Your body is too weak.");
+            target.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body is too weak.");
             return;
         }
 

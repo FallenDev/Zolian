@@ -1,11 +1,15 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-
+using Chaos.Networking;
+using Chaos.Networking.Entities;
+using Chaos.Packets;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -32,12 +36,13 @@ public class ServerSetup : IServerContext
     private static ILogger<ServerSetup> _log;
     public static IOptions<ServerOptions> ServerOptions;
     private static LobbyServer _lobby;
+    private static LoginServer _login;
 
     #region Properties
 
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
-    public GameServer Game { get; set; }
+    public WorldServer Game { get; set; }
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
@@ -223,7 +228,8 @@ public class ServerSetup : IServerContext
     {
         try
         {
-            var files = MetafileManager.GetMetaFiles();
+            var metaFileManager = new MetafileManager();
+            var files = metaFileManager.GetMetaFiles();
             if (files.Any()) GlobalMetaCache.AddRange(files);
         }
         catch (Exception ex)
@@ -279,11 +285,8 @@ public class ServerSetup : IServerContext
     {
         try
         {
-            Game = new GameServer(Config.ConnectionCapacity);
-            Game.Start(Config.SERVER_PORT);
-            _lobby = new LobbyServer();
-            _lobby.Start(Config.LOGIN_PORT);
-
+            Game.Start();
+            
             Console.ForegroundColor = ConsoleColor.Green;
             Logger("Server is now online.");
         }

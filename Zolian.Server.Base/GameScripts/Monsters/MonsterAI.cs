@@ -102,8 +102,8 @@ public class MonsterBaseIntelligence : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendMessage(0x03, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
-        client.SendMessage(0x03, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(GameClient client = null)
@@ -364,7 +364,7 @@ public class MonsterBaseIntelligence : MonsterScript
             skillScript.OnUse(Monster);
             {
                 skillScript.Skill.InUse = true;
-                var readyTime = DateTime.Now;
+                var readyTime = DateTime.UtcNow;
                 if (skillScript.Skill.Template.Cooldown > 0)
                 {
                     skillScript.Skill.NextAvailableUse = readyTime.AddSeconds(skillScript.Skill.Template.Cooldown);
@@ -640,8 +640,8 @@ public class MonsterShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendMessage(0x03, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
-        client.SendMessage(0x03, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(GameClient client = null)
@@ -898,7 +898,7 @@ public class MonsterShadowSight : MonsterScript
             skillScript.OnUse(Monster);
             {
                 skillScript.Skill.InUse = true;
-                var readyTime = DateTime.Now;
+                var readyTime = DateTime.UtcNow;
                 if (skillScript.Skill.Template.Cooldown > 0)
                 {
                     skillScript.Skill.NextAvailableUse = readyTime.AddSeconds(skillScript.Skill.Template.Cooldown);

@@ -1211,7 +1211,7 @@ public class debuff_ArdPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.Client.SendMessage(0x03, "{=qYou are immune to Poison");
+            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1325,7 +1325,7 @@ public class debuff_MorPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.Client.SendMessage(0x03, "{=qYou are immune to Poison");
+            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1439,7 +1439,7 @@ public class debuff_Poison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.Client.SendMessage(0x03, "{=qYou are immune to Poison");
+            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1553,7 +1553,7 @@ public class debuff_BeagPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.Client.SendMessage(0x03, "{=qYou are immune to Poison");
+            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 

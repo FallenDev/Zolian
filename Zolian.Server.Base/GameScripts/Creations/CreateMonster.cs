@@ -42,7 +42,7 @@ public class CreateMonster : MonsterCreateScript
             CastEnabled = true,
             TaggedAislings = new HashSet<int>(),
             AggroList = new List<int>(),
-            Serial = Generator.GenerateNumber(),
+            Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
             Size = "",
             CurrentMapId = _map.ID
         };
@@ -99,7 +99,7 @@ public class CreateMonster : MonsterCreateScript
         if (obj.Map.IsAStarWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
         if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
 
-        obj.AbandonedDate = DateTime.Now;
+        obj.AbandonedDate = DateTime.UtcNow;
 
         obj.Image = _monsterTemplate.ImageVarience > 0
             ? (ushort)Random.Shared.Next(_monsterTemplate.Image, _monsterTemplate.Image + _monsterTemplate.ImageVarience)
@@ -731,7 +731,7 @@ public class CreateMonster : MonsterCreateScript
             }
 
             if (!scripts.TryGetValue(script.ScriptName, out var skillScript)) return;
-            skillScript.Skill.NextAvailableUse = DateTime.Now;
+            skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.SkillScripts.Add(skillScript);
         }
@@ -782,7 +782,7 @@ public class CreateMonster : MonsterCreateScript
             }
 
             if (!scripts.TryGetValue(script.ScriptName, out var skillScript)) return;
-            skillScript.Skill.NextAvailableUse = DateTime.Now;
+            skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.AbilityScripts.Add(skillScript);
         }

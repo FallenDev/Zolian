@@ -1,19 +1,18 @@
 ﻿using System.Collections.Concurrent;
 using System.Data;
-
+using Chaos.Common.Definitions;
 using Dapper;
 
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Interfaces;
-using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Types;
 
@@ -112,7 +111,7 @@ public class EquipmentManager
     private void DisplayToEquipment(byte displaySlot, Item item)
     {
         if (item != null)
-            Client.Send(new ServerFormat37(item, displaySlot));
+            Client.SendEquipment(item);
     }
 
     public bool RemoveFromExisting(int displaySlot, bool returnIt = true)
@@ -155,7 +154,7 @@ public class EquipmentManager
         if (item != null && Client.Aisling.Inventory.Remove(item.InventorySlot) == null) return true;
         if (item == null) return true;
 
-        Client.Send(new ServerFormat10(item.InventorySlot));
+        Client.SendRemoveItemFromPane(item.InventorySlot);
 
         if (handleWeight)
         {
@@ -165,7 +164,7 @@ public class EquipmentManager
         }
 
         Client.LastItemDropped = item;
-        Client.SendStats(StatusFlags.StructA);
+        Client.SendAttributes(StatUpdateType.Primary);
         item.DeleteFromAislingDb();
 
         return true;
@@ -181,7 +180,7 @@ public class EquipmentManager
             Client.Aisling.CurrentWeight = 0;
 
         Client.ObjectHandlers.DelObject(itemObj);
-        Client.SendStats(StatusFlags.StructA);
+        Client.SendAttributes(StatUpdateType.Primary);
         return true;
     }
 
@@ -197,21 +196,21 @@ public class EquipmentManager
         switch (p10)
         {
             case <= 10 when !item.Warnings[0]:
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis almost broken!. Please repair it soon (< 10%)");
                 item.Warnings[0] = true;
                 break;
             case <= 30 and > 10 when !item.Warnings[1]:
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qis wearing out soon. Please repair it ASAP. (< 30%)");
                 item.Warnings[1] = true;
                 break;
             case <= 50 and > 30 when !item.Warnings[2]:
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
-                Client.SendMessage(0x03, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} {{=qwill need a repair soon. (< 50%)");
                 item.Warnings[2] = true;
                 break;
         }
@@ -234,7 +233,7 @@ public class EquipmentManager
             item.ReapplyItemModifiers(Client);
         }
 
-        Client.SendStats(StatusFlags.MultiStat);
+        Client.SendAttributes(StatUpdateType.MultiStat);
         Client.UpdateDisplay();
     }
 
@@ -253,14 +252,14 @@ public class EquipmentManager
         var item = Equipment[displaySlot].Item;
         if (item != null) item.Equipped = false;
 
-        Client.SendStats(StatusFlags.MultiStat);
+        Client.SendAttributes(StatUpdateType.MultiStat);
         Client.UpdateDisplay();
     }
 
     private void RemoveFromSlot(int displaySlot)
     {
         OnEquipmentRemoved((byte)displaySlot);
-        Client.Aisling.Show(Scope.Self, new ServerFormat38((byte)displaySlot));
+        Client.SendUnequip((Chaos.Common.Definitions.EquipmentSlot)displaySlot);
         Equipment[displaySlot] = null;
         var item = new Item();
         item.ReapplyItemModifiers(Client);
@@ -307,7 +306,7 @@ public class EquipmentManager
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.Client.SendMessage(0x03, "Issue equipping gear and saving. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue equipping gear and saving. Contact GM");
                 Crashes.TrackError(e);
                 return;
             }

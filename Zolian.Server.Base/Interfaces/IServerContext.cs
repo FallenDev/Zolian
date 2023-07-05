@@ -50,7 +50,7 @@ public interface IServerContext
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     bool Running { get; set; }
     IServerConstants Config { get; set; }
-    GameServer Game { get; set; }
+    WorldServer Game { get; set; }
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }

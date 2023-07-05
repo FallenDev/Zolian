@@ -123,7 +123,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         GameServer.CheckWarpTransitions(damageDealingSprite.Client);
         damageDealingSprite.UpdateAddAndRemove();
         damageDealingSprite.Client.UpdateDisplay();
-        damageDealingSprite.Client.LastMovement = DateTime.Now;
+        damageDealingSprite.Client.LastMovement = DateTime.UtcNow;
     }
 
     public void Train(IGameClient client, Skill skill)
@@ -176,7 +176,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         // Animation
         attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
         attacker.Show(Scope.NearbyAislings, action);
-        skill.LastUsedSkill = DateTime.Now;
+        skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
         attacker.Animate(387);
     }
@@ -197,7 +197,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
         // Animation
         attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
-        skill.LastUsedSkill = DateTime.Now;
+        skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
         attacker.Animate(387);
     }

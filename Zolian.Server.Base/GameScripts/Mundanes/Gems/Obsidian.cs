@@ -91,13 +91,13 @@ public class Obsidian : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Obsidian");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Obsidian", 1);
                     client.GiveExp(255000);
-                    client.SendMessage(0x03, "Refining success! 255,000 exp");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 255,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Obsidian", 1);
-                    client.SendMessage(0x03, "Refining process failed!");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;

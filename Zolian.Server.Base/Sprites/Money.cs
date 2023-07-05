@@ -24,8 +24,8 @@ public sealed class Money : Sprite
 
         var money = new Money();
         money.CalcAmount(amount);
-        money.Serial = Generator.GenerateNumber();
-        var readyTime = DateTime.Now;
+        money.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        var readyTime = DateTime.UtcNow;
         money.AbandonedDate = readyTime;
         money.CurrentMapId = parent.CurrentMapId;
         money.Pos = new Vector2(location.X, location.Y);
@@ -40,7 +40,7 @@ public sealed class Money : Sprite
     {
         if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
         {
-            aisling.Client.SendMessage(0x03, "Can't quite hold that much.");
+            aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Can't quite hold that much.");
             return;
         }
 
@@ -49,7 +49,7 @@ public sealed class Money : Sprite
         if (aisling.GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
             aisling.GoldPoints = int.MaxValue;
 
-        aisling.Client.SendMessage(0x03, $"You've received {amount} coins.");
+        aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
         aisling.Client.Send(new ServerFormat08(aisling, StatusFlags.StructC));
 
         Remove();

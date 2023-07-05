@@ -126,7 +126,7 @@ public class ClassChooser : MundaneScript
             }
             else
             {
-                client.SendMessage(0x03, "An error occurred, try again.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "An error occurred, try again.");
                 TopMenu(client);
             }
         }
@@ -137,7 +137,7 @@ public class ClassChooser : MundaneScript
         var legend = new Legend.LegendItem
         {
             Category = "Class",
-            Time = DateTime.Now,
+            Time = DateTime.UtcNow,
             Color = LegendColor.Blue,
             Icon = (byte)LegendIcon.Victory,
             Value = $"Devoted to the path of {path}"
@@ -148,7 +148,7 @@ public class ClassChooser : MundaneScript
         var legendItem = new Legend.LegendItem
         {
             Category = "Alpha Aisling",
-            Time = DateTime.Now,
+            Time = DateTime.UtcNow,
             Color = LegendColor.Yellow,
             Icon = (byte)LegendIcon.Heart,
             Value = "Enduring Alpha Testing"
@@ -202,7 +202,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -247,7 +247,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -291,7 +291,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -334,7 +334,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -377,7 +377,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -425,7 +425,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            client.SendMessage(0x03, "You can not hold anymore.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 

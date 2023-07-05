@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 using Darkages.Enums;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -10,8 +11,8 @@ namespace Darkages.Interfaces;
 
 public interface ISprite
 {
-    GameClient Client { get; set; }
-    int Serial { get; set; }
+    WorldClient Client { get; set; }
+    uint Serial { get; set; }
     int CurrentMapId { get; set; }
     double Amplified { get; set; }
     ElementManager.Element OffenseElement { get; set; }
@@ -86,7 +87,7 @@ public interface ISprite
 
     bool CanBeAttackedHere(Sprite source);
     void NotifyPropertyChanged([CallerMemberName] string propertyName = "");
-    void Show<T>(Scope op, T format, IEnumerable<Sprite> definer = null) where T : NetworkFormat;
+    void Show<T>(WorldServer server, Scope op, T format, IEnumerable<Sprite> definer = null) where T : WorldServer
     void ShowTo(Aisling nearbyAisling);
     List<Sprite> GetAllInFront(Sprite sprite, int tileCount = 1);
     List<Sprite> GetAllInFront(int tileCount = 1, bool intersect = false);

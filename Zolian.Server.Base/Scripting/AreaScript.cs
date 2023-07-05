@@ -14,10 +14,10 @@ public abstract class AreaScript : IScriptBase
     protected AreaScript(Area area) => Area = area;
     public abstract void Update(TimeSpan elapsedTime);
         
-    public virtual void OnMapEnter(GameClient client) { }
-    public virtual void OnMapExit(GameClient client) { }
-    public virtual void OnMapClick(GameClient client, int x, int y) { }
-    public virtual void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public virtual void OnItemDropped(GameClient client, Item item, Position location) { }
-    public virtual void OnGossip(GameClient client, string message) { }
+    public virtual void OnMapEnter(WorldClient client) { }
+    public virtual void OnMapExit(WorldClient client) { }
+    public virtual void OnMapClick(WorldClient client, int x, int y) { }
+    public virtual void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public virtual void OnItemDropped(WorldClient client, Item item, Position location) { }
+    public virtual void OnGossip(WorldClient client, string message) { }
 }

@@ -652,7 +652,7 @@ public class Enticed : SkillScript
                 Type = 0x03
             });
 
-            charmImmCheck.Client.SendMessage(0x03, "{=qYou are immune to Entice");
+            charmImmCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Entice");
             return;
         }
 
@@ -714,7 +714,7 @@ public class Enticed : SkillScript
                                 Type = 0x03
                             });
 
-                            damageDealingTarget.Client.SendMessage(0x03, "{=qYou are immune to Entice");
+                            damageDealingTarget.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Entice");
                             return;
                         }
 

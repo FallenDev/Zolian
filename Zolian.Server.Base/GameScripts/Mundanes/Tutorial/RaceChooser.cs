@@ -243,8 +243,8 @@ public class RaceChooser : MundaneScript
                 Task.Delay(1300).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
                 Task.Delay(1500).ContinueWith(ct => { client.Aisling.Animate(303); });
                 client.CloseDialog();
-                client.SendMessage(0x03, "Was that a dream?");
-                Task.Delay(2000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cYou start to feel newly found powers surge within you"); });
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
+                Task.Delay(2000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });
             }
                 return;
             case 0x12:

@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Network.Server;
@@ -10,7 +11,7 @@ public class PlayerRegenerationComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(1));
 
-    public PlayerRegenerationComponent(GameServer server) : base(server) { }
+    public PlayerRegenerationComponent(WorldServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
@@ -19,58 +20,58 @@ public class PlayerRegenerationComponent : GameServerComponent
 
     private static void UpdatePlayerRegeneration()
     {
-        if (!ServerSetup.Instance.Running || ServerSetup.Instance.Game.Clients == null) return;
-        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: not null }))
+        if (!ServerSetup.Instance.Running || Server.Aislings == null) return;
+        foreach (var player in Server.Aislings)
         {
-            if (!client.Aisling.LoggedIn) continue;
-            if (client.Aisling.RegenTimerDisabled) continue;
-            if (client.Aisling.Poisoned) continue;
-            if (client.Aisling.IsDead()) continue;
+            if (!player.LoggedIn) continue;
+            if (player.RegenTimerDisabled) continue;
+            if (player.Poisoned) continue;
+            if (player.IsDead()) continue;
 
-            if (client.Aisling.CurrentHp == client.Aisling.MaximumHp &&
-                client.Aisling.CurrentMp == client.Aisling.MaximumMp) continue;
+            if (player.CurrentHp == player.MaximumHp &&
+                player.CurrentMp == player.MaximumMp) continue;
 
-            lock (client.SyncClient)
+            lock (player.Client.SyncClient)
             {
-                if (client.Aisling.CurrentHp > client.Aisling.MaximumHp)
+                if (player.CurrentHp > player.MaximumHp)
                 {
-                    client.Aisling.CurrentHp = client.Aisling.MaximumHp;
-                    client.SendStats(StatusFlags.Health);
+                    player.CurrentHp = player.MaximumHp;
+                    player.Client.SendAttributes(StatUpdateType.Vitality);
                 }
 
-                if (client.Aisling.CurrentMp > client.Aisling.MaximumMp)
+                if (player.CurrentMp > player.MaximumMp)
                 {
-                    client.Aisling.CurrentMp = client.Aisling.MaximumMp;
-                    client.SendStats(StatusFlags.Health);
+                    player.CurrentMp = player.MaximumMp;
+                    player.Client.SendAttributes(StatUpdateType.Vitality);
                 }
 
-                if (client.Aisling.Path == Class.Peasant | client.Aisling.GameMaster)
+                if (player.Path == Class.Peasant | player.GameMaster)
                 {
-                    client.Aisling.Recover();
+                    player.Recover();
                 }
 
-                if (client.Aisling.CurrentMp < 1) client.Aisling.CurrentMp = 1;
+                if (player.CurrentMp < 1) player.CurrentMp = 1;
 
-                var hpRegenSeed = HpRegenSoftCap(client);
-                var mpRegenSeed = MpRegenSoftCap(client);
-                var hpHardCap = Math.Abs(client.Aisling.BaseHp / 3.00);
-                var mpHardCap = Math.Abs(client.Aisling.BaseMp / 3.00);
+                var hpRegenSeed = HpRegenSoftCap(player.Client);
+                var mpRegenSeed = MpRegenSoftCap(player.Client);
+                var hpHardCap = Math.Abs(player.BaseHp / 3.00);
+                var mpHardCap = Math.Abs(player.BaseMp / 3.00);
                 var performedRegen = false;
 
-                if (client.Aisling.CurrentHp < client.Aisling.MaximumHp)
+                if (player.CurrentHp < player.MaximumHp)
                 {
-                    RegenHpCalculator(client, hpRegenSeed, hpHardCap);
+                    RegenHpCalculator(player.Client, hpRegenSeed, hpHardCap);
                     performedRegen = true;
                 }
 
-                if (client.Aisling.CurrentMp < client.Aisling.MaximumMp)
+                if (player.CurrentMp < player.MaximumMp)
                 {
-                    RegenMpCalculator(client, mpRegenSeed, mpHardCap);
+                    RegenMpCalculator(player.Client, mpRegenSeed, mpHardCap);
                     performedRegen = true;
                 }
 
                 if (performedRegen)
-                    client.SendStats(StatusFlags.Health);
+                    player.Client.SendAttributes(StatUpdateType.Vitality);
             }
         }
     }
@@ -121,27 +122,26 @@ public class PlayerRegenerationComponent : GameServerComponent
         var hpRegenSeed = client.Aisling.Regen switch
         {
             >= 0 and <= 9 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.00,
-            >= 10 and <= 19 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.10,
-            >= 20 and <= 29 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.20,
-            >= 30 and <= 39 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.30,
-            >= 40 and <= 49 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.40,
-            >= 50 and <= 59 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.50,
-            >= 60 and <= 69 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.60,
-            >= 70 and <= 79 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.70,
-            >= 80 and <= 89 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.80,
-            >= 90 and <= 99 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.90,
-            >= 100 and <= 109 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.00,
-            >= 110 and <= 119 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.10,
-            >= 120 and <= 129 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.20,
-            >= 130 and <= 139 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.30,
-            >= 140 and <= 149 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.40,
-            >= 150 and <= 159 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.50,
-            >= 160 and <= 169 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.60,
-            >= 170 and <= 179 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.70,
-            >= 180 and <= 189 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.80,
-            >= 190 and <= 199 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.90,
-            >= 200 => Math.Abs(conMod + client.Aisling.ExpLevel) * 3.00,
-            _ => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.00,
+            <= 19 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.10,
+            <= 29 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.20,
+            <= 39 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.30,
+            <= 49 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.40,
+            <= 59 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.50,
+            <= 69 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.60,
+            <= 79 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.70,
+            <= 89 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.80,
+            <= 99 => Math.Abs(conMod + client.Aisling.ExpLevel) * 1.90,
+            <= 109 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.00,
+            <= 119 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.10,
+            <= 129 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.20,
+            <= 139 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.30,
+            <= 149 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.40,
+            <= 159 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.50,
+            <= 169 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.60,
+            <= 179 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.70,
+            <= 189 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.80, 
+            <= 199 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.90,
+            _ => Math.Abs(conMod + client.Aisling.ExpLevel) * 3.00
         };
 
         var healthMod = client.Aisling.BaseHp * 0.005;
@@ -154,27 +154,26 @@ public class PlayerRegenerationComponent : GameServerComponent
         var mpRegenSeed = client.Aisling.Regen switch
         {
             >= 0 and <= 9 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.00,
-            >= 10 and <= 19 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.10,
-            >= 20 and <= 29 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.20,
-            >= 30 and <= 39 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.30,
-            >= 40 and <= 49 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.40,
-            >= 50 and <= 59 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.50,
-            >= 60 and <= 69 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.60,
-            >= 70 and <= 79 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.70,
-            >= 80 and <= 89 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.80,
-            >= 90 and <= 99 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.90,
-            >= 100 and <= 109 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.00,
-            >= 110 and <= 119 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.10,
-            >= 120 and <= 129 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.20,
-            >= 130 and <= 139 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.30,
-            >= 140 and <= 149 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.40,
-            >= 150 and <= 159 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.50,
-            >= 160 and <= 169 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.60,
-            >= 170 and <= 179 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.70,
-            >= 180 and <= 189 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.80,
-            >= 190 and <= 199 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.90,
-            >= 200 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 3.00,
-            _ => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.00,
+            <= 19 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.10,
+            <= 29 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.20,
+            <= 39 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.30,
+            <= 49 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.40,
+            <= 59 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.50,
+            <= 69 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.60,
+            <= 79 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.70,
+            <= 89 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.80,
+            <= 99 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 1.90,
+            <= 109 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.00,
+            <= 119 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.10,
+            <= 129 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.20,
+            <= 139 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.30,
+            <= 149 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.40,
+            <= 159 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.50,
+            <= 169 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.60,
+            <= 179 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.70,
+            <= 189 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.80,
+            <= 199 => Math.Abs(wisMod + client.Aisling.ExpLevel) * 2.90,
+            _ => Math.Abs(wisMod + client.Aisling.ExpLevel) * 3.00
         };
 
         var manaMod = client.Aisling.BaseMp * 0.005;

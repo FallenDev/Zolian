@@ -15,7 +15,7 @@ public class MonolithComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer;
 
-    public MonolithComponent(GameServer server) : base(server)
+    public MonolithComponent(WorldServer server) : base(server)
     {
         _timer = new GameServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalSpawnTimer));
     }

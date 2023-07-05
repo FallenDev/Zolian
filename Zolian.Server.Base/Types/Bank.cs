@@ -1,11 +1,12 @@
 ﻿using System.Data;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Dapper;
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Sprites;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
@@ -19,13 +20,13 @@ public class Bank : IBank
 {
     public Bank()
     {
-        Items = new Dictionary<int, Item>();
+        Items = new Dictionary<uint, Item>();
     }
 
     private SemaphoreSlim CreateLock1 { get; } = new(1, 1);
     private SemaphoreSlim CreateLock2 { get; } = new(1, 1);
     private SemaphoreSlim SaveLock { get; } = new(1, 1);
-    public Dictionary<int, Item> Items { get; }
+    public Dictionary<uint, Item> Items { get; }
 
     public async Task<bool> Deposit(GameClient client, Item item)
     {
@@ -75,7 +76,7 @@ public class Bank : IBank
                     if (temp.Stacks + (ushort)stacked > temp.Template.MaxStack)
                     {
                         client.CloseDialog();
-                        client.SendMessage(0x03, "Sorry we can't hold that many.");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Sorry we can't hold that many.");
                         temp.GiveTo(client.Aisling);
                         return false;
                     }
@@ -161,7 +162,7 @@ public class Bank : IBank
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.Client.SendMessage(0x03, "Item did not save correctly. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item did not save correctly. Contact GM");
                 Crashes.TrackError(e);
                 return;
             }
@@ -352,7 +353,7 @@ public class Bank : IBank
         {
             // give player item with updated stacks count
             client.PendingBankedSession.SelectedItem.Stacks = (ushort)client.PendingBankedSession.ArgsQuantity;
-            client.PendingBankedSession.SelectedItem.Serial = Generator.GenerateNumber();
+            client.PendingBankedSession.SelectedItem.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             client.PendingBankedSession.SelectedItem.GiveTo(client.Aisling);
 
             // bank item updated with stack count
@@ -377,7 +378,7 @@ public class Bank : IBank
                 {
                     // give player item with updated stacks count
                     client.PendingBankedSession.SelectedItem.Stacks = (ushort)client.PendingBankedSession.ArgsQuantity;
-                    client.PendingBankedSession.SelectedItem.Serial = Generator.GenerateNumber();
+                    client.PendingBankedSession.SelectedItem.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
                     client.PendingBankedSession.SelectedItem.GiveTo(client.Aisling);
                     client.Aisling.BankManager.Items.TryRemove(client.PendingBankedSession.ItemId, out _);
                     DeleteFromAislingDb(client);
@@ -387,7 +388,7 @@ public class Bank : IBank
         }
 
         // default normal items
-        client.PendingBankedSession.SelectedItem.Serial = Generator.GenerateNumber();
+        client.PendingBankedSession.SelectedItem.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         client.PendingBankedSession.SelectedItem.GiveTo(client.Aisling);
         client.Aisling.BankManager.Items.TryRemove(client.PendingBankedSession.ItemId, out _);
         DeleteFromAislingDb(client);

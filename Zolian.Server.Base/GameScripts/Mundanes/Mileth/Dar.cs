@@ -391,7 +391,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(8000);
-                    client.SendMessage(0x03, "You've gained 8,000 experience.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                     client.SendStats(StatusFlags.WeightMoney);
                     client.SendOptionsDialog(Mundane, $"Ah, there it is.. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
                 }
@@ -429,7 +429,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(advExp);
-                    client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                     client.SendStats(StatusFlags.WeightMoney);
                     client.SendOptionsDialog(Mundane, $"Hic! That's what I was looking for. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
                 }
@@ -467,7 +467,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(advExp2);
-                    client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                     client.SendStats(StatusFlags.WeightMoney);
                     client.SendOptionsDialog(Mundane,
                         "I must of passed out again. Thank you, this will advance my research.");
@@ -483,7 +483,7 @@ public class Dar : MundaneScript
                     var item = new Legend.LegendItem
                     {
                         Category = "Adventure",
-                        Time = DateTime.Now,
+                        Time = DateTime.UtcNow,
                         Color = LegendColor.Blue,
                         Icon = (byte)LegendIcon.Wizard,
                         Value = "A Dark Favor"

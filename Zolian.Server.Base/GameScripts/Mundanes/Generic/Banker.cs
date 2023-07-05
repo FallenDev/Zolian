@@ -60,7 +60,7 @@ public class Banker : MundaneScript
         if (item == null) return;
         if (!item.Template.Flags.FlagIsSet(ItemFlags.Bankable))
         {
-            client.SendMessage(0x03, "This item cannot be banked.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "This item cannot be banked.");
             Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
             {
                 Serial = Mundane.Serial,

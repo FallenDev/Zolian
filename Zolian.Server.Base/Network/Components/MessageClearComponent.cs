@@ -1,12 +1,12 @@
-﻿using Darkages.Infrastructure;
-using Darkages.Network.Client;
+﻿using Chaos.Common.Definitions;
+using Darkages.Infrastructure;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class MessageClearComponent : GameServerComponent
 {
-    public MessageClearComponent(GameServer server) : base(server)
+    public MessageClearComponent(WorldServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MessageClearInterval));
     }
@@ -20,21 +20,12 @@ public class MessageClearComponent : GameServerComponent
 
     private void Message()
     {
-        lock (Server.Clients)
+        foreach (var player in Server.Aislings)
         {
-            foreach (var client in Server.Clients.Values.Where(Predicate).Where(Selector))
-                client.SendMessage(0x01, "\u0000");
+            if (player.Client == null) continue;
+            var readyTime = DateTime.UtcNow;
+            if ((readyTime - player.Client.LastMessageSent).TotalSeconds > 5)
+                player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "\u0000");
         }
-    }
-
-    private static bool Predicate(GameClient client)
-    {
-        return client?.Aisling != null;
-    }
-
-    private static bool Selector(GameClient client)
-    {
-        var readyTime = DateTime.Now;
-        return (readyTime - client.LastMessageSent).TotalSeconds > 5;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -11,18 +12,18 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
 {
     private long _onClickCheck;
 
-    protected MundaneScript(GameServer server, Mundane mundane)
+    protected MundaneScript(WorldServer server, Mundane mundane)
     {
         Server = server;
         Mundane = mundane;
     }
 
     protected Mundane Mundane { get; init; }
-    protected GameServer Server { get; }
+    protected WorldServer Server { get; }
 
-    public abstract void OnResponse(GameClient client, ushort responseId, string args);
+    public abstract void OnResponse(WorldClient client, ushort responseId, string args);
 
-    public virtual void OnClick(GameClient client, int serial)
+    public virtual void OnClick(WorldClient client, int serial)
     {
         // Entry to this method, generate a random key
         _onClickCheck = Random.Shared.NextInt64();
@@ -38,12 +39,12 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
         client.EntryCheck = serial;
     }
 
-    protected virtual void TopMenu(IGameClient client)
+    protected virtual void TopMenu(WorldClient client)
     {
         if (Mundane.Serial != client.EntryCheck) client.CloseDialog();
     }
 
-    protected bool AuthenticateUser(GameClient client)
+    protected bool AuthenticateUser(WorldClient client)
     {
         // Ensure the user did not spoof their way to the OnResponse
         if (Mundane.Serial != client.EntryCheck) return false;
@@ -64,13 +65,13 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
         return false;
     }
 
-    public virtual void OnGossip(GameClient client, string message) { }
+    public virtual void OnGossip(WorldClient client, string message) { }
     public virtual void TargetAcquired(Sprite target) { }
-    public virtual void OnItemDropped(GameClient client, Item item) { }
+    public virtual void OnItemDropped(WorldClient client, Item item) { }
 
-    public virtual void OnGoldDropped(GameClient client, uint gold)
+    public virtual void OnGoldDropped(WorldClient client, uint gold)
     {
-        client.SendMessage(0x03, "What's this for? Thank you.");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "What's this for? Thank you.");
     }
 
     /// <summary>

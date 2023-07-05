@@ -2321,7 +2321,7 @@ public class Golden_Lair : SkillScript
             _target = entity;
             _buff.OnApplied(_target, _buff);
             aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-            _skill.LastUsedSkill = DateTime.Now;
+            _skill.LastUsedSkill = DateTime.UtcNow;
             _skillMethod.Train(client, _skill);
             aisling.Show(Scope.NearbyAislings, action);
         }
@@ -2426,7 +2426,7 @@ public class Vicious_Roar : SkillScript
         _target = aisling;
         _buff.OnApplied(_target, _buff);
         aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-        _skill.LastUsedSkill = DateTime.Now;
+        _skill.LastUsedSkill = DateTime.UtcNow;
         _skillMethod.Train(client, _skill);
         aisling.Show(Scope.NearbyAislings, action);
     }

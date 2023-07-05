@@ -123,7 +123,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
@@ -145,7 +145,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
@@ -167,7 +167,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
@@ -189,7 +189,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
@@ -211,7 +211,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
@@ -233,7 +233,7 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            client.SendMessage(0x03, "You've gained 3,500,000 experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendStats(StatusFlags.WeightMoney);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");

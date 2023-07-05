@@ -91,13 +91,13 @@ public class CobaltSteel : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Cobalt Steel");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Cobalt Steel", 1);
                     client.GiveExp(121000);
-                    client.SendMessage(0x03, "Refining success! 121,000 exp");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 121,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Cobalt Steel", 1);
-                    client.SendMessage(0x03, "Refining process failed!");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;

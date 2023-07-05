@@ -48,7 +48,6 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         _clientProvider = clientProvider;
         _notification = Notification.FromFile("Notification.txt");
         CreateCharRequests = new ConcurrentDictionary<uint, CreateCharRequestArgs>();
-
         IndexHandlers();
     }
 
@@ -110,7 +109,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
             if (CreateCharRequests.TryGetValue(localClient.Id, out var requestArgs))
             {
                 var (hairStyle, gender, hairColor) = localArgs;
-                var readyTime = DateTime.Now;
+                var readyTime = DateTime.UtcNow;
                 var maximumHp = Random.Shared.Next(128, 165);
                 var maximumMp = Random.Shared.Next(30, 45);
                 var user = new Aisling

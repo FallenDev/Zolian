@@ -1,14 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Dapper;
 
-using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Templates;
 using Darkages.Types;
@@ -113,8 +112,8 @@ public sealed class Item : Sprite, IItem
     public bool Tarnished { get; set; }
     public Quality ItemQuality { get; set; }
     public Quality OriginalQuality { get; set; }
-    public int ItemId { get; set; }
-    public int Owner { get; set; }
+    public uint ItemId { get; set; }
+    public uint Owner { get; set; }
     public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public byte InventorySlot { get; set; }
     public byte Slot { get; set; }
@@ -242,7 +241,7 @@ public sealed class Item : Sprite, IItem
         if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
 
         var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
             AbandonedDate = readyTime,
@@ -329,8 +328,8 @@ public sealed class Item : Sprite, IItem
             obj.WeapVariance = WeaponVariance.None;
         }
 
-        obj.Serial = Generator.GenerateNumber();
-        obj.ItemId = Generator.GenerateNumber();
+        obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -352,7 +351,7 @@ public sealed class Item : Sprite, IItem
         if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
 
         var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
             AbandonedDate = readyTime,
@@ -402,8 +401,8 @@ public sealed class Item : Sprite, IItem
             obj.Durability = 0;
         }
 
-        obj.Serial = Generator.GenerateNumber();
-        obj.ItemId = Generator.GenerateNumber();
+        obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -416,7 +415,7 @@ public sealed class Item : Sprite, IItem
         if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
 
         var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
             AbandonedDate = readyTime,
@@ -448,8 +447,8 @@ public sealed class Item : Sprite, IItem
             obj.Durability = 0;
         }
 
-        obj.Serial = Generator.GenerateNumber();
-        obj.ItemId = Generator.GenerateNumber();
+        obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -489,7 +488,7 @@ public sealed class Item : Sprite, IItem
     {
         if (owner == null) return null;
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
             AbandonedDate = readyTime,
@@ -510,8 +509,8 @@ public sealed class Item : Sprite, IItem
             WeapVariance = WeaponVariance.None
         };
 
-        obj.Serial = Generator.GenerateNumber();
-        obj.ItemId = Generator.GenerateNumber();
+        obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         return obj;
     }
@@ -520,7 +519,7 @@ public sealed class Item : Sprite, IItem
     {
         if (sprite is not Aisling aisling) return true;
         if (aisling.CurrentWeight + Template.CarryWeight <= aisling.MaximumWeight) return true;
-        aisling.Client.SendMessage(Scope.Self, 0x02, $"{ServerSetup.Instance.Config.ToWeakToLift}");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.ToWeakToLift}");
         return false;
     }
 
@@ -543,9 +542,9 @@ public sealed class Item : Sprite, IItem
             if (item != null)
             {
                 aisling.Inventory.AddRange(aisling.Client, item, numStacks);
-                aisling.Client.SendMessage(Scope.Self, 0x02, $"Received {DisplayName}, You now have {(item.Stacks == 0 ? item.Stacks + 1 : item.Stacks)}");
-                aisling.Client.SendStats(StatusFlags.WeightMoney);
-
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Received {DisplayName}, You now have {(item.Stacks == 0 ? item.Stacks + 1 : item.Stacks)}");
+                aisling.Client.SendAttributes(StatUpdateType.Primary);
+                aisling.Client.SendAttributes(StatUpdateType.ExpGold);
                 return true;
             }
 
@@ -560,16 +559,16 @@ public sealed class Item : Sprite, IItem
 
             if (InventorySlot >= 60)
             {
-                aisling.Client.SendMessage(Scope.Self, 0x02, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
                 return false;
             }
 
-            aisling.Client.Send(new ServerFormat10(InventorySlot));
+            aisling.Client.SendRemoveItemFromPane(InventorySlot);
             aisling.Inventory.Set(this);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
             aisling.Inventory.UpdatePlayersWeight(aisling.Client);
-            aisling.Client?.SendStats(StatusFlags.WeightMoney);
-
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            aisling.Client.SendAttributes(StatUpdateType.ExpGold);
             return true;
         }
 
@@ -582,7 +581,7 @@ public sealed class Item : Sprite, IItem
 
             if (InventorySlot == byte.MaxValue)
             {
-                aisling.Client.SendMessage(Scope.Self, 0x02, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
                 return false;
             }
 
@@ -593,8 +592,8 @@ public sealed class Item : Sprite, IItem
             aisling.Inventory.Set(this);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
             aisling.Inventory.UpdatePlayersWeight(aisling.Client);
-            aisling.Client?.SendStats(StatusFlags.WeightMoney);
-
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            aisling.Client.SendAttributes(StatUpdateType.ExpGold);
             return true;
         }
 
@@ -606,7 +605,7 @@ public sealed class Item : Sprite, IItem
     {
         Pos = new Vector2(position.X, position.Y);
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         CurrentMapId = owner.CurrentMapId;
         AbandonedDate = readyTime;
 
@@ -617,8 +616,8 @@ public sealed class Item : Sprite, IItem
             if (delete) DeleteFromAislingDb();
         }
 
-        Serial = Generator.GenerateNumber();
-        //ItemId = Generator.GenerateNumber();
+        Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        //ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         AddObject(this);
 
@@ -655,7 +654,7 @@ public sealed class Item : Sprite, IItem
     /// <summary>
     /// Removes all item bonuses, then reapplies them on item change
     /// </summary>
-    public void ReapplyItemModifiers(GameClient client)
+    public void ReapplyItemModifiers(WorldClient client)
     {
         if (client?.Aisling == null) return;
 
@@ -693,10 +692,10 @@ public sealed class Item : Sprite, IItem
 
         var ac = client.Aisling.Ac.ToString();
         var regen = client.Aisling.Regen.ToString();
-        client.SendMessage(0x03, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
     }
 
-    public void RemoveModifiers(GameClient client)
+    public void RemoveModifiers(WorldClient client)
     {
         if (client?.Aisling == null) return;
         client.Aisling.BonusAc = 0;
@@ -730,7 +729,7 @@ public sealed class Item : Sprite, IItem
         client.Aisling.Dawn = 0;
     }
 
-    public void StatModifiersCalc(GameClient client, Item equipment)
+    public void StatModifiersCalc(WorldClient client, Item equipment)
     {
         client.Aisling.BonusAc += equipment.Template.AcModifer;
         client.Aisling.BonusMr += (byte)equipment.Template.MrModifer;
@@ -746,7 +745,7 @@ public sealed class Item : Sprite, IItem
         client.Aisling.BonusDmg += (byte)equipment.Template.DmgModifer;
     }
 
-    public void SpellLines(GameClient client)
+    public void SpellLines(WorldClient client)
     {
         for (var i = 0; i < client.Aisling.SpellBook.Spells.Count; i++)
         {
@@ -802,9 +801,9 @@ public sealed class Item : Sprite, IItem
         }
     }
 
-    public void ItemVarianceCalc(GameClient client, Item equipment)
+    public void ItemVarianceCalc(WorldClient client, Item equipment)
     {
-        Dictionary<Variance, Action<GameClient>> varianceActions = new()
+        Dictionary<Variance, Action<WorldClient>> varianceActions = new()
         {
             {Variance.Embunement, c => c.Aisling.BonusHit += 5},
             {Variance.Blessing, c => c.Aisling.BonusDmg += 2},
@@ -827,9 +826,9 @@ public sealed class Item : Sprite, IItem
         }
     }
 
-    public void WeaponVarianceCalc(GameClient client, Item equipment)
+    public void WeaponVarianceCalc(WorldClient client, Item equipment)
     {
-        Dictionary<WeaponVariance, Action<GameClient>> varianceActions = new()
+        Dictionary<WeaponVariance, Action<WorldClient>> varianceActions = new()
         {
             {WeaponVariance.Bleeding, c => c.Aisling.Bleeding += 1},
             {WeaponVariance.Rending, c => c.Aisling.Rending += 1},
@@ -851,7 +850,7 @@ public sealed class Item : Sprite, IItem
         }
     }
 
-    public void QualityVarianceCalc(GameClient client, Item equipment)
+    public void QualityVarianceCalc(WorldClient client, Item equipment)
     {
         if (Tarnished) return;
 
@@ -884,15 +883,15 @@ public sealed class Item : Sprite, IItem
     }
 
 
-    public void UpdateSpellSlot(GameClient client, byte slot)
+    public void UpdateSpellSlot(WorldClient client, byte slot)
     {
         var a = client.Aisling.SpellBook.Remove(slot);
-        client.Send(new ServerFormat18(slot));
+        client.SendRemoveSpellFromPane(slot);
 
         if (a == null) return;
         a.Slot = slot;
         client.Aisling.SpellBook.Set(a);
-        client.Send(new ServerFormat17(a));
+        client.SendAddSpellToPane(a);
     }
 }
 

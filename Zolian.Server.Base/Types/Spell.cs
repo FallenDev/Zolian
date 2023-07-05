@@ -42,7 +42,7 @@ public class Spell
 
     public static Spell Create(int slot, SpellTemplate spellTemplate)
     {
-        var spellID = Generator.GenerateNumber();
+        var spellID = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         var obj = new Spell
         {
             Template = spellTemplate,
@@ -87,7 +87,7 @@ public class Spell
             var cmd = new SqlCommand("SpellToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var spellId = Generator.GenerateNumber();
+            var spellId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var spellNameReplaced = spell.Template.ScriptName;
 
             cmd.Parameters.Add("@SpellId", SqlDbType.Int).Value = spellId;
@@ -107,7 +107,7 @@ public class Spell
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
-                client.SendMessage(0x03, "Issue saving spell on issue. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -158,7 +158,7 @@ public class Spell
             var cmd = new SqlCommand("SpellToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var spellId = Generator.GenerateNumber();
+            var spellId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var spellNameReplaced = spell.Template.ScriptName;
 
             cmd.Parameters.Add("@SpellId", SqlDbType.Int).Value = spellId;
@@ -178,7 +178,7 @@ public class Spell
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
-                aisling.Client.SendMessage(0x03, "Issue saving spell on issue. Contact GM");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }

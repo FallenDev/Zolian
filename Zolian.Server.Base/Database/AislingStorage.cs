@@ -81,7 +81,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Your password did not save. Try again.");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your password did not save. Try again.");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -203,17 +203,17 @@ public record AislingStorage : Sql, IAislingStorage
             ExecuteAndCloseConnection(cmd, connection);
 
             if (skills == false)
-                obj.Client.SendMessage(0x03, "Issue with skills save. (Code: Morning Star)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with skills save. (Code: Morning Star)");
             if (spells == false)
-                obj.Client.SendMessage(0x03, "Issue with spells save. (Code: New Dawn)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with spells save. (Code: New Dawn)");
             if (inventory == false)
-                obj.Client.SendMessage(0x03, "Issue with inventory save. (Code: Dying Light)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with inventory save. (Code: Dying Light)");
         }
         catch (SqlException e)
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Your character did not save. Contact GM (Code: Quick)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Quick)");
                 Crashes.TrackError(e);
                 return;
             }
@@ -323,7 +323,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Your character did not save. Contact GM (Code: Long)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Long)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -368,7 +368,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Your skills did not save. Contact GM (Code: Slash)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skills did not save. Contact GM (Code: Slash)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -409,7 +409,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Your spells did not save. Contact GM (Code: Blast)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your spells did not save. Contact GM (Code: Blast)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -442,7 +442,7 @@ public record AislingStorage : Sql, IAislingStorage
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "InventoryUpdate" : "InventoryInsert", connection);
 
                 if (!updateIfExists && checkIfAnotherPlayerHas)
-                    item.ItemId = Generator.GenerateNumber();
+                    item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
                 var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
@@ -473,7 +473,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -682,10 +682,10 @@ public record AislingStorage : Sql, IAislingStorage
     {
         await CreateLock.WaitAsync().ConfigureAwait(false);
 
-        var serial = Generator.GenerateNumber();
-        var discovered = Generator.GenerateNumber();
-        var item = Generator.GenerateNumber();
-        var skills = Generator.GenerateNumber();
+        var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        var discovered = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        var item = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        var skills = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         try
         {
@@ -793,7 +793,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendMessage(0x03, "Issue creating player. Error: Phoenix");
+                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue creating player. Error: Phoenix");
                 Crashes.TrackError(e);
                 return;
             }

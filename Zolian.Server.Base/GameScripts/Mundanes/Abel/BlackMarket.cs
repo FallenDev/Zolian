@@ -177,7 +177,7 @@ public class BlackMarket : MundaneScript
                     client.Recover();
                     client.TransitionToMap(3003, new Position(5, 9));
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(1); });
-                    client.SendMessage(0x03, "Always watch your six.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Always watch your six.");
                 }
             }
                 break;

@@ -24,14 +24,14 @@ public class Weapon : ItemScript
         {
             if (!client.Aisling.UseBows)
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require a unique skill for this.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
 
             var i = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require both hands to equip such an item.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
             }
         }
@@ -41,14 +41,14 @@ public class Weapon : ItemScript
         {
             if (!client.Aisling.TwoHandedBasher)
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require a unique skill for this.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
 
             var i = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require both hands to equip such an item.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
             }
         }
@@ -58,14 +58,14 @@ public class Weapon : ItemScript
         {
             if (!client.Aisling.TwoHandedCaster)
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require a unique skill for this.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
 
             var i = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
             {
-                aisling.Client.SendMessage(0x03, "{=cYou require both hands to equip such an item.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
             }
         }
@@ -80,7 +80,7 @@ public class Weapon : ItemScript
                         var mainHand = weaponSlot.Item;
                         if (mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
                         {
-                            aisling.Client.SendMessage(0x03, "{=cYou couldn't possibly grip anything else.");
+                            aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou couldn't possibly grip anything else.");
                             return;
                         }
                     }
@@ -103,7 +103,7 @@ public class Weapon : ItemScript
 
             if (equipSlot == ItemSlots.Shield)
             {
-                aisling.Client.SendMessage(0x03, $"{{=c{Item.NoColorDisplayName} equipped to your off-hand.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Item.NoColorDisplayName} equipped to your off-hand.");
             }
 
             if (client.CheckReqs(client, Item))

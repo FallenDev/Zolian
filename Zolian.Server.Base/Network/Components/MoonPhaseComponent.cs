@@ -11,7 +11,7 @@ public class MoonPhaseComponent : GameServerComponent
     private readonly GameServerTimer _timer = new(TimeSpan.FromHours(2.0f));
     private double _dayStored;
 
-    public MoonPhaseComponent(GameServer server) : base(server)
+    public MoonPhaseComponent(WorldServer server) : base(server)
     {
         _dayStored = DateTime.Today.Day;
     }
@@ -24,7 +24,7 @@ public class MoonPhaseComponent : GameServerComponent
 
     private void UpdateMoonPhase()
     {
-        var moonCalc = MoonCalc.GetMoonIllumination(DateTime.Now);
+        var moonCalc = MoonCalc.GetMoonIllumination(DateTime.UtcNow);
         _dayStored = moonCalc.Fraction;
 
         ServerSetup.Instance.MoonPhase = _dayStored switch

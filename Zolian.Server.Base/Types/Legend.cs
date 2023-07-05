@@ -59,7 +59,7 @@ public class Legend
             var cmd = new SqlCommand("AddLegendMark", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var legendId = Generator.GenerateNumber();
+            var legendId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
             cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
@@ -77,7 +77,7 @@ public class Legend
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.Client.SendMessage(0x03, "Issue saving legend mark. Contact GM");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving legend mark. Contact GM");
                 Crashes.TrackError(e);
                 return;
             }

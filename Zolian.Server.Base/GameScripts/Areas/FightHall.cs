@@ -21,7 +21,7 @@ public class FightHall : AreaScript
         if (_aisling.Map.ID != 195) return;
         if (!_aisling.Client.Aisling.IsDead()) return;
         _aisling.Client.GhostFormToAisling();
-        _aisling.Client.SendMessage(0x03, "Be careful out there.");
+        _aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Be careful out there.");
     }
 
     public override void OnMapEnter(GameClient client)
@@ -31,7 +31,7 @@ public class FightHall : AreaScript
         if (_aisling.Map.ID != 195) return;
         if (!_aisling.Client.Aisling.IsDead()) return;
         _aisling.Client.GhostFormToAisling();
-        _aisling.Client.SendMessage(0x03, "Be careful out there.");
+        _aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Be careful out there.");
     }
 
     public override void OnMapExit(GameClient client) { }

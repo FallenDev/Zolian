@@ -304,7 +304,7 @@ public class DestructiveForce : SpellScript
     {
         var targetPosition = _target.GetPendingThrowPosition(2, _target);
         var hasHitOffWall = _target.GetPendingThrowIsWall(2, _target);
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         var response = new ServerFormat0C
         {
             Direction = _target.Direction,

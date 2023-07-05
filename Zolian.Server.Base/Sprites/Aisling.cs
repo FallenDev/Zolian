@@ -1,13 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-
+using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Templates;
 using Darkages.Types;
+using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Sprites;
 
@@ -19,7 +19,6 @@ public class KillRecord
 
 public class IgnoredRecord
 {
-    public int Id { get; init; }
     public int Serial { get; init; }
     public string PlayerIgnored { get; init; }
 }
@@ -29,6 +28,11 @@ public sealed class Aisling : Player, IAisling
     public int EquipmentDamageTaken = 0;
     public readonly ConcurrentDictionary<int, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
+    public new AislingTrackers Trackers
+    {
+        get => (AislingTrackers)base.Trackers;
+        private set => base.Trackers = value;
+    }
 
     public uint MaximumWeight => GameMaster switch
     {
@@ -301,7 +305,7 @@ public sealed class Aisling : Player, IAisling
     {
         if (skill == null) return;
         if (!skill.Ready && skill.Template.SkillType != SkillScope.Assail)
-            Client.SendMessage(0x03, $"{skill.Name} not ready yet.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
         skill.CurrentCooldown = skill.Template.Cooldown;
         Client.Send(new ServerFormat3F(1, skill.Slot, skill.CurrentCooldown));
     }
@@ -352,7 +356,7 @@ public sealed class Aisling : Player, IAisling
     {
         if (spell.InUse)
         {
-            Client.SendMessage(0x03, "Currently casting a similar spell");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Currently casting a similar spell");
             return;
         }
 
@@ -392,7 +396,7 @@ public sealed class Aisling : Player, IAisling
             }
             else
             {
-                Client.SendMessage(0x03, "Issue casting spell; Code: Crocodile");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue casting spell; Code: Crocodile");
             }
         }
 

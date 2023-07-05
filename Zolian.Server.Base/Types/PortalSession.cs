@@ -8,7 +8,7 @@ public class PortalSession : IPortalSession
 {
     public void TransitionToMap(GameClient client, int destinationMap = 0)
     {
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
         client.ResetLocation(client);
 

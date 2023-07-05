@@ -16,7 +16,7 @@ public interface IWorldClient : ISocketClient
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
-    void SendAnimation(ushort casterEffect, ushort targetEffect, short speed, uint casterSerial = 0, uint targetSerial = 0, Position position = null);
+    void SendAnimation(ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null);
     void SendAttributes(StatUpdateType statUpdateType);
     //void SendBoard();
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);

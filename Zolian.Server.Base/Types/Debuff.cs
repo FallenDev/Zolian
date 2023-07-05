@@ -96,7 +96,7 @@ public class Debuff : IDebuff
             var cmd = new SqlCommand("InsertDeBuff", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var deBuffId = Generator.GenerateNumber();
+            var deBuffId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var debuffNameReplaced = debuff.Name;
 
             cmd.Parameters.Add("@DebuffId", SqlDbType.Int).Value = deBuffId;
@@ -112,7 +112,7 @@ public class Debuff : IDebuff
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.Client.SendMessage(0x03, "Issue saving debuff. Error: Duct Tape");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving debuff. Error: Duct Tape");
                 Crashes.TrackError(e);
                 return;
             }

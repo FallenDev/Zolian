@@ -505,11 +505,11 @@ public class GameServer : NetworkServer<GameClient>
 
     private async Task UpdateComponentsFast()
     {
-        _fastGameTime = DateTime.Now;
+        _fastGameTime = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.Now;
+            var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _fastGameTime;
 
             UpdateComponents(gameTime);
@@ -522,11 +522,11 @@ public class GameServer : NetworkServer<GameClient>
 
     private async Task UpdateObjectsNormal()
     {
-        _normalGameTime = DateTime.Now;
+        _normalGameTime = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.Now;
+            var gTimeConvert = DateTime.UtcNow;
             _clientGameTimeSpan = gTimeConvert - _normalGameTime;
 
             UpdateClients(_clientGameTimeSpan);
@@ -540,11 +540,11 @@ public class GameServer : NetworkServer<GameClient>
 
     private async Task UpdateAreasSlow()
     {
-        _slowGameTime = DateTime.Now;
+        _slowGameTime = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.Now;
+            var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _slowGameTime;
 
             UpdateMundanes(gameTime);
@@ -558,11 +558,11 @@ public class GameServer : NetworkServer<GameClient>
 
     private async Task UpdateAbilityGameTimer()
     {
-        _abilityGameTime = DateTime.Now;
+        _abilityGameTime = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.Now;
+            var gTimeConvert = DateTime.UtcNow;
             _abilityGameTimeSpan = gTimeConvert - _abilityGameTime;
             _abilityGameTime += _abilityGameTimeSpan;
             await Task.Delay(AbilityGameSpeed).ConfigureAwait(false);
@@ -571,7 +571,7 @@ public class GameServer : NetworkServer<GameClient>
 
     private static async Task NightlyServerRestart()
     {
-        var currentTime = DateTime.Now;
+        var currentTime = DateTime.UtcNow;
         var midnight = DateTime.Today;
 
         while (ServerSetup.Instance.Running)
@@ -597,7 +597,7 @@ public class GameServer : NetworkServer<GameClient>
         }
 
         ServerSetup.Instance.EncryptKeyConDict = new ConcurrentDictionary<int, byte>();
-        ServerSetup.Instance.EncryptKeyConDict.TryAdd(Generator.GenerateNumber(), data[1]);
+        ServerSetup.Instance.EncryptKeyConDict.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, data[1]);
     }
 
     private void UpdateComponents(TimeSpan elapsedTime)
@@ -697,14 +697,14 @@ public class GameServer : NetworkServer<GameClient>
 
             monster.UpdateBuffs(elapsedTime);
             monster.UpdateDebuffs(elapsedTime);
-            monster.LastUpdated = DateTime.Now;
+            monster.LastUpdated = DateTime.UtcNow;
         }
     }
 
     private static void UpdateKillCounters(Monster monster)
     {
         if (monster.Target is not Aisling aisling) return;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
 
         if (!aisling.MonsterKillCounters.ContainsKey(monster.Template.BaseName))
         {
@@ -741,7 +741,7 @@ public class GameServer : NetworkServer<GameClient>
                     return;
                 }
 
-                aisling.Client.SendMessage(0x03, $"{{=aAssassin Quest: {{=q{killed}{{=a killed.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin Quest: {{=q{killed}{{=a killed.");
             }
         }
 
@@ -760,7 +760,7 @@ public class GameServer : NetworkServer<GameClient>
                     return;
                 }
 
-                aisling.Client.SendMessage(0x03, $"{{=aNeal Quest: {{=q{killed}{{=a killed.");
+                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aNeal Quest: {{=q{killed}{{=a killed.");
             }
         }
     }
@@ -771,7 +771,7 @@ public class GameServer : NetworkServer<GameClient>
         {
             if (mundane == null) continue;
             mundane.Update(elapsedTime);
-            mundane.LastUpdated = DateTime.Now;
+            mundane.LastUpdated = DateTime.UtcNow;
         }
     }
 
@@ -838,7 +838,7 @@ public class GameServer : NetworkServer<GameClient>
 
         if (!client.Aisling.CanMove)
         {
-            client.SendMessage(0x03, "{=bYou cannot feel your legs...");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYou cannot feel your legs...");
             client.SendLocation();
 
             return;
@@ -894,7 +894,7 @@ public class GameServer : NetworkServer<GameClient>
             CheckWarpTransitions(client);
         }
 
-        client.LastMovement = DateTime.Now;
+        client.LastMovement = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -906,12 +906,12 @@ public class GameServer : NetworkServer<GameClient>
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead())
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
         if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsParalyzed || client.Aisling.IsBeagParalyzed || client.Aisling.IsFrozen || client.Aisling.IsStopped)
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
 
@@ -935,7 +935,7 @@ public class GameServer : NetworkServer<GameClient>
                 if (invItem == null) continue;
                 if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
                 if (invItem.Template.Name != item.Template.Name) continue;
-                client.SendMessage(0x03, "You may only hold one in your possession.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
                 return;
             }
 
@@ -944,7 +944,7 @@ public class GameServer : NetworkServer<GameClient>
                 if (invItem == null) continue;
                 if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
                 if (invItem.Template.Name != item.Template.Name) continue;
-                client.SendMessage(0x03, "You may only hold one in your possession.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
                 return;
             }
 
@@ -1007,12 +1007,12 @@ public class GameServer : NetworkServer<GameClient>
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead())
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
         if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsParalyzed || client.Aisling.IsBeagParalyzed || client.Aisling.IsFrozen || client.Aisling.IsStopped)
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
         if (client.Aisling.Map is not { Ready: true }) return;
@@ -1024,7 +1024,7 @@ public class GameServer : NetworkServer<GameClient>
         {
             if (value is null) return;
             item = value;
-            item.Serial = Generator.GenerateNumber();
+            item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         }
 
         if (item == null) return;
@@ -1385,7 +1385,7 @@ public class GameServer : NetworkServer<GameClient>
         }
 
         AuthenticateClient(client);
-        var time = DateTime.Now;
+        var time = DateTime.UtcNow;
         ServerSetup.Logger($"{player.Username} logged in at: {time}");
         client.LastPing = time;
     }
@@ -1484,7 +1484,7 @@ public class GameServer : NetworkServer<GameClient>
             // Skill cleanup
             skill.CurrentCooldown = skill.Template.Cooldown;
             lastTemplate = skill.Template.Name;
-            lpClient.LastAssail = DateTime.Now;
+            lpClient.LastAssail = DateTime.UtcNow;
         }
     }
 
@@ -1509,7 +1509,7 @@ public class GameServer : NetworkServer<GameClient>
         if (client is not { Authenticated: true }) return;
         if (format == null) return;
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastWhisperMessageSent).TotalSeconds < 0.30) return;
         if (format.Name.Length > 24) return;
 
@@ -1630,22 +1630,22 @@ public class GameServer : NetworkServer<GameClient>
         if (!client.Aisling.LoggedIn) return;
         if (client.Aisling.IsDead())
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
         if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsParalyzed || client.Aisling.IsBeagParalyzed || client.Aisling.IsFrozen || client.Aisling.IsStopped)
         {
-            client.SendMessage(0x03, "You cannot do that.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
             return;
         }
         // Speed equipping prevent (movement)
         if (!client.IsEquipping)
         {
-            client.SendMessage(0x03, "Slow down");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
             return;
         }
 
-        client.LastEquip = DateTime.Now;
+        client.LastEquip = DateTime.UtcNow;
 
         if (client.Aisling.Skulled)
         {
@@ -2318,7 +2318,7 @@ public class GameServer : NetworkServer<GameClient>
             return;
         }
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         if (format.Type == 0x06)
         {
             var boards = ServerSetup.Instance.GlobalBoardCache.Select(i => i.Value)
@@ -2345,7 +2345,7 @@ public class GameServer : NetworkServer<GameClient>
 
             if (recipient == null) return;
             recipient.Client.SendStats(StatusFlags.UnreadMail);
-            recipient.Client.SendMessage(0x03, "{=cYou have new mail.");
+            recipient.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou have new mail.");
             return;
         }
 
@@ -2774,7 +2774,7 @@ public class GameServer : NetworkServer<GameClient>
 
                     if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
                     {
-                        player.Client.SendMessage(0x03, "That item is not tradeable");
+                        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item is not tradeable");
                         return;
                     }
 
@@ -2855,13 +2855,13 @@ public class GameServer : NetworkServer<GameClient>
 
                     if (gold > player.GoldPoints)
                     {
-                        player.Client.SendMessage(0x03, "You don't have that much.");
+                        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much.");
                         return;
                     }
 
                     if (trader.GoldPoints + gold > ServerSetup.Instance.Config.MaxCarryGold)
                     {
-                        player.Client.SendMessage(0x03, "Player cannot hold that amount.");
+                        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount.");
                         return;
                     }
 
@@ -2958,7 +2958,7 @@ public class GameServer : NetworkServer<GameClient>
 
         if (info == null) return;
         info.SpellLines = lines;
-        info.Started = DateTime.Now;
+        info.Started = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -3072,15 +3072,7 @@ public class GameServer : NetworkServer<GameClient>
 
     #endregion
 
-    public static void CancelIfCasting(GameClient client)
-    {
-        if (!client.Aisling.LoggedIn) return;
-        if (client.Aisling.IsCastingSpell)
-            client.Send(new ServerFormat48());
 
-        client.CastStack.Clear();
-        client.Aisling.IsCastingSpell = false;
-    }
 
     private static void ExecuteAbility(IGameClient lpClient, Skill lpSkill, bool optExecuteScript = true)
     {
@@ -3193,7 +3185,7 @@ public class GameServer : NetworkServer<GameClient>
             client.Aisling.CancelExchange();
 
             client.DlgSession = null;
-            client.Aisling.LastLogged = DateTime.Now;
+            client.Aisling.LastLogged = DateTime.UtcNow;
             client.Aisling.ActiveReactor = null;
             client.Aisling.ActiveSequence = null;
             client.Aisling.Remove(true);

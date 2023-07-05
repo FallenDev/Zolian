@@ -77,7 +77,7 @@ public class ArenaHost : MundaneScript
 
                 client.CloseDialog();
                 client.SendAnimation(262, client.Aisling, client.Aisling);
-                client.SendMessage(0x03, "Northern Arena");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
                 break;
             }
             case 2:
@@ -105,7 +105,7 @@ public class ArenaHost : MundaneScript
 
                 client.CloseDialog();
                 client.SendAnimation(262, client.Aisling, client.Aisling);
-                client.SendMessage(0x03, "Eastern Arena");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
                 break;
             }
             case 3:
@@ -133,7 +133,7 @@ public class ArenaHost : MundaneScript
 
                 client.CloseDialog();
                 client.SendAnimation(262, client.Aisling, client.Aisling);
-                client.SendMessage(0x03, "Southern Arena");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
                 break;
             }
             case 4:
@@ -161,7 +161,7 @@ public class ArenaHost : MundaneScript
 
                 client.CloseDialog();
                 client.SendAnimation(262, client.Aisling, client.Aisling);
-                client.SendMessage(0x03, "Western Arena");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
                 break;
             }
             case 5:

@@ -45,7 +45,7 @@ public class MonsterTemplate : Template
     {
         get
         {
-            var readyTime = DateTime.Now;
+            var readyTime = DateTime.UtcNow;
             return readyTime > NextAvailableSpawn;
         }
     }
@@ -53,7 +53,7 @@ public class MonsterTemplate : Template
     public bool ReadyToSpawn()
     {
         if (!Ready) return false;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         NextAvailableSpawn = readyTime.AddSeconds(SpawnRate);
         return true;
     }

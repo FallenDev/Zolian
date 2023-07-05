@@ -98,7 +98,7 @@ public class Camille : MundaneScript
                     client.Aisling.QuestManager.MilethReputation += 1;
                     client.Aisling.QuestManager.CamilleGreetingComplete = true;
                     client.SendOptionsDialog(Mundane, "We're happy to hear!");
-                    client.SendMessage(0x03, $"{{=cYou feel refreshed.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel refreshed.");
                     break;
                 case 6:
                     var item2 = new Item();

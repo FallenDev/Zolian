@@ -78,7 +78,7 @@ public class Party : ObjectManager
         if (partyLeader.GroupId != 0) return null;
 
         var party = new Party { LeaderName = partyLeader.Username };
-        var pendingId = Generator.GenerateNumber();
+        var pendingId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         party.Id = pendingId;
         party.LeaderName = partyLeader.Username;
         partyLeader.GroupId = party.Id;

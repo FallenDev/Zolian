@@ -144,12 +144,9 @@ public static class Commander
         });
     }
 
-    private static void Restart(Argument[] args, object arg)
+    public static void Restart(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
-        if (client == null) return;
         var clients = ServerSetup.Instance.Game.Clients.Values;
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
@@ -160,7 +157,6 @@ public static class Commander
             connected.SendMessage(0x08, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
         }
 
-        Analytics.TrackEvent($"{ip!.Address} Restarted the Server.");
         ServerSetup.Instance.Running = false;
         Environment.Exit(0);
     }

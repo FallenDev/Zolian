@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -13,6 +13,8 @@ namespace Darkages.Types;
 public class Inventory : ObjectManager, IInventory
 {
     private const int Length = 59;
+
+    public bool IsFull => TotalItems >= Length;
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
 
@@ -96,13 +98,14 @@ public class Inventory : ObjectManager, IInventory
         return items.Count;
     }
 
-    public void Remove(GameClient client, Item item)
+    public void Remove(WorldClient client, Item item)
     {
         if (item == null)
             return;
 
-        if (Remove(item.InventorySlot) != null) client.Send(new ServerFormat10(item.InventorySlot));
-        client.SendStats(StatusFlags.StructA);
+        if (Remove(item.InventorySlot) != null)
+            client.SendRemoveItemFromPane(item.InventorySlot);
+        client.SendAttributes(StatUpdateType.Primary);
         item.DeleteFromAislingDb();
     }
 
@@ -118,18 +121,18 @@ public class Inventory : ObjectManager, IInventory
         return null;
     }
 
-    public void RemoveFromInventory(GameClient client, Item item)
+    public void RemoveFromInventory(WorldClient client, Item item)
     {
         if (item != null && client.Aisling.Inventory.Remove(item.InventorySlot) == null) return;
         if (item == null) return;
 
-        client.Send(new ServerFormat10(item.InventorySlot));
+        client.SendRemoveItemFromPane(item.InventorySlot);
         client.LastItemDropped = item;
-        client.SendStats(StatusFlags.StructA);
+        client.SendAttributes(StatUpdateType.Primary);
         item.DeleteFromAislingDb();
     }
 
-    public void RemoveRange(GameClient client, Item item, int range)
+    public void RemoveRange(WorldClient client, Item item, int range)
     {
         var remaining = Math.Abs(item.Stacks - range);
 
@@ -141,7 +144,7 @@ public class Inventory : ObjectManager, IInventory
         else
         {
             item.Stacks = (ushort) remaining;
-            client.Send(new ServerFormat10(item.InventorySlot));
+            client.SendRemoveItemFromPane(item.InventorySlot);
             client.Aisling.Inventory.Set(item);
             UpdateSlot(client, item);
         }
@@ -149,7 +152,7 @@ public class Inventory : ObjectManager, IInventory
         UpdatePlayersWeight(client);
     }
 
-    public void AddRange(GameClient client, Item item, int range)
+    public void AddRange(WorldClient client, Item item, int range)
     {
         var given = Math.Abs(item.Stacks + range);
 
@@ -161,7 +164,7 @@ public class Inventory : ObjectManager, IInventory
         else
         {
             item.Stacks = (ushort)given;
-            client.Send(new ServerFormat10(item.InventorySlot));
+            client.SendRemoveItemFromPane(item.InventorySlot);
             client.Aisling.Inventory.Set(item);
             UpdateSlot(client, item);
         }
@@ -176,16 +179,16 @@ public class Inventory : ObjectManager, IInventory
         if (Items.ContainsKey(s.InventorySlot)) Items[s.InventorySlot] = s;
     }
 
-    public void UpdateSlot(GameClient client, Item item)
+    public void UpdateSlot(WorldClient client, Item item)
     {
         item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
         if (!string.IsNullOrEmpty(item.Template.WeaponScript))
             item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
-        client.Send(new ServerFormat0F(item));
+        client.SendAddItemToPane(item);
         UpdatePlayersWeight(client);
     }
 
-    public void UpdatePlayersWeight(GameClient client)
+    public void UpdatePlayersWeight(WorldClient client)
     {
         client.Aisling.CurrentWeight = 0;
 

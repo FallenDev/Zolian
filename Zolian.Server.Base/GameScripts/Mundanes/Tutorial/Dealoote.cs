@@ -67,7 +67,7 @@ public class Dealoote : MundaneScript
                 TopMenu(client);
                 break;
             case 5:
-                client.SendMessage(0x03, "I'll be here if you ever need me.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "I'll be here if you ever need me.");
                 client.CloseDialog();
                 break;
             case 6:

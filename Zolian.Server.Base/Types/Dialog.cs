@@ -11,7 +11,7 @@ public class Dialog
 
     public Dialog()
     {
-        Serial = Generator.GenerateNumber();
+        Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
     }
 
     public bool CanMoveBack => SequenceIndex - 1 >= 0;

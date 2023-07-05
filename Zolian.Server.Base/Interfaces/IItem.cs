@@ -20,8 +20,8 @@ public interface IItem : ISprite
     bool Equipped { get; set; }
     bool Identified { get; init; }
     ushort Image { get; init; }
-    int ItemId { get; set; }
-    int Owner { get; set; }
+    uint ItemId { get; set; }
+    uint Owner { get; set; }
     ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
     byte InventorySlot { get; set; }
@@ -50,12 +50,12 @@ public interface IItem : ISprite
     bool GiveTo(Sprite sprite, bool checkWeight = true);
     void Release(Sprite owner, Position position, bool delete = true);
     void DeleteFromAislingDb();
-    void ReapplyItemModifiers(GameClient client);
-    void RemoveModifiers(GameClient client);
-    void StatModifiersCalc(GameClient client, Item equipment);
-    void SpellLines(GameClient client);
-    void ItemVarianceCalc(GameClient client, Item equipment);
-    void WeaponVarianceCalc(GameClient client, Item equipment);
-    void QualityVarianceCalc(GameClient client, Item equipment);
-    void UpdateSpellSlot(GameClient client, byte slot);
+    void ReapplyItemModifiers(WorldClient client);
+    void RemoveModifiers(WorldClient client);
+    void StatModifiersCalc(WorldClient client, Item equipment);
+    void SpellLines(WorldClient client);
+    void ItemVarianceCalc(WorldClient client, Item equipment);
+    void WeaponVarianceCalc(WorldClient client, Item equipment);
+    void QualityVarianceCalc(WorldClient client, Item equipment);
+    void UpdateSpellSlot(WorldClient client, byte slot);
 }

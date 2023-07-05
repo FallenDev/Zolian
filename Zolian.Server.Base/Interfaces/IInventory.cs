@@ -13,12 +13,12 @@ public interface IInventory
     Item Has(Predicate<Item> predicate);
     int Has(Template templateContext);
     int HasCount(Template templateContext);
-    void Remove(GameClient client, Item item);
+    void Remove(WorldClient client, Item item);
     Item Remove(byte movingFrom);
-    void RemoveFromInventory(GameClient client, Item item);
-    void RemoveRange(GameClient client, Item item, int range);
-    void AddRange(GameClient client, Item item, int range);
+    void RemoveFromInventory(WorldClient client, Item item);
+    void RemoveRange(WorldClient client, Item item, int range);
+    void AddRange(WorldClient client, Item item, int range);
     void Set(Item s);
-    void UpdateSlot(GameClient client, Item item);
-    void UpdatePlayersWeight(GameClient client);
+    void UpdateSlot(WorldClient client, Item item);
+    void UpdatePlayersWeight(WorldClient client);
 }

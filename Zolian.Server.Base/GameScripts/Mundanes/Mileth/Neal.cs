@@ -372,7 +372,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new OptionsDataItem(0x000A, "Yes."),
@@ -390,7 +390,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
@@ -399,7 +399,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Aid)"
@@ -421,7 +421,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new OptionsDataItem(0x000A, "Yes."),
@@ -439,7 +439,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
@@ -448,7 +448,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Rescue)"
@@ -470,7 +470,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new OptionsDataItem(0x000A, "Yes."),
@@ -488,7 +488,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
@@ -497,7 +497,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Aid)"
@@ -519,7 +519,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                client.SendMessage(0x03, "You've gained 8,000 experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new OptionsDataItem(0x000A, "Yes."),
@@ -537,7 +537,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
@@ -546,7 +546,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Rescue)"
@@ -595,7 +595,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
@@ -604,7 +604,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Lullaby Strike)"
@@ -628,7 +628,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
@@ -637,7 +637,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Raise Threat)"
@@ -661,7 +661,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
@@ -670,7 +670,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Lullaby Strike)"
@@ -694,7 +694,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
@@ -703,7 +703,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Raise Threat)"
@@ -753,7 +753,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
 
@@ -762,7 +762,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Desolate)"
@@ -776,7 +776,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Adventure",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
                                         Value = "Finished Neal's Training"
@@ -800,7 +800,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
 
@@ -809,7 +809,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Spell",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Peony,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Defensive Stance)"
@@ -823,7 +823,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Adventure",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
                                         Value = "Finished Neal's Training"
@@ -847,7 +847,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
 
@@ -856,7 +856,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Skill",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Desolate)"
@@ -870,7 +870,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Adventure",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
                                         Value = "Finished Neal's Training"
@@ -894,7 +894,7 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
                                 client.SendStats(StatusFlags.StructC);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
 
@@ -903,7 +903,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Spell",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Peony,
                                         Icon = (byte)LegendIcon.Warrior,
                                         Value = "Neal's Training (Defensive Stance)"
@@ -917,7 +917,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Category = "Adventure",
-                                        Time = DateTime.Now,
+                                        Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
                                         Value = "Finished Neal's Training"

@@ -186,7 +186,7 @@ public class WeaponArmorShop : MundaneScript
                         client.GiveQuantity(client.Aisling, item, quantity);
                         client.SendStats(StatusFlags.WeightMoney);
                         client.PendingBuySessions = null;
-                        client.SendMessage(0x03, $"{{=cThank you!");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
                         TopMenu(client);
                     }
                     else
@@ -213,7 +213,7 @@ public class WeaponArmorShop : MundaneScript
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
                         client.SendStats(StatusFlags.WeightMoney);
                         client.PendingItemSessions = null;
-                        client.SendMessage(0x03, $"{{=cThank you!");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
                         TopMenu(client);
                     }
                 }

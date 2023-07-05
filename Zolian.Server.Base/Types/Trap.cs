@@ -62,7 +62,7 @@ public class Trap
         item = item.TrapCreate(obj, itemTemplate);
         item.Release(obj, pos, false);
 
-        var id = Generator.GenerateNumber();
+        var id = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         return Traps.TryAdd(id, new Trap
         {

@@ -164,7 +164,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x05:
             {
-                client.SendMessage(0x03, "Come back if you need advancement.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Come back if you need advancement.");
                 client.CloseDialog();
             }
                 break;
@@ -192,7 +192,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qBerserker Requirements:\n" +
                                          "{=aDexterity:{=q 40\n" +
                                          "{=aConstitution:{=q 30\n" +
@@ -212,7 +212,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qDefender Requirements:\n" +
                                          "{=aStrength:{=q 50\n" +
                                          "{=bSacrifice:\n" +
@@ -231,7 +231,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qAssassin Requirements:\n" +
                                          "{=aDexterity:{=q 40\n" +
                                          "{=bSacrifice:\n" +
@@ -250,7 +250,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qCleric Requirements:\n" +
                                          "{=aIntelligence:{=q 40\n" +
                                          "{=aConstitution:{=q 30\n" +
@@ -270,7 +270,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qArcanus Requirements:\n" +
                                          "{=aIntelligence:{=q 50\n" +
                                          "{=bSacrifice:\n" +
@@ -289,7 +289,7 @@ public class Forsaken : MundaneScript
                     new (0x05, "No")
                 };
 
-                client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot go below 128 Health / Mana, plan accordingly");
                 client.SendMessage(0x08, "{=qMonk Requirements:\n" +
                                          "{=aConstitution:{=q 40\n" +
                                          "{=aDexterity:{=q 30\n" +
@@ -321,7 +321,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Berserker"
@@ -385,7 +385,7 @@ public class Forsaken : MundaneScript
                         var legend = new Legend.LegendItem
                         {
                             Category = "Class",
-                            Time = DateTime.Now,
+                            Time = DateTime.UtcNow,
                             Color = LegendColor.Red,
                             Icon = (byte)LegendIcon.Victory,
                             Value = "Advanced to the path of Defender"
@@ -440,7 +440,7 @@ public class Forsaken : MundaneScript
                         var legend = new Legend.LegendItem
                         {
                             Category = "Class",
-                            Time = DateTime.Now,
+                            Time = DateTime.UtcNow,
                             Color = LegendColor.Red,
                             Icon = (byte)LegendIcon.Victory,
                             Value = "Advanced to the path of Assassin"
@@ -497,7 +497,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Cleric"
@@ -561,7 +561,7 @@ public class Forsaken : MundaneScript
                         var legend = new Legend.LegendItem
                         {
                             Category = "Class",
-                            Time = DateTime.Now,
+                            Time = DateTime.UtcNow,
                             Color = LegendColor.Red,
                             Icon = (byte)LegendIcon.Victory,
                             Value = "Advanced to the path of Arcanus"
@@ -618,7 +618,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Monk"
@@ -705,7 +705,7 @@ public class Forsaken : MundaneScript
                     var legend = new Legend.LegendItem
                     {
                         Category = "Class",
-                        Time = DateTime.Now,
+                        Time = DateTime.UtcNow,
                         Color = LegendColor.Yellow,
                         Icon = (byte)LegendIcon.Victory,
                         Value = $"Dedication to {client.Aisling.Path}"

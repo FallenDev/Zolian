@@ -1,12 +1,11 @@
 ﻿using Darkages.Infrastructure;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class PingComponent : GameServerComponent
 {
-    public PingComponent(GameServer server) : base(server)
+    public PingComponent(WorldServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromMilliseconds(7000));
     }
@@ -15,10 +14,10 @@ public class PingComponent : GameServerComponent
 
     private void Ping()
     {
-        foreach (var client in Server.Clients.Values.Where(client => client != null))
+        foreach (var player in Server.Aislings)
         {
-            client.Send(new ServerFormat3B());
-            client.LastPing = DateTime.Now;
+            player.Client.SendHeartBeat(0x20, 0x14);
+            player.Client.LastPing = DateTime.UtcNow;
         }
     }
 

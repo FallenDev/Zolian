@@ -5,7 +5,7 @@ namespace Darkages.Interfaces;
 
 public interface IBank
 {
-    Dictionary<int, Item> Items { get; }
+    Dictionary<uint, Item> Items { get; }
     Task<bool> Deposit(GameClient client, Item item);
     void AddToAislingDb(ISprite aisling, Item item);
     Task UpdateBanked(ISprite aisling, Item item);

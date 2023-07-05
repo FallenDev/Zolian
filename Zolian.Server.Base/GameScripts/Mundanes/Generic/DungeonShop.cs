@@ -242,7 +242,7 @@ public class DungeonShop : MundaneScript
                         client.GiveQuantity(client.Aisling, item, quantity);
                         client.SendStats(StatusFlags.WeightMoney);
                         client.PendingBuySessions = null;
-                        client.SendMessage(0x03, $"{{=cHope it serves you well.");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cHope it serves you well.");
                         TopMenu(client);
                     }
                     else
@@ -269,7 +269,7 @@ public class DungeonShop : MundaneScript
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
                         client.SendStats(StatusFlags.WeightMoney);
                         client.PendingItemSessions = null;
-                        client.SendMessage(0x03, $"{{=cWhat a great deal!");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWhat a great deal!");
                         TopMenu(client);
                     }
                 }

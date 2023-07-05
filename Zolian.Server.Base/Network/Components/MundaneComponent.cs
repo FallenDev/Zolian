@@ -6,7 +6,7 @@ namespace Darkages.Network.Components;
 
 public class MundaneComponent : GameServerComponent
 {
-    public MundaneComponent(GameServer server) : base(server)
+    public MundaneComponent(WorldServer server) : base(server)
     {
         Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MundaneRespawnInterval));
     }

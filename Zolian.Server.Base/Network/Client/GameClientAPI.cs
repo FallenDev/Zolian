@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Numerics;
+using Chaos.Common.Definitions;
 using Dapper;
 
 using Darkages.Common;
@@ -19,10 +20,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using ServiceStack;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Network.Client;
 
-public partial class GameClient : IGameClient
+public partial class GameClient : WorldClient
 {
     public GameClient GhostFormToAisling()
     {
@@ -33,16 +35,7 @@ public partial class GameClient : IGameClient
         return this;
     }
 
-    public GameClient AislingToGhostForm()
-    {
-        Aisling.Flags = AislingFlags.Ghost;
-        Aisling.CurrentHp = 0;
-        Aisling.CurrentMp = 0;
-        Aisling.RegenTimerDisabled = true;
-        UpdateDisplay();
-        Task.Delay(500).ContinueWith(ct => { ClientRefreshed(); });
-        return this;
-    }
+
 
     public GameClient LearnSkill(Mundane source, SkillTemplate subject, string message)
     {
@@ -306,7 +299,7 @@ public partial class GameClient : IGameClient
     {
         if (exp <= 0) exp = 1;
 
-        player.Client.SendMessage(0x03, $"Received {exp:n0} experience points!");
+        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
         player.ExpTotal += exp;
         player.ExpNext -= (int)exp;
 
@@ -351,7 +344,7 @@ public partial class GameClient : IGameClient
         player.CurrentHp = player.MaximumHp;
         player.CurrentMp = player.MaximumMp;
 
-        player.Client.SendMessage(0x03, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
+        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
         player.Show(Scope.NearbyAislings, new ServerFormat29((uint)player.Serial, (uint)player.Serial, 0x004F, 0x004F, 64));
         player.Client.SendStats(StatusFlags.ExpSpend);
     }
@@ -361,7 +354,7 @@ public partial class GameClient : IGameClient
         var item = new Legend.LegendItem
         {
             Category = "Event",
-            Time = DateTime.Now,
+            Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Warrior,
             Value = "Fragment of spark taken.."

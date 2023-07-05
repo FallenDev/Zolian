@@ -68,18 +68,18 @@ public class Pete : MundaneScript
             {
                 var killCount = Generator.RandNumGen10();
                 client.Aisling.QuestManager.PeteKill = killCount;
-                client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Player Coordinates are in the bottom center-left corner");
                 client.SendOptionsDialog(Mundane, $"Please cull {killCount} mice anywhere in the crypt. {{=cCoords{{=a: {{=q89{{=a,{{=q 52");
                 Task.Delay(5000).ContinueWith(ct =>
                 {
                     client.CloseDialog();
-                    client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cShift + f {{=ato see system and important messages");
                 });
-                Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
-                Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                Task.Delay(25000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages"); });
-                Task.Delay(30000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                Task.Delay(10000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                Task.Delay(15000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Player Coordinates are in the bottom center-left corner"); });
+                Task.Delay(20000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                Task.Delay(25000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cShift + f {{=ato see system and important messages"); });
+                Task.Delay(30000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
                 break;
             }
             case 0x04:
@@ -91,13 +91,13 @@ public class Pete : MundaneScript
                     client.Aisling.QuestManager.PeteComplete = true;
                     client.GiveExp(exp);
                     client.Aisling.QuestManager.MilethReputation += 1;
-                    client.SendMessage(0x03, $"You've gained {exp} experience.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
                     client.SendStats(StatusFlags.StructC);
 
                     var legend = new Legend.LegendItem
                     {
                         Category = "Adventure",
-                        Time = DateTime.Now,
+                        Time = DateTime.UtcNow,
                         Color = LegendColor.Brass,
                         Icon = (byte)LegendIcon.Heart,
                         Value = "Saved Mileth's Mead"
@@ -112,11 +112,11 @@ public class Pete : MundaneScript
                     Task.Delay(5000).ContinueWith(ct =>
                     {
                         client.CloseDialog();
-                        client.SendMessage(0x03, $"{{=cShift + f {{=ato see system and important messages");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cShift + f {{=ato see system and important messages");
                     });
-                    Task.Delay(10000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
-                    Task.Delay(15000).ContinueWith(ct => { client.SendMessage(0x03, "Player Coordinates are in the bottom center-left corner"); });
-                    Task.Delay(20000).ContinueWith(ct => { client.SendMessage(0x03, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                    Task.Delay(10000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
+                    Task.Delay(15000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Player Coordinates are in the bottom center-left corner"); });
+                    Task.Delay(20000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cCoords{{=a: {{=q89{{=a,{{=q 52"); });
                     break;
                 }
 

@@ -68,7 +68,7 @@ public class EnemyRewards : RewardScript
             };
         }
 
-        player.Client.SendMessage(0x03, $"Received {exp:n0} experience points!");
+        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
         player.ExpTotal += exp;
         player.ExpNext -= (int)exp;
 
@@ -271,7 +271,7 @@ public class EnemyRewards : RewardScript
 
         if (canCrit)
         {
-            var critical = Math.Abs(Generator.GenerateNumber() % 100);
+            var critical = Math.Abs(EphemeralRandomIdGenerator<uint>.Shared.NextId % 100);
 
             if (critical >= 85)
             {

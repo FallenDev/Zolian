@@ -137,13 +137,13 @@ public class Death
         item.Pos = Location;
         item.CurrentMapId = MapId;
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         item.AbandonedDate = readyTime;
         item.Cursed = false;
 
         item.DeleteFromAislingDb();
-        item.Serial = Generator.GenerateNumber();
-        item.ItemId = Generator.GenerateNumber();
+        item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         item.AddObject(item);
 
@@ -158,13 +158,13 @@ public class Death
         item.Pos = Location;
         item.CurrentMapId = MapId;
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         item.AbandonedDate = readyTime;
         item.Cursed = false;
 
         DeleteFromAislingDb(item);
-        item.Serial = Generator.GenerateNumber();
-        item.ItemId = Generator.GenerateNumber();
+        item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         item.AddObject(item);
 

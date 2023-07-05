@@ -8,7 +8,7 @@ public class PlayerSaveComponent : GameServerComponent
 {
     private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(1));
 
-    public PlayerSaveComponent(GameServer server) : base(server) { }
+    public PlayerSaveComponent(WorldServer server) : base(server) { }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
@@ -20,16 +20,16 @@ public class PlayerSaveComponent : GameServerComponent
 
     private static async void UpdatePlayerSave()
     {
-        if (!ServerSetup.Instance.Running || ServerSetup.Instance.Game.Clients == null) return;
-        foreach (var client in ServerSetup.Instance.Game.Clients.Values.Where(client => client is { Aisling: not null }))
+        if (!ServerSetup.Instance.Running || Server.Aislings == null) return;
+        foreach (var player in Server.Aislings)
         {
-            if (!client.Aisling.LoggedIn) continue;
+            if (!player.LoggedIn) continue;
 
-            await StorageManager.AislingBucket.QuickSave(client.Aisling);
+            await StorageManager.AislingBucket.QuickSave(player);
 
-            var readyTime = DateTime.Now;
-            if ((readyTime - client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate)
-                await client.Save();
+            var readyTime = DateTime.UtcNow;
+            if ((readyTime - player.Client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate)
+                await player.Client.Save();
         }
     }
 }

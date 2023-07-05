@@ -31,6 +31,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private readonly GameServerTimer _buffAndDebuffTimer;
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
+    public Trackers Trackers { get; set; }
 
     #region Buffs Debuffs
 
@@ -137,7 +138,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             EntityType = TileContent.Money;
         if (this is Item)
             EntityType = TileContent.Item;
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         _buffAndDebuffTimer = new GameServerTimer(TimeSpan.FromSeconds(1));
 
         Amplified = 0;
@@ -151,8 +152,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         LastPosition = new Position(Vector2.Zero);
     }
 
-    public GameClient Client { get; set; }
-    public int Serial { get; set; }
+    public WorldClient Client { get; set; }
+    public uint Serial { get; set; }
     public int CurrentMapId { get; set; }
     public double Amplified { get; set; }
     public ElementManager.Element OffenseElement { get; set; }
@@ -251,18 +252,18 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #region Identification & Position
 
-    public void Show<T>(Scope op, T format, IEnumerable<Sprite> definer = null) where T : NetworkFormat
+    public void Show(WorldServer server, Scope op, dynamic format, IEnumerable<Sprite> definer = null)
     {
         if (Map == null) return;
         if (ServerSetup.Instance.Game == null) return;
-        if (ServerSetup.Instance.Game.Clients == null) return;
+        if (server.Aislings == null) return;
 
         try
         {
             switch (op)
             {
                 case Scope.Self:
-                    Client?.Send(format);
+                    server.ExecuteHandler(Client, format);
                     return;
                 case Scope.NearbyAislingsExludingSelf:
                 {
@@ -949,7 +950,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         void Step0C(int x, int y)
         {
-            var readyTime = DateTime.Now;
+            var readyTime = DateTime.UtcNow;
             var response = new ServerFormat0C
             {
                 Direction = Direction,
@@ -1111,7 +1112,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             Serial = Serial
         });
 
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         LastTurnUpdated = readyTime;
     }
 
@@ -1189,32 +1190,32 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
-                    aisling.Client.SendMessage(0x03, "{=bFire damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
-                    aisling.Client.SendMessage(0x03, "{=eWater damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
-                    aisling.Client.SendMessage(0x03, "{=rEarth damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
-                    aisling.Client.SendMessage(0x03, "{=hWind damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
-                    aisling.Client.SendMessage(0x03, "{=nDark damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
-                    aisling.Client.SendMessage(0x03, "{=uLight damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
                     return;
                 }
             }
@@ -1233,32 +1234,32 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
-                    aisling.Client.SendMessage(0x03, "{=bFire damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
-                    aisling.Client.SendMessage(0x03, "{=eWater damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
-                    aisling.Client.SendMessage(0x03, "{=rEarth damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
-                    aisling.Client.SendMessage(0x03, "{=hWind damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
-                    aisling.Client.SendMessage(0x03, "{=nDark damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
-                    aisling.Client.SendMessage(0x03, "{=uLight damage negated");
+                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
                     return;
                 }
             }
@@ -1593,13 +1594,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (target is Aisling)
                 {
-                    damageDealingSprite.Client.SendMessage(0x03, "Death doesn't seem to work on them");
+                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                     return;
                 }
 
                 if (target.Level >= 15 + damageDealingSprite.ExpLevel)
                 {
-                    damageDealingSprite.Client.SendMessage(0x03, "Death doesn't seem to be effective. (Level too high)");
+                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                     return;
                 }
 
@@ -1612,13 +1613,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (target is Aisling)
                 {
-                    damageDealingSprite.Client.SendMessage(0x03, "Death doesn't seem to work on them");
+                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                     return;
                 }
 
                 if (target.Level >= 20 + damageDealingSprite.ExpLevel)
                 {
-                    damageDealingSprite.Client.SendMessage(0x03, "Death doesn't seem to be effective. (Level too high)");
+                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                     return;
                 }
 
@@ -1722,7 +1723,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (damageDealingSprite is Aisling aisling)
         {
-            var time = DateTime.Now;
+            var time = DateTime.UtcNow;
             var estTime = time.TimeOfDay;
             aisling.DamageCounter += convDmg;
             if (aisling.ThreatMeter + (uint)convDmg >= uint.MaxValue)

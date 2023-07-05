@@ -629,7 +629,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         GameServer.CheckWarpTransitions(damageDealingSprite.Client);
         damageDealingSprite.UpdateAddAndRemove();
         damageDealingSprite.Client.UpdateDisplay();
-        damageDealingSprite.Client.LastMovement = DateTime.Now;
+        damageDealingSprite.Client.LastMovement = DateTime.UtcNow;
     }
 
     public int DistanceTo(Position spritePos, Position inputPos)

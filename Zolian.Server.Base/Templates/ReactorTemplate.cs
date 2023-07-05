@@ -20,7 +20,7 @@ public class ReactorTemplate : Template
 
     public ReactorTemplate()
     {
-        Id = Generator.GenerateNumber();
+        Id = EphemeralRandomIdGenerator<uint>.Shared.NextId;
     }
 
     public string CallBackScriptKey { get; set; }

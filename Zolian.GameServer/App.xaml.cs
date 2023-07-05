@@ -7,17 +7,20 @@ using System.Windows;
 using System.Windows.Threading;
 
 using Chaos.Extensions.DependencyInjection;
+using Chaos.Networking.Abstractions;
 using Darkages;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Serilog;
@@ -90,6 +93,9 @@ public partial class App
             serviceCollection.AddTransient<IClientFactory<LobbyClient>, ClientFactory<LobbyClient>>();
             serviceCollection.AddTransient<IClientFactory<LoginClient>, ClientFactory<LoginClient>>();
             serviceCollection.AddTransient<IClientFactory<WorldClient>, ClientFactory<WorldClient>>();
+            serviceCollection.AddSingleton<ILobbyServer<ILobbyClient>, IHostedService, LobbyServer>();
+            serviceCollection.AddSingleton<ILoginServer<ILoginClient>, IHostedService, LoginServer>();
+            serviceCollection.AddSingleton<IWorldServer<IWorldClient>, IHostedService, WorldServer>();
             var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
         }

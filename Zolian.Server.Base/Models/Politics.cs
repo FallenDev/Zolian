@@ -13,7 +13,7 @@ public class Politics
     {
         get
         {
-            var readyTime = DateTime.Now;
+            var readyTime = DateTime.UtcNow;
             return readyTime - TermStarted > TermLength;
         }
     }

@@ -52,7 +52,7 @@ public sealed class Mundane : Sprite
             npc.Template.WalkRate = 2;
 
         npc.CurrentMapId = npc.Template.AreaID;
-        npc.Serial = Generator.GenerateNumber();
+        npc.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         npc.Pos = new Vector2(template.X, template.Y);
         npc.Direction = npc.Template.Direction;
         npc.CurrentMapId = npc.Template.AreaID;

@@ -91,13 +91,13 @@ public class Hybrasyl : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Hybrasyl");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Hybrasyl", 1);
                     client.GiveExp(25000);
-                    client.SendMessage(0x03, "Refining success! 25,000 exp");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 25,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Hybrasyl", 1);
-                    client.SendMessage(0x03, "Refining process failed!");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;

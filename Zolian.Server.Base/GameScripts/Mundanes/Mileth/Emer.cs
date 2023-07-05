@@ -226,7 +226,7 @@ public class Emer : MundaneScript
                     var item = new Item();
                     item = item.Create(client.Aisling, "Honey Bacon Burger", Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
                     item.GiveTo(client.Aisling);
-                    client.SendMessage(0x03, "You've gained 2,500 experience.");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 2,500 experience.");
                     client.SendStats(StatusFlags.WeightMoney);
                     client.SendOptionsDialog(Mundane, "Lovely, I'll take as many as you have. Here's a taste of what I make from it.");
                 }

@@ -364,7 +364,7 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.KeelaCount = 0;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp);
-                            client.SendMessage(0x03, $"You've gained {advExp} experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                             client.SendStats(StatusFlags.StructC);
                             client.SendOptionsDialog(Mundane, "Tougher than I thought you were.");
                         }
@@ -410,7 +410,7 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.Keela++;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp2);
-                            client.SendMessage(0x03, $"You've gained {advExp2} experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                             client.SendStats(StatusFlags.StructC);
                             client.SendOptionsDialog(Mundane, "Ahh, so that's what Teegan wants done. Come here, let me teach you something useful.");
 
@@ -419,7 +419,7 @@ public class Keela : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Skill",
-                                    Time = DateTime.Now,
+                                    Time = DateTime.UtcNow,
                                     Color = LegendColor.Pink,
                                     Icon = (byte)LegendIcon.Rogue,
                                     Value = "Keela's Training (Sneak)"
@@ -470,7 +470,7 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.KeelaCount = 0;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp3);
-                            client.SendMessage(0x03, $"You've gained {advExp3} experience.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
                             client.SendStats(StatusFlags.StructC);
                             client.SendOptionsDialog(Mundane, "Always walk in the shadows, indeed, let me show you a technique.");
 
@@ -479,7 +479,7 @@ public class Keela : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Skill",
-                                    Time = DateTime.Now,
+                                    Time = DateTime.UtcNow,
                                     Color = LegendColor.Pink,
                                     Icon = (byte)LegendIcon.Rogue,
                                     Value = "Keela's Training (Shadow Step)"
@@ -500,7 +500,7 @@ public class Keela : MundaneScript
                     var item = new Legend.LegendItem
                     {
                         Category = "Adventure",
-                        Time = DateTime.Now,
+                        Time = DateTime.UtcNow,
                         Color = LegendColor.Yellow,
                         Icon = (byte)LegendIcon.Victory,
                         Value = "Walks in the Shadows"

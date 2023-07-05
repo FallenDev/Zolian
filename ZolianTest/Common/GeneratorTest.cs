@@ -13,7 +13,7 @@ internal class GeneratorTest
     [Test]
     public void ShouldGenerateNumber()
     {
-        var result = Generator.GenerateNumber();
+        var result = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         Assert.NotNull(result);
     }
 

@@ -192,7 +192,7 @@ public class Mileth : AreaScript
                     var legend = new Legend.LegendItem
                     {
                         Category = "Relic Finder",
-                        Time = DateTime.Now,
+                        Time = DateTime.UtcNow,
                         Color = LegendColor.Red,
                         Icon = (byte)LegendIcon.Victory,
                         Value = $"Relic Finder: {client.Aisling.RelicFinder++}"
@@ -202,7 +202,7 @@ public class Mileth : AreaScript
                 }
             }
             else
-                client.SendMessage(0x03, "You couldn't hold the item, fumbled, and it vanished into the altar.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
 
             client.SendStats(StatusFlags.StructA);
         }

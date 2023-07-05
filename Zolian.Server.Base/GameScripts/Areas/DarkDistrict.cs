@@ -13,10 +13,10 @@ public class DarkDistrict : AreaScript
 
     public override void OnMapEnter(GameClient client)
     {
-        client.SendMessage(0x03, "You feel a presence nearby.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a presence nearby.");
         if (client.Aisling.QuestManager.Keela != 1 || !client.Aisling.QuestManager.KeelaQuesting) return;
         if (client.Aisling.HasItem("Assassin Notes")) return;
-        client.SendMessage(0x03, "An assassin briefly appears and tucks some notes in your pocket.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "An assassin briefly appears and tucks some notes in your pocket.");
         client.GiveItem("Assassin Notes");
     }
 

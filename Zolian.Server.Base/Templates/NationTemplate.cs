@@ -11,7 +11,7 @@ public class NationTemplate : Template
 
     public bool PastCurfew(Aisling aisling)
     {
-        var readyTime = DateTime.Now;
+        var readyTime = DateTime.UtcNow;
         return (readyTime - aisling.LastLogged).TotalHours > ServerSetup.Instance.Config.NationReturnHours;
     }
 }

@@ -18,7 +18,7 @@ public class Server : IServer
     public Server(ILogger<ServerSetup> logger, IServerContext context, IServerConstants configConstants,
         IOptions<ServerOptions> serverOptions)
     {
-        var time = DateTime.Now;
+        var time = DateTime.UtcNow;
         var localLogger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         if (serverOptions.Value.Location == null) return;

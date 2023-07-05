@@ -16,7 +16,6 @@ public class Map : ObjectManager
 
 public class DiscoveredMap
 {
-    public int DmId { get; init; }
     public int Serial { get; init; }
     public int MapId { get; init; }
 }
