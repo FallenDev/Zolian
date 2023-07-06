@@ -11,6 +11,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Data;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 
 namespace Darkages.Types;
 
@@ -18,7 +20,7 @@ public class Legend
 {
     public readonly List<LegendItem> LegendMarks = new();
 
-    public void AddLegend(LegendItem legend, GameClient client)
+    public void AddLegend(LegendItem legend, WorldClient client)
     {
         if (legend == null) return;
         if (client.Aisling == null) return;
@@ -32,7 +34,7 @@ public class Legend
         return LegendMarks.Any(i => i.Value.Equals(lpVal));
     }
 
-    public void Remove(LegendItem legend, GameClient client)
+    public void Remove(LegendItem legend, WorldClient client)
     {
         if (legend == null) return;
         if (client.Aisling == null) return;
@@ -77,7 +79,7 @@ public class Legend
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving legend mark. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving legend mark. Contact GM");
                 Crashes.TrackError(e);
                 return;
             }

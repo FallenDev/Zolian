@@ -40,6 +40,7 @@ using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.GameScripts.Formulas;
 using System.Collections.Concurrent;
 using Chaos.Common.Identity;
+using System.Globalization;
 
 namespace Darkages.Network.Client
 {
@@ -410,7 +411,6 @@ namespace Darkages.Network.Client
 
                     var newSkill = new Skill
                     {
-                        SkillId = skill.SkillId,
                         Icon = skill.Template.Icon,
                         Level = skill.Level,
                         Slot = skill.Slot,
@@ -465,7 +465,6 @@ namespace Darkages.Network.Client
 
                     var newSpell = new Spell()
                     {
-                        SpellId = spell.SpellId,
                         Icon = spell.Template.Icon,
                         Level = spell.Level,
                         Slot = spell.Slot,
@@ -969,6 +968,8 @@ namespace Darkages.Network.Client
         }
 
         #endregion
+
+        #region Handlers
 
         protected override ValueTask HandlePacketAsync(Span<byte> span)
         {
@@ -2169,6 +2170,8 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
+        #endregion
+
         #region GameClient Logic
 
         public WorldClient AislingToGhostForm()
@@ -2179,6 +2182,55 @@ namespace Darkages.Network.Client
             Aisling.RegenTimerDisabled = true;
             UpdateDisplay();
             Task.Delay(500).ContinueWith(ct => { ClientRefreshed(); });
+            return this;
+        }
+
+        public WorldClient GhostFormToAisling()
+        {
+            Aisling.Flags = AislingFlags.Normal;
+            Aisling.RegenTimerDisabled = false;
+            UpdateDisplay();
+            Task.Delay(500).ContinueWith(ct => { ClientRefreshed(); });
+            return this;
+        }
+
+        public WorldClient LearnSkill(Mundane source, SkillTemplate subject, string message)
+        {
+            var canLearn = false;
+
+            if (subject.Prerequisites != null) canLearn = PayPrerequisites(subject.Prerequisites);
+            if (subject.LearningRequirements != null && subject.LearningRequirements.Any()) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
+            if (!canLearn) return this;
+
+            var skill = Skill.GiveTo(this, subject.Name);
+            if (skill) LoadSkillBook();
+            //SendOptionsDialog(source, message);
+
+            //Aisling.Show(Scope.NearbyAislings,
+            //    new ServerFormat29((uint)Aisling.Serial, (uint)source.Serial,
+            //        subject.TargetAnimation,
+            //        subject.TargetAnimation, 100));
+
+            return this;
+        }
+
+        public WorldClient LearnSpell(Mundane source, SpellTemplate subject, string message)
+        {
+            var canLearn = false;
+
+            if (subject.Prerequisites != null) canLearn = PayPrerequisites(subject.Prerequisites);
+            if (subject.LearningRequirements != null && subject.LearningRequirements.Any()) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
+            if (!canLearn) return this;
+
+            var spell = Spell.GiveTo(this, subject.Name);
+            if (spell) LoadSpellBook();
+            //SendOptionsDialog(source, message);
+
+            //Aisling.Show(Scope.NearbyAislings,
+            //    new ServerFormat29((uint)Aisling.Serial, (uint)source.Serial,
+            //        subject.TargetAnimation,
+            //        subject.TargetAnimation, 100));
+
             return this;
         }
 
@@ -2318,6 +2370,50 @@ namespace Darkages.Network.Client
                         var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
                         foreach (var obj in allAislings.Where(n => n.LoggedIn))
                             obj.Client.SendServerMessage(type, text);
+                    }
+                    break;
+            }
+        }
+
+        public void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null)
+        {
+            var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
+
+            switch (scope)
+            {
+                case Scope.Self:
+                    SendAnimation(targetEffect, speed, casterEffect, Aisling.Serial, targetSerial, position);
+                    break;
+
+                case Scope.NearbyAislings:
+                    {
+                        foreach (var obj in nearby)
+                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
+                    }
+                    break;
+
+                case Scope.NearbyAislingsExludingSelf:
+                    {
+                        foreach (var obj in nearby)
+                        {
+                            if (obj.Serial == Aisling.Serial) continue;
+                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
+                        }
+                    }
+                    break;
+
+                case Scope.AislingsOnSameMap:
+                    {
+                        foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
+                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
+                    }
+                    break;
+
+                case Scope.All:
+                    {
+                        var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
+                        foreach (var obj in allAislings.Where(n => n.LoggedIn))
+                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
                     }
                     break;
             }
@@ -2589,6 +2685,458 @@ namespace Darkages.Network.Client
             SendLocation();
         }
 
+        public void ForgetSkill(string s)
+        {
+            var subject = Aisling.SkillBook.Skills.Values
+                .FirstOrDefault(i =>
+                    i?.Template != null && !string.IsNullOrEmpty(i.Template.Name) &&
+                    string.Equals(i.Template.Name, s, StringComparison.CurrentCultureIgnoreCase));
+
+            if (subject != null)
+            {
+                ForgetSkillSend(subject);
+                DeleteSkillFromDb(subject);
+            }
+
+            LoadSkillBook();
+        }
+
+        public void ForgetSkills()
+        {
+            var skills = Aisling.SkillBook.Skills.Values
+                .Where(i => i?.Template != null).ToList();
+
+            foreach (var skill in skills)
+            {
+                Task.Delay(100).ContinueWith(_ => ForgetSkillSend(skill));
+                DeleteSkillFromDb(skill);
+            }
+
+            LoadSkillBook();
+        }
+
+        private void ForgetSkillSend(Skill skill)
+        {
+            Aisling.SkillBook.Remove(skill.Slot);
+            {
+                SendRemoveSkillFromPane(skill.Slot);
+            }
+        }
+
+        public void ForgetSpell(string s)
+        {
+            var subject = Aisling.SpellBook.Spells.Values
+                .FirstOrDefault(i =>
+                    i?.Template != null && !string.IsNullOrEmpty(i.Template.Name) &&
+                    string.Equals(i.Template.Name, s, StringComparison.CurrentCultureIgnoreCase));
+
+            if (subject != null)
+            {
+                ForgetSpellSend(subject);
+                DeleteSpellFromDb(subject);
+            }
+
+            LoadSpellBook();
+        }
+
+        public void ForgetSpells()
+        {
+            var spells = Aisling.SpellBook.Spells.Values
+                .Where(i => i?.Template != null).ToList();
+
+            foreach (var spell in spells)
+            {
+                Task.Delay(100).ContinueWith(_ => ForgetSpellSend(spell));
+                DeleteSpellFromDb(spell);
+            }
+
+            LoadSpellBook();
+        }
+
+        private void ForgetSpellSend(Spell spell)
+        {
+            Aisling.SpellBook.Remove(spell.Slot);
+            {
+                SendRemoveSpellFromPane(spell.Slot);
+            }
+        }
+
+        public void TrainSkill(Skill skill)
+        {
+            if (skill.Level >= skill.Template.MaxLevel) return;
+
+            var levelUpRand = Generator.RandomNumPercentGen();
+            if (skill.Uses >= 200)
+                levelUpRand += 0.1;
+
+            switch (levelUpRand)
+            {
+                case <= 0.99:
+                    return;
+                case <= 0.995:
+                    skill.Level++;
+                    skill.Uses = 0;
+                    break;
+                case <= 1:
+                    skill.Level++;
+                    skill.Level++;
+                    skill.Uses = 0;
+                    break;
+            }
+
+            SendAddSkillToPane(skill);
+            skill.CurrentCooldown = skill.Template.Cooldown;
+            SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            SendServerMessage(ServerMessageType.ActiveMessage,
+                skill.Level >= 100
+                    ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", skill.Template.Name)
+                    : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", skill.Template.Name, skill.Level));
+        }
+
+        public void TrainSpell(Spell spell)
+        {
+            if (spell.Level >= spell.Template.MaxLevel) return;
+
+            var levelUpRand = Generator.RandomNumPercentGen();
+            if (spell.Casts >= 40)
+                levelUpRand += 0.1;
+
+            switch (levelUpRand)
+            {
+                case <= 0.93:
+                    return;
+                case <= 0.98:
+                    spell.Level++;
+                    spell.Casts = 0;
+                    break;
+                case <= 1:
+                    spell.Level++;
+                    spell.Level++;
+                    spell.Casts = 0;
+                    break;
+            }
+
+            SendAddSpellToPane(spell);
+            spell.CurrentCooldown = spell.Template.Cooldown;
+            SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            SendServerMessage(ServerMessageType.ActiveMessage,
+                spell.Level >= 100
+                    ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", spell.Template.Name)
+                    : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", spell.Template.Name, spell.Level));
+        }
+
+        public WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps)
+        {
+            if (targetAisling.GroupParty?.PartyMembers == null) return this;
+            foreach (var member in targetAisling.GroupParty.PartyMembers.Where(member => member.Serial != Aisling.Serial).Where(member => allowedMaps.ListContains(member.Map.Name)))
+            {
+                member.Client.SendAnimation(67);
+                member.Client.TransitionToMap(targetAisling.Map, targetAisling.Position);
+            }
+
+            return this;
+        }
+
+        public bool GiveItem(string itemName)
+        {
+            var item = new Item();
+            item = item.Create(Aisling, itemName);
+
+            return item.Template.Name != null && item.GiveTo(Aisling);
+        }
+
+        public void GiveQuantity(Aisling aisling, string itemName, int range)
+        {
+            var item = new Item();
+            item = item.Create(aisling, itemName);
+            item.Stacks = (ushort)range;
+            item.GiveTo(aisling);
+        }
+
+
+
+        public void TakeAwayQuantity(Sprite owner, string item, int range)
+        {
+            var foundItem = Aisling.Inventory.Has(i => i.Template.Name.Equals(item, StringComparison.OrdinalIgnoreCase));
+            if (foundItem == null) return;
+
+            Aisling.Inventory.RemoveRange(Aisling.Client, foundItem, range);
+        }
+
+        public WorldClient LoggedIn(bool state)
+        {
+            Aisling.LoggedIn = state;
+
+            return this;
+        }
+
+        public void OpenBoard(string n)
+        {
+            if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(n, out var boardListObj))
+            {
+                //if (boardListObj != null && boardListObj.Any())
+                //SendBoard(new BoardList(boardListObj));
+            }
+        }
+
+        public void Port(int i, int x = 0, int y = 0)
+        {
+            TransitionToMap(i, new Position(x, y));
+        }
+
+        public void ResetLocation(WorldClient client)
+        {
+            var map = client.Aisling.CurrentMapId;
+            var x = (int)client.Aisling.Pos.X;
+            var y = (int)client.Aisling.Pos.Y;
+            var reset = 0;
+
+            while (reset == 0)
+            {
+                client.Aisling.Abyss = true;
+                client.Port(ServerSetup.Instance.Config.TransitionZone, ServerSetup.Instance.Config.TransitionPointX, ServerSetup.Instance.Config.TransitionPointY);
+                client.Port(map, x, y);
+                client.Aisling.Abyss = false;
+                reset++;
+            }
+        }
+
+        public void Recover()
+        {
+            Revive();
+        }
+
+        public void RevivePlayer(string u)
+        {
+            if (u is null) return;
+            var user = ObjectHandlers.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
+
+            if (user is { LoggedIn: true })
+                user.Client.Revive();
+        }
+
+        public void GiveScar()
+        {
+            var item = new Legend.LegendItem
+            {
+                Category = "Event",
+                Time = DateTime.UtcNow,
+                Color = LegendColor.Red,
+                Icon = (byte)LegendIcon.Warrior,
+                Value = "Fragment of spark taken.."
+            };
+
+            Aisling.LegendBook.AddLegend(item, this);
+        }
+
+        public void RepairEquipment()
+        {
+            if (Aisling.Inventory.Items != null)
+            {
+                foreach (var inventory in Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable) && i.Value.Durability < i.Value.MaxDurability))
+                {
+                    var item = inventory.Value;
+                    if (item.Template == null) continue;
+                    item.ItemQuality = item.OriginalQuality == Item.Quality.Damaged ? Item.Quality.Common : item.OriginalQuality;
+                    item.Tarnished = false;
+                    ItemQualityVariance.ItemDurability(item, item.ItemQuality);
+                    Aisling.Inventory.UpdateSlot(Aisling.Client, item);
+                }
+            }
+
+            foreach (var (key, value) in Aisling.EquipmentManager.Equipment.Where(equip => equip.Value != null && equip.Value.Item.Template.Flags.FlagIsSet(ItemFlags.Repairable) && equip.Value.Item.Durability < equip.Value.Item.MaxDurability))
+            {
+                var item = value.Item;
+                if (item.Template == null) continue;
+                item.ItemQuality = item.OriginalQuality == Item.Quality.Damaged ? Item.Quality.Common : item.OriginalQuality;
+                item.Tarnished = false;
+                ItemQualityVariance.ItemDurability(item, item.ItemQuality);
+                SendEquipment(item);
+            }
+
+            var reapplyMods = new Item();
+            reapplyMods.ReapplyItemModifiers(Aisling.Client);
+
+            SendAttributes(StatUpdateType.Full);
+        }
+
+        public bool Revive()
+        {
+            Aisling.Flags = AislingFlags.Normal;
+            Aisling.RegenTimerDisabled = false;
+            Aisling.CurrentHp = (int)(Aisling.MaximumHp * 0.80);
+            Aisling.CurrentMp = (int)(Aisling.MaximumMp * 0.80);
+
+            SendAttributes(StatUpdateType.Vitality);
+            return Aisling.CurrentHp > 0;
+        }
+
+        public bool IsBehind(Sprite sprite)
+        {
+            var delta = sprite.Direction - Aisling.Direction;
+            return Aisling.Position.IsNextTo(sprite.Position) && delta == 0;
+        }
+
+        public void KillPlayer(string u)
+        {
+            if (u is null) return;
+            var user = ObjectHandlers.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
+
+            if (user != null)
+                user.CurrentHp = 0;
+        }
+
+
+        #endregion
+
+        #region Give Base Stats
+
+        public void GiveHp(int v = 1)
+        {
+            Aisling.BaseHp += v;
+
+            if (Aisling.BaseHp > ServerSetup.Instance.Config.MaxHP)
+                Aisling.BaseHp = ServerSetup.Instance.Config.MaxHP;
+
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveMp(int v = 1)
+        {
+            Aisling.BaseMp += v;
+
+            if (Aisling.BaseMp > ServerSetup.Instance.Config.MaxHP)
+                Aisling.BaseMp = ServerSetup.Instance.Config.MaxHP;
+
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveStr(byte v = 1)
+        {
+            Aisling._Str += v;
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveInt(byte v = 1)
+        {
+            Aisling._Int += v;
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveWis(byte v = 1)
+        {
+            Aisling._Wis += v;
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveCon(byte v = 1)
+        {
+            Aisling._Con += v;
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveDex(byte v = 1)
+        {
+            Aisling._Dex += v;
+            SendAttributes(StatUpdateType.Primary);
+        }
+
+        public void GiveExp(uint exp)
+        {
+            if (exp <= 0) exp = 1;
+
+            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+            Aisling.ExpTotal += exp;
+            Aisling.ExpNext -= (int)exp;
+
+            if (Aisling.ExpNext >= int.MaxValue) Aisling.ExpNext = 0;
+
+            var seed = Aisling.ExpLevel * 0.1 + 0.5;
+            {
+                if (Aisling.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
+                    return;
+            }
+
+            while (Aisling.ExpNext <= 0 && Aisling.ExpLevel < 500)
+            {
+                Aisling.ExpNext = (int)(Aisling.ExpLevel * seed * 5000);
+
+                if (Aisling.ExpLevel == 500)
+                    break;
+
+                if (Aisling.ExpTotal <= 0)
+                    Aisling.ExpTotal = uint.MaxValue;
+
+                if (Aisling.ExpTotal >= uint.MaxValue)
+                    Aisling.ExpTotal = uint.MaxValue;
+
+                if (Aisling.ExpNext <= 0)
+                    Aisling.ExpNext = 1;
+
+                if (Aisling.ExpNext >= int.MaxValue)
+                    Aisling.ExpNext = int.MaxValue;
+
+                Aisling.Client.LevelUp(Aisling);
+            }
+
+            SendAttributes(StatUpdateType.ExpGold);
+        }
+
+        public void LevelUp(Player player)
+        {
+            if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
+            player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
+            player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
+            player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
+            player.ExpLevel++;
+            player.CurrentHp = player.MaximumHp;
+            player.CurrentMp = player.MaximumMp;
+
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
+            SendTargetedAnimation(Scope.NearbyAislings, 0x004F, 64, 0x004F, player.Serial, player.Serial);
+            player.Client.SendAttributes(StatUpdateType.ExpGold);
+        }
+
+        public void GiveAp(uint a)
+        {
+            if (a <= 0) a = 1;
+            SendServerMessage(ServerMessageType.ActiveMessage, $"Received {a:n0} ability points!");
+            Aisling.AbpTotal += a;
+            Aisling.AbpNext -= a;
+
+            if (Aisling.AbpNext >= int.MaxValue) Aisling.AbpNext = 0;
+
+            var seed = Aisling.AbpLevel * 0.1 + 0.5;
+            {
+                if (Aisling.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
+                    return;
+            }
+
+            while (Aisling.AbpNext <= 0 && Aisling.AbpLevel < 500)
+            {
+                Aisling.AbpNext = (uint)(Aisling.AbpLevel * seed * 5000);
+
+                if (Aisling.AbpLevel == 500)
+                    break;
+
+                if (Aisling.AbpNext <= 0)
+                    Aisling.AbpNext = uint.MaxValue;
+
+                if (Aisling.AbpNext >= uint.MaxValue)
+                    Aisling.AbpNext = uint.MaxValue;
+
+                if (Aisling.AbpNext <= 0)
+                    Aisling.AbpNext = 1;
+
+                if (Aisling.AbpNext >= int.MaxValue)
+                    Aisling.AbpNext = int.MaxValue;
+
+                Aisling.AbpLevel++;
+            }
+
+            SendAttributes(StatUpdateType.ExpGold);
+        }
+
         #endregion
 
         #region Warping & Maps
@@ -2793,6 +3341,58 @@ namespace Darkages.Network.Client
 
         #region SQL
 
+        public void DeleteSkillFromDb(Skill skill)
+        {
+            var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            if (skill.SkillName is null) return;
+
+            try
+            {
+                sConn.Open();
+                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE SkillName = @SkillName AND Serial = @Serial";
+                sConn.Execute(cmd, new { skill.SkillName, Aisling.Serial });
+                sConn.Close();
+            }
+            catch (SqlException e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+        }
+
+        public void DeleteSpellFromDb(Spell spell)
+        {
+            var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            if (spell.SpellName is null) return;
+
+            try
+            {
+                sConn.Open();
+                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellName = @SpellName AND Serial = @Serial";
+                sConn.Execute(cmd, new { spell.SpellName, Aisling.Serial });
+                sConn.Close();
+            }
+            catch (SqlException e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+        }
+
         public void LoadBank()
         {
             Aisling.BankManager = new Bank();
@@ -2858,7 +3458,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        public async void AddDiscoveredMapToDb()
+        public async Task AddDiscoveredMapToDb()
         {
             await CreateLock.WaitAsync().ConfigureAwait(false);
 
@@ -2902,7 +3502,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        public async void AddToIgnoreListDb(string ignored)
+        public async Task AddToIgnoreListDb(string ignored)
         {
             await CreateLock.WaitAsync().ConfigureAwait(false);
 

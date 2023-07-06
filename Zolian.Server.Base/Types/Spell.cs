@@ -1,12 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Data;
-
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
@@ -19,7 +18,6 @@ namespace Darkages.Types;
 
 public class Spell
 {
-    public int SpellId { get; init; }
     public byte Icon { get; set; }
     public bool InUse { get; set; }
     public byte Level { get; set; }
@@ -42,11 +40,9 @@ public class Spell
 
     public static Spell Create(int slot, SpellTemplate spellTemplate)
     {
-        var spellID = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         var obj = new Spell
         {
             Template = spellTemplate,
-            SpellId = spellID,
             Level = 1,
             Slot = (byte)slot,
             Icon = spellTemplate.Icon,
@@ -56,7 +52,7 @@ public class Spell
         return obj;
     }
 
-    public static bool GiveTo(GameClient client, string args)
+    public static bool GiveTo(WorldClient client, string args)
     {
         if (!client.Aisling.LoggedIn) return false;
         if (!ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey(args)) return false;
@@ -74,8 +70,7 @@ public class Spell
             AttachScript(spell);
             {
                 client.Aisling.SpellBook.Set(spell);
-
-                client.Send(new ServerFormat17(spell));
+                client.SendAddSpellToPane(spell);
                 client.Aisling.SendAnimation(22, client.Aisling, client.Aisling);
             }
         }
@@ -87,10 +82,8 @@ public class Spell
             var cmd = new SqlCommand("SpellToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var spellId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var spellNameReplaced = spell.Template.ScriptName;
 
-            cmd.Parameters.Add("@SpellId", SqlDbType.Int).Value = spellId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = spell.Slot;
@@ -107,7 +100,7 @@ public class Spell
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -145,8 +138,7 @@ public class Spell
             AttachScript(spell);
             {
                 aisling.SpellBook.Set(spell);
-
-                aisling.Show(Scope.Self, new ServerFormat17(spell));
+                aisling.Client.SendAddSpellToPane(spell);
                 aisling.SendAnimation(22, aisling, aisling);
             }
         }
@@ -158,10 +150,8 @@ public class Spell
             var cmd = new SqlCommand("SpellToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var spellId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var spellNameReplaced = spell.Template.ScriptName;
 
-            cmd.Parameters.Add("@SpellId", SqlDbType.Int).Value = spellId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = spell.Slot;
@@ -178,7 +168,7 @@ public class Spell
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Data;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
@@ -19,7 +20,6 @@ namespace Darkages.Types;
 
 public class Skill
 {
-    public int SkillId { get; init; }
     public byte Icon { get; init; }
     public bool InUse { get; set; }
     public int Level { get; set; }
@@ -57,11 +57,9 @@ public class Skill
 
     public static Skill Create(int slot, SkillTemplate skillTemplate)
     {
-        var skillID = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         var obj = new Skill
         {
             Template = skillTemplate,
-            SkillId = skillID,
             Level = 1,
             Slot = (byte)slot,
             Icon = skillTemplate.Icon
@@ -70,7 +68,7 @@ public class Skill
         return obj;
     }
 
-    public static bool GiveTo(GameClient client, string args)
+    public static bool GiveTo(WorldClient client, string args)
     {
         if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(args)) return false;
 
@@ -88,8 +86,7 @@ public class Skill
             AttachScript(skill);
             {
                 client.Aisling.SkillBook.Set(skill);
-
-                client.Send(new ServerFormat2C(skill.Slot, skill.Icon, skill.Name));
+                client.SendAddSkillToPane(skill);
                 client.Aisling.SendAnimation(22, client.Aisling, client.Aisling);
             }
         }
@@ -121,7 +118,7 @@ public class Skill
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -158,8 +155,7 @@ public class Skill
             AttachScript(skill);
             {
                 aisling.SkillBook.Set(skill);
-
-                aisling.Show(Scope.Self, new ServerFormat2C(skill.Slot, skill.Icon, skill.Name));
+                aisling.Client.SendAddSkillToPane(skill);
                 aisling.SendAnimation(22, aisling, aisling);
             }
         }
@@ -171,10 +167,8 @@ public class Skill
             var cmd = new SqlCommand("SkillToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var skillId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
             var skillNameReplaced = skill.Template.ScriptName;
 
-            cmd.Parameters.Add("@SkillId", SqlDbType.Int).Value = skillId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
@@ -191,7 +185,7 @@ public class Skill
             if (e.Message.Contains("PK__Players"))
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -228,7 +222,7 @@ public class Skill
         (damageDealingSprite, enemy) = (enemy, damageDealingSprite);
         enemy.Animate(27);
         if (damageDealingSprite is Aisling)
-            damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
+            damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
 
         return enemy;
     }

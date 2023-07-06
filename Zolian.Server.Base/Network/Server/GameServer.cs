@@ -4,6 +4,8 @@ using System.Net;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
@@ -11,6 +13,7 @@ using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
 using Darkages.Network.Formats.Models.ClientFormats;
 using Darkages.Network.Formats.Models.ServerFormats;
@@ -23,10 +26,12 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using ServiceStack;
+using MapFlags = Darkages.Enums.MapFlags;
+using Stat = Darkages.Enums.Stat;
 
 namespace Darkages.Network.Server;
 
-public class GameServer : NetworkServer<GameClient>
+public class GameServer : NetworkServer<WorldClient>
 {
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
@@ -790,7 +795,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Request Map Data
     /// </summary>
-    protected override void Format05Handler(GameClient client, ClientFormat05 format)
+    protected override void Format05Handler(WorldClient client, ClientFormat05 format)
     {
         if (client?.Aisling?.Map == null) return;
         if (client is not { Authenticated: true }) return;
@@ -807,7 +812,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    private static void SendMapData(GameClient client)
+    private static void SendMapData(WorldClient client)
     {
         var cluster = new List<NetworkFormat>();
 
@@ -829,7 +834,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Player Movement
     /// </summary>
-    protected override void Format06Handler(GameClient client, ClientFormat06 format)
+    protected override void Format06Handler(WorldClient client, ClientFormat06 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -900,7 +905,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Item Pickup from Map
     /// </summary>
-    protected override void Format07Handler(GameClient client, ClientFormat07 format)
+    protected override void Format07Handler(WorldClient client, ClientFormat07 format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1000,7 +1005,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Item dropped on Map
     /// </summary>
-    protected override void Format08Handler(GameClient client, ClientFormat08 format)
+    protected override void Format08Handler(WorldClient client, ClientFormat08 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1150,7 +1155,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Client End-Game Request
     /// </summary>
-    protected override void Format0BHandler(GameClient client, ClientFormat0B format)
+    protected override void Format0BHandler(WorldClient client, ClientFormat0B format)
     {
         if (!CanInteract(client, false, false, false)) return;
         LeaveGame(client, format);
@@ -1159,12 +1164,12 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Display Object Request
     /// </summary>
-    protected override void Format0CHandler(GameClient client, ClientFormat0C format) { }
+    protected override void Format0CHandler(WorldClient client, ClientFormat0C format) { }
 
     /// <summary>
     /// On Client End-Game Request Continued...
     /// </summary>
-    private void LeaveGame(GameClient client, ClientFormat0B format)
+    private void LeaveGame(WorldClient client, ClientFormat0B format)
     {
         if (client?.Aisling == null) return;
 
@@ -1188,7 +1193,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Ignore Player - F9 Button
     /// </summary>
-    protected override void Format0DHandler(GameClient client, ClientFormat0D format)
+    protected override void Format0DHandler(WorldClient client, ClientFormat0D format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1217,7 +1222,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Public Message
     /// </summary>
-    protected override void Format0EHandler(GameClient client, ClientFormat0E format)
+    protected override void Format0EHandler(WorldClient client, ClientFormat0E format)
     {
         bool ParseCommand()
         {
@@ -1283,7 +1288,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Spell Use
     /// </summary>
-    protected override void Format0FHandler(GameClient client, ClientFormat0F format)
+    protected override void Format0FHandler(WorldClient client, ClientFormat0F format)
     {
         if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1320,7 +1325,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Redirect to GameServer from LoginServer
     /// </summary>
-    protected override async Task Format10Handler(GameClient client, ClientFormat10 format)
+    protected override async Task Format10Handler(WorldClient client, ClientFormat10 format)
     {
         if (client == null) return;
         if (format.Name.IsNullOrEmpty()) return;
@@ -1336,7 +1341,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Redirect to GameServer from LoginServer Continued...
     /// </summary>
-    private async Task EnterGame(GameClient client, ClientFormat10 format)
+    private async Task EnterGame(WorldClient client, ClientFormat10 format)
     {
         SecurityProvider.Instance = format.Parameters;
         client.Server = this;
@@ -1390,7 +1395,7 @@ public class GameServer : NetworkServer<GameClient>
         client.LastPing = time;
     }
 
-    private void DisconnectAndRemoveClient(GameClient client)
+    private void DisconnectAndRemoveClient(WorldClient client)
     {
         ClientDisconnected(client);
         RemoveClient(client);
@@ -1399,7 +1404,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Authentication
     /// </summary>
-    private void AuthenticateClient(GameClient client)
+    private void AuthenticateClient(WorldClient client)
     {
         if (ServerSetup.Redirects.ContainsKey(client.Aisling.Serial))
         {
@@ -1414,7 +1419,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Player Change Direction
     /// </summary>
-    protected override void Format11Handler(GameClient client, ClientFormat11 format)
+    protected override void Format11Handler(WorldClient client, ClientFormat11 format)
     {
         if (client.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1438,7 +1443,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Auto-Attack - Spacebar Button
     /// </summary>
-    protected override void Format13Handler(GameClient client, ClientFormat13 format)
+    protected override void Format13Handler(WorldClient client, ClientFormat13 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1462,7 +1467,7 @@ public class GameServer : NetworkServer<GameClient>
         Assail(client);
     }
 
-    public static void Assail(IGameClient lpClient)
+    public static void Assail(IWorldClient lpClient)
     {
         var lastTemplate = string.Empty;
 
@@ -1491,7 +1496,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On World list Request - (Who is Online)
     /// </summary>
-    protected override void Format18Handler(GameClient client, ClientFormat18 format)
+    protected override void Format18Handler(WorldClient client, ClientFormat18 format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1503,7 +1508,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Private Message (Guild, Group, Direct, World)
     /// </summary>
-    protected override void Format19Handler(GameClient client, ClientFormat19 format)
+    protected override void Format19Handler(WorldClient client, ClientFormat19 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1581,7 +1586,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Client -Options Panel- Change - F4 Button
     /// </summary>
-    protected override void Format1BHandler(GameClient client, ClientFormat1B format)
+    protected override void Format1BHandler(WorldClient client, ClientFormat1B format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (client.Aisling.GameSettings == null) return;
@@ -1607,7 +1612,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    private static void UpdateSettings(IGameClient client)
+    private static void UpdateSettings(IWorldClient client)
     {
         var msg = "\t";
 
@@ -1623,7 +1628,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Item Usage
     /// </summary>
-    protected override void Format1CHandler(GameClient client, ClientFormat1C format)
+    protected override void Format1CHandler(WorldClient client, ClientFormat1C format)
     {
         if (client?.Aisling?.Map == null || !client.Aisling.Map.Ready) return;
         if (client is not { Authenticated: true }) return;
@@ -1704,7 +1709,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Client using Emote
     /// </summary>
-    protected override void Format1DHandler(GameClient client, ClientFormat1D format)
+    protected override void Format1DHandler(WorldClient client, ClientFormat1D format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1728,7 +1733,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Client Dropping Gold on Map
     /// </summary>
-    protected override void Format24Handler(GameClient client, ClientFormat24 format)
+    protected override void Format24Handler(WorldClient client, ClientFormat24 format)
     {
         if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.CanAttack) return;
@@ -1754,7 +1759,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Item Dropped on Sprite
     /// </summary>
-    protected override void Format29Handler(GameClient client, ClientFormat29 format)
+    protected override void Format29Handler(WorldClient client, ClientFormat29 format)
     {
         if (!CanInteract(client, false, true, false)) return;
 
@@ -1826,7 +1831,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Gold Dropped on Sprite
     /// </summary>
-    protected override void Format2AHandler(GameClient client, ClientFormat2A format)
+    protected override void Format2AHandler(WorldClient client, ClientFormat2A format)
     {
         if (!CanInteract(client, false, true, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1904,7 +1909,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Player Request Profile - Load Profile
     /// </summary>
-    protected override void Format2DHandler(GameClient client, ClientFormat2D format)
+    protected override void Format2DHandler(WorldClient client, ClientFormat2D format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -1923,7 +1928,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Party Join Request
     /// </summary>
-    protected override void Format2EHandler(GameClient client, ClientFormat2E format)
+    protected override void Format2EHandler(WorldClient client, ClientFormat2E format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -1961,7 +1966,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Toggle Group Button
     /// </summary>
-    protected override void Format2FHandler(GameClient client, ClientFormat2F format)
+    protected override void Format2FHandler(WorldClient client, ClientFormat2F format)
     {
         if (client is not { Authenticated: true }) return;
 
@@ -1994,7 +1999,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Swapping Sprites within UI (Skills, Spells, Items)
     /// </summary>
-    protected override void Format30Handler(GameClient client, ClientFormat30 format)
+    protected override void Format30Handler(WorldClient client, ClientFormat30 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -2152,7 +2157,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    protected override void Format32Handler(GameClient client, ClientFormat32 format)
+    protected override void Format32Handler(WorldClient client, ClientFormat32 format)
     {
         Console.Write($"Format32HandlerDiscovery: {format.UnknownA}\n{format.UnknownB}\n{format.UnknownC}\n{format.UnknownD}\n");
     }
@@ -2160,7 +2165,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On Client Refresh - F5 Button
     /// </summary>
-    protected override void Format38Handler(GameClient client, ClientFormat38 format)
+    protected override void Format38Handler(WorldClient client, ClientFormat38 format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -2173,7 +2178,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Request Pursuit
     /// </summary>
-    protected override void Format39Handler(GameClient client, ClientFormat39 format)
+    protected override void Format39Handler(WorldClient client, ClientFormat39 format)
     {
         if (!CanInteract(client)) return;
         ServerSetup.Instance.GlobalMundaneCache.TryGetValue(format.Serial, out var npc);
@@ -2192,7 +2197,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// NPC Input Response -- Story Building, Send 3A after OnResponse
     /// </summary>
-    protected override void Format3AHandler(GameClient client, ClientFormat3A format)
+    protected override void Format3AHandler(WorldClient client, ClientFormat3A format)
     {
         if (!CanInteract(client)) return;
 
@@ -2261,7 +2266,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Request Bulletin Board
     /// </summary>
-    protected override void Format3BHandler(GameClient client, ClientFormat3B format)
+    protected override void Format3BHandler(WorldClient client, ClientFormat3B format)
     {
         if (!CanInteract(client, false, true, false)) return;
 
@@ -2456,7 +2461,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Skill Use
     /// </summary>
-    protected override void Format3EHandler(GameClient client, ClientFormat3E format)
+    protected override void Format3EHandler(WorldClient client, ClientFormat3E format)
     {
         if (!CanInteract(client, false, true, false)) return;
         if (client.Aisling.IsDead()) return;
@@ -2487,7 +2492,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// World Map Click
     /// </summary>
-    protected override void Format3FHandler(GameClient client, ClientFormat3F format)
+    protected override void Format3FHandler(WorldClient client, ClientFormat3F format)
     {
         if (client.Aisling is not { LoggedIn: true }) return;
         if (client is not { Authenticated: true, MapOpen: true }) return;
@@ -2500,7 +2505,7 @@ public class GameServer : NetworkServer<GameClient>
         TraverseWorldMap(client);
     }
 
-    private static void TraverseWorldMap(GameClient client)
+    private static void TraverseWorldMap(WorldClient client)
     {
         if (!client.MapOpen) return;
         var selectedPortalNode = client.PendingNode;
@@ -2522,7 +2527,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// On (map, player, monster, npc) Click - F1 Button
     /// </summary>
-    protected override void Format43Handler(GameClient client, ClientFormat43 format)
+    protected override void Format43Handler(WorldClient client, ClientFormat43 format)
     {
         if (!CanInteract(client, false, true, false)) return;
 
@@ -2592,7 +2597,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Remove Equipment From Slot
     /// </summary>
-    protected override void Format44Handler(GameClient client, ClientFormat44 format)
+    protected override void Format44Handler(WorldClient client, ClientFormat44 format)
     {
         if (!CanInteract(client, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -2604,7 +2609,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Ping - Heartbeat
     /// </summary>
-    protected override void Format45Handler(GameClient client, ClientFormat45 format)
+    protected override void Format45Handler(WorldClient client, ClientFormat45 format)
     {
         if (client is not { Authenticated: true }) return;
         if (format.Second != 0x14)
@@ -2622,7 +2627,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Stat Increase Buttons
     /// </summary>
-    protected override void Format47Handler(GameClient client, ClientFormat47 format)
+    protected override void Format47Handler(WorldClient client, ClientFormat47 format)
     {
         if (!CanInteract(client)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -2725,7 +2730,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Trading
     /// </summary>
-    protected override void Format4AHandler(GameClient client, ClientFormat4A format)
+    protected override void Format4AHandler(WorldClient client, ClientFormat4A format)
     {
         if (format == null) return;
         if (!CanInteract(client, false, true, false)) return;
@@ -2937,7 +2942,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Begin Casting - Spell Lines
     /// </summary>
-    protected override void Format4DHandler(GameClient client, ClientFormat4D format)
+    protected override void Format4DHandler(WorldClient client, ClientFormat4D format)
     {
         if (!CanInteract(client, false, false, false)) return;
         if (!client.Aisling.LoggedIn) return;
@@ -2964,7 +2969,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Skill / Spell Lines - Chant Message
     /// </summary>
-    protected override void Format4EHandler(GameClient client, ClientFormat4E format)
+    protected override void Format4EHandler(WorldClient client, ClientFormat4E format)
     {
         if (client?.Aisling == null) return;
         if (client is not { Authenticated: true }) return;
@@ -2992,7 +2997,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Player Portrait & Profile Message
     /// </summary>
-    protected override void Format4FHandler(GameClient client, ClientFormat4F format)
+    protected override void Format4FHandler(WorldClient client, ClientFormat4F format)
     {
         if (!CanInteract(client, false, false, false)) return;
         client.Aisling.ProfileMessage = format.Words;
@@ -3002,7 +3007,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Tick Sync
     /// </summary>
-    protected override void Format75Handler(GameClient client, ClientFormat75 format)
+    protected override void Format75Handler(WorldClient client, ClientFormat75 format)
     {
         Console.Write($"Format75HandlerDiscovery: {format.ClientTick} - {format.ServerTick}\n");
     }
@@ -3010,7 +3015,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Player Social Status
     /// </summary>
-    protected override void Format79Handler(GameClient client, ClientFormat79 format)
+    protected override void Format79Handler(WorldClient client, ClientFormat79 format)
     {
         if (client is not { Authenticated: true }) return;
         client.Aisling.ActiveStatus = format.Status;
@@ -3019,7 +3024,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Client Metafile Request
     /// </summary>
-    protected override void Format7BHandler(GameClient client, ClientFormat7B format)
+    protected override void Format7BHandler(WorldClient client, ClientFormat7B format)
     {
         if (client is not { Authenticated: true }) return;
 
@@ -3056,7 +3061,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    private static string DecideOnSkillsToPull(IGameClient client)
+    private static string DecideOnSkillsToPull(IWorldClient client)
     {
         if (client.Aisling == null) return null;
         return _skillMap.TryGetValue((client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass), out var skillCode) ? skillCode : null;
@@ -3065,7 +3070,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <summary>
     /// Display Mask
     /// </summary>
-    protected override void Format89Handler(GameClient client, ClientFormat89 format)
+    protected override void Format89Handler(WorldClient client, ClientFormat89 format)
     {
         Console.Write($"Format89HandlerDiscovery\n");
     }
@@ -3074,7 +3079,7 @@ public class GameServer : NetworkServer<GameClient>
 
 
 
-    private static void ExecuteAbility(IGameClient lpClient, Skill lpSkill, bool optExecuteScript = true)
+    private static void ExecuteAbility(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
     {
         if (lpSkill.Template.ScriptName == "Assail")
         {
@@ -3091,7 +3096,7 @@ public class GameServer : NetworkServer<GameClient>
         script?.OnUse(lpClient.Aisling);
     }
 
-    public static void CheckWarpTransitions(GameClient client)
+    public static void CheckWarpTransitions(WorldClient client)
     {
         foreach (var (_, value) in ServerSetup.Instance.GlobalWarpTemplateCache)
         {
@@ -3126,7 +3131,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    public static void CheckWarpTransitions(GameClient client, int x, int y)
+    public static void CheckWarpTransitions(WorldClient client, int x, int y)
     {
         foreach (var (_, value) in ServerSetup.Instance.GlobalWarpTemplateCache)
         {
@@ -3163,7 +3168,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    private void RemoveFromServer(GameClient client, byte type = 0)
+    private void RemoveFromServer(WorldClient client, byte type = 0)
     {
         if (client == null) return;
 
@@ -3198,7 +3203,7 @@ public class GameServer : NetworkServer<GameClient>
         }
     }
 
-    private async void ExitGame(GameClient client)
+    private async void ExitGame(WorldClient client)
     {
         if (client.Aisling is null) return;
         var nameSeed = $"{client.Aisling.Username.ToLower()}{client.Aisling.Serial}";
@@ -3230,7 +3235,7 @@ public class GameServer : NetworkServer<GameClient>
         client.Dispose();
     }
 
-    public override void ClientDisconnected(GameClient client)
+    public override void ClientDisconnected(WorldClient client)
     {
         if (client == null) return;
         if (client.Aisling?.GroupId != 0)
@@ -3239,7 +3244,7 @@ public class GameServer : NetworkServer<GameClient>
         RemoveFromServer(client);
     }
 
-    private Task<Aisling> LoadPlayer(GameClient client, string player, uint serial)
+    private Task<Aisling> LoadPlayer(WorldClient client, string player, uint serial)
     {
         if (client == null) return null;
         if (player.IsNullOrEmpty()) return null;
@@ -3273,7 +3278,7 @@ public class GameServer : NetworkServer<GameClient>
         return CleanUpLoadPlayer(client);
     }
 
-    private static async Task<Aisling> CleanUpLoadPlayer(GameClient client)
+    private static async Task<Aisling> CleanUpLoadPlayer(WorldClient client)
     {
         CheckOnLoad(client);
 
@@ -3300,7 +3305,7 @@ public class GameServer : NetworkServer<GameClient>
         return client.Aisling;
     }
 
-    private static void CheckOnLoad(IGameClient client)
+    private static void CheckOnLoad(IWorldClient client)
     {
         var aisling = client.Aisling;
 
@@ -3319,7 +3324,7 @@ public class GameServer : NetworkServer<GameClient>
     /// <param name="deathCheck">Set to false if not checking if the player is dead</param>
     /// <param name="cantCastOrAttack">Set to false if not checking attacking/casting</param>
     /// <returns></returns>
-    private static bool CanInteract(GameClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
+    private static bool CanInteract(WorldClient client, bool cancelCasting = true, bool deathCheck = true, bool cantCastOrAttack = true)
     {
         if (client?.Aisling == null) return false;
         if (client is not ({ Authenticated: true } and { EncryptPass: true })) return false;
