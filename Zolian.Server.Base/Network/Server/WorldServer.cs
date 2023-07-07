@@ -31,6 +31,8 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using ServiceStack;
+
 using Stat = Chaos.Common.Definitions.Stat;
 
 namespace Darkages.Network.Server;
@@ -690,6 +692,49 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
             aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills++;
             aisling.MonsterKillCounters[monster.Template.BaseName].TimeKilled = readyTime;
         }
+
+        QuestHandling(aisling, monster);
+    }
+
+    private static void QuestHandling(Aisling aisling, Monster monster)
+    {
+        if (!aisling.Client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
+        {
+            if (aisling.Client.Aisling.QuestManager.KeelaKill == monster.Template.BaseName)
+            {
+                var killed = aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills;
+
+                if (killed >= aisling.Client.Aisling.QuestManager.KeelaCount)
+                {
+                    const string script = "Nadia";
+                    var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
+                    scriptObj.Value?.OnResponse(aisling.Client, 0x01, null);
+
+                    return;
+                }
+
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin Quest: {{=q{killed}{{=a killed.");
+            }
+        }
+
+        if (!aisling.Client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
+        {
+            if (aisling.Client.Aisling.QuestManager.NealKill == monster.Template.BaseName)
+            {
+                var killed = aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills;
+
+                if (killed >= aisling.Client.Aisling.QuestManager.NealCount)
+                {
+                    const string script = "Nadia";
+                    var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
+                    scriptObj.Value?.OnResponse(aisling.Client, 0x03, null);
+
+                    return;
+                }
+
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aNeal Quest: {{=q{killed}{{=a killed.");
+            }
+        }
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
@@ -724,273 +769,30 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         client.Aisling.IsCastingSpell = false;
     }
 
+
+
     #endregion
 
     #region OnHandlers
 
-    public ValueTask OnBeginChant(IWorldClient client, in ClientPacket clientPacket)
+    /// <summary>
+    /// 0x05 - Request Map Data
+    /// </summary>
+    public ValueTask OnMapDataRequest(IWorldClient client, in ClientPacket clientPacket)
     {
-        var args = PacketSerializer.Deserialize<BeginChantArgs>(in clientPacket);
-
-        static ValueTask InnerOnBeginChant(IWorldClient localClient, BeginChantArgs localArgs)
+        static ValueTask InnerOnMapDataRequest(IWorldClient localClient)
         {
-            localClient.Aisling.UserState |= UserState.IsChanting;
-            localClient.Aisling.ChantTimer.Start(localArgs.CastLineCount);
+            localClient.SendMapData();
 
             return default;
         }
 
-        return ExecuteHandler(client, args, InnerOnBeginChant);
+        return ExecuteHandler(client, InnerOnMapDataRequest);
     }
 
-    public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnBoardRequest(IWorldClient localClient)
-        {
-            localClient.SendBoard();
-
-            return default;
-        }
-
-        /*
-        //this packet is literally retarded
-        private void Board(Client client, ClientPacket packet)
-        {
-            var type = (BoardRequestType)packet.ReadByte();
-
-            switch (type) //request type
-            {
-                case BoardRequestType.BoardList:
-                    //Board List
-                    //client.Enqueue(client.ServerPackets.BulletinBoard);
-                    break;
-                case BoardRequestType.ViewBoard:
-                    {
-                        //Post list for boardNum
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort startPostNum = packet.ReadUInt16(); //you send the newest mail first, which will have the highest number. startPostNum counts down.
-                        //packet.ReadByte() is always 0xF0(240) ???
-                        //the client spam requests this like holy fuck, put a timer on this so you only send 1 packet
-                        break;
-                    }
-                case BoardRequestType.ViewPost:
-                    {
-                        //Post
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16(); //the post number they want, counting up (what the fuck?)
-                        //mailbox = boardNum 0
-                        //otherwise boardnum is the index of the board you're accessing
-                        switch (packet.ReadSByte()) //board controls
-                        {
-                            case -1: //clicked next for older post
-                                break;
-                            case 0: //requested a specific post from the post list
-                                break;
-                            case 1: //clicked previous for newer post
-                                break;
-                        }
-                        break;
-                    }
-                case BoardRequestType.NewPost: //new post
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        string subject = packet.ReadString8();
-                        string message = packet.ReadString16();
-                        break;
-                    }
-                case BoardRequestType.Delete: //delete post
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16(); //the post number they want to delete, counting up
-                        break;
-                    }
-
-                case BoardRequestType.SendMail: //send mail
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        string targetName = packet.ReadString8();
-                        string subject = packet.ReadString8();
-                        string message = packet.ReadString16();
-                        break;
-                    }
-                case BoardRequestType.Highlight: //highlight message
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16();
-                        break;
-                    }
-            }
-
-            Server.WriteLogAsync($@"Recv [{(ClientOpCodes)packet.OpCode}] TYPE: {type}", client);
-            Game.Boards(client);
-        }
-         */
-
-        return ExecuteHandler(client, InnerOnBoardRequest);
-    }
-
-    public ValueTask OnChant(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<DisplayChantArgs>(in clientPacket);
-
-        static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
-        {
-            localClient.Aisling.Chant(localArgs.ChantMessage);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnChant);
-    }
-
-    public ValueTask OnClick(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ClickArgs>(in clientPacket);
-
-        ValueTask InnerOnClick(IWorldClient localClient, ClickArgs localArgs)
-        {
-            (var targetId, var targetPoint) = localArgs;
-
-            if (targetId.HasValue)
-            {
-                if (targetId == uint.MaxValue)
-                {
-                    var f1Merchant = MerchantFactory.Create(
-                        Options.F1MerchantTemplateKey,
-                        localClient.Aisling.MapInstance,
-                        Point.From(localClient.Aisling));
-
-                    f1Merchant.OnClicked(localClient.Aisling);
-
-                    return default;
-                }
-
-                localClient.Aisling.MapInstance.Click(targetId.Value, localClient.Aisling);
-            }
-            else if (targetPoint is not null)
-                localClient.Aisling.MapInstance.Click(targetPoint, localClient.Aisling);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnClick);
-    }
-
-    public ValueTask OnClientRedirected(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in clientPacket);
-
-        ValueTask InnerOnClientRedirected(IWorldClient localClient, ClientRedirectedArgs localArgs)
-        {
-            if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
-            {
-                Logger.WithProperty(localArgs)
-                      .LogWarning("{@ClientIp} tried to redirect to the world with invalid details", client.RemoteIp.ToString());
-
-                localClient.Disconnect();
-
-                return default;
-            }
-
-            //keep this case sensitive
-            if (localArgs.Name != redirect.Name)
-            {
-                Logger
-                    .WithProperty(redirect)
-                    .WithProperty(localArgs)
-                    .LogWarning(
-                        "{@ClientIp} tried to impersonate a redirect with redirect {@RedirectId}",
-                        localClient.RemoteIp.ToString(),
-                        redirect.Id);
-
-                localClient.Disconnect();
-
-                return default;
-            }
-
-            Logger.WithProperty(localClient)
-                  .WithProperty(redirect)
-                  .LogDebug("Received world redirect {@RedirectId}", redirect.Id);
-
-            var existingAisling = Aislings.FirstOrDefault(user => user.Name.EqualsI(redirect.Name));
-
-            //double logon, disconnect both clients
-            if (existingAisling != null)
-            {
-                Logger.WithProperty(localClient)
-                      .WithProperty(existingAisling)
-                      .LogDebug("Duplicate login detected for aisling {@AislingName}, disconnecting both clients", existingAisling.Name);
-
-                existingAisling.Client.Disconnect();
-                localClient.Disconnect();
-
-                return default;
-            }
-
-            return LoadAislingAsync(localClient, redirect);
-        }
-
-        return ExecuteHandler(client, args, InnerOnClientRedirected);
-    }
-
-    public async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
-    {
-        try
-        {
-            client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
-
-            var aisling = await AislingStore.LoadAsync(redirect.Name);
-
-            client.Aisling = aisling;
-            aisling.Client = client;
-
-            await using var sync = await aisling.MapInstance.Sync.WaitAsync();
-
-            try
-            {
-                aisling.Guild?.Associate(aisling);
-                aisling.BeginObserving();
-                client.SendAttributes(StatUpdateType.Full);
-                client.SendLightLevel(LightLevel.Lightest);
-                client.SendUserId();
-                aisling.MapInstance.AddAislingDirect(aisling, aisling);
-                client.SendProfileRequest();
-
-                foreach (var channel in aisling.ChannelSettings)
-                {
-                    ChannelService.JoinChannel(aisling, channel.ChannelName, true);
-
-                    if (channel.MessageColor.HasValue)
-                        ChannelService.SetChannelColor(aisling, channel.ChannelName, channel.MessageColor.Value);
-                }
-
-                Logger.LogDebug("World redirect finalized for {@ClientIp}", client.RemoteIp.ToString());
-
-                foreach (var reactor in aisling.MapInstance.GetDistinctReactorsAtPoint(aisling).ToList())
-                    reactor.OnWalkedOn(aisling);
-            }
-            catch (Exception e)
-            {
-                Logger.WithProperty(aisling)
-                      .LogCritical(e, "Failed to add aisling {@AislingName} to the world", aisling.Name);
-
-                client.Disconnect();
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.WithProperty(client)
-                  .WithProperty(redirect)
-                  .LogCritical(
-                      e,
-                      "Client with ip {ClientIp} failed to load aisling {@AislingName}",
-                      client.RemoteIp,
-                      redirect.Name);
-
-            client.Disconnect();
-        }
-    }
-
+    /// <summary>
+    /// 0x06 - Client Movement
+    /// </summary>
     public ValueTask OnClientWalk(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<ClientWalkArgs>(in clientPacket);
@@ -1011,125 +813,77 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnClientWalk);
     }
 
-    public ValueTask OnDialogResponse(IWorldClient client, in ClientPacket clientPacket)
+    /// <summary>
+    /// 0x07 - Object Pickup
+    /// </summary>
+    public ValueTask OnPickup(IWorldClient client, in ClientPacket clientPacket)
     {
-        var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<PickupArgs>(in clientPacket);
 
-        ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
+        ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
-            var dialog = localClient.Aisling.ActiveDialog.Get();
+            (var destinationSlot, var sourcePoint) = localArgs;
+            var map = localClient.Aisling.MapInstance;
 
-            if (dialog == null)
-            {
-                localClient.Aisling.DialogHistory.Clear();
-
-                Logger.WithProperty(localClient.Aisling)
-                      .WithProperty(localArgs)
-                      .LogWarning(
-                          "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-                          localClient.Aisling.Name);
-
+            if (!localClient.Aisling.WithinRange(sourcePoint, Options.PickupRange))
                 return default;
-            }
 
-            //since we always send a dialog id of 0, we can easily get the result without comparing ids
-            var dialogResult = (DialogResult)localArgs.DialogId;
+            var possibleObjs = map.GetEntitiesAtPoint<GroundEntity>(sourcePoint)
+                .OrderByDescending(obj => obj.Creation)
+                .ToList();
 
-            if (localArgs.Args != null)
-                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+            if (!possibleObjs.Any())
+                return default;
 
-            switch (dialogResult)
-            {
-                case DialogResult.Previous:
-                    dialog.Previous(localClient.Aisling);
+            //loop through the items on the ground, try to pick each one up
+            //if we pick one up, return (only pick up 1 obj at a time)
+            foreach (var obj in possibleObjs)
+                switch (obj)
+                {
+                    case GroundItem groundItem:
+                        if (localClient.Aisling.TryPickupItem(groundItem, destinationSlot))
+                            return default;
 
-                    break;
-                case DialogResult.Close:
-                    localClient.Aisling.DialogHistory.Clear();
+                        break;
+                    case Money money:
+                        if (localClient.Aisling.TryPickupMoney(money))
+                            return default;
 
-                    break;
-                case DialogResult.Next:
-                    dialog.Next(localClient.Aisling, localArgs.Option);
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                        break;
+                }
 
             return default;
         }
 
-        return ExecuteHandler(client, args, InnerOnDialogResponse);
+        return ExecuteHandler(client, args, InnerOnPickup);
     }
 
-    public ValueTask OnEmote(IWorldClient client, in ClientPacket clientPacket)
+    /// <summary>
+    /// 0x08 - Drop Item
+    /// </summary>
+    public ValueTask OnItemDropped(IWorldClient client, in ClientPacket clientPacket)
     {
-        var args = PacketSerializer.Deserialize<EmoteArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<ItemDropArgs>(in clientPacket);
 
-        ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
+        static ValueTask InnerOnItemDropped(IWorldClient localClient, ItemDropArgs localArgs)
         {
-            if ((int)localArgs.BodyAnimation <= 44)
-                client.Aisling.AnimateBody(localArgs.BodyAnimation);
+            (var sourceSlot, var destinationPoint, var count) = localArgs;
+
+            localClient.Aisling.TryDrop(
+                destinationPoint,
+                sourceSlot,
+                out _,
+                count);
 
             return default;
         }
 
-        return ExecuteHandler(client, args, InnerOnEmote);
+        return ExecuteHandler(client, args, InnerOnItemDropped);
     }
 
-    public ValueTask OnExchange(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ExchangeArgs>(in clientPacket);
-
-        ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
-        {
-            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
-
-            if (exchange == null)
-                return default;
-
-            if (exchange.GetOtherUser(localClient.Aisling).Id != localArgs.OtherPlayerId)
-                return default;
-
-            switch (localArgs.ExchangeRequestType)
-            {
-                case ExchangeRequestType.StartExchange:
-                    Logger.WithProperty(localClient)
-                          .LogWarning(
-                              "Aisling {@AislingName} attempted to directly start an exchange. This should not be possible unless packeting",
-                              localClient.Aisling.Name);
-
-                    break;
-                case ExchangeRequestType.AddItem:
-                    exchange.AddItem(localClient.Aisling, localArgs.SourceSlot!.Value);
-
-                    break;
-                case ExchangeRequestType.AddStackableItem:
-                    exchange.AddStackableItem(localClient.Aisling, localArgs.SourceSlot!.Value, localArgs.ItemCount!.Value);
-
-                    break;
-                case ExchangeRequestType.SetGold:
-                    exchange.SetGold(localClient.Aisling, localArgs.GoldAmount!.Value);
-
-                    break;
-                case ExchangeRequestType.Cancel:
-                    exchange.Cancel(localClient.Aisling);
-
-                    break;
-                case ExchangeRequestType.Accept:
-                    exchange.Accept(localClient.Aisling);
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnExchange);
-    }
-
+    /// <summary>
+    /// 0x0B - Exit Request
+    /// </summary>
     public ValueTask OnExitRequest(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<ExitRequestArgs>(in clientPacket);
@@ -1150,10 +904,10 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
                 RedirectManager.Add(redirect);
 
                 Logger.WithProperty(localClient)
-                      .LogDebug(
-                          "Redirecting {@ClientIp} to {@ServerIp}",
-                          client.RemoteIp.ToString(),
-                          Options.LoginRedirect.Address.ToString());
+                    .LogDebug(
+                        "Redirecting {@ClientIp} to {@ServerIp}",
+                        client.RemoteIp.ToString(),
+                        Options.LoginRedirect.Address.ToString());
 
                 localClient.SendRedirect(redirect);
             }
@@ -1164,111 +918,9 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnExitRequest);
     }
 
-    public ValueTask OnGoldDropped(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<GoldDropArgs>(in clientPacket);
-
-        ValueTask InnerOnGoldDropped(IWorldClient localClient, GoldDropArgs localArgs)
-        {
-            (var amount, var destinationPoint) = localArgs;
-            var map = localClient.Aisling.MapInstance;
-
-            if (!localClient.Aisling.WithinRange(destinationPoint, Options.DropRange))
-                return default;
-
-            if (map.IsWall(destinationPoint))
-                return default;
-
-            localClient.Aisling.TryDropGold(destinationPoint, amount, out _);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnGoldDropped);
-    }
-
-    public ValueTask OnGoldDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<GoldDroppedOnCreatureArgs>(in clientPacket);
-
-        ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
-        {
-            (var amount, var targetId) = localArgs;
-
-            var map = localClient.Aisling.MapInstance;
-
-            if (amount <= 0)
-                return default;
-
-            if (!map.TryGetObject<Creature>(targetId, out var target))
-                return default;
-
-            if (!localClient.Aisling.WithinRange(target, Options.TradeRange))
-                return default;
-
-            target.OnGoldDroppedOn(localClient.Aisling, amount);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnGoldDroppedOnCreature);
-    }
-
-    public ValueTask OnGroupRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<GroupRequestArgs>(in clientPacket);
-
-        ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupRequestArgs localArgs)
-        {
-            (var groupRequestType, var targetName) = localArgs;
-            var target = Aislings.FirstOrDefault(user => user.Name.EqualsI(targetName));
-
-            if (target == null)
-            {
-                localClient.Aisling.SendActiveMessage($"{targetName} is nowhere to be found");
-
-                return default;
-            }
-
-            var aisling = localClient.Aisling;
-
-            switch (groupRequestType)
-            {
-                case GroupRequestType.FormalInvite:
-                    Logger.WithProperty(aisling)
-                          .LogWarning(
-                              "Aisling {@AislingName} attempted to send a formal group invite to the server. This type of group request is something only the server should send",
-                              localClient);
-
-                    return default;
-                case GroupRequestType.TryInvite:
-                    {
-                        GroupService.Invite(aisling, target);
-
-                        return default;
-                    }
-                case GroupRequestType.AcceptInvite:
-                    {
-                        GroupService.AcceptInvite(target, aisling);
-
-                        return default;
-                    }
-                case GroupRequestType.Groupbox:
-                    //TODO: implement this maybe
-
-                    return default;
-                case GroupRequestType.RemoveGroupBox:
-                    //TODO: implement this maybe
-
-                    return default;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        return ExecuteHandler(client, args, InnerOnGroupRequest);
-    }
-
+    /// <summary>
+    /// 0x0D - Ignore Player
+    /// </summary>
     public ValueTask OnIgnore(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<IgnoreArgs>(in clientPacket);
@@ -1303,165 +955,9 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnIgnore);
     }
 
-    public ValueTask OnItemDropped(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ItemDropArgs>(in clientPacket);
-
-        static ValueTask InnerOnItemDropped(IWorldClient localClient, ItemDropArgs localArgs)
-        {
-            (var sourceSlot, var destinationPoint, var count) = localArgs;
-
-            localClient.Aisling.TryDrop(
-                destinationPoint,
-                sourceSlot,
-                out _,
-                count);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnItemDropped);
-    }
-
-    public ValueTask OnItemDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ItemDroppedOnCreatureArgs>(in clientPacket);
-
-        ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
-        {
-            (var sourceSlot, var targetId, var count) = localArgs;
-            var map = localClient.Aisling.MapInstance;
-
-            if (!map.TryGetObject<Creature>(targetId, out var target))
-                return default;
-
-            if (!localClient.Aisling.WithinRange(target, Options.TradeRange))
-                return default;
-
-            if (!localClient.Aisling.Inventory.TryGetObject(sourceSlot, out var item))
-                return default;
-
-            if (item.Count < count)
-                return default;
-
-            target.OnItemDroppedOn(localClient.Aisling, sourceSlot, count);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnItemDroppedOnCreature);
-    }
-
-    public ValueTask OnMapDataRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnMapDataRequest(IWorldClient localClient)
-        {
-            localClient.SendMapData();
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnMapDataRequest);
-    }
-
-    public ValueTask OnMetaDataRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in clientPacket);
-
-        ValueTask InnerOnMetaDataRequest(IWorldClient localClient, MetaDataRequestArgs localArgs)
-        {
-            (var metadataRequestType, var name) = localArgs;
-
-            switch (metadataRequestType)
-            {
-                case MetaDataRequestType.DataByName:
-                    localClient.SendMetaData(MetaDataRequestType.DataByName, MetaDataStore, name);
-
-                    break;
-                case MetaDataRequestType.AllCheckSums:
-                    localClient.SendMetaData(MetaDataRequestType.AllCheckSums, MetaDataStore);
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
-    }
-
-    public ValueTask OnPickup(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<PickupArgs>(in clientPacket);
-
-        ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
-        {
-            (var destinationSlot, var sourcePoint) = localArgs;
-            var map = localClient.Aisling.MapInstance;
-
-            if (!localClient.Aisling.WithinRange(sourcePoint, Options.PickupRange))
-                return default;
-
-            var possibleObjs = map.GetEntitiesAtPoint<GroundEntity>(sourcePoint)
-                                  .OrderByDescending(obj => obj.Creation)
-                                  .ToList();
-
-            if (!possibleObjs.Any())
-                return default;
-
-            //loop through the items on the ground, try to pick each one up
-            //if we pick one up, return (only pick up 1 obj at a time)
-            foreach (var obj in possibleObjs)
-                switch (obj)
-                {
-                    case GroundItem groundItem:
-                        if (localClient.Aisling.TryPickupItem(groundItem, destinationSlot))
-                            return default;
-
-                        break;
-                    case Money money:
-                        if (localClient.Aisling.TryPickupMoney(money))
-                            return default;
-
-                        break;
-                }
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnPickup);
-    }
-
-    public ValueTask OnProfile(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ProfileArgs>(in clientPacket);
-
-        static ValueTask InnerOnProfile(IWorldClient localClient, ProfileArgs localArgs)
-        {
-            (var portraitData, var profileMessage) = localArgs;
-            localClient.Aisling.Portrait = portraitData;
-            localClient.Aisling.ProfileText = profileMessage;
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnProfile);
-    }
-
-    public ValueTask OnProfileRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnProfileRequest(IWorldClient localClient)
-        {
-            localClient.SendSelfProfile();
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnProfileRequest);
-    }
-
+    /// <summary>
+    /// 0x0E - Public Chat
+    /// </summary>
     public ValueTask OnPublicMessage(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<PublicMessageArgs>(in clientPacket);
@@ -1483,239 +979,9 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnPublicMessage);
     }
 
-    public ValueTask OnPursuitRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
-
-        ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
-        {
-            var dialog = localClient.Aisling.ActiveDialog.Get();
-
-            if (dialog == null)
-            {
-                Logger.WithProperty(localClient.Aisling)
-                      .WithProperty(localArgs)
-                      .LogWarning(
-                          "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-                          localClient.Aisling.Name);
-
-                return default;
-            }
-
-            //get args if the type is not a "menuWithArgs", this type should not have any new args
-            if (dialog.Type is not ChaosDialogType.MenuWithArgs && (localArgs.Args != null))
-                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
-
-            dialog.Next(localClient.Aisling, (byte)localArgs.PursuitId);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnPursuitRequest);
-    }
-
-    public ValueTask OnRaiseStat(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<RaiseStatArgs>(in clientPacket);
-
-        static ValueTask InnerOnRaiseStat(IWorldClient localClient, RaiseStatArgs localArgs)
-        {
-            if (localClient.Aisling.UserStatSheet.UnspentPoints > 0)
-                if (localClient.Aisling.UserStatSheet.IncrementStat(localArgs.Stat))
-                {
-                    if (localArgs.Stat == Stat.STR)
-                        localClient.Aisling.UserStatSheet.SetMaxWeight(LevelUpFormulae.Default.CalculateMaxWeight(localClient.Aisling));
-
-                    localClient.SendAttributes(StatUpdateType.Full);
-                }
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnRaiseStat);
-    }
-
-    public ValueTask OnRefreshRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
-        {
-            localClient.Aisling.Refresh();
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnRefreshRequest);
-    }
-
-    public ValueTask OnSocialStatus(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<SocialStatusArgs>(in clientPacket);
-
-        static ValueTask InnerOnSocialStatus(IWorldClient localClient, SocialStatusArgs localArgs)
-        {
-            localClient.Aisling.SocialStatus = localArgs.SocialStatus;
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnSocialStatus);
-    }
-
-    public ValueTask OnSpacebar(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnSpacebar(IWorldClient localClient)
-        {
-            localClient.SendCancelCasting();
-
-            foreach (var skill in localClient.Aisling.SkillBook)
-                if (skill.Template.IsAssail)
-                    localClient.Aisling.TryUseSkill(skill);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnSpacebar);
-    }
-
-    public ValueTask OnSwapSlot(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<SwapSlotArgs>(in clientPacket);
-
-        static ValueTask InnerOnSwapSlot(IWorldClient localClient, SwapSlotArgs localArgs)
-        {
-            (var panelType, var slot1, var slot2) = localArgs;
-
-            switch (panelType)
-            {
-                case PanelType.Inventory:
-                    localClient.Aisling.Inventory.TrySwap(slot1, slot2);
-
-                    break;
-                case PanelType.SpellBook:
-                    localClient.Aisling.SpellBook.TrySwap(slot1, slot2);
-
-                    break;
-                case PanelType.SkillBook:
-                    localClient.Aisling.SkillBook.TrySwap(slot1, slot2);
-
-                    break;
-                case PanelType.Equipment:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnSwapSlot);
-    }
-
-    public ValueTask OnToggleGroup(IWorldClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnToggleGroup(IWorldClient localClient)
-        {
-            //don't need to send the updated option, because they arent currently looking at it
-            localClient.Aisling.Options.Toggle(UserOption.Group);
-
-            if (localClient.Aisling.Group != null)
-                localClient.Aisling.Group?.Leave(localClient.Aisling);
-            else
-                localClient.SendSelfProfile();
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnToggleGroup);
-    }
-
-    public ValueTask OnTurn(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<TurnArgs>(in clientPacket);
-
-        static ValueTask InnerOnTurn(IWorldClient localClient, TurnArgs localArgs)
-        {
-            localClient.Aisling.Turn(localArgs.Direction);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnTurn);
-    }
-
-    public ValueTask OnUnequip(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<UnequipArgs>(in clientPacket);
-
-        static ValueTask InnerOnUnequip(IWorldClient localClient, UnequipArgs localArgs)
-        {
-            localClient.Aisling.EquipmentManager.RemoveFromExisting((int)localArgs.EquipmentSlot);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnUnequip);
-    }
-
-    public ValueTask OnUseItem(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ItemUseArgs>(in clientPacket);
-
-        static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
-        {
-            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
-
-            if (exchange != null)
-            {
-                exchange.AddItem(localClient.Aisling, localArgs.SourceSlot);
-
-                return default;
-            }
-
-            localClient.Aisling.TryUseItem(localArgs.SourceSlot);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnUseItem);
-    }
-
-    public ValueTask OnUserOptionToggle(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<UserOptionToggleArgs>(in clientPacket);
-
-        static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, UserOptionToggleArgs localArgs)
-        {
-            if (localArgs.UserOption == UserOption.Request)
-            {
-                localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString());
-
-                return default;
-            }
-
-            localClient.Aisling.Options.Toggle(localArgs.UserOption);
-            localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString(localArgs.UserOption));
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnUsrOptionToggle);
-    }
-
-    public ValueTask OnUseSkill(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<SkillUseArgs>(in clientPacket);
-
-        static ValueTask InnerOnUseSkill(IWorldClient localClient, SkillUseArgs localArgs)
-        {
-            localClient.Aisling.TryUseSkill(localArgs.SourceSlot);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, args, InnerOnUseSkill);
-    }
-
+    /// <summary>
+    /// 0x0F - Spell Use
+    /// </summary>
     public ValueTask OnUseSpell(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
@@ -1788,6 +1054,179 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnUseSpell);
     }
 
+    /// <summary>
+    /// 0x10 - On Redirect
+    /// </summary>
+    public ValueTask OnClientRedirected(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in clientPacket);
+
+        ValueTask InnerOnClientRedirected(IWorldClient localClient, ClientRedirectedArgs localArgs)
+        {
+            if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
+            {
+                Logger.WithProperty(localArgs)
+                      .LogWarning("{@ClientIp} tried to redirect to the world with invalid details", client.RemoteIp.ToString());
+
+                localClient.Disconnect();
+
+                return default;
+            }
+
+            //keep this case sensitive
+            if (localArgs.Name != redirect.Name)
+            {
+                Logger
+                    .WithProperty(redirect)
+                    .WithProperty(localArgs)
+                    .LogWarning(
+                        "{@ClientIp} tried to impersonate a redirect with redirect {@RedirectId}",
+                        localClient.RemoteIp.ToString(),
+                        redirect.Id);
+
+                localClient.Disconnect();
+
+                return default;
+            }
+
+            Logger.WithProperty(localClient)
+                  .WithProperty(redirect)
+                  .LogDebug("Received world redirect {@RedirectId}", redirect.Id);
+
+            var existingAisling = Aislings.FirstOrDefault(user => user.Name.EqualsI(redirect.Name));
+
+            //double logon, disconnect both clients
+            if (existingAisling != null)
+            {
+                Logger.WithProperty(localClient)
+                      .WithProperty(existingAisling)
+                      .LogDebug("Duplicate login detected for aisling {@AislingName}, disconnecting both clients", existingAisling.Name);
+
+                existingAisling.Client.Disconnect();
+                localClient.Disconnect();
+
+                return default;
+            }
+
+            return LoadAislingAsync(localClient, redirect);
+        }
+
+        return ExecuteHandler(client, args, InnerOnClientRedirected);
+    }
+
+    //ToDo: Load Player
+    public async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
+    {
+        try
+        {
+            client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
+
+            var aisling = await AislingStore.LoadAsync(redirect.Name);
+
+            client.Aisling = aisling;
+            aisling.Client = client;
+
+            await using var sync = await aisling.MapInstance.Sync.WaitAsync();
+
+            try
+            {
+                aisling.Guild?.Associate(aisling);
+                aisling.BeginObserving();
+                client.SendAttributes(StatUpdateType.Full);
+                client.SendLightLevel(LightLevel.Lightest);
+                client.SendUserId();
+                aisling.MapInstance.AddAislingDirect(aisling, aisling);
+                client.SendProfileRequest();
+
+                foreach (var channel in aisling.ChannelSettings)
+                {
+                    ChannelService.JoinChannel(aisling, channel.ChannelName, true);
+
+                    if (channel.MessageColor.HasValue)
+                        ChannelService.SetChannelColor(aisling, channel.ChannelName, channel.MessageColor.Value);
+                }
+
+                Logger.LogDebug("World redirect finalized for {@ClientIp}", client.RemoteIp.ToString());
+
+                foreach (var reactor in aisling.MapInstance.GetDistinctReactorsAtPoint(aisling).ToList())
+                    reactor.OnWalkedOn(aisling);
+            }
+            catch (Exception e)
+            {
+                Logger.WithProperty(aisling)
+                      .LogCritical(e, "Failed to add aisling {@AislingName} to the world", aisling.Name);
+
+                client.Disconnect();
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.WithProperty(client)
+                  .WithProperty(redirect)
+                  .LogCritical(
+                      e,
+                      "Client with ip {ClientIp} failed to load aisling {@AislingName}",
+                      client.RemoteIp,
+                      redirect.Name);
+
+            client.Disconnect();
+        }
+    }
+
+    /// <summary>
+    /// 0x11 - Change Direction
+    /// </summary>
+    public ValueTask OnTurn(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<TurnArgs>(in clientPacket);
+
+        static ValueTask InnerOnTurn(IWorldClient localClient, TurnArgs localArgs)
+        {
+            localClient.Aisling.Turn(localArgs.Direction);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnTurn);
+    }
+
+    /// <summary>
+    /// 0x13 - On Spacebar
+    /// </summary>
+    public ValueTask OnSpacebar(IWorldClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnSpacebar(IWorldClient localClient)
+        {
+            localClient.SendCancelCasting();
+
+            foreach (var skill in localClient.Aisling.SkillBook)
+                if (skill.Template.IsAssail)
+                    localClient.Aisling.TryUseSkill(skill);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnSpacebar);
+    }
+
+    /// <summary>
+    /// 0x18 - Request World List
+    /// </summary>
+    public ValueTask OnWorldListRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        ValueTask InnerOnWorldListRequest(IWorldClient localClient)
+        {
+            localClient.SendWorldList(Aislings.ToList());
+
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnWorldListRequest);
+    }
+
+    /// <summary>
+    /// 0x19 - Private Message
+    /// </summary>
     public ValueTask OnWhisper(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<WhisperArgs>(in clientPacket);
@@ -1891,18 +1330,506 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         return ExecuteHandler(client, args, InnerOnWhisper);
     }
 
-    public ValueTask OnWorldListRequest(IWorldClient client, in ClientPacket clientPacket)
+    /// <summary>
+    /// 0x1B - User Option Toggle
+    /// </summary>
+    public ValueTask OnUserOptionToggle(IWorldClient client, in ClientPacket clientPacket)
     {
-        ValueTask InnerOnWorldListRequest(IWorldClient localClient)
+        var args = PacketSerializer.Deserialize<UserOptionToggleArgs>(in clientPacket);
+
+        static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, UserOptionToggleArgs localArgs)
         {
-            localClient.SendWorldList(Aislings.ToList());
+            if (localArgs.UserOption == UserOption.Request)
+            {
+                localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString());
+
+                return default;
+            }
+
+            localClient.Aisling.Options.Toggle(localArgs.UserOption);
+            localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString(localArgs.UserOption));
 
             return default;
         }
 
-        return ExecuteHandler(client, InnerOnWorldListRequest);
+        return ExecuteHandler(client, args, InnerOnUsrOptionToggle);
     }
 
+    /// <summary>
+    /// 0x1C - Item Usage
+    /// </summary>
+    public ValueTask OnUseItem(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ItemUseArgs>(in clientPacket);
+
+        static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
+        {
+            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
+
+            if (exchange != null)
+            {
+                exchange.AddItem(localClient.Aisling, localArgs.SourceSlot);
+
+                return default;
+            }
+
+            localClient.Aisling.TryUseItem(localArgs.SourceSlot);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnUseItem);
+    }
+
+    /// <summary>
+    /// 0x1D - Emote Usage
+    /// </summary>
+    public ValueTask OnEmote(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<EmoteArgs>(in clientPacket);
+
+        ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
+        {
+            if ((int)localArgs.BodyAnimation <= 44)
+                client.Aisling.AnimateBody(localArgs.BodyAnimation);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnEmote);
+    }
+
+    /// <summary>
+    /// 0x24 - Drop Gold
+    /// </summary>
+    public ValueTask OnGoldDropped(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<GoldDropArgs>(in clientPacket);
+
+        ValueTask InnerOnGoldDropped(IWorldClient localClient, GoldDropArgs localArgs)
+        {
+            (var amount, var destinationPoint) = localArgs;
+            var map = localClient.Aisling.MapInstance;
+
+            if (!localClient.Aisling.WithinRange(destinationPoint, Options.DropRange))
+                return default;
+
+            if (map.IsWall(destinationPoint))
+                return default;
+
+            localClient.Aisling.TryDropGold(destinationPoint, amount, out _);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnGoldDropped);
+    }
+
+    /// <summary>
+    /// 0x29 - Drop Item on Sprite
+    /// </summary>
+    public ValueTask OnItemDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ItemDroppedOnCreatureArgs>(in clientPacket);
+
+        ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
+        {
+            (var sourceSlot, var targetId, var count) = localArgs;
+            var map = localClient.Aisling.MapInstance;
+
+            if (!map.TryGetObject<Creature>(targetId, out var target))
+                return default;
+
+            if (!localClient.Aisling.WithinRange(target, Options.TradeRange))
+                return default;
+
+            if (!localClient.Aisling.Inventory.TryGetObject(sourceSlot, out var item))
+                return default;
+
+            if (item.Count < count)
+                return default;
+
+            target.OnItemDroppedOn(localClient.Aisling, sourceSlot, count);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnItemDroppedOnCreature);
+    }
+
+    /// <summary>
+    /// 0x2A - Drop Gold on Sprite
+    /// </summary>
+    public ValueTask OnGoldDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<GoldDroppedOnCreatureArgs>(in clientPacket);
+
+        ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
+        {
+            (var amount, var targetId) = localArgs;
+
+            var map = localClient.Aisling.MapInstance;
+
+            if (amount <= 0)
+                return default;
+
+            if (!map.TryGetObject<Creature>(targetId, out var target))
+                return default;
+
+            if (!localClient.Aisling.WithinRange(target, Options.TradeRange))
+                return default;
+
+            target.OnGoldDroppedOn(localClient.Aisling, amount);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnGoldDroppedOnCreature);
+    }
+
+    /// <summary>
+    /// 0x2D - Request Player Profile & Load Character Meta Data (Skills/Spells)
+    /// </summary>
+    public ValueTask OnProfileRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnProfileRequest(IWorldClient localClient)
+        {
+            localClient.SendSelfProfile();
+
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnProfileRequest);
+    }
+
+    /// <summary>
+    /// 0x2E - Request Party Join
+    /// </summary>
+    public ValueTask OnGroupRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<GroupRequestArgs>(in clientPacket);
+
+        ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupRequestArgs localArgs)
+        {
+            (var groupRequestType, var targetName) = localArgs;
+            var target = Aislings.FirstOrDefault(user => user.Name.EqualsI(targetName));
+
+            if (target == null)
+            {
+                localClient.Aisling.SendActiveMessage($"{targetName} is nowhere to be found");
+
+                return default;
+            }
+
+            var aisling = localClient.Aisling;
+
+            switch (groupRequestType)
+            {
+                case GroupRequestType.FormalInvite:
+                    Logger.WithProperty(aisling)
+                          .LogWarning(
+                              "Aisling {@AislingName} attempted to send a formal group invite to the server. This type of group request is something only the server should send",
+                              localClient);
+
+                    return default;
+                case GroupRequestType.TryInvite:
+                    {
+                        GroupService.Invite(aisling, target);
+
+                        return default;
+                    }
+                case GroupRequestType.AcceptInvite:
+                    {
+                        GroupService.AcceptInvite(target, aisling);
+
+                        return default;
+                    }
+                case GroupRequestType.Groupbox:
+                    //TODO: implement this maybe
+
+                    return default;
+                case GroupRequestType.RemoveGroupBox:
+                    //TODO: implement this maybe
+
+                    return default;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        return ExecuteHandler(client, args, InnerOnGroupRequest);
+    }
+
+    /// <summary>
+    /// 0x2F - Toggle Group
+    /// </summary>
+    public ValueTask OnToggleGroup(IWorldClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnToggleGroup(IWorldClient localClient)
+        {
+            //don't need to send the updated option, because they arent currently looking at it
+            localClient.Aisling.Options.Toggle(UserOption.Group);
+
+            if (localClient.Aisling.Group != null)
+                localClient.Aisling.Group?.Leave(localClient.Aisling);
+            else
+                localClient.SendSelfProfile();
+
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnToggleGroup);
+    }
+
+    /// <summary>
+    /// 0x30 - Swap Slot
+    /// </summary>
+    public ValueTask OnSwapSlot(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<SwapSlotArgs>(in clientPacket);
+
+        static ValueTask InnerOnSwapSlot(IWorldClient localClient, SwapSlotArgs localArgs)
+        {
+            (var panelType, var slot1, var slot2) = localArgs;
+
+            switch (panelType)
+            {
+                case PanelType.Inventory:
+                    localClient.Aisling.Inventory.TrySwap(slot1, slot2);
+
+                    break;
+                case PanelType.SpellBook:
+                    localClient.Aisling.SpellBook.TrySwap(slot1, slot2);
+
+                    break;
+                case PanelType.SkillBook:
+                    localClient.Aisling.SkillBook.TrySwap(slot1, slot2);
+
+                    break;
+                case PanelType.Equipment:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnSwapSlot);
+    }
+
+    /// <summary>
+    /// 0x38 - Request Refresh
+    /// </summary>
+    public ValueTask OnRefreshRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
+        {
+            localClient.Aisling.Refresh();
+
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnRefreshRequest);
+    }
+
+    /// <summary>
+    /// 0x39 - Request Pursuit
+    /// </summary>
+    public ValueTask OnPursuitRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
+
+        ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
+        {
+            var dialog = localClient.Aisling.ActiveDialog.Get();
+
+            if (dialog == null)
+            {
+                Logger.WithProperty(localClient.Aisling)
+                    .WithProperty(localArgs)
+                    .LogWarning(
+                        "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
+                        localClient.Aisling.Name);
+
+                return default;
+            }
+
+            //get args if the type is not a "menuWithArgs", this type should not have any new args
+            if (dialog.Type is not ChaosDialogType.MenuWithArgs && (localArgs.Args != null))
+                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+
+            dialog.Next(localClient.Aisling, (byte)localArgs.PursuitId);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnPursuitRequest);
+    }
+
+    /// <summary>
+    /// 0x3A - Mundane Input Response
+    /// </summary>
+    public ValueTask OnDialogResponse(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
+
+        ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
+        {
+            var dialog = localClient.Aisling.ActiveDialog.Get();
+
+            if (dialog == null)
+            {
+                localClient.Aisling.DialogHistory.Clear();
+
+                Logger.WithProperty(localClient.Aisling)
+                    .WithProperty(localArgs)
+                    .LogWarning(
+                        "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
+                        localClient.Aisling.Name);
+
+                return default;
+            }
+
+            //since we always send a dialog id of 0, we can easily get the result without comparing ids
+            var dialogResult = (DialogResult)localArgs.DialogId;
+
+            if (localArgs.Args != null)
+                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+
+            switch (dialogResult)
+            {
+                case DialogResult.Previous:
+                    dialog.Previous(localClient.Aisling);
+
+                    break;
+                case DialogResult.Close:
+                    localClient.Aisling.DialogHistory.Clear();
+
+                    break;
+                case DialogResult.Next:
+                    dialog.Next(localClient.Aisling, localArgs.Option);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnDialogResponse);
+    }
+
+    /// <summary>
+    /// 0x3B - Request Bulletin Board
+    /// </summary>
+    public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnBoardRequest(IWorldClient localClient)
+        {
+            localClient.SendBoard();
+
+            return default;
+        }
+
+        /*
+        //this packet is literally retarded
+        private void Board(Client client, ClientPacket packet)
+        {
+            var type = (BoardRequestType)packet.ReadByte();
+
+            switch (type) //request type
+            {
+                case BoardRequestType.BoardList:
+                    //Board List
+                    //client.Enqueue(client.ServerPackets.BulletinBoard);
+                    break;
+                case BoardRequestType.ViewBoard:
+                    {
+                        //Post list for boardNum
+                        ushort boardNum = packet.ReadUInt16();
+                        ushort startPostNum = packet.ReadUInt16(); //you send the newest mail first, which will have the highest number. startPostNum counts down.
+                        //packet.ReadByte() is always 0xF0(240) ???
+                        //the client spam requests this like holy fuck, put a timer on this so you only send 1 packet
+                        break;
+                    }
+                case BoardRequestType.ViewPost:
+                    {
+                        //Post
+                        ushort boardNum = packet.ReadUInt16();
+                        ushort postId = packet.ReadUInt16(); //the post number they want, counting up (what the fuck?)
+                        //mailbox = boardNum 0
+                        //otherwise boardnum is the index of the board you're accessing
+                        switch (packet.ReadSByte()) //board controls
+                        {
+                            case -1: //clicked next for older post
+                                break;
+                            case 0: //requested a specific post from the post list
+                                break;
+                            case 1: //clicked previous for newer post
+                                break;
+                        }
+                        break;
+                    }
+                case BoardRequestType.NewPost: //new post
+                    {
+                        ushort boardNum = packet.ReadUInt16();
+                        string subject = packet.ReadString8();
+                        string message = packet.ReadString16();
+                        break;
+                    }
+                case BoardRequestType.Delete: //delete post
+                    {
+                        ushort boardNum = packet.ReadUInt16();
+                        ushort postId = packet.ReadUInt16(); //the post number they want to delete, counting up
+                        break;
+                    }
+
+                case BoardRequestType.SendMail: //send mail
+                    {
+                        ushort boardNum = packet.ReadUInt16();
+                        string targetName = packet.ReadString8();
+                        string subject = packet.ReadString8();
+                        string message = packet.ReadString16();
+                        break;
+                    }
+                case BoardRequestType.Highlight: //highlight message
+                    {
+                        ushort boardNum = packet.ReadUInt16();
+                        ushort postId = packet.ReadUInt16();
+                        break;
+                    }
+            }
+
+            Server.WriteLogAsync($@"Recv [{(ClientOpCodes)packet.OpCode}] TYPE: {type}", client);
+            Game.Boards(client);
+        }
+         */
+
+        return ExecuteHandler(client, InnerOnBoardRequest);
+    }
+
+    /// <summary>
+    /// 0x3E - Skill Use
+    /// </summary>
+    public ValueTask OnUseSkill(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<SkillUseArgs>(in clientPacket);
+
+        static ValueTask InnerOnUseSkill(IWorldClient localClient, SkillUseArgs localArgs)
+        {
+            localClient.Aisling.TryUseSkill(localArgs.SourceSlot);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnUseSkill);
+    }
+
+    /// <summary>
+    /// 0x3F - World Map Click
+    /// </summary>
     public ValueTask OnWorldMapClick(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<WorldMapClickArgs>(in clientPacket);
@@ -1936,6 +1863,241 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         }
 
         return ExecuteHandler(client, args, InnerOnWorldMapClick);
+    }
+
+    /// <summary>
+    /// 0x43 - Client Click
+    /// </summary>
+    public ValueTask OnClick(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ClickArgs>(in clientPacket);
+
+        ValueTask InnerOnClick(IWorldClient localClient, ClickArgs localArgs)
+        {
+            (var targetId, var targetPoint) = localArgs;
+
+            if (targetId.HasValue)
+            {
+                if (targetId == uint.MaxValue)
+                {
+                    var f1Merchant = MerchantFactory.Create(
+                        Options.F1MerchantTemplateKey,
+                        localClient.Aisling.MapInstance,
+                        Point.From(localClient.Aisling));
+
+                    f1Merchant.OnClicked(localClient.Aisling);
+
+                    return default;
+                }
+
+                localClient.Aisling.MapInstance.Click(targetId.Value, localClient.Aisling);
+            }
+            else if (targetPoint is not null)
+                localClient.Aisling.MapInstance.Click(targetPoint, localClient.Aisling);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnClick);
+    }
+
+    /// <summary>
+    /// 0x44 - Unequip Item
+    /// </summary>
+    public ValueTask OnUnequip(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<UnequipArgs>(in clientPacket);
+
+        static ValueTask InnerOnUnequip(IWorldClient localClient, UnequipArgs localArgs)
+        {
+            localClient.Aisling.EquipmentManager.RemoveFromExisting((int)localArgs.EquipmentSlot);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnUnequip);
+    }
+
+    /// <summary>
+    /// 0x47 - Stat Raised
+    /// </summary>
+    public ValueTask OnRaiseStat(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<RaiseStatArgs>(in clientPacket);
+
+        static ValueTask InnerOnRaiseStat(IWorldClient localClient, RaiseStatArgs localArgs)
+        {
+            if (localClient.Aisling.UserStatSheet.UnspentPoints > 0)
+                if (localClient.Aisling.UserStatSheet.IncrementStat(localArgs.Stat))
+                {
+                    if (localArgs.Stat == Stat.STR)
+                        localClient.Aisling.UserStatSheet.SetMaxWeight(LevelUpFormulae.Default.CalculateMaxWeight(localClient.Aisling));
+
+                    localClient.SendAttributes(StatUpdateType.Full);
+                }
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnRaiseStat);
+    }
+
+    /// <summary>
+    /// 0x4A - Client Exchange
+    /// </summary>
+    public ValueTask OnExchange(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ExchangeArgs>(in clientPacket);
+
+        ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
+        {
+            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
+
+            if (exchange == null)
+                return default;
+
+            if (exchange.GetOtherUser(localClient.Aisling).Id != localArgs.OtherPlayerId)
+                return default;
+
+            switch (localArgs.ExchangeRequestType)
+            {
+                case ExchangeRequestType.StartExchange:
+                    Logger.WithProperty(localClient)
+                          .LogWarning(
+                              "Aisling {@AislingName} attempted to directly start an exchange. This should not be possible unless packeting",
+                              localClient.Aisling.Name);
+
+                    break;
+                case ExchangeRequestType.AddItem:
+                    exchange.AddItem(localClient.Aisling, localArgs.SourceSlot!.Value);
+
+                    break;
+                case ExchangeRequestType.AddStackableItem:
+                    exchange.AddStackableItem(localClient.Aisling, localArgs.SourceSlot!.Value, localArgs.ItemCount!.Value);
+
+                    break;
+                case ExchangeRequestType.SetGold:
+                    exchange.SetGold(localClient.Aisling, localArgs.GoldAmount!.Value);
+
+                    break;
+                case ExchangeRequestType.Cancel:
+                    exchange.Cancel(localClient.Aisling);
+
+                    break;
+                case ExchangeRequestType.Accept:
+                    exchange.Accept(localClient.Aisling);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnExchange);
+    }
+
+    /// <summary>
+    /// 0x4D - Begin Casting
+    /// </summary>
+    public ValueTask OnBeginChant(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<BeginChantArgs>(in clientPacket);
+
+        static ValueTask InnerOnBeginChant(IWorldClient localClient, BeginChantArgs localArgs)
+        {
+            localClient.Aisling.UserState |= UserState.IsChanting;
+            localClient.Aisling.ChantTimer.Start(localArgs.CastLineCount);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnBeginChant);
+    }
+
+    /// <summary>
+    /// 0x4E - Casting
+    /// </summary>
+    public ValueTask OnChant(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<DisplayChantArgs>(in clientPacket);
+
+        static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
+        {
+            localClient.Aisling.Chant(localArgs.ChantMessage);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnChant);
+    }
+
+    /// <summary>
+    /// 0x4F - Player Portrait & Profile Message
+    /// </summary>
+    public ValueTask OnProfile(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ProfileArgs>(in clientPacket);
+
+        static ValueTask InnerOnProfile(IWorldClient localClient, ProfileArgs localArgs)
+        {
+            (var portraitData, var profileMessage) = localArgs;
+            localClient.Aisling.Portrait = portraitData;
+            localClient.Aisling.ProfileText = profileMessage;
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnProfile);
+    }
+
+    /// <summary>
+    /// 0x79 - Player Social Status
+    /// </summary>
+    public ValueTask OnSocialStatus(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<SocialStatusArgs>(in clientPacket);
+
+        static ValueTask InnerOnSocialStatus(IWorldClient localClient, SocialStatusArgs localArgs)
+        {
+            localClient.Aisling.SocialStatus = localArgs.SocialStatus;
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnSocialStatus);
+    }
+
+    /// <summary>
+    /// 0x7B - Request Metafile
+    /// </summary>
+    public ValueTask OnMetaDataRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in clientPacket);
+
+        ValueTask InnerOnMetaDataRequest(IWorldClient localClient, MetaDataRequestArgs localArgs)
+        {
+            (var metadataRequestType, var name) = localArgs;
+
+            switch (metadataRequestType)
+            {
+                case MetaDataRequestType.DataByName:
+                    localClient.SendMetaData(MetaDataRequestType.DataByName, MetaDataStore, name);
+
+                    break;
+                case MetaDataRequestType.AllCheckSums:
+                    localClient.SendMetaData(MetaDataRequestType.AllCheckSums, MetaDataStore);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
     }
 
     #endregion

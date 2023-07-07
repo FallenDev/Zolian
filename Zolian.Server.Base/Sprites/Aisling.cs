@@ -328,9 +328,8 @@ public sealed class Aisling : Player, IAisling
         {
             case null:
                 return this;
-            case Aisling aislingTarget:
-                aislingTarget.Client
-                    .SendMessage(0x02, $"{Username} Attacks you with {spell.Template.Name}.");
+            case Aisling:
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Username} Attacks you with {spell.Template.Name}.");
                 break;
         }
 
@@ -356,7 +355,7 @@ public sealed class Aisling : Player, IAisling
     {
         if (spell.InUse)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Currently casting a similar spell");
+            Client.SendServerMessage(ServerMessageType.ActiveMessage, "Currently casting a similar spell");
             return;
         }
 

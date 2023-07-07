@@ -18,16 +18,16 @@ public abstract class MonsterScript : ObjectManager, IScriptBase
     }
 
     public abstract void Update(TimeSpan elapsedTime);
-    public abstract void OnClick(GameClient client);
-    public abstract void OnDeath(GameClient client = null);
+    public abstract void OnClick(WorldClient client);
+    public abstract void OnDeath(WorldClient client = null);
 
     public virtual void MonsterState(TimeSpan elapsedTime) { }
-    public virtual void OnApproach(GameClient client) { }
-    public virtual void OnLeave(GameClient client) { }
-    public virtual bool OnGossip(GameClient client) => false;
-    public virtual bool OnDispelled(GameClient client) => false;
-    public virtual void OnSkulled(GameClient client) { }
-    public virtual void OnDamaged(GameClient client, long dmg, Sprite source) { }
-    public virtual void OnItemDropped(GameClient client, Item item) { }
-    public virtual void OnGoldDropped(GameClient client, uint gold) { }
+    public virtual void OnApproach(WorldClient client) { }
+    public virtual void OnLeave(WorldClient client) { }
+    public virtual bool OnGossip(WorldClient client) => false;
+    public virtual bool OnDispelled(WorldClient client) => false;
+    public virtual void OnSkulled(WorldClient client) { }
+    public virtual void OnDamaged(WorldClient client, long dmg, Sprite source) { }
+    public virtual void OnItemDropped(WorldClient client, Item item) { }
+    public virtual void OnGoldDropped(WorldClient client, uint gold) { }
 }

@@ -18,7 +18,7 @@ namespace Darkages.Types;
 
 public class EquipmentManager
 {
-    public EquipmentManager(GameClient client)
+    public EquipmentManager(WorldClient client)
     {
         Client = client;
         Equipment = new ConcurrentDictionary<int, EquipmentSlot>();
@@ -27,7 +27,7 @@ public class EquipmentManager
             Equipment[i] = null;
     }
 
-    public GameClient Client { get; set; }
+    public WorldClient Client { get; set; }
     public int Length => Equipment?.Count ?? 0;
     public ConcurrentDictionary<int, EquipmentSlot> Equipment { get; set; }
     private SemaphoreSlim CreateLock { get; } = new(1, 1);
@@ -98,12 +98,12 @@ public class EquipmentManager
             {
                 item.ItemQuality = Item.Quality.Damaged;
                 RemoveFromExisting(item.Slot);
-                Client.SendMessage(0x02, $"{item.Template.Name} has been damaged.");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} has been damaged.");
             }
             else
             {
                 RemoveFromExisting(item.Slot, false);
-                Client.SendMessage(0x02, $"{item.Template.Name} was so damaged it fell apart.");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} was so damaged it fell apart.");
             }
         }
     }
