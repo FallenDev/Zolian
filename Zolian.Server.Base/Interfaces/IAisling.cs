@@ -17,7 +17,6 @@ public interface IAisling : ISprite
     uint ThreatMeter { get; set; }
     ReactorTemplate ActiveReactor { get; set; }
     DialogSequence ActiveSequence { get; set; }
-    bool CanReact { get; set; }
     ExchangeSession Exchange { get; set; }
     NameDisplayStyle NameStyle { get; set; }
     bool IsCastingSpell { get; set; }

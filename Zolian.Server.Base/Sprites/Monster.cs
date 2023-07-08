@@ -22,8 +22,8 @@ public sealed class Monster : Sprite
         WalkEnabled = false;
         ObjectUpdateEnabled = false;
         WaypointIndex = 0;
-        TaggedAislings = new HashSet<int>();
-        AggroList = new List<int>();
+        TaggedAislings = new HashSet<uint>();
+        AggroList = new List<uint>();
         EntityType = TileContent.Monster;
     }
 
@@ -51,11 +51,11 @@ public sealed class Monster : Sprite
     public readonly List<SkillScript> SkillScripts = new();
     public readonly List<SkillScript> AbilityScripts = new();
     public readonly List<SpellScript> SpellScripts = new();
-    public List<int> AggroList { get; init; }
+    public List<uint> AggroList { get; init; }
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
     public bool Blind => HasDebuff("Blind");
-    public HashSet<int> TaggedAislings { get; set; }
+    public HashSet<uint> TaggedAislings { get; set; }
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
@@ -80,7 +80,7 @@ public sealed class Monster : Sprite
 
     public void AppendTags(Sprite target)
     {
-        TaggedAislings ??= new HashSet<int>();
+        TaggedAislings ??= new HashSet<uint>();
 
         if (target is not Aisling aisling)
             return;

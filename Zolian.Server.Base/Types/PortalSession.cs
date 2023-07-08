@@ -1,12 +1,11 @@
 ﻿using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 
 namespace Darkages.Types;
 
 public class PortalSession : IPortalSession
 {
-    public void TransitionToMap(GameClient client, int destinationMap = 0)
+    public void TransitionToMap(WorldClient client, int destinationMap = 0)
     {
         var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
@@ -16,13 +15,13 @@ public class PortalSession : IPortalSession
         {
             client.Aisling.Abyss = true;
             ShowFieldMap(client);
-            client.Send(new ServerFormat19(client, 42));
+            client.SendSound(42, true);
         }
 
         client.Aisling.Abyss = false;
     }
 
-    public void ShowFieldMap(GameClient client)
+    public void ShowFieldMap(WorldClient client)
     {
         if (client.MapOpen) return;
 
@@ -37,7 +36,7 @@ public class PortalSession : IPortalSession
             }
         }
 
-        client.Send(new ServerFormat2E(client.Aisling));
+        client.SendWorldMap();
     }
 
     //public void GenerateFieldMap()

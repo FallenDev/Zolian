@@ -76,6 +76,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                     var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
                     var redirect = new Chaos.Networking.Entities.Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                         ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                    RedirectManager.Add(redirect);
                     localClient.SendRedirect(redirect);
                     break;
                 case ServerTableRequestType.RequestTable:

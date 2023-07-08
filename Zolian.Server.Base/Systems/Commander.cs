@@ -1,7 +1,7 @@
 ﻿using System.Net;
-
+using Chaos.Common.Definitions;
 using Darkages.GameScripts.Formulas;
-using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Systems.CLI;
@@ -67,94 +67,24 @@ public static class Commander
             .AddArgument(Argument.Create("name"))
             .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
         );
-
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn All")
-            .AddAlias("learn")
-            .SetAction(LearnAll));
-
+        
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Restart")
             .AddAlias("restart")
             .SetAction(Restart));
     }
-
-    private static void LearnAll(Argument[] args, object arg)
-    {
-        var client = (GameClient)arg;
-        if (client == null) return;
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        client.LearnEverything();
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Learn- on character: {client.Aisling.Username}");
-    }
-
-    public static void Chaos()
-    {
-        var clients = ServerSetup.Instance.Game.Clients.Values;
-
-        foreach (var connected in clients)
-        {
-            connected.SendMessage(0x0C, "{=bChaos is rising in {=q5 {=bminutes{=g.");
-        }
-
-        Task.Delay(60000).ContinueWith(ct =>
-        {
-            foreach (var connected in clients)
-            {
-                connected.SendMessage(0x0C, "{=bChaos is nearing in {=q4 {=bminutes{=g.");
-            }
-        });
-
-        Task.Delay(120000).ContinueWith(ct =>
-        {
-            foreach (var connected in clients)
-            {
-                connected.SendMessage(0x0C, "{=bChaos is nearing in {=q3 {=bminutes{=g.");
-            }
-        });
-
-        Task.Delay(180000).ContinueWith(ct =>
-        {
-            foreach (var connected in clients)
-            {
-                connected.SendMessage(0x0C, "{=bChaos is nearing in {=q2 {=bminutes{=g.");
-            }
-        });
-
-        Task.Delay(240000).ContinueWith(ct =>
-        {
-            foreach (var connected in clients)
-            {
-                connected.SendMessage(0x0C, "{=bDeath Knell will be rung in {=q1 {=bminute{=g.");
-            }
-        });
-
-        Task.Delay(300000).ContinueWith(ct =>
-        {
-            foreach (var connected in clients)
-            {
-                connected.SendMessage(0x0C, "{=bChaos has risen{=g. -{=qPlease re{=g-{=qlogin{=g-");
-            }
-
-            ServerSetup.Logger("Chaos has risen.", LogLevel.Critical);
-            ServerSetup.Instance.Running = false;
-            Environment.Exit(0);
-        });
-    }
-
+    
     public static void Restart(Argument[] args, object arg)
     {
-        var clients = ServerSetup.Instance.Game.Clients.Values;
+        var players = ServerSetup.Instance.Game.Aislings;
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
 
-        foreach (var connected in clients)
+        foreach (var connected in players)
         {
-            connected.SendMessage(0x0C, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Restart-");
-            connected.SendMessage(0x08, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Restart-");
+            connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
         }
 
         ServerSetup.Instance.Running = false;
@@ -167,7 +97,7 @@ public static class Commander
     /// </summary>
     private static void OnLearnSpell(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
         if (client == null) return;
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
@@ -195,7 +125,7 @@ public static class Commander
     /// </summary>
     private static void OnLearnSkill(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
         if (client == null) return;
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
@@ -218,33 +148,34 @@ public static class Commander
     }
 
     /// <summary>
-    /// InGame Usage : /sp "Wren"
+    /// InGame Usage : /s "playerName" - Summons a player
     /// </summary>
     private static void OnSummonPlayer(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
         if (client == null) return;
 
         var who = args.FromName("who").Replace("\"", "");
 
         if (string.IsNullOrEmpty(who)) return;
 
-        var player = client.Server.Clients.Values.FirstOrDefault(i =>
-            i?.Aisling != null && string.Equals(i.Aisling.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        var players = ServerSetup.Instance.Game.Aislings;
+        var player = players.FirstOrDefault(i =>
+            i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
 
         //summon player to my map and position.
-        player?.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
+        player?.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Aisling.Username}");
+        Analytics.TrackEvent($"{ip!.Address} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
     }
 
     /// <summary>
-    /// InGame Usage : /pt "Wren"
+    /// InGame Usage : /p "playerName" - Ports to a player
     /// </summary>
     private static void OnPortToPlayer(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
 
         if (client == null) return;
         var who = args.FromName("who").Replace("\"", "");
@@ -252,15 +183,16 @@ public static class Commander
         if (string.IsNullOrEmpty(who))
             return;
 
-        var player = client.Server.Clients.Values.FirstOrDefault(i =>
-            i?.Aisling != null && string.Equals(i.Aisling.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        var players = ServerSetup.Instance.Game.Aislings;
+        var player = players.FirstOrDefault(i =>
+            i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
 
         //summon myself to players area and position.
         if (player != null)
-            client.TransitionToMap(player.Aisling.Map, player.Aisling.Position);
+            client.TransitionToMap(player.Map, player.Position);
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Aisling.Username}");
+        Analytics.TrackEvent($"{ip!.Address} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
     }
 
     /// <summary>
@@ -268,7 +200,7 @@ public static class Commander
     /// </summary>
     private static void OnTeleport(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
 
         if (client == null) return;
         var mapName = args.FromName("map").Replace("\"", "");
@@ -292,7 +224,7 @@ public static class Commander
     /// </summary>
     private static void OnItemCreate(Argument[] args, object arg)
     {
-        var client = (GameClient)arg;
+        var client = (WorldClient)arg;
         if (client == null) return;
         var ip = client.Socket.RemoteEndPoint as IPEndPoint;
 
@@ -342,7 +274,7 @@ public static class Commander
         }
     }
 
-    private static void ItemDura(Item item, Item.Quality quality, IGameClient client)
+    private static void ItemDura(Item item, Item.Quality quality, WorldClient client)
     {
         var temp = item.Template.MaxDurability;
         switch (quality)
@@ -382,7 +314,7 @@ public static class Commander
         }
     }
 
-    public static void ParseChatMessage(IGameClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
+    public static void ParseChatMessage(WorldClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
 
     private static void OnParseError(object obj, string command) =>
         ServerSetup.Logger($"[Chat Parser] Error: {command}");

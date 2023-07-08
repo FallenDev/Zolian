@@ -5,14 +5,54 @@ using Chaos.Packets;
 using Darkages.Sprites;
 using Darkages.Types;
 using Chaos.Geometry.Abstractions.Definitions;
+using Darkages.Enums;
 using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
+using Darkages.Models;
+using Darkages.Templates;
 
 namespace Darkages.Network.Client.Abstractions;
 
 public interface IWorldClient : ISocketClient
 {
+    bool MapUpdating { get; set; }
+    bool MapOpen { get; set; }
     Aisling Aisling { get; set; }
+    bool SerialSent { get; set; }
+    bool Authenticated { get; set; }
+    bool EncryptPass { get; set; }
+    DateTime BoardOpened { get; set; }
+    DialogSession DlgSession { get; set; }
+    bool CanSendLocation { get; }
+    bool IsRefreshing { get; }
+    bool CanRefresh { get; }
+    bool IsEquipping { get; }
+    bool IsDayDreaming { get; }
+    bool IsMoving { get; }
+    bool IsWarping { get; }
+    bool WasUpdatingMapRecently { get; }
+    DateTime LastAssail { get; set; }
+    DateTime LastClientRefresh { get; set; }
+    DateTime LastWarp { get; set; }
+    Item LastItemDropped { get; set; }
+    DateTime LastLocationSent { get; set; }
+    DateTime LastMapUpdated { get; set; }
+    DateTime LastMessageSent { get; set; }
+    DateTime LastMovement { get; set; }
+    DateTime LastEquip { get; set; }
+    DateTime LastPing { get; set; }
+    DateTime LastPingResponse { get; set; }
+    DateTime LastSave { get; set; }
+    DateTime LastWhisperMessageSent { get; set; }
+    PendingBuy PendingBuySessions { get; set; }
+    PendingSell PendingItemSessions { get; set; }
+    PendingBanked PendingBankedSession { get; set; }
+    bool ShouldUpdateMap { get; set; }
+    DateTime LastNodeClicked { get; set; }
+    WorldPortal PendingNode { get; set; }
+    Position LastKnownPosition { get; set; }
+    int MapClicks { get; set; }
+    int EntryCheck { get; set; }
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
@@ -65,4 +105,76 @@ public interface IWorldClient : ISocketClient
     void SendVisibleEntities(List<Sprite> objects);
     void SendWorldList(IEnumerable<Aisling> users);
     void SendWorldMap();
+    WorldClient AislingToGhostForm();
+    WorldClient GhostFormToAisling();
+    WorldClient LearnSkill(Mundane source, SkillTemplate subject, string message);
+    WorldClient LearnSpell(Mundane source, SpellTemplate subject, string message);
+    void ClientRefreshed();
+    void DaydreamingRoutine(TimeSpan elapsedTime);
+    void VariableLagDisconnector(int delay);
+    void DispatchCasts();
+    WorldClient SystemMessage(string message);
+    void SendTargetedMessage(Scope scope, ServerMessageType type, string text);
+    void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0,
+        uint casterSerial = 0, uint targetSerial = 0, Position position = null);
+    Task<WorldClient> Save();
+    void DeathStatusCheck();
+    WorldClient UpdateDisplay(bool excludeSelf = false);
+    void UpdateStatusBarAndThreat(TimeSpan elapsedTime);
+    void UpdateSkillSpellCooldown(TimeSpan elapsedTime);
+    WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
+    bool PayPrerequisites(LearningPredicate prerequisites);
+    void BuildSettings();
+    bool CheckReqs(WorldClient client, Item item);
+    void HandleBadTrades();
+    WorldClient Insert(bool update, bool delete);
+    void Interrupt();
+    void ForgetSkill(string s);
+    void ForgetSkills();
+    void ForgetSpell(string s);
+    void ForgetSpells();
+    void ForgetSpellSend(Spell spell);
+    void TrainSkill(Skill skill);
+    void TrainSpell(Spell spell);
+    WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps);
+    bool GiveItem(string itemName);
+    void GiveQuantity(Aisling aisling, string itemName, int range);
+    void TakeAwayQuantity(Sprite owner, string item, int range);
+    WorldClient LoggedIn(bool state);
+    void OpenBoard(string n);
+    void Port(int i, int x = 0, int y = 0);
+    void ResetLocation(WorldClient client);
+    void Recover();
+    void RevivePlayer(string u);
+    void GiveScar();
+    void RepairEquipment();
+    bool Revive();
+    bool IsBehind(Sprite sprite);
+    void KillPlayer(string u);
+    void GiveHp(int v = 1);
+    void GiveMp(int v = 1);
+    void GiveStr(byte v = 1);
+    void GiveInt(byte v = 1);
+    void GiveWis(byte v = 1);
+    void GiveCon(byte v = 1);
+    void GiveDex(byte v = 1);
+    void GiveExp(uint exp);
+    void LevelUp(Player player);
+    void GiveAp(uint a);
+    WorldClient RefreshMap(bool updateView = false);
+    WorldClient TransitionToMap(Area area, Position position);
+    WorldClient TransitionToMap(int area, Position position);
+    void WarpToAdjacentMap(WarpTemplate warps);
+    void WarpTo(Position position, bool overrideRefresh);
+    void CheckWarpTransitions(WorldClient client);
+    void CheckWarpTransitions(WorldClient client, int x, int y);
+    WorldClient Enter();
+    WorldClient LeaveArea(bool update = false, bool delete = false);
+    void CompleteMapTransition();
+    void DeleteSkillFromDb(Skill skill);
+    void DeleteSpellFromDb(Spell spell);
+    void LoadBank();
+    Task AddDiscoveredMapToDb();
+    Task AddToIgnoreListDb(string ignored);
+    void RemoveFromIgnoreListDb(string ignored);
 }

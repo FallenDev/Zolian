@@ -78,7 +78,6 @@ public sealed class Aisling : Player, IAisling
     public uint ThreatMeter { get; set; }
     public ReactorTemplate ActiveReactor { get; set; }
     public DialogSequence ActiveSequence { get; set; }
-    public bool CanReact { get; set; }
     public ExchangeSession Exchange { get; set; }
     public NameDisplayStyle NameStyle { get; set; }
     public bool IsCastingSpell { get; set; }

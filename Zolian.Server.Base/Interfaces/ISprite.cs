@@ -87,7 +87,6 @@ public interface ISprite
 
     bool CanBeAttackedHere(Sprite source);
     void NotifyPropertyChanged([CallerMemberName] string propertyName = "");
-    void Show<T>(WorldServer server, Scope op, T format, IEnumerable<Sprite> definer = null) where T : WorldServer
     void ShowTo(Aisling nearbyAisling);
     List<Sprite> GetAllInFront(Sprite sprite, int tileCount = 1);
     List<Sprite> GetAllInFront(int tileCount = 1, bool intersect = false);

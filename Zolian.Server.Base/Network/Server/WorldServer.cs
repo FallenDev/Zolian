@@ -16,7 +16,7 @@ using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
-
+using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -29,15 +29,17 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.SqlServer.Server;
 
 using ServiceStack;
-
+using ServiceStack.Html;
+using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
+using MapFlags = Darkages.Enums.MapFlags;
 using Stat = Chaos.Common.Definitions.Stat;
 
 namespace Darkages.Network.Server;
 
-public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
+public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> ClientProvider;
     private ConcurrentDictionary<Type, GameServerComponent> _serverComponents;
@@ -58,7 +60,7 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         IClientFactory<WorldClient> clientProvider,
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
-        IOptions<Chaos.Networking.Options.ServerOptions> options,
+        Microsoft.Extensions.Options.IOptions<Chaos.Networking.Options.ServerOptions> options,
         ILogger<WorldServer> logger
     )
         : base(
@@ -769,8 +771,6 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
         client.Aisling.IsCastingSpell = false;
     }
 
-
-
     #endregion
 
     #region OnHandlers
@@ -780,9 +780,20 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnMapDataRequest(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling?.Map == null) return default;
+        if (client.MapUpdating && client.Aisling.CurrentMapId != ServerSetup.Instance.Config.TransitionZone) return default;
+
         static ValueTask InnerOnMapDataRequest(IWorldClient localClient)
         {
-            localClient.SendMapData();
+            try
+            {
+                localClient.MapUpdating = true;
+                localClient.SendMapData();
+            }
+            finally
+            {
+                localClient.MapUpdating = false;
+            }
 
             return default;
         }
@@ -795,18 +806,71 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnClientWalk(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling?.Map is not { Ready: true }) return default;
+        if (client.Aisling.CantMove)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "{=bYou cannot feel your legs...");
+            client.SendLocation();
+            client.UpdateDisplay();
+            return default;
+        }
+
+        if (client.Aisling.Skulled)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, ServerSetup.Instance.Config.ReapMessageDuringAction);
+            client.Interrupt();
+
+            return default;
+        }
+
+        if (client.IsRefreshing && ServerSetup.Instance.Config.CancelWalkingIfRefreshing) return default;
+        if (client.Aisling.IsCastingSpell && ServerSetup.Instance.Config.CancelCastingWhenWalking)
+        {
+            CancelIfCasting(client.Aisling.Client);
+            return default;
+        }
+
+
         var args = PacketSerializer.Deserialize<ClientWalkArgs>(in clientPacket);
 
         static ValueTask InnerOnClientWalk(IWorldClient localClient, ClientWalkArgs localArgs)
         {
-            //if player is in a world map, dont allow them to walk
-            if (localClient.Aisling.ActiveObject.TryGet<WorldMap>() != null)
-                return default;
+            localClient.Aisling.Direction = (byte)localArgs.Direction;
+            var success = localClient.Aisling.Walk();
 
-            //TODO: should i refresh the client if the points don't match up? seems like it might get obnoxious
+            if (success)
+            {
+                if (localClient.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
+                {
+                    var portal = new PortalSession();
+                    portal.TransitionToMap(localClient.Aisling.Client);
+                    return default;
+                }
 
-            localClient.Aisling.Walk(localArgs.Direction);
+                localClient.CheckWarpTransitions(localClient.Aisling.Client);
 
+                if (localClient.Aisling.Map?.Script.Item2 == null) return default;
+
+                localClient.Aisling.Map.Script.Item2.OnPlayerWalk(localClient.Aisling.Client, localClient.Aisling.LastPosition, localClient.Aisling.Position);
+                if (!localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) return default;
+
+                foreach (var trap in Trap.Traps.Select(i => i.Value))
+                {
+                    if (trap?.Owner == null || trap.Owner.Serial == localClient.Aisling.Serial ||
+                        localClient.Aisling.X != trap.Location.X ||
+                        localClient.Aisling.Y != trap.Location.Y) continue;
+
+                    var triggered = Trap.Activate(trap, localClient.Aisling);
+                    if (triggered) break;
+                }
+            }
+            else
+            {
+                localClient.ClientRefreshed();
+                localClient.CheckWarpTransitions(localClient.Aisling.Client);
+            }
+
+            localClient.LastMovement = DateTime.UtcNow;
             return default;
         }
 
@@ -818,39 +882,107 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnPickup(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling is null || client.Aisling.LoggedIn == false) return default;
+        if (client.Aisling.IsDead())
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
+        if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsSleeping || client.Aisling.IsFrozen || client.Aisling.IsStopped)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<PickupArgs>(in clientPacket);
 
         ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
-            (var destinationSlot, var sourcePoint) = localArgs;
-            var map = localClient.Aisling.MapInstance;
+            var (destinationSlot, sourcePoint) = localArgs;
+            var map = localClient.Aisling.Map;
+            var itemObjs = ObjectHandlers.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Items).ToList();
+            var moneyObjs = ObjectHandlers.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Money);
 
-            if (!localClient.Aisling.WithinRange(sourcePoint, Options.PickupRange))
-                return default;
+            if (!itemObjs.IsEmpty())
+            {
+                var obj = itemObjs.First();
+                if (obj?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
+                if (!(localClient.Aisling.Position.DistanceFrom(obj.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
 
-            var possibleObjs = map.GetEntitiesAtPoint<GroundEntity>(sourcePoint)
-                .OrderByDescending(obj => obj.Creation)
-                .ToList();
+                if (obj is not Item item) return default;
+                if ((item.Template.Flags & ItemFlags.Trap) == ItemFlags.Trap) return default;
+                if (item.Template.Flags.FlagIsSet(ItemFlags.Unique) && item.Template.Name == "Necra Scribblings")
+                    if (localClient.Aisling.Stage >= ClassStage.Master) return default;
 
-            if (!possibleObjs.Any())
-                return default;
 
-            //loop through the items on the ground, try to pick each one up
-            //if we pick one up, return (only pick up 1 obj at a time)
-            foreach (var obj in possibleObjs)
-                switch (obj)
+                foreach (var invItem in localClient.Aisling.Inventory.Items.Values)
                 {
-                    case GroundItem groundItem:
-                        if (localClient.Aisling.TryPickupItem(groundItem, destinationSlot))
-                            return default;
-
-                        break;
-                    case Money money:
-                        if (localClient.Aisling.TryPickupMoney(money))
-                            return default;
-
-                        break;
+                    if (invItem == null) continue;
+                    if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
+                    if (invItem.Template.Name != item.Template.Name) continue;
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
+                    return default;
                 }
+
+                foreach (var invItem in localClient.Aisling.BankManager.Items.Values)
+                {
+                    if (invItem == null) continue;
+                    if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
+                    if (invItem.Template.Name != item.Template.Name) continue;
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
+                    return default;
+                }
+
+                if (item.Cursed)
+                {
+                    Sprite first = null;
+
+                    if (item.AuthenticatedAislings != null)
+                    {
+                        foreach (var i in item.AuthenticatedAislings)
+                        {
+                            if (i.Serial != localClient.Aisling.Serial) continue;
+
+                            first = i;
+                            break;
+                        }
+
+                        if (item.AuthenticatedAislings != null && first == null)
+                        {
+                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.CursedItemMessage}");
+                            return default;
+                        }
+                    }
+
+                    item.Pos = localClient.Aisling.Pos;
+                    var objToList = new List<Sprite> { obj };
+                    localClient.SendVisibleEntities(objToList);
+                }
+
+                if (item.GiveTo(localClient.Aisling))
+                {
+                    item.Remove();
+                    if (item.Scripts is null) return default;
+                    foreach (var itemScript in item.Scripts.Values)
+                        itemScript?.OnPickedUp(localClient.Aisling, new Position(sourcePoint.X, sourcePoint.Y), map);
+                    return default;
+                }
+
+                item.Pos = localClient.Aisling.Pos;
+                var objToList2 = new List<Sprite> { obj };
+                localClient.SendVisibleEntities(objToList2);
+            }
+
+            foreach (var obj in moneyObjs)
+            {
+                if (obj?.CurrentMapId != localClient.Aisling.CurrentMapId) break;
+                if (!(localClient.Aisling.Position.DistanceFrom(obj.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) break;
+
+                if (obj is not Money money) continue;
+
+                money.GiveTo(money.Amount, localClient.Aisling);
+            }
 
             return default;
         }
@@ -863,17 +995,152 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnItemDropped(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling is null || client.Aisling.LoggedIn == false) return default;
+        if (client.Aisling.Map is not { Ready: true }) return default;
+        if (client.Aisling.IsDead())
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
+        if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsSleeping || client.Aisling.IsFrozen || client.Aisling.IsStopped)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<ItemDropArgs>(in clientPacket);
 
         static ValueTask InnerOnItemDropped(IWorldClient localClient, ItemDropArgs localArgs)
         {
-            (var sourceSlot, var destinationPoint, var count) = localArgs;
+            var (sourceSlot, destinationPoint, count) = localArgs;
+            if (sourceSlot is 0) return default;
+            if (count is > 1000 or < 0) return default;
+            Item item = null;
+            if (localClient.Aisling.Inventory.Items.TryGetValue(sourceSlot, out var value))
+            {
+                if (value is null) return default;
+                item = value;
+                item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+            }
 
-            localClient.Aisling.TryDrop(
-                destinationPoint,
-                sourceSlot,
-                out _,
-                count);
+            if (item == null) return default;
+
+            if (item.Stacks > 1)
+            {
+                if (count > item.Stacks)
+                {
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Wait.. how many did I have again?");
+                    return default;
+                }
+            }
+
+            if (!item.Template.Flags.FlagIsSet(ItemFlags.Dropable))
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.CantDropItemMsg}");
+                return default;
+            }
+            var itemPosition = new Position(destinationPoint.X, destinationPoint.Y);
+
+            if (localClient.Aisling.Position.DistanceFrom(itemPosition.X, itemPosition.Y) > 9)
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can not do that. Too far.");
+                return default;
+            }
+            if (localClient.Aisling.Map.IsWall(destinationPoint.X, destinationPoint.Y))
+                if ((int)localClient.Aisling.Pos.X != destinationPoint.X || (int)localClient.Aisling.Pos.Y != destinationPoint.Y)
+                {
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Something is in the way.");
+                    return default;
+                }
+
+            if (item.Template.Flags.FlagIsSet(ItemFlags.Stackable))
+            {
+                if (count > item.Stacks)
+                {
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Wait.. how many did I have again?");
+                    return default;
+                }
+
+                var remaining = item.Stacks - (ushort)count;
+                item.Dropping = count;
+
+                if (remaining == 0)
+                {
+                    if (localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true))
+                    {
+                        item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+
+                        // Mileth Altar 
+                        if (localClient.Aisling.Map.ID == 500)
+                        {
+                            if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
+                                item.Remove();
+                        }
+                    }
+                }
+                else
+                {
+                    var temp = new Item
+                    {
+                        Slot = item.Slot,
+                        Image = item.Image,
+                        DisplayImage = item.DisplayImage,
+                        Durability = item.Durability,
+                        ItemVariance = item.ItemVariance,
+                        WeapVariance = item.WeapVariance,
+                        ItemQuality = item.ItemQuality,
+                        OriginalQuality = item.OriginalQuality,
+                        InventorySlot = sourceSlot,
+                        Stacks = (ushort)count,
+                        Template = item.Template
+                    };
+
+                    temp.Release(localClient.Aisling, itemPosition);
+
+                    // Mileth Altar 
+                    if (localClient.Aisling.Map.ID == 500)
+                    {
+                        if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
+                            temp.Remove();
+                    }
+
+                    item.Stacks = (ushort)remaining;
+                    localClient.SendRemoveItemFromPane(item.InventorySlot);
+                    localClient.Aisling.Inventory.Set(item);
+                    localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
+                }
+            }
+            else
+            {
+                if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
+                    if (localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true))
+                    {
+                        item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+
+                        // Mileth Altar 
+                        if (localClient.Aisling.Map.ID == 500)
+                        {
+                            if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
+                                item.Remove();
+                        }
+                    }
+            }
+
+            localClient.Aisling.Inventory.UpdatePlayersWeight(localClient.Aisling.Client);
+            localClient.SendAttributes(StatUpdateType.Primary);
+            localClient.SendAttributes(StatUpdateType.ExpGold);
+
+            if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
+            {
+                localClient.Aisling.Map?.Script.Item2?.OnItemDropped(localClient.Aisling.Client, item, itemPosition);
+            }
+
+            if (item.Scripts == null) return default;
+            foreach (var itemScript in item.Scripts.Values)
+            {
+                itemScript?.OnDropped(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y), localClient.Aisling.Map);
+            }
 
             return default;
         }
@@ -894,21 +1161,13 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
                 localClient.SendConfirmExit();
             else
             {
+                var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
                 var redirect = new Redirect(
                     EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                    Options.LoginRedirect,
-                    ServerType.Login,
-                    localClient.Crypto.Key,
-                    localClient.Crypto.Seed);
+                    new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
+                    ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
 
                 RedirectManager.Add(redirect);
-
-                Logger.WithProperty(localClient)
-                    .LogDebug(
-                        "Redirecting {@ClientIp} to {@ServerIp}",
-                        client.RemoteIp.ToString(),
-                        Options.LoginRedirect.Address.ToString());
-
                 localClient.SendRedirect(redirect);
             }
 
@@ -923,30 +1182,32 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnIgnore(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client != null && !client.Aisling.LoggedIn) return default;
+
         var args = PacketSerializer.Deserialize<IgnoreArgs>(in clientPacket);
 
         static ValueTask InnerOnIgnore(IWorldClient localClient, IgnoreArgs localArgs)
         {
-            (var ignoreType, var targetName) = localArgs;
+            var (ignoreType, targetName) = localArgs;
 
             switch (ignoreType)
             {
                 case IgnoreType.Request:
-                    localClient.SendServerMessage(ServerMessageType.ScrollWindow, localClient.Aisling.IgnoreList.ToString());
-
+                    var ignored = string.Join(", ", localClient.Aisling.IgnoredList);
+                    localClient.SendServerMessage(ServerMessageType.NonScrollWindow, ignored);
                     break;
                 case IgnoreType.AddUser:
-                    if (!string.IsNullOrEmpty(targetName))
-                        localClient.Aisling.IgnoreList.Add(targetName);
-
+                    if (targetName == null) break;
+                    if (targetName.EqualsIgnoreCase("Death")) break;
+                    if (localClient.Aisling.IgnoredList.ListContains(targetName)) break;
+                    localClient.AddToIgnoreListDb(targetName);
                     break;
                 case IgnoreType.RemoveUser:
-                    if (!string.IsNullOrEmpty(targetName))
-                        localClient.Aisling.IgnoreList.Remove(targetName);
-
+                    if (targetName == null) break;
+                    if (targetName.EqualsIgnoreCase("Death")) break;
+                    if (!localClient.Aisling.IgnoredList.ListContains(targetName)) break;
+                    localClient.RemoveFromIgnoreListDb(targetName);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
 
             return default;
@@ -960,20 +1221,64 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
     /// </summary>
     public ValueTask OnPublicMessage(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsSilenced) return default;
+
         var args = PacketSerializer.Deserialize<PublicMessageArgs>(in clientPacket);
 
         async ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
         {
-            (var publicMessageType, var message) = localArgs;
-
-            if (CommandInterceptor.IsCommand(message))
+            var (publicMessageType, message) = localArgs;
+            string response;
+            IEnumerable<Aisling> audience;
+            bool ParseCommand()
             {
-                await CommandInterceptor.HandleCommandAsync(localClient.Aisling, message);
+                if (!localClient.Aisling.GameMaster) return false;
+                if (!message.StartsWith("/")) return false;
+                Commander.ParseChatMessage(localClient.Aisling.Client, message);
+                return true;
+            }
+            
+            if (ParseCommand()) return;
 
-                return;
+            switch (publicMessageType)
+            {
+                case PublicMessageType.Normal:
+                    response = $"{localClient.Aisling.Username}: {message}";
+                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.WithinRangeOf(n));
+                    break;
+                case PublicMessageType.Shout:
+                    response = $"{localClient.Aisling.Username}! {message}";
+                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.CurrentMapId == n.CurrentMapId);
+                    break;
+                case PublicMessageType.Chant:
+                    response = message;
+                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.WithinRangeOf(n, false));
+                    break;
+                default:
+                    localClient.Disconnect();
+                    return;
             }
 
-            localClient.Aisling.ShowPublicMessage(publicMessageType, message);
+            var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
+            
+            foreach (var player in playersToShowList)
+            {
+                localClient.SendPublicMessage(player.Serial, publicMessageType, response);
+            }
+
+            var nearbyMundanes = localClient.Aisling.MundanesNearby();
+
+            foreach (var npc in nearbyMundanes)
+            {
+                if (npc?.Scripts is null) continue;
+
+                foreach (var script in npc.Scripts.Values)
+                    script?.OnGossip(localClient.Aisling.Client, message);
+            }
+
+            localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, message);
         }
 
         return ExecuteHandler(client, args, InnerOnPublicMessage);
@@ -988,7 +1293,7 @@ public class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
-            (var sourceSlot, var argsData) = localArgs;
+            var (sourceSlot, argsData) = localArgs;
 
             if (localClient.Aisling.SpellBook.TryGetObject(sourceSlot, out var spell))
             {

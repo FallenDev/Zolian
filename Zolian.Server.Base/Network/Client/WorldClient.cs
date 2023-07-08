@@ -48,11 +48,11 @@ namespace Darkages.Network.Client
     {
         private readonly IWorldServer<WorldClient> _server;
         public readonly ObjectManager ObjectHandlers = new();
-        public bool MapUpdating;
         public readonly GameServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
         private readonly GameServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
         public Aisling Aisling { get; set; }
+        public bool MapUpdating { get; set; }
         public bool MapOpen { get; set; }
         private SemaphoreSlim CreateLock { get; } = new(1, 1);
         private SemaphoreSlim LoadLock { get; } = new(1, 1);
@@ -2144,14 +2144,12 @@ namespace Darkages.Network.Client
 
             foreach (var warp in portal.Portals.Where(warps => warps?.Destination != null))
             {
+                var map = warp.Destination.AreaID.ToString();
+                var x = warp.Destination.Location.X;
+                var y = warp.Destination.Location.Y;
                 var addWarp = new WorldMapNodeInfo
                 {
-                    Destination = new Location
-                    {
-                        Map = warp.Destination.AreaID.ToString(),
-                        X = warp.Destination.Location.X,
-                        Y = warp.Destination.Location.Y
-                    },
+                    Destination = new Location(map, x, y),
                     ScreenPosition = new Point(warp.PointX, warp.PointY),
                     Text = warp.DisplayName,
                     UniqueId = (ushort)EphemeralRandomIdGenerator<uint>.Shared.NextId
@@ -2753,7 +2751,7 @@ namespace Darkages.Network.Client
             LoadSpellBook();
         }
 
-        private void ForgetSpellSend(Spell spell)
+        public void ForgetSpellSend(Spell spell)
         {
             Aisling.SpellBook.Remove(spell.Slot);
             {
@@ -3249,6 +3247,78 @@ namespace Darkages.Network.Client
             Aisling.Pos = new Vector2(position.X, position.Y);
             if (overrideRefresh) return;
             ClientRefreshed();
+        }
+
+        public void CheckWarpTransitions(WorldClient client)
+        {
+            foreach (var (_, value) in ServerSetup.Instance.GlobalWarpTemplateCache)
+            {
+                var breakOuterLoop = false;
+                if (value.ActivationMapId != client.Aisling.CurrentMapId) continue;
+
+                lock (ServerSetup.SyncLock)
+                {
+                    foreach (var _ in value.Activations.Where(o =>
+                                 o.Location.X == (int)client.Aisling.Pos.X &&
+                                 o.Location.Y == (int)client.Aisling.Pos.Y))
+                    {
+                        if (value.WarpType == WarpType.Map)
+                        {
+                            client.WarpToAdjacentMap(value);
+                            breakOuterLoop = true;
+                            break;
+                        }
+
+                        if (value.WarpType != WarpType.World) continue;
+                        if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
+                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = value.To.PortalKey;
+
+                        var portal = new PortalSession();
+                        portal.TransitionToMap(client);
+                        breakOuterLoop = true;
+                        break;
+                    }
+                }
+
+                if (breakOuterLoop) break;
+            }
+        }
+
+        public void CheckWarpTransitions(WorldClient client, int x, int y)
+        {
+            foreach (var (_, value) in ServerSetup.Instance.GlobalWarpTemplateCache)
+            {
+                var breakOuterLoop = false;
+                if (value.ActivationMapId != client.Aisling.CurrentMapId) continue;
+
+                lock (ServerSetup.SyncLock)
+                {
+                    foreach (var _ in value.Activations.Where(o =>
+                                 o.Location.X == x &&
+                                 o.Location.Y == y))
+                    {
+                        if (value.WarpType == WarpType.Map)
+                        {
+                            client.WarpToAdjacentMap(value);
+                            breakOuterLoop = true;
+                            client.Interrupt();
+                            break;
+                        }
+
+                        if (value.WarpType != WarpType.World) continue;
+                        if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
+                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = value.To.PortalKey;
+
+                        var portal = new PortalSession();
+                        portal.TransitionToMap(client);
+                        breakOuterLoop = true;
+                        client.Interrupt();
+                        break;
+                    }
+                }
+
+                if (breakOuterLoop) break;
+            }
         }
 
         public WorldClient Enter()

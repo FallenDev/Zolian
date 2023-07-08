@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Chaos.Common.Definitions;
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
@@ -11,7 +13,6 @@ using Darkages.GameScripts.Spells;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Scripting;
@@ -47,14 +48,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
     public bool IsCursed => HasDebuff(i => i.Name.Contains("Cradh"));
-    public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Suain") || HasDebuff("Dark Chain");
+    public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsCharmed => HasDebuff("Entice");
-    public bool IsParalyzed => HasDebuff("Paralyzed");
+    public bool IsParalyzed => HasDebuff("Suain");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein"));
     public bool IsSleeping => HasDebuff("Sleep");
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
+    public bool IsInvisible => HasBuff("Hide");
     public bool CanSeeInvisible
     {
         get
@@ -70,9 +72,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #endregion
 
-    public bool CanCast => !(IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsCharmed || IsSilenced);
-    public bool CanAttack => !(IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsCharmed);
-    public bool CanMove => !(IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsBeagParalyzed);
+    public bool CantCast => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsSilenced);
+    public bool CantAttack => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsCharmed);
+    public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsBeagParalyzed);
     public bool HasDoT => (IsBleeding || IsPoisoned);
     private int CheckHp => BaseHp + BonusHp;
     public int MaximumHp => CheckHp;
@@ -379,10 +381,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (nearbyAisling == null) return;
         if (this is Aisling aisling)
         {
-            nearbyAisling.Show(Scope.Self, new ServerFormat33(aisling));
+            nearbyAisling.Client.SendDisplayAisling(aisling);
         }
         else
-            nearbyAisling.Show(Scope.Self, new ServerFormat07(new[] { this }));
+        {
+            var sprite = new List<Sprite> { this };
+            nearbyAisling.Client.SendVisibleEntities(sprite);
+        }
     }
 
     private IEnumerable<Sprite> GetInFrontToSide(int tileCount = 1)
@@ -699,6 +704,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         return new Position(pendingX, pendingY);
     }
+
     public Position GetPendingThrowPosition(int warp, Sprite sprite)
     {
         var pendingX = X;
@@ -710,9 +716,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingY++;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                var pos = new Vector2(pendingX, pendingY);
-                var animation = new ServerFormat29(197, pos);
-                sprite.Show(Scope.NearbyAislings, animation);
+                SendAnimation(197, new Position(pendingX, pendingY));
                 continue;
             }
             pendingY--;
@@ -724,9 +728,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingX--;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                var pos = new Vector2(pendingX, pendingY);
-                var animation = new ServerFormat29(197, pos);
-                sprite.Show(Scope.NearbyAislings, animation);
+                SendAnimation(197, new Position(pendingX, pendingY));
                 continue;
             }
             pendingX++;
@@ -738,9 +740,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingY--;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                var pos = new Vector2(pendingX, pendingY);
-                var animation = new ServerFormat29(197, pos);
-                sprite.Show(Scope.NearbyAislings, animation);
+                SendAnimation(197, new Position(pendingX, pendingY));
                 continue;
             }
             pendingY++;
@@ -752,9 +752,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingX++;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                var pos = new Vector2(pendingX, pendingY);
-                var animation = new ServerFormat29(197, pos);
-                sprite.Show(Scope.NearbyAislings, animation);
+                SendAnimation(197, new Position(pendingX, pendingY));
                 continue;
             }
             pendingX--;
@@ -900,7 +898,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (monster.TaggedAislings.Count == 0)
             canTag = true;
 
-        var tagstoRemove = new List<int>();
+        var tagstoRemove = new List<uint>();
         foreach (var userId in monster.TaggedAislings.Where(i => i != attackingPlayer.Serial))
         {
             var taggedUser = GetObject<Aisling>(Map, i => i.Serial == userId);
@@ -944,28 +942,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         void Step0B(int x, int y)
         {
-            Client.Send(new ServerFormat0B(Direction, (short)x, (short)y));
-            Client.Send(new ServerFormat32());
+            Client.SendConfirmClientWalk(new Position(x, y), (Direction)Direction);
         }
 
         void Step0C(int x, int y)
         {
             var readyTime = DateTime.UtcNow;
-            var response = new ServerFormat0C
-            {
-                Direction = Direction,
-                Serial = Serial,
-                X = (short)x,
-                Y = (short)y
-            };
-
             Pos = new Vector2(PendingX, PendingY);
-
-            Show(Scope.NearbyAislingsExludingSelf, response);
-            {
-                LastMovementChanged = readyTime;
-                LastPosition = new Position(x, y);
-            }
+            Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+            LastMovementChanged = readyTime;
+            LastPosition = new Position(x, y);
         }
 
         lock (ServerSetup.SyncLock)
@@ -1094,26 +1080,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         Direction = (byte)RandomNumberGenerator.GetInt32(5);
         if (Direction != savedDirection) update = true;
 
-        if (!Walk() && update)
-            Show(Scope.NearbyAislings, new ServerFormat11
-            {
-                Direction = Direction,
-                Serial = Serial
-            });
+        if (Walk() || !update) return;
+        Client.SendCreatureTurn(Serial, (Direction)Direction);
+        LastTurnUpdated = DateTime.UtcNow;
     }
 
     public void Turn()
     {
         if (!CanUpdate()) return;
-
-        Show(Scope.NearbyAislings, new ServerFormat11
-        {
-            Direction = Direction,
-            Serial = Serial
-        });
-
-        var readyTime = DateTime.UtcNow;
-        LastTurnUpdated = readyTime;
+        Client.SendCreatureTurn(Serial, (Direction)Direction);
+        LastTurnUpdated = DateTime.UtcNow;
     }
 
     #endregion
@@ -1190,32 +1166,32 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
                     return;
                 }
             }
@@ -1234,32 +1210,32 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
-                    aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
                     return;
                 }
             }
@@ -1394,16 +1370,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             if (hit <= Reflex)
             {
-                var empty = new ServerFormat13
-                {
-                    Serial = Serial,
-                    Health = byte.MaxValue,
-                    Sound = 255
-                };
-
+                Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
                 aisling.Animate(92);
-                Show(Scope.NearbyAislings, empty);
             }
 
             if (fort <= Fortitude)
@@ -1479,8 +1448,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var buff = new buff_spell_reflect();
                 if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
-                damageDealingSprite.Client.SendStats(StatusFlags.MultiStat);
-                damageDealingSprite.Client.SendMessage(0x02, "The effects of your weapon surround you.");
+                damageDealingSprite.Client.SendAttributes(StatUpdateType.Full);
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The effects of your weapon surround you.");
                 damageDealingSprite.Animate(83);
                 break;
             }
@@ -1488,8 +1457,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var buff = new buff_spell_reflect();
                 if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
-                damageDealingSprite.Client.SendStats(StatusFlags.MultiStat);
-                damageDealingSprite.Client.SendMessage(0x02, "The effects of your weapon surround you.");
+                damageDealingSprite.Client.SendAttributes(StatUpdateType.Full);
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The effects of your weapon surround you.");
                 damageDealingSprite.Animate(83);
                 break;
             }
@@ -1502,8 +1471,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 const double absorbPct = 0.07;
                 var absorb = absorbPct * dmg;
                 damageDealingSprite.CurrentHp += (int)absorb;
-                damageDealingSprite.Client.SendStats(StatusFlags.Health);
-                damageDealingSprite.Client.SendMessage(0x02, "Your weapon is hungry....");
+                damageDealingSprite.Client.SendAttributes(StatUpdateType.Vitality);
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon is hungry....");
                 damageDealingSprite.Animate(324);
                 break;
             }
@@ -1512,8 +1481,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 const double absorbPct = 0.14;
                 var absorb = absorbPct * dmg;
                 damageDealingSprite.CurrentHp += (int)absorb;
-                damageDealingSprite.Client.SendStats(StatusFlags.Health);
-                damageDealingSprite.Client.SendMessage(0x02, "Your weapon is hungry....");
+                damageDealingSprite.Client.SendAttributes(StatUpdateType.Vitality);
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon is hungry....");
                 damageDealingSprite.Animate(324);
                 break;
             }
@@ -1524,7 +1493,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when hasteChance >= 99:
             {
                 damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
-                damageDealingSprite.Client.SendMessage(0x02, "You begin to move faster.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You begin to move faster.");
                 damageDealingSprite.Animate(291);
                 Task.Delay(5000).ContinueWith(ct => { damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                 break;
@@ -1532,7 +1501,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when hasteChance >= 97:
             {
                 damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
-                damageDealingSprite.Client.SendMessage(0x02, "You begin to move faster.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You begin to move faster.");
                 damageDealingSprite.Animate(291);
                 Task.Delay(5000).ContinueWith(ct => { damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                 break;
@@ -1554,7 +1523,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var deBuff = new debuff_bleeding();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "Your weapon has caused your target to bleed.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has caused your target to bleed.");
                 damageDealingSprite.Animate(105);
                 break;
             }
@@ -1562,7 +1531,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var deBuff = new debuff_bleeding();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "The weapon has caused your target to bleed.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The weapon has caused your target to bleed.");
                 damageDealingSprite.Animate(105);
                 break;
             }
@@ -1574,7 +1543,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var deBuff = new debuff_rending();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "Your weapon has inflicted a minor curse.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has inflicted a minor curse.");
                 damageDealingSprite.Animate(160);
                 break;
             }
@@ -1582,7 +1551,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 var deBuff = new debuff_rending();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "Your weapon has inflicted a minor curse.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has inflicted a minor curse.");
                 damageDealingSprite.Animate(160);
                 break;
             }
@@ -1594,38 +1563,38 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 if (target is Aisling)
                 {
-                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                     return;
                 }
 
                 if (target.Level >= 15 + damageDealingSprite.ExpLevel)
                 {
-                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                     return;
                 }
 
                 var deBuff = new debuff_reaping();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "You've cast Death.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've cast Death.");
                 break;
             }
             case 2 when reapChance >= 0.995:
             {
                 if (target is Aisling)
                 {
-                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                     return;
                 }
 
                 if (target.Level >= 20 + damageDealingSprite.ExpLevel)
                 {
-                    damageDealingSprite.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                     return;
                 }
 
                 var deBuff = new debuff_reaping();
                 if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendMessage(0x02, "You've cast Death.");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've cast Death.");
                 break;
             }
         }
@@ -1634,11 +1603,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when gustChance >= 98:
                 _ = new Gust(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when gustChance >= 95:
                 _ = new Gust(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
 
@@ -1646,11 +1615,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when quakeChance >= 98:
                 _ = new Quake(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when quakeChance >= 95:
                 _ = new Quake(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
 
@@ -1658,11 +1627,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when rainChance >= 98:
                 _ = new Rain(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when rainChance >= 95:
                 _ = new Rain(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
 
@@ -1670,11 +1639,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when flameChance >= 98:
                 _ = new Flame(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when flameChance >= 95:
                 _ = new Flame(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
 
@@ -1682,11 +1651,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when duskChance >= 98:
                 _ = new Dusk(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when duskChance >= 95:
                 _ = new Dusk(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
 
@@ -1694,11 +1663,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when dawnChance >= 98:
                 _ = new Dawn(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
             case 2 when dawnChance >= 95:
                 _ = new Dawn(damageDealingSprite, target);
-                damageDealingSprite.Client.SendMessage(0x02, "Weapon's seal breaks!");
+                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
                 break;
         }
     }
@@ -1734,17 +1703,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             ShowDmg(aisling, estTime);
         }
 
-        var hpBar = new ServerFormat13
-        {
-            Serial = Serial,
-            Health = (ushort)((double)100 * CurrentHp / MaximumHp),
-            Sound = sound
-        };
-
-        Show(Scope.NearbyAislings, hpBar);
-        {
-            dmgcb?.Invoke(convDmg);
-        }
+        Client.SendHealthBar(this, sound);
+        dmgcb?.Invoke(convDmg);
 
         return convDmg;
     }
@@ -1755,15 +1715,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
 
         var dmgShow = aisling.DamageCounter.ToString();
-
-        aisling.Show(Scope.NearbyAislings,
-            new ServerFormat0D
-            {
-                Serial = aisling.Serial,
-                Text = $"{dmgShow}",
-                Type = 0x02
-            });
-
+        Client.SendPublicMessage(Serial, PublicMessageType.Chant, $"{dmgShow}");
         aisling.DamageCounter = 0;
     }
 
@@ -1798,14 +1750,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
             {
-                var empty = new ServerFormat13
-                {
-                    Serial = Serial,
-                    Health = byte.MaxValue,
-                    Sound = sound
-                };
-
-                Show(Scope.NearbyAislings, empty);
+                Client.SendHealthBar(this, sound);
                 return false;
             }
         }
@@ -1815,21 +1760,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (damageDealingSprite is Aisling aisling)
                 if (!CanTag(aisling, forced))
                 {
-                    aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.CantAttack}");
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
                     return false;
                 }
         }
 
         if (Immunity && !forced)
         {
-            var empty = new ServerFormat13
-            {
-                Serial = Serial,
-                Health = byte.MaxValue,
-                Sound = sound
-            };
-
-            Show(Scope.NearbyAislings, empty);
+            Client.SendHealthBar(this, sound);
             return false;
         }
 
@@ -1946,7 +1884,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void OnDamaged(Sprite source, long dmg)
     {
-        (this as Aisling)?.Client.SendStats(StatusFlags.StructB);
+        (this as Aisling)?.Client.SendAttributes(StatUpdateType.Vitality);
 
         if (this is not Monster monster) return;
         if (source is not Aisling aisling) return;
@@ -2044,8 +1982,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void UpdateAddAndRemove()
     {
-        Show(Scope.NearbyAislings, new ServerFormat0E(Serial));
-        Show(Scope.NearbyAislings, new ServerFormat07(new[] { this }));
+        Client.SendRemoveObject(Serial);
+        var obj = new List<Sprite>{ this };
+        Client.SendVisibleEntities(obj);
     }
 
     public void UpdateBuffs(TimeSpan elapsedTime)
@@ -2129,7 +2068,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     private bool CanUpdate()
     {
-        if (!CanMove || IsBlind) return false;
+        if (CantMove || IsBlind) return false;
 
         if (this is Monster || this is Mundane)
             if (CurrentHp == 0)
@@ -2155,41 +2094,36 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void Remove()
     {
         var nearby = GetObjects<Aisling>(null, i => i is { LoggedIn: true });
-        var response = new ServerFormat0E(Serial);
 
         foreach (var o in nearby)
             for (var i = 0; i < 2; i++)
-                o?.Client?.Send(response);
+                o?.Client?.SendRemoveObject(Serial);
 
         DeleteObject();
     }
 
     public void HideFrom(Aisling nearbyAisling)
     {
-        nearbyAisling?.Show(Scope.Self, new ServerFormat0E(Serial));
+        nearbyAisling.Client.SendRemoveObject(Serial);
     }
 
     public void Animate(ushort animation, byte speed = 100)
     {
         if (this is Aisling aisling)
-            Show(Scope.NearbyAislings, new ServerFormat29((uint)aisling.Serial, (uint)aisling.Serial, animation, animation, speed));
+            aisling.Client.SendAnimation(animation, speed, animation, aisling.Serial, aisling.Serial);
         else
-            Show(Scope.NearbyAislings, new ServerFormat29((uint)Serial, (uint)Serial, animation, animation, speed));
+            Client.SendAnimation(animation, speed, animation, Serial, Serial);
     }
 
     public Aisling SendAnimation(ushort animation, Sprite to, Sprite from, byte speed = 100)
     {
-        var format = new ServerFormat29((uint)from.Serial, (uint)to.Serial, animation, 0, speed);
-        {
-            Show(Scope.NearbyAislings, format);
-        }
-
-        return this is not Aisling aisling ? null : aisling;
+        Client.SendAnimation(animation, speed, animation, from.Serial, to.Serial);
+        return this as Aisling;
     }
 
     public void SendAnimation(ushort v, Position position)
     {
-        Show(Scope.NearbyAislings, new ServerFormat29(v, new Vector2(position.X, position.Y)));
+        Client.SendAnimation(v, 100, v, Serial, Serial, position);
     }
 
     private void DeleteObject()
