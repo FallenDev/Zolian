@@ -13,15 +13,15 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Pete")]
 public class Pete : MundaneScript
 {
-    public Pete(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Pete(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -40,7 +40,7 @@ public class Pete : MundaneScript
             : "Thank you friend, please enjoy some mead on us in the tavern!", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

@@ -1,5 +1,6 @@
 ﻿using System.Data;
-
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Dapper;
 
 using Darkages.Common;
@@ -81,7 +82,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your password did not save. Try again.");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your password did not save. Try again.");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -148,17 +149,17 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Con", SqlDbType.Int).Value = obj._Con;
             cmd.Parameters.Add("@Dex", SqlDbType.Int).Value = obj._Dex;
             cmd.Parameters.Add("@Luck", SqlDbType.Int).Value = obj._Luck;
-            cmd.Parameters.Add("@ABL", SqlDbType.Int).Value = obj.AbpLevel;
+            cmd.Parameters.Add("@ABL", SqlDbType.SmallInt).Value = obj.AbpLevel;
             cmd.Parameters.Add("@ABN", SqlDbType.Int).Value = obj.AbpNext;
-            cmd.Parameters.Add("@ABT", SqlDbType.Int).Value = obj.AbpTotal;
-            cmd.Parameters.Add("@EXPL", SqlDbType.Int).Value = obj.ExpLevel;
+            cmd.Parameters.Add("@ABT", SqlDbType.BigInt).Value = obj.AbpTotal;
+            cmd.Parameters.Add("@EXPL", SqlDbType.SmallInt).Value = obj.ExpLevel;
             cmd.Parameters.Add("@EXPN", SqlDbType.Int).Value = obj.ExpNext;
-            cmd.Parameters.Add("@EXPT", SqlDbType.Int).Value = obj.ExpTotal;
+            cmd.Parameters.Add("@EXPT", SqlDbType.BigInt).Value = obj.ExpTotal;
             cmd.Parameters.Add("@Afflix", SqlDbType.VarChar).Value = obj.Afflictions;
-            cmd.Parameters.Add("@HairColor", SqlDbType.Int).Value = obj.HairColor;
-            cmd.Parameters.Add("@HairStyle", SqlDbType.Int).Value = obj.HairStyle;
-            cmd.Parameters.Add("@OldColor", SqlDbType.Int).Value = obj.OldColor;
-            cmd.Parameters.Add("@OldStyle", SqlDbType.Int).Value = obj.OldStyle;
+            cmd.Parameters.Add("@HairColor", SqlDbType.TinyInt).Value = obj.HairColor;
+            cmd.Parameters.Add("@HairStyle", SqlDbType.TinyInt).Value = obj.HairStyle;
+            cmd.Parameters.Add("@OldColor", SqlDbType.TinyInt).Value = obj.OldColor;
+            cmd.Parameters.Add("@OldStyle", SqlDbType.TinyInt).Value = obj.OldStyle;
             cmd.Parameters.Add("@Animal", SqlDbType.VarChar).Value = obj.AnimalForm;
             cmd.Parameters.Add("@Monster", SqlDbType.Int).Value = obj.MonsterForm;
             cmd.Parameters.Add("@Active", SqlDbType.VarChar).Value = obj.ActiveStatus;
@@ -171,49 +172,57 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
             cmd.Parameters.Add("@GoldPoints", SqlDbType.BigInt).Value = obj.GoldPoints;
             cmd.Parameters.Add("@StatPoints", SqlDbType.Int).Value = obj.StatPoints;
-            cmd.Parameters.Add("@GamePoints", SqlDbType.Int).Value = obj.GamePoints;
+            cmd.Parameters.Add("@GamePoints", SqlDbType.BigInt).Value = obj.GamePoints;
             cmd.Parameters.Add("@BankedGold", SqlDbType.BigInt).Value = obj.BankedGold;
-            cmd.Parameters.Add("@ArmorImg", SqlDbType.Int).Value = obj.ArmorImg;
-            cmd.Parameters.Add("@HelmetImg", SqlDbType.Int).Value = obj.HelmetImg;
-            cmd.Parameters.Add("@ShieldImg", SqlDbType.Int).Value = obj.ShieldImg;
-            cmd.Parameters.Add("@WeaponImg", SqlDbType.Int).Value = obj.WeaponImg;
-            cmd.Parameters.Add("@BootsImg", SqlDbType.Int).Value = obj.BootsImg;
-            cmd.Parameters.Add("@HeadAccessory1Img", SqlDbType.Int).Value = obj.HeadAccessory1Img;
-            cmd.Parameters.Add("@HeadAccessory2Img", SqlDbType.Int).Value = obj.HeadAccessory2Img;
-            cmd.Parameters.Add("@OverCoatImg", SqlDbType.Int).Value = obj.OverCoatImg;
-            cmd.Parameters.Add("@BootColor", SqlDbType.Int).Value = obj.BootColor;
-            cmd.Parameters.Add("@OverCoatColor", SqlDbType.Int).Value = obj.OverCoatColor;
-            cmd.Parameters.Add("@Pants", SqlDbType.Int).Value = obj.Pants;
-            cmd.Parameters.Add("@Aegis", SqlDbType.Int).Value = obj.Aegis;
-            cmd.Parameters.Add("@Bleeding", SqlDbType.Int).Value = obj.Bleeding;
+            cmd.Parameters.Add("@ArmorImg", SqlDbType.SmallInt).Value = obj.ArmorImg;
+            cmd.Parameters.Add("@HelmetImg", SqlDbType.SmallInt).Value = obj.HelmetImg;
+            cmd.Parameters.Add("@ShieldImg", SqlDbType.SmallInt).Value = obj.ShieldImg;
+            cmd.Parameters.Add("@WeaponImg", SqlDbType.SmallInt).Value = obj.WeaponImg;
+            cmd.Parameters.Add("@BootsImg", SqlDbType.SmallInt).Value = obj.BootsImg;
+            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.SmallInt).Value = obj.HeadAccessoryImg;
+            cmd.Parameters.Add("@Accessory1Img", SqlDbType.SmallInt).Value = obj.Accessory1Img;
+            cmd.Parameters.Add("@Accessory2Img", SqlDbType.SmallInt).Value = obj.Accessory2Img;
+            cmd.Parameters.Add("@Accessory3Img", SqlDbType.SmallInt).Value = obj.Accessory3Img;
+            cmd.Parameters.Add("@Accessory1Color", SqlDbType.SmallInt).Value = obj.Accessory1Color;
+            cmd.Parameters.Add("@Accessory2Color", SqlDbType.SmallInt).Value = obj.Accessory2Color;
+            cmd.Parameters.Add("@Accessory3Color", SqlDbType.SmallInt).Value = obj.Accessory3Color;
+            cmd.Parameters.Add("@BodyColor", SqlDbType.SmallInt).Value = obj.BodyColor;
+            cmd.Parameters.Add("@BodySprite", SqlDbType.SmallInt).Value = obj.BodySprite;
+            cmd.Parameters.Add("@FaceSprite", SqlDbType.SmallInt).Value = obj.FaceSprite;
+            cmd.Parameters.Add("@OverCoatImg", SqlDbType.SmallInt).Value = obj.OverCoatImg;
+            cmd.Parameters.Add("@BootColor", SqlDbType.SmallInt).Value = obj.BootColor;
+            cmd.Parameters.Add("@OverCoatColor", SqlDbType.SmallInt).Value = obj.OverCoatColor;
+            cmd.Parameters.Add("@Pants", SqlDbType.SmallInt).Value = obj.Pants;
+            cmd.Parameters.Add("@Aegis", SqlDbType.SmallInt).Value = obj.Aegis;
+            cmd.Parameters.Add("@Bleeding", SqlDbType.SmallInt).Value = obj.Bleeding;
             cmd.Parameters.Add("@Spikes", SqlDbType.Int).Value = obj.Spikes;
-            cmd.Parameters.Add("@Rending", SqlDbType.Int).Value = obj.Rending;
-            cmd.Parameters.Add("@Reaping", SqlDbType.Int).Value = obj.Reaping;
-            cmd.Parameters.Add("@Vampirism", SqlDbType.Int).Value = obj.Vampirism;
-            cmd.Parameters.Add("@Haste", SqlDbType.Int).Value = obj.Haste;
-            cmd.Parameters.Add("@Gust", SqlDbType.Int).Value = obj.Gust;
-            cmd.Parameters.Add("@Quake", SqlDbType.Int).Value = obj.Quake;
-            cmd.Parameters.Add("@Rain", SqlDbType.Int).Value = obj.Rain;
-            cmd.Parameters.Add("@Flame", SqlDbType.Int).Value = obj.Flame;
-            cmd.Parameters.Add("@Dusk", SqlDbType.Int).Value = obj.Dusk;
-            cmd.Parameters.Add("@Dawn", SqlDbType.Int).Value = obj.Dawn;
-
+            cmd.Parameters.Add("@Rending", SqlDbType.SmallInt).Value = obj.Rending;
+            cmd.Parameters.Add("@Reaping", SqlDbType.SmallInt).Value = obj.Reaping;
+            cmd.Parameters.Add("@Vampirism", SqlDbType.SmallInt).Value = obj.Vampirism;
+            cmd.Parameters.Add("@Haste", SqlDbType.SmallInt).Value = obj.Haste;
+            cmd.Parameters.Add("@Gust", SqlDbType.SmallInt).Value = obj.Gust;
+            cmd.Parameters.Add("@Quake", SqlDbType.SmallInt).Value = obj.Quake;
+            cmd.Parameters.Add("@Rain", SqlDbType.SmallInt).Value = obj.Rain;
+            cmd.Parameters.Add("@Flame", SqlDbType.SmallInt).Value = obj.Flame;
+            cmd.Parameters.Add("@Dusk", SqlDbType.SmallInt).Value = obj.Dusk;
+            cmd.Parameters.Add("@Dawn", SqlDbType.SmallInt).Value = obj.Dawn;
+            
             #endregion
 
             ExecuteAndCloseConnection(cmd, connection);
 
             if (skills == false)
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with skills save. (Code: Morning Star)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with skills save. (Code: Morning Star)");
             if (spells == false)
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with spells save. (Code: New Dawn)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with spells save. (Code: New Dawn)");
             if (inventory == false)
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with inventory save. (Code: Dying Light)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with inventory save. (Code: Dying Light)");
         }
         catch (SqlException e)
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Quick)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Quick)");
                 Crashes.TrackError(e);
                 return;
             }
@@ -323,7 +332,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Long)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Long)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -368,7 +377,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skills did not save. Contact GM (Code: Slash)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skills did not save. Contact GM (Code: Slash)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -409,7 +418,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your spells did not save. Contact GM (Code: Blast)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your spells did not save. Contact GM (Code: Blast)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -473,7 +482,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
                 Crashes.TrackError(e);
                 return false;
             }
@@ -603,7 +612,7 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public async Task<bool> CheckIfInventoryItemExists(int itemSerial, int playerSerial)
+    public async Task<bool> CheckIfInventoryItemExists(uint itemSerial, uint playerSerial)
     {
         try
         {
@@ -641,7 +650,7 @@ public record AislingStorage : Sql, IAislingStorage
         return false;
     }
 
-    public async Task<bool> CheckIfInventoryItemExistsElsewhere(int itemSerial)
+    public async Task<bool> CheckIfInventoryItemExistsElsewhere(uint itemSerial)
     {
         try
         {
@@ -793,7 +802,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue creating player. Error: Phoenix");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue creating player. Error: Phoenix");
                 Crashes.TrackError(e);
                 return;
             }

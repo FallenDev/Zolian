@@ -12,10 +12,10 @@ public class MilethInnRoom : AreaScript
     public MilethInnRoom(Area area) : base(area) => Area = area;
 
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(GameClient client) { }
-    public override void OnMapExit(GameClient client) { }
+    public override void OnMapEnter(WorldClient client) { }
+    public override void OnMapExit(WorldClient client) { }
 
-    public override void OnMapClick(GameClient client, int x, int y)
+    public override void OnMapClick(WorldClient client, int x, int y)
     {
         if ((x != 1 || y != 2) && (x != 2 || y != 2) && (x != 1 || y != 3) && (x != 2 || y != 3)) return;
         client.Aisling.CurrentHp = client.Aisling.MaximumHp;
@@ -24,7 +24,7 @@ public class MilethInnRoom : AreaScript
         client.SendMessage(0x02, "You feel well rested.");
     }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

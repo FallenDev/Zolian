@@ -6,9 +6,9 @@ using SunCalcNet;
 
 namespace Darkages.Network.Components;
 
-public class MoonPhaseComponent : GameServerComponent
+public class MoonPhaseComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromHours(2.0f));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromHours(2.0f));
     private double _dayStored;
 
     public MoonPhaseComponent(WorldServer server) : base(server)

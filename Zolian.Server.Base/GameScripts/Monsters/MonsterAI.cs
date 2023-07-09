@@ -59,7 +59,7 @@ public class MonsterBaseIntelligence : MonsterScript
         }
     }
 
-    public override void OnClick(GameClient client)
+    public override void OnClick(WorldClient client)
     {
         var colorA = "";
         var colorB = "";
@@ -106,7 +106,7 @@ public class MonsterBaseIntelligence : MonsterScript
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
-    public override void OnDeath(GameClient client = null)
+    public override void OnDeath(WorldClient client = null)
     {
         Monster.Remove();
 
@@ -209,15 +209,15 @@ public class MonsterBaseIntelligence : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(GameClient client) { }
+    public override void OnApproach(WorldClient client) { }
 
-    public override void OnLeave(GameClient client)
+    public override void OnLeave(WorldClient client)
     {
         Monster.AggroList.Remove(client.Aisling.Serial);
         if (Monster.Target == client.Aisling) ClearTarget();
     }
 
-    public override void OnDamaged(GameClient client, long dmg, Sprite source)
+    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
         try
         {
@@ -235,7 +235,7 @@ public class MonsterBaseIntelligence : MonsterScript
         Monster.Aggressive = true;
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
         if (client == null) return;
@@ -243,7 +243,7 @@ public class MonsterBaseIntelligence : MonsterScript
         Monster.MonsterBank.Add(item);
     }
 
-    private string LevelColor(IGameClient client)
+    private string LevelColor(IWorldClient client)
     {
         if (Monster.Template.Level >= client.Aisling.Level + 30)
             return "{=n???{=s";
@@ -597,7 +597,7 @@ public class MonsterShadowSight : MonsterScript
         }
     }
 
-    public override void OnClick(GameClient client)
+    public override void OnClick(WorldClient client)
     {
         var colorA = "";
         var colorB = "";
@@ -644,7 +644,7 @@ public class MonsterShadowSight : MonsterScript
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
-    public override void OnDeath(GameClient client = null)
+    public override void OnDeath(WorldClient client = null)
     {
         Monster.Remove();
 
@@ -747,15 +747,15 @@ public class MonsterShadowSight : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(GameClient client) { }
+    public override void OnApproach(WorldClient client) { }
 
-    public override void OnLeave(GameClient client)
+    public override void OnLeave(WorldClient client)
     {
         Monster.AggroList.Remove(client.Aisling.Serial);
         if (Monster.Target == client.Aisling) ClearTarget();
     }
 
-    public override void OnDamaged(GameClient client, long dmg, Sprite source)
+    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
         try
         {
@@ -773,7 +773,7 @@ public class MonsterShadowSight : MonsterScript
         Monster.Aggressive = true;
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
         if (client == null) return;
@@ -781,7 +781,7 @@ public class MonsterShadowSight : MonsterScript
         Monster.MonsterBank.Add(item);
     }
 
-    private string LevelColor(IGameClient client)
+    private string LevelColor(IWorldClient client)
     {
         if (Monster.Template.Level >= client.Aisling.Level + 30)
             return "{=n???{=s";

@@ -7,9 +7,9 @@ using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
 
-public class PlayerRegenerationComponent : GameServerComponent
+public class PlayerRegenerationComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(1));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(1));
 
     public PlayerRegenerationComponent(WorldServer server) : base(server) { }
 
@@ -77,7 +77,7 @@ public class PlayerRegenerationComponent : GameServerComponent
     }
 
 
-    private static void RegenHpCalculator(IGameClient client, double seed, double cap)
+    private static void RegenHpCalculator(WorldClient client, double seed, double cap)
     {
         var currentHp = client.Aisling.CurrentHp;
 
@@ -96,7 +96,7 @@ public class PlayerRegenerationComponent : GameServerComponent
         }
     }
 
-    private static void RegenMpCalculator(IGameClient client, double seed, double cap)
+    private static void RegenMpCalculator(WorldClient client, double seed, double cap)
     {
         var currentMp = client.Aisling.CurrentMp;
 
@@ -116,7 +116,7 @@ public class PlayerRegenerationComponent : GameServerComponent
     }
 
 
-    private static double HpRegenSoftCap(IGameClient client)
+    private static double HpRegenSoftCap(WorldClient client)
     {
         var conMod = Math.Abs(client.Aisling.Con / 3.00);
         var hpRegenSeed = client.Aisling.Regen switch
@@ -148,7 +148,7 @@ public class PlayerRegenerationComponent : GameServerComponent
         return Math.Abs(healthMod + hpRegenSeed);
     }
 
-    private static double MpRegenSoftCap(IGameClient client)
+    private static double MpRegenSoftCap(WorldClient client)
     {
         var wisMod = Math.Abs(client.Aisling.Wis / 3.00);
         var mpRegenSeed = client.Aisling.Regen switch

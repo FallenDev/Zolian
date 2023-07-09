@@ -11,13 +11,13 @@ using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
 
-public class MonolithComponent : GameServerComponent
+public class MonolithComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer;
+    private readonly WorldServerTimer _timer;
 
     public MonolithComponent(WorldServer server) : base(server)
     {
-        _timer = new GameServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalSpawnTimer));
+        _timer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalSpawnTimer));
     }
 
     private void CreateFromTemplate(MonsterTemplate template, Area map)

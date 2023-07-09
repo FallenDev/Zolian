@@ -11,15 +11,15 @@ namespace Darkages.GameScripts.Mundanes.Tutorial;
 [Script("Berserker Class")]
 public class BerserkerClass : MundaneScript
 {
-    public BerserkerClass(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public BerserkerClass(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -40,7 +40,7 @@ public class BerserkerClass : MundaneScript
         }
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

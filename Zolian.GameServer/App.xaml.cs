@@ -27,7 +27,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
 
-namespace Zolian.GameServer;
+namespace Zolian.WorldServer;
 
 public partial class App
 {

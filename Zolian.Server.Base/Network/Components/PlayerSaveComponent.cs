@@ -4,9 +4,9 @@ using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class PlayerSaveComponent : GameServerComponent
+public class PlayerSaveComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(1));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(1));
 
     public PlayerSaveComponent(WorldServer server) : base(server) { }
 

@@ -14,13 +14,13 @@ namespace Darkages.GameScripts.Areas;
 public class Hell : AreaScript
 {
     private Sprite _aisling;
-    private GameServerTimer AnimTimer { get; }
+    private WorldServerTimer AnimTimer { get; }
     private bool _animate;
 
     public Hell(Area area) : base(area)
     {
         Area = area;
-        AnimTimer = new GameServerTimer(TimeSpan.FromMilliseconds(1 + 2000));
+        AnimTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(1 + 2000));
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -33,13 +33,13 @@ public class Hell : AreaScript
             HandleMapAnimations(elapsedTime);
     }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
         _animate = true;
     }
 
-    public override void OnMapExit(GameClient client)
+    public override void OnMapExit(WorldClient client)
     {
         _aisling = null;
         _animate = false;

@@ -15,25 +15,25 @@ public interface IEphermeral
 
 public abstract class Summon : ObjectManager, IEphermeral
 {
-    private readonly GameClient _client;
+    private readonly WorldClient _client;
 
-    private GameServerTimer ObjectsUpdateTimer { get; set; }
-    private GameServerTimer ObjectsRemovedTimer { get; set; }
+    private WorldServerTimer ObjectsUpdateTimer { get; set; }
+    private WorldServerTimer ObjectsRemovedTimer { get; set; }
 
     public List<(string, Monster)> Spawns = new();
 
     private KeyValuePair<string, MonsterTemplate> Template { get; set; }
     private string Script { get; set; }
 
-    protected Summon(GameClient client)
+    protected Summon(WorldClient client)
     {
         _client = client;
     }
 
     public void Spawn(string creatureName, string script, double lifespan = 120, double updateRate = 650, int count = 1)
     {
-        ObjectsRemovedTimer = new GameServerTimer(TimeSpan.FromSeconds(lifespan));
-        ObjectsUpdateTimer = new GameServerTimer(TimeSpan.FromMilliseconds(updateRate));
+        ObjectsRemovedTimer = new WorldServerTimer(TimeSpan.FromSeconds(lifespan));
+        ObjectsUpdateTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(updateRate));
 
         Template = ServerSetup.Instance.GlobalMonsterTemplateCache.FirstOrDefault(i => i.Value.BaseName == creatureName);
         Script = script;

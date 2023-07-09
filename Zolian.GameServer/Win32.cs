@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Zolian.GameServer;
+namespace Zolian.WorldServer;
 
 internal static class Win32
 {

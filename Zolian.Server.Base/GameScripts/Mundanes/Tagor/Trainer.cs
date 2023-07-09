@@ -18,7 +18,7 @@ public class Trainer : MundaneScript
     private List<Spell> _spellList;
     private readonly List<Vector2> _dojoSpots;
 
-    public Trainer(GameServer server, Mundane mundane) : base(server, mundane)
+    public Trainer(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _dojoSpots = new List<Vector2>
         {
@@ -41,7 +41,7 @@ public class Trainer : MundaneScript
         };
     }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         _skillList = ObtainSkillList(client);
@@ -49,7 +49,7 @@ public class Trainer : MundaneScript
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -71,7 +71,7 @@ public class Trainer : MundaneScript
         client.SendOptionsDialog(Mundane, "Here to train? Let's get started.", options.ToArray());
     }
 
-    public override async void OnResponse(GameClient client, ushort responseID, string args)
+    public override async void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -172,7 +172,7 @@ public class Trainer : MundaneScript
                                     skill.CurrentCooldown = skill.Template.Cooldown;
                                 }
 
-                                GameServer.Assail(client);
+                                WorldServer.Assail(client);
                             });
                         }
                     }
@@ -220,13 +220,13 @@ public class Trainer : MundaneScript
         }
     }
 
-    private static List<Skill> ObtainSkillList(IGameClient client)
+    private static List<Skill> ObtainSkillList(WorldClient client)
     {
         return client.Aisling.SkillBook.GetSkills(s => s != null && s.Slot != 0).ToList();
     }
 
-    private static List<Spell> ObtainSpellList(IGameClient client)
+    private static List<Spell> ObtainSpellList(WorldClient client)
     {
-        return client.Aisling.SpellBook.GetSpells(s => s != null && s.Slot != 0).ToList();
+        return client.Aisling.SpellBook.TryGetSpells(s => s != null && s.Slot != 0).ToList();
     }
 }

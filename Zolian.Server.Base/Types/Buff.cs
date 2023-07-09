@@ -22,7 +22,7 @@ public class Buff : IBuff
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
     public int TimeLeft { get; set; }
-    public GameServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
+    public WorldServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
     public Buff BuffSpell { get; set; }
 
     public virtual void OnApplied(Sprite affected, Buff buff) { }
@@ -187,7 +187,7 @@ public class Buff : IBuff
         }
     }
 
-    public async Task<bool> CheckOnBuffAsync(IGameClient client, string name)
+    public async Task<bool> CheckOnBuffAsync(IWorldClient client, string name)
     {
         try
         {

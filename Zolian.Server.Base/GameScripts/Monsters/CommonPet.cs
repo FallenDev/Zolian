@@ -31,7 +31,7 @@ public class CommonPet : MonsterScript
                 LoadSkillScript(skillScriptStr);
     }
 
-    public override void OnDeath(GameClient client)
+    public override void OnDeath(WorldClient client)
     {
         client.Aisling.SummonObjects?.DeSpawn();
     }
@@ -229,5 +229,5 @@ public class CommonPet : MonsterScript
         }
     }
 
-    public override void OnClick(GameClient client) { }
+    public override void OnClick(WorldClient client) { }
 }

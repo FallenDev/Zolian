@@ -11,30 +11,34 @@ using Chaos.Common.Synchronization;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
-using Chaos.Networking.Entities;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
+
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
+using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Systems;
+using Darkages.Templates;
 using Darkages.Types;
-
+using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using Microsoft.SqlServer.Server;
 
 using ServiceStack;
 using ServiceStack.Html;
+
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
+using Redirect = Chaos.Networking.Entities.Redirect;
 using Stat = Chaos.Common.Definitions.Stat;
 
 namespace Darkages.Network.Server;
@@ -42,7 +46,7 @@ namespace Darkages.Network.Server;
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> ClientProvider;
-    private ConcurrentDictionary<Type, GameServerComponent> _serverComponents;
+    private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
@@ -82,7 +86,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         lock (ServerSetup.SyncLock)
         {
-            _serverComponents = new ConcurrentDictionary<Type, GameServerComponent>
+            _serverComponents = new ConcurrentDictionary<Type, WorldServerComponent>
             {
                 [typeof(InterestAndCommunityComponent)] = new InterestAndCommunityComponent(this),
                 [typeof(MessageClearComponent)] = new MessageClearComponent(this),
@@ -1239,7 +1243,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Commander.ParseChatMessage(localClient.Aisling.Client, message);
                 return true;
             }
-            
+
             if (ParseCommand()) return;
 
             switch (publicMessageType)
@@ -1262,7 +1266,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
-            
+
             foreach (var player in playersToShowList)
             {
                 localClient.SendPublicMessage(player.Serial, publicMessageType, response);
@@ -1289,70 +1293,77 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnUseSpell(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
             var (sourceSlot, argsData) = localArgs;
-
-            if (localClient.Aisling.SpellBook.TryGetObject(sourceSlot, out var spell))
+            var spell = client.Aisling.SpellBook.TryGetSpells(i => i != null && i.Slot == sourceSlot).FirstOrDefault();
+            if (spell == null)
             {
-                var source = (Creature)localClient.Aisling;
-                var prompt = default(string?);
-                uint? targetId = null;
+                client.SendCancelCasting();
+                return default;
+            }
 
-                //if we expect the spell we're casting to be more than 0 lines
-                //it should have started a chant... so we check the chant timer for validation
-                if ((spell.CastLines > 0) && !localClient.Aisling.ChantTimer.Validate(spell.CastLines))
-                    return default;
-
-                //it's impossible to know what kind of spell is being used during deserialization
-                //there is no spell type specified in the packet, so we arent sure if the packet will
-                //contains a prompt or target info
-                //so we have to do that deserialization here, where we know what spell type we're dealing with
-                //we also need to build the activation context for the spell
-                switch (spell.Template.SpellType)
+            if (client.Aisling.CantCast)
+            {
+                if (spell.Template.ScriptName is not ("Ao Suain" or "Ao Sith"))
                 {
-                    case SpellType.None:
-                        return default;
-                    case SpellType.Prompt:
-                        prompt = PacketSerializer.Encoding.GetString(argsData);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "I am unable to cast that spell..");
+                    client.SendCancelCasting();
+                    return default;
+                }
+            }
 
-                        break;
-                    case SpellType.Targeted:
-                        var targetIdSegment = new ArraySegment<byte>(argsData, 0, 4);
-                        var targetPointSegment = new ArraySegment<byte>(argsData, 4, 4);
+            var info = new CastInfo
+            {
+                Slot = sourceSlot,
+                Position = null,
+                Target = 0
+            };
 
-                        targetId = (uint)((targetIdSegment[0] << 24)
+            var source = localClient.Aisling;
+
+            //it's impossible to know what kind of spell is being used during deserialization
+            //there is no spell type specified in the packet, so we arent sure if the packet will
+            //contains a prompt or target info
+            //so we have to do that deserialization here, where we know what spell type we're dealing with
+            //we also need to build the activation context for the spell
+            switch (spell.Template.TargetType)
+            {
+                case SpellTemplate.SpellUseType.None:
+                    return default;
+                case SpellTemplate.SpellUseType.Prompt:
+                    info.Data = PacketSerializer.Encoding.GetString(argsData);
+                    break;
+                case SpellTemplate.SpellUseType.ChooseTarget:
+                    var targetIdSegment = new ArraySegment<byte>(argsData, 0, 4);
+                    var targetPointSegment = new ArraySegment<byte>(argsData, 4, 4);
+
+                    var targetId = (uint)((targetIdSegment[0] << 24)
                                           | (targetIdSegment[1] << 16)
                                           | (targetIdSegment[2] << 8)
                                           | targetIdSegment[3]);
 
-                        // ReSharper disable once UnusedVariable
-                        var targetPoint = new Point(
-                            (targetPointSegment[0] << 8) | targetPointSegment[1],
-                            (targetPointSegment[2] << 8) | targetPointSegment[3]);
-
-                        break;
-
-                    case SpellType.Prompt1Num:
-                    case SpellType.Prompt2Nums:
-                    case SpellType.Prompt3Nums:
-                    case SpellType.Prompt4Nums:
-                    case SpellType.NoTarget:
-                        targetId = source.Id;
-
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                localClient.Aisling.TryUseSpell(spell, targetId, prompt);
+                    var targetPoint = new Position(
+                        (targetPointSegment[0] << 8) | targetPointSegment[1],
+                        (targetPointSegment[2] << 8) | targetPointSegment[3]);
+                    info.Position = targetPoint;
+                    info.Target = (uint)targetId;
+                    break;
+                    case SpellTemplate.SpellUseType.OneDigit:
+                case SpellTemplate.SpellUseType.TwoDigit:
+                case SpellTemplate.SpellUseType.ThreeDigit:
+                case SpellTemplate.SpellUseType.FourDigit:
+                case SpellTemplate.SpellUseType.NoTarget:
+                    info.Target = source.Serial;
+                    break;
             }
 
-            localClient.Aisling.UserState &= ~UserState.IsChanting;
-
+            localClient.Aisling.CastSpell(spell, info);
             return default;
         }
 
@@ -1370,112 +1381,125 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
-                Logger.WithProperty(localArgs)
-                      .LogWarning("{@ClientIp} tried to redirect to the world with invalid details", client.RemoteIp.ToString());
-
+                ServerSetup.Logger($"{client.RemoteIp} tried to redirect to the world with invalid details.");
                 localClient.Disconnect();
-
                 return default;
             }
 
             //keep this case sensitive
             if (localArgs.Name != redirect.Name)
             {
-                Logger
-                    .WithProperty(redirect)
-                    .WithProperty(localArgs)
-                    .LogWarning(
-                        "{@ClientIp} tried to impersonate a redirect with redirect {@RedirectId}",
-                        localClient.RemoteIp.ToString(),
-                        redirect.Id);
-
+                ServerSetup.Logger($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
                 localClient.Disconnect();
-
                 return default;
             }
 
-            Logger.WithProperty(localClient)
-                  .WithProperty(redirect)
-                  .LogDebug("Received world redirect {@RedirectId}", redirect.Id);
-
-            var existingAisling = Aislings.FirstOrDefault(user => user.Name.EqualsI(redirect.Name));
+            ServerSetup.Logger($"Received successful redirect: {redirect.Id}");
+            var existingAisling = Aislings.FirstOrDefault(user => user.Username.EqualsI(redirect.Name));
 
             //double logon, disconnect both clients
-            if (existingAisling != null)
-            {
-                Logger.WithProperty(localClient)
-                      .WithProperty(existingAisling)
-                      .LogDebug("Duplicate login detected for aisling {@AislingName}, disconnecting both clients", existingAisling.Name);
-
-                existingAisling.Client.Disconnect();
-                localClient.Disconnect();
-
-                return default;
-            }
-
-            return LoadAislingAsync(localClient, redirect);
+            if (existingAisling == null) return LoadAislingAsync(localClient, redirect);
+            ServerSetup.Logger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
+            existingAisling.Client.Disconnect();
+            localClient.Disconnect();
+            return default;
         }
 
         return ExecuteHandler(client, args, InnerOnClientRedirected);
     }
 
-    //ToDo: Load Player
-    public async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
+    private async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
     {
         try
         {
             client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
-
-            var aisling = await AislingStore.LoadAsync(redirect.Name);
+            var exists = await StorageManager.AislingBucket.CheckPassword(redirect.Name);
+            var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
 
             client.Aisling = aisling;
-            aisling.Client = client;
+            client.Aisling.Serial = aisling.Serial;
+            client.Aisling.Pos = new Vector2(aisling.X, aisling.Y);
+            aisling.Client = client as WorldClient;
+            aisling.GameMaster = ServerSetup.Instance.Config.GameMasters?.Any(n =>
+                string.Equals(n, aisling.Username, StringComparison.OrdinalIgnoreCase)) ?? false;
 
-            await using var sync = await aisling.MapInstance.Sync.WaitAsync();
+            if (client.Aisling._Str <= 0 || client.Aisling._Int <= 0 || client.Aisling._Wis <= 0 ||
+                client.Aisling._Con <= 0 || client.Aisling._Dex <= 0)
+            {
+                ServerSetup.Logger($"Player {client.Aisling.Username} has corrupt stats.");
+                client.Disconnect();
+                return;
+            }
+
+            CheckOnLoad(client);
+            if (client.Aisling.Map != null) client.Aisling.CurrentMapId = client.Aisling.Map.ID;
+            client.LoggedIn(false);
+            client.Aisling.EquipmentManager.Client = client as WorldClient;
+            client.Aisling.CurrentWeight = 0;
+            client.Aisling.ActiveStatus = ActivityStatus.Awake;
+
+            if (aisling.GameMaster)
+            {
+                const string ip = "192.168.50.1";
+                var ipLocal = IPAddress.Parse(ip);
+
+                if (aisling.Client.RemoteIp.Equals(ServerSetup.Instance.IpAddress) ||
+                    aisling.Client.RemoteIp.Equals(ipLocal))
+                {
+                    client.SendTargetedAnimation(Scope.NearbyAislings, 0, 100, 391, aisling.Serial, 0,
+                        new Position(aisling.Pos));
+                }
+                else
+                {
+                    ServerSetup.Logger($"Failed to login GM from {client.RemoteIp}.");
+                    Analytics.TrackEvent($"Failed to login GM from {client.RemoteIp}.");
+                    client.Disconnect();
+                    return;
+                }
+            }
 
             try
             {
-                aisling.Guild?.Associate(aisling);
-                aisling.BeginObserving();
+                await client.Aisling.Client.Load();
+                client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
                 client.SendAttributes(StatUpdateType.Full);
-                client.SendLightLevel(LightLevel.Lightest);
-                client.SendUserId();
-                aisling.MapInstance.AddAislingDirect(aisling, aisling);
-                client.SendProfileRequest();
-
-                foreach (var channel in aisling.ChannelSettings)
-                {
-                    ChannelService.JoinChannel(aisling, channel.ChannelName, true);
-
-                    if (channel.MessageColor.HasValue)
-                        ChannelService.SetChannelColor(aisling, channel.ChannelName, channel.MessageColor.Value);
-                }
-
-                Logger.LogDebug("World redirect finalized for {@ClientIp}", client.RemoteIp.ToString());
-
-                foreach (var reactor in aisling.MapInstance.GetDistinctReactorsAtPoint(aisling).ToList())
-                    reactor.OnWalkedOn(aisling);
+                client.LoggedIn(true);
+                if (!client.Aisling.Dead) return;
+                client.Aisling.Flags = AislingFlags.Ghost;
+                client.Aisling.WarpToHell();
             }
             catch (Exception e)
             {
-                Logger.WithProperty(aisling)
-                      .LogCritical(e, "Failed to add aisling {@AislingName} to the world", aisling.Name);
-
+                ServerSetup.Logger($"Failed to add player {redirect.Name} to world server.");
+                Crashes.TrackError(e);
                 client.Disconnect();
             }
         }
         catch (Exception e)
         {
-            Logger.WithProperty(client)
-                  .WithProperty(redirect)
-                  .LogCritical(
-                      e,
-                      "Client with ip {ClientIp} failed to load aisling {@AislingName}",
-                      client.RemoteIp,
-                      redirect.Name);
-
+            ServerSetup.Logger($"Client with ip {client.RemoteIp} failed to load player {redirect.Name}.");
+            Crashes.TrackError(e);
             client.Disconnect();
         }
+        finally
+        {
+            var time = DateTime.UtcNow;
+            ServerSetup.Logger($"{redirect.Name} logged in at: {time}");
+            client.LastPing = time;
+        }
+    }
+
+    private static void CheckOnLoad(IWorldClient client)
+    {
+        var aisling = client.Aisling;
+
+        aisling.SkillBook ??= new SkillBook();
+        aisling.SpellBook ??= new SpellBook();
+        aisling.Inventory ??= new Inventory();
+        aisling.BankManager ??= new Bank();
+        aisling.EquipmentManager ??= new EquipmentManager(aisling.Client);
+        aisling.QuestManager ??= new Quests();
     }
 
     /// <summary>

@@ -15,15 +15,15 @@ public class InnerHost : MundaneScript
 {
     private long _repairSum;
 
-    public InnerHost(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public InnerHost(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -44,7 +44,7 @@ public class InnerHost : MundaneScript
         client.SendOptionsDialog(Mundane, "How can I help you? ", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

@@ -15,15 +15,15 @@ public class ItemShop : MundaneScript
 {
     private long _repairSum;
 
-    public ItemShop(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public ItemShop(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -37,7 +37,7 @@ public class ItemShop : MundaneScript
         client.SendOptionsDialog(Mundane, "Take a look, we're always in stock.", opts.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -317,7 +317,7 @@ public class ItemShop : MundaneScript
         }
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (client == null) return;
         if (item == null) return;

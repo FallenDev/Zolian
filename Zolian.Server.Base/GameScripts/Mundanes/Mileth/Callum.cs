@@ -16,15 +16,15 @@ public class Callum : MundaneScript
     private Item _itemDetail;
     private uint _cost;
 
-    public Callum(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Callum(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -37,7 +37,7 @@ public class Callum : MundaneScript
         client.SendOptionsDialog(Mundane, "*cleans glass* Need something?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -221,7 +221,7 @@ public class Callum : MundaneScript
         }
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
         if (item.Template.CanStack || !item.Template.Enchantable) return;

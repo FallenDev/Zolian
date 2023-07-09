@@ -46,10 +46,10 @@ namespace Darkages.Network.Client
 {
     public class WorldClient : SocketClientBase, IWorldClient
     {
-        private readonly IWorldServer<WorldClient> _server;
+        public readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
-        public readonly GameServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
-        private readonly GameServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
+        public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
+        private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
         public Aisling Aisling { get; set; }
         public bool MapUpdating { get; set; }
@@ -162,7 +162,7 @@ namespace Darkages.Network.Client
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
             [NotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
         {
-            _server = server;
+            Server = server;
         }
 
         public void Update(TimeSpan elapsedTime)
@@ -644,7 +644,7 @@ namespace Darkages.Network.Client
                     buff.OnApplied(Aisling, buff);
                     // Set Timer & Time left
                     buff.TimeLeft = buffDb.TimeLeft;
-                    buff.Timer = new GameServerTimer(TimeSpan.FromSeconds(1))
+                    buff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
                     {
                         Tick = buff.Length - buff.TimeLeft
                     };
@@ -703,7 +703,7 @@ namespace Darkages.Network.Client
                     debuff.OnApplied(Aisling, debuff);
                     // Set Timer & Time left
                     debuff.TimeLeft = deBuffDb.TimeLeft;
-                    debuff.Timer = new GameServerTimer(TimeSpan.FromSeconds(1))
+                    debuff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
                     {
                         Tick = debuff.Length - debuff.TimeLeft
                     };
@@ -980,7 +980,7 @@ namespace Darkages.Network.Client
             if (isEncrypted)
                 Crypto.Decrypt(ref packet);
 
-            return _server.HandlePacketAsync(this, in packet);
+            return Server.HandlePacketAsync(this, in packet);
         }
 
         /// <summary>
@@ -2170,7 +2170,7 @@ namespace Darkages.Network.Client
 
         #endregion
 
-        #region GameClient Logic
+        #region WorldClient Logic
 
         public WorldClient AislingToGhostForm()
         {
@@ -2292,7 +2292,7 @@ namespace Darkages.Network.Client
                 CastStack.TryPeek(out var stack);
                 if (stack == null) continue;
 
-                var spell = Aisling.SpellBook.GetSpells(i => i.Slot == stack.Slot).First();
+                var spell = Aisling.SpellBook.TryGetSpells(i => i.Slot == stack.Slot).First();
                 if (spell == null) continue;
 
                 if (stack.Target == 0 && spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)

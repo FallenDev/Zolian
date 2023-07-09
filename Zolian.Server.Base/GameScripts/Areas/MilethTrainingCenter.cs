@@ -13,10 +13,10 @@ public class MilethTrainingCenter : AreaScript
     public MilethTrainingCenter(Area area) : base(area) => Area = area;
 
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(GameClient client) { }
-    public override void OnMapExit(GameClient client) { }
+    public override void OnMapEnter(WorldClient client) { }
+    public override void OnMapExit(WorldClient client) { }
 
-    public override void OnMapClick(GameClient client, int x, int y)
+    public override void OnMapClick(WorldClient client, int x, int y)
     {
         if ((x != 4 || y != 0) && (x != 5 || y != 1)) return;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
@@ -25,7 +25,7 @@ public class MilethTrainingCenter : AreaScript
         client.SendMessage(0x02, "Ahh Refreshing!");
     }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

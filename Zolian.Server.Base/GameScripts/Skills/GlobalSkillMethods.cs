@@ -1,8 +1,9 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Chaos.Networking.Entities.Server;
+
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
-using Darkages.Network.Formats.Models.ServerFormats;
-using Darkages.Network.Server;
+using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -10,15 +11,15 @@ namespace Darkages.GameScripts.Skills;
 
 public class GlobalSkillMethods : IGlobalSkillMethods
 {
-    private static bool Attempt(IGameClient client, Skill skill)
+    private static bool Attempt(WorldClient client, Skill skill)
     {
-        if (!client.Aisling.CanAttack) return false;
+        if (client.Aisling.CantAttack) return false;
 
         var success = Generator.RandNumGen100();
 
         if (skill.Level == 100)
         {
-            return success >= 5;
+            return success >= 2;
         }
 
         return success switch
@@ -43,62 +44,52 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         return diffX + diffY;
     }
 
-    public void ApplyPhysicalDebuff(IGameClient client, Debuff debuff, Sprite target, Skill skill)
+    public void ApplyPhysicalDebuff(WorldClient client, Debuff debuff, Sprite target, Skill skill)
     {
-        ServerFormat1A action = null;
-
-        if (target is Monster)
+        if (client != null)
         {
-            action = new ServerFormat1A
+            var dmg = 0;
+
+            if (!debuff.Name.Contains("Beag Suain"))
             {
-                Serial = client.Aisling.Serial,
-                Number = (byte)(client.Aisling.Path == Class.Defender
-                    ? client.Aisling.UsingTwoHanded ? 0x8B : 0x01
-                    : 0x01),
-                Speed = 20
-            };
-        }
+                var knockOutDmg = Generator.RandNumGen100();
 
-        var dmg = 0;
+                if (knockOutDmg >= 98)
+                {
+                    dmg += knockOutDmg * client.Aisling.Str * 3;
+                }
+                else
+                {
+                    dmg += knockOutDmg * client.Aisling.Str * 1;
+                }
 
-        if (!debuff.Name.Contains("Beag Suain"))
-        {
-            var knockOutDmg = Generator.RandNumGen100();
-
-            if (knockOutDmg >= 98)
-            {
-                dmg += knockOutDmg * client.Aisling.Str * 3;
+                target.ApplyDamage(client.Aisling, dmg, skill);
             }
-            else
-            {
-                dmg += knockOutDmg * client.Aisling.Str * 1;
-            }
-
-            target.ApplyDamage(client.Aisling, dmg, skill);
         }
 
         debuff.OnApplied(target, debuff);
 
-        if (target is Monster)
-        {
-            client.Aisling.Show(Scope.NearbyAislings, action);
-        }
+        if (target is not Monster) return;
+        var animationPick = client.Aisling.Path == Class.Defender
+            ? client.Aisling.UsingTwoHanded
+                ? BodyAnimation.Swipe
+                : BodyAnimation.TwoHandAtk
+            : BodyAnimation.Assail;
+
+        client.SendBodyAnimation(client.Aisling.Serial, animationPick, 20);
     }
 
     public void ApplyPhysicalBuff(Sprite target, Buff buff)
     {
         if (target is Aisling aisling)
         {
-            var action = new ServerFormat1A
-            {
-                Serial = aisling.Client.Aisling.Serial,
-                Number = (byte)(aisling.Client.Aisling.Path == Class.Defender
-                    ? aisling.Client.Aisling.UsingTwoHanded ? 0x8B : 0x06
-                    : 0x06),
-                Speed = 20
-            };
+            var animationPick = aisling.Path == Class.Defender
+                ? aisling.UsingTwoHanded
+                    ? BodyAnimation.Swipe
+                    : BodyAnimation.TwoHandAtk
+                : BodyAnimation.Assail;
 
-            aisling.Client.Aisling.Show(Scope.NearbyAislings, action);
+            aisling.Client.SendBodyAnimation(aisling.Serial, animationPick, 20);
         }
 
         buff.OnApplied(target, buff);
@@ -120,29 +111,13 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         if (sprite is not Aisling damageDealingSprite) return;
         var warpPos = new Position(savedXStep, savedYStep);
         damageDealingSprite.Client.WarpTo(warpPos, true);
-        GameServer.CheckWarpTransitions(damageDealingSprite.Client);
+        damageDealingSprite.Client.CheckWarpTransitions(damageDealingSprite.Client);
         damageDealingSprite.UpdateAddAndRemove();
         damageDealingSprite.Client.UpdateDisplay();
         damageDealingSprite.Client.LastMovement = DateTime.UtcNow;
     }
 
-    public void Train(IGameClient client, Skill skill)
-    {
-        var trainPoint = Generator.RandNumGen100();
-
-        switch (trainPoint)
-        {
-            case <= 5:
-                break;
-            case <= 98 and >= 6:
-                client.TrainSkill(skill);
-                break;
-            case <= 100 and >= 99:
-                client.TrainSkill(skill);
-                client.TrainSkill(skill);
-                break;
-        };
-    }
+    public void Train(WorldClient client, Skill skill) => client.TrainSkill(skill);
 
     public bool OnUse(Aisling aisling, Skill skill)
     {
@@ -159,7 +134,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         return Attempt(client, skill);
     }
 
-    public void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, ServerFormat1A action)
+    public void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, BodyAnimationArgs action)
     {
         var target = enemy;
 
@@ -174,8 +149,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
-        attacker.Show(Scope.NearbyAislings, action);
+        attacker.Client.SendTargetedAnimation(Scope.NearbyAislings, skill.Template.TargetAnimation, 100, 0, attacker.Serial, enemy.Serial, target.Position);
+        attacker.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
         attacker.Animate(387);
@@ -196,13 +171,13 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.Show(Scope.NearbyAislings, new ServerFormat29(skill.Template.TargetAnimation, target.Pos));
+        attacker.Client.SendTargetedAnimation(Scope.NearbyAislings, skill.Template.TargetAnimation, 100, 0, attacker.Serial, enemy.Serial, target.Position);
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
         attacker.Animate(387);
     }
 
-    public int Thrown(IGameClient client, Skill skill, bool crit)
+    public int Thrown(WorldClient client, Skill skill, bool crit)
     {
         if (client.Aisling.EquipmentManager.Equipment[1].Item?.Template.Group is not ("Glaives" or "Shuriken" or "Daggers" or "Bows")) return 10015;
         return client.Aisling.EquipmentManager.Equipment[1].Item.Template.Group switch
@@ -217,10 +192,24 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         // 10006,7,8 = ice arrows, 10003,4,5 = fire arrows
     }
 
-    public void FailedAttempt(Sprite sprite, Skill skill, ServerFormat1A action)
+    public void FailedAttempt(Sprite sprite, Skill skill, BodyAnimationArgs action)
     {
-        sprite.Show(Scope.NearbyAislings, new ServerFormat19(skill.Template.Sound));
-        sprite.Show(Scope.NearbyAislings, action);
+        BodyAnimation anim;
+        switch (sprite)
+        {
+            case Aisling aisling:
+                anim = aisling.Path == Class.Defender
+                    ? aisling.UsingTwoHanded
+                        ? BodyAnimation.Swipe
+                        : BodyAnimation.TwoHandAtk
+                    : BodyAnimation.Assail;
+                aisling.Client.SendBodyAnimation(aisling.Serial, anim, 20, skill.Template.Sound);
+                break;
+            case Monster monster:
+                anim = BodyAnimation.Assail;
+                monster.Client.SendBodyAnimation(monster.Serial, anim, 20, skill.Template.Sound);
+                break;
+        }
     }
 
     public (bool, int) OnCrit(int dmg)

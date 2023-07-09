@@ -7,8 +7,8 @@ namespace Darkages.Scripting;
 
 public abstract class GlobalScript : ObjectManager, IScriptBase
 {
-    private GameClient _client;
-    protected GlobalScript(GameClient client) => _client = client;
-    public GameServerTimer Timer { get; set; }
+    private WorldClient _client;
+    protected GlobalScript(WorldClient client) => _client = client;
+    public WorldServerTimer Timer { get; set; }
     public abstract void Update(TimeSpan elapsedTime);
 }

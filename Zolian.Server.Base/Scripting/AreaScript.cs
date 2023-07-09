@@ -9,7 +9,7 @@ namespace Darkages.Scripting;
 public abstract class AreaScript : IScriptBase
 {
     protected Area Area;
-    public GameServerTimer Timer { get; set; }
+    public WorldServerTimer Timer { get; set; }
 
     protected AreaScript(Area area) => Area = area;
     public abstract void Update(TimeSpan elapsedTime);

@@ -22,7 +22,7 @@ public class Debuff : IDebuff
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
     public int TimeLeft { get; set; }
-    public GameServerTimer Timer { get; set; } = new (TimeSpan.FromSeconds(1));
+    public WorldServerTimer Timer { get; set; } = new (TimeSpan.FromSeconds(1));
     public Debuff DebuffSpell { get; set; }
 
     public virtual void OnApplied(Sprite affected, Debuff debuff) { }
@@ -193,7 +193,7 @@ public class Debuff : IDebuff
         }
     }
 
-    public async Task<bool> CheckOnDebuffAsync(IGameClient client, string name)
+    public async Task<bool> CheckOnDebuffAsync(IWorldClient client, string name)
     {
         try
         {

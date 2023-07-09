@@ -6,7 +6,7 @@ using Darkages.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Zolian.GameServer;
+namespace Zolian.WorldServer;
 
 public interface IServer
 {

@@ -12,15 +12,15 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Camille's Greetings")]
 public class Camille : MundaneScript
 {
-    public Camille(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Camille(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -57,7 +57,7 @@ public class Camille : MundaneScript
         }
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

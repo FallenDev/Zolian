@@ -12,7 +12,7 @@ public interface IBuff
     int Length { get; set; }
     string Name { get; set; }
     int TimeLeft { get; set; }
-    GameServerTimer Timer { get; set; }
+    WorldServerTimer Timer { get; set; }
     Buff BuffSpell { get; set; }
 
     void OnApplied(Sprite affected, Buff buff);
@@ -23,5 +23,5 @@ public interface IBuff
     void InsertBuff(Aisling aisling, Buff buff);
     void UpdateBuff(Aisling aisling);
     void DeleteBuff(Aisling aisling, Buff buff);
-    Task<bool> CheckOnBuffAsync(IGameClient client, string name);
+    Task<bool> CheckOnBuffAsync(WorldClient client, string name);
 }

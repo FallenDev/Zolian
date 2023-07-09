@@ -4,14 +4,14 @@ using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class MessageClearComponent : GameServerComponent
+public class MessageClearComponent : WorldServerComponent
 {
     public MessageClearComponent(WorldServer server) : base(server)
     {
-        Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MessageClearInterval));
+        Timer = new WorldServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MessageClearInterval));
     }
 
-    private GameServerTimer Timer { get; set; }
+    private WorldServerTimer Timer { get; set; }
 
     protected internal override void Update(TimeSpan elapsedTime)
     {

@@ -10,15 +10,15 @@ namespace Darkages.GameScripts.Mundanes.Mehadi;
 [Script("Donkan")]
 public class Donkan : MundaneScript
 {
-    public Donkan(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Donkan(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -35,7 +35,7 @@ public class Donkan : MundaneScript
         client.SendOptionsDialog(Mundane, "Hmmm, waffles!", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

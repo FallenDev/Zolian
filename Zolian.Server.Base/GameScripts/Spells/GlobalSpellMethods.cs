@@ -12,7 +12,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 {
     private const int CritDmg = 2;
 
-    public bool Execute(IGameClient client, Spell spell)
+    public bool Execute(WorldClient client, Spell spell)
     {
         if (!client.Aisling.CanCast) return false;
         var success = Generator.RandNumGen100();
@@ -40,7 +40,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         }
     }
 
-    public void Train(IGameClient client, Spell spell) => client.TrainSpell(spell);
+    public void Train(WorldClient client, Spell spell) => client.TrainSpell(spell);
 
     public long WeaponDamageElementalProc(Sprite sprite, int weaponProc)
     {
@@ -626,7 +626,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is not Aisling damageDealingSprite) return;
         var warpPos = new Position(savedXStep, savedYStep);
         damageDealingSprite.Client.WarpTo(warpPos, true);
-        GameServer.CheckWarpTransitions(damageDealingSprite.Client);
+        WorldServer.CheckWarpTransitions(damageDealingSprite.Client);
         damageDealingSprite.UpdateAddAndRemove();
         damageDealingSprite.Client.UpdateDisplay();
         damageDealingSprite.Client.LastMovement = DateTime.UtcNow;

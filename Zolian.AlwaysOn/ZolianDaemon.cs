@@ -14,18 +14,18 @@ internal class ZolianDaemon
     {
         StartProcess();
         ObtainProcess();
-        var gameServerCheckThread = new Thread(CheckGameServer) { IsBackground = false };
-        gameServerCheckThread.Start();
+        var WorldServerCheckThread = new Thread(CheckWorldServer) { IsBackground = false };
+        WorldServerCheckThread.Start();
         Thread.CurrentThread.Join();
     }
 
-    private static void GameServerProcessExited(object sender, EventArgs e)
+    private static void WorldServerProcessExited(object sender, EventArgs e)
     {
         Console.Write("AlwaysOn: Restarting Server\n");
         StartProcess();
     }
 
-    private static void CheckGameServer()
+    private static void CheckWorldServer()
     {
         do
         {
@@ -33,7 +33,7 @@ internal class ZolianDaemon
             {
                 Console.Write("-Server AlwaysOn Enabled-\n");
                 _serverProcess!.EnableRaisingEvents = true;
-                _serverProcess.Exited += GameServerProcessExited;
+                _serverProcess.Exited += WorldServerProcessExited;
                 _serverProcess.WaitForExit();
             }
             catch
@@ -50,7 +50,7 @@ internal class ZolianDaemon
 
     private static void StartProcess()
     {
-        var exePath = Directory.GetCurrentDirectory() + "\\Zolian.GameServer.exe";
+        var exePath = Directory.GetCurrentDirectory() + "\\Zolian.WorldServer.exe";
         if (!File.Exists(exePath)) return;
         var pr = new Process();
 
@@ -76,7 +76,7 @@ internal class ZolianDaemon
 
     private static void ObtainProcess()
     {
-        var serverProcesses = Process.GetProcessesByName("Zolian.GameServer");
+        var serverProcesses = Process.GetProcessesByName("Zolian.WorldServer");
         if (serverProcesses.Length == 0)
         {
             Console.Write("-AlwaysOn Failed to obtain Process-\n");

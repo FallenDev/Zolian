@@ -39,7 +39,7 @@ public interface IGameClient
     PendingSell PendingItemSessions { get; set; }
     PendingBuy PendingBuySessions { get; set; }
     PendingBanked PendingBankedSession { get; set; }
-    GameServer Server { get; set; }
+    WorldServer Server { get; set; }
     bool ShouldUpdateMap { get; set; }
     DateTime LastNodeClicked { get; set; }
     WorldPortal PendingNode { get; set; }
@@ -48,10 +48,10 @@ public interface IGameClient
     int MapClicks { get; set; }
     int EntryCheck { get; set; }
 
-    GameClient AislingToGhostForm();
+    WorldClient AislingToGhostForm();
     void BuildSettings();
     bool CastSpell(string spellName, Sprite caster, Sprite target);
-    bool CheckReqs(GameClient client, Item item);
+    bool CheckReqs(WorldClient client, Item item);
     void CloseDialog();
     void DoUpdate(TimeSpan elapsedTime);
     void PreventMultiLogging();
@@ -62,7 +62,7 @@ public interface IGameClient
     void ForgetSpell(string s);
     void ForgetSpells();
     void DeleteSpellFromDb(Spell spell);
-    GameClient GhostFormToAisling();
+    WorldClient GhostFormToAisling();
     void GiveCon(byte v = 1);
     void GiveDex(byte v = 1);
     void GiveExp(uint a);
@@ -73,7 +73,7 @@ public interface IGameClient
     bool GiveItem(string itemName);
     void GiveQuantity(Aisling aisling, string itemName, int range);
     void TakeAwayQuantity(Sprite owner, string item, int range);
-    GameClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps);
+    WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps);
     void GiveMp(int v = 1);
     void GiveScar();
     void GiveStr(byte v = 1);
@@ -81,45 +81,45 @@ public interface IGameClient
     bool IsBehind(Sprite sprite);
     void GiveWis(byte v = 1);
     void HandleBadTrades();
-    GameClient InitSpellBar();
-    GameClient InitBuffs();
-    GameClient InitDeBuffs();
-    GameClient InitLegend();
-    GameClient InitDiscoveredMaps();
-    GameClient InitIgnoreList();
-    GameClient Insert(bool update, bool delete);
+    WorldClient InitSpellBar();
+    WorldClient InitBuffs();
+    WorldClient InitDeBuffs();
+    WorldClient InitLegend();
+    WorldClient InitDiscoveredMaps();
+    WorldClient InitIgnoreList();
+    WorldClient Insert(bool update, bool delete);
     void Interrupt();
     void KillPlayer(string u);
     void LearnEverything();
-    GameClient LearnSkill(Mundane source, SkillTemplate subject, string message);
-    GameClient LearnSpell(Mundane source, SpellTemplate subject, string message);
-    GameClient LeaveArea(bool update = false, bool delete = false);
-    Task<GameClient> Load();
-    GameClient LoadEquipment();
-    GameClient LoadInventory();
-    GameClient LoadSkillBook();
-    GameClient LoadSpellBook();
-    GameClient LoggedIn(bool state);
+    WorldClient LearnSkill(Mundane source, SkillTemplate subject, string message);
+    WorldClient LearnSpell(Mundane source, SpellTemplate subject, string message);
+    WorldClient LeaveArea(bool update = false, bool delete = false);
+    Task<WorldClient> Load();
+    WorldClient LoadEquipment();
+    WorldClient LoadInventory();
+    WorldClient LoadSkillBook();
+    WorldClient LoadSpellBook();
+    WorldClient LoggedIn(bool state);
     void OpenBoard(string n);
-    GameClient PayItemPrerequisites(LearningPredicate prerequisites);
+    WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
     bool PayPrerequisites(LearningPredicate prerequisites);
     void Port(int i, int x = 0, int y = 0);
-    void ResetLocation(GameClient client);
+    void ResetLocation(WorldClient client);
     void Recover();
     void ClientRefreshed();
-    GameClient RefreshMap(bool updateView = false);
+    WorldClient RefreshMap(bool updateView = false);
     void DisableShade();
     void RepairEquipment();
     bool Revive();
     void RevivePlayer(string u);
-    Task<GameClient> Save();
+    Task<WorldClient> Save();
     void Say(string message, byte type = 0x00);
     void SendAnimation(ushort animation, Sprite to, Sprite from, byte speed = 100);
     void SendItemSellDialog(Mundane mundane, string text, ushort step, IEnumerable<byte> items);
     void SendItemShopDialog(Mundane mundane, string text, ushort step, IEnumerable<ItemTemplate> items);
-    GameClient SendLocation();
-    GameClient SendMessage(byte type, string text);
-    GameClient SendMessage(string text);
+    WorldClient SendLocation();
+    WorldClient SendMessage(byte type, string text);
+    WorldClient SendMessage(string text);
     void SendMessage(Scope scope, byte type, string text);
     void SendMapMusic();
     void SendOptionsDialog(Mundane mundane, string text, params OptionsDataItem[] options);
@@ -127,7 +127,7 @@ public interface IGameClient
     void SendPopupDialog(Mundane popup, string text, params OptionsDataItem[] options);
     void SendProfileUpdate();
     void SendSerial();
-    GameClient InitQuests();
+    WorldClient InitQuests();
     void SkillsAndSpellsCleanup();
     void SkillCleanup();
     void SpellCleanup();
@@ -135,30 +135,30 @@ public interface IGameClient
     void LoadBank();
     void SendSkillForgetDialog(Mundane mundane, string text, ushort step);
     void SendSkillLearnDialog(Mundane mundane, string text, ushort step, IEnumerable<SkillTemplate> skills);
-    GameClient SendSound(byte sound, Scope scope = Scope.Self);
+    WorldClient SendSound(byte sound, Scope scope = Scope.Self);
     void SendSpellForgetDialog(Mundane mundane, string text, ushort step);
     void SendSpellLearnDialog(Mundane mundane, string text, ushort step, IEnumerable<SpellTemplate> spells);
-    GameClient SendStats(StatusFlags flags);
+    WorldClient SendStats(StatusFlags flags);
     void SetAislingStartupVariables();
     void Spawn(string t, int x, int y, int c);
     void DeathStatusCheck();
     void StressTest();
-    GameClient SystemMessage(string lpmessage);
+    WorldClient SystemMessage(string lpmessage);
     void TrainSkill(Skill skill);
     void TrainSpell(Spell spell);
-    GameClient TransitionToMap(Area area, Position position);
-    GameClient TransitionToMap(int area, Position position);
+    WorldClient TransitionToMap(Area area, Position position);
+    WorldClient TransitionToMap(int area, Position position);
     void Update(TimeSpan elapsedTime);
     void PassEncryption();
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);
     void DispatchCasts();
-    GameClient UpdateDisplay(bool excludeSelf);
+    WorldClient UpdateDisplay(bool excludeSelf);
     void UpdateStatusBarAndThreat(TimeSpan elapsedTime);
     void UpdateSkillSpellCooldown(TimeSpan elapsedTime);
     void WarpToAdjacentMap(WarpTemplate warps);
     void WarpTo(Position position, bool overrideRefresh);
-    GameClient Enter();
+    WorldClient Enter();
     void CompleteMapTransition();
     void AddDiscoveredMapToDb();
     void AddToIgnoreListDb(string ignored);

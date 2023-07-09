@@ -16,14 +16,14 @@ public class TowerDefense : MonsterScript
         Monster.Template.SpawnRate = 1;
     }
 
-    public override void OnApproach(GameClient client)
+    public override void OnApproach(WorldClient client)
     {
         Monster.Target = client.Aisling;
     }
 
-    public override void OnClick(GameClient client) { }
+    public override void OnClick(WorldClient client) { }
 
-    public override void OnDeath(GameClient client)
+    public override void OnDeath(WorldClient client)
     {
         var remaining = GetObjects<Monster>(client.Aisling.Map, i => i.CurrentMapId == client.Aisling.AreaId
                                                                      && i.Template.Name == Monster.Template.Name)
@@ -50,7 +50,7 @@ public class TowerDefense : MonsterScript
             DelObject(Monster);
     }
 
-    public override void OnLeave(GameClient client)
+    public override void OnLeave(WorldClient client)
     {
         Monster.Target = null;
     }

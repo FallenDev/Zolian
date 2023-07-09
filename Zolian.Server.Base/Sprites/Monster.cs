@@ -38,12 +38,12 @@ public sealed class Monster : Sprite
     public string Size { get; set; }
     public ushort Image { get; set; }
     public bool WalkEnabled { get; set; }
-    public GameServerTimer BashTimer { get; init; }
-    public GameServerTimer AbilityTimer { get; init; }
-    public GameServerTimer CastTimer { get; init; }
+    public WorldServerTimer BashTimer { get; init; }
+    public WorldServerTimer AbilityTimer { get; init; }
+    public WorldServerTimer CastTimer { get; init; }
     public MonsterTemplate Template { get; set; }
-    public GameServerTimer WalkTimer { get; init; }
-    public GameServerTimer ObjectUpdateTimer { get; init; }
+    public WorldServerTimer WalkTimer { get; init; }
+    public WorldServerTimer ObjectUpdateTimer { get; init; }
     public bool IsAlive => CurrentHp > 0;
     public long DamageReceived { get; set; }
     private bool Rewarded { get; set; }

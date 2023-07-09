@@ -10,15 +10,15 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Fiona")]
 public class Fiona : MundaneScript
 {
-    public Fiona(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Fiona(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -34,7 +34,7 @@ public class Fiona : MundaneScript
         client.SendOptionsDialog(Mundane, "Wanna Dance?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

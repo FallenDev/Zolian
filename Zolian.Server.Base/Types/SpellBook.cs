@@ -43,13 +43,13 @@ public class SpellBook : ObjectManager
     {
         Spell ret = null;
 
-        if (Spells.ContainsKey(slot))
-            ret = Spells[slot];
+        if (Spells.TryGetValue(slot, out var spell))
+            ret = spell;
 
         return ret is { Template: not null } ? ret : null;
     }
 
-    public IEnumerable<Spell> GetSpells(Predicate<Spell> predicate) => Spells.Values.Where(i => i != null && predicate(i)).ToArray();
+    public IEnumerable<Spell> TryGetSpells(Predicate<Spell> predicate) => Spells.Values.Where(i => i != null && predicate(i)).ToArray();
 
     public bool HasSpell(string s)
     {

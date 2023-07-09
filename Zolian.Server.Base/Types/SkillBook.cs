@@ -43,8 +43,8 @@ public class SkillBook : ObjectManager
     {
         Skill ret = null;
 
-        if (Skills.ContainsKey(slot))
-            ret = Skills[slot];
+        if (Skills.TryGetValue(slot, out var skill))
+            ret = skill;
 
         return ret is { Template: not null } ? ret : null;
     }

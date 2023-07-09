@@ -11,15 +11,15 @@ namespace Darkages.GameScripts.Mundanes.Gems;
 [Script("Obsidian")]
 public class Obsidian : MundaneScript
 {
-    public Obsidian(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Obsidian(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -33,7 +33,7 @@ public class Obsidian : MundaneScript
         client.SendOptionsDialog(Mundane, $"Stone smithing level: {client.Aisling.QuestManager.StoneSmithing} ", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (Mundane.Serial != client.EntryCheck)
         {

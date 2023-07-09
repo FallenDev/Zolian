@@ -6,8 +6,8 @@ namespace Darkages.GameScripts.Spells;
 
 public interface IGlobalSpellMethods
 {
-    bool Execute(IGameClient client, Spell spell);
-    void Train(IGameClient client, Spell spell);
+    bool Execute(WorldClient client, Spell spell);
+    void Train(WorldClient client, Spell spell);
     long WeaponDamageElementalProc(Sprite sprite, int weaponProc);
     long AislingSpellDamageCalc(Sprite sprite, long baseDmg, Spell spell, double exp);
     long MonsterElementalDamageProc(Sprite sprite, long baseDmg, Spell spell, double exp);

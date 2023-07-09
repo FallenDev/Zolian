@@ -12,7 +12,7 @@ public interface IDebuff
     int Length { get; set; }
     string Name { get; set; }
     int TimeLeft { get; set; }
-    GameServerTimer Timer { get; set; }
+    WorldServerTimer Timer { get; set; }
     Debuff DebuffSpell { get; set; }
 
     void OnApplied(Sprite affected, Debuff debuff);
@@ -23,5 +23,5 @@ public interface IDebuff
     void InsertDebuff(Aisling aisling, Debuff debuff);
     void UpdateDebuff(Aisling aisling);
     void DeleteDebuff(Aisling aisling, Debuff debuff);
-    Task<bool> CheckOnDebuffAsync(IGameClient client, string name);
+    Task<bool> CheckOnDebuffAsync(WorldClient client, string name);
 }

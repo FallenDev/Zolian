@@ -12,15 +12,15 @@ namespace Darkages.GameScripts.Mundanes.Arena;
 [Script("Arena Host")]
 public class ArenaHost : MundaneScript
 {
-    public ArenaHost(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public ArenaHost(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -36,7 +36,7 @@ public class ArenaHost : MundaneScript
         client.SendOptionsDialog(Mundane, "Beyond this point, some fight for honor; others glory. Are you sure you're up for that? ", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (Mundane.Serial != client.EntryCheck)
         {

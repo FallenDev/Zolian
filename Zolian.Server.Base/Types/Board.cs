@@ -28,7 +28,7 @@ public class Board : NetworkFormat
         IsMail = isMail;
     }
 
-    [JsonIgnore] public GameClient Client { get; set; }
+    [JsonIgnore] public WorldClient Client { get; set; }
     public ushort Index { get; set; }
     public bool IsMail { get; set; }
     public ushort LetterId { get; set; }

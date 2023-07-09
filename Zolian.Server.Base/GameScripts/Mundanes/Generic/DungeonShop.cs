@@ -14,15 +14,15 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Dungeon Shop")]
 public class DungeonShop : MundaneScript
 {
-    public DungeonShop(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public DungeonShop(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -36,7 +36,7 @@ public class DungeonShop : MundaneScript
         client.SendOptionsDialog(Mundane, "Greetings Adventurer, look no further.\nI have exactly what you're looking for.\nAll items purchased have a quality range of (Common => Rare)", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -284,7 +284,7 @@ public class DungeonShop : MundaneScript
         }
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (client == null) return;
         if (item == null) return;

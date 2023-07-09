@@ -5,10 +5,10 @@ using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class InterestAndCommunityComponent : GameServerComponent
+public class InterestAndCommunityComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromSeconds(45));
-    private readonly GameServerTimer _interest = new(TimeSpan.FromMinutes(30));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(45));
+    private readonly WorldServerTimer _interest = new(TimeSpan.FromMinutes(30));
 
     public InterestAndCommunityComponent(WorldServer server) : base(server) { }
 

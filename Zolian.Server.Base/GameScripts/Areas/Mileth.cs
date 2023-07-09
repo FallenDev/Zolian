@@ -42,12 +42,12 @@ public class Mileth : AreaScript
 
     public Mileth(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(GameClient client) { }
-    public override void OnMapExit(GameClient client) { }
-    public override void OnMapClick(GameClient client, int x, int y) { }
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
+    public override void OnMapEnter(WorldClient client) { }
+    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
 
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped)
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped)
     {
         switch (locationDropped.X)
         {
@@ -58,9 +58,9 @@ public class Mileth : AreaScript
         }
     }
 
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnGossip(WorldClient client, string message) { }
 
-    private void MilethAltar(GameClient client, Item itemDropped, Position locationDropped)
+    private void MilethAltar(WorldClient client, Item itemDropped, Position locationDropped)
     {
         var loop = itemDropped.Dropping;
         var luck = 0 + client.Aisling.Luck;
@@ -208,7 +208,7 @@ public class Mileth : AreaScript
         }
     }
 
-    private static void ItemDura(Item item, Item.Quality quality, IGameClient client)
+    private static void ItemDura(Item item, Item.Quality quality, WorldClient client)
     {
         var temp = item.Template.MaxDurability;
         switch (quality)

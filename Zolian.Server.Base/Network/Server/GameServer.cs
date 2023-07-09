@@ -15,8 +15,6 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
-using Darkages.Network.Formats.Models.ClientFormats;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -31,12 +29,12 @@ using Stat = Darkages.Enums.Stat;
 
 namespace Darkages.Network.Server;
 
-public class GameServer : NetworkServer<WorldClient>
+public class GameServer
 {
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
-    private ConcurrentDictionary<Type, GameServerComponent> _serverComponents;
+    private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private DateTime _fastGameTime;
     private DateTime _normalGameTime;
     private DateTime _slowGameTime;
@@ -52,137 +50,6 @@ public class GameServer : NetworkServer<WorldClient>
     #region Client Handlers
     
     
-    /// <summary>
-    /// Spell Use
-    /// </summary>
-    protected override void Format0FHandler(WorldClient client, ClientFormat0F format)
-    {
-        if (!CanInteract(client, false, true, false)) return;
-        if (!client.Aisling.LoggedIn) return;
-        if (client.Aisling.IsDead()) return;
-
-        var spellReq = client.Aisling.SpellBook.GetSpells(i => i != null && i.Slot == format.Index).FirstOrDefault();
-
-        if (spellReq == null) return;
-
-        //ToDo: Abort cast if spell is not "Ao Suain" or "Ao Pramh"
-        if (!client.Aisling.CanCast)
-            if (spellReq.Template.Name != "Ao Suain" && spellReq.Template.Name != "Ao Pramh")
-            {
-                CancelIfCasting(client);
-                return;
-            }
-
-        var info = new CastInfo
-        {
-            Slot = format.Index,
-            Target = format.Serial,
-            Position = format.Point,
-            Data = format.Data,
-        };
-
-        info.Position ??= new Position(client.Aisling.X, client.Aisling.Y);
-
-        lock (client.CastStack)
-        {
-            client.CastStack?.Push(info);
-        }
-    }
-
-    /// <summary>
-    /// Client Redirect to GameServer from LoginServer
-    /// </summary>
-    protected override async Task Format10Handler(WorldClient client, ClientFormat10 format)
-    {
-        if (client == null) return;
-        if (format.Name.IsNullOrEmpty()) return;
-
-        await EnterGame(client, format);
-
-        if (client.Server.Clients.Values.Count <= 500) return;
-        client.SendMessage(0x08, $"Server Capacity Reached: {client.Server.Clients.Values.Count} \n Thank you, please come back later.");
-        ClientDisconnected(client);
-        RemoveClient(client);
-    }
-
-    /// <summary>
-    /// Client Redirect to GameServer from LoginServer Continued...
-    /// </summary>
-    private async Task EnterGame(WorldClient client, ClientFormat10 format)
-    {
-        SecurityProvider.Instance = format.Parameters;
-        client.Server = this;
-        var serialString = string.Concat(format.Name.Where(char.IsDigit));
-
-        if (!uint.TryParse(serialString, out var serial) || serial == 0)
-        {
-            DisconnectAndRemoveClient(client);
-            return;
-        }
-
-        var playerName = string.Concat(format.Name.TrimEnd("0123456789".ToCharArray()).Select(char.ToLowerInvariant));
-
-        if (Clients.Values.Any(globalClient => globalClient.Serial != client.Serial &&
-                                               globalClient.Aisling?.Username?.Equals(playerName, StringComparison.OrdinalIgnoreCase) == true))
-        {
-            client.SendMessage(0x08, "You're already logged in.");
-            DisconnectAndRemoveClient(client);
-            return;
-        }
-
-        var player = await LoadPlayer(client, playerName, serial);
-
-        if (player == null || serial != client.Aisling.Serial)
-        {
-            DisconnectAndRemoveClient(client);
-            return;
-        }
-
-        player.GameMaster = ServerSetup.Instance.Config.GameMasters?.Any(n => string.Equals(n, player.Username, StringComparison.OrdinalIgnoreCase)) ?? false;
-
-        if (player.GameMaster)
-        {
-            const string ip = "192.168.50.1";
-            var ipLocal = IPAddress.Parse(ip);
-
-            if (player.Client.Server.Address.Equals(ServerSetup.Instance.IpAddress) || player.Client.Server.Address.Equals(ipLocal))
-            {
-                player.Show(Scope.NearbyAislings, new ServerFormat29(391, player.Pos));
-            }
-            else
-            {
-                DisconnectAndRemoveClient(client);
-                return;
-            }
-        }
-
-        AuthenticateClient(client);
-        var time = DateTime.UtcNow;
-        ServerSetup.Logger($"{player.Username} logged in at: {time}");
-        client.LastPing = time;
-    }
-
-    private void DisconnectAndRemoveClient(WorldClient client)
-    {
-        ClientDisconnected(client);
-        RemoveClient(client);
-    }
-
-    /// <summary>
-    /// Client Authentication
-    /// </summary>
-    private void AuthenticateClient(WorldClient client)
-    {
-        if (ServerSetup.Redirects.ContainsKey(client.Aisling.Serial))
-        {
-            client.Aisling.Client.Authenticated = true;
-            return;
-        }
-
-        ClientDisconnected(client);
-        RemoveClient(client);
-    }
-
     /// <summary>
     /// On Player Change Direction
     /// </summary>
@@ -2010,80 +1877,7 @@ public class GameServer : NetworkServer<WorldClient>
         RemoveFromServer(client, 1);
         RemoveFromServer(client);
     }
-
-    private Task<Aisling> LoadPlayer(WorldClient client, string player, uint serial)
-    {
-        if (client == null) return null;
-        if (player.IsNullOrEmpty()) return null;
-
-        var aisling = StorageManager.AislingBucket.LoadAisling(player, serial);
-
-        if (aisling.Result == null) return null;
-        client.Aisling = aisling.Result;
-        client.Aisling.Serial = aisling.Result.Serial;
-        client.Aisling.Pos = new Vector2(aisling.Result.X, aisling.Result.Y);
-        client.Aisling.Client = client;
-
-        if (client.Aisling == null)
-        {
-            client.SendMessage(0x02, "Something happened. Please report this bug to Zolian staff.");
-            Analytics.TrackEvent($"{player} failed to load character.");
-            base.ClientDisconnected(client);
-            RemoveClient(client);
-            return null;
-        }
-
-        if (client.Aisling._Str <= 0 || client.Aisling._Int <= 0 || client.Aisling._Wis <= 0 || client.Aisling._Con <= 0 || client.Aisling._Dex <= 0)
-        {
-            client.SendMessage(0x02, "Your stats have has been corrupted. Please report this bug to Zolian staff.");
-            Analytics.TrackEvent($"{player} has corrupted stats.");
-            base.ClientDisconnected(client);
-            RemoveClient(client);
-            return null;
-        }
-
-        return CleanUpLoadPlayer(client);
-    }
-
-    private static async Task<Aisling> CleanUpLoadPlayer(WorldClient client)
-    {
-        CheckOnLoad(client);
-
-        if (client.Aisling.Map != null) client.Aisling.CurrentMapId = client.Aisling.Map.ID;
-        client.Aisling.LoggedIn = false;
-        client.Aisling.EquipmentManager.Client = client;
-        client.Aisling.CurrentWeight = 0;
-        client.Aisling.ActiveStatus = ActivityStatus.Awake;
-
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-        Analytics.TrackEvent($"{ip!.Address} logged in {client.Aisling.Username}");
-        client.FlushAfterCleanup();
-        await client.Load();
-        client.SendMessage(0x02, $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
-        client.SendStats(StatusFlags.All);
-        client.LoggedIn(true);
-
-        if (client.Aisling == null) return null;
-
-        if (!client.Aisling.Dead) return client.Aisling;
-        client.Aisling.Flags = AislingFlags.Ghost;
-        client.Aisling.WarpToHell();
-
-        return client.Aisling;
-    }
-
-    private static void CheckOnLoad(IWorldClient client)
-    {
-        var aisling = client.Aisling;
-
-        aisling.SkillBook ??= new SkillBook();
-        aisling.SpellBook ??= new SpellBook();
-        aisling.Inventory ??= new Inventory();
-        aisling.BankManager ??= new Bank();
-        aisling.EquipmentManager ??= new EquipmentManager(aisling.Client);
-        aisling.QuestManager ??= new Quests();
-    }
-
+    
     /// <summary>
     /// Reduces code redundancy by combining many Interaction checks into a method with boolean handlers
     /// </summary>

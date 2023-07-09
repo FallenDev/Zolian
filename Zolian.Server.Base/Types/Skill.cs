@@ -36,7 +36,7 @@ public class Skill
     public int Uses { get; set; }
 
     // For zero-line skill control
-    public readonly GameServerTimer ZeroLineTimer = new (TimeSpan.FromMilliseconds(2000));
+    public readonly WorldServerTimer ZeroLineTimer = new (TimeSpan.FromMilliseconds(2000));
     public DateTime LastUsedSkill { get; set; }
     public bool CanUseZeroLineAbility
     {

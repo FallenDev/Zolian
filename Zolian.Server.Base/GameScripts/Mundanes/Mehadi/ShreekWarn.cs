@@ -9,22 +9,22 @@ namespace Darkages.GameScripts.Mundanes.Mehadi;
 [Script("Shreek Warn")]
 public class ShreekWarn : MundaneScript
 {
-    public ShreekWarn(GameServer server, Mundane mundane) : base(server, mundane) => Mundane = mundane;
+    public ShreekWarn(WorldServer server, Mundane mundane) : base(server, mundane) => Mundane = mundane;
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
         client.SendOptionsDialog(Mundane, "What are you doing in my swamp? Alright, get out of here. All of you. Move it. Let's go.");
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "What are you doing in my swamp?");
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (Mundane.Serial != client.EntryCheck)
         {

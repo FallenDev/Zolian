@@ -14,15 +14,15 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Emer")]
 public class Emer : MundaneScript
 {
-    public Emer(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Emer(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -50,7 +50,7 @@ public class Emer : MundaneScript
         client.SendOptionsDialog(Mundane, "Are ye hungry?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

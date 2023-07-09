@@ -34,11 +34,11 @@ public class CreateMonster : MonsterCreateScript
         var obj = new Monster
         {
             Template = _monsterTemplate,
-            BashTimer = new GameServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.AttackSpeed)),
-            AbilityTimer = new GameServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
-            CastTimer = new GameServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
-            WalkTimer = new GameServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.MovementSpeed)),
-            ObjectUpdateTimer = new GameServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay)),
+            BashTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.AttackSpeed)),
+            AbilityTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
+            CastTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
+            WalkTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.MovementSpeed)),
+            ObjectUpdateTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay)),
             CastEnabled = true,
             TaggedAislings = new HashSet<int>(),
             AggroList = new List<int>(),

@@ -284,7 +284,7 @@ public class LearningPredicate
         if (SpellRequired is null or "") return n;
         {
             var spell = ServerSetup.Instance.GlobalSpellTemplateCache[SpellRequired];
-            var spellRetainer = player.SpellBook.GetSpells(i => i?.Template != null && i.Template.Name.Equals(spell.Name)).FirstOrDefault();
+            var spellRetainer = player.SpellBook.TryGetSpells(i => i?.Template != null && i.Template.Name.Equals(spell.Name)).FirstOrDefault();
 
             if (spellRetainer == null)
             {

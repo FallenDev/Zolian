@@ -68,8 +68,8 @@ public sealed class Aisling : Player, IAisling
         DiscoveredMaps = new List<int>();
         IgnoredList = new List<string>();
         GroupId = 0;
-        AttackDmgTrack = new GameServerTimer(TimeSpan.FromSeconds(1));
-        ThreatTimer = new GameServerTimer(TimeSpan.FromSeconds(60));
+        AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
+        ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         EntityType = TileContent.Aisling;
     }
 
@@ -85,8 +85,8 @@ public sealed class Aisling : Player, IAisling
     public Summon SummonObjects { get; set; }
     public bool UsingTwoHanded { get; set; }
     public int LastMapId { get; set; }
-    public GameServerTimer AttackDmgTrack { get; }
-    public GameServerTimer ThreatTimer { get; set; }
+    public WorldServerTimer AttackDmgTrack { get; }
+    public WorldServerTimer ThreatTimer { get; set; }
     public List<ClientGameSettings> GameSettings { get; set; }
     public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }

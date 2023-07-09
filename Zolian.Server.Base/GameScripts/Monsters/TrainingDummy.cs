@@ -18,7 +18,7 @@ public class TrainingDummy : MonsterScript
         Monster.MonsterBank = new List<Item>();
     }
 
-    public override void OnClick(GameClient client)
+    public override void OnClick(WorldClient client)
     {
         var level = Monster.Template.Level.ToString();
         var ac = Monster.Ac.ToString();
@@ -27,7 +27,7 @@ public class TrainingDummy : MonsterScript
         client.SendMessage(0x02, $"Lvl: {level}, AC: {ac}, Def Element: {defEle}");
     }
 
-    public override void OnDamaged(GameClient client, long dmg, Sprite source)
+    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
         _incoming.What = client.Aisling.ActionUsed;
 
@@ -55,7 +55,7 @@ public class TrainingDummy : MonsterScript
         Monster.Turn();
     }
 
-    public override void OnDeath(GameClient client = null)
+    public override void OnDeath(WorldClient client = null)
     {
         foreach (var debuff in Monster.Debuffs.Values)
         {
@@ -72,7 +72,7 @@ public class TrainingDummy : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(GameClient client) => Monster.Animate(49);
+    public override void OnSkulled(WorldClient client) => Monster.Animate(49);
 
     public override void Update(TimeSpan elapsedTime)
     {

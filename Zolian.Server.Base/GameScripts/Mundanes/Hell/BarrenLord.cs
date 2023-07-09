@@ -12,15 +12,15 @@ namespace Darkages.GameScripts.Mundanes.Hell;
 [Script("Barren Lord")]
 public class BarrenLord : MundaneScript
 {
-    public BarrenLord(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public BarrenLord(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -33,7 +33,7 @@ public class BarrenLord : MundaneScript
         client.SendOptionsDialog(Mundane, "You seek redemption?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

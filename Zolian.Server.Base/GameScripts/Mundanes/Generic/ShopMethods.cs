@@ -21,13 +21,13 @@ public static class ShopMethods
             .ToList().Concat(defaultBag.Where(n => n != null));
     }
 
-    public static IEnumerable<byte> GetCharacterSellInventoryByteList(GameClient client)
+    public static IEnumerable<byte> GetCharacterSellInventoryByteList(WorldClient client)
     {
         return client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.Flags.FlagIsSet(ItemFlags.Sellable)).ToList()
             .Select(i => i.InventorySlot).ToList();
     }
 
-    public static void CompletePendingItemSell(GameClient client)
+    public static void CompletePendingItemSell(WorldClient client)
     {
         if (ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(client.PendingItemSessions.Name))
         {
@@ -48,7 +48,7 @@ public static class ShopMethods
         client.SendStats(StatusFlags.WeightMoney);
     }
 
-    public static List<byte> GetCharacterDetailingByteListForLowGradePolish(GameClient client)
+    public static List<byte> GetCharacterDetailingByteListForLowGradePolish(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && (i.Template.CanStack == false && i.Template.Enchantable)));
@@ -56,7 +56,7 @@ public static class ShopMethods
         return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common).Select(i => i.InventorySlot).ToList();
     }
 
-    public static List<byte> GetCharacterDetailingByteListForMidGradePolish(GameClient client)
+    public static List<byte> GetCharacterDetailingByteListForMidGradePolish(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && (i.Template.CanStack == false && i.Template.Enchantable)));
@@ -64,7 +64,7 @@ public static class ShopMethods
         return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon or Item.Quality.Rare).Select(i => i.InventorySlot).ToList();
     }
 
-    public static List<byte> GetCharacterDetailingByteListForHighGradePolish(GameClient client)
+    public static List<byte> GetCharacterDetailingByteListForHighGradePolish(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && (i.Template.CanStack == false && i.Template.Enchantable)));
@@ -72,7 +72,7 @@ public static class ShopMethods
         return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon or Item.Quality.Rare or Item.Quality.Epic or Item.Quality.Legendary).Select(i => i.InventorySlot).ToList();
     }
 
-    public static long GetRepairCosts(GameClient client)
+    public static long GetRepairCosts(WorldClient client)
     {
         long repairCosts = 0;
 
@@ -87,7 +87,7 @@ public static class ShopMethods
         return repairCosts;
     }
 
-    public static uint GetDetailCosts(GameClient client, string args)
+    public static uint GetDetailCosts(WorldClient client, string args)
     {
         ItemDetail = client.Aisling.Inventory.Get(i => i != null && i.InventorySlot == Convert.ToInt32(args)).FirstOrDefault();
 

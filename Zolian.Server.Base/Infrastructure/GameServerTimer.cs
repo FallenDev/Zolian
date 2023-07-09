@@ -2,11 +2,11 @@
 
 namespace Darkages.Infrastructure;
 
-public class GameServerTimer
+public class WorldServerTimer
 {
     private int _randomVariancePct;
 
-    public GameServerTimer(TimeSpan delay)
+    public WorldServerTimer(TimeSpan delay)
     {
         Timer = TimeSpan.Zero;
         BaseDelay = delay;

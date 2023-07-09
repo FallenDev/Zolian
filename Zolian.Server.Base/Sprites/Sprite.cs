@@ -29,7 +29,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public Position LastPosition;
     public int RelicFinder;
     public event PropertyChangedEventHandler PropertyChanged;
-    private readonly GameServerTimer _buffAndDebuffTimer;
+    private readonly WorldServerTimer _buffAndDebuffTimer;
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
     public Trackers Trackers { get; set; }
@@ -41,8 +41,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") || HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool SpellReflect => HasBuff("Deireas Faileas");
-    public bool SpellNegate => HasBuff("Perfect Defense");
-    public bool SkillReflect => HasBuff("Asgall");
+    public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
+    public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
     public bool IsBleeding => HasDebuff("Bleeding");
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
@@ -141,7 +141,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is Item)
             EntityType = TileContent.Item;
         var readyTime = DateTime.UtcNow;
-        _buffAndDebuffTimer = new GameServerTimer(TimeSpan.FromSeconds(1));
+        _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
 
         Amplified = 0;
         Target = null;
@@ -666,7 +666,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 0)
                 pendingY--;
             if (sprite is Aisling aisling)
-                GameServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingY++;
             break;
@@ -676,7 +676,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 1)
                 pendingX++;
             if (sprite is Aisling aisling)
-                GameServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingX--;
             break;
@@ -686,7 +686,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 2)
                 pendingY++;
             if (sprite is Aisling aisling)
-                GameServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingY--;
             break;
@@ -696,7 +696,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 3)
                 pendingX--;
             if (sprite is Aisling aisling)
-                GameServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingX++;
             break;
@@ -1698,7 +1698,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (aisling.ThreatMeter + (uint)convDmg >= uint.MaxValue)
                 aisling.ThreatMeter = 500000;
             aisling.ThreatMeter += (uint)convDmg;
-            aisling.ThreatTimer = new GameServerTimer(TimeSpan.FromSeconds(60));
+            aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
 
             ShowDmg(aisling, estTime);
         }

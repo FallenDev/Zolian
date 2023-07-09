@@ -4,9 +4,9 @@ namespace Darkages.Types;
 
 public class Pet : Summon
 {
-    private readonly GameClient _client;
+    private readonly WorldClient _client;
 
-    public Pet(GameClient client) : base(client)
+    public Pet(WorldClient client) : base(client)
     {
         _client = client;
     }

@@ -12,15 +12,15 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Senan")]
 public class Senan : MundaneScript
 {
-    public Senan(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Senan(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -44,13 +44,13 @@ public class Senan : MundaneScript
         client.SendOptionsDialog(Mundane, "Would you kind sir, spare some change?", options.ToArray());
     }
 
-    public override void OnGoldDropped(GameClient client, uint money)
+    public override void OnGoldDropped(WorldClient client, uint money)
     {
         client.SendOptionsDialog(Mundane,
             money >= 1 ? "Wow, thank you. *stumbles to bar to order more alcohol*" : "I'm sorry, where is it?");
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

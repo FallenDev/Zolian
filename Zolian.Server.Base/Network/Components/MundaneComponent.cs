@@ -4,14 +4,14 @@ using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
-public class MundaneComponent : GameServerComponent
+public class MundaneComponent : WorldServerComponent
 {
     public MundaneComponent(WorldServer server) : base(server)
     {
-        Timer = new GameServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MundaneRespawnInterval));
+        Timer = new WorldServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MundaneRespawnInterval));
     }
 
-    private GameServerTimer Timer { get; }
+    private WorldServerTimer Timer { get; }
 
     private void SpawnMundanes()
     {

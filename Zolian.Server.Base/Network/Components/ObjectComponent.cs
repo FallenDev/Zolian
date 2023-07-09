@@ -8,9 +8,9 @@ using Darkages.Types;
 
 namespace Darkages.Network.Components;
 
-public class ObjectComponent : GameServerComponent
+public class ObjectComponent : WorldServerComponent
 {
-    private readonly GameServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
 
     public ObjectComponent(WorldServer server) : base(server) { }
 

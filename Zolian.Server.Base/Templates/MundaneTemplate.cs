@@ -29,11 +29,11 @@ public class MundaneTemplate : Template
     public List<Position> Waypoints { get; set; }
     public PathQualifer PathQualifer { get; set; }
 
-    public GameServerTimer AttackTimer { get; set; }
-    public GameServerTimer SpellTimer { get; set; }
-    public GameServerTimer ChatTimer { get; set; }
-    public GameServerTimer TurnTimer { get; set; }
-    public GameServerTimer WalkTimer { get; set; }
+    public WorldServerTimer AttackTimer { get; set; }
+    public WorldServerTimer SpellTimer { get; set; }
+    public WorldServerTimer ChatTimer { get; set; }
+    public WorldServerTimer TurnTimer { get; set; }
+    public WorldServerTimer WalkTimer { get; set; }
 
     public int CastRate { get; set; }
     public int ChatRate { get; set; }

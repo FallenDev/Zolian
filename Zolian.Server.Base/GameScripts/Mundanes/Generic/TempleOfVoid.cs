@@ -12,9 +12,9 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Temple of Void")]
 public class TempleOfVoid : MundaneScript
 {
-    public TempleOfVoid(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public TempleOfVoid(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         client.EntryCheck = serial;
 
@@ -24,7 +24,7 @@ public class TempleOfVoid : MundaneScript
         }
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -37,7 +37,7 @@ public class TempleOfVoid : MundaneScript
         client.SendOptionsDialog(Mundane, "Do not visit the temple expecting favors.", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (Mundane.Serial != client.EntryCheck)
         {

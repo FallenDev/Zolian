@@ -14,7 +14,7 @@ public class DialogSession
         Sequence = 0;
     }
 
-    public Action<GameClient, ushort, string> Callback { get; init; }
+    public Action<WorldClient, ushort, string> Callback { get; init; }
     public int CurrentMapId { get; }
     public ushort Sequence { get; set; }
     public int Serial { get; }

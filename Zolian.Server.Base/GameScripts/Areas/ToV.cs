@@ -13,15 +13,15 @@ namespace Darkages.GameScripts.Areas;
 public class ToV : AreaScript
 {
     private Sprite _aisling;
-    private GameServerTimer AnimTimer { get; set; }
-    private GameServerTimer AnimTimer2 { get; set; }
+    private WorldServerTimer AnimTimer { get; set; }
+    private WorldServerTimer AnimTimer2 { get; set; }
     private bool _animate;
 
     public ToV(Area area) : base(area)
     {
         Area = area;
-        AnimTimer = new GameServerTimer(TimeSpan.FromMilliseconds(1 + 5000));
-        AnimTimer2 = new GameServerTimer(TimeSpan.FromMilliseconds(2500));
+        AnimTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(1 + 5000));
+        AnimTimer2 = new WorldServerTimer(TimeSpan.FromMilliseconds(2500));
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -34,19 +34,19 @@ public class ToV : AreaScript
             HandleMapAnimations(elapsedTime);
     }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
         _animate = true;
     }
 
-    public override void OnMapExit(GameClient client)
+    public override void OnMapExit(WorldClient client)
     {
         _aisling = null;
         _animate = false;
     }
 
-    public override void OnMapClick(GameClient client, int x, int y)
+    public override void OnMapClick(WorldClient client, int x, int y)
     {
         if (x == 15 && y == 52 || x == 14 && y == 51 || x == 14 && y == 50)
         {
@@ -54,9 +54,9 @@ public class ToV : AreaScript
         }
     }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 
     private void HandleMapAnimations(TimeSpan elapsedTime)
     {

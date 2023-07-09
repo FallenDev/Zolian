@@ -12,9 +12,9 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Temple of Light")]
 public class TempleOfLight : MundaneScript
 {
-    public TempleOfLight(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public TempleOfLight(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         client.EntryCheck = serial;
 
@@ -24,7 +24,7 @@ public class TempleOfLight : MundaneScript
         }
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -37,7 +37,7 @@ public class TempleOfLight : MundaneScript
         client.SendOptionsDialog(Mundane, "Cleansing such an item here? Very well, do you wish to visit the temple?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (Mundane.Serial != client.EntryCheck)
         {

@@ -22,19 +22,19 @@ public class Neal : MundaneScript
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
-    public Neal(GameServer server, Mundane mundane) : base(server, mundane)
+    public Neal(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
         _spellList = ObtainSpellList();
     }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -91,7 +91,7 @@ public class Neal : MundaneScript
                 : "Hail, let's get to work.", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

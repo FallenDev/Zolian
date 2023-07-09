@@ -8,7 +8,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 public static class RacialBonus
 {
 
-    public static void HumanSkill(GameClient client, string skill)
+    public static void HumanSkill(WorldClient client, string skill)
     {
         client.Aisling._Str += 1;
         client.Aisling._Int += 1;
@@ -23,7 +23,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void HumanSpell(GameClient client, string spell)
+    public static void HumanSpell(WorldClient client, string spell)
     {
         client.Aisling._Str += 1;
         client.Aisling._Int += 1;
@@ -38,7 +38,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void Dwarf(GameClient client)
+    public static void Dwarf(WorldClient client)
     {
         client.Aisling._Str += 2;
         client.Aisling._Con += 2;
@@ -52,7 +52,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void Halfling(GameClient client)
+    public static void Halfling(WorldClient client)
     {
         client.Aisling._Int += 2;
         client.Aisling._Dex += 4;
@@ -66,7 +66,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void HighElf(GameClient client)
+    public static void HighElf(WorldClient client)
     {
         client.Aisling._Int += 8;
         client.Aisling._Wis += 3;
@@ -78,7 +78,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void DarkElf(GameClient client)
+    public static void DarkElf(WorldClient client)
     {
         client.Aisling._Con += 2;
         client.Aisling._Dex += 3;
@@ -92,7 +92,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void WoodElf(GameClient client)
+    public static void WoodElf(WorldClient client)
     {
         client.Aisling._Wis += 2;
         client.Aisling._Dex += 5;
@@ -106,7 +106,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void HalfElfSkill(GameClient client, string skill)
+    public static void HalfElfSkill(WorldClient client, string skill)
     {
         client.Aisling._Str += 1;
         client.Aisling.StatPoints += 4;
@@ -117,7 +117,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void HalfElfSpell(GameClient client, string spell)
+    public static void HalfElfSpell(WorldClient client, string spell)
     {
         client.Aisling._Int += 1;
         client.Aisling.StatPoints += 4;
@@ -128,7 +128,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void Orc(GameClient client)
+    public static void Orc(WorldClient client)
     {
         client.Aisling._Str += 3;
         client.Aisling._Int += 1;
@@ -142,7 +142,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void Dragonkin(GameClient client, SubClassDragonkin dragonkin)
+    public static void Dragonkin(WorldClient client, SubClassDragonkin dragonkin)
     {
         switch (dragonkin)
         {
@@ -209,7 +209,7 @@ public static class RacialBonus
         DragonRacialLegend(client, ClassStrings.SubRaceDragonkinValue(dragonkin));
     }
 
-    public static void HalfBeast(GameClient client)
+    public static void HalfBeast(WorldClient client)
     {
         client.Aisling.StatPoints += 30;
         client.Aisling.RaceSkill = null;
@@ -217,7 +217,7 @@ public static class RacialBonus
         RacialLegend(client);
     }
 
-    public static void Merfolk(GameClient client)
+    public static void Merfolk(WorldClient client)
     {
         client.Aisling.RaceSkill = "Splash";
         client.Aisling.RaceSpell = "Tail Flip";
@@ -242,7 +242,7 @@ public static class RacialBonus
         if (raceSpellBool) client.LoadSpellBook();
     }
 
-    private static void RacialLegend(IGameClient client)
+    private static void RacialLegend(WorldClient client)
     {
         var race = ClassStrings.RaceValue(client.Aisling.Race);
 
@@ -260,7 +260,7 @@ public static class RacialBonus
         client.SendStats(StatusFlags.MultiStat);
     }
 
-    private static void DragonRacialLegend(IGameClient client, string subRace)
+    private static void DragonRacialLegend(WorldClient client, string subRace)
     {
         var race = ClassStrings.RaceValue(client.Aisling.Race);
 

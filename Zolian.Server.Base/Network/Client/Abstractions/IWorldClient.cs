@@ -9,6 +9,7 @@ using Darkages.Enums;
 using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
+using Darkages.Network.Server;
 using Darkages.Templates;
 
 namespace Darkages.Network.Client.Abstractions;

@@ -13,15 +13,15 @@ namespace Darkages.GameScripts.Mundanes.Tutorial;
 [Script("Class Chooser")]
 public class ClassChooser : MundaneScript
 {
-    public ClassChooser(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public ClassChooser(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -45,7 +45,7 @@ public class ClassChooser : MundaneScript
         }
     }
 
-    public override async void OnResponse(GameClient client, ushort responseID, string args)
+    public override async void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -132,7 +132,7 @@ public class ClassChooser : MundaneScript
         }
     }
 
-    private async void ClassWrapUp(GameClient client, string path)
+    private async void ClassWrapUp(WorldClient client, string path)
     {
         var legend = new Legend.LegendItem
         {
@@ -169,7 +169,7 @@ public class ClassChooser : MundaneScript
         client.TransitionToMap(137, new Position(1, 4));
     }
 
-    private void Berzerker(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Berzerker(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Skill.GiveTo(client.Aisling, "Onslaught", 1);
 
@@ -212,7 +212,7 @@ public class ClassChooser : MundaneScript
         item1.GiveTo(client.Aisling);
     }
 
-    private void Defender(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Defender(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Skill.GiveTo(client.Aisling, "Assault", 1);
 
@@ -258,7 +258,7 @@ public class ClassChooser : MundaneScript
         item2.GiveTo(client.Aisling);
     }
 
-    private void Assassin(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Assassin(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Skill.GiveTo(client.Aisling, "Stab", 1);
         
@@ -301,7 +301,7 @@ public class ClassChooser : MundaneScript
         item1.GiveTo(client.Aisling);
     }
 
-    private void Monk(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Monk(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Skill.GiveTo(client.Aisling, "Punch", 1);
 
@@ -344,7 +344,7 @@ public class ClassChooser : MundaneScript
         item1.GiveTo(client.Aisling);
     }
 
-    private void Cleric(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Cleric(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
 
@@ -387,7 +387,7 @@ public class ClassChooser : MundaneScript
         item1.GiveTo(client.Aisling);
     }
 
-    private void Arcanus(IGameClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private void Arcanus(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
     {
         Spell.GiveTo(client.Aisling, "Beag Athar", 1);
         Spell.GiveTo(client.Aisling, "Beag Creag", 1);

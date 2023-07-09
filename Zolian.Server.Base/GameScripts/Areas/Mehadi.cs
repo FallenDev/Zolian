@@ -10,7 +10,7 @@ public class Mehadi : AreaScript
     public Mehadi(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         if (client == null) return;
         if (client.Aisling.QuestManager.SwampAccess) return;
@@ -27,7 +27,7 @@ public class Mehadi : AreaScript
         client.TransitionToMap(3071, new Position(3, 7));
     }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation)
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         if (client == null) return;
         if (client.Aisling.QuestManager.SwampAccess) return;

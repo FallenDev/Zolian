@@ -12,14 +12,14 @@ public class AbelBarber : AreaScript
     public AbelBarber(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         if (client.Aisling.Map.ID == client.Aisling.LastMapId) return;
         client.Aisling.OldStyle = client.Aisling.HairStyle;
         client.Aisling.OldColor = client.Aisling.HairColor;
     }
 
-    public override void OnMapExit(GameClient client)
+    public override void OnMapExit(WorldClient client)
     {
         if (client.Aisling.Coloring != 0)
         {
@@ -36,11 +36,11 @@ public class AbelBarber : AreaScript
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
     }
 
-    public override void OnMapClick(GameClient client, int x, int y) { }
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
 
-    public override void OnGossip(GameClient client, string message)
+    public override void OnGossip(WorldClient client, string message)
     {
         if (message.StringContains("fag"))
         {

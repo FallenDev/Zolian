@@ -3,14 +3,14 @@ using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class PingComponent : GameServerComponent
+public class PingComponent : WorldServerComponent
 {
     public PingComponent(WorldServer server) : base(server)
     {
-        Timer = new GameServerTimer(TimeSpan.FromMilliseconds(7000));
+        Timer = new WorldServerTimer(TimeSpan.FromMilliseconds(7000));
     }
 
-    private GameServerTimer Timer { get; }
+    private WorldServerTimer Timer { get; }
 
     private void Ping()
     {

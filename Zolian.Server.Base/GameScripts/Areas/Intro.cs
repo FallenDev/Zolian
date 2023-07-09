@@ -17,7 +17,7 @@ public class Intro : AreaScript
 
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override async void OnMapEnter(GameClient client)
+    public override async void OnMapEnter(WorldClient client)
     {
         await Task.Delay(250).ContinueWith(ct =>
         {
@@ -64,10 +64,10 @@ public class Intro : AreaScript
         }).ConfigureAwait(false);
     }
 
-    public override void OnMapExit(GameClient client) { }
-    public override void OnMapClick(GameClient client, int x, int y) { }
+    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation)
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         if (_givenClothes) return;
         var item = new Item();
@@ -99,6 +99,6 @@ public class Intro : AreaScript
         client.SendStats(StatusFlags.StructA);
         client.UpdateDisplay();
     }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

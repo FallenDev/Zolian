@@ -2,9 +2,9 @@
 
 namespace Darkages.Network;
 
-public abstract class GameServerComponent
+public abstract class WorldServerComponent
 {
-    protected GameServerComponent(WorldServer server) => Server = server;
+    protected WorldServerComponent(WorldServer server) => Server = server;
     protected static WorldServer Server { get; private set; }
     protected internal abstract void Update(TimeSpan elapsedTime);
 }

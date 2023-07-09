@@ -31,7 +31,7 @@ public class Dialog
     //    }
     //}
 
-    //public void MoveNext(GameClient client)
+    //public void MoveNext(WorldClient client)
     //{
     //    if (CanMoveNext)
     //        SequenceIndex++;

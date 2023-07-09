@@ -28,7 +28,7 @@ public class Bank : IBank
     private SemaphoreSlim SaveLock { get; } = new(1, 1);
     public Dictionary<uint, Item> Items { get; }
 
-    public async Task<bool> Deposit(GameClient client, Item item)
+    public async Task<bool> Deposit(WorldClient client, Item item)
     {
         var temp = new Item
         {
@@ -278,7 +278,7 @@ public class Bank : IBank
         }
     }
 
-    public async Task<bool> Withdraw(GameClient client, Mundane mundane)
+    public async Task<bool> Withdraw(WorldClient client, Mundane mundane)
     {
         #region Item Check
 
@@ -395,7 +395,7 @@ public class Bank : IBank
         return true;
     }
 
-    public void DeleteFromAislingDb(IGameClient client)
+    public void DeleteFromAislingDb(IWorldClient client)
     {
         if (client.PendingBankedSession.ItemId == 0) return;
 
@@ -421,21 +421,21 @@ public class Bank : IBank
         }
     }
 
-    public void DepositGold(IGameClient client, uint gold)
+    public void DepositGold(IWorldClient client, uint gold)
     {
         client.Aisling.GoldPoints -= gold;
         client.Aisling.BankedGold += gold;
         client.SendStats(StatusFlags.StructC);
     }
 
-    public void WithdrawGold(IGameClient client, uint gold)
+    public void WithdrawGold(IWorldClient client, uint gold)
     {
         client.Aisling.GoldPoints += gold;
         client.Aisling.BankedGold -= gold;
         client.SendStats(StatusFlags.StructC);
     }
 
-    public void UpdatePlayersWeight(GameClient client)
+    public void UpdatePlayersWeight(WorldClient client)
     {
         client.Aisling.CurrentWeight = 0;
 

@@ -14,10 +14,10 @@ public class Player : Sprite
     public DateTime LastLogged { get; set; }
     public string LastIP { get; set; }
     public string LastAttemptIP { get; set; }
-    public uint AbpLevel { get; set; }
-    public uint AbpNext { get; set; }
+    public short AbpLevel { get; set; }
+    public int AbpNext { get; set; }
     public uint AbpTotal { get; set; }
-    public uint ExpLevel { get; set; }
+    public short ExpLevel { get; set; }
     // Since this property needs to be used in negative calculations it must stay int
     public int ExpNext { get; set; }
     public uint ExpTotal { get; set; }

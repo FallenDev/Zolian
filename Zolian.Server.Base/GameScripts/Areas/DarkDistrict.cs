@@ -11,7 +11,7 @@ public class DarkDistrict : AreaScript
     public DarkDistrict(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a presence nearby.");
         if (client.Aisling.QuestManager.Keela != 1 || !client.Aisling.QuestManager.KeelaQuesting) return;
@@ -20,9 +20,9 @@ public class DarkDistrict : AreaScript
         client.GiveItem("Assassin Notes");
     }
 
-    public override void OnMapExit(GameClient client) { }
-    public override void OnMapClick(GameClient client, int x, int y) { }
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

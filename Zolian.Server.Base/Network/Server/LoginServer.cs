@@ -67,25 +67,14 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
             if (reservedRedirect != null)
             {
-                Logger.WithProperty(localClient)
-                      .WithProperty(reservedRedirect)
-                      .LogDebug("Received external redirect {@RedirectID}", reservedRedirect.Id);
-
                 localClient.Crypto = new Crypto(localArgs.Seed, localArgs.Key, string.Empty);
                 localClient.SendLoginNotice(false, _notification);
             } else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
-                Logger.WithProperty(localClient)
-                      .WithProperty(redirect)
-                      .LogDebug("Received internal redirect {@RedirectId}", redirect.Id);
-
                 localClient.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
                 localClient.SendLoginNotice(false, _notification);
             } else
             {
-                Logger.WithProperty(localClient)
-                      .WithProperty(localArgs)
-                      .LogWarning("{@ClientIp} tried to redirect with invalid redirect details", localClient.RemoteIp.ToString());
                 ServerSetup.Logger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 Analytics.TrackEvent($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 localClient.Disconnect();
@@ -133,9 +122,6 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                 };
 
                 await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
-
-                Logger.WithProperty(localClient).LogDebug("New character created with name {@Name}", user.Username);
-
                 localClient.SendLoginMessage(LoginMessageType.Confirm);
             } else
                 localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unable to create character, bad request.");
@@ -195,20 +181,11 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
             if (result == null)
             {
-                Logger.WithProperty(localClient)
-                      .WithProperty(password)
-                      .LogDebug("Player does not exist {@Name}.", name);
-
                 localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
-
                 return;
             }
-
-            Logger.WithProperty(client)
-                  .LogDebug("Validated credentials for {@Name}", name);
-
+            
             var maintCheck = name.ToLowerInvariant();
-
             var connInfo = new ConnectionInfo
             {
                 Address = IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp),
@@ -366,10 +343,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
             aisling.Result.Password = newPassword;
             aisling.Result.LastIP = localClient.RemoteIp.ToString();
             aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
-            await SavePassword(aisling.Result);
-
-            Logger.WithProperty(client)
-                  .LogInformation("Changed password for aisling {@AislingName}", name);
+            await SavePassword(aisling.Result).ConfigureAwait(false);
         }
 
         return ExecuteHandler(client, args, InnerOnPasswordChange);
@@ -388,8 +362,6 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
     protected override void IndexHandlers()
     {
-        if (ClientHandlers == null!) return;
-
         base.IndexHandlers();
 
         ClientHandlers[(byte)ClientOpCode.CreateCharRequest] = OnCreateCharRequest;
@@ -433,11 +405,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
         if (!ClientRegistry.TryAdd(client))
         {
-            Logger.WithProperty(client)
-                  .LogError("Somehow two clients got the same id");
-
             client.Disconnect();
-
             return;
         }
 

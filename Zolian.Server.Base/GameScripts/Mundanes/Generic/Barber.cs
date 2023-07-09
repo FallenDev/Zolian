@@ -14,15 +14,15 @@ public class Barber : MundaneScript
     private int _styleNumber;
     private int _colorNumber;
 
-    public Barber(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Barber(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -35,7 +35,7 @@ public class Barber : MundaneScript
         client.SendOptionsDialog(Mundane, "Looking for a change? Ok, get in the chair.", opts.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

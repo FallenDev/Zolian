@@ -13,13 +13,13 @@ namespace Darkages.GameScripts.Areas;
 public class MilethCryptTerror : AreaScript
 {
     private Sprite _aisling;
-    private GameServerTimer AnimTimer { get; }
+    private WorldServerTimer AnimTimer { get; }
     private bool _animate;
 
     public MilethCryptTerror(Area area) : base(area)
     {
         Area = area;
-        AnimTimer = new GameServerTimer(TimeSpan.FromMilliseconds(1 + 5000));
+        AnimTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(1 + 5000));
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -32,21 +32,21 @@ public class MilethCryptTerror : AreaScript
             HandleMapAnimations(elapsedTime);
     }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
         _animate = true;
     }
 
-    public override void OnMapExit(GameClient client)
+    public override void OnMapExit(WorldClient client)
     {
         _aisling = null;
         _animate = false;
     }
 
-    public override void OnMapClick(GameClient client, int x, int y) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation)
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         if (newLocation.X == 1 && newLocation.Y == 19 && client.Aisling.QuestManager.CryptTerror && !client.Aisling.QuestManager.CryptTerrorSlayed)
         {
@@ -61,7 +61,7 @@ public class MilethCryptTerror : AreaScript
         }
     }
 
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
 
     private void HandleMapAnimations(TimeSpan elapsedTime)
     {
@@ -72,5 +72,5 @@ public class MilethCryptTerror : AreaScript
         _aisling?.Show(Scope.NearbyAislings, new ServerFormat29(214, new Vector2(1, 19)));
     }
 
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

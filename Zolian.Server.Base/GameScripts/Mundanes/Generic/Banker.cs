@@ -17,15 +17,15 @@ public class Banker : MundaneScript
 {
     private readonly Bank _bank = new();
 
-    public Banker(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Banker(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -55,7 +55,7 @@ public class Banker : MundaneScript
         client.SendOptionsDialog(Mundane, "We'll take real good care of your possessions.", options.ToArray());
     }
 
-    public override void OnItemDropped(GameClient client, Item item)
+    public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
         if (!item.Template.Flags.FlagIsSet(ItemFlags.Bankable))
@@ -97,7 +97,7 @@ public class Banker : MundaneScript
         }
     }
 
-    public override void OnGoldDropped(GameClient client, uint money)
+    public override void OnGoldDropped(WorldClient client, uint money)
     {
         if (money >= 1)
         {
@@ -111,7 +111,7 @@ public class Banker : MundaneScript
         }
     }
 
-    public override async void OnResponse(GameClient client, ushort responseID, string args)
+    public override async void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
@@ -552,7 +552,7 @@ public class Banker : MundaneScript
         }
     }
         
-    private void CompleteTrade(GameClient client, uint cost)
+    private void CompleteTrade(WorldClient client, uint cost)
     {
         client.Aisling.GoldPoints -= cost;
         client.Aisling.BankManager.UpdatePlayersWeight(client);
@@ -560,7 +560,7 @@ public class Banker : MundaneScript
         OnClick(client, Mundane.Serial);
     }
 
-    private void DepositMenu(GameClient client)
+    private void DepositMenu(WorldClient client)
     {
         if (client.Aisling.Inventory.BankList.Any())
             client.Send(new ServerFormat2F(Mundane, "We'll take care of your possessions.",
@@ -569,7 +569,7 @@ public class Banker : MundaneScript
             OnClick(client, Mundane.Serial);
     }
 
-    private void WithDrawMenu(GameClient client)
+    private void WithDrawMenu(WorldClient client)
     {
         if (client.Aisling.BankManager.Items.Count > 0)
             client.Send(new ServerFormat2F(Mundane, "What would you like back?",
@@ -578,7 +578,7 @@ public class Banker : MundaneScript
             OnClick(client, Mundane.Serial);
     }
 
-    private static void Refresh(IGameClient client)
+    private static void Refresh(IWorldClient client)
     {
         client.PendingBankedSession = new PendingBanked()
         {

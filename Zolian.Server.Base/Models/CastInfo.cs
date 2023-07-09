@@ -8,7 +8,7 @@ public class CastInfo
     public byte SpellLines;
     public DateTime Started;
 
-    public string Data { get; init; }
+    public string Data { get; set; }
     public Position Position { get; set; }
-    public uint Target { get; init; }
+    public uint Target { get; set; }
 }

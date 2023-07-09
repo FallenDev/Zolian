@@ -5,7 +5,7 @@ using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
-using GameServer = Darkages.Network.Server.GameServer;
+using WorldServer = Darkages.Network.Server.WorldServer;
 
 namespace Darkages.GameScripts.Mundanes.Rucesion;
 
@@ -15,19 +15,19 @@ public class Gowther : MundaneScript
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
-    public Gowther(GameServer server, Mundane mundane) : base(server, mundane)
+    public Gowther(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
         _spellList = ObtainSpellList();
     }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -52,7 +52,7 @@ public class Gowther : MundaneScript
                 : "Walk in the shadows my dear friend.", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 

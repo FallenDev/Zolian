@@ -32,7 +32,7 @@ public class ReactorTemplate : Template
     public Position Location { get; set; }
     public string ScriptKey { get; set; }
 
-    public void Goto(GameClient client, int Idx)
+    public void Goto(WorldClient client, int Idx)
     {
         client.Aisling.ActiveReactor.Index = Idx;
         client.Aisling.ActiveSequence = client.Aisling.ActiveReactor.Sequences[Idx];
@@ -43,7 +43,7 @@ public class ReactorTemplate : Template
             Sequences[Idx].OnSequenceStep.Invoke(client.Aisling, Sequences[Idx]);
     }
 
-    public void Next(GameClient client, bool start = false)
+    public void Next(WorldClient client, bool start = false)
     {
         if (Sequences.Count == 0)
             return;
@@ -92,7 +92,7 @@ public class ReactorTemplate : Template
         if (first != null) client.Send(new ReactorSequence(client, first));
     }
 
-    public void Update(GameClient client)
+    public void Update(WorldClient client)
     {
         if (client.Aisling.CanReact)
         {

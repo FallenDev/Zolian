@@ -24,8 +24,8 @@ public interface IAisling : ISprite
     Summon SummonObjects { get; set; }
     bool UsingTwoHanded { get; set; }
     int LastMapId { get; set; }
-    GameServerTimer AttackDmgTrack { get; }
-    GameServerTimer ThreatTimer { get; }
+    WorldServerTimer AttackDmgTrack { get; }
+    WorldServerTimer ThreatTimer { get; }
     List<ClientGameSettings> GameSettings { get; set; }
     Mail MailFlags { get; set; }
     SkillBook SkillBook { get; set; }

@@ -13,10 +13,10 @@ public class ArenaEntrance : AreaScript
 
     public ArenaEntrance(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(GameClient client) => _aisling = client.Aisling;
-    public override void OnMapExit(GameClient client) { }
+    public override void OnMapEnter(WorldClient client) => _aisling = client.Aisling;
+    public override void OnMapExit(WorldClient client) { }
 
-    public override void OnMapClick(GameClient client, int x, int y)
+    public override void OnMapClick(WorldClient client, int x, int y)
     {
         switch (x)
         {
@@ -31,7 +31,7 @@ public class ArenaEntrance : AreaScript
         }
     }
 
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation)
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (_aisling.Pos != vectorMap) return;
@@ -53,6 +53,6 @@ public class ArenaEntrance : AreaScript
         }
     }
 
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

@@ -25,19 +25,19 @@ public class Dar : MundaneScript
     private bool _0X0E;
     private bool _0X0F;
 
-    public Dar(GameServer server, Mundane mundane) : base(server, mundane)
+    public Dar(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
         _spellList = ObtainSpellList();
     }
     
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(IWorldClient client)
     {
         base.TopMenu(client);
 
@@ -97,7 +97,7 @@ public class Dar : MundaneScript
         client.SendOptionsDialog(Mundane, "Looking into the darker things is what I like to do, how may I help you?", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseId, string args)
+    public override void OnResponse(WorldClient client, ushort responseId, string args)
     {
         if (!AuthenticateUser(client)) return;
 

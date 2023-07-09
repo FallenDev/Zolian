@@ -68,12 +68,12 @@ public sealed class Mundane : Sprite
         if (npc.Scripts != null)
             ServerSetup.Instance.GlobalMundaneScriptCache.TryAdd(npc.Template.Name, npc.Scripts.Values.FirstOrDefault());
 
-        npc.Template.AttackTimer = new GameServerTimer(TimeSpan.FromMilliseconds(450));
+        npc.Template.AttackTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(450));
         npc.Template.EnableTurning = false;
-        npc.Template.WalkTimer = new GameServerTimer(TimeSpan.FromSeconds(npc.Template.WalkRate));
-        npc.Template.ChatTimer = new GameServerTimer(TimeSpan.FromSeconds(npc.Template.ChatRate));
-        npc.Template.TurnTimer = new GameServerTimer(TimeSpan.FromSeconds(npc.Template.TurnRate));
-        npc.Template.SpellTimer = new GameServerTimer(TimeSpan.FromSeconds(npc.Template.CastRate));
+        npc.Template.WalkTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.WalkRate));
+        npc.Template.ChatTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.ChatRate));
+        npc.Template.TurnTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.TurnRate));
+        npc.Template.SpellTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.CastRate));
 
         npc.InitMundane();
         ServerSetup.Instance.GlobalMundaneCache.TryAdd(npc.Serial, npc);

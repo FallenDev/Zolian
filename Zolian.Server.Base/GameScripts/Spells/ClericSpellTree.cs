@@ -355,7 +355,7 @@ public class Detect : SpellScript
         }
     }
 
-    private string LevelColor(IGameClient client, Monster monster)
+    private string LevelColor(WorldClient client, Monster monster)
     {
         if (monster.Template.Level >= client.Aisling.Level + 30)
             return "{=n???{=s";

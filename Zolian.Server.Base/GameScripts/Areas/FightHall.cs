@@ -24,7 +24,7 @@ public class FightHall : AreaScript
         _aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Be careful out there.");
     }
 
-    public override void OnMapEnter(GameClient client)
+    public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
         if (_aisling == null) return;
@@ -34,9 +34,9 @@ public class FightHall : AreaScript
         _aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Be careful out there.");
     }
 
-    public override void OnMapExit(GameClient client) { }
-    public override void OnMapClick(GameClient client, int x, int y) { }
-    public override void OnPlayerWalk(GameClient client, Position oldLocation, Position newLocation) { }
-    public override void OnItemDropped(GameClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(GameClient client, string message) { }
+    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapClick(WorldClient client, int x, int y) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
+    public override void OnGossip(WorldClient client, string message) { }
 }

@@ -11,15 +11,15 @@ namespace Darkages.GameScripts.Mundanes.TempleOfLight;
 [Script("Cloud")]
 public class Cloud : MundaneScript
 {
-    public Cloud(GameServer server, Mundane mundane) : base(server, mundane) { }
+    public Cloud(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(GameClient client, int serial)
+    public override void OnClick(WorldClient client, int serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IGameClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
@@ -32,7 +32,7 @@ public class Cloud : MundaneScript
         client.SendOptionsDialog(Mundane, "I can help you transpose your experience with your health.", options.ToArray());
     }
 
-    public override void OnResponse(GameClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
 
