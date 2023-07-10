@@ -4,10 +4,8 @@ using System.Net.Sockets;
 using System.Numerics;
 
 using Chaos.Collections.Common;
-using Chaos.Common.Abstractions;
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
-using Chaos.Common.Synchronization;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
@@ -24,18 +22,16 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
 using Darkages.Object;
+using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Systems;
 using Darkages.Templates;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-using Microsoft.SqlServer.Server;
-
 using ServiceStack;
-using ServiceStack.Html;
-
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
@@ -1354,7 +1350,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     info.Position = targetPoint;
                     info.Target = (uint)targetId;
                     break;
-                    case SpellTemplate.SpellUseType.OneDigit:
+                case SpellTemplate.SpellUseType.OneDigit:
                 case SpellTemplate.SpellUseType.TwoDigit:
                 case SpellTemplate.SpellUseType.ThreeDigit:
                 case SpellTemplate.SpellUseType.FourDigit:
@@ -1511,7 +1507,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnTurn(IWorldClient localClient, TurnArgs localArgs)
         {
-            localClient.Aisling.Turn(localArgs.Direction);
+            localClient.Aisling.Direction = (byte)localArgs.Direction;
+
+            if (localClient.Aisling.Skulled)
+            {
+                localClient.SendLocation();
+                return default;
+            }
+
+            localClient.Aisling.Turn();
 
             return default;
         }
@@ -1524,13 +1528,28 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnSpacebar(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsDead()) return default;
+        if (ServerSetup.Instance.Config.AssailsCancelSpells)
+        {
+            client.SendCancelCasting();
+            return default;
+        }
+
+        if (client.Aisling.Skulled)
+        {
+            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
+            return default;
+        }
+
+        if (client.Aisling.CantAttack)
+        {
+            return default;
+        }
+
         static ValueTask InnerOnSpacebar(IWorldClient localClient)
         {
-            localClient.SendCancelCasting();
-
-            foreach (var skill in localClient.Aisling.SkillBook)
-                if (skill.Template.IsAssail)
-                    localClient.Aisling.TryUseSkill(skill);
+            AssailRoutine(localClient);
 
             return default;
         }
@@ -1538,11 +1557,57 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         return ExecuteHandler(client, InnerOnSpacebar);
     }
 
+    private static void AssailRoutine(IWorldClient lpClient)
+    {
+        var lastTemplate = string.Empty;
+
+        foreach (var skill in lpClient.Aisling.GetAssails())
+        {
+            // Skill exists check
+            if (skill?.Template == null) continue;
+            if (lastTemplate == skill.Template.Name) continue;
+            if (skill.Scripts == null) continue;
+
+            // Skill can be used check
+            if (!skill.Ready && skill.InUse) continue;
+
+            skill.InUse = true;
+            // Skill animation and execute
+            ExecuteAbility(lpClient, skill);
+            skill.InUse = false;
+
+            // Skill cleanup
+            skill.CurrentCooldown = skill.Template.Cooldown;
+            lastTemplate = skill.Template.Name;
+            lpClient.LastAssail = DateTime.UtcNow;
+        }
+    }
+
+    private static void ExecuteAbility(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
+    {
+        if (lpSkill.Template.ScriptName == "Assail")
+        {
+            // Uses a script equipped to the main-hand item if there is one
+            var itemScripts = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScripts;
+
+            if (itemScripts != null)
+                foreach (var itemScript in itemScripts.Values.Where(itemScript => itemScript != null))
+                    itemScript.OnUse(lpClient.Aisling);
+        }
+
+        if (!optExecuteScript) return;
+        var script = lpSkill.Scripts.Values.First();
+        script?.OnUse(lpClient.Aisling);
+    }
+
     /// <summary>
     /// 0x18 - Request World List
     /// </summary>
     public ValueTask OnWorldListRequest(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.IsRefreshing) return default;
+
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
             localClient.SendWorldList(Aislings.ToList());
@@ -1559,99 +1624,82 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnWhisper(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<WhisperArgs>(in clientPacket);
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastWhisperMessageSent).TotalSeconds < 0.30) return default;
 
         ValueTask InnerOnWhisper(IWorldClient localClient, WhisperArgs localArgs)
         {
-            (var targetName, var message) = localArgs;
+            var (targetName, message) = localArgs;
             var fromAisling = localClient.Aisling;
+            if (targetName.Length > 12) return default;
+            if (message.Length > 100) return default;
+            client.LastWhisperMessageSent = readyTime;
+            var maxLength = CONSTANTS.MAX_SERVER_MESSAGE_LENGTH - targetName.Length - 4;
+            if (message.Length > maxLength)
+                message = message[..maxLength];
 
-            if (message.Length > 100)
-                return default;
-
-            if (ChannelService.IsChannel(targetName))
+            switch (targetName)
             {
-                if (targetName.EqualsI(WorldOptions.Instance.GroupChatName) || targetName.EqualsI("!group"))
-                {
-                    if (fromAisling.Group == null)
+                case "#" when client.Aisling.GameMaster:
+                    foreach (var player in Aislings)
                     {
-                        fromAisling.SendOrangeBarMessage("You are not in a group");
-
-                        return default;
+                        if (player.Client is null) return default;
+                        player.Client.SendServerMessage(ServerMessageType.AdminMessage, $"{{=c{client.Aisling.Username}: {message}");
                     }
-
-                    fromAisling.Group.SendMessage(fromAisling, message);
-                }
-                else if (targetName.EqualsI(WorldOptions.Instance.GuildChatName) || targetName.EqualsI("!guild"))
-                {
-                    if (fromAisling.Guild == null)
+                    break;
+                case "#" when client.Aisling.GameMaster != true:
+                    client.SystemMessage("You cannot broadcast in this way.");
+                    break;
+                case "!" when !string.IsNullOrEmpty(client.Aisling.Clan):
+                    foreach (var player in Aislings)
                     {
-                        fromAisling.SendOrangeBarMessage("You are not in a guild");
-
-                        return default;
+                        if (player.Client is null) return default;
+                        if (player.Clan == client.Aisling.Clan)
+                        {
+                            player.Client.SendServerMessage(ServerMessageType.GuildChat, $"<!{client.Aisling.Username}> {message}");
+                        }
                     }
-
-                    fromAisling.Guild.SendMessage(fromAisling, message);
-                }
-                else if (ChannelService.ContainsChannel(targetName))
-                    ChannelService.SendMessage(fromAisling, targetName, message);
-
-                return default;
+                    break;
+                case "!" when string.IsNullOrEmpty(client.Aisling.Clan):
+                    client.SystemMessage("{=eYou're not in a guild.");
+                    return default;
+                case "!!" when client.Aisling.PartyMembers != null:
+                    foreach (var player in Aislings)
+                    {
+                        if (player.Client is null) return default;
+                        if (player.GroupParty == client.Aisling.GroupParty)
+                        {
+                            player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {message}");
+                        }
+                    }
+                    break;
+                case "!!" when client.Aisling.PartyMembers == null:
+                    client.SystemMessage("{=eYou're not in a group or party.");
+                    return default;
             }
 
-            var targetAisling = Aislings.FirstOrDefault(player => player.Name.EqualsI(targetName));
+            var targetAisling = Aislings.FirstOrDefault(player => player.Username.EqualsI(targetName));
 
             if (targetAisling == null)
             {
-                fromAisling.SendActiveMessage($"{targetName} is not online");
-
+                fromAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{targetName} is not online");
                 return default;
             }
 
             if (targetAisling.Equals(fromAisling))
             {
                 localClient.SendServerMessage(ServerMessageType.Whisper, "Talking to yourself?");
-
                 return default;
             }
 
-            if (targetAisling.SocialStatus == SocialStatus.DoNotDisturb)
+            if (targetAisling.ActiveStatus == ActivityStatus.DoNotDisturb)
             {
-                localClient.SendServerMessage(ServerMessageType.Whisper, $"{targetAisling.Name} doesn't want to be bothered");
-
+                localClient.SendServerMessage(ServerMessageType.Whisper, $"{targetAisling.Username} doesn't want to be bothered");
                 return default;
             }
 
-            var maxLength = CONSTANTS.MAX_SERVER_MESSAGE_LENGTH - targetAisling.Name.Length - 4;
-
-            if (message.Length > maxLength)
-                message = message[..maxLength];
-
-            localClient.SendServerMessage(ServerMessageType.Whisper, $"[{targetAisling.Name}]> {message}");
-
-            //if someone is being ignored, they shouldnt know it
-            //let them waste their time typing for no reason
-            if (targetAisling.IgnoreList.ContainsI(fromAisling.Name))
-            {
-                Logger.WithProperty(fromAisling)
-                      .WithProperty(targetAisling)
-                      .LogWarning(
-                          "Aisling {@FromAislingName} sent whisper {@Message} to aisling {@TargetAislingName}, but they are being ignored (possibly harassment)",
-                          fromAisling.Name,
-                          message,
-                          targetAisling.Name);
-
-                return default;
-            }
-
-            Logger.WithProperty(fromAisling)
-                  .WithProperty(targetAisling)
-                  .LogTrace(
-                      "Aisling {@FromAislingName} sent whisper {@Message} to aisling {@TargetAislingName}",
-                      fromAisling.Name,
-                      message,
-                      targetAisling.Name);
-
-            targetAisling.Client.SendServerMessage(ServerMessageType.Whisper, $"[{fromAisling.Name}]: {message}");
+            localClient.SendServerMessage(ServerMessageType.Whisper, $"[{targetAisling.Username}]> {message}");
+            targetAisling.Client.SendServerMessage(ServerMessageType.Whisper, $"[{fromAisling.Username}]: {message}");
 
             return default;
         }
@@ -1664,19 +1712,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnUserOptionToggle(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client.Aisling.GameSettings == null) return default;
+
         var args = PacketSerializer.Deserialize<UserOptionToggleArgs>(in clientPacket);
 
         static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, UserOptionToggleArgs localArgs)
         {
             if (localArgs.UserOption == UserOption.Request)
             {
-                localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString());
+                localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.GameSettings.ToString());
 
                 return default;
             }
 
-            localClient.Aisling.Options.Toggle(localArgs.UserOption);
-            localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.Options.ToString(localArgs.UserOption));
+            localClient.Aisling.GameSettings.Toggle(localArgs.UserOption);
+            localClient.SendServerMessage(ServerMessageType.UserOptions, localClient.Aisling.GameSettings.ToString(localArgs.UserOption));
 
             return default;
         }
@@ -1689,20 +1739,72 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnUseItem(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling?.Map is not { Ready: true }) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        
+        if (client.Aisling.IsDead())
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+            return default;
+        }
+        
+        if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsParalyzed || client.Aisling.IsFrozen || client.Aisling.IsStopped)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+            return default;
+        }
+        
+        // Speed equipping prevent (movement)
+        if (!client.IsEquipping)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
+            return default;
+        }
+        
         var args = PacketSerializer.Deserialize<ItemUseArgs>(in clientPacket);
 
         static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
         {
-            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
+            var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
+            if (item?.Template == null) return default;
 
-            if (exchange != null)
+            if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
+                localClient.LastEquip = DateTime.UtcNow;
+
+            var activated = false;
+
+            // Run Scripts on item on use
+            if (!string.IsNullOrEmpty(item.Template.ScriptName)) item.Scripts ??= ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
+            if (!string.IsNullOrEmpty(item.Template.WeaponScript)) item.WeaponScripts ??= ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
+
+            if (item.Scripts == null)
             {
-                exchange.AddItem(localClient.Aisling, localArgs.SourceSlot);
-
-                return default;
+                localClient.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantUseThat}");
+            }
+            else
+            {
+                var script = item.Scripts.Values.First();
+                script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
+                activated = true;
             }
 
-            localClient.Aisling.TryUseItem(localArgs.SourceSlot);
+            if (!activated) return default;
+            if (!item.Template.Flags.FlagIsSet(ItemFlags.Consumable)) return default;
+
+            int stack = item.Stacks;
+            if (item.Stacks >= 1)
+                stack--;
+
+            if (stack >= 1)
+            {
+                localClient.SendRemoveItemFromPane(item.InventorySlot);
+                localClient.Aisling.Inventory.Set(item);
+                localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
+            }
+            else
+            {
+                localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+            }
 
             return default;
         }
@@ -1715,12 +1817,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnEmote(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.IsRefreshing) return default;
+        if (client.Aisling.IsDead()) return default;
+        if (client.Aisling.Skulled)
+        {
+            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
+            client.SendLocation();
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<EmoteArgs>(in clientPacket);
 
         ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
         {
             if ((int)localArgs.BodyAnimation <= 44)
-                client.Aisling.AnimateBody(localArgs.BodyAnimation);
+                localClient.SendBodyAnimation(localClient.Aisling.Serial, localArgs.BodyAnimation, 120);
 
             return default;
         }
@@ -1733,22 +1846,40 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnGoldDropped(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsDead()) return default;
+        if (client.Aisling.CantAttack) return default;
+        if (client.Aisling.Skulled)
+        {
+            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
+            client.SendLocation();
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<GoldDropArgs>(in clientPacket);
 
         ValueTask InnerOnGoldDropped(IWorldClient localClient, GoldDropArgs localArgs)
         {
-            (var amount, var destinationPoint) = localArgs;
-            var map = localClient.Aisling.MapInstance;
+            var (amount, destinationPoint) = localArgs;
+            if (amount <= 0) return default;
 
-            if (!localClient.Aisling.WithinRange(destinationPoint, Options.DropRange))
-                return default;
+            if (client.Aisling.GoldPoints >= (uint)amount)
+            {
+                client.Aisling.GoldPoints -= (uint)amount;
+                if (client.Aisling.GoldPoints <= 0)
+                    client.Aisling.GoldPoints = 0;
 
-            if (map.IsWall(destinationPoint))
-                return default;
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.YouDroppedGoldMsg}");
+                client.SendTargetedMessage(Scope.NearbyAislingsExludingSelf, ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}");
 
-            localClient.Aisling.TryDropGold(destinationPoint, amount, out _);
-
-            return default;
+                Money.Create(client.Aisling, (uint)amount, new Position(destinationPoint.X, destinationPoint.Y));
+                client.SendAttributes(StatUpdateType.ExpGold);
+            }
+            else
+            {
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NotEnoughGoldToDropMsg}");
+            }
         }
 
         return ExecuteHandler(client, args, InnerOnGoldDropped);

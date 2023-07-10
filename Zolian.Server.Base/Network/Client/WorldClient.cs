@@ -2579,15 +2579,6 @@ namespace Darkages.Network.Client
             }
         }
 
-        public void BuildSettings()
-        {
-            Aisling.GameSettings = new List<ClientGameSettings>();
-
-            foreach (var settings in ServerSetup.Instance.Config.Settings)
-                Aisling.GameSettings.Add(new ClientGameSettings(settings.SettingOff, settings.SettingOn,
-                    settings.Enabled));
-        }
-
         public bool CheckReqs(WorldClient client, Item item)
         {
             // Game Master check

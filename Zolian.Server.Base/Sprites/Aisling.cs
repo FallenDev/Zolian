@@ -87,7 +87,7 @@ public sealed class Aisling : Player, IAisling
     public int LastMapId { get; set; }
     public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
-    public List<ClientGameSettings> GameSettings { get; set; }
+    public UserOptions GameSettings { get; init; }
     public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }
     public SpellBook SpellBook { get; set; }
@@ -390,11 +390,11 @@ public sealed class Aisling : Player, IAisling
                 }
 
                 spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
-                Client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
+                Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
             }
             else
             {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue casting spell; Code: Crocodile");
+                Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue casting spell; Code: Crocodile");
             }
         }
 

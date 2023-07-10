@@ -125,7 +125,6 @@ public interface IWorldClient : ISocketClient
     void UpdateSkillSpellCooldown(TimeSpan elapsedTime);
     WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
     bool PayPrerequisites(LearningPredicate prerequisites);
-    void BuildSettings();
     bool CheckReqs(WorldClient client, Item item);
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);

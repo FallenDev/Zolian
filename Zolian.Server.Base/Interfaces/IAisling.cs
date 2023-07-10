@@ -26,7 +26,7 @@ public interface IAisling : ISprite
     int LastMapId { get; set; }
     WorldServerTimer AttackDmgTrack { get; }
     WorldServerTimer ThreatTimer { get; }
-    List<ClientGameSettings> GameSettings { get; set; }
+    UserOptions GameSettings { get; init; }
     Mail MailFlags { get; set; }
     SkillBook SkillBook { get; set; }
     SpellBook SpellBook { get; set; }
