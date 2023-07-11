@@ -50,7 +50,7 @@ internal class ZolianDaemon
 
     private static void StartProcess()
     {
-        var exePath = Directory.GetCurrentDirectory() + "\\Zolian.WorldServer.exe";
+        var exePath = Directory.GetCurrentDirectory() + "\\Zolian.GameServer.exe";
         if (!File.Exists(exePath)) return;
         var pr = new Process();
 
@@ -76,7 +76,7 @@ internal class ZolianDaemon
 
     private static void ObtainProcess()
     {
-        var serverProcesses = Process.GetProcessesByName("Zolian.WorldServer");
+        var serverProcesses = Process.GetProcessesByName("Zolian.GameServer");
         if (serverProcesses.Length == 0)
         {
             Console.Write("-AlwaysOn Failed to obtain Process-\n");
