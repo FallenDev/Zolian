@@ -15,7 +15,7 @@ public class Player : Sprite
     public string LastIP { get; set; }
     public string LastAttemptIP { get; set; }
     public short AbpLevel { get; set; }
-    public int AbpNext { get; set; }
+    public uint AbpNext { get; set; }
     public uint AbpTotal { get; set; }
     public short ExpLevel { get; set; }
     // Since this property needs to be used in negative calculations it must stay int

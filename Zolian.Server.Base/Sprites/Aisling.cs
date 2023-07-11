@@ -37,7 +37,7 @@ public sealed class Aisling : Player, IAisling
     public uint MaximumWeight => GameMaster switch
     {
         true => 999,
-        false => (uint)(ExpLevel / 2 + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer)
+        false => (uint)(Math.Round(ExpLevel / 2d) + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer)
     };
 
     public bool Dead => IsDead();
@@ -70,6 +70,7 @@ public sealed class Aisling : Player, IAisling
         GroupId = 0;
         AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
+        ChantTimer = new ChantTimer(1500);
         EntityType = TileContent.Aisling;
     }
 
@@ -87,6 +88,7 @@ public sealed class Aisling : Player, IAisling
     public int LastMapId { get; set; }
     public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
+    public ChantTimer ChantTimer { get; }
     public UserOptions GameSettings { get; init; }
     public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }

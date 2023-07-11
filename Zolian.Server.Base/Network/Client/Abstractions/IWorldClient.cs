@@ -53,7 +53,7 @@ public interface IWorldClient : ISocketClient
     WorldPortal PendingNode { get; set; }
     Position LastKnownPosition { get; set; }
     int MapClicks { get; set; }
-    int EntryCheck { get; set; }
+    uint EntryCheck { get; set; }
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
@@ -116,6 +116,7 @@ public interface IWorldClient : ISocketClient
     void DispatchCasts();
     WorldClient SystemMessage(string message);
     void SendTargetedMessage(Scope scope, ServerMessageType type, string text);
+    void SendTargetedPublicMessage(Scope scope, PublicMessageType type, string text);
     void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0,
         uint casterSerial = 0, uint targetSerial = 0, Position position = null);
     Task<WorldClient> Save();

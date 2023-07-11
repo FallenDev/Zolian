@@ -98,7 +98,7 @@ public class Gowther : MundaneScript
                     client.CloseDialog();
                 }
 
-                client.Aisling.SkillBook.Remove((byte)idx, true);
+                client.Aisling.SkillBook.Remove(client, (byte)idx, true);
                 client.Send(new ServerFormat2D((byte)idx));
                 client.LoadSkillBook();
 
@@ -256,7 +256,7 @@ public class Gowther : MundaneScript
                     client.CloseDialog();
                 }
 
-                client.Aisling.SpellBook.Remove((byte)idx, true);
+                client.Aisling.SpellBook.Remove(client, (byte)idx, true);
                 client.Send(new ServerFormat18((byte)idx));
                 client.LoadSpellBook();
 

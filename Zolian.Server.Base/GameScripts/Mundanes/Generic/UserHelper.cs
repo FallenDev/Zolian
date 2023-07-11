@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -13,7 +14,7 @@ public class UserHelper : MundaneScript
 {
     public UserHelper(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
@@ -55,13 +56,13 @@ public class UserHelper : MundaneScript
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
 
-        client.SendMessage(0x08, $"{{=gClient Latency: {{={latencyCode}{latencyMs} {{=gMap#: {{=a{mapNum}\n{{=cSTR: {{=a{playerStr}{{=c, INT: {{=a{playerInt}{{=c, WIS: {{=a{playerWis}{{=c, CON: {{=a{playerCon}{{=c, DEX: {{=a{playerDex}\n" +
-                                 $"{{=cDMG: {{=a{playerDmg}{{=c, Regen: {{=a{playerRegen}{{=c, {{=sArmor{{=c: {{=a{playerAc}, {{=sAmplified{{=c: {{=a{amplified}%\n" +
-                                 $"{{=sSupport Offense{{=c: {{=a{playerOffElement}{{=c, {{=sSupport Defense{{=c: {{=a{playerDefElement}{{=c\n\n" +
-                                 $"{{=eSave Throws{{=c: {{=sFortitude{{=c:{{=a{playerFort}%{{=c, {{=sReflex{{=c:{{=a{playerReflex}%{{=c, {{=sWill{{=c:{{=a{playerWill}%\n\n" +
-                                 $"{{=bBleeding{{=c: {{=a{playerBleeding}{{=c, {{=rRending{{=c: {{=a{playerRending}{{=c, {{=sAegis{{=c: {{=a{playerAegis}{{=c, {{=nReaping{{=c: {{=a{playerReaping}\n" +
-                                 $"{{=bVampirism{{=c: {{=a{playerVamp}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +
-                                 $"{{=uQuake{{=c: {{=a{playerQuake}{{=c, {{=uRain{{=c: {{=a{playerRain}, {{=uFlame{{=c: {{=a{playerFlame}{{=c, {{=uDusk{{=c: {{=a{playerDusk}{{=c, {{=uDawn{{=c: {{=a{playerDawn}");
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gClient Latency: {{={latencyCode}{latencyMs} {{=gMap#: {{=a{mapNum}\n{{=cSTR: {{=a{playerStr}{{=c, INT: {{=a{playerInt}{{=c, WIS: {{=a{playerWis}{{=c, CON: {{=a{playerCon}{{=c, DEX: {{=a{playerDex}\n" +
+                                                                      $"{{=cDMG: {{=a{playerDmg}{{=c, Regen: {{=a{playerRegen}{{=c, {{=sArmor{{=c: {{=a{playerAc}, {{=sAmplified{{=c: {{=a{amplified}%\n" +
+                                                                      $"{{=sSupport Offense{{=c: {{=a{playerOffElement}{{=c, {{=sSupport Defense{{=c: {{=a{playerDefElement}{{=c\n\n" +
+                                                                      $"{{=eSave Throws{{=c: {{=sFortitude{{=c:{{=a{playerFort}%{{=c, {{=sReflex{{=c:{{=a{playerReflex}%{{=c, {{=sWill{{=c:{{=a{playerWill}%\n\n" +
+                                                                      $"{{=bBleeding{{=c: {{=a{playerBleeding}{{=c, {{=rRending{{=c: {{=a{playerRending}{{=c, {{=sAegis{{=c: {{=a{playerAegis}{{=c, {{=nReaping{{=c: {{=a{playerReaping}\n" +
+                                                                      $"{{=bVampirism{{=c: {{=a{playerVamp}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +
+                                                                      $"{{=uQuake{{=c: {{=a{playerQuake}{{=c, {{=uRain{{=c: {{=a{playerRain}, {{=uFlame{{=c: {{=a{playerFlame}{{=c, {{=uDusk{{=c: {{=a{playerDusk}{{=c, {{=uDawn{{=c: {{=a{playerDawn}");
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)

@@ -1,21 +1,6 @@
-﻿using Darkages.Interfaces;
+﻿namespace Darkages.Meta;
 
-namespace Darkages.Meta;
-
-public class MetafileCollection : List<Metafile>, IFormattableNetwork
+public class MetafileCollection : List<Metafile>
 {
     public MetafileCollection(int capacity) : base(capacity) { }
-
-    public void Serialize(NetworkPacketReader reader) { }
-
-    public void Serialize(NetworkPacketWriter writer)
-    {
-        writer.Write((ushort)Count);
-
-        foreach (var metafile in this)
-        {
-            writer.WriteStringA(metafile.Name);
-            writer.Write(metafile.Hash);
-        }
-    }
 }

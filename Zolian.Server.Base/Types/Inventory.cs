@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Chaos.Common.Definitions;
+using Chaos.Extensions.Common;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -13,7 +14,7 @@ namespace Darkages.Types;
 public class Inventory : ObjectManager, IInventory
 {
     private const int Length = 59;
-
+    private readonly int[] _invalidSlots = { 0, 60};
     public bool IsFull => TotalItems >= Length;
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
@@ -22,6 +23,8 @@ public class Inventory : ObjectManager, IInventory
     {
         for (var i = 0; i < Length; i++) Items[i + 1] = null;
     }
+
+    public bool IsValidSlot(byte slot) => slot is > 0 and < Length && !_invalidSlots.Contains(slot);
 
     public IEnumerable<byte> BankList => (Items.Where(i => i.Value is {Template: not null } && i.Value.Template.Flags.FlagIsSet(ItemFlags.Bankable))).Select(i => i.Value.InventorySlot);
 
@@ -229,6 +232,70 @@ public class Inventory : ObjectManager, IInventory
             var hash = 17;
             hash = hash * 23 + Items.Values.GetHashCode();
             return hash * 23 + Items.Keys.GetHashCode();
+        }
+    }
+
+    public bool TrySwap(WorldClient client, byte slot1, byte slot2)
+    {
+        lock (Items)
+        {
+            var item1 = FindInSlot(slot1);
+            var item2 = FindInSlot(slot2);
+
+            if ((item1 == null)
+                || (item2 == null)
+                || !item1.Template.CanStack
+                || !item2.Template.CanStack
+                || (item1.Stacks == item1.Template.MaxStack)
+                || (item2.Stacks == item2.Template.MaxStack)
+                || !item1.DisplayName.EqualsI(item2.DisplayName))
+                return AttemptSwap(slot1, slot2);
+
+            // Total stacks an item can support, minus stack
+            var missingStacks = item2.Template.MaxStack - item2.Stacks;
+            // Available space that can be filled within the stack
+            var stacksToGive = Math.Min(missingStacks, item1.Stacks);
+            
+            if (item1.Stacks == stacksToGive)
+            {
+                AddRange(client, item2, item1.Stacks);
+                Remove(slot1);
+                return true;
+            }
+
+            if (item1.Stacks < stacksToGive)
+            {
+                AddRange(client, item2, item1.Stacks);
+            }
+            else if (item1.Stacks > stacksToGive)
+            {
+                return AttemptSwap(slot1, slot2);
+            }
+
+            return true;
+        }
+    }
+
+    private bool AttemptSwap(byte item1, byte item2)
+    {
+        if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
+
+        lock (Items)
+        {
+            var obj1 = FindInSlot(item1);
+            var obj2 = FindInSlot(item2);
+
+            if (obj1 != null)
+            {
+                obj1.Slot = item2;
+            }
+
+            if (obj2 != null)
+            {
+                obj2.Slot = item1;
+            }
+
+            return true;
         }
     }
 }

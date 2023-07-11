@@ -156,7 +156,7 @@ namespace Darkages.Network.Client
         public WorldPortal PendingNode { get; set; }
         public Position LastKnownPosition { get; set; }
         public int MapClicks { get; set; }
-        public int EntryCheck { get; set; }
+        public uint EntryCheck { get; set; }
 
         public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -2373,6 +2373,52 @@ namespace Darkages.Network.Client
             }
         }
 
+        public void SendTargetedPublicMessage(Scope scope, PublicMessageType type, string text)
+        {
+            var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
+
+            switch (scope)
+            {
+                case Scope.Self:
+                    SendPublicMessage(Aisling.Serial, type, text);
+                    break;
+
+                case Scope.NearbyAislings:
+                    {
+                        foreach (var obj in nearby)
+                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
+                    }
+                    break;
+
+                case Scope.NearbyAislingsExludingSelf:
+                    {
+                        foreach (var obj in nearby)
+                        {
+                            if (obj.Serial == Aisling.Serial)
+                                continue;
+
+                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
+                        }
+                    }
+                    break;
+
+                case Scope.AislingsOnSameMap:
+                    {
+                        foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
+                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
+                    }
+                    break;
+
+                case Scope.All:
+                    {
+                        var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
+                        foreach (var obj in allAislings.Where(n => n.LoggedIn))
+                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
+                    }
+                    break;
+            }
+        }
+
         public void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null)
         {
             var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
@@ -2706,7 +2752,7 @@ namespace Darkages.Network.Client
 
         private void ForgetSkillSend(Skill skill)
         {
-            Aisling.SkillBook.Remove(skill.Slot);
+            Aisling.SkillBook.Remove(this, skill.Slot);
             {
                 SendRemoveSkillFromPane(skill.Slot);
             }
@@ -2744,7 +2790,7 @@ namespace Darkages.Network.Client
 
         public void ForgetSpellSend(Spell spell)
         {
-            Aisling.SpellBook.Remove(spell.Slot);
+            Aisling.SpellBook.Remove(this, spell.Slot);
             {
                 SendRemoveSpellFromPane(spell.Slot);
             }

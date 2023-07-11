@@ -23,7 +23,7 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
 
     public abstract void OnResponse(WorldClient client, ushort responseId, string args);
 
-    public virtual void OnClick(WorldClient client, int serial)
+    public virtual void OnClick(WorldClient client, uint serial)
     {
         // Entry to this method, generate a random key
         _onClickCheck = Random.Shared.NextInt64();

@@ -1,12 +1,12 @@
-﻿using Darkages.Compression;
-using Darkages.Interfaces;
+﻿using Chaos.Cryptography;
+using Darkages.Compression;
 using Darkages.IO;
 using Darkages.Models;
 using ServiceStack;
 
 namespace Darkages.Meta;
 
-public class Metafile : CompressableObject, IFormattableNetwork
+public class Metafile : CompressableObject
 {
     public Metafile()
     {
@@ -35,7 +35,7 @@ public class Metafile : CompressableObject, IFormattableNetwork
             }
         }
 
-        Hash = Crc32Provider.Generate32(InflatedData);
+        Hash = Crc.Generate32(InflatedData);
         Name = Path.GetFileName(Filename);
     }
 
@@ -54,15 +54,5 @@ public class Metafile : CompressableObject, IFormattableNetwork
         }
 
         return new MemoryStream(writer.BaseStream.ReadFully());
-    }
-
-    public void Serialize(NetworkPacketReader reader) { }
-
-    public void Serialize(NetworkPacketWriter writer)
-    {
-        writer.WriteStringA(Name);
-        writer.Write(Hash);
-        writer.Write((ushort)DeflatedData.Length);
-        writer.Write(DeflatedData);
     }
 }

@@ -2,6 +2,7 @@
 using Dapper;
 
 using Darkages.Database;
+using Darkages.Network.Client;
 using Darkages.Object;
 using Darkages.Templates;
 
@@ -14,13 +15,16 @@ namespace Darkages.Types;
 
 public class SkillBook : ObjectManager
 {
-    private const int SkillLength = 86;
+    private const int SkillLength = 88;
+    private readonly int[] _invalidSlots = { 0, 36, 72, 89};
     public readonly ConcurrentDictionary<int, Skill> Skills = new();
 
     public SkillBook()
     {
         for (var i = 0; i < SkillLength; i++) Skills[i + 1] = null;
     }
+
+    public bool IsValidSlot(byte slot) => slot is > 0 and < SkillLength && !_invalidSlots.Contains(slot);
 
     public int FindEmpty(int start = 0)
     {
@@ -60,13 +64,13 @@ public class SkillBook : ObjectManager
 
     public bool Has(SkillTemplate s) => Skills.Where(i => i.Value?.Template != null).Select(i => i.Value.Template).FirstOrDefault(i => i.Name.Equals(s.Name)) != null;
 
-    public Skill Remove(byte movingFrom, bool skillDelete = false)
+    public Skill Remove(WorldClient client, byte movingFrom, bool skillDelete = false)
     {
         if (!Skills.ContainsKey(movingFrom)) return null;
         var copy = Skills[movingFrom];
         if (skillDelete)
         {
-            DeleteFromAislingDb(copy);
+            DeleteFromAislingDb(client, copy);
         }
 
         Skills[movingFrom] = null;
@@ -75,14 +79,49 @@ public class SkillBook : ObjectManager
 
     public void Set(Skill s) => Skills[s.Slot] = s;
 
-    private static void DeleteFromAislingDb(Skill skill)
+    public bool AttemptSwap(byte item1, byte item2)
+    {
+        if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
+
+        if (item2 == 35)
+        {
+            var skillSlot = FindEmpty(36);
+            item2 = (byte)skillSlot;
+        }
+
+        if (item2 == 71)
+        {
+            var skillSlot = FindEmpty();
+            item2 = (byte)skillSlot;
+        }
+
+        lock (Skills)
+        {
+            var obj1 = FindInSlot(item1);
+            var obj2 = FindInSlot(item2);
+
+            if (obj1 != null)
+            {
+                obj1.Slot = item2;
+            }
+
+            if (obj2 != null)
+            {
+                obj2.Slot = item1;
+            }
+
+            return true;
+        }
+    }
+
+    private static void DeleteFromAislingDb(WorldClient client, Skill skill)
     {
         try
         {
             using var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE SkillId = @SkillId";
-            sConn.Execute(cmd, new { skill.SkillId });
+            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE Serial = @Serial AND SkillName = @SkillName";
+            sConn.Execute(cmd, new { client.Aisling.Serial, skill.SkillName });
             sConn.Close();
         }
         catch (SqlException e)

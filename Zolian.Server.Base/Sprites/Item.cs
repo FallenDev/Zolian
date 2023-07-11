@@ -885,7 +885,7 @@ public sealed class Item : Sprite, IItem
 
     public void UpdateSpellSlot(WorldClient client, byte slot)
     {
-        var a = client.Aisling.SpellBook.Remove(slot);
+        var a = client.Aisling.SpellBook.Remove(client, slot);
         client.SendRemoveSpellFromPane(slot);
 
         if (a == null) return;

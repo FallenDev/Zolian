@@ -108,7 +108,7 @@ public class MetafileManager
             metaFile.InflatedData = stream.ToArray();
         }
 
-        metaFile.Hash = Crc32Provider.Generate32(metaFile.InflatedData);
+        metaFile.Hash = Chaos.Cryptography.Crc.Generate32(metaFile.InflatedData);
         metaFile.Compress();
     }
 
@@ -126,7 +126,7 @@ public class MetafileManager
         {
             var fileName = Path.GetFileName(file);
             metaFile.DeflatedData = File.ReadAllBytes(file);
-            metaFile.Hash = Crc32Provider.Generate32(metaFile.DeflatedData);
+            metaFile.Hash = Chaos.Cryptography.Crc.Generate32(metaFile.DeflatedData);
             metaFile.Name = file;
             metaFile.Decompress();
             var fs = File.Open($"Z:\\Zolian\\Metafiles\\{fileName}", FileMode.Create);
