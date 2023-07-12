@@ -24,7 +24,7 @@ public interface ISprite
     Sprite Target { get; set; }
     int X { get; set; }
     int Y { get; set; }
-    TileContent EntityType { get; set; }
+    TileContent TileType { get; set; }
     int GroupId { get; set; }
     byte Direction { get; set; }
     int PendingX { get; set; }

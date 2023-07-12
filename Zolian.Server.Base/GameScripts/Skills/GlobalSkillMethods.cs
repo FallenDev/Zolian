@@ -101,7 +101,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var front = sprite.GetInFrontToSide();
 
         if (!front.Any()) return objs.ToArray();
-        objs.AddRange(front.Where(monster => monster.EntityType == TileContent.Monster && monster.Alive));
+        objs.AddRange(front.Where(monster => monster.TileType == TileContent.Monster && monster.Alive));
 
         return objs.ToArray();
     }

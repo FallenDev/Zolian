@@ -8,8 +8,6 @@ public static class SpriteMaker
         {
             Gender.Male => "Male",
             Gender.Female => "Female",
-            Gender.Invisible => "Invisible",
-            Gender.Both => "Both",
             _ => "Male"
         };
     }

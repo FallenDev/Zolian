@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using Chaos.Networking.Abstractions;
+using Darkages.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Darkages.Network.Server

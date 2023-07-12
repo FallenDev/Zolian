@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Numerics;
 using Chaos.Common.Definitions;
 using Darkages.Enums;
@@ -26,7 +27,7 @@ public class IgnoredRecord
 public sealed class Aisling : Player, IAisling
 {
     public int EquipmentDamageTaken = 0;
-    public readonly ConcurrentDictionary<int, Sprite> View = new();
+    public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
     public new AislingTrackers Trackers
     {
@@ -64,20 +65,21 @@ public sealed class Aisling : Player, IAisling
         Remains = new Death();
         Hacked = false;
         PasswordAttempts = 0;
-        ActiveReactor = null;
+        ActiveDialog = null;
         DiscoveredMaps = new List<int>();
         IgnoredList = new List<string>();
         GroupId = 0;
         AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         ChantTimer = new ChantTimer(1500);
-        EntityType = TileContent.Aisling;
+        TileType = TileContent.Aisling;
     }
 
     public bool Loading { get; set; }
     public long DamageCounter { get; set; }
     public uint ThreatMeter { get; set; }
-    public ReactorTemplate ActiveReactor { get; set; }
+    public Dialog ActiveDialog { get; set; }
+    public Stack<Dialog> DialogHistory { get; set; }
     public DialogSequence ActiveSequence { get; set; }
     public ExchangeSession Exchange { get; set; }
     public NameDisplayStyle NameStyle { get; set; }
@@ -275,26 +277,10 @@ public sealed class Aisling : Player, IAisling
         if (GoldPoints > (uint)ServerSetup.Instance.Config.MaxCarryGold)
             GoldPoints = (uint)ServerSetup.Instance.Config.MaxCarryGold;
 
-        trader.Client.SendStats(StatusFlags.StructC);
-        Client.SendStats(StatusFlags.StructC);
-
-        var packet = new NetworkPacketWriter();
-        packet.Write((byte)0x42);
-        packet.Write((byte)0x00);
-
-        packet.Write((byte)0x04);
-        packet.Write((byte)0x00);
-        packet.WriteStringA("Trade was aborted.");
-        Client.Send(packet);
-
-        packet = new NetworkPacketWriter();
-        packet.Write((byte)0x42);
-        packet.Write((byte)0x00);
-
-        packet.Write((byte)0x04);
-        packet.Write((byte)0x01);
-        packet.WriteStringA("Trade was aborted.");
-        trader.Client.Send(packet);
+        trader.Client.SendAttributes(StatUpdateType.ExpGold);
+        Client.SendAttributes(StatUpdateType.ExpGold);
+        trader.Client.SendExchangeCancel(true);
+        Client.SendExchangeCancel(false);
     }
 
     public bool CanSeeGhosts()
@@ -306,24 +292,20 @@ public sealed class Aisling : Player, IAisling
     {
         if (skill == null) return;
         if (!skill.Ready && skill.Template.SkillType != SkillScope.Assail)
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
-        skill.CurrentCooldown = skill.Template.Cooldown;
-        Client.Send(new ServerFormat3F(1, skill.Slot, skill.CurrentCooldown));
+            Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
     }
 
-    public Aisling Cast(Spell spell, Sprite target, byte actionSpeed = 30)
+    public Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30)
     {
-        var action = new ServerFormat1A
+        var bodyAnim = Path switch
         {
-            Serial = Serial,
-            Number = Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            },
-            Speed = actionSpeed
+            Class.Cleric => (BodyAnimation)128,
+            Class.Arcanus => (BodyAnimation)136,
+            Class.Monster => (BodyAnimation)1,
+            _ => (BodyAnimation)6
         };
+
+        Client.SendBodyAnimation(Serial, bodyAnim, actionSpeed);
 
         switch (target)
         {
@@ -334,10 +316,8 @@ public sealed class Aisling : Player, IAisling
                 break;
         }
 
-        Client.SendMessage(0x02, $"You've cast {spell.Template.Name}.");
-        var animation = new ServerFormat29(spell.Template.Animation, target.Pos);
-        Show(Scope.NearbyAislings, action);
-        Show(Scope.NearbyAislings, animation);
+        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
+        Client.SendTargetedAnimation(Scope.NearbyAislings, spell.Template.Animation, 100, 0, 0U, 0U, new Position(target.Pos.X, target.Pos.Y));
 
         return this;
     }
@@ -417,14 +397,10 @@ public sealed class Aisling : Player, IAisling
         trader.Exchange = null;
 
         foreach (var item in itemsB)
-            if (item.GiveTo(this))
-            {
-            }
+            item.GiveTo(this);
 
         foreach (var item in itemsA)
-            if (item.GiveTo(trader))
-            {
-            }
+            item.GiveTo(trader);
 
         GoldPoints += goldB;
         trader.GoldPoints += goldA;
@@ -437,8 +413,10 @@ public sealed class Aisling : Player, IAisling
         exchangeA.Items.Clear();
         exchangeB.Items.Clear();
 
-        trader.Client?.SendStats(StatusFlags.WeightMoney);
-        Client?.SendStats(StatusFlags.WeightMoney);
+        trader.Client?.SendAttributes(StatUpdateType.ExpGold);
+        trader.Client?.SendAttributes(StatUpdateType.Primary);
+        Client?.SendAttributes(StatUpdateType.ExpGold);
+        Client?.SendAttributes(StatUpdateType.Primary);
     }
 
     public IEnumerable<Skill> GetAssails()
@@ -454,7 +432,7 @@ public sealed class Aisling : Player, IAisling
             return true;
         }
 
-        if (sendClientUpdate) Client?.SendStats(StatusFlags.StructC);
+        if (sendClientUpdate) Client?.SendAttributes(StatUpdateType.ExpGold);
 
         return false;
     }
@@ -528,7 +506,7 @@ public sealed class Aisling : Player, IAisling
     {
         if (CurrentMp >= spell.Template.ManaCost)
             return this;
-        Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+        Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
 
         return null;
     }
@@ -557,13 +535,19 @@ public sealed class Aisling : Player, IAisling
         CurrentHp = MaximumHp;
         CurrentMp = MaximumMp;
 
-        Client.SendStats(StatusFlags.Health);
+        Client.SendAttributes(StatUpdateType.Vitality);
     }
 
     public void Remove(bool update = false, bool delete = true)
     {
         if (update)
-            Show(Scope.NearbyAislingsExludingSelf, new ServerFormat0E(Serial));
+        {
+            var players = AislingsNearby();
+            foreach (var player in players.Where(s => s.Serial != Serial))
+            {
+                player.Client.SendRemoveObject(Serial);
+            }
+        }
 
         try
         {
@@ -587,13 +571,6 @@ public sealed class Aisling : Player, IAisling
     {
         var infront = DamageableGetInFront().OfType<Aisling>();
 
-        var action = new ServerFormat1A
-        {
-            Serial = Serial,
-            Number = 0x01,
-            Speed = 30
-        };
-
         foreach (var obj in infront)
         {
             if (obj.Serial == Serial)
@@ -610,19 +587,12 @@ public sealed class Aisling : Player, IAisling
         }
 
         ApplyDamage(this, 0, null);
-        Show(Scope.NearbyAislings, new ServerFormat19(8));
-        Show(Scope.NearbyAislings, action);
+        Client.SendSound(8, false);
+        Client.SendBodyAnimation(Serial, BodyAnimation.Assail, 35);
     }
 
     public void ReviveFromAfar(Aisling aisling)
     {
-        var action = new ServerFormat1A
-        {
-            Serial = Serial,
-            Number = 0x01,
-            Speed = 30
-        };
-
         if (aisling.HasDebuff("Skulled"))
             aisling.RemoveDebuff("Skulled", true);
 
@@ -630,8 +600,8 @@ public sealed class Aisling : Player, IAisling
         aisling.Animate(5);
 
         ApplyDamage(this, 0, null);
-        Show(Scope.NearbyAislings, new ServerFormat19(8));
-        Show(Scope.NearbyAislings, action);
+        Client.SendSound(8, false);
+        Client.SendBodyAnimation(Serial, BodyAnimation.Assail, 35);
     }
 
     public void PrepareForHell()
@@ -655,13 +625,13 @@ public sealed class Aisling : Player, IAisling
 
     public Aisling UpdateStats(Spell lpSpell)
     {
-        Client.SendStats(StatusFlags.All);
+        Client.SendAttributes(StatUpdateType.Full);
         return this;
     }
 
     public void UpdateStats()
     {
-        Client?.SendStats(StatusFlags.All);
+        Client.SendAttributes(StatUpdateType.Full);
     }
 
     public void WarpToHell()

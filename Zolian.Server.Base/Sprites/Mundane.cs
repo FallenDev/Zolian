@@ -1,10 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
 using System.Security.Cryptography;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Common;
+using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Infrastructure;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Templates;
 using Darkages.Types;
@@ -13,7 +15,7 @@ using ServiceStack;
 
 namespace Darkages.Sprites;
 
-public sealed class Mundane : Sprite
+public sealed class Mundane : Sprite, IDialogSourceEntity
 {
     private readonly List<SkillScript> _skillScripts = new();
     private readonly List<SpellScript> _spellScripts = new();
@@ -25,7 +27,7 @@ public sealed class Mundane : Sprite
 
     public Mundane()
     {
-        EntityType = TileContent.Mundane;
+        TileType = TileContent.Mundane;
     }
 
     public static void Create(MundaneTemplate template)
@@ -152,12 +154,7 @@ public sealed class Mundane : Sprite
                     if (!msg.IsNullOrEmpty())
                         foreach (var aisling in nearby)
                         {
-                            aisling.Show(Scope.Self, new ServerFormat0D
-                            {
-                                Serial = Serial,
-                                Text = $"{Template.Name}: {msg}",
-                                Type = 0
-                            });
+                            aisling.Client.SendPublicMessage(Serial, PublicMessageType.Normal, $"{Template.Name}: {msg}");
                         }
                 }
 
@@ -202,4 +199,11 @@ public sealed class Mundane : Sprite
             }
         }
     }
+
+    public DisplayColor Color => DisplayColor.Default;
+    public EntityType EntityType => EntityType.Creature;
+    public uint Id => Serial;
+    public string Name => Template.Name;
+    public ushort Sprite => Template.Image;
+    public void Activate(Aisling source) => Scripts.First().Value.OnClick(source.Client, Id);
 }

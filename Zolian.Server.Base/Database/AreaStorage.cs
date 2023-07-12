@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Cryptography;
+using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Scripting;
 using Darkages.Types;
@@ -87,7 +88,7 @@ public record AreaStorage : IAreaStorage
     {
         mapObj.FilePath = mapFile;
         mapObj.Data = File.ReadAllBytes(mapFile);
-        mapObj.Hash = Crc16Provider.Generate16(mapObj.Data);
+        mapObj.Hash = Crc.Generate16(mapObj.Data);
 
         return mapObj.OnLoaded();
     }

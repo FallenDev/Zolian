@@ -76,7 +76,7 @@ public interface IWorldClient : ISocketClient
     void SendExchangeAddItem(bool rightSide, byte index, Item item);
     void SendExchangeCancel(bool rightSide);
     void SendExchangeRequestAmount(byte slot);
-    void SendExchangeSetGold(bool rightSide, int amount);
+    void SendExchangeSetGold(bool rightSide, uint amount);
     void SendExchangeStart(Aisling fromAisling);
     void SendForcedClientPacket(ref ClientPacket clientPacket);
     void SendGroupRequest(GroupRequestType groupRequestType, string fromName);

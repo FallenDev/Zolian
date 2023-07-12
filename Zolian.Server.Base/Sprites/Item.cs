@@ -5,6 +5,7 @@ using Chaos.Common.Identity;
 using Dapper;
 
 using Darkages.Database;
+using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -18,7 +19,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Darkages.Sprites;
 
-public sealed class Item : Sprite, IItem
+public sealed class Item : Sprite, IItem, IDialogSourceEntity
 {
     public enum Quality
     {
@@ -97,9 +98,14 @@ public sealed class Item : Sprite, IItem
 
     public Sprite[] AuthenticatedAislings { get; set; }
     public byte Color { get; set; }
+    public EntityType EntityType => EntityType.Item;
+    public uint Id => Serial;
     public bool Cursed { get; set; }
     public ushort DisplayImage { get; init; }
+    DisplayColor IDialogSourceEntity.Color => (DisplayColor)Color;
     public string Name { get; set; }
+    public ushort Sprite => Template.Image;
+    public void Activate(Aisling source) => Scripts.First().Value.OnUse(source, Slot);
     public string DisplayName => GetDisplayName();
     public string NoColorDisplayName => NoColorGetDisplayName();
     public uint Durability { get; set; }
@@ -222,7 +228,7 @@ public sealed class Item : Sprite, IItem
 
     public Item()
     {
-        EntityType = TileContent.Item;
+        TileType = TileContent.Item;
     }
 
     public Item Create(Sprite owner, string item, Quality quality, Variance variance,

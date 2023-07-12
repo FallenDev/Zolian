@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Server;
@@ -32,7 +33,7 @@ public class ObjectComponent : WorldServerComponent
 
             if (onMap) continue;
             user.Client.TransitionToMap(136, new Position(5, 7));
-            user.Client.SendMessage(0x02, "Something grabs your hand...");
+            user.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Something grabs your hand...");
         }
     }
 

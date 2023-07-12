@@ -15,7 +15,7 @@ public sealed class Money : Sprite
 
     private Money()
     {
-        EntityType = TileContent.Money;
+        TileType = TileContent.Money;
     }
 
     public static void Create(Sprite parent, uint amount, Position location)

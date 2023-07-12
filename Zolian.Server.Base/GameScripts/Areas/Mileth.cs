@@ -1,8 +1,8 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -75,7 +75,7 @@ public class Mileth : AreaScript
         switch (itemDropped.DisplayName)
         {
             case "Mead":
-                client.SendMessage(0x02, "The mead disappears, nothing happens.");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "The mead disappears, nothing happens.");
                 return;
             case "Succubus Hair":
             {
@@ -123,45 +123,45 @@ public class Mileth : AreaScript
             {
                 case >= 95:
                     item = new Item();
-                    client.SendMessage(0x02, "You hear Ceannlaidir's voice as a weapon manifests before you.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You hear Ceannlaidir's voice as a weapon manifests before you.");
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
                     if (ceanWeapon != null)
                         item = item.Create(client.Aisling, ceanWeapon, ShopMethods.DungeonHighQuality(), variance, wVariance);
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(83); });
                     break;
                 case >= 75 and < 95:
-                    client.SendMessage(0x02, "You feel a warmth placed on your shoulder. (100 Exp)")
-                        .GiveExp(100);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a warmth placed on your shoulder. (100 Exp)");
+                    client.GiveExp(100);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 62 and < 75:
-                    client.SendMessage(0x02, "Thoughts of past achievements fill you with joy. (75 Exp)")
-                        .GiveExp(75);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Thoughts of past achievements fill you with joy. (75 Exp)");
+                    client.GiveExp(75);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 50 and < 62:
-                    client.SendMessage(0x02, "A vision of Spring time and gentle rain overcomes you. (75 Exp)")
-                        .GiveExp(75);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A vision of Spring time and gentle rain overcomes you. (75 Exp)");
+                    client.GiveExp(75);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 37 and < 50:
-                    client.SendMessage(0x02, "You briefly hear whispers. What was that? (50 Exp)")
-                        .GiveExp(50);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You briefly hear whispers. What was that? (50 Exp)");
+                    client.GiveExp(50);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 25 and < 37:
-                    client.SendMessage(0x02, "... (50 Exp)")
-                        .GiveExp(50);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "... (50 Exp)");
+                    client.GiveExp(50);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 12 and < 25:
-                    client.SendMessage(0x02, "Light fills you. (25 Exp)")
-                        .GiveExp(25);
-                    client.SendStats(StatusFlags.StructC);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Light fills you. (25 Exp)");
+                    client.GiveExp(25);
+                    client.SendAttributes(StatUpdateType.ExpGold);
                     break;
                 case >= 0 and < 12:
                     item = new Item();
-                    client.SendMessage(0x02, "Glioca manifests before you, then quickly tucks a potion in your bag.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Glioca manifests before you, then quickly tucks a potion in your bag.");
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue("Ard Ioc Deum", out var potion);
                     if (potion != null)
                         item = item.Create(client.Aisling, potion);
@@ -174,7 +174,7 @@ public class Mileth : AreaScript
             var carry = item.Template.CarryWeight + client.Aisling.CurrentWeight;
             if (carry <= client.Aisling.MaximumWeight)
             {
-                ItemDura(item, quality, client);
+                ItemDura(item, quality);
                 item.GiveTo(client.Aisling);
 
                 if (item is { OriginalQuality: Item.Quality.Forsaken })
@@ -202,13 +202,13 @@ public class Mileth : AreaScript
                 }
             }
             else
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
 
-            client.SendStats(StatusFlags.StructA);
+            client.SendAttributes(StatUpdateType.Primary);
         }
     }
 
-    private static void ItemDura(Item item, Item.Quality quality, WorldClient client)
+    private static void ItemDura(Item item, Item.Quality quality)
     {
         var temp = item.Template.MaxDurability;
         switch (quality)

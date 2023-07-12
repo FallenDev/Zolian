@@ -103,7 +103,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         : null;
 
     public Position Position => new(Pos);
-    public uint Level => EntityType switch
+    public uint Level => TileType switch
     {
         TileContent.Aisling => ((Aisling)this).ExpLevel,
         TileContent.Monster => ((Monster)this).Template.Level,
@@ -131,15 +131,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     protected Sprite()
     {
         if (this is Aisling)
-            EntityType = TileContent.Aisling;
+            TileType = TileContent.Aisling;
         if (this is Monster)
-            EntityType = TileContent.Monster;
+            TileType = TileContent.Monster;
         if (this is Mundane)
-            EntityType = TileContent.Mundane;
+            TileType = TileContent.Mundane;
         if (this is Money)
-            EntityType = TileContent.Money;
+            TileType = TileContent.Money;
         if (this is Item)
-            EntityType = TileContent.Item;
+            TileType = TileContent.Item;
         var readyTime = DateTime.UtcNow;
         _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
 
@@ -178,7 +178,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             NotifyPropertyChanged();
         }
     }
-    public TileContent EntityType { get; set; }
+    public TileContent TileType { get; set; }
     public int GroupId { get; set; }
     public byte Direction { get; set; }
     public int PendingX { get; set; }

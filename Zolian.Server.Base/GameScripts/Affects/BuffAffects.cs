@@ -1,7 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Sprites;
 using Darkages.Types;
 

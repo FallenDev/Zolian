@@ -1,5 +1,4 @@
-﻿using Darkages.Network.Formats.Models.ServerFormats;
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 
 namespace Darkages.Models;
 

@@ -16,7 +16,7 @@ public class MundaneTemplate : Template
         Speech = new List<string>();
     }
 
-    public short Image { get; set; }
+    public ushort Image { get; set; }
     public string ScriptKey { get; set; }
     public bool EnableWalking { get; set; }
     public bool EnableTurning { get; set; }
@@ -111,7 +111,7 @@ public static class MundaneStorage
                 var stock30 = reader["DefaultStock30"].ToString();
 
 
-                temp.Image = (short)image;
+                temp.Image = (ushort)image;
                 temp.ScriptKey = reader["ScriptKey"].ToString();
                 temp.EnableWalking = (bool)reader["EnableWalking"];
                 temp.EnableTurning = (bool)reader["EnableTurning"];

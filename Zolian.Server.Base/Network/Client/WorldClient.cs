@@ -1227,27 +1227,10 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x2F - Send Dialog
         /// </summary>
-        public void SendDialog(Dialog dialog)
+        public void SendDialog(DialogArgs dialog)
         {
             if (dialog == null) return;
-            var args = new DialogArgs
-            {
-                Color = DisplayColor.Default,
-                DialogId = 0,
-                DialogType = DialogType.Normal,
-                EntityType = (EntityType)0,
-                HasNextButton = false,
-                HasPreviousButton = false,
-                Name = null,
-                Options = null,
-                PursuitId = null,
-                SourceId = null,
-                Sprite = 0,
-                Text = null,
-                TextBoxLength = null
-            };
-
-            Send(args);
+            Send(dialog);
         }
 
         /// <summary>
@@ -1428,13 +1411,13 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x42 - Add Gold to Exchange 
         /// </summary>
-        public void SendExchangeSetGold(bool rightSide, int amount)
+        public void SendExchangeSetGold(bool rightSide, uint amount)
         {
             var args = new ExchangeArgs
             {
                 ExchangeResponseType = ExchangeResponseType.SetGold,
                 RightSide = rightSide,
-                GoldAmount = amount
+                GoldAmount = (int)amount
             };
 
             Send(args);
@@ -1455,7 +1438,19 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
-        public void SendForcedClientPacket(ref ClientPacket clientPacket) => throw new NotImplementedException();
+        /// <summary>
+        /// Forced Client Packet -- Exchange / Pursuit / NPC Reply
+        /// </summary>
+        public void SendForcedClientPacket(ref ClientPacket clientPacket)
+        {
+            var args = new ForceClientPacketArgs
+            {
+                ClientOpCode = clientPacket.OpCode,
+                Data = clientPacket.Buffer.ToArray()
+            };
+
+            Send(args);
+        }
 
         /// <summary>
         /// 0x63 - Group Request
@@ -2047,8 +2042,8 @@ namespace Darkages.Network.Client
                         case Mundane npc:
                             var npcInfo = new CreatureInfo
                             {
-                                Id = (uint)npc.Serial,
-                                Sprite = (ushort)npc.Template.Image,
+                                Id = npc.Serial,
+                                Sprite = npc.Template.Image,
                                 X = npc.X,
                                 Y = npc.Y,
                                 CreatureType = CreatureType.Merchant,
@@ -2690,9 +2685,9 @@ namespace Darkages.Network.Client
 
         public void HandleBadTrades()
         {
-            if (Aisling.Exchange?.Trader == null) return;
+            if (Aisling.Exchange?.Trader2 == null) return;
 
-            if (!Aisling.Exchange.Trader.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader))
+            if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
                 Aisling.Client.SendExchangeCancel(true);
         }
 
@@ -2718,6 +2713,24 @@ namespace Darkages.Network.Client
         {
             WorldServer.CancelIfCasting(this);
             SendLocation();
+        }
+
+        public void CloseDialog(ushort dialogId, EntityType spriteType, bool next, bool previous, ushort spriteDisplayId, string spriteName, string text = "")
+        {
+            var dialog = new DialogArgs
+            {
+                Color = DisplayColor.Default,
+                DialogId = dialogId,
+                DialogType = DialogType.CloseDialog,
+                EntityType = spriteType,
+                HasNextButton = next,
+                HasPreviousButton = previous,
+                Sprite = spriteDisplayId,
+                Name = spriteName,
+                Text = text
+            };
+
+            SendDialog(dialog);
         }
 
         public void ForgetSkill(string s)

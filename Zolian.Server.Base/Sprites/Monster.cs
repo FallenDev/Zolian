@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-
+using Chaos.Common.Definitions;
+using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
 using Darkages.Infrastructure;
@@ -10,7 +11,7 @@ using Darkages.Types;
 
 namespace Darkages.Sprites;
 
-public sealed class Monster : Sprite
+public sealed class Monster : Sprite, IDialogSourceEntity
 {
     public Task<IList<Vector2>> Path;
 
@@ -24,7 +25,7 @@ public sealed class Monster : Sprite
         WaypointIndex = 0;
         TaggedAislings = new HashSet<uint>();
         AggroList = new List<uint>();
-        EntityType = TileContent.Monster;
+        TileType = TileContent.Monster;
     }
 
     public bool Aggressive { get; set; }
@@ -158,4 +159,11 @@ public sealed class Monster : Sprite
 
         WalkTo((int)nodeX, (int)nodeY);
     }
+
+    public DisplayColor Color => DisplayColor.Default;
+    public EntityType EntityType => EntityType.Creature;
+    public uint Id => Serial;
+    public string Name => Template.BaseName;
+    public ushort Sprite => Template.Image;
+    public void Activate(Aisling source) => Scripts.First().Value.OnClick(source.Client);
 }

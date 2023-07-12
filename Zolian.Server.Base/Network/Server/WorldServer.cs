@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -18,6 +19,7 @@ using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
+using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -32,6 +34,7 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.AppCenter.Utils.Synchronization;
 using Microsoft.Extensions.Logging;
 using Microsoft.SqlServer.Server;
 
@@ -1585,6 +1588,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             // Skill cleanup
             skill.CurrentCooldown = skill.Template.Cooldown;
+            lpClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
             lastTemplate = skill.Template.Name;
             lpClient.LastAssail = DateTime.UtcNow;
         }
@@ -2039,7 +2043,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     case Aisling aisling:
                         {
                             aisling.Client.SendExchangeSetGold(true, 0);
-                            localClient.SendExchangeSetGold(false, amount);
+                            localClient.SendExchangeSetGold(false, (uint)amount);
                             break;
                         }
                 }
@@ -2209,10 +2213,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnRefreshRequest(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.IsRefreshing) return default;
+
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {
-            localClient.Aisling.Refresh();
-
+            localClient.ClientRefreshed();
             return default;
         }
 
@@ -2228,24 +2235,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
         {
-            var dialog = localClient.Aisling.ActiveDialog.Get();
+            //var dialog = localClient.Aisling.ActiveDialog.Get();
 
-            if (dialog == null)
-            {
-                Logger.WithProperty(localClient.Aisling)
-                    .WithProperty(localArgs)
-                    .LogWarning(
-                        "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-                        localClient.Aisling.Name);
+            //if (dialog == null)
+            //{
+            //    Logger.WithProperty(localClient.Aisling)
+            //        .WithProperty(localArgs)
+            //        .LogWarning(
+            //            "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
+            //            localClient.Aisling.Name);
 
-                return default;
-            }
+            //    return default;
+            //}
 
-            //get args if the type is not a "menuWithArgs", this type should not have any new args
-            if (dialog.Type is not ChaosDialogType.MenuWithArgs && (localArgs.Args != null))
-                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+            ////get args if the type is not a "menuWithArgs", this type should not have any new args
+            //if (dialog.Type is not ChaosDialogType.MenuWithArgs && (localArgs.Args != null))
+            //    dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
 
-            dialog.Next(localClient.Aisling, (byte)localArgs.PursuitId);
+            //dialog.Next(localClient.Aisling, (byte)localArgs.PursuitId);
 
             return default;
         }
@@ -2262,44 +2269,44 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
         {
-            var dialog = localClient.Aisling.ActiveDialog.Get();
+            //var dialog = localClient.Aisling.ActiveDialog.Get();
 
-            if (dialog == null)
-            {
-                localClient.Aisling.DialogHistory.Clear();
+            //if (dialog == null)
+            //{
+            //    localClient.Aisling.DialogHistory.Clear();
 
-                Logger.WithProperty(localClient.Aisling)
-                    .WithProperty(localArgs)
-                    .LogWarning(
-                        "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-                        localClient.Aisling.Name);
+            //    Logger.WithProperty(localClient.Aisling)
+            //        .WithProperty(localArgs)
+            //        .LogWarning(
+            //            "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
+            //            localClient.Aisling.Name);
 
-                return default;
-            }
+            //    return default;
+            //}
 
-            //since we always send a dialog id of 0, we can easily get the result without comparing ids
-            var dialogResult = (DialogResult)localArgs.DialogId;
+            ////since we always send a dialog id of 0, we can easily get the result without comparing ids
+            //var dialogResult = (DialogResult)localArgs.DialogId;
 
-            if (localArgs.Args != null)
-                dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+            //if (localArgs.Args != null)
+            //    dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
 
-            switch (dialogResult)
-            {
-                case DialogResult.Previous:
-                    dialog.Previous(localClient.Aisling);
+            //switch (dialogResult)
+            //{
+            //    case DialogResult.Previous:
+            //        dialog.Previous(localClient.Aisling);
 
-                    break;
-                case DialogResult.Close:
-                    localClient.Aisling.DialogHistory.Clear();
+            //        break;
+            //    case DialogResult.Close:
+            //        localClient.Aisling.DialogHistory.Clear();
 
-                    break;
-                case DialogResult.Next:
-                    dialog.Next(localClient.Aisling, localArgs.Option);
+            //        break;
+            //    case DialogResult.Next:
+            //        dialog.Next(localClient.Aisling, localArgs.Option);
 
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            //        break;
+            //    default:
+            //        throw new ArgumentOutOfRangeException();
+            //}
 
             return default;
         }
@@ -2314,7 +2321,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         static ValueTask InnerOnBoardRequest(IWorldClient localClient)
         {
-            localClient.SendBoard();
+            //localClient.SendBoard();
 
             return default;
         }
@@ -2401,12 +2408,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnUseSkill(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsDead()) return default;
+        if (client.Aisling.CantAttack)
+        {
+            client.SendLocation();
+            return default;
+        }
         var args = PacketSerializer.Deserialize<SkillUseArgs>(in clientPacket);
 
         static ValueTask InnerOnUseSkill(IWorldClient localClient, SkillUseArgs localArgs)
         {
-            localClient.Aisling.TryUseSkill(localArgs.SourceSlot);
+            var skill = localClient.Aisling.SkillBook.GetSkills(i => i.Slot == localArgs.SourceSlot).FirstOrDefault();
+            if (skill?.Template == null || skill.Scripts == null) return default;
 
+            if (!skill.CanUse()) return default;
+
+            skill.InUse = true;
+            
+            var script = skill.Scripts.Values.First();
+            script?.OnUse(localClient.Aisling);
+
+            skill.InUse = false;
+            skill.CurrentCooldown = skill.Template.Cooldown;
+            localClient.SendCooldown(true, localArgs.SourceSlot, skill.CurrentCooldown);
             return default;
         }
 
@@ -2640,50 +2666,71 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnExchange(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsDead()) return default;
         var args = PacketSerializer.Deserialize<ExchangeArgs>(in clientPacket);
 
         ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
         {
-            var exchange = localClient.Aisling.ActiveObject.TryGet<Exchange>();
+            //var otherPlayer = ObjectHandlers.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
+            //var localPlayer = localClient.Aisling;
+            //if (localPlayer == null || otherPlayer == null) return default;
+            //if (!localPlayer.WithinRangeOf(otherPlayer)) return default;
+            //localPlayer.Exchange = new ExchangeSession(otherPlayer);
+            //otherPlayer.Exchange = new ExchangeSession(localPlayer);
 
-            if (exchange == null)
-                return default;
+            //switch (localArgs.ExchangeRequestType)
+            //{
+            //    case ExchangeRequestType.StartExchange:
+            //        ServerSetup.Logger($"{client.RemoteIp} - {localPlayer} started a direct exchange, in Chaos this is not possible unless packeting");
+            //        Analytics.TrackEvent($"{client.RemoteIp} - {localPlayer} started a direct exchange, in Chaos this is not possible unless packeting");
+            //        return default;
+            //    case ExchangeRequestType.AddItem:
+            //        if (localPlayer.ThrewHealingPot)
+            //        {
+            //            localPlayer.ThrewHealingPot = false;
+            //            return default;
+            //        }
 
-            if (exchange.GetOtherUser(localClient.Aisling).Id != localArgs.OtherPlayerId)
-                return default;
+            //        if (localArgs.SourceSlot == null) return default;
 
-            switch (localArgs.ExchangeRequestType)
-            {
-                case ExchangeRequestType.StartExchange:
-                    Logger.WithProperty(localClient)
-                          .LogWarning(
-                              "Aisling {@AislingName} attempted to directly start an exchange. This should not be possible unless packeting",
-                              localClient.Aisling.Name);
+            //        var item = client.Aisling.Inventory.Items[(int)localArgs.SourceSlot];
+            //        if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
+            //        {
+            //            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "That item is not tradeable");
+            //            return default;
+            //        }
 
-                    break;
-                case ExchangeRequestType.AddItem:
-                    exchange.AddItem(localClient.Aisling, localArgs.SourceSlot!.Value);
+            //        if (localPlayer.Exchange == null) return default;
+            //        if (otherPlayer.Exchange == null) return default;
+            //        if (localPlayer.Exchange.Trader != otherPlayer) return default;
+            //        if (otherPlayer.Exchange.Trader != localPlayer) return default;
+            //        if (localPlayer.Exchange.Confirmed) return default;
+            //        if (item?.Template == null) return default;
 
-                    break;
-                case ExchangeRequestType.AddStackableItem:
-                    exchange.AddStackableItem(localClient.Aisling, localArgs.SourceSlot!.Value, localArgs.ItemCount!.Value);
+            //        exchange.AddItem(localClient.Aisling, localArgs.SourceSlot!.Value);
 
-                    break;
-                case ExchangeRequestType.SetGold:
-                    exchange.SetGold(localClient.Aisling, localArgs.GoldAmount!.Value);
+            //        break;
+            //    case ExchangeRequestType.AddStackableItem:
+            //        exchange.AddStackableItem(localClient.Aisling, localArgs.SourceSlot!.Value, localArgs.ItemCount!.Value);
 
-                    break;
-                case ExchangeRequestType.Cancel:
-                    exchange.Cancel(localClient.Aisling);
+            //        break;
+            //    case ExchangeRequestType.SetGold:
+            //        exchange.SetGold(localClient.Aisling, localArgs.GoldAmount!.Value);
 
-                    break;
-                case ExchangeRequestType.Accept:
-                    exchange.Accept(localClient.Aisling);
+            //        break;
+            //    case ExchangeRequestType.Cancel:
+            //        exchange.Cancel(localClient.Aisling);
 
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            //        break;
+            //    case ExchangeRequestType.Accept:
+            //        exchange.Accept(localClient.Aisling);
+
+            //        break;
+            //    default:
+            //        throw new ArgumentOutOfRangeException();
+            //}
 
             return default;
         }

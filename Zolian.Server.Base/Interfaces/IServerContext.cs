@@ -44,9 +44,9 @@ public interface IServerContext
     ConcurrentDictionary<string, List<Board>> GlobalBoardCache { get; set; }
     ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; }
     ConcurrentDictionary<string, MonsterScript> GlobalMonsterScriptCache { get; set; }
-    ConcurrentDictionary<int, Monster> GlobalMonsterCache { get; set; }
+    ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; }
     ConcurrentDictionary<string, MundaneScript> GlobalMundaneScriptCache { get; set; }
-    ConcurrentDictionary<int, Mundane> GlobalMundaneCache { get; set; }
+    ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     bool Running { get; set; }
     IServerConstants Config { get; set; }

@@ -15,6 +15,7 @@ using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
 using Darkages.Database;
+using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
