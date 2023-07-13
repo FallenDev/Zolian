@@ -5,6 +5,7 @@ using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Models;
 using Darkages.Sprites;
+using Darkages.Templates;
 using Darkages.Types;
 
 namespace Darkages.Interfaces;
@@ -14,8 +15,7 @@ public interface IAisling : ISprite
     bool Loading { get; set; }
     long DamageCounter { get; set; }
     uint ThreatMeter { get; set; }
-    Dialog ActiveDialog { get; set; }
-    Stack<Dialog> DialogHistory { get; set; }
+    ReactorTemplate ActiveReactor { get; set; }
     DialogSequence ActiveSequence { get; set; }
     ExchangeSession Exchange { get; set; }
     NameDisplayStyle NameStyle { get; set; }

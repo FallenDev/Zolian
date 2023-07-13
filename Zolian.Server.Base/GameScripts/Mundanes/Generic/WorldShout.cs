@@ -1,10 +1,10 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Common;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -13,7 +13,7 @@ public class WorldShout : MundaneScript
 {
     public WorldShout(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
@@ -23,7 +23,7 @@ public class WorldShout : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new (0x0001, "World Announce"),
         };

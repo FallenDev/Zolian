@@ -1,4 +1,5 @@
-﻿using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -11,13 +12,13 @@ public class ShreekWarn : MundaneScript
 {
     public ShreekWarn(WorldServer server, Mundane mundane) : base(server, mundane) => Mundane = mundane;
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
         client.SendOptionsDialog(Mundane, "What are you doing in my swamp? Alright, get out of here. All of you. Move it. Let's go.");

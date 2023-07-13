@@ -44,7 +44,7 @@ public class ItemTemplate : Template
     public int EquipmentSlot { get; set; }
     public string NpcKey { get; init; }
     public Class Class { get; init; }
-    public uint LevelRequired { get; init; }
+    public ushort LevelRequired { get; init; }
     public ClassStage StageRequired { get; init; }
     public int DmgMin { get; init; }
     public int DmgMax { get; init; }
@@ -144,7 +144,7 @@ public static class ItemStorage
                     Value = (uint)worth,
                     NpcKey = reader["NpcKey"].ToString(),
                     Class = itemClass,
-                    LevelRequired = (uint)level,
+                    LevelRequired = (ushort)level,
                     DropRate = (double)drop,
                     StageRequired = classStage,
                     Color = color,
@@ -210,7 +210,7 @@ public static class ItemStorage
                     EquipmentSlot = (int)reader["EquipmentSlot"],
                     NpcKey = "",
                     Class = itemClass,
-                    LevelRequired = (uint)level,
+                    LevelRequired = (ushort)level,
                     DmgMin = 0,
                     DmgMax = 0,
                     DropRate = (double)drop,
@@ -298,7 +298,7 @@ public static class ItemStorage
                     EquipmentSlot = (int)reader["EquipmentSlot"],
                     NpcKey = "",
                     Class = itemClass,
-                    LevelRequired = (uint)level,
+                    LevelRequired = (ushort)level,
                     DmgMin = 0,
                     DmgMax = 0,
                     DropRate = (double)drop,
@@ -388,7 +388,7 @@ public static class ItemStorage
                     EquipmentSlot = (int)reader["EquipmentSlot"],
                     NpcKey = reader["NpcKey"].ToString(),
                     Class = itemClass,
-                    LevelRequired = (uint)level,
+                    LevelRequired = (ushort)level,
                     DmgMin = (int)reader["DmgMin"],
                     DmgMax = (int)reader["DmgMax"],
                     DropRate = (double)drop,

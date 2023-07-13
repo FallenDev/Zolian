@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Dapper;
-
-using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
@@ -30,8 +30,8 @@ public class Death
         ReapInventory();
         ReapGold();
 
-        Owner.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
-        Owner.Client.SendStats(StatusFlags.All);
+        Owner.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
+        Owner.Client.SendAttributes(StatUpdateType.Full);
         Owner.Client.UpdateDisplay();
     }
 

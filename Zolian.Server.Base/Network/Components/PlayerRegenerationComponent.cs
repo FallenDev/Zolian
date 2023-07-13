@@ -1,7 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Infrastructure;
-using Darkages.Interfaces;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Microsoft.AppCenter.Crashes;
 

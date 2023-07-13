@@ -103,7 +103,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         : null;
 
     public Position Position => new(Pos);
-    public uint Level => TileType switch
+    public ushort Level => TileType switch
     {
         TileContent.Aisling => ((Aisling)this).ExpLevel,
         TileContent.Monster => ((Monster)this).Template.Level,
@@ -253,6 +253,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     }
 
     #region Identification & Position
+
+    public TSprite CastSpriteToType<TSprite>() where TSprite : Sprite
+    {
+        return this as TSprite;
+    }
 
     public void Show(WorldServer server, Scope op, dynamic format, IEnumerable<Sprite> definer = null)
     {
@@ -666,7 +671,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 0)
                 pendingY--;
             if (sprite is Aisling aisling)
-                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                aisling.Client.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingY++;
             break;
@@ -676,7 +681,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 1)
                 pendingX++;
             if (sprite is Aisling aisling)
-                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                aisling.Client.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingX--;
             break;
@@ -686,7 +691,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 2)
                 pendingY++;
             if (sprite is Aisling aisling)
-                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                aisling.Client.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingY--;
             break;
@@ -696,7 +701,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (Direction == 3)
                 pendingX--;
             if (sprite is Aisling aisling)
-                WorldServer.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
+                aisling.Client.CheckWarpTransitions(aisling.Client, pendingX, pendingY);
             if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
             pendingX++;
             break;
@@ -2085,11 +2090,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     #endregion
 
     #region Sprite Methods
-
-    public TSprite Cast<TSprite>() where TSprite : Sprite
-    {
-        return this as TSprite;
-    }
 
     public void Remove()
     {

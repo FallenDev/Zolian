@@ -6,7 +6,7 @@ namespace Darkages.Models;
 
 public class DialogSession
 {
-    public DialogSession(Sprite user, int serial)
+    public DialogSession(Sprite user, uint serial)
     {
         Serial = serial;
         SessionPosition = user.Position;
@@ -17,7 +17,7 @@ public class DialogSession
     public Action<WorldClient, ushort, string> Callback { get; init; }
     public int CurrentMapId { get; }
     public ushort Sequence { get; set; }
-    public int Serial { get; }
+    public uint Serial { get; }
     public Position SessionPosition { get; }
     public Dialog StateObject { get; set; }
 }

@@ -1,5 +1,5 @@
-﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -35,7 +35,7 @@ public class ao_sith : SpellScript
         {
             var client = (sprite as Aisling).Client;
 
-            client.SendMessage(0x02, $"you cast {Spell.Template.Name}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"you cast {Spell.Template.Name}");
 
             var action = new ServerFormat1A
             {
@@ -105,7 +105,7 @@ public class ao_sith : SpellScript
             if (sprite.CurrentMp < 0)
                 sprite.CurrentMp = 0;
 
-            (sprite as Aisling).Client.SendMessage(0x02, ServerSetup.Instance.Config.NoManaMessage);
+            (sprite as Aisling).client.SendServerMessage(ServerMessageType.OrangeBar1, ServerSetup.Instance.Config.NoManaMessage);
         }
 
         // ToDo: Rand Lock using Gen

@@ -1,5 +1,6 @@
 ﻿using System.Text;
-
+using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Sprites;
 using Darkages.Templates;
@@ -116,7 +117,7 @@ public class LearningPredicate
         catch (Exception ex)
         {
             player.Client.CloseDialog();
-            player.Client.SendMessage(0x02, "Hmm, you're not ready yet.");
+            player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, you're not ready yet.");
             player.SendAnimation(94, player, player);
 
             ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);

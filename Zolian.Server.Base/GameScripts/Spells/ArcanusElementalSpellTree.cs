@@ -1,6 +1,6 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -639,9 +639,9 @@ public class Gust
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Gust.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Gust.");
 
             return;
         }
@@ -649,9 +649,9 @@ public class Gust
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Gust.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Gust.");
 
             return;
         }
@@ -666,7 +666,7 @@ public class Gust
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -675,8 +675,7 @@ public class Gust
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon releases a gust of wind.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a gust of wind.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Gust);
 
@@ -701,9 +700,9 @@ public class Quake
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Quake.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Quake.");
 
             return;
         }
@@ -711,9 +710,9 @@ public class Quake
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Quake.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Quake.");
 
             return;
         }
@@ -728,7 +727,7 @@ public class Quake
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -737,8 +736,7 @@ public class Quake
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon releases a tremor.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a tremor.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Quake);
 
@@ -763,9 +761,9 @@ public class Rain
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Rain.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Rain.");
 
             return;
         }
@@ -773,9 +771,9 @@ public class Rain
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Rain.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Rain.");
 
             return;
         }
@@ -790,7 +788,7 @@ public class Rain
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -799,8 +797,7 @@ public class Rain
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon releases a storm.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a storm.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Rain);
 
@@ -825,9 +822,9 @@ public class Flame
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Flame.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Flame.");
 
             return;
         }
@@ -835,9 +832,9 @@ public class Flame
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Flame.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Flame.");
 
             return;
         }
@@ -852,7 +849,7 @@ public class Flame
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -861,8 +858,7 @@ public class Flame
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon spews forth flames.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon spews forth flames.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Flame);
 
@@ -887,9 +883,9 @@ public class Dusk
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Dusk.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Dusk.");
 
             return;
         }
@@ -897,9 +893,9 @@ public class Dusk
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Dusk.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Dusk.");
 
             return;
         }
@@ -914,7 +910,7 @@ public class Dusk
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -923,8 +919,7 @@ public class Dusk
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon draws from the night.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the night.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dusk);
 
@@ -949,18 +944,18 @@ public class Dawn
         if (target.SpellReflect)
         {
             target.Animate(184);
-            client.SendMessage(0x02, "Your weapon's spell has been negated!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You negated Dawn.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Dawn.");
             return;
         }
 
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, "You deflected Dawn.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Dawn.");
 
             return;
         }
@@ -975,7 +970,7 @@ public class Dawn
             OnSuccess(aisling, target);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void OnSuccess(Sprite sprite, Sprite target)
@@ -984,8 +979,7 @@ public class Dawn
         var client = aisling.Client;
 
         if (target is Aisling aislingTarget)
-            aislingTarget.Client
-                .SendMessage(0x02, $"{client.Aisling.Username} weapon draws from the light.");
+            aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the light.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dawn);
 

@@ -1,10 +1,10 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -17,17 +17,17 @@ public class BlackMarket : MundaneScript
 {
     public BlackMarket(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             //new (0x01, "Dungeon Rumors"),
             new (0x02, "Buy"),
@@ -36,7 +36,7 @@ public class BlackMarket : MundaneScript
 
         if (client.Aisling.IsDead())
         {
-            options.Add(new OptionsDataItem(0x07, "Revive"));
+            options.Add(new Dialog.OptionsDataItem(0x07, "Revive"));
         }
 
         client.SendOptionsDialog(Mundane, "What do you have for me?", options.ToArray());
@@ -60,7 +60,7 @@ public class BlackMarket : MundaneScript
                     if (item != null)
                     {
                         var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                        var opts = new List<OptionsDataItem>
+                        var opts = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -88,7 +88,7 @@ public class BlackMarket : MundaneScript
                                 client.PendingItemSessions.Removing = amount;
 
 
-                                var opts2 = new List<OptionsDataItem>
+                                var opts2 = new List<Dialog.OptionsDataItem>
                                 {
                                     new(0x0030, ServerSetup.Instance.Config.MerchantConfirmMessage),
                                     new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -132,7 +132,7 @@ public class BlackMarket : MundaneScript
                             Quantity = 0,
                             Offer = (int)template.Value,
                         };
-                        client.Send(new ServerFormat2F(Mundane, $"How many {template.Name} would you like to purchase?", new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {template.Name} would you like to purchase?");
                         break;
                     case false when client.Aisling.GoldPoints >= template.Value:
                     {
@@ -142,22 +142,22 @@ public class BlackMarket : MundaneScript
                         if (item.GiveTo(client.Aisling))
                         {
                             client.Aisling.GoldPoints -= (uint)template.Value;
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane, $"Hope it servers you better than the last.\n{{=c{args}");
                         }
                         else
                         {
-                            client.SendMessage(0x02, "Yeah right, you can't even physically hold it.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "Yeah right, you can't even physically hold it.");
                         }
 
                         break;
                     }
                     case false:
                     {
-                        if (ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey("Ard Cradh"))
+                        if (ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue("Ard Cradh", out var value))
                         {
                             var scripts = ScriptManager.Load<SpellScript>("Ard Cradh",
-                                Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache["Ard Cradh"]));
+                                Spell.Create(1, value));
                             {
                                 foreach (var script in scripts.Values)
                                     script.OnUse(Mundane, client.Aisling);
@@ -177,7 +177,7 @@ public class BlackMarket : MundaneScript
                     client.Recover();
                     client.TransitionToMap(3003, new Position(5, 9));
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(1); });
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Always watch your six.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Always watch your six.");
                 }
             }
                 break;
@@ -204,9 +204,7 @@ public class BlackMarket : MundaneScript
                             Quantity = 0
                         };
 
-                        client.Send(new ServerFormat2F(Mundane,
-                            $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}",
-                            new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}");
                     }
                     else
                     {
@@ -217,7 +215,7 @@ public class BlackMarket : MundaneScript
                             Quantity = 1
                         };
 
-                        var opts2 = new List<OptionsDataItem>
+                        var opts2 = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -251,7 +249,7 @@ public class BlackMarket : MundaneScript
                     {
                         client.Aisling.GoldPoints -= Convert.ToUInt32(cost);
                         client.GiveQuantity(client.Aisling, item, quantity);
-                        client.SendStats(StatusFlags.All);
+                        client.SendAttributes(StatUpdateType.Full);
                         client.PendingBuySessions = null;
                         client.SendOptionsDialog(Mundane, $"{{=cAlways watch your six.");
                         Task.Delay(750).ContinueWith(ct => { client.CloseDialog(); });
@@ -284,7 +282,7 @@ public class BlackMarket : MundaneScript
                     {
                         client.Aisling.GoldPoints += Convert.ToUInt32(offer);
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.WeightGold);
 
                         client.SendOptionsDialog(Mundane, "Eh, I could have found better in the gutter.");
                     }

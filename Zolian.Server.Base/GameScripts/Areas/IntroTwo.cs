@@ -16,7 +16,7 @@ public class IntroTwo : AreaScript
     public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
-        _aisling.Client.SendMessage(0x08, "{=bDeath{=a... was that all that was left? \n\nYears after the conflict, which consisted of law and chaos, the Anaman Pact attempted to right its wrong. Surely {=bChadul {=awas here to destroy the world? \n\nHowever, when he revived. {=bChadul {=ainstead took a bit of power from each of the Gods, he then infused it, nurtured it, into something that exists in the very being of everything. \n\n-There is rebirth in death.- {=cSgrios muttered with a grin");
+        _aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bDeath{=a... was that all that was left? \n\nYears after the conflict, which consisted of law and chaos, the Anaman Pact attempted to right its wrong. Surely {=bChadul {=awas here to destroy the world? \n\nHowever, when he revived. {=bChadul {=ainstead took a bit of power from each of the Gods, he then infused it, nurtured it, into something that exists in the very being of everything. \n\n-There is rebirth in death.- {=cSgrios muttered with a grin");
     }
 
     public override void OnMapExit(WorldClient client) { }

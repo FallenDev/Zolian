@@ -54,7 +54,7 @@ public class Intro : AreaScript
         });
 
         await Task.Delay(750).ContinueWith(ct => {
-            _aisling.Client.SendMessage(0x08,
+            _aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
                 "{=qWelcome!\n\n{=aThis private server that has been made possible due to countless hours of creation and inspiration.\n\n" +
                 "This server falls under Fair Use and accepts zero donations of any kind. With that said, art, music, and the client are property of Nexon Inc.\n\n" +
                 "{=bZolian{=a: is a server based on Dungeons & Dragons, Final Fantasy, Diablo 3, Zelda, Elder Scrolls, World of Warcraft and many other MMORPGs. Many " +

@@ -1,12 +1,14 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
-using Darkages.Models;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
+using EquipmentSlot = Darkages.Models.EquipmentSlot;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
@@ -15,19 +17,19 @@ public class ClassChooser : MundaneScript
 {
     public ClassChooser(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
         if (client.Aisling.Path == Class.Peasant)
         {
-            var options = new List<OptionsDataItem>
+            var options = new List<Dialog.OptionsDataItem>
             {
                 new (0x21, "I'm ready to choose a path."),
                 new (0x22, "I'm not worthy of a path.")
@@ -41,7 +43,7 @@ public class ClassChooser : MundaneScript
             client.SendOptionsDialog(Mundane, "Your path has been set. Only those who've mastered their path may look for anew.");
 
             Task.Delay(2000).ContinueWith(ct => { client.TransitionToMap(393, new Position(6, 4)); });
-            client.SendMessage(0x02, "You don't belong here, begone!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't belong here, begone!");
         }
     }
 
@@ -55,7 +57,7 @@ public class ClassChooser : MundaneScript
             {
                 case 33:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x01, "Berserker"),
                         new (0x02, "Defender"),
@@ -164,7 +166,7 @@ public class ClassChooser : MundaneScript
         client.SendStats(StatusFlags.StructA);
         client.UpdateDisplay();
         await Task.Delay(500).ContinueWith(ct => {
-            client.SendMessage(0x02, "You wake from your slumber.. music begins to fill the air.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You wake from your slumber.. music begins to fill the air.");
         });
         client.TransitionToMap(137, new Position(1, 4));
     }

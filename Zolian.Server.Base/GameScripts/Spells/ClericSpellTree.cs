@@ -1,10 +1,11 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Interfaces;
-using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -35,7 +36,7 @@ public class Spectral_Shield : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -69,7 +70,7 @@ public class Aite : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -103,7 +104,7 @@ public class Mor_Dion : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -199,7 +200,7 @@ public class Pramh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         };
 
@@ -282,16 +283,16 @@ public class Detect : SpellScript
         switch (_spell.Level)
         {
             case < 10:
-                aisling.Client.SendMessage(0x08,
+                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
                     $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}");
                 break;
             case >= 11 and <= 40:
-                aisling.Client.SendMessage(0x08,
+                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
                     $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" +
                     $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac}");
                 break;
             default:
-                aisling.Client.SendMessage(0x08, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" +
+                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" +
                                                  $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac} {{=aRegen: {{=s{monster.Regen}\n" +
                                                  $"{{=aSTR:{{=s{monster.Str} {{=aINT:{{=s{monster.Int} {{=aWIS:{{=s{monster.Wis} {{=aCON:{{=s{monster.Con} {{=aDEX:{{=s{monster.Dex}\n" +
                                                  $"{{=aRace:{{=s{monster.Template.MonsterRace} {{=aFortitude:{{=s{monster.Fortitude} {{=aReflex:{{=s{monster.Reflex} {{=aWill:{{=s{monster.Will}");
@@ -314,7 +315,7 @@ public class Detect : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -339,7 +340,7 @@ public class Detect : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -394,25 +395,16 @@ public class Heal_Minor : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            aisling.Cast(_spell, target);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
-
+            aisling.CastSpell(_spell, );
             var healBase = target.MaximumHp * 0.15;
 
             target.CurrentHp += (int)healBase;
             if (target.CurrentHp > target.MaximumHp)
                 target.CurrentHp = target.MaximumHp;
 
-            var healthBar = new ServerFormat13
-            {
-                Serial = target.Serial,
-                Health = (ushort)(100 * target.CurrentHp / target.MaximumHp),
-                Sound = 8
-            };
-
-            aisling.Show(Scope.NearbyAislings, healthBar);
+            aisling.Client.SendHealthBar(target, _spell.Template.Sound);
             if (target is Aisling)
-                target.Client.SendStats(StatusFlags.Health);
+                target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -441,7 +433,7 @@ public class Heal_Minor : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -466,7 +458,7 @@ public class Heal_Minor : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -522,7 +514,7 @@ public class Heal_Major : SpellScript
 
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
-                target.Client.SendStats(StatusFlags.Health);
+                target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -551,7 +543,7 @@ public class Heal_Major : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -576,7 +568,7 @@ public class Heal_Major : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -632,7 +624,7 @@ public class Heal_Critical : SpellScript
 
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
-                target.Client.SendStats(StatusFlags.Health);
+                target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -661,7 +653,7 @@ public class Heal_Critical : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -686,7 +678,7 @@ public class Heal_Critical : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -737,7 +729,7 @@ public class Dire_Aid : SpellScript
             if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
             {
                 if (target is Aisling)
-                    aisling.Client.SendMessage(0x02, "Another spell of similar nature is applied.");
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is applied.");
             }
             else
             {
@@ -753,7 +745,7 @@ public class Dire_Aid : SpellScript
 
             aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
-                target.Client.SendStats(StatusFlags.Health);
+                target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -782,7 +774,7 @@ public class Dire_Aid : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -807,7 +799,7 @@ public class Dire_Aid : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -902,7 +894,7 @@ public class Healing_Winds : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -927,7 +919,7 @@ public class Healing_Winds : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -993,7 +985,7 @@ public class Forestall : SpellScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -1008,7 +1000,7 @@ public class Forestall : SpellScript
 
         OnSuccess(sprite, target);
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 
@@ -1040,7 +1032,7 @@ public class Raise_Ally : SpellScript
             foreach (var deadPartyMember in aisling.PartyMembers.Where(m => m is { Dead: true }))
             {
                 deadPartyMember.Client.Revive();
-                deadPartyMember.Client.SendMessage(0x02, "I live again.");
+                deadPartyMember.client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
                 deadPartyMember.Client.SendStats(StatusFlags.MultiStat);
                 deadPartyMember.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
                 Task.Delay(350).ContinueWith(ct => { deadPartyMember.Client.Aisling.Animate(304); });
@@ -1077,7 +1069,7 @@ public class Raise_Ally : SpellScript
         }
         else
         {
-            client.SendMessage(0x02, "Not enough ether to perform such a divine task.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough ether to perform such a divine task.");
             return;
         }
 
@@ -1101,7 +1093,7 @@ public class Raise_Ally : SpellScript
         OnSuccess(sprite, target);
 
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 
@@ -1378,11 +1370,11 @@ public class AoPuinsein : SpellScript
         var cursed = target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein") ||
                      target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your ailment.");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1427,7 +1419,7 @@ public class AoPuinsein : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -1452,7 +1444,7 @@ public class AoPuinsein : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -1489,11 +1481,11 @@ public class AoDall : SpellScript
         var client = aisling.Client;
         var blind = target.HasDebuff("Blind");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (blind)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your ailment.");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1538,7 +1530,7 @@ public class AoDall : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -1563,7 +1555,7 @@ public class AoDall : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -1600,11 +1592,11 @@ public class AoBeagCradh : SpellScript
         var client = aisling.Client;
         var cursed = target.HasDebuff("Beag Cradh");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your curse mark");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1649,7 +1641,7 @@ public class AoBeagCradh : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -1674,7 +1666,7 @@ public class AoBeagCradh : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -1711,11 +1703,11 @@ public class AoCradh : SpellScript
         var client = aisling.Client;
         var cursed = target.HasDebuff("Cradh");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your curse mark");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1760,7 +1752,7 @@ public class AoCradh : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -1785,7 +1777,7 @@ public class AoCradh : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -1822,11 +1814,11 @@ public class AoMorCradh : SpellScript
         var client = aisling.Client;
         var cursed = target.HasDebuff("Mor Cradh");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your curse mark");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1871,7 +1863,7 @@ public class AoMorCradh : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -1896,7 +1888,7 @@ public class AoMorCradh : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -1933,11 +1925,11 @@ public class AoArdCradh : SpellScript
         var client = aisling.Client;
         var cursed = target.HasDebuff("Ard Cradh");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} cured your curse mark");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -1982,7 +1974,7 @@ public class AoArdCradh : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -2007,7 +1999,7 @@ public class AoArdCradh : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -2044,11 +2036,11 @@ public class AoSuain : SpellScript
         var client = aisling.Client;
         var cursed = target.HasDebuff("Suain");
 
-        client.SendMessage(0x02, $"Cast {Spell.Template.Name}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendMessage(0x02, $"{aisling.Username} removed your paralysis");
+                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
 
         client.SendAnimation(Spell.Template.Animation, target, aisling);
 
@@ -2093,7 +2085,7 @@ public class AoSuain : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -2118,7 +2110,7 @@ public class AoSuain : SpellScript
             }
 
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {

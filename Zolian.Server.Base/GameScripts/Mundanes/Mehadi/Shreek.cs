@@ -1,9 +1,9 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Common;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Mehadi;
 
@@ -12,7 +12,7 @@ public class Shreek : MundaneScript
 {
     public Shreek(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
@@ -22,7 +22,7 @@ public class Shreek : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         if (client.Aisling.HasItem("Maple Syrup"))
         {
@@ -42,7 +42,7 @@ public class Shreek : MundaneScript
         {
             case 0x01:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x03, "Go on.."),
                     new (0x02, "Oh? Take care")

@@ -1,11 +1,12 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
@@ -14,19 +15,19 @@ public class Artur : MundaneScript
 {
     public Artur(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
         if (client.Aisling.Level == 99 && client.Aisling.QuestManager.ArtursGift == 0)
         {
-            var options = new List<OptionsDataItem>
+            var options = new List<Dialog.OptionsDataItem>
             {
                 new (0x02, "Yes?"),
                 new (0x03, "Ok...")
@@ -38,7 +39,7 @@ public class Artur : MundaneScript
         {
             case 1:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x06, "I found a strange lexicon."),
                     new(0x07, "I haven't found one yet..")
@@ -49,7 +50,7 @@ public class Artur : MundaneScript
             }
             case 2:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x08, "So what do you have?")
                 };
@@ -64,7 +65,7 @@ public class Artur : MundaneScript
             }
             default:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x03, "Alright.")
                 };
@@ -84,7 +85,7 @@ public class Artur : MundaneScript
         {
             case 2:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x04, "I'll try my best."),
                     new (0x05, "What do I look like, your dog?"),
@@ -123,8 +124,8 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }
@@ -145,8 +146,8 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 2;
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }
@@ -168,7 +169,7 @@ public class Artur : MundaneScript
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
                             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }
@@ -190,7 +191,7 @@ public class Artur : MundaneScript
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
                             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }
@@ -212,7 +213,7 @@ public class Artur : MundaneScript
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
                             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }
@@ -234,7 +235,7 @@ public class Artur : MundaneScript
                             client.Aisling.Inventory.RemoveRange(client, item, 1);
                             client.GiveExp(3500000);
                             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane,
                                 "Great, give me a moment and I'll have something for you.");
                         }

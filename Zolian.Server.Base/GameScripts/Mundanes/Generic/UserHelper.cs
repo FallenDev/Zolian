@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;

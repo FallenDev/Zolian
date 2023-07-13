@@ -1,8 +1,7 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -15,17 +14,17 @@ public class Pete : MundaneScript
 {
     public Pete(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         if (!client.Aisling.QuestManager.PeteComplete && client.Aisling.QuestManager.PeteKill == 0)
         {
@@ -50,7 +49,7 @@ public class Pete : MundaneScript
         {
             case 0x01:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x03, "Sure."),
                     new (0x02, "Not right now.")
@@ -84,7 +83,7 @@ public class Pete : MundaneScript
             }
             case 0x04:
             {
-                var options = new List<OptionsDataItem>();
+                var options = new List<Dialog.OptionsDataItem>();
 
                 if (client.Aisling.HasKilled("Mouse", client.Aisling.QuestManager.PeteKill))
                 {

@@ -1,10 +1,11 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.TempleOfLight;
 
@@ -13,7 +14,7 @@ public class Aerith : MundaneScript
 {
     public Aerith(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
@@ -23,7 +24,7 @@ public class Aerith : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new(0x01, "Dedicate experience"),
             new(0x02, "Dedicate ability")
@@ -39,12 +40,12 @@ public class Aerith : MundaneScript
         switch (responseID)
         {
             case 0x00:
-                client.SendMessage(0x02, "{=cCome back again!");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "{=cCome back again!");
                 client.CloseDialog();
                 break;
             case 0x01:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x03, "{=qMeditate x1"),
                     new(0x04, "{=qMeditate x10"),
@@ -56,7 +57,7 @@ public class Aerith : MundaneScript
             }
             case 0x02:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x00, "{=bSecond thought")
                 };
@@ -84,7 +85,7 @@ public class Aerith : MundaneScript
                     break;
                 }
 
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x03, "{=qMeditate x1"),
                     new(0x04, "{=qMeditate x10"),
@@ -114,7 +115,7 @@ public class Aerith : MundaneScript
                     break;
                 }
 
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x03, "{=qMeditate x1"),
                     new(0x04, "{=qMeditate x10"),

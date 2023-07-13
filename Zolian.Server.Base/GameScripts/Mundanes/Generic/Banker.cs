@@ -1,8 +1,9 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -19,37 +20,37 @@ public class Banker : MundaneScript
 
     public Banker(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
         client.Aisling.Client.LoadBank();
         Refresh(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new (0x11, "Deposit Item")
         };
 
         if (client.Aisling.BankManager.Items.Count > 0)
         {
-            options.Add(new OptionsDataItem(0x06, "Withdraw Item"));
+            options.Add(new Dialog.OptionsDataItem(0x06, "Withdraw Item"));
         }
 
         if (client.Aisling.GoldPoints > 0)
         {
-            options.Add(new OptionsDataItem(0x07, "Deposit Gold"));
+            options.Add(new Dialog.OptionsDataItem(0x07, "Deposit Gold"));
         }
 
         if (client.Aisling.BankedGold > 0)
         {
-            options.Add(new OptionsDataItem(0x08, "Withdraw Gold"));
+            options.Add(new Dialog.OptionsDataItem(0x08, "Withdraw Gold"));
         }
 
         client.SendOptionsDialog(Mundane, "We'll take real good care of your possessions.", options.ToArray());
@@ -87,7 +88,7 @@ public class Banker : MundaneScript
         }
         else
         {
-            var options = new List<OptionsDataItem>
+            var options = new List<Dialog.OptionsDataItem>
             {
                 new (0x0051, "Confirm"),
                 new (0x0052, "Cancel")
@@ -145,7 +146,7 @@ public class Banker : MundaneScript
                 }
                 else
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0051, "Confirm"),
                         new (0x0052, "Cancel")
@@ -177,7 +178,7 @@ public class Banker : MundaneScript
 
                         if (client.Aisling.GoldPoints >= client.PendingBankedSession.TempGold)
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                             {
                                 new (0x02, "Yes"),
                                 new (0x07, "No")
@@ -187,7 +188,7 @@ public class Banker : MundaneScript
                         }
                         else
                         {
-                            client.SendMessage(0x02, "You don't have enough gold.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't have enough gold.");
                             client.PendingBankedSession.DepositGold = false;
                             client.CloseDialog();
                         }
@@ -195,7 +196,7 @@ public class Banker : MundaneScript
                     else
                     {
                         client.SendOptionsDialog(Mundane, $"{{=cEh, that's not quite right. Let's try again.{{=a\nInventory: {{=c{client.Aisling.GoldPoints}\n{{=aBanked: {{=q{client.Aisling.BankedGold}", args,
-                            new OptionsDataItem(0x07, "Alright"));
+                            new Dialog.OptionsDataItem(0x07, "Alright"));
                     }
                 }
 
@@ -217,7 +218,7 @@ public class Banker : MundaneScript
 
                         if (client.Aisling.BankedGold >= client.PendingBankedSession.TempGold && client.Aisling.GoldPoints + client.PendingBankedSession.TempGold <= 100000000)
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                             {
                                 new (0x03, "Yes"),
                                 new (0x07, "No")
@@ -228,14 +229,14 @@ public class Banker : MundaneScript
 
                         if (client.Aisling.GoldPoints + client.PendingBankedSession.TempGold >= 1000000000)
                         {
-                            client.SendMessage(0x02, "I'm sorry, you're not able to hold that much.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "I'm sorry, you're not able to hold that much.");
                             client.PendingBankedSession.WithdrawGold = false;
                             client.CloseDialog();
                         }
 
                         if (client.PendingBankedSession.TempGold > client.Aisling.BankedGold)
                         {
-                            client.SendMessage(0x02, "You haven't invested that much with us.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "You haven't invested that much with us.");
                             client.PendingBankedSession.WithdrawGold = false;
                             client.CloseDialog();
                         }
@@ -243,7 +244,7 @@ public class Banker : MundaneScript
                     else
                     {
                         client.SendOptionsDialog(Mundane, $"{{=cEh, that's not quite right. Let's try again.{{=a\nInventory: {{=c{client.Aisling.GoldPoints}\n{{=aBanked: {{=q{client.Aisling.BankedGold}", args,
-                            new OptionsDataItem(0x08, "Alright"));
+                            new Dialog.OptionsDataItem(0x08, "Alright"));
                     }
                 }
 
@@ -281,7 +282,7 @@ public class Banker : MundaneScript
                             
                     client.PendingBankedSession.Cost *= amount;
 
-                    var opts = new List<OptionsDataItem>
+                    var opts = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0051, "Yes"),
                         new (0x0052, "No")
@@ -349,7 +350,7 @@ public class Banker : MundaneScript
                             });
                         }
 
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.WeightGold);
                         OnClick(client, Mundane.Serial);
                     }
                     else
@@ -521,7 +522,7 @@ public class Banker : MundaneScript
                                 Type = 0x03
                             });
 
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             OnClick(client, Mundane.Serial);
                         }
                         else
@@ -545,7 +546,7 @@ public class Banker : MundaneScript
                 break;
             default:
             {
-                client.SendMessage(0x02, $"{Mundane.Template.Name} waves you away.");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{Mundane.Template.Name} waves you away.");
                 client.CloseDialog();
             }
                 break;
@@ -556,7 +557,7 @@ public class Banker : MundaneScript
     {
         client.Aisling.GoldPoints -= cost;
         client.Aisling.BankManager.UpdatePlayersWeight(client);
-        client.SendStats(StatusFlags.WeightMoney);
+        client.SendAttributes(StatUpdateType.WeightGold);
         OnClick(client, Mundane.Serial);
     }
 

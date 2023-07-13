@@ -1,6 +1,6 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -25,7 +25,7 @@ public class Shadowfade : SkillScript
     {
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
-        client.SendMessage(0x02, "Failed to fade into the shadows.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to fade into the shadows.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -258,7 +258,7 @@ public class Splash : SkillScript
                 {
                     var client = damageDealingAisling.Client;
 
-                    client.SendMessage(0x02, "You've lost focus.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
 
                     break;
@@ -307,7 +307,7 @@ public class Splash : SkillScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -476,7 +476,7 @@ public class Adrenaline : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "You're out of steam.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "You're out of steam.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -547,7 +547,7 @@ public class Atlantean_Weapon : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to enhance offense.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance offense.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -572,7 +572,7 @@ public class Atlantean_Weapon : SkillScript
 
         if (aisling.SecondaryOffensiveElement != ElementManager.Element.None && aisling.EquipmentManager.Shield != null)
         {
-            client.SendMessage(0x02, "Your off-hand already grants a secondary elemental boost.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your off-hand already grants a secondary elemental boost.");
             return;
         }
 
@@ -624,7 +624,7 @@ public class Elemental_Bane : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to increase elemental fortitude.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to increase elemental fortitude.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -693,7 +693,7 @@ public class Appraise : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        client.SendMessage(0x02, "Hmm, can't seem to identify that.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -879,7 +879,7 @@ public class Fire_Breath : SkillScript
         }
         else
         {
-            aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
             return;
@@ -901,10 +901,10 @@ public class Fire_Breath : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -912,9 +912,9 @@ public class Fire_Breath : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                aisling.Client.SendMessage(0x02, "Your breath has been negated");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -963,7 +963,7 @@ public class Fire_Breath : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -972,7 +972,7 @@ public class Fire_Breath : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -1057,7 +1057,7 @@ public class Bubble_Burst : SkillScript
         }
         else
         {
-            aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
             return;
@@ -1079,10 +1079,10 @@ public class Bubble_Burst : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -1090,9 +1090,9 @@ public class Bubble_Burst : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                aisling.Client.SendMessage(0x02, "Your breath has been negated");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -1141,7 +1141,7 @@ public class Bubble_Burst : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -1150,7 +1150,7 @@ public class Bubble_Burst : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -1236,7 +1236,7 @@ public class Icy_Blast : SkillScript
         }
         else
         {
-            aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
             return;
@@ -1258,10 +1258,10 @@ public class Icy_Blast : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -1269,9 +1269,9 @@ public class Icy_Blast : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                aisling.Client.SendMessage(0x02, "Your breath has been negated");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -1320,7 +1320,7 @@ public class Icy_Blast : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -1329,7 +1329,7 @@ public class Icy_Blast : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -1416,7 +1416,7 @@ public class Earthly_Delights : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -1565,7 +1565,7 @@ public class Heavenly_Gaze : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -1746,7 +1746,7 @@ public class Silent_Siren : SkillScript
         }
         else
         {
-            aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -1766,10 +1766,10 @@ public class Silent_Siren : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -1777,9 +1777,9 @@ public class Silent_Siren : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                aisling.Client.SendMessage(0x02, "Your breath has been negated");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -1829,7 +1829,7 @@ public class Silent_Siren : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -1838,7 +1838,7 @@ public class Silent_Siren : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -1925,7 +1925,7 @@ public class Poison_Talon : SkillScript
         }
         else
         {
-            aisling.Client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -1945,10 +1945,10 @@ public class Poison_Talon : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -1956,9 +1956,9 @@ public class Poison_Talon : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                aisling.Client.SendMessage(0x02, "Your breath has been negated");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -2008,7 +2008,7 @@ public class Poison_Talon : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -2017,7 +2017,7 @@ public class Poison_Talon : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -2105,7 +2105,7 @@ public class Toxic_Breath : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -2125,10 +2125,10 @@ public class Toxic_Breath : SkillScript
             if (_target.SpellReflect)
             {
                 _target.Animate(184);
-                sprite.Client.SendMessage(0x02, "Your breath has been repelled");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                 _target = Spell.SpellReflect(_target, sprite);
             }
@@ -2136,9 +2136,9 @@ public class Toxic_Breath : SkillScript
             if (_target.SpellNegate)
             {
                 _target.Animate(64);
-                client.SendMessage(0x02, "Your breath has been negated");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
-                    _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                    _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                 continue;
             }
@@ -2188,7 +2188,7 @@ public class Toxic_Breath : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You repelled {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -2197,7 +2197,7 @@ public class Toxic_Breath : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You negated {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
                     continue;
                 }
@@ -2267,7 +2267,7 @@ public class Golden_Lair : SkillScript
                 {
                     var client = damageDealingAisling.Client;
 
-                    client.SendMessage(0x02, "You've lost focus.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2297,7 +2297,7 @@ public class Golden_Lair : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -2377,7 +2377,7 @@ public class Vicious_Roar : SkillScript
                 {
                     var client = damageDealingAisling.Client;
 
-                    client.SendMessage(0x02, "You've lost focus.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
@@ -2412,7 +2412,7 @@ public class Vicious_Roar : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 

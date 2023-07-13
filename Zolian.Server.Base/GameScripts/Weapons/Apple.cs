@@ -1,5 +1,4 @@
 ﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 
@@ -24,21 +23,10 @@ public class Apple : WeaponScript
                 return;
         }
 
-        var animation = new ServerFormat29
-        {
-            CasterSerial = (uint)damageDealingSprite.Serial,
-            TargetSerial = (uint)enemy.Serial,
-            CasterEffect = 10010,
-            TargetEffect = 10010,
-            Speed = 100
-        };
-
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
-
         // Rotten debuff
         dmg /= 2;
-            
-        damageDealingSprite.Show(Scope.NearbyAislings, animation);
+        damageDealingSprite.Client.SendTargetedAnimation(Scope.NearbyAislings, 10010, 100, 10010, damageDealingSprite.Serial, enemy.Serial);
         enemy.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

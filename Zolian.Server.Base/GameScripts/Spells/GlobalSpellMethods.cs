@@ -1,10 +1,11 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
-using Darkages.Network.Formats.Models.ServerFormats;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -140,10 +141,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         switch (sprite)
         {
             case Aisling aisling:
-                aisling
-                    .Client.SendMessage(0x02, $"{spell.Template.Name} has been deflected.");
-                aisling
-                    .Client.SendAnimation(115, target, aisling);
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has been deflected.");
+                aisling.Client.SendAnimation(115, target, aisling);
                 break;
             case Monster:
                 if (sprite.Target is Aisling player)
@@ -158,7 +157,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Ability is not quite ready yet.");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -166,9 +165,9 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             target.Animate(184);
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Your spell has been reflected!");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You reflected {spell.Template.Name}.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
@@ -184,16 +183,16 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
             if (target.SpellNegate)
             {
                 target.Animate(64);
-                client.SendMessage(0x02, "Your spell has been deflected!");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You deflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
                 return;
             }
@@ -220,7 +219,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 }
             }
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -238,7 +237,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 target.Animate(184);
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You reflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
                 sprite = Spell.SpellReflect(target, sprite);
             }
@@ -247,7 +246,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 target.Animate(64);
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You deflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
                 return;
             }
@@ -312,9 +311,9 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             debuff.OnApplied(target, debuff);
 
             if (target is Aisling targetPlayer)
-                targetPlayer.Client.SendMessage(0x02, $"{client.Aisling.Username} poisons you with {spell.Template.Name}.");
+                targetPlayer.client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} poisons you with {spell.Template.Name}.");
 
-            client.SendMessage(0x02, $"You've cast {spell.Template.Name}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"You've cast {spell.Template.Name}");
             client.SendAnimation(spell.Template.Animation, target, sprite);
 
             var action = new ServerFormat1A
@@ -387,7 +386,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         switch (sprite)
         {
             case Aisling aisling:
-                aisling.Client.SendMessage(0x02, $"{spell.Template.Name} has failed.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has failed.");
                 aisling.Client.SendAnimation(115, target ?? aisling, aisling);
                 break;
             case Monster:
@@ -414,7 +413,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Ability is not quite ready yet.");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         };
 
@@ -422,9 +421,9 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             target.Animate(184);
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Your spell has been reflected!");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You reflected {spell.Template.Name}.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
@@ -440,16 +439,16 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
             if (target.SpellNegate)
             {
                 target.Animate(64);
-                client.SendMessage(0x02, "Your spell has been deflected!");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You deflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
                 return;
             }
@@ -483,7 +482,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 }
             }
 
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -501,7 +500,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 target.Animate(184);
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You reflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
                 sprite = Spell.SpellReflect(target, sprite);
             }
@@ -510,7 +509,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 target.Animate(64);
                 if (target is Aisling)
-                    target.Client.SendMessage(0x02, $"You deflected {spell.Template.Name}.");
+                    target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
                 return;
             }
@@ -577,7 +576,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (!spell.CanUse())
         {
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Ability is not quite ready yet.");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         };
 
@@ -592,7 +591,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -603,7 +602,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             }
 
             EnhancementOnSuccess(sprite, target, spell, buff);
-            client.SendStats(StatusFlags.StructB);
+            client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
@@ -626,7 +625,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is not Aisling damageDealingSprite) return;
         var warpPos = new Position(savedXStep, savedYStep);
         damageDealingSprite.Client.WarpTo(warpPos, true);
-        WorldServer.CheckWarpTransitions(damageDealingSprite.Client);
+        aisling.Client.CheckWarpTransitions(damageDealingSprite.Client);
         damageDealingSprite.UpdateAddAndRemove();
         damageDealingSprite.Client.UpdateDisplay();
         damageDealingSprite.Client.LastMovement = DateTime.UtcNow;

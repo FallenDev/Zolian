@@ -1,5 +1,4 @@
 ﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;

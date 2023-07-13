@@ -1,3 +1,4 @@
+using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
 

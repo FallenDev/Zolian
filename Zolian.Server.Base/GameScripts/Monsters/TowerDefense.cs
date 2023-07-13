@@ -1,4 +1,5 @@
-﻿using Darkages.Network.Client;
+﻿using Chaos.Common.Definitions;
+using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -43,7 +44,7 @@ public class TowerDefense : MonsterScript
 
             Monster.Template = temp;
 
-            client.SendMessage(0x02, $"[Difficulty: {temp.Level}] Creeps get stronger ...");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"[Difficulty: {temp.Level}] Creeps get stronger ...");
         }
 
         if (GetObject<Monster>(client.Aisling.Map, i => i.Serial == Monster.Serial) != null)

@@ -1,5 +1,5 @@
 ﻿using Darkages.Infrastructure;
-using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -24,5 +24,5 @@ public interface IDebuff
     void InsertDebuff(Aisling aisling, Debuff debuff);
     void UpdateDebuff(Aisling aisling);
     void DeleteDebuff(Aisling aisling, Debuff debuff);
-    Task<bool> CheckOnDebuffAsync(WorldClient client, string name);
+    Task<bool> CheckOnDebuffAsync(IWorldClient client, string name);
 }

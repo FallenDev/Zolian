@@ -1,4 +1,5 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using Chaos.Common.Definitions;
+using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -31,7 +32,7 @@ public class Dion : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 

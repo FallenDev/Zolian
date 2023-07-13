@@ -1,11 +1,12 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Templates;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
@@ -22,7 +23,7 @@ public class Conn : MundaneScript
         _spellList = ObtainSpellList();
     }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
@@ -32,7 +33,7 @@ public class Conn : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         if (_skillList.Count > 0)
         {
@@ -91,14 +92,14 @@ public class Conn : MundaneScript
                 else
                 {
                     client.CloseDialog();
-                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
                 }
 
                 break;
             }
             case 0x0002:
             {
-                client.SendSkillForgetDialog(Mundane,
+                client.SendForgetSkills(Mundane,
                     "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
                 break;
             }
@@ -108,23 +109,23 @@ public class Conn : MundaneScript
 
                 if (idx is < 0 or > byte.MaxValue)
                 {
-                    client.SendMessage(0x02, "You don't quite have that skill.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't quite have that skill.");
                     client.CloseDialog();
                 }
 
                 client.Aisling.SkillBook.Remove(client, (byte)idx, true);
-                client.Send(new ServerFormat2D((byte)idx));
+                client.SendRemoveSkillFromPane((byte)idx);
                 client.LoadSkillBook();
 
-                client.SendSkillForgetDialog(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+                client.SendForgetSkills(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
                 break;
             }
             case 0x0003:
             {
                 client.SendOptionsDialog(Mundane, "Are you sure you want to learn the method of " + args + "? \nLet me test if you're ready.", args,
-                    new OptionsDataItem(0x0006, $"What does {args} do?"),
-                    new OptionsDataItem(0x0004, "Learn"),
-                    new OptionsDataItem(0x0001, "No, thank you."));
+                    new Dialog.OptionsDataItem(0x0006, $"What does {args} do?"),
+                    new Dialog.OptionsDataItem(0x0004, "Learn"),
+                    new Dialog.OptionsDataItem(0x0001, "No, thank you."));
                 break;
             }
             case 0x0004:
@@ -144,8 +145,8 @@ public class Conn : MundaneScript
                 {
                     client.SendOptionsDialog(Mundane, "Have you brought what is required?",
                         subject.Name,
-                        new OptionsDataItem(0x0005, "Yes."),
-                        new OptionsDataItem(0x0001, "I'll come back later."));
+                        new Dialog.OptionsDataItem(0x0005, "Yes."),
+                        new Dialog.OptionsDataItem(0x0001, "I'll come back later."));
                 }
 
                 break;
@@ -158,8 +159,8 @@ public class Conn : MundaneScript
                 client.SendOptionsDialog(Mundane,
                     $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
                     subject.Name,
-                    new OptionsDataItem(0x0004, "Yes"),
-                    new OptionsDataItem(0x0001, "No"));
+                    new Dialog.OptionsDataItem(0x0004, "Yes"),
+                    new Dialog.OptionsDataItem(0x0001, "No"));
 
                 break;
             }
@@ -168,7 +169,7 @@ public class Conn : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, client.Aisling, Mundane);
+                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
                 client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
                 break;
@@ -195,22 +196,22 @@ public class Conn : MundaneScript
                 else
                 {
                     client.CloseDialog();
-                    client.SendMessage(0x02, "I have nothing left to teach you, for now.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
                 }
 
                 break;
             }
             case 0x0011:
             {
-                client.SendSpellForgetDialog(Mundane, "The mind is a complex place, sometimes we need to declutter. \nBe warned, This cannot be undone.", 0x0800);
+                client.SendForgetSpells(Mundane, "The mind is a complex place, sometimes we need to declutter. \nBe warned, This cannot be undone.", 0x0800);
                 break;
             }
             case 0x0012:
             {
                 client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
-                    new OptionsDataItem(0x0015, $"What does {args} do?"),
-                    new OptionsDataItem(0x0013, "Learn"),
-                    new OptionsDataItem(0x0010, "No, thank you."));
+                    new Dialog.OptionsDataItem(0x0015, $"What does {args} do?"),
+                    new Dialog.OptionsDataItem(0x0013, "Learn"),
+                    new Dialog.OptionsDataItem(0x0010, "No, thank you."));
                 break;
             }
             case 0x0013:
@@ -230,8 +231,8 @@ public class Conn : MundaneScript
                 {
                     client.SendOptionsDialog(Mundane, "Have you brought what is required?",
                         subject.Name,
-                        new OptionsDataItem(0x0014, "Yes."),
-                        new OptionsDataItem(0x0010, "I'll come back later."));
+                        new Dialog.OptionsDataItem(0x0014, "Yes."),
+                        new Dialog.OptionsDataItem(0x0010, "I'll come back later."));
                 }
 
                 break;
@@ -241,7 +242,7 @@ public class Conn : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, client.Aisling, Mundane);
+                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
                 client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
 
                 break;
@@ -254,8 +255,8 @@ public class Conn : MundaneScript
                 client.SendOptionsDialog(Mundane,
                     $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
                     subject.Name,
-                    new OptionsDataItem(0x0013, "Yes"),
-                    new OptionsDataItem(0x0010, "No"));
+                    new Dialog.OptionsDataItem(0x0013, "Yes"),
+                    new Dialog.OptionsDataItem(0x0010, "No"));
 
                 break;
             }
@@ -265,15 +266,15 @@ public class Conn : MundaneScript
 
                 if (idx is < 0 or > byte.MaxValue)
                 {
-                    client.SendMessage(0x02, "I do not sense this spell within you any longer.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not sense this spell within you any longer.");
                     client.CloseDialog();
                 }
 
                 client.Aisling.SpellBook.Remove(client, (byte)idx, true);
-                client.Send(new ServerFormat18((byte)idx));
+                client.SendRemoveSpellFromPane((byte)idx);
                 client.LoadSpellBook();
 
-                client.SendSpellForgetDialog(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);
+                client.SendForgetSpells(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);
                 break;
             }
 

@@ -1,9 +1,10 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -37,7 +38,14 @@ public class Remote_Bank : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-
+        if (sprite.Client != null)
+        {
+            sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
+        else
+        {
+            target.Client?.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
     }
 }
 
@@ -68,9 +76,14 @@ public class Needle_Trap : SpellScript
     {
         target.MagicApplyDamage(sprite, 250, Spell);
 
-        target.Show(Scope.NearbyAislings,
-            new ServerFormat29((uint)target.Serial, (uint)target.Serial,
-                Spell.Template.TargetAnimation, 0, 100));
+        if (sprite.Client != null)
+        {
+            sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
+        else
+        {
+            target.Client?.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -78,7 +91,7 @@ public class Needle_Trap : SpellScript
         Trap.Set(sprite, 3000, 1, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You laid a {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
     }
 }
 
@@ -109,9 +122,14 @@ public class Stiletto_Trap : SpellScript
     {
         target.MagicApplyDamage(sprite, 750, Spell);
 
-        target.Show(Scope.NearbyAislings,
-            new ServerFormat29((uint)target.Serial, (uint)target.Serial,
-                Spell.Template.TargetAnimation, 0, 100));
+        if (sprite.Client != null)
+        {
+            sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
+        else
+        {
+            target.Client?.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -119,7 +137,7 @@ public class Stiletto_Trap : SpellScript
         Trap.Set(sprite, 3000, 1, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You laid a {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
     }
 }
 
@@ -153,9 +171,14 @@ public class Poison_Trap : SpellScript
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);
         {
-            target.Show(Scope.NearbyAislings,
-                new ServerFormat29((uint)target.Serial, (uint)target.Serial,
-                    Spell.Template.TargetAnimation, 0, 100));
+            if (sprite.Client != null)
+            {
+                sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
+            else
+            {
+                target.Client?.SendTargetedAnimation(Scope.NearbyAislings, Spell.Template.TargetAnimation, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
         }
     }
 
@@ -164,7 +187,7 @@ public class Poison_Trap : SpellScript
         Trap.Set(sprite, 3000, 1, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You laid a {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
     }
 }
 
@@ -198,9 +221,14 @@ public class Snare_Trap : SpellScript
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);
         {
-            target.Show(Scope.NearbyAislings,
-                new ServerFormat29((uint)target.Serial, (uint)target.Serial,
-                    95, 0, 100));
+            if (sprite.Client != null)
+            {
+                sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, 95, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
+            else
+            {
+                target.Client?.SendTargetedAnimation(Scope.NearbyAislings, 95, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
         }
     }
 
@@ -209,7 +237,7 @@ public class Snare_Trap : SpellScript
         Trap.Set(sprite, 3000, 1, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You laid a {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
     }
 }
 
@@ -243,8 +271,14 @@ public class Flash_Trap : SpellScript
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);
         {
-            target.Show(Scope.NearbyAislings,
-                new ServerFormat29(18, target.Pos));
+            if (sprite.Client != null)
+            {
+                sprite.Client.SendTargetedAnimation(Scope.NearbyAislings, 18, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
+            else
+            {
+                target.Client?.SendTargetedAnimation(Scope.NearbyAislings, 18, 100, 0, sprite.Serial, 0U, new Position(target.Pos.X, target.Pos.Y));
+            }
         }
     }
 
@@ -253,7 +287,7 @@ public class Flash_Trap : SpellScript
         Trap.Set(sprite, 3000, 3, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You laid a {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
     }
 }
 
@@ -272,7 +306,7 @@ public class Hiraishin : SpellScript
     public override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"No suitable targets nearby.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"No suitable targets nearby.");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
@@ -280,13 +314,6 @@ public class Hiraishin : SpellScript
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
         damageDealingSprite.ActionUsed = "Hiraishin";
-
-        var action = new ServerFormat1A
-        {
-            Serial = client.Aisling.Serial,
-            Number = 0x82,
-            Speed = 20
-        };
 
         if (target == null)
         {
@@ -300,13 +327,10 @@ public class Hiraishin : SpellScript
         if (targetPos == null || targetPos == target.Position) return;
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(76, damageDealingSprite.Pos));
-
+        client.SendTargetedAnimation(Scope.NearbyAislings, 76, 100, 0, damageDealingSprite.Serial, 0U, new Position(damageDealingSprite.Pos.X, damageDealingSprite.Pos.Y));
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        target.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -324,7 +348,7 @@ public class Hiraishin : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 
@@ -406,7 +430,7 @@ public class Shunshin : SpellScript
     public override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"No suitable targets nearby.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"No suitable targets nearby.");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
@@ -414,13 +438,6 @@ public class Shunshin : SpellScript
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
         damageDealingSprite.ActionUsed = "Shunshin";
-
-        var action = new ServerFormat1A
-        {
-            Serial = client.Aisling.Serial,
-            Number = 0x82,
-            Speed = 20
-        };
 
         if (target == null)
         {
@@ -433,25 +450,23 @@ public class Shunshin : SpellScript
         var targetPos = damageDealingSprite.GetFromAllSidesEmpty(damageDealingSprite, target);
         if (targetPos == null || targetPos == target.Position)
         {
-            client.SendMessage(0x02, "Something got in the way.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Something got in the way.");
             return;
         }
 
         client.Aisling.Invisible = true;
-        client.SendMessage(0x02, "You've blended into the shadows.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
         client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;
 
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(63, oldPos));
-        damageDealingSprite.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(76, damageDealingSprite.Pos));
+        client.SendTargetedAnimation(Scope.NearbyAislings, 63, 100, 0, damageDealingSprite.Serial, 0U, new Position(oldPos.X, oldPos.Y));
+        client.SendTargetedAnimation(Scope.NearbyAislings, 76, 100, 0, damageDealingSprite.Serial, 0U, new Position(damageDealingSprite.Pos.X, damageDealingSprite.Pos.Y));
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        target.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -469,7 +484,7 @@ public class Shunshin : SpellScript
             }
             else
             {
-                client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
                 return;
             }
 

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
-
-using Darkages.Common;
+using Chaos.Common.Identity;
 using Darkages.Enums;
 using Darkages.Sprites;
 using Darkages.Templates;
@@ -9,7 +8,7 @@ namespace Darkages.Types;
 
 public class Trap
 {
-    public static readonly ConcurrentDictionary<int, Trap> Traps = new();
+    public static readonly ConcurrentDictionary<uint, Trap> Traps = new();
     private int _ticks;
 
     private Trap()
@@ -22,7 +21,7 @@ public class Trap
     public Position Location { get; init; }
     public Sprite Owner { get; init; }
     private int Radius { get; set; }
-    private int Serial { get; set; }
+    private uint Serial { get; set; }
     private Item TrapItem { get; set; }
     private Action<Sprite, Sprite> Tripped { get; set; }
 

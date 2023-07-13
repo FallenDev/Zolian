@@ -1,5 +1,4 @@
 ﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 
@@ -29,15 +28,6 @@ public class NinjaStar : WeaponScript
                 return;
         }
 
-        var animation = new ServerFormat29
-        {
-            CasterSerial = (uint)damageDealingSprite.Serial,
-            TargetSerial = (uint)enemy.Serial,
-            CasterEffect = 10011,
-            TargetEffect = 10011,
-            Speed = 100
-        };
-
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
 
         switch (_item.ItemQuality)
@@ -60,7 +50,7 @@ public class NinjaStar : WeaponScript
                 break;
         }
 
-        damageDealingSprite.Show(Scope.NearbyAislings, animation);
+        damageDealingSprite.Client.SendTargetedAnimation(Scope.NearbyAislings, 10011, 100, 10011, damageDealingSprite.Serial, enemy.Serial);
         enemy.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

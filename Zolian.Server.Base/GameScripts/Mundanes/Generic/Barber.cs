@@ -1,10 +1,11 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -16,17 +17,17 @@ public class Barber : MundaneScript
 
     public Barber(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var opts = new List<OptionsDataItem>
+        var opts = new List<Dialog.OptionsDataItem>
         {
             new (0x02, "Style"),
             new (0x03, "Color")
@@ -104,7 +105,7 @@ public class Barber : MundaneScript
                     break;
                 case 0x0B:
                 {
-                    var opts = new List<OptionsDataItem>
+                    var opts = new List<Dialog.OptionsDataItem>
                     {
                         new (0x02, "It's not doing it for me"),
                         new (0x0C, "Let's go with that")
@@ -168,7 +169,7 @@ public class Barber : MundaneScript
                     break;
                 case 0x015:
                 {
-                    var opts = new List<OptionsDataItem>
+                    var opts = new List<Dialog.OptionsDataItem>
                     {
                         new (0x03, "It's not doing it for me"),
                         new (0x016, "Let's go with that")

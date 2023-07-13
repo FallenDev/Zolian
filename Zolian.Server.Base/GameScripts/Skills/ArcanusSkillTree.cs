@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
-
+using Chaos.Common.Definitions;
 using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -49,7 +48,7 @@ public class Flame_Thrower : SkillScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             _skillMethod.FailedAttempt(aisling, _skill, action);
             OnFailed(aisling);
             return;
@@ -79,10 +78,10 @@ public class Flame_Thrower : SkillScript
         if (_target.SpellReflect)
         {
             _target.Animate(184);
-            sprite.Client.SendMessage(0x02, "Your spell has been reflected!");
+            sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
 
             if (_target is Aisling)
-                _target.Client.SendMessage(0x02, $"You reflected {_skill.Template.Name}.");
+                _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {_skill.Template.Name}.");
 
             _target = Spell.SpellReflect(_target, sprite);
         }
@@ -90,9 +89,9 @@ public class Flame_Thrower : SkillScript
         if (_target.SpellNegate)
         {
             _target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (_target is Aisling)
-                _target.Client.SendMessage(0x02, $"You deflected {_skill.Template.Name}.");
+                _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_skill.Template.Name}.");
 
             return;
         }
@@ -150,7 +149,7 @@ public class Flame_Thrower : SkillScript
                 {
                     _target.Animate(184);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You reflected {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {_skill.Template.Name}.");
 
                     _target = Spell.SpellReflect(_target, sprite);
                 }
@@ -159,7 +158,7 @@ public class Flame_Thrower : SkillScript
                 {
                     _target.Animate(64);
                     if (_target is Aisling)
-                        _target.Client.SendMessage(0x02, $"You deflected {_skill.Template.Name}.");
+                        _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_skill.Template.Name}.");
 
                     continue;
                 }

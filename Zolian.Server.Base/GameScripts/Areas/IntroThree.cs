@@ -16,7 +16,7 @@ public class IntroThree : AreaScript
     public override void OnMapEnter(WorldClient client)
     {
         _aisling = client.Aisling;
-        _aisling.Client.SendMessage(0x08, "{=wRebirth{=a... its what's left, when ashes and the decay stops. Then can life begin anew. \n\nSee for your eyes that today is a new light. Today a new beginning, today a new spark. \n\n\n{=qWelcome to Zolian.");
+        _aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=wRebirth{=a... its what's left, when ashes and the decay stops. Then can life begin anew. \n\nSee for your eyes that today is a new light. Today a new beginning, today a new spark. \n\n\n{=qWelcome to Zolian.");
     }
 
     public override void OnMapExit(WorldClient client) { }

@@ -1,7 +1,7 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -14,17 +14,17 @@ public class Senan : MundaneScript
 {
     public Senan(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         switch (client.Aisling.QuestManager.CryptTerror)
         {
@@ -86,7 +86,7 @@ public class Senan : MundaneScript
                 case 0x02:
                 {
                     client.SendOptionsDialog(Mundane, "Hic... Damn");
-                    client.SendStats(StatusFlags.WeightMoney);
+                    client.SendAttributes(StatUpdateType.WeightGold);
                 }
                     break;
                 case 0x03:
@@ -96,7 +96,7 @@ public class Senan : MundaneScript
                     break;
                 case 0x04:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Thank you.")
                     };
@@ -109,13 +109,13 @@ public class Senan : MundaneScript
                     client.Aisling.QuestManager.DrunkenHabit = true;
                     client.Aisling.QuestManager.MilethReputation += 1;
                     client.GiveItem("Mold");
-                    client.SendStats(StatusFlags.WeightMoney);
+                    client.SendAttributes(StatUpdateType.WeightGold);
                     client.CloseDialog();
                 }
                     break;
                 case 0x06:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x07, "I'll go."),
                         new (0x02, "No time for this.")
@@ -155,7 +155,7 @@ public class Senan : MundaneScript
                     else
                     {
                         client.SendOptionsDialog(Mundane, "I'm still being terrified at night.",
-                            new OptionsDataItem(0x07, "Sorry."));
+                            new Dialog.OptionsDataItem(0x07, "Sorry."));
                     }
                 }
                     break;

@@ -1,7 +1,6 @@
-﻿using Darkages.Common;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -14,17 +13,17 @@ public class ArenaHost : MundaneScript
 {
     public ArenaHost(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new(0x01, "Enter North"),
             new(0x02, "Enter East"),

@@ -1,15 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using Chaos.Networking;
-using Chaos.Networking.Entities;
-using Chaos.Packets;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
-using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -166,7 +161,7 @@ public class ServerSetup : IServerContext
         GlobalItemTemplateCache = new ConcurrentDictionary<string, ItemTemplate>();
         GlobalNationTemplateCache = new ConcurrentDictionary<string, NationTemplate>();
         GlobalMonsterTemplateCache = new ConcurrentDictionary<string, MonsterTemplate>();
-        GlobalMonsterCache = new ConcurrentDictionary<int, Monster>();
+        GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
         GlobalMundaneTemplateCache = new ConcurrentDictionary<string, MundaneTemplate>();
         GlobalSkillTemplateCache = new ConcurrentDictionary<string, SkillTemplate>();
         GlobalSpellTemplateCache = new ConcurrentDictionary<string, SpellTemplate>();

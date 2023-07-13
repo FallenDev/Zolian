@@ -1,12 +1,11 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
+﻿using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 
 namespace Darkages.GameScripts.Mundanes.Tagor;
@@ -41,7 +40,7 @@ public class Trainer : MundaneScript
         };
     }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         _skillList = ObtainSkillList(client);
@@ -53,7 +52,7 @@ public class Trainer : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         if (_skillList.Count > 0)
         {
@@ -80,30 +79,30 @@ public class Trainer : MundaneScript
             #region Skills
 
             case 0x00:
-                client.SendMessage(0x02, "Come back sometime!");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Come back sometime!");
                 client.CloseDialog();
                 break;
             case 0x0001:
                 {
-                    var options = new List<OptionsDataItem>();
+                    var options = new List<Dialog.OptionsDataItem>();
 
                     if (_skillList.Count > 0)
                     {
                         options.Add(new(0x03, "Let's get started"));
-                        options.Add(new OptionsDataItem(0x00, "{=bNo, thank you"));
+                        options.Add(new Dialog.OptionsDataItem(0x00, "{=bNo, thank you"));
                         client.SendOptionsDialog(Mundane, "Ready? It'll cost you 100,000 gold for unlimited time.", options.ToArray());
                     }
                     else
                     {
                         client.CloseDialog();
-                        client.SendMessage(0x02, "Ah, come back anytime.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Ah, come back anytime.");
                     }
 
                     break;
                 }
             case 0x0002:
                 {
-                    client.SendSkillForgetDialog(Mundane,
+                    client.SendForgetSkills(Mundane,
                         "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
                     break;
                 }
@@ -113,15 +112,15 @@ public class Trainer : MundaneScript
 
                     if (idx is < 0 or > byte.MaxValue)
                     {
-                        client.SendMessage(0x02, "You don't quite have that skill.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't quite have that skill.");
                         client.CloseDialog();
                     }
 
                     client.Aisling.SkillBook.Remove(client, (byte)idx, true);
-                    client.Send(new ServerFormat2D((byte)idx));
+                    client.SendRemoveSkillFromPane((byte)idx);
                     client.LoadSkillBook();
 
-                    client.SendSkillForgetDialog(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+                    client.SendForgetSkills(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
                     break;
                 }
             case 0x0003:
@@ -195,7 +194,7 @@ public class Trainer : MundaneScript
 
             case 0x0011:
                 {
-                    client.SendSpellForgetDialog(Mundane, "The mind is a complex place, sometimes we need to declutter. \nBe warned, This cannot be undone.", 0x0800);
+                    client.SendForgetSpells(Mundane, "The mind is a complex place, sometimes we need to declutter. \nBe warned, This cannot be undone.", 0x0800);
                     break;
                 }
             case 0x0800:
@@ -204,15 +203,15 @@ public class Trainer : MundaneScript
 
                     if (idx is < 0 or > byte.MaxValue)
                     {
-                        client.SendMessage(0x02, "I do not sense this spell within you any longer.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not sense this spell within you any longer.");
                         client.CloseDialog();
                     }
 
                     client.Aisling.SpellBook.Remove(client, (byte)idx, true);
-                    client.Send(new ServerFormat18((byte)idx));
+                    client.SendRemoveSpellFromPane((byte)idx);
                     client.LoadSpellBook();
 
-                    client.SendSpellForgetDialog(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);
+                    client.SendForgetSpells(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);
                     break;
                 }
 

@@ -1,7 +1,5 @@
 ﻿using Darkages.Common;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -14,7 +12,7 @@ public class TempleOfLight : MundaneScript
 {
     public TempleOfLight(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;
 
@@ -28,7 +26,7 @@ public class TempleOfLight : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new(0x01, "Approach the Temple"),
             new(0x02, "...")

@@ -134,7 +134,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        public readonly Stack<CastInfo> CastStack = new();
+        public CastInfo SpellCastInfo { get; set; }
         public DateTime LastAssail { get; set; }
         public DateTime LastClientRefresh { get; set; }
         public DateTime LastWarp { get; set; }
@@ -236,7 +236,6 @@ namespace Darkages.Network.Client
 
         public void DoUpdate(TimeSpan elapsedTime)
         {
-            DispatchCasts();
             HandleBadTrades();
             DeathStatusCheck();
             UpdateStatusBarAndThreat(elapsedTime);
@@ -1148,6 +1147,63 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
+        /// Attempts to cast a spell from cache, creating a temporary copy of it
+        /// </summary>
+        /// <param name="spellName">Used for finding the spell in cache</param>
+        /// <param name="caster">Sprite that cast the spell</param>
+        /// <param name="target">Sprite the spell is cast on</param>
+        /// <returns>Spell with an attached script was found and called</returns>
+        public bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target = null)
+        {
+            if (!ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue(spellName, out var value)) return false;
+
+            var scripts = ScriptManager.Load<SpellScript>(spellName, Spell.Create(1, value));
+            if (scripts == null) return false;
+
+            scripts.Values.First().OnUse(caster, target);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Displays player's body animation, sends sound, messages, and displays spells animation on target
+        /// </summary>
+        public void PlayerCastBodyAnimationSoundAndMessage(Spell spell, Sprite target, byte actionSpeed = 30)
+        {
+            switch (target)
+            {
+                case null:
+                    return;
+                case Aisling aislingTarget:
+                    aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
+                    break;
+            }
+
+            SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
+            SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound);
+            SendTargetedAnimation(Scope.NearbyAislings, spell.Template.TargetAnimation, 100, spell.Template.Animation, Aisling.Serial, target.Serial);
+        }
+
+        /// <summary>
+        /// Displays player's body animation, sends sound, messages, and displays spells animation on target position
+        /// </summary>
+        public void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, byte actionSpeed = 30)
+        {
+            switch (target)
+            {
+                case null:
+                    return;
+                case Aisling aislingTarget:
+                    aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
+                    break;
+            }
+
+            SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
+            SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound);
+            SendTargetedAnimation(Scope.NearbyAislings, spell.Template.TargetAnimation, 100, spell.Template.Animation, Aisling.Serial, target.Serial, SpellCastInfo.Position);
+        }
+
+        /// <summary>
         /// 0x48 - Cancel Casting
         /// </summary>
         public void SendCancelCasting()
@@ -1222,6 +1278,14 @@ namespace Darkages.Network.Client
             };
 
             Send(args);
+        }
+
+        /// <summary>
+        /// 0x2F - Send Dialog
+        /// </summary>
+        public void SendDialog(Dialog dialog)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -2277,45 +2341,6 @@ namespace Darkages.Network.Client
             Disconnect();
         }
 
-        public void DispatchCasts()
-        {
-            if (!CastStack.Any()) return;
-            if (CastStack.Count == 0) return;
-
-            for (var i = 0; i < CastStack.Count; i++)
-            {
-                CastStack.TryPeek(out var stack);
-                if (stack == null) continue;
-
-                var spell = Aisling.SpellBook.TryGetSpells(i => i.Slot == stack.Slot).First();
-                if (spell == null) continue;
-
-                if (stack.Target == 0 && spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)
-                {
-                    if (CastStack.Count <= 0) return;
-                    CastStack.TryPop(out _);
-                    continue;
-                }
-
-                if (!spell.Ready)
-                {
-                    try
-                    {
-                        if (CastStack.Count <= 0) return;
-                        CastStack.TryPop(out _);
-                        continue;
-                    }
-                    catch
-                    {
-                        return;
-                    }
-                }
-
-                CastStack.TryPop(out var info);
-                Aisling.CastSpell(spell, info);
-            }
-        }
-
         public WorldClient SystemMessage(string message)
         {
             SendServerMessage(ServerMessageType.ActiveMessage, message);
@@ -2715,24 +2740,6 @@ namespace Darkages.Network.Client
             SendLocation();
         }
 
-        public void CloseDialog(ushort dialogId, EntityType spriteType, bool next, bool previous, ushort spriteDisplayId, string spriteName, string text = "")
-        {
-            var dialog = new DialogArgs
-            {
-                Color = DisplayColor.Default,
-                DialogId = dialogId,
-                DialogType = DialogType.CloseDialog,
-                EntityType = spriteType,
-                HasNextButton = next,
-                HasPreviousButton = previous,
-                Sprite = spriteDisplayId,
-                Name = spriteName,
-                Text = text
-            };
-
-            SendDialog(dialog);
-        }
-
         public void ForgetSkill(string s)
         {
             var subject = Aisling.SkillBook.Skills.Values
@@ -3093,9 +3100,9 @@ namespace Darkages.Network.Client
         {
             if (exp <= 0) exp = 1;
 
-            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+            SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
             Aisling.ExpTotal += exp;
-            Aisling.ExpNext -= (int)exp;
+            Aisling.ExpNext -= exp;
 
             if (Aisling.ExpNext >= int.MaxValue) Aisling.ExpNext = 0;
 
@@ -3107,7 +3114,7 @@ namespace Darkages.Network.Client
 
             while (Aisling.ExpNext <= 0 && Aisling.ExpLevel < 500)
             {
-                Aisling.ExpNext = (int)(Aisling.ExpLevel * seed * 5000);
+                Aisling.ExpNext = (uint)(Aisling.ExpLevel * seed * 5000);
 
                 if (Aisling.ExpLevel == 500)
                     break;
@@ -3231,7 +3238,7 @@ namespace Darkages.Network.Client
             }
 
             // ToDo: Logic to only play this if a menu is opened.
-            //CloseDialog();
+            this.CloseDialog();
 
             return this;
         }
@@ -3274,7 +3281,7 @@ namespace Darkages.Network.Client
                 {
                     var msgTier = Math.Abs(Aisling.ExpLevel - warps.LevelRequired);
 
-                    Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, msgTier <= 15
+                    SendServerMessage(ServerMessageType.ActiveMessage, msgTier <= 15
                         ? $"You're too afraid to enter. {{=c{warps.LevelRequired} REQ"
                         : $"{{=bNightmarish visions of your own death repel you. {{=c{warps.LevelRequired} REQ)");
 
@@ -3601,7 +3608,7 @@ namespace Darkages.Network.Client
             {
                 if (e.Message.Contains("PK__Players"))
                 {
-                    Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving new found map. Contact GM");
+                    SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving new found map. Contact GM");
                     Crashes.TrackError(e);
                     return;
                 }
@@ -3645,7 +3652,7 @@ namespace Darkages.Network.Client
             {
                 if (e.Message.Contains("PK__Players"))
                 {
-                    Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving player to ignored list. Contact GM");
+                    SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving player to ignored list. Contact GM");
                     Crashes.TrackError(e);
                     return;
                 }

@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -19,7 +20,7 @@ public class Scroll : ItemScript
 
         if (aisling.Path == Class.Peasant)
         {
-            client.SendMessage(0x02, "You are not allowed to use this.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You are not allowed to use this.");
             return;
         }
 

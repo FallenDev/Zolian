@@ -1,7 +1,7 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -14,40 +14,40 @@ public class Camille : MundaneScript
 {
     public Camille(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
         if (client.Aisling.Path != Class.Peasant)
         {
-            var options = new List<OptionsDataItem>();
+            var options = new List<Dialog.OptionsDataItem>();
 
             if (client.Aisling.QuestManager.PeteComplete)
-                options.Add(new OptionsDataItem(0x02, "{=qI'll take a pint."));
+                options.Add(new Dialog.OptionsDataItem(0x02, "{=qI'll take a pint."));
                 
             if (client.Aisling.Level <= 50 && !client.Aisling.QuestManager.CamilleGreetingComplete)
             {
-                options.Add(new OptionsDataItem(0x04, "Good Morning, Camille"));
+                options.Add(new Dialog.OptionsDataItem(0x04, "Good Morning, Camille"));
             }
 
             if (!client.Aisling.HasItem("Zolian Guide"))
             {
-                options.Add(new OptionsDataItem(0x06, "Lost my Guide"));
+                options.Add(new Dialog.OptionsDataItem(0x06, "Lost my Guide"));
             }
 
-            options.Add(new OptionsDataItem(0x03, "Take care"));
+            options.Add(new Dialog.OptionsDataItem(0x03, "Take care"));
 
             client.SendOptionsDialog(Mundane, "Welcome, we have warm beds and plenty of mead. Please sit down and relax.", options.ToArray());
         }
         else if (client.Aisling.Path == Class.Peasant)
         {
-            var options = new List<OptionsDataItem>
+            var options = new List<Dialog.OptionsDataItem>
             {
                 new (0x06, "How do I get back to the tutorial?"),
                 new (0x03, "Nothing now.")
@@ -85,7 +85,7 @@ public class Camille : MundaneScript
                     break;
                 case 4:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x02, "How about some of that mead?"),
                         new (0x05, "Yes, I enjoyed my stay.")
@@ -98,14 +98,14 @@ public class Camille : MundaneScript
                     client.Aisling.QuestManager.MilethReputation += 1;
                     client.Aisling.QuestManager.CamilleGreetingComplete = true;
                     client.SendOptionsDialog(Mundane, "We're happy to hear!");
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel refreshed.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel refreshed.");
                     break;
                 case 6:
                     var item2 = new Item();
                     item2 = item2.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Zolian Guide"]);
                     item2.GiveTo(client.Aisling);
 
-                    var guide = new List<OptionsDataItem>
+                    var guide = new List<Dialog.OptionsDataItem>
                     {
                         new (0x03, "Thank you")
                     };

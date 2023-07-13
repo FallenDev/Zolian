@@ -23,7 +23,7 @@ public class MonsterTemplate : Template
     public bool IgnoreCollision { get; set; }
     public ushort Image { get; set; }
     public int ImageVarience { get; set; }
-    public uint Level { get; set; }
+    public ushort Level { get; set; }
     public LootQualifer LootType { get; set; }
     public MonsterRace MonsterRace { get; set; }
     public MoodQualifer MoodType { get; set; }
@@ -148,7 +148,7 @@ public static class MonsterStorage
                 temp.OffenseElement = offEle;
                 temp.DefenseElement = defEle;
                 var level = (int)reader["Level"];
-                temp.Level = (uint)level;
+                temp.Level = (ushort)level;
                 temp.SkillScripts = new List<string>();
                 temp.SpellScripts = new List<string>();
                 temp.AbilityScripts = new List<string>();

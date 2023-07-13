@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -21,7 +22,7 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
     protected Mundane Mundane { get; init; }
     protected WorldServer Server { get; }
 
-    public abstract void OnResponse(WorldClient client, ushort responseId, string args);
+    public abstract void OnResponse(WorldClient client, ushort responseId, string[] args);
 
     public virtual void OnClick(WorldClient client, uint serial)
     {

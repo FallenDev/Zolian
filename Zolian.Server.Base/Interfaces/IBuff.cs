@@ -1,5 +1,5 @@
 ﻿using Darkages.Infrastructure;
-using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -24,5 +24,5 @@ public interface IBuff
     void InsertBuff(Aisling aisling, Buff buff);
     void UpdateBuff(Aisling aisling);
     void DeleteBuff(Aisling aisling, Buff buff);
-    Task<bool> CheckOnBuffAsync(WorldClient client, string name);
+    Task<bool> CheckOnBuffAsync(IWorldClient client, string name);
 }

@@ -1,8 +1,7 @@
 ﻿using System.Numerics;
-
-using Darkages.Common;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Types;
 
 namespace Darkages.Sprites;
@@ -40,7 +39,7 @@ public sealed class Money : Sprite
     {
         if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
         {
-            aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Can't quite hold that much.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Can't quite hold that much.");
             return;
         }
 
@@ -49,8 +48,8 @@ public sealed class Money : Sprite
         if (aisling.GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
             aisling.GoldPoints = int.MaxValue;
 
-        aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
-        aisling.Client.Send(new ServerFormat08(aisling, StatusFlags.StructC));
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
+        aisling.Client.SendAttributes(StatUpdateType.ExpGold);
 
         Remove();
     }

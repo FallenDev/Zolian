@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
+using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -52,12 +52,12 @@ public class MilethCryptTerror : AreaScript
         {
             if (client.Aisling.HasKilled("Crypt Terror", 1))
             {
-                client.SendMessage(0x02, "You feel a sense of dread.");
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a sense of dread.");
                 return;
             }
 
             client.TransitionToMap(3023, new Position(5, 2));
-            client.SendMessage(0x02, "Something pulls you in.");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Something pulls you in.");
         }
     }
 

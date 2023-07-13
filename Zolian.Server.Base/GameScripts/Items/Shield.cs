@@ -1,5 +1,5 @@
-﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
 
@@ -25,13 +25,13 @@ public class Shield : ItemScript
 
             if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHanded))
             {
-                aisling.Client.SendMessage(0x02, "I cannot wield an offhand with this weapon.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I cannot wield an offhand with this weapon.");
                 return;
             }
 
             if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
             {
-                aisling.Client.SendMessage(0x02, "I cannot wield an offhand with a staff.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I cannot wield an offhand with a staff.");
                 return;
             }
         }
@@ -40,14 +40,14 @@ public class Shield : ItemScript
         {
             if (!client.Aisling.TwoHandedBasher)
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
 
             var l = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (l != null && !aisling.EquipmentManager.RemoveFromExisting((int)l))
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
             }
         }
@@ -56,14 +56,14 @@ public class Shield : ItemScript
         {
             if (!client.Aisling.TwoHandedCaster)
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
 
             var k = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (k != null && !aisling.EquipmentManager.RemoveFromExisting((int)k))
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
             }
         }

@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -20,7 +21,7 @@ public class MilethCottage : AreaScript
         client.Aisling.CurrentHp = client.Aisling.MaximumHp;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
         client.SendStats(StatusFlags.Health);
-        client.SendMessage(0x02, "You feel well rested.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel well rested.");
     }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }

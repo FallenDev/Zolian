@@ -1,12 +1,13 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -17,17 +18,17 @@ public class ItemShop : MundaneScript
 
     public ItemShop(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var opts = new List<OptionsDataItem>
+        var opts = new List<Dialog.OptionsDataItem>
         {
             new (0x0001, "Buy"),
             new (0x0002, "Sell"),
@@ -44,10 +45,10 @@ public class ItemShop : MundaneScript
         switch (responseID)
         {
             case 0x0001:
-                client.SendItemShopDialog(Mundane, "Here's what I have to offer.", 0x0004, ShopMethods.BuyFromStoreInventory(Mundane));
+                client.SendItemShopDialog(Mundane, "Here's what I have to offer.", ShopMethods.BuyFromStoreInventory(Mundane));
                 break;
             case 0x0002:
-                client.SendItemSellDialog(Mundane, "What do you want to sell?", 0x0005, ShopMethods.GetCharacterSellInventoryByteList(client));
+                client.SendItemSellDialog(Mundane, "What do you want to sell?", ShopMethods.GetCharacterSellInventoryByteList(client));
                 break;
             case 0x0030:
             {
@@ -73,7 +74,7 @@ public class ItemShop : MundaneScript
                     if (item != null)
                     {
                         var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                        var opts = new List<OptionsDataItem>
+                        var opts = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -100,7 +101,7 @@ public class ItemShop : MundaneScript
                                 client.PendingItemSessions.Offer = (uint)(offer * amount);
                                 client.PendingItemSessions.Removing = amount;
 
-                                var opts2 = new List<OptionsDataItem>
+                                var opts2 = new List<Dialog.OptionsDataItem>
                                 {
                                     new(0x0030, ServerSetup.Instance.Config.MerchantConfirmMessage),
                                     new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -147,9 +148,7 @@ public class ItemShop : MundaneScript
                             Quantity = 0
                         };
 
-                        client.Send(new ServerFormat2F(Mundane,
-                            $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}",
-                            new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}");
                     }
                     else
                     {
@@ -160,7 +159,7 @@ public class ItemShop : MundaneScript
                             Quantity = 1
                         };
 
-                        var opts2 = new List<OptionsDataItem>
+                        var opts2 = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -184,9 +183,10 @@ public class ItemShop : MundaneScript
                     {
                         client.Aisling.GoldPoints -= cost;
                         client.GiveQuantity(client.Aisling, item, quantity);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.Primary);
+                        client.SendAttributes(StatUpdateType.ExpGold);
                         client.PendingBuySessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
                         TopMenu(client);
                     }
                     else
@@ -211,9 +211,10 @@ public class ItemShop : MundaneScript
                     {
                         client.Aisling.GoldPoints += offer;
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.Primary);
+                        client.SendAttributes(StatUpdateType.ExpGold);
                         client.PendingItemSessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
                         TopMenu(client);
                     }
                 }
@@ -242,7 +243,7 @@ public class ItemShop : MundaneScript
                             Quantity = 0,
                             Offer = (int)template.Value,
                         };
-                        client.Send(new ServerFormat2F(Mundane, $"How many {template.Name} would you like to purchase?", new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {template.Name} would you like to purchase?");
                         break;
                     case false when client.Aisling.GoldPoints >= template.Value:
                     {
@@ -253,12 +254,13 @@ public class ItemShop : MundaneScript
                         {
                             client.Aisling.GoldPoints -= template.Value;
 
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.Primary);
+                            client.SendAttributes(StatUpdateType.ExpGold);
                             client.SendOptionsDialog(Mundane, $"You've purchased: {{=c{args}");
                         }
                         else
                         {
-                            client.SendMessage(0x02, "Yeah right, You can't even physically hold it.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "Yeah right, You can't even physically hold it.");
                         }
 
                         break;
@@ -277,7 +279,7 @@ public class ItemShop : MundaneScript
             {
                 _repairSum = ShopMethods.GetRepairCosts(client);
 
-                var optsRepair = new List<OptionsDataItem>
+                var optsRepair = new List<Dialog.OptionsDataItem>
                 {
                     new(0x0014, ServerSetup.Instance.Config.MerchantConfirmMessage),
                     new(0x0015, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -289,10 +291,7 @@ public class ItemShop : MundaneScript
                 }
                 else
                 {
-                    client.SendOptionsDialog(Mundane,
-                        "It will cost {=c" + _repairSum + "{=a Gold to repair everything. Do you Agree?",
-                        _repairSum.ToString(), optsRepair.ToArray());
-                }
+                    client.SendOptionsDialog(Mundane, "It will cost {=c" + _repairSum + "{=a Gold to repair everything. Do you Agree?", _repairSum.ToString(), optsRepair.ToArray()); }
             }
                 break;
             case 0x0014:

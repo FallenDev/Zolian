@@ -1,5 +1,5 @@
-﻿using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -21,7 +21,7 @@ public class IdentifyWeapon : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        client.SendMessage(0x02, "Hmm, can't seem to identify that.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -119,7 +119,7 @@ public class IdentifyArmor : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        client.SendMessage(0x02, "Hmm, can't seem to identify that.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -194,7 +194,7 @@ public class InspectItem : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        client.SendMessage(0x02, "Hmm, can't seem to identify that.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)

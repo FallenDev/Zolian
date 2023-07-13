@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -87,6 +86,7 @@ public interface ISprite
 
     bool CanBeAttackedHere(Sprite source);
     void NotifyPropertyChanged([CallerMemberName] string propertyName = "");
+    TSprite CastSpriteToType<TSprite>() where TSprite : Sprite;
     void ShowTo(Aisling nearbyAisling);
     List<Sprite> GetAllInFront(Sprite sprite, int tileCount = 1);
     List<Sprite> GetAllInFront(int tileCount = 1, bool intersect = false);
@@ -153,7 +153,6 @@ public interface ISprite
     void UpdateDebuffs(TimeSpan elapsedTime);
     void StatusBarDisplayUpdateBuff(Buff buff, TimeSpan elapsedTime);
     void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime);
-    TSprite Cast<TSprite>() where TSprite : Sprite;
     void Remove();
     void HideFrom(Aisling nearbyAisling);
     void Animate(ushort animation, byte speed = 100);

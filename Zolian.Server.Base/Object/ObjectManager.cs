@@ -60,16 +60,16 @@ public class ObjectManager : IObjectManager
         {
             Aisling => GetObject<Aisling>(null,
                 i => i != null && string.Equals(i.Username.ToLower(), name.ToLower(),
-                    StringComparison.InvariantCulture)).Cast<T>(),
+                    StringComparison.InvariantCulture)).CastSpriteToType<T>(),
             Monster => GetObject<Monster>(map,
                 i => i != null && string.Equals(i.Template.Name.ToLower(), name.ToLower(),
-                    StringComparison.InvariantCulture)).Cast<T>(),
+                    StringComparison.InvariantCulture)).CastSpriteToType<T>(),
             Mundane => GetObject<Mundane>(map,
                 i => i != null && string.Equals(i.Template.Name.ToLower(), name.ToLower(),
-                    StringComparison.InvariantCulture)).Cast<T>(),
+                    StringComparison.InvariantCulture)).CastSpriteToType<T>(),
             Item => GetObject<Item>(map,
                 i => i != null && string.Equals(i.Template.Name.ToLower(), name.ToLower(),
-                    StringComparison.InvariantCulture)).Cast<T>(),
+                    StringComparison.InvariantCulture)).CastSpriteToType<T>(),
             _ => null
         };
     }

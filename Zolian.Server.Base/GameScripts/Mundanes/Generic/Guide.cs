@@ -1,9 +1,9 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Common;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -12,7 +12,7 @@ public class Guide : MundaneScript
 {
     public Guide(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;
         TopMenu(client);
@@ -22,7 +22,7 @@ public class Guide : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new(0x01, "Basics"),
             new(0x02, "Mechanics"),
@@ -46,7 +46,7 @@ public class Guide : MundaneScript
         {
             case 1:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "Character Panels"),
                     new (0x11, "Movement"),
@@ -59,7 +59,7 @@ public class Guide : MundaneScript
             }
             case 2:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x19, "Regeneration"),
                     new (0x20, "Item Quality"),
@@ -75,7 +75,7 @@ public class Guide : MundaneScript
             }
             case 3:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x28, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -88,7 +88,7 @@ public class Guide : MundaneScript
             }
             case 4:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x28, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -141,12 +141,12 @@ public class Guide : MundaneScript
                 //client.Aisling.BetaReset = true;
                 //client.CloseDialog();
                 //client.TransitionToMap(720, new Position(14, 9));
-                //client.SendMessage(0x02, "Character has been reset. Please re-login prior to changing class.");
+                //client.SendServerMessage(ServerMessageType.OrangeBar1, "Character has been reset. Please re-login prior to changing class.");
                 break;
             }
             case 9:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x13, "Inventory"),
                     new (0x14, "Skills"),
@@ -167,7 +167,7 @@ public class Guide : MundaneScript
             }
             case 17:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x01, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -178,7 +178,7 @@ public class Guide : MundaneScript
             }
             case 18:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x01, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -189,7 +189,7 @@ public class Guide : MundaneScript
             }
             case 19:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -201,7 +201,7 @@ public class Guide : MundaneScript
             }
             case 20:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -213,7 +213,7 @@ public class Guide : MundaneScript
             }
             case 21:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -225,7 +225,7 @@ public class Guide : MundaneScript
             }
             case 22:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -237,7 +237,7 @@ public class Guide : MundaneScript
             }
             case 23:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -249,7 +249,7 @@ public class Guide : MundaneScript
             }
             case 24:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x09, "{=q<- Back"),
                     new (0x01, "{=cTop Menu"),
@@ -261,7 +261,7 @@ public class Guide : MundaneScript
             }
             case 25:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -276,7 +276,7 @@ public class Guide : MundaneScript
             }
             case 32:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -295,7 +295,7 @@ public class Guide : MundaneScript
             }
             case 33:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -313,7 +313,7 @@ public class Guide : MundaneScript
             }
             case 34:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -342,7 +342,7 @@ public class Guide : MundaneScript
             }
             case 36:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -353,7 +353,7 @@ public class Guide : MundaneScript
             }
             case 37:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x02, "{=q<- Back"),
                     new (0x05, "{=bExit")
@@ -374,7 +374,7 @@ public class Guide : MundaneScript
             }
             case 41:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x28, "{=q<- Back"),
                     new (0x05, "{=bExit")

@@ -1,9 +1,10 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -24,7 +25,7 @@ public class Blink : SkillScript
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, "No suitable targets nearby.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "No suitable targets nearby.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -44,7 +45,7 @@ public class Blink : SkillScript
         if (!_skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
-        aisling.Client.SendMessage(0x02, "Use the Cleric's Feather (Drag & Drop on map)");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Use the Cleric's Feather (Drag & Drop on map)");
     }
 
     public override void ItemOnDropped(Sprite sprite, Position pos, Area map)
@@ -134,7 +135,7 @@ public class Smite : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to purify.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to purify.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 

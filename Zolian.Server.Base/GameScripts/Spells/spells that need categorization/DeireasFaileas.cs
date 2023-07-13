@@ -1,4 +1,5 @@
-﻿using Darkages.Scripting;
+﻿using Chaos.Common.Definitions;
+using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -13,7 +14,7 @@ public class deireasfaileas : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        client.SendMessage(0x02, "Failed to cast.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to cast.");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
@@ -25,7 +26,7 @@ public class deireasfaileas : SpellScript
         if (target is not Aisling aisling) return;
         if (aisling.HasBuff("Deireas Faileas"))
         {
-            aisling.Client.SendMessage(0x02, "Offensive spells are now being deflected.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Offensive spells are now being deflected.");
             return;
         }
 

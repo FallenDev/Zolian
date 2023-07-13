@@ -1,7 +1,7 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -482,7 +482,7 @@ public class Lullaby_Strike : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to incapacitate.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to incapacitate.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -744,7 +744,7 @@ public class Crasher : SkillScript
             aisling.CurrentHp -= criticalHp;
         }
 
-        aisling.Client.SendMessage(0x02, "I feel drained...");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel drained...");
         aisling.Client.Send(new ServerFormat08(aisling, StatusFlags.StructB));
         _skillMethod.OnSuccess(_target, aisling, _skill, dmg, false, action);
     }
@@ -944,7 +944,7 @@ public class Rush : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "*Stumbled*");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
         if (_target == null) return;
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
@@ -1363,7 +1363,7 @@ public class Beag_Suain : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to incapacitate.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to incapacitate.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -1594,7 +1594,7 @@ public class Charge : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "*Stumbled*");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
         if (_target == null) return;
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
@@ -2046,7 +2046,7 @@ public class Beag_Suain_Ia_Gar : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed to incapacitate.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to incapacitate.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 
@@ -2138,7 +2138,7 @@ public class Sneak_Attack : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "*Stumbled*");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
         if (_target == null) return;
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
     }
@@ -2249,7 +2249,7 @@ public class Raise_Threat : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "Failed.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed.");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 

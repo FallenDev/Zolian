@@ -1,14 +1,13 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Numerics;
 using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Templates;
 using Darkages.Types;
-using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Sprites;
 
@@ -65,7 +64,7 @@ public sealed class Aisling : Player, IAisling
         Remains = new Death();
         Hacked = false;
         PasswordAttempts = 0;
-        ActiveDialog = null;
+        ActiveReactor = null;
         DiscoveredMaps = new List<int>();
         IgnoredList = new List<string>();
         GroupId = 0;
@@ -78,8 +77,7 @@ public sealed class Aisling : Player, IAisling
     public bool Loading { get; set; }
     public long DamageCounter { get; set; }
     public uint ThreatMeter { get; set; }
-    public Dialog ActiveDialog { get; set; }
-    public Stack<Dialog> DialogHistory { get; set; }
+    public ReactorTemplate ActiveReactor { get; set; }
     public DialogSequence ActiveSequence { get; set; }
     public ExchangeSession Exchange { get; set; }
     public NameDisplayStyle NameStyle { get; set; }
@@ -334,12 +332,6 @@ public sealed class Aisling : Player, IAisling
 
     public void CastSpell(Spell spell, CastInfo info)
     {
-        if (spell.InUse)
-        {
-            Client.SendServerMessage(ServerMessageType.ActiveMessage, "Currently casting a similar spell");
-            return;
-        }
-
         if (info != null)
         {
             if (!string.IsNullOrEmpty(info.Data))
@@ -353,6 +345,8 @@ public sealed class Aisling : Player, IAisling
                 if (target != null)
                 {
                     spell.InUse = true;
+                    
+                    Client.PlayerCastBodyAnimationSoundAndMessageOnPosition(spell, target);
 
                     foreach (var script in spell.Scripts.Values)
                         script.OnUse(this, target);
@@ -361,9 +355,15 @@ public sealed class Aisling : Player, IAisling
                 }
                 else
                 {
-                    if (spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget) return;
+                    if (spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)
+                    {
+                        Client.SpellCastInfo = null;
+                        return;
+                    }
 
                     spell.InUse = true;
+
+                    Client.PlayerCastBodyAnimationSoundAndMessage(spell, this);
 
                     foreach (var script in spell.Scripts.Values)
                         script.OnUse(this, this);
@@ -376,11 +376,13 @@ public sealed class Aisling : Player, IAisling
             }
             else
             {
-                Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue casting spell; Code: Crocodile");
+                Client.SendServerMessage(ServerMessageType.OrangeBar2, "Issue casting spell; Code: Crocodile");
+                Client.SpellCastInfo = null;
             }
         }
 
         Client.Aisling.IsCastingSpell = false;
+        Client.SpellCastInfo = null;
     }
 
     public void FinishExchange()

@@ -1,4 +1,5 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using Chaos.Common.Definitions;
+using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -23,10 +24,7 @@ public class Leap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanMove) return;
-
-
-
+        if (sprite.CantMove) return;
     }
 }
 
@@ -55,7 +53,7 @@ public class DiaAite : SpellScript
         if (target.HasBuff("Aite") || target.HasBuff("Dia Aite"))
         {
             if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 

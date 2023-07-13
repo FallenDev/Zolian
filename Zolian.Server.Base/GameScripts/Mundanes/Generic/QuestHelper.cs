@@ -1,6 +1,5 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Common;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -18,7 +17,7 @@ public class QuestHelper : MundaneScript
         _entryCheck = mundane.Serial;
     }
 
-    public override void OnClick(WorldClient client, int serial) { }
+    public override void OnClick(WorldClient client, uint serial) { }
 
     protected override void TopMenu(WorldClient client) => client.CloseDialog();
 
@@ -35,7 +34,7 @@ public class QuestHelper : MundaneScript
             case 1:
             {
                 // Keela
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x02, "{=qReturn me"),
                     new(0x0320, "{=bNo, I'll stay")
@@ -52,7 +51,7 @@ public class QuestHelper : MundaneScript
             case 3:
             {
                 // Neal
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x04, "{=qReturn me"),
                     new(0x0320, "{=bNo, I'll stay")

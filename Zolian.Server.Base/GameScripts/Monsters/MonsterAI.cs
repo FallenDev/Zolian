@@ -1,10 +1,10 @@
 ﻿using System.Numerics;
 using System.Security.Cryptography;
-
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;

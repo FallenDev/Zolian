@@ -60,7 +60,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
-    public int SummonerId { get; set; }
+    public uint SummonerId { get; set; }
 
     public static Monster Create(MonsterTemplate template, Area map)
     {

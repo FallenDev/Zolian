@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
 
@@ -37,7 +38,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .75;
                         client.Aisling.CurrentHp += (int)hp;
 
-                        client.SendMessage(0x02, "Recovered 75% HP");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 75% HP");
                         client.Aisling.Animate(364);
                     }
                         break;
@@ -46,7 +47,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .50;
                         client.Aisling.CurrentHp += (int)hp;
 
-                        client.SendMessage(0x02, "Recovered 50% HP");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 50% HP");
                         client.Aisling.Animate(363);
                     }
                         break;
@@ -55,7 +56,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .25;
                         client.Aisling.CurrentHp += (int)hp;
 
-                        client.SendMessage(0x02, "Recovered 25% HP");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 25% HP");
                         client.Aisling.Animate(168);
                     }
                         break;
@@ -149,7 +150,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Wow, that's delicious! Recovered 25% HP, 10% MP.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow, that's delicious! Recovered 25% HP, 10% MP.");
                     }
                         break;
                     case "Pizza Slice":
@@ -157,7 +158,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .05;
 
                         client.Aisling.CurrentHp += (int)hp;
-                        client.SendMessage(0x02, "Yum! Recovered 5% HP.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Yum! Recovered 5% HP.");
                     }
                         break;
                     case "Mushroom":
@@ -167,7 +168,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Delicious Fungi! 15% HP, 10% MP.");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Delicious Fungi! 15% HP, 10% MP.");
                     }
                         break;
 
@@ -180,7 +181,7 @@ public class Potion : ItemScript
                         hp = 50;
 
                         client.Aisling.CurrentHp -= (int)hp;
-                        client.SendMessage(0x02, "That went down smooth. -50 hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "That went down smooth. -50 hp");
                     }
                         break;
                     case "Strong Mead":
@@ -188,7 +189,7 @@ public class Potion : ItemScript
                         hp = 150;
 
                         client.Aisling.CurrentHp -= (int)hp;
-                        client.SendMessage(0x02, "Strong! -150 hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Strong! -150 hp");
                     }
                         break;
                     case "Carafe":
@@ -198,7 +199,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp -= (int)hp;
                         client.Aisling.CurrentMp -= (int)mp;
-                        client.SendMessage(0x02, "Too much of a good thing. -80 hp, -1000 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Too much of a good thing. -80 hp, -1000 mp");
                     }
                         break;
                     case "Wine":
@@ -208,7 +209,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "It's good for the heart after all. 80 hp, 100 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "It's good for the heart after all. 80 hp, 100 mp");
                     }
                         break;
 
@@ -223,7 +224,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "An apple a day. 50 hp, 100 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "An apple a day. 50 hp, 100 mp");
                     }
                         break;
                     case "Baguette":
@@ -231,7 +232,7 @@ public class Potion : ItemScript
                         hp = 10;
 
                         client.Aisling.CurrentHp += (int)hp;
-                        client.SendMessage(0x02, "Delicious! 10 hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Delicious! 10 hp");
                     }
                         break;
                     case "Beef":
@@ -239,7 +240,7 @@ public class Potion : ItemScript
                         hp = 100;
 
                         client.Aisling.CurrentHp += (int)hp;
-                        client.SendMessage(0x02, "Hearty! 100 hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hearty! 100 hp");
                     }
                         break;
 
@@ -248,7 +249,7 @@ public class Potion : ItemScript
                         mp = 100;
 
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Nutritious! 100 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Nutritious! 100 mp");
                     }
                         break;
                     case "Cherries":
@@ -256,7 +257,7 @@ public class Potion : ItemScript
                         mp = 25;
 
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Yum! 25 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Yum! 25 mp");
                     }
                         break;
                     case "Chicken":
@@ -266,7 +267,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Tender! (Tendies ya!) 100 hp, 100 mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Tender! (Tendies ya!) 100 hp, 100 mp");
                     }
                         break;
                     case "Ginger":
@@ -276,7 +277,7 @@ public class Potion : ItemScript
 
                         client.Aisling.CurrentHp += (int)hp;
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Wow, that's powerful! 5% hp, 5% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow, that's powerful! 5% hp, 5% mp");
                     }
                         break;
                     case "Juicy Apple":
@@ -284,7 +285,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .02;
 
                         client.Aisling.CurrentHp += (int)hp;
-                        client.SendMessage(0x02, "So healthy! 2% hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "So healthy! 2% hp");
                     }
                         break;
                     case "Juicy Grapes":
@@ -292,7 +293,7 @@ public class Potion : ItemScript
                         mp = client.Aisling.MaximumMp * .03;
 
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "So healthy! 3% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "So healthy! 3% mp");
                     }
                         break;
                     case "Leeks":
@@ -300,7 +301,7 @@ public class Potion : ItemScript
                         mp = client.Aisling.MaximumMp * .02;
 
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "Getting my veggies on! 2% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Getting my veggies on! 2% mp");
                     }
                         break;
 
@@ -309,7 +310,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .07;
 
                         client.Aisling.CurrentHp += (int)hp;
-                        client.SendMessage(0x02, "Almost as good as a doctor! 7% hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Almost as good as a doctor! 7% hp");
                     }
                         break;
                     case "Poisonous Tentacle":
@@ -317,7 +318,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .33;
 
                         client.Aisling.CurrentHp -= (int)hp;
-                        client.SendMessage(0x02, "I shouldn't eat these. -33% hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I shouldn't eat these. -33% hp");
                     }
                         break;
                     case "Rotten Veggies":
@@ -325,7 +326,7 @@ public class Potion : ItemScript
                         hp = client.Aisling.MaximumHp * .05;
 
                         client.Aisling.CurrentHp -= (int)hp;
-                        client.SendMessage(0x02, "Yea, no good. -5% hp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "Yea, no good. -5% hp");
                     }
                         break;
                     case "Spoiled Cherries":
@@ -333,7 +334,7 @@ public class Potion : ItemScript
                         mp = client.Aisling.MaximumMp * .08;
 
                         client.Aisling.CurrentMp -= (int)mp;
-                        client.SendMessage(0x02, "I feel my power leaving me. -8% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel my power leaving me. -8% mp");
                     }
                         break;
                     case "Spoiled Grapes":
@@ -341,7 +342,7 @@ public class Potion : ItemScript
                         mp = client.Aisling.MaximumMp * .08;
 
                         client.Aisling.CurrentMp -= (int)mp;
-                        client.SendMessage(0x02, "I feel my power leaving me. -8% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel my power leaving me. -8% mp");
                     }
                         break;
                     case "Tomato":
@@ -349,7 +350,7 @@ public class Potion : ItemScript
                         mp = client.Aisling.MaximumMp * .03;
 
                         client.Aisling.CurrentMp += (int)mp;
-                        client.SendMessage(0x02, "This would be great in a stew. 3% mp");
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "This would be great in a stew. 3% mp");
                     }
                         break;
 

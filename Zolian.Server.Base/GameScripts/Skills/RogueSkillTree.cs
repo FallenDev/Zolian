@@ -1,6 +1,6 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -401,7 +401,7 @@ public class Sneak : SkillScript
     {
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
-        client.SendMessage(0x02, "Failed to blend in.");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to blend in.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -619,7 +619,7 @@ public class Enticed : SkillScript
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
 
-        client.SendMessage(0x02, "... What?");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "... What?");
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
     }
 

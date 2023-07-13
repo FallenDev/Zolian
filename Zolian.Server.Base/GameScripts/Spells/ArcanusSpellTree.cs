@@ -1,6 +1,6 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -22,7 +22,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
     public override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You're too weak to perform that action.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You're too weak to perform that action.");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
@@ -40,8 +40,6 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         foreach (var targetObj in targets)
         {
             if (targetObj.Serial == aisling.Serial) continue;
-
-            aisling.Cast(_spell, target);
             client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_spell.Template.TargetAnimation, targetObj.Pos));
             targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, _spell);
         }
@@ -77,9 +75,9 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You deflected {_spell.Template.Name}.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
 
             return;
         }
@@ -106,6 +104,6 @@ public class Mor_Strioch_Pian_Gar : SpellScript
             }
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }

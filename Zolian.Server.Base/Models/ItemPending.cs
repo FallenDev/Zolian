@@ -4,31 +4,31 @@ namespace Darkages.Models;
 
 public class PendingSell
 {
-    public int ID { get; init; }
+    public uint ID { get; init; }
     public string Name { get; init; }
     public uint Offer { get; set; }
-    public int Quantity { get; set; }
-    public int Removing { get; set; }
+    public ushort Quantity { get; set; }
+    public ushort Removing { get; set; }
 }
 
 public class PendingBuy
 {
     public string Name { get; init; }
     public int Offer { get; init; }
-    public int Quantity { get; set; }
+    public ushort Quantity { get; set; }
 }
 
 public class PendingBanked
 {
     // Item parsed on click
     public Item SelectedItem;
-    public int ItemId { get; set; }
+    public uint ItemId { get; set; }
     // Item's inventory slot on click
-    public int InventorySlot { get; set; }
+    public byte InventorySlot { get; set; }
     // Selected quantity for stacked items
-    public int ArgsQuantity { get; set; }
+    public ushort ArgsQuantity { get; set; }
     // ??
-    public int BankQuantity { get; set; }
+    public ushort BankQuantity { get; set; }
     public uint Cost { get; set; }
     public uint TempGold { get; set; }
     public bool DepositGold { get; set; }

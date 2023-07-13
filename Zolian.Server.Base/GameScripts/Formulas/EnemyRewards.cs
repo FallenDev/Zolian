@@ -1,10 +1,10 @@
 ﻿using System.Security.Cryptography;
-
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
 using Darkages.Models;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -126,7 +126,7 @@ public class EnemyRewards : RewardScript
         player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
         player.AbpLevel++;
 
-        player.Client.SendMessage(0x02, $"{string.Format(ServerSetup.Instance.Config.AbilityUpMessage, player.AbpLevel)}");
+        player.client.SendServerMessage(ServerMessageType.OrangeBar1, $"{string.Format(ServerSetup.Instance.Config.AbilityUpMessage, player.AbpLevel)}");
         player.Show(Scope.NearbyAislings,
             new ServerFormat29((uint)player.Serial, (uint)player.Serial, 385, 385, 75));
         var item = new Item();
@@ -135,7 +135,7 @@ public class EnemyRewards : RewardScript
         var y = player.Position.Y - 2;
         var pos = new Position(x, y);
         item.Release(player, pos, false);
-        player.Client.SendStats(StatusFlags.All);
+        player.client.SendAttributes(StatUpdateType.Full);
         Task.Delay(2500).ContinueWith(ct =>
         {
             item.Remove();

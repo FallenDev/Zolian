@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -75,7 +75,7 @@ public class Caltrops : SpellScript
         Trap.Set(sprite, 3000, 1, OnTriggeredBy);
 
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"You threw down {Spell.Template.Name}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You threw down {Spell.Template.Name}");
     }
 }
 
@@ -99,7 +99,7 @@ public class Calming_Voice : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast) return;
+        if (sprite.CantCast) return;
         if (sprite is not Aisling aisling)
         {
             _spellMethod.SpellOnFailed(sprite, target, _spell);
@@ -121,7 +121,7 @@ public class Calming_Voice : SpellScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -154,7 +154,7 @@ public class Calming_Voice : SpellScript
             _spellMethod.SpellOnFailed(aisling, target, _spell);
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 
@@ -179,12 +179,12 @@ public class Stone_Skin : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast) return;
+        if (sprite.CantCast) return;
         if (target.Immunity)
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -236,7 +236,7 @@ public class DestructiveForce : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast) return;
+        if (sprite.CantCast) return;
         if (sprite is not Aisling aisling)
         {
             _spellMethod.SpellOnFailed(sprite, target, _spell);
@@ -252,7 +252,7 @@ public class DestructiveForce : SpellScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -266,7 +266,7 @@ public class DestructiveForce : SpellScript
         }
 
         Target(aisling);
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private void Target(Sprite sprite)
@@ -368,7 +368,7 @@ public class Elemental_Bolt : SpellScript
         if (!_spell.CanUse())
         {
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Ability is not quite ready yet.");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -376,9 +376,9 @@ public class Elemental_Bolt : SpellScript
         {
             target.Animate(184);
             if (sprite is Aisling)
-                sprite.Client.SendMessage(0x02, "Your spell has been reflected!");
+                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You reflected {_spell.Template.Name}.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {_spell.Template.Name}.");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
@@ -393,16 +393,16 @@ public class Elemental_Bolt : SpellScript
         }
         else
         {
-            client.SendMessage(0x02, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
         if (target.SpellNegate)
         {
             target.Animate(64);
-            client.SendMessage(0x02, "Your spell has been deflected!");
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendMessage(0x02, $"You deflected {_spell.Template.Name}.");
+                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
 
             return;
         }
@@ -433,7 +433,7 @@ public class Elemental_Bolt : SpellScript
             }
         }
 
-        client.SendStats(StatusFlags.StructB);
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 

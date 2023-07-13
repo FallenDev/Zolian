@@ -1,6 +1,6 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -22,7 +22,7 @@ public class MilethTrainingCenter : AreaScript
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
         client.SendStats(StatusFlags.Health);
         client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(209, client.Aisling.Pos));
-        client.SendMessage(0x02, "Ahh Refreshing!");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahh Refreshing!");
     }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }

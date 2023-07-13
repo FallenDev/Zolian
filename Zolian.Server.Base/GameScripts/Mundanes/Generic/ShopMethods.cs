@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Sprites;
@@ -39,13 +40,13 @@ public static class ShopMethods
                     client.Aisling.Inventory.RemoveRange(client, item,
                         client.PendingItemSessions.Removing);
                     client.PendingItemSessions = null;
-                    client.SendStats(StatusFlags.WeightMoney);
+                    client.SendAttributes(StatUpdateType.WeightGold);
                     return;
                 }
         }
 
         client.PendingItemSessions = null;
-        client.SendStats(StatusFlags.WeightMoney);
+        client.SendAttributes(StatUpdateType.WeightGold);
     }
 
     public static List<byte> GetCharacterDetailingByteListForLowGradePolish(WorldClient client)

@@ -1,4 +1,5 @@
 ﻿using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.Models;
 
@@ -16,7 +17,7 @@ public class DialogSequence
     public int Id { get; set; }
     public bool IsCheckPoint { get; set; }
     public Action<Aisling, DialogSequence> OnSequenceStep { get; set; }
-    public OptionsDataItem[] Options { get; set; }
+    public Dialog.OptionsDataItem[] Options { get; set; }
     public int RollBackTo { get; set; }
     public string Title { get; set; }
 }

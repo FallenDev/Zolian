@@ -1,4 +1,5 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using Chaos.Common.Definitions;
+using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -33,7 +34,7 @@ public class Ard_Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -41,7 +42,7 @@ public class Ard_Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -75,7 +76,7 @@ public class Ard_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -83,7 +84,7 @@ public class Ard_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -117,7 +118,7 @@ public class Ard_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -125,7 +126,7 @@ public class Ard_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -163,7 +164,7 @@ public class Mor_Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -171,7 +172,7 @@ public class Mor_Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -179,7 +180,7 @@ public class Mor_Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -213,7 +214,7 @@ public class Mor_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -221,7 +222,7 @@ public class Mor_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -229,7 +230,7 @@ public class Mor_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -263,7 +264,7 @@ public class Mor_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -271,7 +272,7 @@ public class Mor_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -279,7 +280,7 @@ public class Mor_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -343,7 +344,7 @@ public class Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -351,7 +352,7 @@ public class Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -359,7 +360,7 @@ public class Fas_Nadur : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -393,7 +394,7 @@ public class Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -401,7 +402,7 @@ public class Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -409,7 +410,7 @@ public class Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -443,7 +444,7 @@ public class Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -451,7 +452,7 @@ public class Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -459,7 +460,7 @@ public class Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A lessor version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
@@ -493,7 +494,7 @@ public class Blind : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         };
 
@@ -517,7 +518,7 @@ public class Fas_Spiorad : SpellScript
     public override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
-            aisling.Client.SendMessage(0x02, $"Your body is too weak.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Your body is too weak.");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target) { }
@@ -528,7 +529,7 @@ public class Fas_Spiorad : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            target.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body is too weak.");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body is too weak.");
             return;
         }
 
@@ -575,7 +576,7 @@ public class Beag_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -583,7 +584,7 @@ public class Beag_Cradh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
@@ -617,7 +618,7 @@ public class Beag_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "A more potent version has already been cast.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
 
@@ -625,7 +626,7 @@ public class Beag_Puinsein : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "You've already cast that spell.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 

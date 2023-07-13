@@ -9,7 +9,6 @@ using Darkages.Enums;
 using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
-using Darkages.Network.Server;
 using Darkages.Templates;
 
 namespace Darkages.Network.Client.Abstractions;
@@ -32,6 +31,7 @@ public interface IWorldClient : ISocketClient
     bool IsMoving { get; }
     bool IsWarping { get; }
     bool WasUpdatingMapRecently { get; }
+    CastInfo SpellCastInfo { get; set; }
     DateTime LastAssail { get; set; }
     DateTime LastClientRefresh { get; set; }
     DateTime LastWarp { get; set; }
@@ -61,6 +61,9 @@ public interface IWorldClient : ISocketClient
     void SendAttributes(StatUpdateType statUpdateType);
     //void SendBoard();
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
+    bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target);
+    void PlayerCastBodyAnimationSoundAndMessage(Spell spell, Sprite target, byte actionSpeed = 30);
+    void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, byte actionSpeed = 30);
     void SendCancelCasting();
     void SendConfirmClientWalk(Position oldPoint, Direction direction);
     void SendConfirmExit();
@@ -113,7 +116,6 @@ public interface IWorldClient : ISocketClient
     void ClientRefreshed();
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);
-    void DispatchCasts();
     WorldClient SystemMessage(string message);
     void SendTargetedMessage(Scope scope, ServerMessageType type, string text);
     void SendTargetedPublicMessage(Scope scope, PublicMessageType type, string text);

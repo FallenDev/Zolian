@@ -1,7 +1,5 @@
 ﻿using Chaos.Common.Identity;
-using Darkages.Common;
 using Darkages.Models;
-using Darkages.Network.Client;
 
 namespace Darkages.Types;
 
@@ -38,4 +36,16 @@ public class Dialog
 
     //    client.DlgSession.Sequence = (ushort)SequenceIndex;
     //}
+
+    public class OptionsDataItem
+    {
+        public OptionsDataItem(short step, string text)
+        {
+            Step = step;
+            Text = text;
+        }
+
+        public short Step { get; }
+        public string Text { get; }
+    }
 }

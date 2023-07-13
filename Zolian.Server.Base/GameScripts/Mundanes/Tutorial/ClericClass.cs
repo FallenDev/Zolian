@@ -1,10 +1,10 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
@@ -13,7 +13,7 @@ public class ClericClass : MundaneScript
 {
     public ClericClass(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
@@ -25,7 +25,7 @@ public class ClericClass : MundaneScript
 
         if (client.Aisling.Path == Class.Peasant)
         {
-            var options = new List<OptionsDataItem>
+            var options = new List<Dialog.OptionsDataItem>
             {
                 new (0x02, "Yes"),
                 new (0x03, "Nothing, I'm sorry for bothering you.")

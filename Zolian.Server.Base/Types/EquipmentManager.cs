@@ -233,7 +233,7 @@ public class EquipmentManager
             item.ReapplyItemModifiers(Client);
         }
 
-        Client.SendAttributes(StatUpdateType.MultiStat);
+        Client.SendAttributes(StatUpdateType.Full);
         Client.UpdateDisplay();
     }
 
@@ -252,7 +252,7 @@ public class EquipmentManager
         var item = Equipment[displaySlot].Item;
         if (item != null) item.Equipped = false;
 
-        Client.SendAttributes(StatUpdateType.MultiStat);
+        Client.SendAttributes(StatUpdateType.Full);
         Client.UpdateDisplay();
     }
 

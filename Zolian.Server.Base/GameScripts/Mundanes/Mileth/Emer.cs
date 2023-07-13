@@ -1,9 +1,9 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -16,17 +16,17 @@ public class Emer : MundaneScript
 {
     public Emer(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             new (0x01, "Buy")
         };
@@ -37,13 +37,13 @@ public class Emer : MundaneScript
             {
                 if (client.Aisling.Level >= 11 || client.Aisling.GameMaster)
                 {
-                    options.Add(new OptionsDataItem(0x03, "Killer Bee Jam"));
+                    options.Add(new Dialog.OptionsDataItem(0x03, "Killer Bee Jam"));
                 }
 
                 break;
             }
             case true:
-                options.Add(new OptionsDataItem(0x06, "Here's the corpse"));
+                options.Add(new Dialog.OptionsDataItem(0x06, "Here's the corpse"));
                 break;
         }
 
@@ -72,7 +72,7 @@ public class Emer : MundaneScript
                     if (item != null)
                     {
                         var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                        var opts = new List<OptionsDataItem>
+                        var opts = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -93,7 +93,7 @@ public class Emer : MundaneScript
                     {
                         client.Aisling.GoldPoints -= Convert.ToUInt32(cost);
                         client.GiveQuantity(client.Aisling, item, quantity);
-                        client.SendStats(StatusFlags.All);
+                        client.SendAttributes(StatUpdateType.Full);
                         client.PendingBuySessions = null;
                         client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantTradeCompletedMessage);
                     }
@@ -125,7 +125,7 @@ public class Emer : MundaneScript
                     {
                         client.Aisling.GoldPoints += Convert.ToUInt32(offer);
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.WeightGold);
 
                         client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantTradeCompletedMessage);
                     }
@@ -164,12 +164,12 @@ public class Emer : MundaneScript
                         {
                             client.Aisling.GoldPoints -= template.Value;
 
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane, $"You've purchased: {{=c{args}");
                         }
                         else
                         {
-                            client.SendMessage(0x02, "Yeah right, You can't even physically hold it.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "Yeah right, You can't even physically hold it.");
                         }
 
                         break;
@@ -196,7 +196,7 @@ public class Emer : MundaneScript
             #endregion
             case 0x03:
             {
-                var options = new List<OptionsDataItem>
+                var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x04, "I'll take care of them."),
                     new (0x05, "Sorry, I'm busy.")
@@ -227,7 +227,7 @@ public class Emer : MundaneScript
                     item = item.Create(client.Aisling, "Honey Bacon Burger", Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
                     item.GiveTo(client.Aisling);
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 2,500 experience.");
-                    client.SendStats(StatusFlags.WeightMoney);
+                    client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, "Lovely, I'll take as many as you have. Here's a taste of what I make from it.");
                 }
                 else

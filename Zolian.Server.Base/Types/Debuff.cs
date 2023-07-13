@@ -1,11 +1,12 @@
 ﻿using System.Data;
+using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Dapper;
-
-using Darkages.Common;
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
@@ -112,7 +113,7 @@ public class Debuff : IDebuff
         {
             if (e.Message.Contains("PK__Players"))
             {
-                aisling.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving debuff. Error: Duct Tape");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving debuff. Error: Duct Tape");
                 Crashes.TrackError(e);
                 return;
             }

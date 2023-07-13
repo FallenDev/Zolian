@@ -86,7 +86,7 @@ public abstract class Summon : ObjectManager, IEphermeral
                 for (var i = 0; i < count; i++)
                 {
                     //Share similar attributes as the summoner.
-                    monsterTemplate.Level = _client.Aisling.ExpLevel + 3;
+                    monsterTemplate.Level = (ushort)(_client.Aisling.ExpLevel + 3);
                     monsterTemplate.LootType = LootQualifer.None;
                     monsterTemplate.DefenseElement = _client.Aisling.DefenseElement;
                     monsterTemplate.OffenseElement = _client.Aisling.OffenseElement;

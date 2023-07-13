@@ -1,4 +1,5 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using Chaos.Common.Definitions;
+using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -26,10 +27,10 @@ public class Asgall : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast)
+        if (sprite.CantCast)
         {
             if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Incapacitated.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
         };
 
@@ -37,7 +38,7 @@ public class Asgall : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -64,10 +65,10 @@ public class Defensive_Stance : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast)
+        if (sprite.CantCast)
         {
             if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Incapacitated.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
         };
 
@@ -75,7 +76,7 @@ public class Defensive_Stance : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -104,10 +105,10 @@ public class Perfect_Defense : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!sprite.CanCast)
+        if (sprite.CantCast)
         {
             if (sprite is Aisling aisling)
-                aisling.Client.SendMessage(0x02, "Incapacitated.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
         };
 
@@ -115,7 +116,7 @@ public class Perfect_Defense : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendMessage(0x02, "Another spell of similar nature is already applied.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 

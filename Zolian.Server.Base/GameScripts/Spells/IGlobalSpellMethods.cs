@@ -1,4 +1,4 @@
-﻿using Darkages.Interfaces;
+﻿using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 

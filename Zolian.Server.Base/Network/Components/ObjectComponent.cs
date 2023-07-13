@@ -1,6 +1,5 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
-using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Server;
 using Darkages.Object;

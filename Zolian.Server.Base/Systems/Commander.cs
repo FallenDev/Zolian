@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Chaos.Common.Definitions;
 using Darkages.GameScripts.Formulas;
-using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Systems.CLI;

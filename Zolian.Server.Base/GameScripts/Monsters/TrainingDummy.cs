@@ -1,6 +1,6 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -24,7 +24,7 @@ public class TrainingDummy : MonsterScript
         var ac = Monster.Ac.ToString();
         var defEle = ElementManager.ElementValue(Monster.DefenseElement);
 
-        client.SendMessage(0x02, $"Lvl: {level}, AC: {ac}, Def Element: {defEle}");
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Lvl: {level}, AC: {ac}, Def Element: {defEle}");
     }
 
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)

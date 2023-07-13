@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Darkages.Object;
 using Darkages.Sprites;
 
@@ -78,7 +79,7 @@ public class Party : ObjectManager
         if (partyLeader.GroupId != 0) return null;
 
         var party = new Party { LeaderName = partyLeader.Username };
-        var pendingId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        var pendingId = EphemeralRandomIdGenerator<int>.Shared.NextId;
         party.Id = pendingId;
         party.LeaderName = partyLeader.Username;
         partyLeader.GroupId = party.Id;
@@ -97,7 +98,7 @@ public class Party : ObjectManager
         foreach (var player in group.PartyMembers)
         {
             player.GroupId = 0;
-            player.Client.SendMessage("The party has now been disbanded.");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,"The party has now been disbanded.");
         }
     }
 
@@ -109,7 +110,7 @@ public class Party : ObjectManager
 
         if (group == null) return;
         foreach (var player in group.PartyMembers)
-            player.Client.SendMessage($"{playerToRemove.Username} has left the party.");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{playerToRemove.Username} has left the party.");
 
         playerToRemove.GroupId = 0;
 
@@ -126,7 +127,7 @@ public class Party : ObjectManager
             group.LeaderName = nextPlayer.Username;
 
             foreach (var player in group.PartyMembers)
-                player.Client.SendMessage($"{nextPlayer.Username} is now the party leader.");
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{nextPlayer.Username} is now the party leader.");
         }
     }
 

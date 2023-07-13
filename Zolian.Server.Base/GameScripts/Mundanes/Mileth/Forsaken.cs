@@ -1,5 +1,6 @@
-﻿using Darkages.Enums;
-using Darkages.Interfaces;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -43,7 +44,7 @@ public class Forsaken : MundaneScript
 
     public Forsaken(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
@@ -52,33 +53,33 @@ public class Forsaken : MundaneScript
     protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
-        var options = new List<OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>();
 
         switch (client.Aisling.Stage)
         {
             case ClassStage.Class:
-                options.Add(new OptionsDataItem(0x02, "Advanced classing"));
-                options.Add(new OptionsDataItem(0x03, "Dedication to my class"));
-                options.Add(new OptionsDataItem(0x05, "Nothing for now"));
+                options.Add(new Dialog.OptionsDataItem(0x02, "Advanced classing"));
+                options.Add(new Dialog.OptionsDataItem(0x03, "Dedication to my class"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hello there young one.", options.ToArray());
                 break;
             case ClassStage.Dedicated:
-                options.Add(new OptionsDataItem(0x01, "Ascending to Master"));
-                options.Add(new OptionsDataItem(0x05, "Nothing for now"));
+                options.Add(new Dialog.OptionsDataItem(0x01, "Ascending to Master"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hello there devoted one.", options.ToArray());
                 break;
             case ClassStage.Advance:
-                options.Add(new OptionsDataItem(0x01, "Ascending to Master"));
-                options.Add(new OptionsDataItem(0x05, "Nothing for now"));
+                options.Add(new Dialog.OptionsDataItem(0x01, "Ascending to Master"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Advanced one, what is it you wish to learn?", options.ToArray());
                 break;
             case ClassStage.Master:
-                options.Add(new OptionsDataItem(0x04, "Reaching Zenith"));
-                options.Add(new OptionsDataItem(0x05, "Nothing for now"));
+                options.Add(new Dialog.OptionsDataItem(0x04, "Reaching Zenith"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hope you are well, experienced one.", options.ToArray());
                 break;
             case ClassStage.Forsaken:
-                options.Add(new OptionsDataItem(0x05, "Nothing for now"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Ah, brother; What can I do for you?", options.ToArray());
                 break;
             case ClassStage.Quest:
@@ -103,7 +104,7 @@ public class Forsaken : MundaneScript
             // Master
             case 0x01:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x011, "I am ready"),
                     new (0x05, "No")
@@ -117,21 +118,21 @@ public class Forsaken : MundaneScript
             // Advanced
             case 0x02:
                 {
-                    var options = new List<OptionsDataItem>();
+                    var options = new List<Dialog.OptionsDataItem>();
                     if (client.Aisling.Path != Class.Berserker)
-                        options.Add(new OptionsDataItem(0x021, "Berserker"));
+                        options.Add(new Dialog.OptionsDataItem(0x021, "Berserker"));
                     if (client.Aisling.Path != Class.Defender)
-                        options.Add(new OptionsDataItem(0x022, "Defender"));
+                        options.Add(new Dialog.OptionsDataItem(0x022, "Defender"));
                     if (client.Aisling.Path != Class.Assassin)
-                        options.Add(new OptionsDataItem(0x023, "Assassin"));
+                        options.Add(new Dialog.OptionsDataItem(0x023, "Assassin"));
                     if (client.Aisling.Path != Class.Cleric)
-                        options.Add(new OptionsDataItem(0x024, "Cleric"));
+                        options.Add(new Dialog.OptionsDataItem(0x024, "Cleric"));
                     if (client.Aisling.Path != Class.Arcanus)
-                        options.Add(new OptionsDataItem(0x025, "Arcanus"));
+                        options.Add(new Dialog.OptionsDataItem(0x025, "Arcanus"));
                     if (client.Aisling.Path != Class.Monk)
-                        options.Add(new OptionsDataItem(0x026, "Monk"));
+                        options.Add(new Dialog.OptionsDataItem(0x026, "Monk"));
 
-                    options.Add(new OptionsDataItem(0x05, "None, right now"));
+                    options.Add(new Dialog.OptionsDataItem(0x05, "None, right now"));
 
                     client.SendOptionsDialog(Mundane,
                         "If only I advanced my class in my youth. What class are you pondering about?", options.ToArray());
@@ -140,7 +141,7 @@ public class Forsaken : MundaneScript
             // Dedication
             case 0x03:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x030, "I'm devote"),
                     new (0x05, "No")
@@ -154,7 +155,7 @@ public class Forsaken : MundaneScript
             // Forsaken
             case 0x04:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x05, "I seek power"),
                     new (0x05, "No")
@@ -175,7 +176,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x011:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x05, "{=bI'm sorry not now")
                 };
@@ -191,7 +192,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x021:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0210, "{=bI will devote myself to Berserker"),
                         new (0x05, "No")
@@ -211,7 +212,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x022:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0220, "{=bI will devote myself to Defender"),
                         new (0x05, "No")
@@ -230,7 +231,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x023:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0230, "{=bI will devote myself to Assassin"),
                         new (0x05, "No")
@@ -249,7 +250,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x024:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0240, "{=bI will devote myself to Cleric"),
                         new (0x05, "No")
@@ -269,7 +270,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x025:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0250, "{=bI will devote myself to Arcanus"),
                         new (0x05, "No")
@@ -288,7 +289,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x026:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x0260, "{=bI will devote myself to Monk"),
                         new (0x05, "No")
@@ -334,7 +335,7 @@ public class Forsaken : MundaneScript
                                 Berserker(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
-                                client.SendStats(StatusFlags.All);
+                                client.SendAttributes(StatUpdateType.Full);
                                 foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                                 {
                                     announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Berserker");
@@ -343,7 +344,7 @@ public class Forsaken : MundaneScript
                             }
                             else
                             {
-                                var options = new List<OptionsDataItem>
+                                var options = new List<Dialog.OptionsDataItem>
                                 {
                                     new (0x05, "Alright")
                                 };
@@ -353,7 +354,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                             {
                                 new (0x05, "Alright")
                             };
@@ -363,7 +364,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -398,7 +399,7 @@ public class Forsaken : MundaneScript
                             Defender(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
-                            client.SendStats(StatusFlags.All);
+                            client.SendAttributes(StatUpdateType.Full);
                             foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                             {
                                 announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Defender");
@@ -407,7 +408,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -418,7 +419,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Alright")
                     };
@@ -453,7 +454,7 @@ public class Forsaken : MundaneScript
                             Assassin(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
-                            client.SendStats(StatusFlags.All);
+                            client.SendAttributes(StatUpdateType.Full);
                             foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                             {
                                 announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Assassin");
@@ -462,7 +463,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -473,7 +474,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Alright")
                     };
@@ -510,7 +511,7 @@ public class Forsaken : MundaneScript
                                 Cleric(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
-                                client.SendStats(StatusFlags.All);
+                                client.SendAttributes(StatUpdateType.Full);
                                 foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                                 {
                                     announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Cleric");
@@ -519,7 +520,7 @@ public class Forsaken : MundaneScript
                             }
                             else
                             {
-                                var options = new List<OptionsDataItem>
+                                var options = new List<Dialog.OptionsDataItem>
                             {
                                 new (0x05, "Alright")
                             };
@@ -529,7 +530,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -539,7 +540,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Alright")
                     };
@@ -574,7 +575,7 @@ public class Forsaken : MundaneScript
                             Arcanus(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
-                            client.SendStats(StatusFlags.All);
+                            client.SendAttributes(StatUpdateType.Full);
                             foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                             {
                                 announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Arcanus");
@@ -583,7 +584,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -594,7 +595,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Alright")
                     };
@@ -631,7 +632,7 @@ public class Forsaken : MundaneScript
                                 Monk(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
-                                client.SendStats(StatusFlags.All);
+                                client.SendAttributes(StatUpdateType.Full);
                                 foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                                 {
                                     announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Monk");
@@ -640,7 +641,7 @@ public class Forsaken : MundaneScript
                             }
                             else
                             {
-                                var options = new List<OptionsDataItem>
+                                var options = new List<Dialog.OptionsDataItem>
                             {
                                 new (0x05, "Alright")
                             };
@@ -650,7 +651,7 @@ public class Forsaken : MundaneScript
                         }
                         else
                         {
-                            var options = new List<OptionsDataItem>
+                            var options = new List<Dialog.OptionsDataItem>
                         {
                             new (0x05, "Alright")
                         };
@@ -660,7 +661,7 @@ public class Forsaken : MundaneScript
                     }
                     else
                     {
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Alright")
                     };
@@ -671,7 +672,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x030:
                 {
-                    var options = new List<OptionsDataItem>
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x031, "Let's proceed"),
                     new (0x05, "I've changed my mind")
@@ -718,13 +719,13 @@ public class Forsaken : MundaneScript
                         };
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.Aisling.Stage = ClassStage.Dedicated;
-                        client.SendStats(StatusFlags.All);
+                        client.SendAttributes(StatUpdateType.Full);
                         foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
                         {
                             announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has reaffirmed their dedication to their class");
                         }
 
-                        var options = new List<OptionsDataItem>
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x05, "Thank you")
                     };

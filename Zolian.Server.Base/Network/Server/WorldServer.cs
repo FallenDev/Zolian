@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -34,13 +33,9 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using Microsoft.AppCenter.Utils.Synchronization;
 using Microsoft.Extensions.Logging;
-using Microsoft.SqlServer.Server;
 
 using ServiceStack;
-using ServiceStack.Html;
-using ServiceStack.Messaging;
 
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
@@ -777,7 +772,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.IsCastingSpell)
             client.SendCancelCasting();
 
-        client.CastStack.Clear();
         client.Aisling.IsCastingSpell = false;
     }
 
@@ -1307,29 +1301,42 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
             var (sourceSlot, argsData) = localArgs;
-            var spell = client.Aisling.SpellBook.TryGetSpells(i => i != null && i.Slot == sourceSlot).FirstOrDefault();
+            var spell = localClient.Aisling.SpellBook.TryGetSpells(i => i != null && i.Slot == sourceSlot).FirstOrDefault();
             if (spell == null)
             {
-                client.SendCancelCasting();
+                localClient.SendCancelCasting();
                 return default;
             }
 
-            if (client.Aisling.CantCast)
+            if (localClient.Aisling.CantCast)
             {
                 if (spell.Template.ScriptName is not ("Ao Suain" or "Ao Sith"))
                 {
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "I am unable to cast that spell..");
-                    client.SendCancelCasting();
+                    localClient.SendServerMessage(ServerMessageType.OrangeBar1, "I am unable to cast that spell..");
+                    localClient.SendCancelCasting();
                     return default;
                 }
             }
 
-            var info = new CastInfo
+            var info = new CastInfo();
+
+            if (localClient.SpellCastInfo is null)
             {
-                Slot = sourceSlot,
-                Position = null,
-                Target = 0
-            };
+                info = new CastInfo
+                {
+                    Slot = sourceSlot,
+                    Target = 0,
+                    Position = new Position(),
+                    Data = argsData.ToString(),
+                };
+            }
+            else
+            {
+                info.Slot = localClient.SpellCastInfo.Slot;
+                info.Target = localClient.SpellCastInfo.Target;
+                info.Position = localClient.SpellCastInfo.Position;
+                info.Data = argsData.ToString();
+            }
 
             var source = localClient.Aisling;
 
@@ -1369,6 +1376,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     break;
             }
 
+            info.Position ??= new Position(localClient.Aisling.X, localClient.Aisling.Y);
             localClient.Aisling.CastSpell(spell, info);
             return default;
         }
@@ -2231,28 +2239,26 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnPursuitRequest(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
 
         ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
         {
-            //var dialog = localClient.Aisling.ActiveDialog.Get();
+            ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
+            if (npc == null) return default;
 
-            //if (dialog == null)
+            // ToDo: Perform NPC ID == Stored Serial Check
+            //if (localClient.EntryCheck != npc.Serial)
             //{
-            //    Logger.WithProperty(localClient.Aisling)
-            //        .WithProperty(localArgs)
-            //        .LogWarning(
-            //            "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-            //            localClient.Aisling.Name);
-
+            //    localClient.CloseDialog();
             //    return default;
             //}
 
-            ////get args if the type is not a "menuWithArgs", this type should not have any new args
-            //if (dialog.Type is not ChaosDialogType.MenuWithArgs && (localArgs.Args != null))
-            //    dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+            var script = npc.Scripts.FirstOrDefault();
 
-            //dialog.Next(localClient.Aisling, (byte)localArgs.PursuitId);
+            // Step in 0x3A is "DialogId" perhaps that also needs to go here for step?
+            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.Step, localArgs.Args);
 
             return default;
         }
@@ -2265,48 +2271,65 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnDialogResponse(IWorldClient client, in ClientPacket clientPacket)
     {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
 
         ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
         {
-            //var dialog = localClient.Aisling.ActiveDialog.Get();
+            if (localArgs.PursuitId == 0 && localArgs.ScriptId == ushort.MaxValue)
+            {
+                localClient.CloseDialog();
+                return default;
+            }
 
-            //if (dialog == null)
-            //{
-            //    localClient.Aisling.DialogHistory.Clear();
+            var objId = localArgs.EntityId;
 
-            //    Logger.WithProperty(localClient.Aisling)
-            //        .WithProperty(localArgs)
-            //        .LogWarning(
-            //            "Aisling {@AislingName} attempted to access a dialog, but there is no active dialog (possibly packeting)",
-            //            localClient.Aisling.Name);
+            if (objId is > 0 and < uint.MaxValue)
+            {
+                ServerSetup.Instance.GlobalMundaneCache.TryGetValue(objId, out var npc);
+                if (npc == null) return default;
 
-            //    return default;
-            //}
+                // ToDo: Perform NPC ID == Stored Serial Check
+                //if (localClient.EntryCheck != npc.Serial)
+                //{
+                //    localClient.CloseDialog();
+                //    return default;
+                //}
 
-            ////since we always send a dialog id of 0, we can easily get the result without comparing ids
-            //var dialogResult = (DialogResult)localArgs.DialogId;
+                var script = npc.Scripts.FirstOrDefault();
+                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args?.ToArray());
+                return default;
+            }
 
-            //if (localArgs.Args != null)
-            //    dialog.MenuArgs = new ArgumentCollection(dialog.MenuArgs.Append(localArgs.Args.Last()));
+            var result = (DialogResult)localArgs.DialogId;
 
-            //switch (dialogResult)
-            //{
-            //    case DialogResult.Previous:
-            //        dialog.Previous(localClient.Aisling);
+            if (localArgs.ScriptId == ushort.MaxValue)
+            {
+                if (localClient.Aisling.ActiveReactor?.Decorators == null) return default;
 
-            //        break;
-            //    case DialogResult.Close:
-            //        localClient.Aisling.DialogHistory.Clear();
-
-            //        break;
-            //    case DialogResult.Next:
-            //        dialog.Next(localClient.Aisling, localArgs.Option);
-
-            //        break;
-            //    default:
-            //        throw new ArgumentOutOfRangeException();
-            //}
+                switch (result)
+                {
+                    case DialogResult.Previous:
+                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+                            script.OnBack(localClient.Aisling);
+                        break;
+                    case DialogResult.Next:
+                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+                            script.OnNext(localClient.Aisling);
+                        break;
+                    case DialogResult.Close:
+                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+                            script.OnClose(localClient.Aisling);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            else
+            {
+                localClient.DlgSession?.Callback?.Invoke(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args.ToString());
+            }
 
             return default;
         }
@@ -2426,7 +2449,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (!skill.CanUse()) return default;
 
             skill.InUse = true;
-            
+
             var script = skill.Scripts.Values.First();
             script?.OnUse(localClient.Aisling);
 
@@ -2546,7 +2569,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     localClient.SendProfile(aisling);
                     break;
             }
-            
+
             return default;
         }
 
@@ -2755,7 +2778,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (localArgs.CastLineCount <= 0)
                 return default;
             localClient.Aisling.ChantTimer.Start(localArgs.CastLineCount);
-
+            localClient.SpellCastInfo ??= new CastInfo
+            {
+                SpellLines = localArgs.CastLineCount,
+                Started = DateTime.UtcNow
+            };
             return default;
         }
 

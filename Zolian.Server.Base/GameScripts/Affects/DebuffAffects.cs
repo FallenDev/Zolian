@@ -68,7 +68,7 @@ public class debuff_morcradh : Debuff
 
         if (affected is not Aisling aisling) return;
         InsertDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -86,7 +86,7 @@ public class debuff_morcradh : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -110,7 +110,7 @@ public class debuff_decay : Debuff
         aisling.RegenTimerDisabled = true;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body begins to decay");
         InsertDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -129,7 +129,7 @@ public class debuff_decay : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Body stops decaying");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -151,7 +151,7 @@ public class debuff_cradh : Debuff
 
         if (affected is not Aisling aisling) return;
         InsertDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -169,7 +169,7 @@ public class debuff_cradh : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -191,7 +191,7 @@ public class debuff_beagcradh : Debuff
 
         if (affected is not Aisling aisling) return;
         InsertDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -209,7 +209,7 @@ public class debuff_beagcradh : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -234,7 +234,7 @@ public class debuff_rending : Debuff
             aisling.Client.SendAnimation(85, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
             InsertDebuff(aisling, debuff);
             aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(72));
-            aisling.Client.SendStats(StatusFlags.StructD);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -281,7 +281,7 @@ public class debuff_rending : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor has regained its integrity.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -306,7 +306,7 @@ public class debuff_rend : Debuff
             aisling.Client.SendAnimation(383, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
             InsertDebuff(aisling, debuff);
             aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(72));
-            aisling.Client.SendStats(StatusFlags.StructD);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -353,7 +353,7 @@ public class debuff_rend : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor has regained its integrity.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -378,7 +378,7 @@ public class debuff_hurricane : Debuff
             aisling.Client.SendAnimation(58, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
             InsertDebuff(aisling, debuff);
             aisling.Show(Scope.NearbyAislings, new ServerFormat19(65));
-            aisling.Client.SendStats(StatusFlags.StructD);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -425,7 +425,7 @@ public class debuff_hurricane : Debuff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The hurricane has passed.");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendStats(StatusFlags.StructD);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -1094,7 +1094,7 @@ public class debuff_reaping : Debuff
 
                 aisling.PrepareForHell();
                 aisling.CastDeath();
-                aisling.Client.SendStats(StatusFlags.All);
+                aisling.client.SendAttributes(StatUpdateType.Full);
                 break;
             case Aisling savedAffected when debuff.Cancelled:
                 if (savedAffected.Debuffs.TryRemove(debuff.Name, out var saved))
@@ -1105,7 +1105,7 @@ public class debuff_reaping : Debuff
 
                 savedAffected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were saved.");
                 savedAffected.Client.Recover();
-                savedAffected.Client.SendStats(StatusFlags.All);
+                savedAffected.client.SendAttributes(StatUpdateType.Full);
                 break;
         }
 

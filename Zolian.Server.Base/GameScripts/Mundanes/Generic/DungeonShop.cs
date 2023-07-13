@@ -1,9 +1,9 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Formats.Models.ServerFormats;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -16,17 +16,17 @@ public class DungeonShop : MundaneScript
 {
     public DungeonShop(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-    public override void OnClick(WorldClient client, int serial)
+    public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
         TopMenu(client);
     }
 
-    protected override void TopMenu(IWorldClient client)
+    protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
 
-        var options = new List<OptionsDataItem>
+        var options = new List<Dialog.OptionsDataItem>
         {
             //new (0x01, "Dungeon Rumors"),
             new (0x02, "Buy"),
@@ -56,7 +56,7 @@ public class DungeonShop : MundaneScript
                     if (item != null)
                     {
                         var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                        var opts = new List<OptionsDataItem>
+                        var opts = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -83,7 +83,7 @@ public class DungeonShop : MundaneScript
                                 client.PendingItemSessions.Offer = (uint)(offer * amount);
                                 client.PendingItemSessions.Removing = amount;
 
-                                var opts2 = new List<OptionsDataItem>
+                                var opts2 = new List<Dialog.OptionsDataItem>
                                 {
                                     new(0x0030, ServerSetup.Instance.Config.MerchantConfirmMessage),
                                     new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -144,12 +144,12 @@ public class DungeonShop : MundaneScript
                         {
                             client.Aisling.GoldPoints -= template.Value;
 
-                            client.SendStats(StatusFlags.WeightMoney);
+                            client.SendAttributes(StatUpdateType.WeightGold);
                             client.SendOptionsDialog(Mundane, $"Ah, one of our best items.\n{{=c{args}{{=a, it will serve you well.");
                         }
                         else
                         {
-                            client.SendMessage(0x02, "Yeah right, you can't even physically hold it.");
+                            client.SendServerMessage(ServerMessageType.OrangeBar1, "Yeah right, you can't even physically hold it.");
                         }
                         break;
                     }
@@ -206,7 +206,7 @@ public class DungeonShop : MundaneScript
                             Quantity = 1
                         };
 
-                        var opts2 = new List<OptionsDataItem>
+                        var opts2 = new List<Dialog.OptionsDataItem>
                         {
                             new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
                             new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
@@ -240,7 +240,7 @@ public class DungeonShop : MundaneScript
                     {
                         client.Aisling.GoldPoints -= cost;
                         client.GiveQuantity(client.Aisling, item, quantity);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingBuySessions = null;
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cHope it serves you well.");
                         TopMenu(client);
@@ -267,7 +267,7 @@ public class DungeonShop : MundaneScript
                     {
                         client.Aisling.GoldPoints += offer;
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
-                        client.SendStats(StatusFlags.WeightMoney);
+                        client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingItemSessions = null;
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWhat a great deal!");
                         TopMenu(client);
