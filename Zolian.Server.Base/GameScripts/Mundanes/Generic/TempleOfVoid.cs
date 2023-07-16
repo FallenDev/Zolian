@@ -65,7 +65,7 @@ public class TempleOfVoid : MundaneScript
                         break;
                 }
 
-                client.SendAnimation(262, client.Aisling, client.Aisling);
+                client.SendAnimation(262, client.Aisling.Serial);
                 break;
             }
             case 2:

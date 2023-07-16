@@ -122,13 +122,13 @@ public class ClassChooser : MundaneScript
             if (path != "Peasant")
             {
                 ClassWrapUp(client, path);
-                await Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(303); });
-                await Task.Delay(350).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                await Task.Delay(750).ContinueWith(ct => { client.Aisling.Animate(303); });
+                await Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                await Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                await Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
             }
             else
             {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "An error occurred, try again.");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "An error occurred, try again.");
                 TopMenu(client);
             }
         }
@@ -163,7 +163,7 @@ public class ClassChooser : MundaneScript
         client.LoadSkillBook();
         client.LoadSpellBook();
         client.LoadEquipment();
-        client.SendStats(StatusFlags.StructA);
+        client.SendAttributes(StatUpdateType.Primary);
         client.UpdateDisplay();
         await Task.Delay(500).ContinueWith(ct => {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "You wake from your slumber.. music begins to fill the air.");
@@ -204,7 +204,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -249,7 +249,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -293,7 +293,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -336,7 +336,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -379,7 +379,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 
@@ -427,7 +427,7 @@ public class ClassChooser : MundaneScript
 
         if (weightTest > client.Aisling.MaximumWeight)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
             return;
         }
 

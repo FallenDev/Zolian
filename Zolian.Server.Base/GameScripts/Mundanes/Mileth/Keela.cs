@@ -207,7 +207,7 @@ public class Keela : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
                 client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
                 break;
@@ -280,7 +280,7 @@ public class Keela : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
                 client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
 
                 break;
@@ -363,8 +363,8 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.KeelaCount = 0;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp);
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                            client.SendStats(StatusFlags.StructC);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                            client.SendAttributes(StatUpdateType.ExpGold);
                             client.SendOptionsDialog(Mundane, "Tougher than I thought you were.");
                         }
                     }
@@ -409,8 +409,8 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.Keela++;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp2);
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                            client.SendStats(StatusFlags.StructC);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                            client.SendAttributes(StatUpdateType.ExpGold);
                             client.SendOptionsDialog(Mundane, "Ahh, so that's what Teegan wants done. Come here, let me teach you something useful.");
 
                             if (client.Aisling.QuestManager.Keela == 2)
@@ -469,8 +469,8 @@ public class Keela : MundaneScript
                             client.Aisling.QuestManager.KeelaCount = 0;
                             client.Aisling.QuestManager.KeelaQuesting = false;
                             client.GiveExp(advExp3);
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
-                            client.SendStats(StatusFlags.StructC);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
+                            client.SendAttributes(StatUpdateType.ExpGold);
                             client.SendOptionsDialog(Mundane, "Always walk in the shadows, indeed, let me show you a technique.");
 
                             if (client.Aisling.QuestManager.Keela == 3)

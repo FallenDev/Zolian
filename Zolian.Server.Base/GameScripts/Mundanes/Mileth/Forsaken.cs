@@ -170,7 +170,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x05:
                 {
-                    client.SendMessage(0x03, "Come back if you need advancement.");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Come back if you need advancement.");
                     client.CloseDialog();
                 }
                 break;
@@ -198,13 +198,13 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qBerserker Requirements:\n" +
-                                             "{=aDexterity:{=q 40\n" +
-                                             "{=aConstitution:{=q 30\n" +
-                                             "{=bSacrifice:\n" +
-                                             "{=q500 {=aHealth\n" +
-                                             "{=q300 {=aMana");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qBerserker Requirements:\n" +
+                                                                           "{=aDexterity:{=q 40\n" +
+                                                                           "{=aConstitution:{=q 30\n" +
+                                                                           "{=bSacrifice:\n" +
+                                                                           "{=q500 {=aHealth\n" +
+                                                                           "{=q300 {=aMana");
 
                     client.SendOptionsDialog(Mundane, "Let me check a few things, and you understand that berserkers are very agile? Therefore to make an easy transition I'll ask that you have at least the minimum dexterity and a slight sacrifice to your vitality.",
                         options.ToArray());
@@ -218,8 +218,8 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qDefender Requirements:\n" +
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qDefender Requirements:\n" +
                                              "{=aStrength:{=q 50\n" +
                                              "{=bSacrifice:\n" +
                                              "{=q500 {=aHealth\n" +
@@ -237,8 +237,8 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qAssassin Requirements:\n" +
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qAssassin Requirements:\n" +
                                              "{=aDexterity:{=q 40\n" +
                                              "{=bSacrifice:\n" +
                                              "{=q300 {=aHealth\n" +
@@ -256,8 +256,8 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qCleric Requirements:\n" +
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qCleric Requirements:\n" +
                                              "{=aIntelligence:{=q 40\n" +
                                              "{=aConstitution:{=q 30\n" +
                                              "{=bSacrifice:\n" +
@@ -276,8 +276,8 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qArcanus Requirements:\n" +
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qArcanus Requirements:\n" +
                                              "{=aIntelligence:{=q 50\n" +
                                              "{=bSacrifice:\n" +
                                              "{=q200 {=aHealth\n" +
@@ -295,8 +295,8 @@ public class Forsaken : MundaneScript
                         new (0x05, "No")
                     };
 
-                    client.SendMessage(0x03, "You cannot go below 128 Health / Mana, plan accordingly");
-                    client.SendMessage(0x08, "{=qMonk Requirements:\n" +
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot go below 128 Health / Mana, plan accordingly");
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "{=qMonk Requirements:\n" +
                                              "{=aConstitution:{=q 40\n" +
                                              "{=aDexterity:{=q 30\n" +
                                              "{=bSacrifice:\n" +
@@ -321,9 +321,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.BaseMp -= 300;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Berserker;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                                await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
@@ -336,9 +336,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                                foreach (var player in ServerSetup.Instance.Game.Aislings)
                                 {
-                                    announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Berserker");
+                                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Berserker");
                                 }
                                 client.CloseDialog();
                             }
@@ -385,9 +385,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.BaseMp -= 300;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Defender;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                            await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
@@ -400,9 +400,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                             {
-                                announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Defender");
+                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Defender");
                             }
                             client.CloseDialog();
                         }
@@ -440,9 +440,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.BaseMp -= 600;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Assassin;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                            await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
@@ -455,9 +455,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                             {
-                                announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Assassin");
+                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Assassin");
                             }
                             client.CloseDialog();
                         }
@@ -497,9 +497,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.BaseMp -= 400;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Cleric;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                                await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
@@ -512,9 +512,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                                foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                                 {
-                                    announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Cleric");
+                                    announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Cleric");
                                 }
                                 client.CloseDialog();
                             }
@@ -561,9 +561,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.BaseMp -= 700;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Arcanus;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                            await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
@@ -576,9 +576,9 @@ public class Forsaken : MundaneScript
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                             {
-                                announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Arcanus");
+                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Arcanus");
                             }
                             client.CloseDialog();
                         }
@@ -618,9 +618,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.BaseMp -= 400;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Monk;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                                await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
@@ -633,9 +633,9 @@ public class Forsaken : MundaneScript
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                                foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                                 {
-                                    announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has advanced to Monk");
+                                    announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Monk");
                                 }
                                 client.CloseDialog();
                             }
@@ -677,7 +677,7 @@ public class Forsaken : MundaneScript
                     new (0x031, "Let's proceed"),
                     new (0x05, "I've changed my mind")
                 };
-                    client.SendMessage(0x08, "{=qDedicated Buffs:\n" +
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "{=qDedicated Buffs:\n" +
                                              "{=gBase HP: {=e1000\n" +
                                              "{=gBase MP: {=e1000\n" +
                                              "{=gStr: {=e5\n" +
@@ -706,9 +706,9 @@ public class Forsaken : MundaneScript
                         client.Aisling._Dmg += 5;
                         client.Aisling._Hit += 5;
                         client.Aisling.PastClass = client.Aisling.Path;
-                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.Animate(303); });
-                        await Task.Delay(250).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.Animate(303); });
+                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                         var legend = new Legend.LegendItem
                         {
                             Category = "Class",
@@ -720,9 +720,9 @@ public class Forsaken : MundaneScript
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.Aisling.Stage = ClassStage.Dedicated;
                         client.SendAttributes(StatUpdateType.Full);
-                        foreach (var announceClient in ServerSetup.Instance.Game.Clients.Values.Where(x => x.Aisling != null))
+                        foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
                         {
-                            announceClient.SendMessage(0x0B, $"{{=c{client.Aisling.Username} has reaffirmed their dedication to their class");
+                            announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has reaffirmed their dedication to their class");
                         }
 
                         var options = new List<Dialog.OptionsDataItem>

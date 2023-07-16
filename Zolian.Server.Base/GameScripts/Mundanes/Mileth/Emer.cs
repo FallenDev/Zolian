@@ -64,7 +64,7 @@ public class Emer : MundaneScript
             {
                 if (string.IsNullOrEmpty(args)) return;
 
-                int.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
                 if (amount > 0 && client.PendingBuySessions != null)
                 {
                     client.PendingBuySessions.Quantity = amount;
@@ -226,7 +226,7 @@ public class Emer : MundaneScript
                     var item = new Item();
                     item = item.Create(client.Aisling, "Honey Bacon Burger", Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
                     item.GiveTo(client.Aisling);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 2,500 experience.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 2,500 experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, "Lovely, I'll take as many as you have. Here's a taste of what I make from it.");
                 }

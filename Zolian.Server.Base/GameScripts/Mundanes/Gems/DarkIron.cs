@@ -91,13 +91,13 @@ public class DarkIron : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Dark Iron");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Dark Iron", 1);
                     client.GiveExp(66000);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 66,000 exp");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 66,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Dark Iron", 1);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;

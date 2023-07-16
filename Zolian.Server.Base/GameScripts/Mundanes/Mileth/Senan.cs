@@ -137,8 +137,8 @@ public class Senan : MundaneScript
                         client.Aisling.QuestManager.CryptTerrorSlayed = true;
                         client.Aisling.QuestManager.MilethReputation += 1;
                         client.GiveExp(exp);
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
-                        client.SendStats(StatusFlags.StructC);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
+                        client.SendAttributes(StatUpdateType.ExpGold);
                         var item = new Legend.LegendItem
                         {
                             Category = "Adventure",

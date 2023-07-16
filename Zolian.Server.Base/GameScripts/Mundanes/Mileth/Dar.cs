@@ -234,7 +234,7 @@ public class Dar : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                client.SendAnimation(109, Mundane.Serial);
                 client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
                 break;
@@ -307,7 +307,7 @@ public class Dar : MundaneScript
                 var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
                 if (subject == null) return;
 
-                client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                client.SendAnimation(109, Mundane.Serial);
                 client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
 
                 break;
@@ -391,7 +391,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(8000);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, $"Ah, there it is.. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
                 }
@@ -429,7 +429,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(advExp);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, $"Hic! That's what I was looking for. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
                 }
@@ -467,7 +467,7 @@ public class Dar : MundaneScript
                     client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
                     client.Aisling.QuestManager.DarItem = null;
                     client.GiveExp(advExp2);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane,
                         "I must of passed out again. Thank you, this will advance my research.");

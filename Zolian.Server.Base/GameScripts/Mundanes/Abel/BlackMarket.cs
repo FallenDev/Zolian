@@ -52,7 +52,7 @@ public class BlackMarket : MundaneScript
             {
                 if (string.IsNullOrEmpty(args)) return;
 
-                int.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
                 if (amount > 0 && client.PendingBuySessions != null)
                 {
                     client.PendingBuySessions.Quantity = amount;
@@ -176,7 +176,7 @@ public class BlackMarket : MundaneScript
                 {
                     client.Recover();
                     client.TransitionToMap(3003, new Position(5, 9));
-                    Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(1); });
+                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial)); });
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Always watch your six.");
                 }
             }

@@ -217,7 +217,7 @@ public class Neal : MundaneScript
                     var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
                     if (subject == null) return;
 
-                    client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
                     client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
                     break;
@@ -290,7 +290,7 @@ public class Neal : MundaneScript
                     var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
                     if (subject == null) return;
 
-                    client.SendAnimation(109, 100, 0, Mundane.Serial, client.Aisling.Serial);
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
                     client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
 
                     break;
@@ -371,8 +371,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new Dialog.OptionsDataItem(0x000A, "Yes."),
                                     new Dialog.OptionsDataItem(0x0008, "I'll come back later."));
@@ -389,8 +389,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 2)
@@ -420,8 +420,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new Dialog.OptionsDataItem(0x000A, "Yes."),
                                     new Dialog.OptionsDataItem(0x0008, "I'll come back later."));
@@ -438,8 +438,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 2)
@@ -469,8 +469,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new Dialog.OptionsDataItem(0x000A, "Yes."),
                                     new Dialog.OptionsDataItem(0x0008, "I'll come back later."));
@@ -487,8 +487,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 2)
@@ -518,8 +518,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(8000);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Crypts have been getting dangerous, thank you for taking care of that.",
                                     new Dialog.OptionsDataItem(0x000A, "Yes."),
                                     new Dialog.OptionsDataItem(0x0008, "I'll come back later."));
@@ -536,8 +536,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "You've passed your {=qsecond{=a trial. For that, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 2)
@@ -594,8 +594,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 3)
@@ -627,8 +627,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 3)
@@ -660,8 +660,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 3)
@@ -693,8 +693,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp2);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Good aisling, you have shown real talent, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 3)
@@ -752,8 +752,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 4)
@@ -799,8 +799,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 4)
@@ -846,8 +846,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 4)
@@ -893,8 +893,8 @@ public class Neal : MundaneScript
                                 client.Aisling.QuestManager.NealKill = null;
                                 client.Aisling.QuestManager.NealCount = 0;
                                 client.GiveExp(advExp3);
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
-                                client.SendStats(StatusFlags.StructC);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp3} experience.");
+                                client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Revered one, as promised, now let me teach you something.");
 
                                 if (client.Aisling.QuestManager.Neal == 4)

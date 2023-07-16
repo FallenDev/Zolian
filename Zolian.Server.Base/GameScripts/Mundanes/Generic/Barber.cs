@@ -122,10 +122,10 @@ public class Barber : MundaneScript
                     if (client.Aisling.GoldPoints >= 5000)
                     {
                         client.Aisling.GoldPoints -= 5000;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Great! Thank you for the business, come again.");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Great! Thank you for the business, come again.");
                         client.Aisling.Styling = 0;
                         client.Aisling.OldStyle = client.Aisling.HairStyle;
-                        client.SendStats(StatusFlags.StructC);
+                        client.SendAttributes(StatUpdateType.ExpGold);
                         TopMenu(client);
                     }
                     else
@@ -186,10 +186,10 @@ public class Barber : MundaneScript
                     if (client.Aisling.GoldPoints >= 20000)
                     {
                         client.Aisling.GoldPoints -= 20000;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Great! Thank you for the business, come again.");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Great! Thank you for the business, come again.");
                         client.Aisling.Coloring = 0;
                         client.Aisling.OldColor = client.Aisling.HairColor;
-                        client.SendStats(StatusFlags.StructC);
+                        client.SendAttributes(StatUpdateType.ExpGold);
                         TopMenu(client);
                     }
                     else

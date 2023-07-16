@@ -22,7 +22,7 @@ public class ShreekWarn : MundaneScript
     {
         base.TopMenu(client);
         client.SendOptionsDialog(Mundane, "What are you doing in my swamp? Alright, get out of here. All of you. Move it. Let's go.");
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "What are you doing in my swamp?");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "What are you doing in my swamp?");
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)

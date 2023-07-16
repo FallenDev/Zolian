@@ -61,14 +61,8 @@ public class Banker : MundaneScript
         if (item == null) return;
         if (!item.Template.Flags.FlagIsSet(ItemFlags.Bankable))
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "This item cannot be banked.");
-            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = Mundane.Serial,
-                Text = "We can't accept that.",
-                Type = 0x03
-            });
-
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "This item cannot be banked.");
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "We can't accept that."));
             return;
         }
 
@@ -126,7 +120,7 @@ public class Banker : MundaneScript
                 // Makes sure the trade is fresh
                 Refresh(client);
                 // Sets Inventory Slot
-                client.PendingBankedSession.InventorySlot = Convert.ToInt32(args);
+                client.PendingBankedSession.InventorySlot = Convert.ToByte(args);
                 // Sets Selected Item
                 client.Aisling.Inventory.Items.TryGetValue(client.PendingBankedSession.InventorySlot, out var value);
 
@@ -256,10 +250,10 @@ public class Banker : MundaneScript
                 }
 
                 // Set Qty if stacked
-                uint.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
                 if (amount == 0) amount = 1;
 
-                client.PendingBankedSession.ArgsQuantity = (int)amount;
+                client.PendingBankedSession.ArgsQuantity = amount;
 
                 if (client.PendingBankedSession.DepositStackedItem)
                 {
@@ -268,13 +262,7 @@ public class Banker : MundaneScript
                     {
                         if (client.PendingBankedSession.ArgsQuantity > client.PendingBankedSession.SelectedItem.Stacks)
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = "You don't have that many in your inventory.",
-                                Type = 0x03
-                            });
-
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "You don't have that many in your inventory."));
                             OnClick(client, Mundane.Serial);
                             return;
                         }
@@ -298,13 +286,7 @@ public class Banker : MundaneScript
 
                     if (client.PendingBankedSession.SelectedItem == null)
                     {
-                        Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                        {
-                            Serial = Mundane.Serial,
-                            Text = "Uh.. Let us check our ledger. Nope, not here.",
-                            Type = 0x03
-                        });
-
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Uh.. Let us check out ledger. Nope, not here."));
                         OnClick(client, Mundane.Serial);
                         return;
                     }
@@ -313,13 +295,7 @@ public class Banker : MundaneScript
                     {
                         if (client.PendingBankedSession.ArgsQuantity > client.PendingBankedSession.SelectedItem.Stacks)
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = "You don't have that many with us.",
-                                Type = 0x03
-                            });
-
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "It seems you don't have that many with us."));
                             OnClick(client, Mundane.Serial);
                             return;
                         }
@@ -333,21 +309,11 @@ public class Banker : MundaneScript
                     {
                         if (client.PendingBankedSession.ArgsQuantity > 1)
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = $"{client.Aisling.Username}, here are your stacks of {client.PendingBankedSession.SelectedItem.Template.Name}.",
-                                Type = 0x03
-                            });
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here are your stacks of {client.PendingBankedSession.SelectedItem.Template.Name}."));
                         }
                         else
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = $"{client.Aisling.Username}, Here is your {client.PendingBankedSession.SelectedItem.Template.Name}.",
-                                Type = 0x03
-                            });
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {client.PendingBankedSession.SelectedItem.Template.Name}."));
                         }
 
                         client.SendAttributes(StatUpdateType.WeightGold);
@@ -374,7 +340,7 @@ public class Banker : MundaneScript
             {
                 _bank.WithdrawGold(client, client.PendingBankedSession.TempGold);
                 client.PendingBankedSession.WithdrawGold = false;
-                client.SendMessage(0x0C, $"{{=aYou withdrew {{=c{client.PendingBankedSession.TempGold}{{=a coins out of {{=q{client.Aisling.BankedGold}{{=a currently banked.");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aYou withdrew {{=c{client.PendingBankedSession.TempGold}{{=a coins out of {{=q{client.Aisling.BankedGold}{{=a currently banked.");
                 OnClick(client, Mundane.Serial);
             }
                 break;
@@ -421,50 +387,26 @@ public class Banker : MundaneScript
 
                         if (deposited)
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = $"Great, That will be {client.PendingBankedSession.Cost} gold.",
-                                Type = 0x03
-                            });
-
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"Great, That will be {client.PendingBankedSession.Cost} gold."));
                             client.PendingBankedSession.DepositStackedItem = false;
                             CompleteTrade(client, client.PendingBankedSession.Cost);
                         }
                         else
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = "We won't accept that. I'm sorry.",
-                                Type = 0x03
-                            });
-
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "We can't accept that. I'm sorry."));
                             client.CloseDialog();
                         }
                     }
                     else
                     {
-                        Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                        {
-                            Serial = Mundane.Serial,
-                            Text = "Come back when you have enough gold.",
-                            Type = 0x03
-                        });
-
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Come back when you have enough gold."));
                         client.PendingBankedSession.DepositStackedItem = false;
                         client.CloseDialog();
                     }
                 }
                 else
                 {
-                    Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                    {
-                        Serial = Mundane.Serial,
-                        Text = "Well, where is it?",
-                        Type = 0x03
-                    });
-
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Well? Where is it?"));
                     client.PendingBankedSession.DepositStackedItem = false;
                     OnClick(client, Mundane.Serial);
                 }
@@ -515,13 +457,7 @@ public class Banker : MundaneScript
 
                         if (withdraw)
                         {
-                            Mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-                            {
-                                Serial = Mundane.Serial,
-                                Text = $"{client.Aisling.Username}, Here is your {args}.",
-                                Type = 0x03
-                            });
-
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, Here is your {args}."));
                             client.SendAttributes(StatUpdateType.WeightGold);
                             OnClick(client, Mundane.Serial);
                         }

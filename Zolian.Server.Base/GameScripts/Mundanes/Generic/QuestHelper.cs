@@ -10,7 +10,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Quest Helper")]
 public class QuestHelper : MundaneScript
 {
-    private readonly int _entryCheck;
+    private readonly uint _entryCheck;
 
     public QuestHelper(WorldServer server, Mundane mundane) : base(server, mundane)
     {

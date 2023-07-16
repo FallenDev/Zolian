@@ -1,5 +1,7 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -50,188 +52,191 @@ public class InnerHost : MundaneScript
         switch (responseID)
         {
             case 1:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.WarpTo(new Position(4, 4), false);
-                        break;
-                    case >= 25 and <= 49:
-                        client.WarpTo(new Position(2, 6), false);
-                        break;
-                    case >= 50 and <= 74:
-                        client.WarpTo(new Position(6, 2), false);
-                        break;
-                    case >= 75 and <= 100:
-                        client.WarpTo(new Position(2, 2), false);
-                        break;
-                    default:
-                        client.WarpTo(new Position(4, 4), false);
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, client.Aisling, client.Aisling);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.WarpTo(new Position(4, 4), false);
+                            break;
+                        case >= 25 and <= 49:
+                            client.WarpTo(new Position(2, 6), false);
+                            break;
+                        case >= 50 and <= 74:
+                            client.WarpTo(new Position(6, 2), false);
+                            break;
+                        case >= 75 and <= 100:
+                            client.WarpTo(new Position(2, 2), false);
+                            break;
+                        default:
+                            client.WarpTo(new Position(4, 4), false);
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
+                    break;
+                }
             case 2:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.WarpTo(new Position(51, 4), false);
-                        break;
-                    case >= 25 and <= 49:
-                        client.WarpTo(new Position(49, 2), false);
-                        break;
-                    case >= 50 and <= 74:
-                        client.WarpTo(new Position(53, 6), false);
-                        break;
-                    case >= 75 and <= 100:
-                        client.WarpTo(new Position(53, 2), false);
-                        break;
-                    default:
-                        client.WarpTo(new Position(51, 4), false);
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, client.Aisling, client.Aisling);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.WarpTo(new Position(51, 4), false);
+                            break;
+                        case >= 25 and <= 49:
+                            client.WarpTo(new Position(49, 2), false);
+                            break;
+                        case >= 50 and <= 74:
+                            client.WarpTo(new Position(53, 6), false);
+                            break;
+                        case >= 75 and <= 100:
+                            client.WarpTo(new Position(53, 2), false);
+                            break;
+                        default:
+                            client.WarpTo(new Position(51, 4), false);
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
+                    break;
+                }
             case 3:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.WarpTo(new Position(51, 51), false);
-                        break;
-                    case >= 25 and <= 49:
-                        client.WarpTo(new Position(49, 53), false);
-                        break;
-                    case >= 50 and <= 74:
-                        client.WarpTo(new Position(53, 49), false);
-                        break;
-                    case >= 75 and <= 100:
-                        client.WarpTo(new Position(53, 53), false);
-                        break;
-                    default:
-                        client.WarpTo(new Position(51, 51), false);
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, client.Aisling, client.Aisling);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.WarpTo(new Position(51, 51), false);
+                            break;
+                        case >= 25 and <= 49:
+                            client.WarpTo(new Position(49, 53), false);
+                            break;
+                        case >= 50 and <= 74:
+                            client.WarpTo(new Position(53, 49), false);
+                            break;
+                        case >= 75 and <= 100:
+                            client.WarpTo(new Position(53, 53), false);
+                            break;
+                        default:
+                            client.WarpTo(new Position(51, 51), false);
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
+                    break;
+                }
             case 4:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.WarpTo(new Position(4, 51), false);
-                        break;
-                    case >= 25 and <= 49:
-                        client.WarpTo(new Position(2, 53), false);
-                        break;
-                    case >= 50 and <= 74:
-                        client.WarpTo(new Position(2, 49), false);
-                        break;
-                    case >= 75 and <= 100:
-                        client.WarpTo(new Position(6, 53), false);
-                        break;
-                    default:
-                        client.WarpTo(new Position(4, 51), false);
-                        break;
+                    var rand = Generator.RandNumGen100();
+
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.WarpTo(new Position(4, 51), false);
+                            break;
+                        case >= 25 and <= 49:
+                            client.WarpTo(new Position(2, 53), false);
+                            break;
+                        case >= 50 and <= 74:
+                            client.WarpTo(new Position(2, 49), false);
+                            break;
+                        case >= 75 and <= 100:
+                            client.WarpTo(new Position(6, 53), false);
+                            break;
+                        default:
+                            client.WarpTo(new Position(4, 51), false);
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
+                    break;
                 }
-
-                client.CloseDialog();
-                client.SendAnimation(262, client.Aisling, client.Aisling);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
-                break;
-            }
             case 5:
-            {
-                client.CloseDialog();
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    break;
+                }
             case 6:
-            {
-                client.TransitionToMap(5232, new Position(3, 7));
-                client.CloseDialog();
-                client.SendAnimation(262, client.Aisling, client.Aisling);
-                break;
-            }
+                {
+                    client.TransitionToMap(5232, new Position(3, 7));
+                    client.CloseDialog();
+                    client.SendAnimation(262, client.Aisling.Serial);
+                    break;
+                }
             case 9:
-            {
-                _repairSum = ShopMethods.GetRepairCosts(client);
+                {
+                    _repairSum = ShopMethods.GetRepairCosts(client);
 
-                var optsRepair = new List<Dialog.OptionsDataItem>
+                    var optsRepair = new List<Dialog.OptionsDataItem>
                 {
                     new(20, ServerSetup.Instance.Config.MerchantConfirmMessage),
                     new(21, ServerSetup.Instance.Config.MerchantCancelMessage)
                 };
 
-                if (_repairSum == 0)
-                {
-                    client.SendOptionsDialog(Mundane, "Your items are in good condition, no repairs are necessary.");
-                }
-                else
-                {
-                    client.SendOptionsDialog(Mundane,
-                        "It will cost {=c" + _repairSum + "{=a Gold to repair everything. Do you Agree?",
-                        _repairSum.ToString(), optsRepair.ToArray());
-                }
-
-                break;
-            }
-            case 20:
-            {
-                if (client.Aisling.GoldPoints >= Convert.ToUInt32(_repairSum))
-                {
-                    client.Aisling.GoldPoints -= Convert.ToUInt32(_repairSum);
-
-                    client.RepairEquipment();
-                    client.SendOptionsDialog(Mundane, "Here you are, fight on.");
-                }
-                else
-                {
-                    client.SendOptionsDialog(Mundane, "No money, no service.");
-                }
-                break;
-            }
-            case 21:
-            {
-                client.SendOptionsDialog(Mundane, "Come back before anything breaks.");
-                break;
-            }
-            case 48:
-            {
-                if (client.Aisling.IsDead())
-                {
-                    foreach (var player in client.Aisling.AislingsNearby())
+                    if (_repairSum == 0)
                     {
-                        player?.Client.SendMessage(0x05, $"{client.Aisling.Username} revived.");
+                        client.SendOptionsDialog(Mundane, "Your items are in good condition, no repairs are necessary.");
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane,
+                            "It will cost {=c" + _repairSum + "{=a Gold to repair everything. Do you Agree?",
+                            _repairSum.ToString(), optsRepair.ToArray());
                     }
 
-                    client.Recover();
-                    client.TransitionToMap(5232, new Position(3, 7));
-                    client.CloseDialog();
-                    Task.Delay(350).ContinueWith(ct => { client.Aisling.Animate(1); });
+                    break;
                 }
-                break;
-            }
+            case 20:
+                {
+                    if (client.Aisling.GoldPoints >= Convert.ToUInt32(_repairSum))
+                    {
+                        client.Aisling.GoldPoints -= Convert.ToUInt32(_repairSum);
+
+                        client.RepairEquipment();
+                        client.SendOptionsDialog(Mundane, "Here you are, fight on.");
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "No money, no service.");
+                    }
+                    break;
+                }
+            case 21:
+                {
+                    client.SendOptionsDialog(Mundane, "Come back before anything breaks.");
+                    break;
+                }
+            case 48:
+                {
+                    if (client.Aisling.IsDead())
+                    {
+                        foreach (var player in client.Aisling.AislingsNearby())
+                        {
+                            player?.Client.SendServerMessage(ServerMessageType.OrangeBar5, $"{client.Aisling.Username} revived.");
+                        }
+
+                        client.Recover();
+                        client.TransitionToMap(5232, new Position(3, 7));
+                        client.CloseDialog();
+                        Task.Delay(350).ContinueWith(ct =>
+                        {
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
+                        });
+                    }
+                    break;
+                }
         }
     }
 }

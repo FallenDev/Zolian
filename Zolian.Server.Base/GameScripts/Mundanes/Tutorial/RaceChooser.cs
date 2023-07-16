@@ -239,12 +239,12 @@ public class RaceChooser : MundaneScript
 
                 client.SendOptionsDialog(Mundane, "*raises a hand towards you*");
                 Task.Delay(1000).ContinueWith(ct => { client.TransitionToMap(720, new Position(14, 15)); });
-                Task.Delay(1300).ContinueWith(ct => { client.Aisling.Animate(303); });
-                Task.Delay(1300).ContinueWith(ct => { client.SendSound(97, Scope.AislingsOnSameMap); });
-                Task.Delay(1500).ContinueWith(ct => { client.Aisling.Animate(303); });
+                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
                 client.CloseDialog();
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
-                Task.Delay(2000).ContinueWith(ct => { aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
+                Task.Delay(2000).ContinueWith(ct => { client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });
             }
                 return;
             case 0x12:
@@ -292,7 +292,7 @@ public class RaceChooser : MundaneScript
                     new Dialog.OptionsDataItem(0x28, "{=cGold"),
                     new Dialog.OptionsDataItem(0x29, "{=gSilver"),
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
-                client.SendMessage(0x09,
+                client.SendServerMessage(ServerMessageType.ScrollWindow,
                     $"{{=aScroll between the various abilities below and chose one that matches the type of dragonkin blood that flows through you.\n" +
                     $"{{=bRed{{=a: Fire Breath, and immunity to fire dmg.\n" + 
                     $"{{=fBlue{{=a: Bubble Burst, and immunity to water dmg.\n" + 

@@ -46,7 +46,7 @@ public class DungeonShop : MundaneScript
             {
                 if (string.IsNullOrEmpty(args)) return;
 
-                int.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
 
                 if (amount > 0 && client.PendingBuySessions != null)
                 {
@@ -242,7 +242,7 @@ public class DungeonShop : MundaneScript
                         client.GiveQuantity(client.Aisling, item, quantity);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingBuySessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cHope it serves you well.");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cHope it serves you well.");
                         TopMenu(client);
                     }
                     else
@@ -269,7 +269,7 @@ public class DungeonShop : MundaneScript
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingItemSessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWhat a great deal!");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWhat a great deal!");
                         TopMenu(client);
                     }
                 }

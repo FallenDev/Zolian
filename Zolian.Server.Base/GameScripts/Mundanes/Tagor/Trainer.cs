@@ -170,8 +170,6 @@ public class Trainer : MundaneScript
                                     skill.InUse = false;
                                     skill.CurrentCooldown = skill.Template.Cooldown;
                                 }
-
-                                WorldServer.Assail(client);
                             });
                         }
                     }

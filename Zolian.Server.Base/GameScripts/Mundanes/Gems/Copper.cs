@@ -91,13 +91,13 @@ public class Copper : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Copper");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Copper", 1);
                     client.GiveExp(5000);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 5,000 exp");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 5,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Copper", 1);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;

@@ -57,7 +57,7 @@ public class Eireann : MundaneScript
             {
                 if (string.IsNullOrEmpty(args)) return;
 
-                int.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
 
                 if (amount > 0 && client.PendingBuySessions != null)
                 {
@@ -269,7 +269,7 @@ public class Eireann : MundaneScript
                         client.GiveQuantity(client.Aisling, item, quantity);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingBuySessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cBottoms Up!");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cBottoms Up!");
                         TopMenu(client);
                     }
                     else
@@ -296,7 +296,7 @@ public class Eireann : MundaneScript
                         client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingItemSessions = null;
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cSee you around.");
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cSee you around.");
                         TopMenu(client);
                     }
                 }

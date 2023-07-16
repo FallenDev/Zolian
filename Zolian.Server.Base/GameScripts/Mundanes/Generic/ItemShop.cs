@@ -64,7 +64,7 @@ public class ItemShop : MundaneScript
             {
                 if (string.IsNullOrEmpty(args)) return;
 
-                int.TryParse(args, out var amount);
+                ushort.TryParse(args, out var amount);
 
                 if (amount > 0 && client.PendingBuySessions != null)
                 {

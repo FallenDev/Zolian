@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Types;
 
@@ -255,8 +256,7 @@ public static class RacialBonus
         };
 
         client.Aisling.LegendBook.AddLegend(item, client.Aisling.Client);
-
-        client.SendStats(StatusFlags.MultiStat);
+        client.SendAttributes(StatUpdateType.Full);
     }
 
     private static void DragonRacialLegend(WorldClient client, string subRace)
@@ -273,7 +273,6 @@ public static class RacialBonus
         };
 
         client.Aisling.LegendBook.AddLegend(item, client.Aisling.Client);
-
-        client.SendStats(StatusFlags.MultiStat);
+        client.SendAttributes(StatUpdateType.Full);
     }
 }

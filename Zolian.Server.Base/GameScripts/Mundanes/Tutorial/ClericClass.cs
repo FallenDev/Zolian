@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -36,7 +37,7 @@ public class ClericClass : MundaneScript
         }
         else
         {
-            client.SendMessage(0x04, "I'm set in my ways.");
+            client.SendServerMessage(ServerMessageType.OrangeBar5, "I'm set in my ways.");
         }
     }
 

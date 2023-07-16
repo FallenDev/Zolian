@@ -91,13 +91,13 @@ public class Talos : MundaneScript
                     client.Aisling.Client.GiveItem("Refined Talos");
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Talos", 1);
                     client.GiveExp(1000);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 1,000 exp");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining success! 1,000 exp");
                     client.CloseDialog();
                 }
                 else
                 {
                     client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Raw Talos", 1);
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Refining process failed!");
                     client.CloseDialog();
                 }
                 break;
