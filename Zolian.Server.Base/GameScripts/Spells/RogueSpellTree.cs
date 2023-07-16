@@ -454,7 +454,7 @@ public class Shunshin : SpellScript
             return;
         }
 
-        client.Aisling.Invisible = true;
+        client.Aisling.IsInvisible = true;
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
         client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;

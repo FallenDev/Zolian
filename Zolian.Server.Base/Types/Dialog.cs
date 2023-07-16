@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Identity;
 using Darkages.Models;
+using Darkages.Network.Client;
 
 namespace Darkages.Types;
 
@@ -20,22 +21,22 @@ public class Dialog
     private int SequenceIndex { get; set; }
     private int Serial { get; set; }
 
-    //public DialogSequence Invoke(WorldClient client)
-    //{
-    //    client.SendDialog(new ServerFormat30(client, this));
-    //    {
-    //        Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
-    //        return Current;
-    //    }
-    //}
+    public DialogSequence Invoke(WorldClient client)
+    {
+        client.SendDialog(new ServerFormat30(client, this));
+        {
+            Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
+            return Current;
+        }
+    }
 
-    //public void MoveNext(WorldClient client)
-    //{
-    //    if (CanMoveNext)
-    //        SequenceIndex++;
+    public void MoveNext(WorldClient client)
+    {
+        if (CanMoveNext)
+            SequenceIndex++;
 
-    //    client.DlgSession.Sequence = (ushort)SequenceIndex;
-    //}
+        client.DlgSession.Sequence = (ushort)SequenceIndex;
+    }
 
     public class OptionsDataItem
     {

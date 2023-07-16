@@ -155,7 +155,4 @@ public interface ISprite
     void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime);
     void Remove();
     void HideFrom(Aisling nearbyAisling);
-    void Animate(ushort animation, byte speed = 100);
-    Aisling SendAnimation(ushort animation, Sprite to, Sprite from, byte speed = 100);
-    void SendAnimation(ushort v, Position position);
 }

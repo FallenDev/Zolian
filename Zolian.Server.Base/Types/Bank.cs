@@ -426,14 +426,14 @@ public class Bank : IBank
     {
         client.Aisling.GoldPoints -= gold;
         client.Aisling.BankedGold += gold;
-        client.SendStats(StatusFlags.StructC);
+        client.SendAttributes(StatUpdateType.ExpGold);
     }
 
     public void WithdrawGold(IWorldClient client, uint gold)
     {
         client.Aisling.GoldPoints += gold;
         client.Aisling.BankedGold -= gold;
-        client.SendStats(StatusFlags.StructC);
+        client.SendAttributes(StatUpdateType.ExpGold);
     }
 
     public void UpdatePlayersWeight(WorldClient client)

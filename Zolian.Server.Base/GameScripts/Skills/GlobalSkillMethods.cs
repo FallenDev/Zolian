@@ -124,9 +124,9 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var client = aisling.Client;
         aisling.UsedSkill(skill);
 
-        if (client.Aisling.Invisible && skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+        if (client.Aisling.IsInvisible && skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.Invisible = false;
+            client.Aisling.IsInvisible = false;
             client.UpdateDisplay();
             return Attempt(client, skill);
         }

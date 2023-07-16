@@ -10,6 +10,7 @@ using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
 using Darkages.Templates;
+using JetBrains.Annotations;
 
 namespace Darkages.Network.Client.Abstractions;
 
@@ -57,7 +58,7 @@ public interface IWorldClient : ISocketClient
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
-    void SendAnimation(ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null);
+    void SendAnimation(ushort targetEffect, uint? targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint? casterSerial = 0, [CanBeNull] Position position = null);
     void SendAttributes(StatUpdateType statUpdateType);
     //void SendBoard();
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
@@ -117,10 +118,6 @@ public interface IWorldClient : ISocketClient
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);
     WorldClient SystemMessage(string message);
-    void SendTargetedMessage(Scope scope, ServerMessageType type, string text);
-    void SendTargetedPublicMessage(Scope scope, PublicMessageType type, string text);
-    void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0,
-        uint casterSerial = 0, uint targetSerial = 0, Position position = null);
     Task<WorldClient> Save();
     void DeathStatusCheck();
     WorldClient UpdateDisplay(bool excludeSelf = false);

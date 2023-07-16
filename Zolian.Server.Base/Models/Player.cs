@@ -46,7 +46,6 @@ public class Player : Sprite
     public int CurrentWeight { get; set; }
     public int World { get; set; }
     public byte Lantern { get; set; }
-    public bool Invisible { get; set; }
     public RestPosition Resting { get; set; }
     public bool FireImmunity { get; set; }
     public bool WaterImmunity { get; set; }

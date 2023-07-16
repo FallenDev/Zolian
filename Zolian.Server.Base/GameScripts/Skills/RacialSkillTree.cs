@@ -318,9 +318,9 @@ public class Splash : SkillScript
 
             if (_success)
             {
-                if (client.Aisling.Invisible && _skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 

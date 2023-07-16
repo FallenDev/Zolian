@@ -132,9 +132,9 @@ public class Calming_Voice : SpellScript
 
         if (success)
         {
-            if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.Invisible = false;
+                client.Aisling.IsInvisible = false;
                 client.UpdateDisplay();
             }
 
@@ -259,9 +259,9 @@ public class DestructiveForce : SpellScript
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+        if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.Invisible = false;
+            client.Aisling.IsInvisible = false;
             client.UpdateDisplay();
         }
 
@@ -418,10 +418,10 @@ public class Elemental_Bolt : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible &&
+                if (client.Aisling.IsInvisible &&
                     _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 

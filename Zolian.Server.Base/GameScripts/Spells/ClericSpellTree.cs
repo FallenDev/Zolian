@@ -326,9 +326,9 @@ public class Detect : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -444,9 +444,9 @@ public class Heal_Minor : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -554,9 +554,9 @@ public class Heal_Major : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -664,9 +664,9 @@ public class Heal_Critical : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -785,9 +785,9 @@ public class Dire_Aid : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -905,9 +905,9 @@ public class Healing_Winds : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -992,9 +992,9 @@ public class Forestall : SpellScript
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+        if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.Invisible = false;
+            client.Aisling.IsInvisible = false;
             client.UpdateDisplay();
         }
 
@@ -1084,9 +1084,9 @@ public class Raise_Ally : SpellScript
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+        if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.Invisible = false;
+            client.Aisling.IsInvisible = false;
             client.UpdateDisplay();
         }
 
@@ -1145,9 +1145,9 @@ public class Turn_Undead : SpellScript
 
         if (success)
         {
-            if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.Invisible = false;
+                client.Aisling.IsInvisible = false;
                 client.UpdateDisplay();
             }
 
@@ -1208,9 +1208,9 @@ public class Turn_Critter : SpellScript
 
         if (success)
         {
-            if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.Invisible = false;
+                client.Aisling.IsInvisible = false;
                 client.UpdateDisplay();
             }
 
@@ -1271,9 +1271,9 @@ public class Turn_Greater_Undead : SpellScript
 
         if (success)
         {
-            if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.Invisible = false;
+                client.Aisling.IsInvisible = false;
                 client.UpdateDisplay();
             }
 
@@ -1334,9 +1334,9 @@ public class Turn_Greater_Critter : SpellScript
 
         if (success)
         {
-            if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.Invisible = false;
+                client.Aisling.IsInvisible = false;
                 client.UpdateDisplay();
             }
 
@@ -1430,9 +1430,9 @@ public class AoPuinsein : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -1541,9 +1541,9 @@ public class AoDall : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -1652,9 +1652,9 @@ public class AoBeagCradh : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -1763,9 +1763,9 @@ public class AoCradh : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -1874,9 +1874,9 @@ public class AoMorCradh : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -1985,9 +1985,9 @@ public class AoArdCradh : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 
@@ -2096,9 +2096,9 @@ public class AoSuain : SpellScript
 
             if (success)
             {
-                if (client.Aisling.Invisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.Invisible = false;
+                    client.Aisling.IsInvisible = false;
                     client.UpdateDisplay();
                 }
 

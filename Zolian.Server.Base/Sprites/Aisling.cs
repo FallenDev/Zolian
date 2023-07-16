@@ -128,6 +128,7 @@ public sealed class Aisling : Player, IAisling
         }
     }
 
+    public bool CantReact => CantAttack || CantCast || CantMove;
     public bool Camouflage => SkillBook.HasSkill("Camouflage");
     public bool PainBane => SkillBook.HasSkill("Pain Bane");
 
@@ -315,7 +316,7 @@ public sealed class Aisling : Player, IAisling
         }
 
         Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-        Client.SendTargetedAnimation(Scope.NearbyAislings, spell.Template.Animation, 100, 0, 0U, 0U, new Position(target.Pos.X, target.Pos.Y));
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.Animation, target.Serial, 100, 0, Serial, new Position(target.Pos.X, target.Pos.Y)));
 
         return this;
     }
@@ -585,7 +586,7 @@ public sealed class Aisling : Player, IAisling
                 obj.RemoveDebuff("Skulled", true);
 
             obj.Client.Revive();
-            obj.Animate(5);
+            obj.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, obj.Serial));
         }
 
         ApplyDamage(this, 0, null);
@@ -599,7 +600,7 @@ public sealed class Aisling : Player, IAisling
             aisling.RemoveDebuff("Skulled", true);
 
         aisling.Client.Revive();
-        aisling.Animate(5);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, aisling.Serial));
 
         ApplyDamage(this, 0, null);
         Client.SendSound(8, false);

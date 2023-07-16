@@ -620,7 +620,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         break;
                 }
 
-                if (player.Invisible) continue;
+                if (player.IsInvisible) continue;
                 var buffs = player.Buffs.Values;
 
                 foreach (var buff in buffs)
@@ -1460,8 +1460,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (aisling.Client.RemoteIp.Equals(ServerSetup.Instance.IpAddress) ||
                     aisling.Client.RemoteIp.Equals(ipLocal))
                 {
-                    client.SendTargetedAnimation(Scope.NearbyAislings, 0, 100, 391, aisling.Serial, 0,
-                        new Position(aisling.Pos));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, aisling.Serial));
                 }
                 else
                 {
@@ -1890,7 +1889,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     client.Aisling.GoldPoints = 0;
 
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.YouDroppedGoldMsg}");
-                client.SendTargetedMessage(Scope.NearbyAislingsExludingSelf, ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}");
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislingsExludingSelf, c => c.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}"));
 
                 Money.Create(client.Aisling, (uint)amount, new Position(destinationPoint.X, destinationPoint.Y));
                 client.SendAttributes(StatUpdateType.ExpGold);
@@ -2114,7 +2113,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (Party.AddPartyMember(localClient.Aisling, player))
             {
                 localClient.Aisling.PartyStatus = GroupStatus.AcceptingRequests;
-                if (localClient.Aisling.GroupParty.PartyMembers.Any(other => other.Invisible))
+                if (localClient.Aisling.GroupParty.PartyMembers.Any(other => other.IsInvisible))
                     localClient.UpdateDisplay();
                 return default;
             }
@@ -2258,7 +2257,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var script = npc.Scripts.FirstOrDefault();
 
             // Step in 0x3A is "DialogId" perhaps that also needs to go here for step?
-            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.Step, localArgs.Args);
+            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args);
 
             return default;
         }
@@ -2277,7 +2276,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
         {
-            if (localArgs.PursuitId == 0 && localArgs.ScriptId == ushort.MaxValue)
+            if (localArgs.DialogId == 0 && localArgs.PursuitId == ushort.MaxValue)
             {
                 localClient.CloseDialog();
                 return default;
@@ -2304,7 +2303,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             var result = (DialogResult)localArgs.DialogId;
 
-            if (localArgs.ScriptId == ushort.MaxValue)
+            if (localArgs.PursuitId == ushort.MaxValue)
             {
                 if (localClient.Aisling.ActiveReactor?.Decorators == null) return default;
 
@@ -2801,7 +2800,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
         {
-            localClient.SendTargetedPublicMessage(Scope.NearbyAislings, PublicMessageType.Chant, localArgs.ChantMessage);
+            localClient.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, PublicMessageType.Chant, localArgs.ChantMessage));
             return default;
         }
 

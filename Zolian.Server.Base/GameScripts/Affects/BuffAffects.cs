@@ -26,11 +26,11 @@ public class buff_DiaAite : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a sense of security");
-            aisling.Client.SendAnimation(93, 100, 93, aisling.Serial, aisling.Target.Serial);
-            aisling.Client.SendSound(30, false);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel Ceannlaidir's hand on your shoulder");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
-            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -38,8 +38,9 @@ public class buff_DiaAite : Buff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(93, 100, 93, affected.Serial, affected.Serial);
-                near.Client.SendSound(30, false);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             }
         }
     }
@@ -56,9 +57,8 @@ public class buff_DiaAite : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your resolve returns to normal");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -78,11 +78,10 @@ public class buff_aite : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a sense of security");
-            aisling.Client.SendAnimation(93, 100, 93, aisling.Serial, aisling.Target.Serial);
-            aisling.Client.SendSound(30, false);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a sense of security");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
-            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -90,8 +89,8 @@ public class buff_aite : Buff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(93, 100, 93, affected.Serial, affected.Serial);
-                near.Client.SendSound(30, false);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             }
         }
     }
@@ -108,9 +107,8 @@ public class buff_aite : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your resolve returns to normal");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
@@ -132,9 +130,9 @@ public class buff_SpectralShield : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Spectral Shield has strengthened your resolve.");
-            aisling.Client.SendAnimation(262, 100, 262, aisling.Serial, aisling.Target.Serial);
-            aisling.Client.SendSound(30, false);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spectral Shield has strengthened your resolve.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
@@ -144,8 +142,8 @@ public class buff_SpectralShield : Buff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(262, 100, 262, affected.Serial, affected.Serial);
-                near.Client.SendSound(30, false);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             }
         }
     }
@@ -163,7 +161,7 @@ public class buff_SpectralShield : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your resolve returns to normal.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal.");
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -187,9 +185,9 @@ public class buff_DefenseUp : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're now aware of your surroundings.");
-            aisling.Client.SendAnimation(89, 100, 89, aisling.Serial, aisling.Target.Serial);
-            aisling.Client.SendSound(83, false);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're now aware of your surroundings.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
             InsertBuff(aisling, buff);
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
@@ -199,8 +197,8 @@ public class buff_DefenseUp : Buff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(89, 100, 89, affected.Serial, affected.Serial);
-                near.Client.SendSound(83, false);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
             }
         }
     }
@@ -218,7 +216,7 @@ public class buff_DefenseUp : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've grown complacent.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've grown complacent.");
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -242,11 +240,24 @@ public class buff_Hasten : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Everything starts to slow down around you");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -259,12 +270,23 @@ public class buff_Hasten : Buff
     {
         affected.Buffs.TryRemove(buff.Name, out _);
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
-        aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Time goes back to normal");
-        DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Serial));
+            aisling.Client.SendEffect(byte.MinValue, Icon);
+            DeleteBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Serial));
+            }
+        }
     }
 }
 
@@ -283,10 +305,23 @@ public class buff_clawfist : Buff
             affected.ClawFistEmpowerment = true;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your hands are empowered!");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands are empowered!");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -302,9 +337,8 @@ public class buff_clawfist : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your hands turn back to normal.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands turn back to normal.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -322,10 +356,23 @@ public class buff_wingsOfProtect : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've become almost impervious.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -340,9 +387,8 @@ public class buff_wingsOfProtect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer impervious.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -360,10 +406,23 @@ public class buff_ArdDion : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've become almost impervious.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -378,9 +437,8 @@ public class buff_ArdDion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer impervious.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -398,10 +456,23 @@ public class buff_MorDion : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've become almost impervious.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -416,9 +487,8 @@ public class buff_MorDion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer impervious.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -436,10 +506,23 @@ public class buff_dion : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've become almost impervious.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -454,16 +537,15 @@ public class buff_dion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer impervious.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
 public class buff_IronSkin : Buff
 {
     public override byte Icon => 53;
-    public override int Length => 35;
+    public override int Length => 50;
     public override string Name => "Iron Skin";
 
     public override void OnApplied(Sprite affected, Buff buff)
@@ -474,10 +556,23 @@ public class buff_IronSkin : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your skin turns to Iron!");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to iron!");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -492,9 +587,8 @@ public class buff_IronSkin : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your skin turns back to normal.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns back to normal.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -512,10 +606,23 @@ public class buff_StoneSkin : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your skin turns to stone!");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to stone!");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -530,9 +637,8 @@ public class buff_StoneSkin : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your skin turns back to normal.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns back to normal.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -550,15 +656,23 @@ public class buff_hide : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        var client = aisling.Client;
-        if (client.Aisling == null || client.Aisling.Dead) return;
+        if (affected is Aisling aisling)
+        {
+            if (aisling.Client == null || aisling.IsDead()) return;
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blended into the shadows");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            InsertBuff(aisling, buff);
+            aisling.Client.UpdateDisplay();
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
 
-        client.Aisling.Invisible = true;
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "You blend in to the shadows.");
-        aisling.Client.SendSound(43, false);
-        client.UpdateDisplay();
-        InsertBuff(aisling, buff);
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -572,14 +686,11 @@ public class buff_hide : Buff
         affected.Buffs.TryRemove(buff.Name, out _);
 
         if (affected is not Aisling aisling) return;
-        var client = aisling.Client;
 
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        client.Aisling.Invisible = false;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've emerged from the shadows.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        client.UpdateDisplay();
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the shadows");
         DeleteBuff(aisling, buff);
+        aisling.Client.UpdateDisplay();
     }
 }
 
@@ -597,15 +708,23 @@ public class buff_ShadowFade : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        var client = aisling.Client;
-        if (client.Aisling == null || client.Aisling.Dead) return;
+        if (affected is Aisling aisling)
+        {
+            if (aisling.Client == null || aisling.IsDead()) return;
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Faded into the dark");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            InsertBuff(aisling, buff);
+            aisling.Client.UpdateDisplay();
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
 
-        client.Aisling.Invisible = true;
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "You've faded into the dark.");
-        aisling.Client.SendSound(43, false);
-        client.UpdateDisplay();
-        InsertBuff(aisling, buff);
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -622,9 +741,7 @@ public class buff_ShadowFade : Buff
         var client = aisling.Client;
 
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Invisible = false;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've emerged from the shadows.");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the shadows");
         client.UpdateDisplay();
         DeleteBuff(aisling, buff);
     }
@@ -645,10 +762,24 @@ public class buff_DexUp : Buff
             affected.BonusDex += 15;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Adrenaline starts pumping!");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Adrenaline starts pumping!");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -664,9 +795,9 @@ public class buff_DexUp : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You begin to come back down from your high.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to come down from your high");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
 }
 
@@ -682,17 +813,29 @@ public class buff_randWeaponElement : Buff
         {
             BuffSpell = buff;
             BuffSpell.TimeLeft = BuffSpell.Length;
-            affected.SecondaryOffensiveElement = Generator.RandomEnumValue<ElementManager.Element>();
-            if (affected.SecondaryOffensiveElement == ElementManager.Element.None)
+            while (affected.SecondaryOffensiveElement == ElementManager.Element.None)
             {
                 affected.SecondaryOffensiveElement = Generator.RandomEnumValue<ElementManager.Element>();
             }
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Secondary Offensive element has changed {aisling.SecondaryOffensiveElement}");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Secondary Offensive element has changed {aisling.SecondaryOffensiveElement}");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -708,9 +851,8 @@ public class buff_randWeaponElement : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Element applied to your offense has worn off");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Element enhancement has worn off");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -731,9 +873,7 @@ public class buff_ElementalBane : Buff
         }
 
         if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-            $"Your resistance to all damage has been increased by 33%");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Resistance to damage increased by 33%");
         InsertBuff(aisling, buff);
     }
 
@@ -750,9 +890,8 @@ public class buff_ElementalBane : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You are no longer protected.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are no longer protected.");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -774,9 +913,21 @@ public class buff_skill_reflect : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Physical attacks are now being repelled");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -791,9 +942,8 @@ public class buff_skill_reflect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Skills are no longer being reflected.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Physical attacks can get through again");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -811,9 +961,21 @@ public class buff_spell_reflect : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being reflected back");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -828,9 +990,8 @@ public class buff_spell_reflect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Spells are no longer reflecting.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spells are no longer being reflected");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -848,9 +1009,21 @@ public class buff_PerfectDefense : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        if (affected is not Aisling aisling) return;
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        InsertBuff(aisling, buff);
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being deflected");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
+
+            foreach (var near in nearby)
+            {
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            }
+        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -865,9 +1038,8 @@ public class buff_PerfectDefense : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Spells are no longer being deflected.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spells are no longer being deflected");
         DeleteBuff(aisling, buff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 

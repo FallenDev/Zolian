@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-
 using Darkages.Common;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -86,19 +85,14 @@ public class ReactorTemplate : Template
         }
 
         var first = Sequences[Index = 0];
-        if (first != null)
-        {
-            var react = new ReactorSequence(client).Send()
-        }
+        if (first != null) client.Send(new ReactorSequence(client, first));
     }
 
     public void Update(WorldClient client)
     {
-        if (client.Aisling.CantAttack || client.Aisling.CantCast)
-        {
-            if (Decorators != null)
-                foreach (var script in Decorators.Values)
-                    script?.OnTriggered(client.Aisling);
-        }
+        if (client.Aisling.CantReact) return;
+        if (Decorators == null) return;
+        foreach (var script in Decorators.Values)
+            script?.OnTriggered(client.Aisling);
     }
 }

@@ -3,9 +3,11 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+
 using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
@@ -13,12 +15,14 @@ using Darkages.GameScripts.Spells;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Sprites;
@@ -56,7 +60,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein"));
     public bool IsSleeping => HasDebuff("Sleep");
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
-    public bool IsInvisible => HasBuff("Hide");
+    public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
     public bool CanSeeInvisible
     {
         get
@@ -65,7 +69,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 return monster.Scripts.TryGetValue("ShadowSight Monster", out _);
             }
-                
+
             return HasBuff("Shadow Sight");
         }
     }
@@ -259,81 +263,85 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return this as TSprite;
     }
 
-    public void Show(WorldServer server, Scope op, dynamic format, IEnumerable<Sprite> definer = null)
+    /// <summary>
+    /// Sends a ServerFormat to target players using a scope or definer
+    /// </summary>
+    /// <param name="op">Scope of the method call</param>
+    /// <param name="method">IWorldClient method to send</param>
+    /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
+    public void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Sprite> definer = null)
     {
-        if (Map == null) return;
-        if (ServerSetup.Instance.Game == null) return;
-        if (server.Aislings == null) return;
-
-        try
+        switch (op)
         {
-            switch (op)
-            {
-                case Scope.Self:
-                    server.ExecuteHandler(Client, format);
-                    return;
-                case Scope.NearbyAislingsExludingSelf:
+            case Scope.Self:
+                method(Client);
+                return;
+            case Scope.NearbyAislingsExludingSelf:
                 {
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
                     {
                         if (gc == null || gc.Serial == Serial) continue;
                         if (gc.Client == null) continue;
-                        if (format != null)
-                            gc.Client.Send(format);
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.NearbyAislings:
+            case Scope.NearbyAislings:
                 {
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.Clan:
+            case Scope.Clan:
                 {
                     if (this is not Aisling playerTalking) return;
 
                     foreach (var gc in GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, playerTalking.Clan, StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.VeryNearbyAislings:
+            case Scope.VeryNearbyAislings:
                 {
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.AislingsOnSameMap:
+            case Scope.AislingsOnSameMap:
                 {
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.GroupMembers:
+            case Scope.GroupMembers:
                 {
                     if (this is not Aisling playersTalking) return;
 
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && playersTalking.GroupParty.Has(otherPlayers)))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.NearbyGroupMembersExcludingSelf:
+            case Scope.NearbyGroupMembersExcludingSelf:
                 {
                     if (this is not Aisling playersTalking) return;
 
@@ -341,43 +349,47 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     {
                         if (gc == null || gc.Serial == Serial) continue;
                         if (gc.Client == null) continue;
-                        if (format != null)
-                            gc?.Client.Send(format);
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.NearbyGroupMembers:
+            case Scope.NearbyGroupMembers:
                 {
                     if (this is not Aisling playersTalking) return;
 
                     foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && otherPlayers.WithinRangeOf(playersTalking) && playersTalking.GroupParty.Has(otherPlayers)))
                     {
-                        gc?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.DefinedAislings when definer == null:
-                    return;
-                case Scope.DefinedAislings:
+            case Scope.DefinedAislings when definer == null:
+                return;
+            case Scope.DefinedAislings:
                 {
                     foreach (var gc in definer)
                     {
-                        (gc as Aisling)?.Client.Send(format);
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
                     }
 
                     return;
                 }
-                case Scope.All:
-                    return;
-            }
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
-            Crashes.TrackError(ex);
+            case Scope.All:
+                var players = ServerSetup.Instance.Game.Aislings;
+                foreach (var p in players)
+                {
+                    if (p?.Client == null) continue;
+                    method(p.Client);
+                }
+
+                return;
+            default:
+                method(Client);
+                return;
         }
     }
 
@@ -721,7 +733,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingY++;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                SendAnimation(197, new Position(pendingX, pendingY));
+                var pos = new Position(pendingX, pendingY);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingY--;
@@ -733,7 +746,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingX--;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                SendAnimation(197, new Position(pendingX, pendingY));
+                var pos = new Position(pendingX, pendingY);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingX++;
@@ -745,7 +759,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingY--;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                SendAnimation(197, new Position(pendingX, pendingY));
+                var pos = new Position(pendingX, pendingY);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingY++;
@@ -757,7 +772,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 pendingX++;
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
-                SendAnimation(197, new Position(pendingX, pendingY));
+                var pos = new Position(pendingX, pendingY);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingX--;
@@ -1377,7 +1393,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
-                aisling.Animate(92);
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, aisling.Serial));
             }
 
             if (fort <= Fortitude)
@@ -1404,7 +1420,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void Thorns(Sprite damageDealingSprite, long dmg)
     {
         if (Client is null) return;
-        if (damageDealingSprite is null or Sprites.Aisling) return;
+        if (damageDealingSprite is null) return;
         var thornsTargetList = damageDealingSprite.DamageableGetInFront(1);
 
         foreach (var i in thornsTargetList.Where(i => i is { Attackable: true }))
@@ -1422,7 +1438,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             var convDmg = (int)dmg;
 
-            damageDealingSprite.Animate(163);
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Serial));
             damageDealingSprite.CurrentHp -= convDmg;
         }
     }
@@ -1450,169 +1466,164 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         switch (damageDealingSprite.Aegis)
         {
             case 1 when aegisChance >= 99:
-            {
-                var buff = new buff_spell_reflect();
-                if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
-                damageDealingSprite.Client.SendAttributes(StatUpdateType.Full);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The effects of your weapon surround you.");
-                damageDealingSprite.Animate(83);
-                break;
-            }
+                {
+                    var buff = new buff_spell_reflect();
+                    if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, damageDealingSprite.Serial));
+                    break;
+                }
             case 2 when aegisChance >= 97:
-            {
-                var buff = new buff_spell_reflect();
-                if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
-                damageDealingSprite.Client.SendAttributes(StatUpdateType.Full);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The effects of your weapon surround you.");
-                damageDealingSprite.Animate(83);
-                break;
-            }
+                {
+                    var buff = new buff_spell_reflect();
+                    if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, damageDealingSprite.Serial));
+                    break;
+                }
         }
 
         switch (damageDealingSprite.Vampirism)
         {
             case 1 when vampChance >= 99:
-            {
-                const double absorbPct = 0.07;
-                var absorb = absorbPct * dmg;
-                damageDealingSprite.CurrentHp += (int)absorb;
-                damageDealingSprite.Client.SendAttributes(StatUpdateType.Vitality);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon is hungry....");
-                damageDealingSprite.Animate(324);
-                break;
-            }
+                {
+                    const double absorbPct = 0.07;
+                    var absorb = absorbPct * dmg;
+                    damageDealingSprite.CurrentHp += (int)absorb;
+                    client.SendAttributes(StatUpdateType.Vitality);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, damageDealingSprite.Serial));
+                    break;
+                }
             case 2 when vampChance >= 97:
-            {
-                const double absorbPct = 0.14;
-                var absorb = absorbPct * dmg;
-                damageDealingSprite.CurrentHp += (int)absorb;
-                damageDealingSprite.Client.SendAttributes(StatUpdateType.Vitality);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon is hungry....");
-                damageDealingSprite.Animate(324);
-                break;
-            }
+                {
+                    const double absorbPct = 0.14;
+                    var absorb = absorbPct * dmg;
+                    damageDealingSprite.CurrentHp += (int)absorb;
+                    client.SendAttributes(StatUpdateType.Vitality);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, damageDealingSprite.Serial));
+                    break;
+                }
         }
 
         switch (damageDealingSprite.Haste)
         {
             case 1 when hasteChance >= 99:
-            {
-                damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You begin to move faster.");
-                damageDealingSprite.Animate(291);
-                Task.Delay(5000).ContinueWith(ct => { damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
-                break;
-            }
+                {
+                    client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, damageDealingSprite.Serial));
+                    Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
+                    break;
+                }
             case 2 when hasteChance >= 97:
-            {
-                damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You begin to move faster.");
-                damageDealingSprite.Animate(291);
-                Task.Delay(5000).ContinueWith(ct => { damageDealingSprite.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
-                break;
-            }
+                {
+                    client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, damageDealingSprite.Serial));
+                    Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
+                    break;
+                }
         }
 
-        #region Sanity Check
-
+        // The below procs are separated out by these checks to reduce complexity
         if (target == null) return;
         if (damageDealingSprite.Rending == 0 && damageDealingSprite.Bleeding == 0 && damageDealingSprite.Reaping == 0
             && damageDealingSprite.Gust == 0 && damageDealingSprite.Quake == 0 && damageDealingSprite.Rain == 0
             && damageDealingSprite.Flame == 0 && damageDealingSprite.Dusk == 0 && damageDealingSprite.Dawn == 0) return;
 
-        #endregion
-
         switch (damageDealingSprite.Bleeding)
         {
             case 1 when bleedingChance >= 99:
-            {
-                var deBuff = new debuff_bleeding();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has caused your target to bleed.");
-                damageDealingSprite.Animate(105);
-                break;
-            }
+                {
+                    var deBuff = new debuff_bleeding();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has caused your target to bleed.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, target.Serial));
+                    break;
+                }
             case 2 when bleedingChance >= 97:
-            {
-                var deBuff = new debuff_bleeding();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The weapon has caused your target to bleed.");
-                damageDealingSprite.Animate(105);
-                break;
-            }
+                {
+                    var deBuff = new debuff_bleeding();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "The weapon has caused your target to bleed.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, target.Serial));
+                    break;
+                }
         }
 
         switch (damageDealingSprite.Rending)
         {
             case 1 when rendingChance >= 99:
-            {
-                var deBuff = new debuff_rending();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has inflicted a minor curse.");
-                damageDealingSprite.Animate(160);
-                break;
-            }
+                {
+                    var deBuff = new debuff_rending();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, target.Serial));
+                    break;
+                }
             case 2 when rendingChance >= 97:
-            {
-                var deBuff = new debuff_rending();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon has inflicted a minor curse.");
-                damageDealingSprite.Animate(160);
-                break;
-            }
+                {
+                    var deBuff = new debuff_rending();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, target.Serial));
+                    break;
+                }
         }
 
         switch (damageDealingSprite.Reaping)
         {
             case 1 when reapChance >= 0.999:
-            {
-                if (target is Aisling)
                 {
-                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                    return;
-                }
+                    if (target is Aisling)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                        return;
+                    }
 
-                if (target.Level >= 15 + damageDealingSprite.ExpLevel)
-                {
-                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
-                    return;
-                }
+                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
 
-                var deBuff = new debuff_reaping();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've cast Death.");
-                break;
-            }
+                    var deBuff = new debuff_reaping();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
+                    break;
+                }
             case 2 when reapChance >= 0.995:
-            {
-                if (target is Aisling)
                 {
-                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                    return;
-                }
+                    if (target is Aisling)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                        return;
+                    }
 
-                if (target.Level >= 20 + damageDealingSprite.ExpLevel)
-                {
-                    damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
-                    return;
-                }
+                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
 
-                var deBuff = new debuff_reaping();
-                if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've cast Death.");
-                break;
-            }
+                    var deBuff = new debuff_reaping();
+                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
+                    break;
+                }
         }
 
         switch (damageDealingSprite.Gust)
         {
             case 1 when gustChance >= 98:
                 _ = new Gust(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
                 break;
             case 2 when gustChance >= 95:
                 _ = new Gust(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
                 break;
         }
 
@@ -1620,11 +1631,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when quakeChance >= 98:
                 _ = new Quake(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
                 break;
             case 2 when quakeChance >= 95:
                 _ = new Quake(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
                 break;
         }
 
@@ -1632,11 +1643,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when rainChance >= 98:
                 _ = new Rain(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
                 break;
             case 2 when rainChance >= 95:
                 _ = new Rain(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
                 break;
         }
 
@@ -1644,11 +1655,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when flameChance >= 98:
                 _ = new Flame(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
                 break;
             case 2 when flameChance >= 95:
                 _ = new Flame(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
                 break;
         }
 
@@ -1656,11 +1667,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when duskChance >= 98:
                 _ = new Dusk(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
                 break;
             case 2 when duskChance >= 95:
                 _ = new Dusk(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
                 break;
         }
 
@@ -1668,11 +1679,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when dawnChance >= 98:
                 _ = new Dawn(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
                 break;
             case 2 when dawnChance >= 95:
                 _ = new Dawn(damageDealingSprite, target);
-                damageDealingSprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Weapon's seal breaks!");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
                 break;
         }
     }
@@ -1988,7 +1999,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void UpdateAddAndRemove()
     {
         Client.SendRemoveObject(Serial);
-        var obj = new List<Sprite>{ this };
+        var obj = new List<Sprite> { this };
         Client.SendVisibleEntities(obj);
     }
 
@@ -2105,25 +2116,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void HideFrom(Aisling nearbyAisling)
     {
         nearbyAisling.Client.SendRemoveObject(Serial);
-    }
-
-    public void Animate(ushort animation, byte speed = 100)
-    {
-        if (this is Aisling aisling)
-            aisling.Client.SendAnimation(animation, speed, animation, aisling.Serial, aisling.Serial);
-        else
-            Client.SendAnimation(animation, speed, animation, Serial, Serial);
-    }
-
-    public Aisling SendAnimation(ushort animation, Sprite to, Sprite from, byte speed = 100)
-    {
-        Client.SendAnimation(animation, speed, animation, from.Serial, to.Serial);
-        return this as Aisling;
-    }
-
-    public void SendAnimation(ushort v, Position position)
-    {
-        Client.SendAnimation(v, 100, v, Serial, Serial, position);
     }
 
     private void DeleteObject()

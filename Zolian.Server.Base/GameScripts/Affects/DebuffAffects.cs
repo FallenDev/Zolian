@@ -1,10 +1,14 @@
 ﻿using System.Security.Cryptography;
+
 using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using Newtonsoft.Json.Linq;
 
 namespace Darkages.GameScripts.Affects;
 
@@ -231,9 +235,9 @@ public class debuff_rending : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(85, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(85, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
             InsertDebuff(aisling, debuff);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(72));
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
@@ -242,8 +246,8 @@ public class debuff_rending : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(85, affected, affected);
-                near.Show(Scope.VeryNearbyAislings, new ServerFormat19(72));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(85, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
             }
         }
     }
@@ -252,10 +256,8 @@ public class debuff_rending : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Your armor has lost its integrity...")
-                .SendAnimation(85, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity is weakened");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(85, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -264,10 +266,7 @@ public class debuff_rending : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(85, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(85, affected.Serial));
             }
         }
     }
@@ -279,7 +278,7 @@ public class debuff_rending : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor has regained its integrity.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor's integrity has been restored");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -303,9 +302,9 @@ public class debuff_rend : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(383, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(383, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
             InsertDebuff(aisling, debuff);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(72));
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
@@ -314,8 +313,8 @@ public class debuff_rend : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(383, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(72));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(383, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
             }
         }
     }
@@ -324,10 +323,8 @@ public class debuff_rend : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Your armor has lost its integrity...")
-                .SendAnimation(383, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity is weakened");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(383, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -336,10 +333,7 @@ public class debuff_rend : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(383, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(383, affected.Serial));
             }
         }
     }
@@ -351,7 +345,7 @@ public class debuff_rend : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor has regained its integrity.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor's integrity has been restored");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -375,9 +369,9 @@ public class debuff_hurricane : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(58, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(65, false));
             InsertDebuff(aisling, debuff);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(65));
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
@@ -386,8 +380,8 @@ public class debuff_hurricane : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(58, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(65));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(65, false));
             }
         }
     }
@@ -396,10 +390,8 @@ public class debuff_hurricane : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Your armor feels light...")
-                .SendAnimation(58, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor feels lighter");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -408,10 +400,7 @@ public class debuff_hurricane : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(58, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, affected.Serial));
             }
         }
     }
@@ -423,7 +412,7 @@ public class debuff_hurricane : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The hurricane has passed.");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The storm has passed");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -448,8 +437,8 @@ public class debuff_beagsuain : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(41, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(14));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(14, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -458,8 +447,8 @@ public class debuff_beagsuain : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(41, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(14));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(14, false));
             }
         }
     }
@@ -468,10 +457,8 @@ public class debuff_beagsuain : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "You've been incapacitated.")
-                .SendAnimation(41, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -480,10 +467,7 @@ public class debuff_beagsuain : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(41, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
             }
         }
     }
@@ -491,12 +475,10 @@ public class debuff_beagsuain : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -516,8 +498,8 @@ public class debuff_DarkChain : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(129, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(108));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(129, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -526,8 +508,8 @@ public class debuff_DarkChain : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(129, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(108));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(129, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             }
         }
     }
@@ -536,10 +518,8 @@ public class debuff_DarkChain : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "You've been incapacitated.")
-                .SendAnimation(117, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(117, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -548,10 +528,7 @@ public class debuff_DarkChain : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(117, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(117, affected.Serial));
             }
         }
     }
@@ -559,12 +536,10 @@ public class debuff_DarkChain : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -584,8 +559,8 @@ public class debuff_Silence : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(94, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(108));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(94, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -594,8 +569,8 @@ public class debuff_Silence : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(94, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(108));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(94, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             }
         }
     }
@@ -604,10 +579,8 @@ public class debuff_Silence : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "...")
-                .SendAnimation(94, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "...");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(94, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -616,10 +589,7 @@ public class debuff_Silence : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(94, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(94, affected.Serial));
             }
         }
     }
@@ -627,11 +597,9 @@ public class debuff_Silence : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -651,8 +619,8 @@ public class debuff_Halt : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(128, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(108));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(128, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -661,8 +629,8 @@ public class debuff_Halt : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(128, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(108));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(128, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(108, false));
             }
         }
     }
@@ -671,10 +639,8 @@ public class debuff_Halt : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Time is at a still")
-                .SendAnimation(116, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Time is at a still");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(116, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -683,10 +649,7 @@ public class debuff_Halt : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(116, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(116, affected.Serial));
             }
         }
     }
@@ -694,12 +657,10 @@ public class debuff_Halt : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Things begin to move");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -719,8 +680,8 @@ public class debuff_beagsuaingar : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(41, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(64));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(64, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -729,8 +690,8 @@ public class debuff_beagsuaingar : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(41, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(64));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(64, false));
             }
         }
     }
@@ -739,10 +700,8 @@ public class debuff_beagsuaingar : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "You've been incapacitated.")
-                .SendAnimation(41, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -751,10 +710,7 @@ public class debuff_beagsuaingar : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(41, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(41, affected.Serial));
             }
         }
     }
@@ -762,12 +718,10 @@ public class debuff_beagsuaingar : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -787,8 +741,8 @@ public class debuff_charmed : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(118, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(6));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(118, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(6, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -797,8 +751,8 @@ public class debuff_charmed : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(118, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(6));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(118, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(6, false));
             }
         }
     }
@@ -807,10 +761,8 @@ public class debuff_charmed : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Wow.. I can't harm you.")
-                .SendAnimation(118, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow.. I can't harm you");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(118, affected.Serial));
             UpdateDebuff(aisling);
         }
         else
@@ -819,10 +771,7 @@ public class debuff_charmed : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(118, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(118, affected.Serial));
             }
         }
     }
@@ -830,12 +779,10 @@ public class debuff_charmed : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "What was I thinking?!.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "What was I thinking?!");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -855,8 +802,8 @@ public class debuff_frozen : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(40, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.VeryNearbyAislings, new ServerFormat19(15));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(15, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -865,8 +812,8 @@ public class debuff_frozen : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(40, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(15));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(15, false));
             }
         }
     }
@@ -875,12 +822,10 @@ public class debuff_frozen : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "Your body is frozen. Brrrrr...")
-                .SendAnimation(40, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body is frozen. Brrrrr...");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(123, false));
             UpdateDebuff(aisling);
-            aisling.Show(Scope.Self, new ServerFormat19(123));
         }
         else
         {
@@ -888,11 +833,8 @@ public class debuff_frozen : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(40, affected, client.Aisling);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(123));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(123, false));
             }
         }
     }
@@ -900,12 +842,10 @@ public class debuff_frozen : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can move again.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can move again");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
 
@@ -925,8 +865,8 @@ public class debuff_sleep : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(32, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(29));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(32, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(29, false));
             InsertDebuff(aisling, debuff);
         }
         else
@@ -935,8 +875,8 @@ public class debuff_sleep : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(32, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(29));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(32, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(29, false));
             }
         }
     }
@@ -945,12 +885,10 @@ public class debuff_sleep : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendLocation()
-                .SendMessage(0x02, "You've been placed in a dream like state.")
-                .SendAnimation(32, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been placed in a dream like state");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(32, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(65, false));
             UpdateDebuff(aisling);
-            aisling.Show(Scope.Self, new ServerFormat19(65));
         }
         else
         {
@@ -958,11 +896,8 @@ public class debuff_sleep : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(32, affected, client.Aisling);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(65));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(32, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(65, false));
             }
         }
     }
@@ -992,13 +927,14 @@ public class debuff_reaping : Debuff
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
+        if (affected is Aisling { GameMaster: true }) return;
         _afflicted = affected;
 
         if (affected is Monster)
         {
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
             foreach (var near in nearby)
-                near.Client.SendAnimation(374, affected, affected);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(374, affected.Serial));
         }
 
         if (affected.Debuffs.TryAdd(debuff.Name, debuff))
@@ -1008,10 +944,6 @@ public class debuff_reaping : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        if (aisling.GameMaster)
-        {
-            DebuffSpell.OnEnded(aisling, debuff);
-        }
 
         if (aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap)
         {
@@ -1019,9 +951,9 @@ public class debuff_reaping : Debuff
             return;
         }
 
-        aisling.Client.SendAnimation(24, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(6, false));
         aisling.CurrentHp = 0;
-        aisling.Show(Scope.Self, new ServerFormat19(6));
         InsertDebuff(aisling, debuff);
     }
 
@@ -1051,11 +983,10 @@ public class debuff_reaping : Debuff
 
             aisling.RegenTimerDisabled = true;
             aisling.CurrentHp = 1;
-            aisling.Client.SendStats(StatusFlags.MultiStat)
-                .SendAnimation(24, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendAttributes(StatUpdateType.Full);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, aisling.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(6, false));
             UpdateDebuff(aisling);
-            aisling.Show(Scope.Self, new ServerFormat19(6));
         }
         else
         {
@@ -1063,10 +994,7 @@ public class debuff_reaping : Debuff
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(374, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(374, affected.Serial));
             }
         }
     }
@@ -1079,33 +1007,33 @@ public class debuff_reaping : Debuff
                 foreach (var (_, value) in aisling.Debuffs)
                 {
                     if (!aisling.Debuffs.TryRemove(value.Name, out var debuffs)) continue;
-                    debuffs.DeleteDebuff(aisling, debuffs);
-                    aisling.Client.Send(new ServerFormat3A(debuffs.Icon, byte.MinValue));
+                    debuffs.DeleteDebuff(aisling, value);
+                    aisling.Client.SendEffect(byte.MinValue, value.Icon);
                 }
                 foreach (var (_, value) in aisling.Buffs)
                 {
                     if (!aisling.Buffs.TryRemove(value.Name, out var buffs)) continue;
-                    buffs.DeleteBuff(aisling, buffs);
-                    aisling.Client.Send(new ServerFormat3A(buffs.Icon, byte.MinValue));
+                    buffs.DeleteBuff(aisling, value);
+                    aisling.Client.SendEffect(byte.MinValue, value.Icon);
                 }
 
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your soul has been ripped from your mortal coil.");
-                aisling.Show(Scope.AislingsOnSameMap, new ServerFormat19(5));
+                aisling.SendTargetedClientMethod(Scope.AislingsOnSameMap, client => client.SendSound(5, false));
 
                 aisling.PrepareForHell();
                 aisling.CastDeath();
-                aisling.client.SendAttributes(StatUpdateType.Full);
+                aisling.Client.SendAttributes(StatUpdateType.Full);
                 break;
             case Aisling savedAffected when debuff.Cancelled:
                 if (savedAffected.Debuffs.TryRemove(debuff.Name, out var saved))
                 {
                     saved.DeleteDebuff(savedAffected, saved);
-                    savedAffected.Client.Send(new ServerFormat3A(saved.Icon, byte.MinValue));
+                    savedAffected.Client.SendEffect(byte.MinValue, saved.Icon);
                 }
 
                 savedAffected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were saved.");
                 savedAffected.Client.Recover();
-                savedAffected.client.SendAttributes(StatUpdateType.Full);
+                savedAffected.Client.SendAttributes(StatUpdateType.Full);
                 break;
         }
 
@@ -1119,7 +1047,7 @@ public class debuff_reaping : Debuff
 #region DoT
 public class debuff_bleeding : Debuff
 {
-    private static double Modifier => .02;
+    private static double Modifier => .07;
     public override byte Icon => 111;
     public override int Length => 7;
     public override string Name => "Bleeding";
@@ -1134,9 +1062,10 @@ public class debuff_bleeding : Debuff
 
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendAnimation(310, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.Self, new ServerFormat19(106));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(310, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(106, false));
             InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -1144,35 +1073,31 @@ public class debuff_bleeding : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(310, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(106));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(310, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(106, false));
             }
         }
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        ApplyBleeding(affected);
+
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendStats(StatusFlags.StructB)
-                .SendMessage(0x02, "You're bleeding out...")
-                .SendAnimation(310, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Quick! You're bleeding out");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(310, affected.Serial));
+            aisling.Client.SendAttributes(StatUpdateType.Vitality);
             UpdateDebuff(aisling);
-            ApplyBleeding(aisling);
         }
         else
         {
-            ApplyBleeding(affected);
 
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => affected.WithinRangeOf(i));
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(310, affected, client.Aisling);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(310, affected.Serial));
             }
         }
     }
@@ -1180,12 +1105,11 @@ public class debuff_bleeding : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "It stopped for now.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Bleeding slowed");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private static void ApplyBleeding(Sprite affected)
@@ -1210,7 +1134,7 @@ public class debuff_ArdPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1223,13 +1147,10 @@ public class debuff_ArdPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.RegenTimerDisabled = true;
-            aisling.Client.SendAnimation(Animation switch
-            {
-                0 => 25,
-                _ => Animation
-            }, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(34));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -1237,53 +1158,31 @@ public class debuff_ArdPoison : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(34));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             }
         }
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        ApplyPoison(affected, debuff);
+
         if (affected is Aisling aisling)
         {
-            aisling
-                .Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                },
-                    aisling.Client.Aisling,
-                    aisling.Client.Aisling.Target ??
-                    aisling.Client.Aisling);
-
-            ApplyPoison(aisling, debuff);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're poisoned.");
-
             UpdateDebuff(aisling);
         }
         else
         {
-            ApplyPoison(affected, debuff);
 
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => affected.WithinRangeOf(i));
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             }
         }
     }
@@ -1291,13 +1190,12 @@ public class debuff_ArdPoison : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
         DeleteDebuff(aisling, debuff);
-        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private static void ApplyPoison(Sprite affected, Debuff debuff)
@@ -1324,7 +1222,7 @@ public class debuff_MorPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1337,13 +1235,10 @@ public class debuff_MorPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.RegenTimerDisabled = true;
-            aisling.Client.SendAnimation(Animation switch
-            {
-                0 => 25,
-                _ => Animation
-            }, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(34));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -1351,53 +1246,31 @@ public class debuff_MorPoison : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(34));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             }
         }
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        ApplyPoison(affected, debuff);
+
         if (affected is Aisling aisling)
         {
-            aisling
-                .Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                },
-                    aisling.Client.Aisling,
-                    aisling.Client.Aisling.Target ??
-                    aisling.Client.Aisling);
-
-            ApplyPoison(aisling, debuff);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're poisoned.");
-
             UpdateDebuff(aisling);
         }
         else
         {
-            ApplyPoison(affected, debuff);
 
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => affected.WithinRangeOf(i));
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             }
         }
     }
@@ -1405,11 +1278,10 @@ public class debuff_MorPoison : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -1438,7 +1310,7 @@ public class debuff_Poison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1451,13 +1323,10 @@ public class debuff_Poison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.RegenTimerDisabled = true;
-            aisling.Client.SendAnimation(Animation switch
-            {
-                0 => 25,
-                _ => Animation
-            }, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(34));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -1465,53 +1334,31 @@ public class debuff_Poison : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(34));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             }
         }
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        ApplyPoison(affected, debuff);
+
         if (affected is Aisling aisling)
         {
-            aisling
-                .Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                },
-                    aisling.Client.Aisling,
-                    aisling.Client.Aisling.Target ??
-                    aisling.Client.Aisling);
-
-            ApplyPoison(aisling, debuff);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're poisoned.");
-
             UpdateDebuff(aisling);
         }
         else
         {
-            ApplyPoison(affected, debuff);
 
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => affected.WithinRangeOf(i));
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             }
         }
     }
@@ -1519,11 +1366,10 @@ public class debuff_Poison : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -1552,7 +1398,7 @@ public class debuff_BeagPoison : Debuff
     {
         if (affected is Aisling { PoisonImmunity: true } immuneCheck)
         {
-            immuneCheck.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
             return;
         }
 
@@ -1565,13 +1411,10 @@ public class debuff_BeagPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.RegenTimerDisabled = true;
-            aisling.Client.SendAnimation(Animation switch
-            {
-                0 => 25,
-                _ => Animation
-            }, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(34));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
         else
         {
@@ -1579,53 +1422,31 @@ public class debuff_BeagPoison : Debuff
 
             foreach (var near in nearby)
             {
-                near.Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
-                near.Show(Scope.NearbyAislings, new ServerFormat19(34));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(34, false));
             }
         }
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        ApplyPoison(affected, debuff);
+
         if (affected is Aisling aisling)
         {
-            aisling
-                .Client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                },
-                    aisling.Client.Aisling,
-                    aisling.Client.Aisling.Target ??
-                    aisling.Client.Aisling);
-
-            ApplyPoison(aisling, debuff);
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're poisoned.");
-
             UpdateDebuff(aisling);
         }
         else
         {
-            ApplyPoison(affected, debuff);
 
             var nearby = affected.GetObjects<Aisling>(affected.Map, i => affected.WithinRangeOf(i));
 
             foreach (var near in nearby)
             {
-                if (near?.Client == null) continue;
-
-                var client = near.Client;
-                client.SendAnimation(Animation switch
-                {
-                    0 => 25,
-                    _ => Animation
-                }, affected, affected);
+                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
             }
         }
     }
@@ -1633,11 +1454,10 @@ public class debuff_BeagPoison : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -1677,7 +1497,7 @@ public class debuff_blind : Debuff
             InsertDebuff(aisling, debuff);
         }
 
-        affected.SendAnimation(114, affected, affected);
+        affected.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(114, affected.Serial));
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1688,13 +1508,13 @@ public class debuff_blind : Debuff
             UpdateDebuff(aisling);
         }
 
-        affected.SendAnimation(42, affected, affected);
+        affected.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(42, affected.Serial));
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.SendAnimation(379, affected, affected);
+        affected.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(379, affected.Serial));
 
         if (affected is not Aisling aisling) return;
         var client = aisling.Client;
@@ -1840,7 +1660,7 @@ public class debuff_fasspiorad : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        aisling.Client.SendAnimation(1, aisling.Client.Aisling, aisling.Client.Aisling.Target ?? aisling.Client.Aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, affected.Serial));
 
         var reduce = aisling.MaximumMp * 0.33;
         aisling.CurrentHp -= (int)reduce;
@@ -1851,7 +1671,7 @@ public class debuff_fasspiorad : Debuff
         aisling.CurrentMp = aisling.MaximumMp;
 
         InsertDebuff(aisling, debuff);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(26));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(26, false));
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)

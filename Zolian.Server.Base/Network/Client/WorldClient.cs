@@ -1050,7 +1050,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x29 - Animation
         /// </summary>
-        public void SendAnimation(ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null)
+        public void SendAnimation(ushort targetEffect, uint? targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint? casterSerial = 0,  [CanBeNull] Position position = null)
         {
             Point? point;
 
@@ -1061,7 +1061,7 @@ namespace Darkages.Network.Client
 
             var args = new AnimationArgs
             {
-                AnimationSpeed = (ushort)speed,
+                AnimationSpeed = speed,
                 SourceAnimation = casterEffect,
                 SourceId = casterSerial,
                 TargetAnimation = targetEffect,
@@ -2345,142 +2345,6 @@ namespace Darkages.Network.Client
         {
             SendServerMessage(ServerMessageType.ActiveMessage, message);
             return this;
-        }
-
-        public void SendTargetedMessage(Scope scope, ServerMessageType type, string text)
-        {
-            var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
-
-            switch (scope)
-            {
-                case Scope.Self:
-                    SendServerMessage(type, text);
-                    break;
-
-                case Scope.NearbyAislings:
-                    {
-                        foreach (var obj in nearby)
-                            obj.Client.SendServerMessage(type, text);
-                    }
-                    break;
-
-                case Scope.NearbyAislingsExludingSelf:
-                    {
-                        foreach (var obj in nearby)
-                        {
-                            if (obj.Serial == Aisling.Serial)
-                                continue;
-
-                            obj.Client.SendServerMessage(type, text);
-                        }
-                    }
-                    break;
-
-                case Scope.AislingsOnSameMap:
-                    {
-                        foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
-                            obj.Client.SendServerMessage(type, text);
-                    }
-                    break;
-
-                case Scope.All:
-                    {
-                        var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
-                        foreach (var obj in allAislings.Where(n => n.LoggedIn))
-                            obj.Client.SendServerMessage(type, text);
-                    }
-                    break;
-            }
-        }
-
-        public void SendTargetedPublicMessage(Scope scope, PublicMessageType type, string text)
-        {
-            var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
-
-            switch (scope)
-            {
-                case Scope.Self:
-                    SendPublicMessage(Aisling.Serial, type, text);
-                    break;
-
-                case Scope.NearbyAislings:
-                    {
-                        foreach (var obj in nearby)
-                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
-                    }
-                    break;
-
-                case Scope.NearbyAislingsExludingSelf:
-                    {
-                        foreach (var obj in nearby)
-                        {
-                            if (obj.Serial == Aisling.Serial)
-                                continue;
-
-                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
-                        }
-                    }
-                    break;
-
-                case Scope.AislingsOnSameMap:
-                    {
-                        foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
-                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
-                    }
-                    break;
-
-                case Scope.All:
-                    {
-                        var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
-                        foreach (var obj in allAislings.Where(n => n.LoggedIn))
-                            obj.Client.SendPublicMessage(Aisling.Serial, type, text);
-                    }
-                    break;
-            }
-        }
-
-        public void SendTargetedAnimation(Scope scope, ushort targetEffect, short speed = 100, ushort casterEffect = 0, uint casterSerial = 0, uint targetSerial = 0, Position position = null)
-        {
-            var nearby = ObjectHandlers.GetObjects<Aisling>(Aisling.Map, i => i.WithinRangeOf(Aisling));
-
-            switch (scope)
-            {
-                case Scope.Self:
-                    SendAnimation(targetEffect, speed, casterEffect, Aisling.Serial, targetSerial, position);
-                    break;
-
-                case Scope.NearbyAislings:
-                    {
-                        foreach (var obj in nearby)
-                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
-                    }
-                    break;
-
-                case Scope.NearbyAislingsExludingSelf:
-                    {
-                        foreach (var obj in nearby)
-                        {
-                            if (obj.Serial == Aisling.Serial) continue;
-                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
-                        }
-                    }
-                    break;
-
-                case Scope.AislingsOnSameMap:
-                    {
-                        foreach (var obj in nearby.Where(n => n.CurrentMapId == Aisling.CurrentMapId))
-                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
-                    }
-                    break;
-
-                case Scope.All:
-                    {
-                        var allAislings = ObjectHandlers.GetObjects<Aisling>(null, i => i.WithinRangeOf(Aisling));
-                        foreach (var obj in allAislings.Where(n => n.LoggedIn))
-                            obj.Client.SendAnimation(targetEffect, speed, casterEffect, obj.Serial, targetSerial, position);
-                    }
-                    break;
-            }
         }
 
         public async Task<WorldClient> Save()
