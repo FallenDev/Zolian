@@ -127,7 +127,7 @@ public class Weapon : ItemScript
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
-            client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
+            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
 
         var templateImage = aisling.EquipmentManager.Equipment[1]?.Item.Template.Image;
@@ -175,7 +175,7 @@ public class Weapon : ItemScript
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
-            client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
+            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
     }
 }

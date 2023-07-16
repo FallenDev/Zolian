@@ -78,7 +78,7 @@ public class TowerDefense : MonsterScript
 
     private void Walk()
     {
-        if (!Monster.CanMove)
+        if (Monster.CantMove)
             return;
 
         if (Monster.Template.Waypoints.Count > 0)

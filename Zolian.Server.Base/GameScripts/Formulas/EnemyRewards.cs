@@ -68,9 +68,9 @@ public class EnemyRewards : RewardScript
             };
         }
 
-        player.aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
         player.ExpTotal += exp;
-        player.ExpNext -= (int)exp;
+        player.ExpNext -= exp;
 
         if (player.ExpNext >= int.MaxValue) player.ExpNext = 0;
 
@@ -82,7 +82,7 @@ public class EnemyRewards : RewardScript
 
         while (player.ExpNext <= 0 && player.ExpLevel < 500)
         {
-            player.ExpNext = (int)(player.ExpLevel * seed * 5000);
+            player.ExpNext = (uint)(player.ExpLevel * seed * 5000);
 
             if (player.ExpLevel == 500)
                 break;
@@ -126,16 +126,15 @@ public class EnemyRewards : RewardScript
         player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
         player.AbpLevel++;
 
-        player.client.SendServerMessage(ServerMessageType.OrangeBar1, $"{string.Format(ServerSetup.Instance.Config.AbilityUpMessage, player.AbpLevel)}");
-        player.Show(Scope.NearbyAislings,
-            new ServerFormat29((uint)player.Serial, (uint)player.Serial, 385, 385, 75));
+        player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{string.Format(ServerSetup.Instance.Config.AbilityUpMessage, player.AbpLevel)}");
+        player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, player.Serial, 75, 0, player.Serial));
         var item = new Item();
         item = item.Create(player, "Dark Rank");
         var x = player.Position.X - 2;
         var y = player.Position.Y - 2;
         var pos = new Position(x, y);
         item.Release(player, pos, false);
-        player.client.SendAttributes(StatUpdateType.Full);
+        player.Client.SendAttributes(StatUpdateType.Full);
         Task.Delay(2500).ContinueWith(ct =>
         {
             item.Remove();
@@ -242,9 +241,9 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.Client.SendAnimation(361, player, monster);
-                    player.Client.SendSound(88, Scope.NearbyAislings);
-                    player.Client.SendSound(157, Scope.NearbyAislings);
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(361, monster.Serial));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }
 
@@ -252,9 +251,9 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.Client.SendAnimation(359, player, monster);
-                    player.Client.SendSound(88, Scope.NearbyAislings);
-                    player.Client.SendSound(157, Scope.NearbyAislings);
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(359, monster.Serial));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }
         }
@@ -276,7 +275,7 @@ public class EnemyRewards : RewardScript
             if (critical >= 85)
             {
                 exp *= 2;
-                player.SendAnimation(341, player, player);
+                player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(341, player.Serial));
             }
         }
 

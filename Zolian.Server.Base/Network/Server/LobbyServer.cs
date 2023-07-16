@@ -63,6 +63,22 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         return ExecuteHandler(client, InnerOnConnectionInfoRequest);
     }
 
+    public ValueTask OnVersion(ILobbyClient client, in ClientPacket packet)
+    {
+        var args = PacketSerializer.Deserialize<VersionArgs>(in packet);
+
+        ValueTask InnerOnVersion(ILobbyClient localClient, VersionArgs localArgs)
+        {
+            if (localArgs.Version != ServerSetup.Instance.Config.ClientVersion) return default;
+
+            localClient.SendConnectionInfo(_serverTable.Hash);
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnVersion);
+    }
+
     public ValueTask OnServerTableRequest(ILobbyClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<ServerTableRequestArgs>(in packet);
@@ -91,9 +107,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         return ExecuteHandler(client, args, InnerOnServerTableRequest);
     }
+
     #endregion
 
     #region Connection / Handler
+
     public override ValueTask HandlePacketAsync(ILobbyClient client, in ClientPacket packet)
     {
         var handler = ClientHandlers[(byte)packet.OpCode];
@@ -104,7 +122,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         base.IndexHandlers();
 
-        ClientHandlers[(byte)ClientOpCode.ConnectionInfoRequest] = OnConnectionInfoRequest;
+        ClientHandlers[(byte)ClientOpCode.Version] = OnVersion;
         ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 

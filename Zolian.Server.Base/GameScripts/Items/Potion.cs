@@ -39,7 +39,7 @@ public class Potion : ItemScript
                         client.Aisling.CurrentHp += (int)hp;
 
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 75% HP");
-                        client.Aisling.Animate(364);
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(364, client.Aisling.Serial));
                     }
                         break;
                     case "Mor Ioc Deum":
@@ -48,7 +48,7 @@ public class Potion : ItemScript
                         client.Aisling.CurrentHp += (int)hp;
 
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 50% HP");
-                        client.Aisling.Animate(363);
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(363, client.Aisling.Serial));
                     }
                         break;
                     case "Ioc Deum":
@@ -57,7 +57,7 @@ public class Potion : ItemScript
                         client.Aisling.CurrentHp += (int)hp;
 
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 25% HP");
-                        client.Aisling.Animate(168);
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(168, client.Aisling.Serial));
                     }
                         break;
                     case "Minor Ao Puinsein Deum":
@@ -66,7 +66,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -74,7 +74,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                         }
                     }
                         break;
@@ -84,7 +84,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -92,7 +92,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -100,7 +100,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Mor Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                         }
                     }
                         break;
@@ -110,7 +110,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -118,7 +118,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -126,7 +126,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Mor Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                             break;
                         }
 
@@ -134,7 +134,7 @@ public class Potion : ItemScript
                         {
                             client.Aisling.Debuffs.TryRemove("Ard Puinsein", out var debuff);
                             debuff?.OnEnded(client.Aisling, debuff);
-                            client.Aisling.Animate(1);
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
                         }
                     }
                         break;
@@ -362,7 +362,7 @@ public class Potion : ItemScript
                 break;
         }
 
-        client.SendStats(StatusFlags.MultiStat);
+        client.SendAttributes(StatUpdateType.Full);
     }
 
     public override void Equipped(Sprite sprite, byte displaySlot) { }

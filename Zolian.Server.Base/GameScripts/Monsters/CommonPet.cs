@@ -47,7 +47,7 @@ public class CommonPet : MonsterScript
             return;
         }
 
-        if (!Monster.CanAttack || !Monster.CanCast) return;
+        if (Monster.CantAttack || Monster.CantCast) return;
 
         if (Monster.Summoner != null)
             if (!Monster.Summoner.View.ContainsKey(Monster.Serial))
@@ -120,7 +120,7 @@ public class CommonPet : MonsterScript
             {
                 UpdateTarget();
 
-                if (!Monster.CanCast)
+                if (Monster.CantCast)
                     return;
 
                 if (Monster.Target == null)

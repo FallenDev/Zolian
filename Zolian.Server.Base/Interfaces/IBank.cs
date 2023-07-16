@@ -1,4 +1,5 @@
 ﻿using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 
 namespace Darkages.Interfaces;
@@ -10,8 +11,8 @@ public interface IBank
     void AddToAislingDb(ISprite aisling, Item item);
     Task UpdateBanked(ISprite aisling, Item item);
     Task<bool> Withdraw(WorldClient client, Mundane mundane);
-    void DeleteFromAislingDb(WorldClient client);
-    void DepositGold(WorldClient client, uint gold);
-    void WithdrawGold(WorldClient client, uint gold);
+    void DeleteFromAislingDb(IWorldClient client);
+    void DepositGold(IWorldClient client, uint gold);
+    void WithdrawGold(IWorldClient client, uint gold);
     void UpdatePlayersWeight(WorldClient client);
 }

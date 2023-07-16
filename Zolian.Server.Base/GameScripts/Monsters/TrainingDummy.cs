@@ -40,14 +40,7 @@ public class TrainingDummy : MonsterScript
         _incoming.Damage = convDmg;
         var dmgDisplay = _incoming.Damage.ToString();
 
-        Monster.Show(Scope.NearbyAislings,
-            new ServerFormat0D
-            {
-                Serial = Monster.Serial,
-                Text = $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n",
-                Type = 0x01
-            });
-
+        Monster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n"));
         Monster.Facing((int)source.Pos.X, (int)source.Pos.Y, out var direction);
 
         if (!Monster.Position.IsNextTo(source.Position)) return;
@@ -72,7 +65,7 @@ public class TrainingDummy : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(WorldClient client) => Monster.Animate(49);
+    public override void OnSkulled(WorldClient client) => Monster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, Monster.Serial));
 
     public override void Update(TimeSpan elapsedTime)
     {

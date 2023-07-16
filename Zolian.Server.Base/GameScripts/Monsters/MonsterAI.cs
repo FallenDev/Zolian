@@ -102,8 +102,8 @@ public class MonsterBaseIntelligence : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -164,7 +164,7 @@ public class MonsterBaseIntelligence : MonsterScript
                 ClearTarget();
             }
 
-            if (aisling.Invisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
+            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
             {
                 if (!Monster.WalkEnabled) return;
 
@@ -174,7 +174,7 @@ public class MonsterBaseIntelligence : MonsterScript
                     ClearTarget();
                 }
 
-                if (!Monster.CanMove || Monster.Blind) return;
+                if (Monster.CantMove || Monster.Blind) return;
                 if (walk) Walk();
 
                 return;
@@ -182,26 +182,26 @@ public class MonsterBaseIntelligence : MonsterScript
 
             if (Monster.BashEnabled)
             {
-                if (Monster.CanAttack)
+                if (!Monster.CantAttack)
                     if (assail) Bash();
             }
 
             if (Monster.AbilityEnabled)
             {
-                if (Monster.CanAttack)
+                if (!Monster.CantAttack)
                     if (ability) Ability();
             }
 
             if (Monster.CastEnabled)
             {
-                if (Monster.CanCast)
+                if (!Monster.CantCast)
                     if (cast) CastSpell();
             }
         }
 
         if (Monster.WalkEnabled)
         {
-            if (!Monster.CanMove || Monster.Blind) return;
+            if (Monster.CantMove || Monster.Blind) return;
             if (walk) Walk();
         }
 
@@ -293,7 +293,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
         if (Monster.Target is Aisling checkTarget)
         {
-            if (checkTarget.Skulled || checkTarget.Invisible)
+            if (checkTarget.Skulled || checkTarget.IsInvisible)
             {
                 Monster.AggroList.Remove(Monster.Target.Serial);
                 Monster.Target = null;
@@ -308,7 +308,7 @@ public class MonsterBaseIntelligence : MonsterScript
             {
                 if (target is Aisling { Skulled: true }) continue;
                 if (target is not Aisling aisling) continue;
-                if (aisling.Invisible) continue;
+                if (aisling.IsInvisible) continue;
                 if (!Monster.AggroList.Contains(aisling.Serial))
                     Monster.AggroList.Add(aisling.Serial);
 
@@ -343,7 +343,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
     private void Bash()
     {
-        if (!Monster.CanAttack) return;
+        if (Monster.CantAttack) return;
         if (Target != null)
             if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
             {
@@ -387,7 +387,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
     private void Ability()
     {
-        if (!Monster.CanAttack) return;
+        if (Monster.CantAttack) return;
         if (Target != null)
             if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
             {
@@ -414,8 +414,8 @@ public class MonsterBaseIntelligence : MonsterScript
 
     private void CastSpell()
     {
-        if (!Monster.CanCast) return;
-        if (!Monster.CanAttack) return;
+        if (Monster.CantCast) return;
+        if (Monster.CantAttack) return;
         if (Target is null) return;
         if (!Target.WithinRangeOf(Monster)) return;
         if (Monster.SpellScripts.Count == 0) return;
@@ -428,7 +428,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
     private void Walk()
     {
-        if (!Monster.CanMove) return;
+        if (Monster.CantMove) return;
         if (Monster.ThrownBack) return;
 
         if (Target != null)
@@ -449,7 +449,7 @@ public class MonsterBaseIntelligence : MonsterScript
                     return;
                 }
 
-                if (aisling.Invisible || aisling.Dead || aisling.Skulled)
+                if (aisling.IsInvisible || aisling.Dead || aisling.Skulled)
                 {
                     Monster.AggroList.Remove(Monster.Target.Serial);
                     Monster.Wander();
@@ -640,8 +640,8 @@ public class MonsterShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.Ac}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -712,7 +712,7 @@ public class MonsterShadowSight : MonsterScript
                     ClearTarget();
                 }
 
-                if (!Monster.CanMove || Monster.Blind) return;
+                if (Monster.CantMove || Monster.Blind) return;
                 if (walk) Walk();
 
                 return;
@@ -720,26 +720,26 @@ public class MonsterShadowSight : MonsterScript
 
             if (Monster.BashEnabled)
             {
-                if (Monster.CanAttack)
+                if (!Monster.CantAttack)
                     if (assail) Bash();
             }
 
             if (Monster.AbilityEnabled)
             {
-                if (Monster.CanAttack)
+                if (!Monster.CantAttack)
                     if (ability) Ability();
             }
 
             if (Monster.CastEnabled)
             {
-                if (Monster.CanCast)
+                if (!Monster.CantCast)
                     if (cast) CastSpell();
             }
         }
 
         if (Monster.WalkEnabled)
         {
-            if (!Monster.CanMove || Monster.Blind) return;
+            if (Monster.CantMove || Monster.Blind) return;
             if (walk) Walk();
         }
 
@@ -877,7 +877,7 @@ public class MonsterShadowSight : MonsterScript
 
     private void Bash()
     {
-        if (!Monster.CanAttack) return;
+        if (Monster.CantAttack) return;
         if (Target != null)
             if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
             {
@@ -921,7 +921,7 @@ public class MonsterShadowSight : MonsterScript
 
     private void Ability()
     {
-        if (!Monster.CanAttack) return;
+        if (Monster.CantAttack) return;
         if (Target != null)
             if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
             {
@@ -948,8 +948,8 @@ public class MonsterShadowSight : MonsterScript
 
     private void CastSpell()
     {
-        if (!Monster.CanCast) return;
-        if (!Monster.CanAttack) return;
+        if (Monster.CantCast) return;
+        if (Monster.CantAttack) return;
         if (Target is null) return;
         if (!Target.WithinRangeOf(Monster)) return;
         if (Monster.SpellScripts.Count == 0) return;
@@ -962,7 +962,7 @@ public class MonsterShadowSight : MonsterScript
 
     private void Walk()
     {
-        if (!Monster.CanMove) return;
+        if (Monster.CantMove) return;
         if (Monster.ThrownBack) return;
 
         if (Target != null)

@@ -27,14 +27,14 @@ public class MilethBarber : AreaScript
             client.Aisling.Coloring = 0;
             client.Aisling.HairColor = client.Aisling.OldColor;
             client.UpdateDisplay();
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
         }
 
         if (client.Aisling.Styling == 0) return;
         client.Aisling.Styling = 0;
         client.Aisling.HairStyle = client.Aisling.OldStyle;
         client.UpdateDisplay();
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
     }
 
     public override void OnMapClick(WorldClient client, int x, int y) { }
@@ -48,7 +48,7 @@ public class MilethBarber : AreaScript
             client.Aisling.HairStyle = 46;
             client.Aisling.HairColor = 40;
             client.UpdateDisplay();
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Not here honey!");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Not here honey!");
         }
 
         if (message.StringContains("gay"))
@@ -56,7 +56,7 @@ public class MilethBarber : AreaScript
             client.Aisling.HairStyle = 46;
             client.Aisling.HairColor = 40;
             client.UpdateDisplay();
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Not here honey!");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Not here honey!");
         }
     }
 }

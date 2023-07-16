@@ -292,60 +292,35 @@ public class Bank : IBank
         // weight check
         if (client.Aisling.CurrentWeight + client.PendingBankedSession.SelectedItem.Template.CarryWeight > client.Aisling.MaximumWeight)
         {
-            mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = mundane.Serial,
-                Text = $"{client.PendingBankedSession.SelectedItem.Template.Name} is too heavy for you.",
-                Type = 0x03
-            });
+            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{client.PendingBankedSession.SelectedItem.Template.Name} is too heavy for you."));
             return false;
         }
 
         // max stack check
         if (pullStack > client.PendingBankedSession.SelectedItem.Template.MaxStack && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = mundane.Serial,
-                Text = "Well, that's impossible. Can you even hold that?",
-                Type = 0x03
-            });
+            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Well, that's impossible. Can you even hold that?"));
             return false;
         }
 
         // banked check
         if (client.PendingBankedSession.ArgsQuantity > client.PendingBankedSession.SelectedItem.Stacks && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = mundane.Serial,
-                Text = "You don't have that many banked with us.",
-                Type = 0x03
-            });
+            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "You don't have that many banked with us."));
             return false;
         }
 
         // prevent 0 on stacked check
         if (client.PendingBankedSession.ArgsQuantity == 0 && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = mundane.Serial,
-                Text = "Zero? You sure?",
-                Type = 0x03
-            });
+            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Zero? You sure?"));
             return false;
         }
 
         // dup & fraud check
         if (client.PendingBankedSession.ArgsQuantity < 0 && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.Show(Scope.NearbyAislings, new ServerFormat0D
-            {
-                Serial = mundane.Serial,
-                Text = "What? Should I call a guard?",
-                Type = 0x03
-            });
+            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "What? Should I call a guard?"));
             return false;
         }
 

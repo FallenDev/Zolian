@@ -20,7 +20,7 @@ public class Piet : AreaScript
     {
         if (x == 48 && y == 22 || x == 48 && y == 21 || x == 47 && y == 21)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Door seems to be locked.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Door seems to be locked.");
         }
     }
 

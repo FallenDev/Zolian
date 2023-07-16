@@ -83,7 +83,7 @@ public class Shield : ItemScript
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
-            client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
+            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
 
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
@@ -122,7 +122,7 @@ public class Shield : ItemScript
         foreach (var (_, spell) in aisling.SpellBook.Spells)
         {
             if (spell == null) continue;
-            client.Send(new ServerFormat3F(0, spell.Slot, spell.CurrentCooldown));
+            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
     }
 }

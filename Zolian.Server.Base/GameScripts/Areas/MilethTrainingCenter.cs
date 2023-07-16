@@ -20,8 +20,8 @@ public class MilethTrainingCenter : AreaScript
     {
         if ((x != 4 || y != 0) && (x != 5 || y != 1)) return;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
-        client.SendStats(StatusFlags.Health);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(209, client.Aisling.Pos));
+        client.SendAttributes(StatUpdateType.FullVitality);
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(209, 0U, 100, 0, 0U, new Position(client.Aisling.Pos)));
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahh Refreshing!");
     }
 

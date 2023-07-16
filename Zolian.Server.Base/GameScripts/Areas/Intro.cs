@@ -1,8 +1,10 @@
-﻿using Darkages.Enums;
+﻿using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Areas;
 
@@ -48,7 +50,7 @@ public class Intro : AreaScript
             if (client.Aisling.EquipmentManager.Equipment[2] == null)
                 client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
             client.LoadEquipment();
-            client.SendStats(StatusFlags.StructA);
+            client.SendAttributes(StatUpdateType.Primary);
             client.UpdateDisplay();
             _givenClothes = true;
         });
@@ -96,7 +98,7 @@ public class Intro : AreaScript
         if (client.Aisling.EquipmentManager.Equipment[2] == null)
             client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
         client.LoadEquipment();
-        client.SendStats(StatusFlags.StructA);
+        client.SendAttributes(StatUpdateType.Primary);
         client.UpdateDisplay();
     }
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }

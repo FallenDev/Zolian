@@ -1096,7 +1096,7 @@ namespace Darkages.Network.Client
                 IsAdmin = Aisling.GameMaster,
                 Level = (byte)Aisling.ExpLevel,
                 MagicResistance = Aisling.Mr,
-                MailFlags = MailFlag.None,
+                HasUnreadMail = Aisling.MailFlags == (Mail.Letter),
                 MaximumHp = (uint)Aisling.MaximumHp,
                 MaximumMp = (uint)Aisling.MaximumMp,
                 MaxWeight = (short)Aisling.MaximumWeight,
@@ -1180,8 +1180,8 @@ namespace Darkages.Network.Client
             }
 
             SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-            SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound);
-            SendTargetedAnimation(Scope.NearbyAislings, spell.Template.TargetAnimation, 100, spell.Template.Animation, Aisling.Serial, target.Serial);
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Serial, 100, spell.Template.Animation, Aisling.Serial));
         }
 
         /// <summary>
@@ -1199,8 +1199,8 @@ namespace Darkages.Network.Client
             }
 
             SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-            SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound);
-            SendTargetedAnimation(Scope.NearbyAislings, spell.Template.TargetAnimation, 100, spell.Template.Animation, Aisling.Serial, target.Serial, SpellCastInfo.Position);
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Serial, 100, spell.Template.Animation, Aisling.Serial, SpellCastInfo.Position));
         }
 
         /// <summary>
@@ -1325,7 +1325,7 @@ namespace Darkages.Network.Client
                 Id = (uint)aisling.Serial,
                 IsDead = aisling.IsDead(),
                 IsHidden = false, // Not sure the difference between hidden and transparent (perhaps GM hide?)
-                IsTransparent = aisling.Invisible,
+                IsTransparent = aisling.IsInvisible,
                 LanternSize = (LanternSize)aisling.Lantern,
                 Name = aisling.Username,
                 NameTagStyle = (NameTagStyle)aisling.NameStyle,
@@ -1345,7 +1345,7 @@ namespace Darkages.Network.Client
                 if (Aisling.Map.Flags.MapFlagIsSet(Darkages.Enums.MapFlags.PlayerKill))
                     args.NameTagStyle = NameTagStyle.Hostile;
                 //if we're not an admin, and the aisling is not visible
-                if (!Aisling.GameMaster && aisling.Invisible)
+                if (!Aisling.GameMaster && aisling.IsInvisible)
                 {
                     //remove the name
                     args.Name = string.Empty;
@@ -2385,11 +2385,11 @@ namespace Darkages.Network.Client
                 if (target != null)
                 {
                     if (target is Aisling aisling)
-                        SendTargetedMessage(Scope.NearbyAislings, ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}.");
+                        aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
                 }
                 else
                 {
-                    SendTargetedMessage(Scope.NearbyAislings, ServerMessageType.ActiveMessage, $"{Aisling.Username} has died.");
+                    Aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
                 }
 
                 return;
@@ -2572,12 +2572,13 @@ namespace Darkages.Network.Client
             return false;
         }
 
+        //ToDo; Fix Trading -- Handle Bad Trades
         public void HandleBadTrades()
         {
-            if (Aisling.Exchange?.Trader2 == null) return;
+            //if (Aisling.Exchange?.Trader2 == null) return;
 
-            if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
-                Aisling.Client.SendExchangeCancel(true);
+            //if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
+            //    Aisling.Client.SendExchangeCancel(true);
         }
 
         public WorldClient Insert(bool update, bool delete)
@@ -3012,7 +3013,7 @@ namespace Darkages.Network.Client
             player.CurrentMp = player.MaximumMp;
 
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
-            SendTargetedAnimation(Scope.NearbyAislings, 0x004F, 64, 0x004F, player.Serial, player.Serial);
+            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(79, player.Serial, 64));
             player.Client.SendAttributes(StatUpdateType.ExpGold);
         }
 

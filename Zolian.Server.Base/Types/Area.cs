@@ -236,7 +236,7 @@ public class Area : Map, IArea
                 return path;
             case Aisling { LoggedIn: false }:
                 return path;
-            case Aisling { Invisible: true }:
+            case Aisling { IsInvisible: true }:
                 return path;
             case Aisling { Map: null }:
                 return path;

@@ -20,7 +20,7 @@ public class MilethCottage : AreaScript
         if ((x != 1 || y != 1) && (x != 1 || y != 2) && (x != 2 || y != 1) && (x != 2 || y != 2)) return;
         client.Aisling.CurrentHp = client.Aisling.MaximumHp;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
-        client.SendStats(StatusFlags.Health);
+        client.SendAttributes(StatUpdateType.FullVitality);
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel well rested.");
     }
 

@@ -165,7 +165,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@CurrentWeight", SqlDbType.Int).Value = obj.CurrentWeight;
             cmd.Parameters.Add("@World", SqlDbType.Int).Value = obj.World;
             cmd.Parameters.Add("@Lantern", SqlDbType.Int).Value = obj.Lantern;
-            cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.Invisible;
+            cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.IsInvisible;
             cmd.Parameters.Add("@Resting", SqlDbType.VarChar).Value = obj.Resting;
             cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
             cmd.Parameters.Add("@GoldPoints", SqlDbType.BigInt).Value = obj.GoldPoints;
