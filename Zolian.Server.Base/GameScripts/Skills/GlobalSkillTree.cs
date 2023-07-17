@@ -1,4 +1,6 @@
 ﻿using Chaos.Common.Definitions;
+using Chaos.Networking.Entities.Server;
+
 using Darkages.Enums;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -29,11 +31,12 @@ public class IdentifyWeapon : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 50
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = aisling.Serial
         };
 
         try
@@ -73,16 +76,16 @@ public class IdentifyWeapon : SkillScript
 
             var classString = itemToBeIdentified.Template.Class != Class.Peasant ? ClassStrings.ClassValue(itemToBeIdentified.Template.Class) : "All";
             var name = itemToBeIdentified.DisplayName;
-            client.SendMessage(0x08, $"{{=sWeapon{{=b:{{=c {name}\n" +
-                                     $"{{=uMain hand only{{=b:{{=c {answerMainHand}\n" +
-                                     $"{{=uCan Dual Wield{{=b:{{=c {answerDualWield}\n" +
-                                     $"{{=uTwo-Handed{{=b:{{=c {answerTwoHander}\n" +
-                                     $"{{=uDmg Min{{=b:{{=c {itemToBeIdentified.Template.DmgMin}  {{=uDmg Max{{=b:{{=c {itemToBeIdentified.Template.DmgMax}\n" +
-                                     $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
-                                     "{=sStats Buff{=b:\n" +
-                                     $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
-                                     $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
-                                     $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
+            client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sWeapon{{=b:{{=c {name}\n" +
+                                                                      $"{{=uMain hand only{{=b:{{=c {answerMainHand}\n" +
+                                                                      $"{{=uCan Dual Wield{{=b:{{=c {answerDualWield}\n" +
+                                                                      $"{{=uTwo-Handed{{=b:{{=c {answerTwoHander}\n" +
+                                                                      $"{{=uDmg Min{{=b:{{=c {itemToBeIdentified.Template.DmgMin}  {{=uDmg Max{{=b:{{=c {itemToBeIdentified.Template.DmgMax}\n" +
+                                                                      $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
+                                                                      "{=sStats Buff{=b:\n" +
+                                                                      $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
+                                                                      $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
+                                                                      $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
         }
         catch
         {
@@ -90,9 +93,8 @@ public class IdentifyWeapon : SkillScript
             return;
         }
 
-        aisling.Client.Send(new ServerFormat2C(_skill.Slot, _skill.Icon, _skill.Name));
-        aisling.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -127,11 +129,12 @@ public class IdentifyArmor : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 50
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = aisling.Serial
         };
 
         try
@@ -152,12 +155,12 @@ public class IdentifyArmor : SkillScript
 
             var classString = itemToBeIdentified.Template.Class != Class.Peasant ? ClassStrings.ClassValue(itemToBeIdentified.Template.Class) : "All";
             var name = itemToBeIdentified.DisplayName;
-            client.SendMessage(0x08, $"{{=sArmor{{=b:{{=c {name}\n" +
-                                     $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
-                                     "{=sStats Buff{=b:\n" +
-                                     $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
-                                     $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
-                                     $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
+            client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sArmor{{=b:{{=c {name}\n" +
+                                                                      $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
+                                                                      "{=sStats Buff{=b:\n" +
+                                                                      $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
+                                                                      $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
+                                                                      $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
         }
         catch
         {
@@ -165,9 +168,8 @@ public class IdentifyArmor : SkillScript
             return;
         }
 
-        aisling.Client.Send(new ServerFormat2C(_skill.Slot, _skill.Icon, _skill.Name));
-        aisling.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -202,11 +204,12 @@ public class InspectItem : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 50
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = aisling.Serial
         };
 
         try
@@ -228,11 +231,11 @@ public class InspectItem : SkillScript
             };
 
             var name = itemToBeIdentified.DisplayName;
-            client.SendMessage(0x08, $"{{=sItem{{=b:{{=c {name}\n" +
-                                     $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uGender{{=b:{{=c {itemToBeIdentified.Template.Gender}\n" +
-                                     $"{{=uWeight{{=b:{{=c {itemToBeIdentified.Template.CarryWeight}  {{=uWorth{{=b:{{=c {itemToBeIdentified.Template.Value}\n" +
-                                     $"{{=uEnchantable{{=b:{{=c {enchanted} {{=uClass{{=b:{{=c {classString}\n" +
-                                     $"{{=uDrop Rate{{=b:{{=c {itemToBeIdentified.Template.DropRate}");
+            client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sItem{{=b:{{=c {name}\n" +
+                                                                      $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uGender{{=b:{{=c {itemToBeIdentified.Template.Gender}\n" +
+                                                                      $"{{=uWeight{{=b:{{=c {itemToBeIdentified.Template.CarryWeight}  {{=uWorth{{=b:{{=c {itemToBeIdentified.Template.Value}\n" +
+                                                                      $"{{=uEnchantable{{=b:{{=c {enchanted} {{=uClass{{=b:{{=c {classString}\n" +
+                                                                      $"{{=uDrop Rate{{=b:{{=c {itemToBeIdentified.Template.DropRate}");
         }
         catch
         {
@@ -240,9 +243,8 @@ public class InspectItem : SkillScript
             return;
         }
 
-        aisling.Client.Send(new ServerFormat2C(_skill.Slot, _skill.Icon, _skill.Name));
-        aisling.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)

@@ -2,7 +2,6 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Types;
 using MapFlags = Darkages.Enums.MapFlags;
@@ -200,6 +199,16 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 {
                     if (client.Aisling.IsInvisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                     {
+                        if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                        {
+                            hide.OnEnded(client.Aisling, hide);
+                        }
+
+                        if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                        {
+                            shadowFade.OnEnded(client.Aisling, shadowFade);
+                        }
+
                         client.UpdateDisplay();
                     }
 
@@ -423,6 +432,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                         {
                             shadowFade.OnEnded(client.Aisling, shadowFade);
                         }
+
+                        client.UpdateDisplay();
                     }
 
                     if (debuff.Name.Contains("Puinsein"))
@@ -547,6 +558,16 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (client.Aisling.IsInvisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 

@@ -1,4 +1,6 @@
 ﻿using Chaos.Common.Definitions;
+using Chaos.Networking.Entities.Server;
+
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
@@ -33,11 +35,11 @@ public class Blink : SkillScript
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
 
-        damageDealingSprite.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(76, damageDealingSprite.Pos));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Serial));
 
         _skillMethod.Train(client, _skill);
 
-        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat19(_skill.Template.Sound));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_skill.Template.Sound, false));
     }
 
     public override void OnUse(Sprite sprite)
@@ -55,7 +57,7 @@ public class Blink : SkillScript
         damageDealingSprite.ActionUsed = "Blink";
         if (map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "This does not work here");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "This does not work here");
             return;
         }
 
@@ -90,8 +92,7 @@ public class Blink : SkillScript
             }
 
             var newPos = orgPos with { Y = orgPos.Y + yDiffHold };
-            var action = new ServerFormat29(197, newPos);
-            damageDealingSprite.Show(Scope.NearbyAislings, action);
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, 0U, 100, 0, 0U, new Position(newPos.X, newPos.Y)));
         }
 
         for (var i = 0; i < xGap; i++)
@@ -107,11 +108,8 @@ public class Blink : SkillScript
             }
 
             var newPos = orgPos with { X = orgPos.X + xDiffHold };
-            var action = new ServerFormat29(197, newPos);
-            damageDealingSprite.Show(Scope.NearbyAislings, action);
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, 0U, 100, 0, 0U, new Position(newPos.X, newPos.Y)));
         }
-
-
     }
 }
 
@@ -136,7 +134,7 @@ public class Smite : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to purify.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -144,13 +142,12 @@ public class Smite : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Smite";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.Defender
-                ? aisling.UsingTwoHanded ? 0x81 : 0x01
-                : 0x01),
-            Speed = 20
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = aisling.Serial
         };
 
         var enemy = aisling.GetHorizontalInFront();
@@ -185,7 +182,7 @@ public class Smite : SkillScript
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)

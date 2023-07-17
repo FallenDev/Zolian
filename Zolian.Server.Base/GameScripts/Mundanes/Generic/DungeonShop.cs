@@ -133,7 +133,7 @@ public class DungeonShop : MundaneScript
                             Quantity = 0,
                             Offer = (int)template.Value,
                         };
-                        client.Send(new ServerFormat2F(Mundane, $"How many {template.Name} would you like to purchase?", new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {template.Name} would you like to purchase?");
                         break;
                     case false when client.Aisling.GoldPoints >= template.Value:
                     {
@@ -193,9 +193,7 @@ public class DungeonShop : MundaneScript
                             Quantity = 0
                         };
 
-                        client.Send(new ServerFormat2F(Mundane,
-                            $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}",
-                            new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}");
                     }
                     else
                     {

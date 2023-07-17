@@ -3,24 +3,18 @@ using Darkages.Network.Client;
 
 namespace Darkages.Types;
 
-public class Board : NetworkFormat
+public class Board
 {
     private static readonly string StoragePath = $@"{ServerSetup.Instance.StoragePath}\Community\Boards";
 
-    public List<PostFormat> Posts = new List<PostFormat>();
+    public List<PostFormat> Posts = new();
 
     static Board()
     {
         if (!Directory.Exists(StoragePath))
             Directory.CreateDirectory(StoragePath);
     }
-
-    public Board()
-    {
-        Encrypted = true;
-        OpCode = 0x31;
-    }
-
+    
     public Board(string name, ushort index, bool isMail = false)
     {
         Index = index;
@@ -50,17 +44,6 @@ public class Board : NetworkFormat
         }
 
         return results;
-    }
-
-    public static Board Load(string lookupKey)
-    {
-        var path = Path.Combine(StoragePath, $"{lookupKey}.json");
-
-        if (!File.Exists(path)) return null;
-
-        using var s = File.OpenRead(path);
-        using var f = new StreamReader(s);
-        return JsonConvert.DeserializeObject<Board>(f.ReadToEnd(), Settings);
     }
 
     public static Board LoadFromFile(string path)

@@ -1,6 +1,8 @@
 ﻿using System.Security.Cryptography;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
@@ -51,22 +53,19 @@ public class EnemyRewards : RewardScript
                 exp += (uint)bonus;
         }
 
-        if (player.ExpLevel <= 98 && _monster.Template.Level <= 98)
+        var difference = (int)(player.ExpLevel - _monster.Template.Level);
+        exp = difference switch
         {
-            var difference = (int)(player.ExpLevel - _monster.Template.Level);
-            exp = difference switch
-            {
-                // Monster is higher level than player
-                <= -30 => (uint)(exp * 0.25),
-                <= -15 => (uint)(exp * 0.5),
-                <= -10 => (uint)(exp * 0.75),
-                // Monster is lower level than player
-                >= 30 => 1,
-                >= 15 => (uint)(exp * 0.25),
-                >= 10 => (uint)(exp * 0.5),
-                _ => exp
-            };
-        }
+            // Monster is higher level than player
+            <= -30 => (uint)(exp * 0.25),
+            <= -15 => (uint)(exp * 0.5),
+            <= -10 => (uint)(exp * 0.75),
+            // Monster is lower level than player
+            >= 30 => 1,
+            >= 15 => (uint)(exp * 0.25),
+            >= 10 => (uint)(exp * 0.5),
+            _ => exp
+        };
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
         player.ExpTotal += exp;
@@ -178,57 +177,57 @@ public class EnemyRewards : RewardScript
         switch (items.Count)
         {
             case >= 3:
-            {
-                for (var i = 3; i > randEquipItems.Count; i--)
                 {
-                    var item = RandomNumberGenerator.GetInt32(items.Count);
-                    chance = Generator.RandNumGen100();
-                    var kickOut = Generator.RandNumGen100();
-                    if (kickOut >= 90) return;
-
-                    switch (chance)
+                    for (var i = 3; i > randEquipItems.Count; i--)
                     {
-                        // If greater than equal 70, restart the list
-                        case >= 70:
-                            randEquipItems = new List<Item>();
-                            continue;
-                        // If greater than 30, continue without adding
-                        case >= 45 and <= 69:
-                            continue;
-                        default:
-                            randEquipItems.Add(items[item]);
-                            continue;
-                    }
-                }
+                        var item = RandomNumberGenerator.GetInt32(items.Count);
+                        chance = Generator.RandNumGen100();
+                        var kickOut = Generator.RandNumGen100();
+                        if (kickOut >= 90) return;
 
-                break;
-            }
+                        switch (chance)
+                        {
+                            // If greater than equal 70, restart the list
+                            case >= 70:
+                                randEquipItems = new List<Item>();
+                                continue;
+                            // If greater than 30, continue without adding
+                            case >= 45 and <= 69:
+                                continue;
+                            default:
+                                randEquipItems.Add(items[item]);
+                                continue;
+                        }
+                    }
+
+                    break;
+                }
             case 2:
-            {
-                for (var i = 2; i > randEquipItems.Count; i--)
                 {
-                    var item = RandomNumberGenerator.GetInt32(items.Count);
-                    chance = Generator.RandNumGen100();
-                    var kickOut = Generator.RandNumGen100();
-                    if (kickOut >= 95) return;
-
-                    switch (chance)
+                    for (var i = 2; i > randEquipItems.Count; i--)
                     {
-                        // If greater than equal 70, restart the list
-                        case >= 70:
-                            randEquipItems = new List<Item>();
-                            continue;
-                        // If greater than 50, continue without adding
-                        case >= 50 and <= 69:
-                            continue;
-                        default:
-                            randEquipItems.Add(items[item]);
-                            continue;
-                    }
-                }
+                        var item = RandomNumberGenerator.GetInt32(items.Count);
+                        chance = Generator.RandNumGen100();
+                        var kickOut = Generator.RandNumGen100();
+                        if (kickOut >= 95) return;
 
-                break;
-            }
+                        switch (chance)
+                        {
+                            // If greater than equal 70, restart the list
+                            case >= 70:
+                                randEquipItems = new List<Item>();
+                                continue;
+                            // If greater than 50, continue without adding
+                            case >= 50 and <= 69:
+                                continue;
+                            default:
+                                randEquipItems.Add(items[item]);
+                                continue;
+                        }
+                    }
+
+                    break;
+                }
             default:
                 randEquipItems = items;
                 break;

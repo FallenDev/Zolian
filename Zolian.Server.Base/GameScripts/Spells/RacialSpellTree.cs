@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
 using Chaos.Common.Definitions;
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
@@ -64,10 +66,7 @@ public class Caltrops : SpellScript
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
         target.MagicApplyDamage(sprite, 2500, Spell);
-
-        target.Show(Scope.NearbyAislings,
-            new ServerFormat29((uint)target.Serial, (uint)target.Serial,
-                Spell.Template.TargetAnimation, 0, 100));
+        target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Serial));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -134,7 +133,16 @@ public class Calming_Voice : SpellScript
         {
             if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.IsInvisible = false;
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 
@@ -214,9 +222,9 @@ public class DestructiveForce : SpellScript
     {
         if (sprite is not Aisling damageDealingSprite) return;
         damageDealingSprite.ActionUsed = "Destructive Force";
-        damageDealingSprite.Cast(_spell, target);
-        damageDealingSprite.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
-        
+        damageDealingSprite.CastAnimation(_spell, target);
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
+
         if (target == null)
         {
             _spellMethod.SpellOnFailed(damageDealingSprite, null, _spell);
@@ -261,7 +269,16 @@ public class DestructiveForce : SpellScript
 
         if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.IsInvisible = false;
+            if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+            {
+                hide.OnEnded(client.Aisling, hide);
+            }
+
+            if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+            {
+                shadowFade.OnEnded(client.Aisling, shadowFade);
+            }
+
             client.UpdateDisplay();
         }
 
@@ -305,29 +322,18 @@ public class DestructiveForce : SpellScript
         var targetPosition = _target.GetPendingThrowPosition(2, _target);
         var hasHitOffWall = _target.GetPendingThrowIsWall(2, _target);
         var readyTime = DateTime.UtcNow;
-        var response = new ServerFormat0C
-        {
-            Direction = _target.Direction,
-            Serial = _target.Serial,
-            X = (short)targetPosition.X,
-            Y = (short)targetPosition.Y
-        };
 
         if (hasHitOffWall)
         {
             var stunned = new debuff_beagsuain();
             stunned.OnApplied(_target, stunned);
-            _target.Animate(208);
+            _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, _target.Serial));
         }
 
         _target.Pos = new Vector2(targetPosition.X, targetPosition.Y);
-
-        _target.Show(Scope.NearbyAislings, response);
-        {
-            _target.LastMovementChanged = readyTime;
-            _target.LastPosition = new Position(targetPosition.X, targetPosition.Y);
-        }
-
+        _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendCreatureWalk(_target.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)_target.Direction));
+        _target.LastMovementChanged = readyTime;
+        _target.LastPosition = new Position(targetPosition.X, targetPosition.Y);
         _target.UpdateAddAndRemove();
     }
 }
@@ -356,7 +362,7 @@ public class Elemental_Bolt : SpellScript
         dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, _spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
 
-        aisling.Cast(_spell, target);
+        aisling.CastAnimation(_spell, target);
         target.ApplyElementalSpellDamage(aisling, dmg, randomEle, _spell);
     }
 
@@ -368,15 +374,15 @@ public class Elemental_Bolt : SpellScript
         if (!_spell.CanUse())
         {
             if (sprite is Aisling)
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             if (sprite is Aisling)
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {_spell.Template.Name}.");
 
@@ -399,7 +405,7 @@ public class Elemental_Bolt : SpellScript
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
@@ -421,7 +427,16 @@ public class Elemental_Bolt : SpellScript
                 if (client.Aisling.IsInvisible &&
                     _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 

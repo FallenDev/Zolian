@@ -76,7 +76,7 @@ public class Banker : MundaneScript
 
         if (client.PendingBankedSession.SelectedItem.Template.CanStack && client.PendingBankedSession.SelectedItem.Stacks > 1)
         {
-            client.Send(new ServerFormat2F(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\nCurrently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.", new TextInputData()));
+            client.SendTextInput(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\nCurrently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.");
             // Sets that the player is now committing to a stacked deposit
             client.PendingBankedSession.DepositStackedItem = true;
         }
@@ -132,8 +132,8 @@ public class Banker : MundaneScript
 
                 if (client.PendingBankedSession.SelectedItem.Template.CanStack && client.PendingBankedSession.SelectedItem.Stacks >= 1)
                 {
-                    client.Send(new ServerFormat2F(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\n" +
-                                                            $"Currently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.", new TextInputData()));
+                    client.SendTextInput(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\n" + 
+                                                  $"Currently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.");
                             
                     // Sets that the player is now committing to a stacked deposit
                     client.PendingBankedSession.DepositStackedItem = true;
@@ -346,13 +346,13 @@ public class Banker : MundaneScript
                 break;
             case 0x07:
             {
-                client.Send(new ServerFormat2F(Mundane, $"Inventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}", new TextInputData()));
+                client.SendTextInput(Mundane, $"Inventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}");
                 client.PendingBankedSession.DepositGold = true;
             }
                 break;
             case 0x08:
             {
-                client.Send(new ServerFormat2F(Mundane, $"How much would you like returned?\nInventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}", new TextInputData()));
+                client.SendTextInput(Mundane, $"How much would you like returned?\nInventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}");
                 client.PendingBankedSession.WithdrawGold = true;
             }
                 break;
@@ -448,7 +448,7 @@ public class Banker : MundaneScript
                 switch (client.PendingBankedSession.SelectedItem.Template.CanStack)
                 {
                     case true:
-                        client.Send(new ServerFormat2F(Mundane, $"How many {{=q{client.PendingBankedSession.SelectedItem.Template.Name}{{=a would you like back?", new TextInputData()));
+                        client.SendTextInput(Mundane, $"How many {{=q{client.PendingBankedSession.SelectedItem.Template.Name}{{=a would you like back?");
                         client.PendingBankedSession.WithdrawItem = true;
                         break;
                     case false:
@@ -499,20 +499,20 @@ public class Banker : MundaneScript
 
     private void DepositMenu(WorldClient client)
     {
-        if (client.Aisling.Inventory.BankList.Any())
-            client.Send(new ServerFormat2F(Mundane, "We'll take care of your possessions.",
-                new BankingData(0x08, client.Aisling.Inventory.BankList)));
-        else
-            OnClick(client, Mundane.Serial);
+        //if (client.Aisling.Inventory.BankList.Any())
+        //    client.Send(new ServerFormat2F(Mundane, "We'll take care of your possessions.",
+        //        new BankingData(0x08, client.Aisling.Inventory.BankList)));
+        //else
+        //    OnClick(client, Mundane.Serial);
     }
 
     private void WithDrawMenu(WorldClient client)
     {
-        if (client.Aisling.BankManager.Items.Count > 0)
-            client.Send(new ServerFormat2F(Mundane, "What would you like back?",
-                new WithdrawBankData(0x0A, client.Aisling.BankManager)));
-        else
-            OnClick(client, Mundane.Serial);
+        //if (client.Aisling.BankManager.Items.Count > 0)
+        //    client.Send(new ServerFormat2F(Mundane, "What would you like back?",
+        //        new WithdrawBankData(0x0A, client.Aisling.BankManager)));
+        //else
+        //    OnClick(client, Mundane.Serial);
     }
 
     private static void Refresh(IWorldClient client)

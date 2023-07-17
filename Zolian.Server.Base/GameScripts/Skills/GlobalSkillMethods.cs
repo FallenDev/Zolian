@@ -126,7 +126,16 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
         if (client.Aisling.IsInvisible && skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.IsInvisible = false;
+            if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+            {
+                hide.OnEnded(client.Aisling, hide);
+            }
+
+            if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+            {
+                shadowFade.OnEnded(client.Aisling, shadowFade);
+            }
+
             client.UpdateDisplay();
             return Attempt(client, skill);
         }
@@ -149,11 +158,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.Client.SendTargetedAnimation(Scope.NearbyAislings, skill.Template.TargetAnimation, 100, 0, attacker.Serial, enemy.Serial, target.Position);
+        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
         attacker.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.Animate(387);
+        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
     }
 
     public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit)
@@ -171,10 +180,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.Client.SendTargetedAnimation(Scope.NearbyAislings, skill.Template.TargetAnimation, 100, 0, attacker.Serial, enemy.Serial, target.Position);
+        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.Animate(387);
+        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
     }
 
     public int Thrown(WorldClient client, Skill skill, bool crit)
@@ -194,22 +203,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
     public void FailedAttempt(Sprite sprite, Skill skill, BodyAnimationArgs action)
     {
-        BodyAnimation anim;
-        switch (sprite)
-        {
-            case Aisling aisling:
-                anim = aisling.Path == Class.Defender
-                    ? aisling.UsingTwoHanded
-                        ? BodyAnimation.Swipe
-                        : BodyAnimation.TwoHandAtk
-                    : BodyAnimation.Assail;
-                aisling.Client.SendBodyAnimation(aisling.Serial, anim, 20, skill.Template.Sound);
-                break;
-            case Monster monster:
-                anim = BodyAnimation.Assail;
-                monster.Client.SendBodyAnimation(monster.Serial, anim, 20, skill.Template.Sound);
-                break;
-        }
+        sprite.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
     }
 
     public (bool, int) OnCrit(int dmg)

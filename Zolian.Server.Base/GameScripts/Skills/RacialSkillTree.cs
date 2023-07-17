@@ -320,7 +320,16 @@ public class Splash : SkillScript
             {
                 if (client.Aisling.IsInvisible && _skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 

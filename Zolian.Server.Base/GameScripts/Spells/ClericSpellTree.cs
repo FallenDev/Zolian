@@ -231,11 +231,11 @@ public class Detect : SpellScript
         if (target is not Monster monster) return;
         var client = aisling.Client;
 
-        aisling.Cast(_spell, target);
+        aisling.CastAnimation(_spell, target);
 
         if (target.CurrentHp > 0)
         {
-            target.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
         }
 
         var title = $"{"{=bDetect",33}";
@@ -328,7 +328,16 @@ public class Detect : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -395,7 +404,7 @@ public class Heal_Minor : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            aisling.CastSpell(_spell, );
+            aisling.CastAnimation(_spell, target);
             var healBase = target.MaximumHp * 0.15;
 
             target.CurrentHp += (int)healBase;
@@ -446,7 +455,16 @@ public class Heal_Minor : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -496,8 +514,8 @@ public class Heal_Major : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            aisling.Cast(_spell, target);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+            aisling.CastAnimation(_spell, target);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
             var healBase = target.MaximumHp * 0.30;
 
@@ -505,14 +523,8 @@ public class Heal_Major : SpellScript
             if (target.CurrentHp > target.MaximumHp)
                 target.CurrentHp = target.MaximumHp;
 
-            var healthBar = new ServerFormat13
-            {
-                Serial = target.Serial,
-                Health = (ushort)(100 * target.CurrentHp / target.MaximumHp),
-                Sound = 8
-            };
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
-            aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
@@ -556,7 +568,16 @@ public class Heal_Major : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -606,8 +627,8 @@ public class Heal_Critical : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            aisling.Cast(_spell, target);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+            aisling.CastAnimation(_spell, target);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
             var healBase = target.MaximumHp * 0.65;
 
@@ -615,14 +636,8 @@ public class Heal_Critical : SpellScript
             if (target.CurrentHp > target.MaximumHp)
                 target.CurrentHp = target.MaximumHp;
 
-            var healthBar = new ServerFormat13
-            {
-                Serial = target.Serial,
-                Health = (ushort)(100 * target.CurrentHp / target.MaximumHp),
-                Sound = 8
-            };
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
-            aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
@@ -666,7 +681,16 @@ public class Heal_Critical : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -717,8 +741,8 @@ public class Dire_Aid : SpellScript
     {
         if (sprite is Aisling aisling)
         {
-            aisling.Cast(_spell, target);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+            aisling.CastAnimation(_spell, target);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
             var healBase = target.MaximumHp * 0.80;
 
@@ -736,14 +760,8 @@ public class Dire_Aid : SpellScript
                 _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
             }
 
-            var healthBar = new ServerFormat13
-            {
-                Serial = target.Serial,
-                Health = (ushort)(100 * target.CurrentHp / target.MaximumHp),
-                Sound = 8
-            };
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
-            aisling.Show(Scope.NearbyAislings, healthBar);
             if (target is Aisling)
                 target.Client.SendAttributes(StatUpdateType.FullVitality);
         }
@@ -787,7 +805,16 @@ public class Dire_Aid : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -837,8 +864,8 @@ public class Healing_Winds : SpellScript
     {
         if (sprite is not Aisling aisling) return;
 
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         var healBase = aisling.MaximumHp * 0.25;
 
@@ -851,15 +878,10 @@ public class Healing_Winds : SpellScript
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
 
-                var healthBar = new ServerFormat13
-                {
-                    Serial = partyMember.Serial,
-                    Health = (ushort)(100 * partyMember.CurrentHp / partyMember.MaximumHp),
-                    Sound = 8
-                };
-                partyMember.Show(Scope.NearbyAislings, healthBar);
-                partyMember.SendAnimation(267, partyMember, aisling);
-                partyMember.Client.SendStats(StatusFlags.Health);
+                target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
+
+                partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(267, partyMember.Serial));
+                partyMember.Client.SendAttributes(StatUpdateType.Vitality);
             }
         }
         else
@@ -868,14 +890,8 @@ public class Healing_Winds : SpellScript
             if (aisling.CurrentHp > aisling.MaximumHp)
                 aisling.CurrentHp = aisling.MaximumHp;
 
-            var healthBar = new ServerFormat13
-            {
-                Serial = aisling.Serial,
-                Health = (ushort)(100 * aisling.CurrentHp / aisling.MaximumHp),
-                Sound = 8
-            };
-            aisling.Show(Scope.NearbyAislings, healthBar);
-            aisling.Client.SendStats(StatusFlags.Health);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(aisling, 8));
+            aisling.Client.SendAttributes(StatUpdateType.Vitality);
         }
     }
 
@@ -907,7 +923,16 @@ public class Healing_Winds : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -957,8 +982,8 @@ public class Forestall : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         if (target is not Aisling savedAisling) return;
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         if (savedAisling.Skulled)
         {
@@ -994,7 +1019,16 @@ public class Forestall : SpellScript
 
         if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.IsInvisible = false;
+            if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+            {
+                hide.OnEnded(client.Aisling, hide);
+            }
+
+            if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+            {
+                shadowFade.OnEnded(client.Aisling, shadowFade);
+            }
+
             client.UpdateDisplay();
         }
 
@@ -1024,18 +1058,18 @@ public class Raise_Ally : SpellScript
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         if (aisling.GroupId != 0)
         {
             foreach (var deadPartyMember in aisling.PartyMembers.Where(m => m is { Dead: true }))
             {
                 deadPartyMember.Client.Revive();
-                deadPartyMember.client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
-                deadPartyMember.Client.SendStats(StatusFlags.MultiStat);
+                deadPartyMember.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
+                deadPartyMember.Client.SendAttributes(StatUpdateType.Full);
                 deadPartyMember.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
-                Task.Delay(350).ContinueWith(ct => { deadPartyMember.Client.Aisling.Animate(304); });
+                Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, deadPartyMember.Serial)); });
                 break;
             }
         }
@@ -1086,7 +1120,16 @@ public class Raise_Ally : SpellScript
 
         if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
         {
-            client.Aisling.IsInvisible = false;
+            if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+            {
+                hide.OnEnded(client.Aisling, hide);
+            }
+
+            if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+            {
+                shadowFade.OnEnded(client.Aisling, shadowFade);
+            }
+
             client.UpdateDisplay();
         }
 
@@ -1119,8 +1162,8 @@ public class Turn_Undead : SpellScript
     {
         if (sprite is not Aisling aisling) return;
 
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         foreach (var monster in aisling.MonstersNearby())
         {
@@ -1147,7 +1190,16 @@ public class Turn_Undead : SpellScript
         {
             if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.IsInvisible = false;
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 
@@ -1182,8 +1234,8 @@ public class Turn_Critter : SpellScript
     {
         if (sprite is not Aisling aisling) return;
 
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         foreach (var monster in aisling.MonstersNearby())
         {
@@ -1210,7 +1262,16 @@ public class Turn_Critter : SpellScript
         {
             if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.IsInvisible = false;
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 
@@ -1245,8 +1306,8 @@ public class Turn_Greater_Undead : SpellScript
     {
         if (sprite is not Aisling aisling) return;
 
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         foreach (var monster in aisling.MonstersNearby())
         {
@@ -1273,7 +1334,16 @@ public class Turn_Greater_Undead : SpellScript
         {
             if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.IsInvisible = false;
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 
@@ -1308,8 +1378,8 @@ public class Turn_Greater_Critter : SpellScript
     {
         if (sprite is not Aisling aisling) return;
 
-        aisling.Cast(_spell, target);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_spell.Template.Sound));
+        aisling.CastAnimation(_spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
 
         foreach (var monster in aisling.MonstersNearby())
         {
@@ -1336,7 +1406,16 @@ public class Turn_Greater_Critter : SpellScript
         {
             if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
             {
-                client.Aisling.IsInvisible = false;
+                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                {
+                    hide.OnEnded(client.Aisling, hide);
+                }
+
+                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                {
+                    shadowFade.OnEnded(client.Aisling, shadowFade);
+                }
+
                 client.UpdateDisplay();
             }
 
@@ -1374,24 +1453,11 @@ public class AoPuinsein : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Puinsein"));
@@ -1432,7 +1498,16 @@ public class AoPuinsein : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -1485,24 +1560,11 @@ public class AoDall : SpellScript
 
         if (blind)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!blind) return;
         var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Blind"));
@@ -1543,7 +1605,16 @@ public class AoDall : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -1596,24 +1667,11 @@ public class AoBeagCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Beag Cradh");
@@ -1654,7 +1712,16 @@ public class AoBeagCradh : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -1707,24 +1774,11 @@ public class AoCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Cradh");
@@ -1765,7 +1819,16 @@ public class AoCradh : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -1818,24 +1881,11 @@ public class AoMorCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Mor Cradh");
@@ -1876,7 +1926,16 @@ public class AoMorCradh : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -1929,24 +1988,11 @@ public class AoArdCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Ard Cradh");
@@ -1987,7 +2033,16 @@ public class AoArdCradh : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 
@@ -2040,24 +2095,11 @@ public class AoSuain : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetaisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
+                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
 
-        client.SendAnimation(Spell.Template.Animation, target, aisling);
-
-        var action = new ServerFormat1A
-        {
-            Serial = aisling.Serial,
-            Number = (byte)(client.Aisling.Path switch
-            {
-                Class.Cleric => 0x80,
-                Class.Arcanus => 0x88,
-                _ => 0x06
-            }),
-            Speed = 30
-        };
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat19(Spell.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.CastAnimation(Spell, target);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Suain");
@@ -2098,7 +2140,16 @@ public class AoSuain : SpellScript
             {
                 if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                 {
-                    client.Aisling.IsInvisible = false;
+                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                    {
+                        hide.OnEnded(client.Aisling, hide);
+                    }
+
+                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                    {
+                        shadowFade.OnEnded(client.Aisling, shadowFade);
+                    }
+
                     client.UpdateDisplay();
                 }
 

@@ -1,4 +1,6 @@
 ﻿using Chaos.Common.Definitions;
+using Chaos.Networking.Entities.Server;
+
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Spells;
@@ -28,7 +30,7 @@ public class Ambush : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -36,11 +38,12 @@ public class Ambush : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Ambush";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x82,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var targetPos = aisling.GetFromAllSidesEmpty(aisling, _target);
@@ -137,7 +140,7 @@ public class WolfFangFist : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to incapacitate.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -145,11 +148,12 @@ public class WolfFangFist : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Wolf Fang Fist";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x84,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -234,7 +238,7 @@ public class KnifeHandStrike : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -242,11 +246,12 @@ public class KnifeHandStrike : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Knife Hand Strike";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x84,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -282,11 +287,12 @@ public class KnifeHandStrike : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -347,7 +353,7 @@ public class PalmHeelStrike : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -355,11 +361,12 @@ public class PalmHeelStrike : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Palm Heel Strike";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x85,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.RoundHouseKick,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront();
@@ -380,7 +387,7 @@ public class PalmHeelStrike : SkillScript
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -402,11 +409,12 @@ public class PalmHeelStrike : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -467,7 +475,7 @@ public class HammerTwist : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -475,11 +483,12 @@ public class HammerTwist : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Hammer Twist";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x84,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.GetInFrontToSide();
@@ -498,7 +507,7 @@ public class HammerTwist : SkillScript
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -520,11 +529,12 @@ public class HammerTwist : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -585,7 +595,7 @@ public class CrossBodyPunch : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -593,11 +603,12 @@ public class CrossBodyPunch : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Cross Body Punch";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x84,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront(3);
@@ -616,7 +627,7 @@ public class CrossBodyPunch : SkillScript
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -638,11 +649,12 @@ public class CrossBodyPunch : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront(3).FirstOrDefault();
@@ -704,7 +716,7 @@ public class HurricaneKick : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -712,11 +724,12 @@ public class HurricaneKick : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Hurricane Kick";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x85,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.RoundHouseKick,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = _skillMethod.GetInCone(aisling);
@@ -737,12 +750,12 @@ public class HurricaneKick : SkillScript
             if (!_target.HasDebuff(debuff.Name)) 
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
-                targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));
+                targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
 
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -764,11 +777,12 @@ public class HurricaneKick : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -786,7 +800,7 @@ public class HurricaneKick : SkillScript
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Rend")) 
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
-                targetPlayer.Client.Send(new ServerFormat08(targetPlayer, StatusFlags.StructD));
+                targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
 
             var dmg = (int)(sprite.MaximumHp * 1.2);
             sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
@@ -835,7 +849,7 @@ public class Kelberoth_Strike : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -845,11 +859,12 @@ public class Kelberoth_Strike : SkillScript
 
         var criticalHp = (int)(aisling.MaximumHp * .10);
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x82,
-            Speed = 30
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -870,7 +885,7 @@ public class Kelberoth_Strike : SkillScript
         }
 
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahhhhh!");
-        aisling.Client.Send(new ServerFormat08(aisling, StatusFlags.StructB));
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmg, false, action);
     }
 
@@ -893,11 +908,12 @@ public class Kelberoth_Strike : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -936,7 +952,7 @@ public class Krane_Kick : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -944,11 +960,12 @@ public class Krane_Kick : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Krane Kick";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x83,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Kick,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront(2);
@@ -967,7 +984,7 @@ public class Krane_Kick : SkillScript
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -989,11 +1006,12 @@ public class Krane_Kick : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront(2).FirstOrDefault();
@@ -1054,7 +1072,7 @@ public class Claw_Fist : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance assails.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1062,11 +1080,12 @@ public class Claw_Fist : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Claw Fist";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x06,
-            Speed = 70
+            AnimationSpeed = 70,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.HasBuff("Claw Fist"))
@@ -1121,7 +1140,7 @@ public class EmberStrike : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1129,13 +1148,12 @@ public class EmberStrike : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Ember Strike";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = (byte)(aisling.Path == Class.DualBash
-                ? aisling.TwoHandedBasher ? 0x81 : 0x01
-                : 0x01),
-            Speed = 20
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.Punch,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var spellMethod = new GlobalSpellMethods();
@@ -1154,11 +1172,11 @@ public class EmberStrike : SkillScript
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling,  1);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, _skill);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat29(17, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(17, _target.Serial));
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, 0, _crit);
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -1186,11 +1204,12 @@ public class EmberStrike : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
