@@ -58,27 +58,27 @@ public class ReactorInputSequence
     }
 
 
-    public void Send()
-    {
-        var args = new DialogArgs
-        {
-            Color = DisplayColor.Default,
-            DialogId = 0,
-            DialogType = DialogType.Normal,
-            EntityType = EntityType.Creature,
-            HasNextButton = _sequence.CanMoveNext,
-            HasPreviousButton = _sequence.CanMoveBack,
-            Name = _sequence.Title,
-            Options = null,
-            PursuitId = ushort.MaxValue,
-            SourceId = (uint)_sequence.Id,
-            Sprite = _sequence.DisplayImage,
-            Text = _sequence.DisplayText,
-            TextBoxLength = 0
-        };
+    //public void Send()
+    //{
+    //    var args = new DialogArgs
+    //    {
+    //        Color = DisplayColor.Default,
+    //        DialogId = 0,
+    //        DialogType = DialogType.Normal,
+    //        EntityType = EntityType.Creature,
+    //        HasNextButton = _sequence.CanMoveNext,
+    //        HasPreviousButton = _sequence.CanMoveBack,
+    //        Name = _sequence.Title,
+    //        Options = null,
+    //        PursuitId = ushort.MaxValue,
+    //        SourceId = (uint)_sequence.Id,
+    //        Sprite = _sequence.DisplayImage,
+    //        Text = _sequence.DisplayText,
+    //        TextBoxLength = 0
+    //    };
 
-        _client.Send(args);
-    }
+    //    _client.Send(args);
+    //}
 }
 
 public class Pursuit
@@ -92,25 +92,25 @@ public class Pursuit
         Sequence = sequenceMenu;
     }
 
-    public void Send()
-    {
-        var args = new DialogArgs
-        {
-            Color = DisplayColor.Default,
-            DialogId = 0,
-            DialogType = DialogType.Normal,
-            EntityType = EntityType.Creature,
-            HasNextButton = _sequence.CanMoveNext,
-            HasPreviousButton = _sequence.CanMoveBack,
-            Name = _sequence.Title,
-            Options = null,
-            PursuitId = ushort.MaxValue,
-            SourceId = (uint)_sequence.Id,
-            Sprite = _sequence.DisplayImage,
-            Text = _sequence.DisplayText,
-            TextBoxLength = 0
-        };
+    //public void Send()
+    //{
+    //    var args = new DialogArgs
+    //    {
+    //        Color = DisplayColor.Default,
+    //        DialogId = 0,
+    //        DialogType = DialogType.Normal,
+    //        EntityType = EntityType.Creature,
+    //        HasNextButton = _sequence.CanMoveNext,
+    //        HasPreviousButton = _sequence.CanMoveBack,
+    //        Name = _sequence.Title,
+    //        Options = null,
+    //        PursuitId = ushort.MaxValue,
+    //        SourceId = (uint)_sequence.Id,
+    //        Sprite = _sequence.DisplayImage,
+    //        Text = _sequence.DisplayText,
+    //        TextBoxLength = 0
+    //    };
 
-        _client.Send(args);
-    }
+    //    _client.Send(args);
+    //}
 }

@@ -91,7 +91,7 @@ public class Senan : MundaneScript
                     break;
                 case 0x03:
                 {
-                    client.Send(new ReactorInputSequence(Mundane, "How much would you like to give?", "I'm broke.", 6));
+                    //client.Send(new ReactorInputSequence(Mundane, "How much would you like to give?", "I'm broke.", 6));
                 }
                     break;
                 case 0x04:

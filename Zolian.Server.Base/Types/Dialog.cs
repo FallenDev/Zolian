@@ -23,11 +23,12 @@ public class Dialog
 
     public DialogSequence Invoke(WorldClient client)
     {
-        client.SendDialog(new ServerFormat30(client, this));
-        {
-            Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
-            return Current;
-        }
+        //client.SendDialog(new ServerFormat30(client, this));
+        //{
+        //    Current?.OnSequenceStep?.Invoke(client.Aisling, Current);
+        //    return Current;
+        //}
+        return default;
     }
 
     public void MoveNext(WorldClient client)

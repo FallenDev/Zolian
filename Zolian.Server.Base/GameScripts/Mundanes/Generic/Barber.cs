@@ -86,14 +86,14 @@ public class Barber : MundaneScript
                     client.Aisling.Styling = 2;
                     client.Aisling.HairStyle = client.Aisling.OldStyle;
                     client.UpdateDisplay();
-                    client.Send(new ReactorInputSequence(Mundane, "Which style are you interested in?", "1-65", 2));
+                    //client.Send(new ReactorInputSequence(Mundane, "Which style are you interested in?", "1-65", 2));
                 }
                     break;
                 case 0x0A:
                 {
                     if (_styleNumber is 0 or > 65)
                     {
-                        client.Send(new ReactorInputSequence(Mundane, "Please select a valid hairstyle:", "1-65", 2));
+                        //client.Send(new ReactorInputSequence(Mundane, "Please select a valid hairstyle:", "1-65", 2));
                     }
                     else
                     {
@@ -138,7 +138,7 @@ public class Barber : MundaneScript
                     break;
                 case 0x0D:
                 {
-                    client.Send(new ReactorInputSequence(Mundane, "Please select a valid hairstyle:", "1-65", 2));
+                    //client.Send(new ReactorInputSequence(Mundane, "Please select a valid hairstyle:", "1-65", 2));
                 }
                     break;
 
@@ -150,14 +150,14 @@ public class Barber : MundaneScript
                     client.Aisling.Coloring = 2;
                     client.Aisling.HairColor = client.Aisling.OldColor;
                     client.UpdateDisplay();
-                    client.Send(new ReactorInputSequence(Mundane, "Which dye would you like in your hair?", "0-55", 2));
+                    //client.Send(new ReactorInputSequence(Mundane, "Which dye would you like in your hair?", "0-55", 2));
                 }
                     break;
                 case 0x014:
                 {
                     if (_colorNumber is <= 0 or > 55)
                     {
-                        client.Send(new ReactorInputSequence(Mundane, "Please select a valid color:", "0-55", 2));
+                        //client.Send(new ReactorInputSequence(Mundane, "Please select a valid color:", "0-55", 2));
                     }
                     else
                     {
@@ -202,7 +202,7 @@ public class Barber : MundaneScript
                     break;
                 case 0x017:
                 {
-                    client.Send(new ReactorInputSequence(Mundane, "Please select a valid color:", "0-55", 2));
+                    //client.Send(new ReactorInputSequence(Mundane, "Please select a valid color:", "0-55", 2));
                 }
                     break;
 

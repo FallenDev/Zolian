@@ -2257,7 +2257,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var script = npc.Scripts.FirstOrDefault();
 
             // Step in 0x3A is "DialogId" perhaps that also needs to go here for step?
-            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args);
+            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?.ToString());
 
             return default;
         }
@@ -2297,7 +2297,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 //}
 
                 var script = npc.Scripts.FirstOrDefault();
-                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args?.ToArray());
+                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?.ToArray())?.ToString());
                 return default;
             }
 

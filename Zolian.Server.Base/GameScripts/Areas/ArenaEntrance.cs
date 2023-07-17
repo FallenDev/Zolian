@@ -22,11 +22,11 @@ public class ArenaEntrance : AreaScript
         {
             case 8 when y == 3:
             case 9 when y == 4:
-                client.OpenBoard("Arena Updates");
+                client.SendBoard("Arena Updates");
                 break;
             case 2 when y == 3:
             case 3 when y == 4:
-                client.OpenBoard("Trash Talk");
+                client.SendBoard("Trash Talk");
                 break;
         }
     }

@@ -33,7 +33,7 @@ public class ReactorTemplate : Template
         client.Aisling.ActiveReactor.Index = Idx;
         client.Aisling.ActiveSequence = client.Aisling.ActiveReactor.Sequences[Idx];
 
-        client.Send(new ReactorSequence(client, client.Aisling.ActiveSequence));
+        //client.Send(new ReactorSequence(client, client.Aisling.ActiveSequence));
 
         if (Sequences[Idx].OnSequenceStep != null)
             Sequences[Idx].OnSequenceStep.Invoke(client.Aisling, Sequences[Idx]);
@@ -85,7 +85,7 @@ public class ReactorTemplate : Template
         }
 
         var first = Sequences[Index = 0];
-        if (first != null) client.Send(new ReactorSequence(client, first));
+        //if (first != null) client.Send(new ReactorSequence(client, first));
     }
 
     public void Update(WorldClient client)

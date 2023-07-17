@@ -1050,7 +1050,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x29 - Animation
         /// </summary>
-        public void SendAnimation(ushort targetEffect, uint? targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint? casterSerial = 0,  [CanBeNull] Position position = null)
+        public void SendAnimation(ushort targetEffect, uint? targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint? casterSerial = 0, [CanBeNull] Position position = null)
         {
             Point? point;
 
@@ -1117,15 +1117,77 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x31 - Show Board
         /// </summary>
-        public void SendBoard()
+        public void SendBoard(string boardName)
         {
-            //var packet = ServerPacketEx.FromData(
-            //    ServerOpCode.BulletinBoard,
-            //    PacketSerializer.Encoding,
-            //    1,
-            //    0);
+            if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardList))
+            {
+                foreach (var board in boardList)
+                {
+                    var post = new PostInfo();
+                    ICollection<PostInfo> postsCollection = new List<PostInfo>();
 
-            //Send(ref packet);
+                    foreach (var postFormat in board.Posts)
+                    {
+                        post = new PostInfo
+                        {
+                            Author = postFormat.Sender,
+                            CreationDate = postFormat.DatePosted,
+                            IsHighlighted = postFormat.HighLighted,
+                            Message = postFormat.Message,
+                            PostId = (short)postFormat.PostId,
+                            Subject = postFormat.Subject
+                        };
+
+                        postsCollection.Add(post);
+                    }
+
+                    var boardInfo = new BoardInfo
+                    {
+                        BoardId = board.Index,
+                        Name = boardName,
+                        Posts = postsCollection
+                    };
+
+                    var args = new BoardArgs
+                    {
+                        Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
+                        Board = boardInfo,
+                        StartPostId = postsCollection.First().PostId
+                    };
+
+                    Send(args);
+                }
+            }
+        }
+
+        public void SendBoardList(IEnumerable<Board> boards)
+        {
+            IEnumerable<Board> boardList;
+
+            foreach (var board in ServerSetup.Instance.GlobalBoardCache.Values)
+            {
+
+            }
+
+            //var args = new BoardArgs
+            //{
+            //    Type = BoardOrResponseType.BoardList,
+            //    Boards = ServerSetup.Instance.GlobalBoardCache
+            //};
+
+            //Send(args);
+        }
+
+        public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
+        {
+            var args = new BoardArgs
+            {
+                Type = responseType,
+                ResponseMessage = message,
+                Success = success
+            };
+
+            Send(args);
         }
 
         /// <summary>
@@ -2788,15 +2850,6 @@ namespace Darkages.Network.Client
             Aisling.LoggedIn = state;
 
             return this;
-        }
-
-        public void OpenBoard(string n)
-        {
-            if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(n, out var boardListObj))
-            {
-                //if (boardListObj != null && boardListObj.Any())
-                //SendBoard(new BoardList(boardListObj));
-            }
         }
 
         public void Port(int i, int x = 0, int y = 0)

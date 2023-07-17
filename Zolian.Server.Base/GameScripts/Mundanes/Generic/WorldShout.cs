@@ -58,7 +58,7 @@ public class WorldShout : MundaneScript
             {
                 case 0x0001:
                 {
-                    client.Send(new ReactorInputSequence(Mundane, "What do you want to shout?", "Remember to always be kind and considerate.", 40));
+                    //client.Send(new ReactorInputSequence(Mundane, "What do you want to shout?", "Remember to always be kind and considerate.", 40));
                 }
                     break;
             }

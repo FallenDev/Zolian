@@ -69,32 +69,30 @@ public class Board
         Formatting = Formatting.Indented,
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
     };
+}
 
-    public override void Serialize(NetworkPacketReader reader)
+public class PostFormat
+{
+    public PostFormat(ushort boardId, ushort topicId)
     {
+        BoardId = boardId;
+        TopicId = topicId;
     }
 
-    public override void Serialize(NetworkPacketWriter writer)
+    public bool HighLighted { get; set; }
+    public ushort BoardId { get; set; }
+    public DateTime DatePosted { get; init; }
+    public string Message { get; init; }
+    public string Owner { get; set; }
+    public ushort PostId { get; init; }
+    public bool Read { get; set; }
+    public string Recipient { get; init; }
+    public string Sender { get; init; }
+    public string Subject { get; init; }
+    public ushort TopicId { get; set; }
+
+    public void Associate(string username)
     {
-        writer.Write((byte) (IsMail ? 0x04 : 0x02));
-        writer.Write((byte) 0x01);
-        writer.Write((ushort) (IsMail ? 0x00 : LetterId));
-        writer.WriteStringA(IsMail ? "Mail" : Subject);
-
-        if (IsMail && Client != null)
-            Posts = Posts.Where(i => i.Recipient != null &&
-                                     i.Recipient.Equals(Client.Aisling.Username,
-                                         StringComparison.OrdinalIgnoreCase)).ToList();
-
-        writer.Write((byte) Posts.Count);
-        foreach (var post in Posts)
-        {
-            writer.Write((byte) (post.HighLighted ? 1 : !post.Read && IsMail ? 1 : 0));
-            writer.Write(post.PostId);
-            writer.WriteStringA(post.Sender);
-            writer.Write((byte) post.DatePosted.Month);
-            writer.Write((byte) post.DatePosted.Day);
-            writer.WriteStringA(post.Subject);
-        }
+        Owner = username;
     }
 }
