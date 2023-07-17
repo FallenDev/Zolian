@@ -30,9 +30,9 @@ public class deireasfaileas : SpellScript
             return;
         }
 
-        aisling.HasManaFor(Spell)?.Cast(Spell, target)
-            ?.ApplyBuff("buff_spell_reflect").Cast<Aisling>()
-            ?.UpdateStats(Spell)
-            ?.TrainSpell(Spell);
+        //aisling.HasManaFor(Spell)?.Cast(Spell, target)
+        //    ?.ApplyBuff("buff_spell_reflect").Cast<Aisling>()
+        //    ?.UpdateStats(Spell)
+        //    ?.TrainSpell(Spell);
     }
 }

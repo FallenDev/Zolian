@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+using Chaos.Networking.Entities.Server;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.Scripting;
@@ -34,14 +35,15 @@ public class Shadowfade : SkillScript
         {
             case Aisling aisling:
                 {
-                    var action = new ServerFormat1A
+                    var action = new BodyAnimationArgs
                     {
-                        Serial = aisling.Serial,
-                        Number = 0x06,
-                        Speed = 30
+                        AnimationSpeed = 30,
+                        BodyAnimation = BodyAnimation.HandsUp,
+                        Sound = null,
+                        SourceId = sprite.Serial
                     };
 
-                    if (aisling.Dead || aisling.Invisible)
+                    if (aisling.Dead || aisling.IsInvisible)
                     {
                         _skillMethod.FailedAttempt(aisling, _skill, action);
                         OnFailed(aisling);
@@ -51,7 +53,7 @@ public class Shadowfade : SkillScript
                     var buff = new buff_hide();
                     buff.OnApplied(aisling, buff);
                     _skillMethod.Train(aisling.Client, _skill);
-                    aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial));
                     break;
                 }
             case Monster monster:
@@ -108,7 +110,7 @@ public class Archery : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -116,11 +118,12 @@ public class Archery : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Archery";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x8E,
-            Speed = 30
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.LongBowShot,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront(9);
@@ -137,21 +140,21 @@ public class Archery : SkillScript
             _target = i;
             var thrown = _skillMethod.Thrown(aisling.Client, _skill, _crit);
 
-            var animation = new ServerFormat29
+            var animation = new AnimationArgs
             {
-                CasterSerial = (uint)aisling.Serial,
-                TargetSerial = (uint)i.Serial,
-                CasterEffect = (ushort)thrown,
-                TargetEffect = (ushort)thrown,
-                Speed = 100
+                AnimationSpeed = 100,
+                SourceAnimation = (ushort)thrown,
+                SourceId = aisling.Serial,
+                TargetAnimation = (ushort)thrown,
+                TargetId = i.Serial
             };
 
             var dmgCalc = DamageCalc(sprite);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
-            aisling.Show(Scope.NearbyAislings, animation);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, animation.TargetId, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId));
         }
 
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -179,11 +182,12 @@ public class Archery : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront(7).FirstOrDefault();
@@ -196,16 +200,20 @@ public class Archery : SkillScript
                 return;
             }
 
-            var animation = new ServerFormat29
+            var animation = new AnimationArgs
             {
-                CasterSerial = (uint)sprite.Serial,
-                TargetSerial = (uint)_target.Serial,
-                CasterEffect = (ushort)(_crit ? 10002 : 10000),
-                TargetEffect = (ushort)(_crit ? 10002 : 10000),
-                Speed = 100
+                AnimationSpeed = 100,
+                SourceAnimation = (ushort)(_crit
+                    ? 10002
+                    : 10000),
+                SourceId = sprite.Serial,
+                TargetAnimation = (ushort)(_crit
+                    ? 10002
+                    : 10000),
+                TargetId = _target.Serial
             };
 
-            sprite.Show(Scope.NearbyAislings, animation);
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, animation.TargetId, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId));
             var dmgCalc = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
@@ -259,16 +267,13 @@ public class Splash : SkillScript
                     var client = damageDealingAisling.Client;
 
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-                    damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+                    damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, damageDealingAisling.Serial));
 
                     break;
                 }
-            case Monster damageDealingMonster:
+            case Monster:
                 {
-                    var client = damageDealingMonster.Client;
-
-                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingMonster.Pos));
-
+                    sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, sprite.Serial));
                     break;
                 }
         }
@@ -279,18 +284,18 @@ public class Splash : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Splash";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
-        aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos, 75));
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(_skill.Template.Sound));
-
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial, 75));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_skill.Template.Sound, false));
         _skillMethod.Train(aisling.Client, _skill);
-        aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -371,7 +376,7 @@ public class Slash : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -379,11 +384,12 @@ public class Slash : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Slash";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x84,
-            Speed = 20
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         var enemy = aisling.DamageableGetInFront().FirstOrDefault();
@@ -419,11 +425,12 @@ public class Slash : SkillScript
         }
         else
         {
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             var enemy = sprite.MonsterGetInFront().FirstOrDefault();
@@ -486,7 +493,7 @@ public class Adrenaline : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You're out of steam.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -495,11 +502,12 @@ public class Adrenaline : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Adrenaline";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x06,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.HasBuff("Adrenaline"))
@@ -514,8 +522,7 @@ public class Adrenaline : SkillScript
         }
 
         _skillMethod.Train(client, _skill);
-
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -557,7 +564,7 @@ public class Atlantean_Weapon : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance offense.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -566,11 +573,12 @@ public class Atlantean_Weapon : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Atlantean Weapon";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x06,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.HasBuff("Atlantean Weapon"))
@@ -592,7 +600,7 @@ public class Atlantean_Weapon : SkillScript
 
         _skillMethod.Train(client, _skill);
 
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -634,7 +642,7 @@ public class Elemental_Bane : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to increase elemental fortitude.");
-        client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, damageDealingAisling.Pos));
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -643,11 +651,12 @@ public class Elemental_Bane : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Elemental Bane";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x06,
-            Speed = 50
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.HasBuff("Elemental Bane"))
@@ -663,8 +672,8 @@ public class Elemental_Bane : SkillScript
 
         _skillMethod.Train(client, _skill);
 
-        aisling.SendAnimation(360, aisling, aisling);
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(360, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -710,11 +719,12 @@ public class Appraise : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 50
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         try
@@ -747,9 +757,8 @@ public class Appraise : SkillScript
             return;
         }
 
-        aisling.Client.Send(new ServerFormat2C(_skill.Slot, _skill.Icon, _skill.Name));
-        aisling.Client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, aisling.Pos));
-        client.Aisling.Show(Scope.NearbyAislings, action);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -792,16 +801,16 @@ public class Appraise : SkillScript
 
         var classString = itemToBeIdentified.Template.Class != Class.Peasant ? ClassStrings.ClassValue(itemToBeIdentified.Template.Class) : "All";
         var name = itemToBeIdentified.DisplayName;
-        client.SendMessage(0x08, $"{{=sWeapon{{=b:{{=c {name}\n" +
-                                 $"{{=uMain hand only{{=b:{{=c {answerMainHand}\n" +
-                                 $"{{=uCan Dual Wield{{=b:{{=c {answerDualWield}\n" +
-                                 $"{{=uTwo-Handed{{=b:{{=c {answerTwoHander}\n" +
-                                 $"{{=uDmg Min{{=b:{{=c {itemToBeIdentified.Template.DmgMin}  {{=uDmg Max{{=b:{{=c {itemToBeIdentified.Template.DmgMax}\n" +
-                                 $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
-                                 "{=sStats Buff{=b:\n" +
-                                 $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
-                                 $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
-                                 $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sWeapon{{=b:{{=c {name}\n" +
+                                                                      $"{{=uMain hand only{{=b:{{=c {answerMainHand}\n" +
+                                                                      $"{{=uCan Dual Wield{{=b:{{=c {answerDualWield}\n" +
+                                                                      $"{{=uTwo-Handed{{=b:{{=c {answerTwoHander}\n" +
+                                                                      $"{{=uDmg Min{{=b:{{=c {itemToBeIdentified.Template.DmgMin}  {{=uDmg Max{{=b:{{=c {itemToBeIdentified.Template.DmgMax}\n" +
+                                                                      $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
+                                                                      "{=sStats Buff{=b:\n" +
+                                                                      $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
+                                                                      $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
+                                                                      $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
     }
 
     private void ArmorAppraisal(Sprite sprite, Item itemToBeIdentified)
@@ -817,12 +826,12 @@ public class Appraise : SkillScript
 
         var classString = itemToBeIdentified.Template.Class != Class.Peasant ? ClassStrings.ClassValue(itemToBeIdentified.Template.Class) : "All";
         var name = itemToBeIdentified.DisplayName;
-        client.SendMessage(0x08, $"{{=sArmor{{=b:{{=c {name}\n" +
-                                 $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
-                                 "{=sStats Buff{=b:\n" +
-                                 $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
-                                 $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
-                                 $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sArmor{{=b:{{=c {name}\n" +
+                                                                  $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uClass{{=b:{{=c {classString}\n" +
+                                                                  "{=sStats Buff{=b:\n" +
+                                                                  $"{{=uStr{{=b:{{=c {itemToBeIdentified.Template.StrModifer} {{=uInt{{=b:{{=c {itemToBeIdentified.Template.IntModifer} {{=uWis{{=b:{{=c {itemToBeIdentified.Template.WisModifer} {{=uCon{{=b:{{=c {itemToBeIdentified.Template.ConModifer} {{=uDex{{=b:{{=c {itemToBeIdentified.Template.DexModifer}\n" +
+                                                                  $"{{=uHealth{{=b:{{=c {itemToBeIdentified.Template.HealthModifer} {{=uMana{{=b:{{=c {itemToBeIdentified.Template.ManaModifer}\n" +
+                                                                  $"{{=uArmor{{=b:{{=c {itemToBeIdentified.Template.AcModifer} {{=uReflex{{=b:{{=c {itemToBeIdentified.Template.HitModifer} {{=uDamage{{=b:{{=c {itemToBeIdentified.Template.DmgModifer} {{=uRegen{{=b:{{=c {itemToBeIdentified.Template.RegenModifer}");
     }
 
     private static void ItemAppraisal(Sprite sprite, Item itemToBeIdentified)
@@ -838,11 +847,11 @@ public class Appraise : SkillScript
 
         var classString = itemToBeIdentified.Template.Class != Class.Peasant ? ClassStrings.ClassValue(itemToBeIdentified.Template.Class) : "All";
         var name = itemToBeIdentified.DisplayName;
-        client.SendMessage(0x08, $"{{=sItem{{=b:{{=c {name}\n" +
-                                 $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uGender{{=b:{{=c {itemToBeIdentified.Template.Gender}\n" +
-                                 $"{{=uWeight{{=b:{{=c {itemToBeIdentified.Template.CarryWeight}  {{=uWorth{{=b:{{=c {itemToBeIdentified.Template.Value}\n" +
-                                 $"{{=uEnchantable{{=b:{{=c {enchanted} {{=uClass{{=b:{{=c {classString}\n" +
-                                 $"{{=uDrop Rate{{=b:{{=c {itemToBeIdentified.Template.DropRate}");
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=sItem{{=b:{{=c {name}\n" +
+                                                                  $"{{=uLevel{{=b:{{=c {itemToBeIdentified.Template.LevelRequired}  {{=uGender{{=b:{{=c {itemToBeIdentified.Template.Gender}\n" +
+                                                                  $"{{=uWeight{{=b:{{=c {itemToBeIdentified.Template.CarryWeight}  {{=uWorth{{=b:{{=c {itemToBeIdentified.Template.Value}\n" +
+                                                                  $"{{=uEnchantable{{=b:{{=c {enchanted} {{=uClass{{=b:{{=c {classString}\n" +
+                                                                  $"{{=uDrop Rate{{=b:{{=c {itemToBeIdentified.Template.DropRate}");
     }
 }
 
@@ -867,7 +876,7 @@ public class Fire_Breath : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -875,11 +884,12 @@ public class Fire_Breath : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Fire Breath";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -909,8 +919,8 @@ public class Fire_Breath : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -920,7 +930,7 @@ public class Fire_Breath : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -955,11 +965,12 @@ public class Fire_Breath : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -970,7 +981,7 @@ public class Fire_Breath : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -979,7 +990,7 @@ public class Fire_Breath : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -991,11 +1002,12 @@ public class Fire_Breath : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -1045,7 +1057,7 @@ public class Bubble_Burst : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1053,11 +1065,12 @@ public class Bubble_Burst : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Bubble Burst";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1087,8 +1100,8 @@ public class Bubble_Burst : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -1098,7 +1111,7 @@ public class Bubble_Burst : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -1133,11 +1146,12 @@ public class Bubble_Burst : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -1148,7 +1162,7 @@ public class Bubble_Burst : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -1157,7 +1171,7 @@ public class Bubble_Burst : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -1169,11 +1183,12 @@ public class Bubble_Burst : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -1224,7 +1239,7 @@ public class Icy_Blast : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1232,11 +1247,12 @@ public class Icy_Blast : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Icy Blast";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1266,8 +1282,8 @@ public class Icy_Blast : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -1277,7 +1293,7 @@ public class Icy_Blast : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -1312,11 +1328,12 @@ public class Icy_Blast : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -1327,7 +1344,7 @@ public class Icy_Blast : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -1336,7 +1353,7 @@ public class Icy_Blast : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -1349,11 +1366,12 @@ public class Icy_Blast : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -1403,7 +1421,7 @@ public class Earthly_Delights : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1412,11 +1430,12 @@ public class Earthly_Delights : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Earthly Delights";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1476,11 +1495,12 @@ public class Earthly_Delights : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -1498,10 +1518,11 @@ public class Earthly_Delights : SkillScript
                 if (_target.CurrentHp > _target.MaximumHp)
                     _target.CurrentHp = _target.MaximumHp;
 
-                sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) continue;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
                 _crit = false;
             }
         }
@@ -1552,7 +1573,7 @@ public class Heavenly_Gaze : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1561,11 +1582,12 @@ public class Heavenly_Gaze : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Heavenly Gaze";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1641,11 +1663,12 @@ public class Heavenly_Gaze : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -1679,10 +1702,11 @@ public class Heavenly_Gaze : SkillScript
                 if (_target.CurrentMp > _target.MaximumMp)
                     _target.CurrentMp = _target.MaximumMp;
 
-                sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) continue;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
                 _crit = false;
             }
         }
@@ -1734,7 +1758,7 @@ public class Silent_Siren : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1742,11 +1766,12 @@ public class Silent_Siren : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Silent Siren";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1774,8 +1799,8 @@ public class Silent_Siren : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -1785,7 +1810,7 @@ public class Silent_Siren : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -1821,11 +1846,12 @@ public class Silent_Siren : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -1836,7 +1862,7 @@ public class Silent_Siren : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -1845,7 +1871,7 @@ public class Silent_Siren : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -1858,11 +1884,12 @@ public class Silent_Siren : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -1913,7 +1940,7 @@ public class Poison_Talon : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1921,11 +1948,12 @@ public class Poison_Talon : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Poison Talon";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -1953,8 +1981,8 @@ public class Poison_Talon : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -1964,7 +1992,7 @@ public class Poison_Talon : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -2000,11 +2028,12 @@ public class Poison_Talon : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -2015,7 +2044,7 @@ public class Poison_Talon : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -2024,7 +2053,7 @@ public class Poison_Talon : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -2037,11 +2066,12 @@ public class Poison_Talon : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -2092,7 +2122,7 @@ public class Toxic_Breath : SkillScript
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+            sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2101,11 +2131,12 @@ public class Toxic_Breath : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Toxic Breath";
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (aisling.CurrentMp - 300 > 0)
@@ -2133,8 +2164,8 @@ public class Toxic_Breath : SkillScript
 
             if (_target.SpellReflect)
             {
-                _target.Animate(184);
-                sprite.client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
+                sprite.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
 
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
@@ -2144,7 +2175,7 @@ public class Toxic_Breath : SkillScript
 
             if (_target.SpellNegate)
             {
-                _target.Animate(64);
+                _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
                 if (_target is Aisling)
                     _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
@@ -2180,11 +2211,12 @@ public class Toxic_Breath : SkillScript
         {
             var enemy = sprite.GetInFrontToSide();
 
-            var action = new ServerFormat1A
+            var action = new BodyAnimationArgs
             {
-                Serial = sprite.Serial,
-                Number = 0x01,
-                Speed = 30
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
             };
 
             if (enemy.Count == 0) return;
@@ -2195,7 +2227,7 @@ public class Toxic_Breath : SkillScript
 
                 if (_target.SpellReflect)
                 {
-                    _target.Animate(184);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {_skill.Template.Name}.");
 
@@ -2204,7 +2236,7 @@ public class Toxic_Breath : SkillScript
 
                 if (_target.SpellNegate)
                 {
-                    _target.Animate(64);
+                    _target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, _target.Serial));
                     if (_target is Aisling)
                         _target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {_skill.Template.Name}.");
 
@@ -2217,11 +2249,12 @@ public class Toxic_Breath : SkillScript
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
-                        sprite.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+                        sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
 
-                sprite.Show(Scope.NearbyAislings, action);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
                 if (!_crit) return;
-                sprite.Animate(387);
+                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, sprite.Serial));
             }
         }
     }
@@ -2279,16 +2312,13 @@ public class Golden_Lair : SkillScript
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
-                        damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+                        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
 
                     break;
                 }
-            case Monster damageDealingMonster:
+            case Monster:
                 {
-                    var client = damageDealingMonster.Client;
-
-                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-
+                    sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial));
                     break;
                 }
         }
@@ -2311,11 +2341,12 @@ public class Golden_Lair : SkillScript
         }
 
         var party = client.Aisling.PartyMembers;
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         if (party == null || party.Count == 0)
@@ -2329,11 +2360,12 @@ public class Golden_Lair : SkillScript
             if (entity.Map.ID != aisling.Map.ID) continue;
             _target = entity;
             _buff.OnApplied(_target, _buff);
-            aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
-            _skill.LastUsedSkill = DateTime.UtcNow;
-            _skillMethod.Train(client, _skill);
-            aisling.Show(Scope.NearbyAislings, action);
+            entity.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            entity.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, entity.Serial, 170));
         }
+        
+        _skill.LastUsedSkill = DateTime.UtcNow;
+        _skillMethod.Train(client, _skill);
     }
 
     public override void OnUse(Sprite sprite)
@@ -2389,16 +2421,13 @@ public class Vicious_Roar : SkillScript
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
                     if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
-                        damageDealingAisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
+                        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, _target.Serial));
 
                     break;
                 }
-            case Monster damageDealingMonster:
+            case Monster:
                 {
-                    var client = damageDealingMonster.Client;
-
-                    client.Aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.MissAnimation, _target.Pos));
-
+                    sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial));
                     break;
                 }
         }
@@ -2425,19 +2454,20 @@ public class Vicious_Roar : SkillScript
             return;
         }
 
-        var action = new ServerFormat1A
+        var action = new BodyAnimationArgs
         {
-            Serial = client.Aisling.Serial,
-            Number = 0x91,
-            Speed = 70
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
         };
 
         _target = aisling;
         _buff.OnApplied(_target, _buff);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat29(_skill.Template.TargetAnimation, _target.Pos, 170));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, _target.Serial, 170));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         _skill.LastUsedSkill = DateTime.UtcNow;
         _skillMethod.Train(client, _skill);
-        aisling.Show(Scope.NearbyAislings, action);
     }
 
     public override void OnUse(Sprite sprite)

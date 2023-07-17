@@ -50,7 +50,7 @@ public class NinjaStar : WeaponScript
                 break;
         }
 
-        damageDealingSprite.Client.SendTargetedAnimation(Scope.NearbyAislings, 10011, 100, 10011, damageDealingSprite.Serial, enemy.Serial);
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(10011, enemy.Serial, 100, 10011, damageDealingSprite.Serial));
         enemy.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

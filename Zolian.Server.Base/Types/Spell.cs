@@ -71,7 +71,7 @@ public class Spell
             {
                 client.Aisling.SpellBook.Set(spell);
                 client.SendAddSpellToPane(spell);
-                client.Aisling.SendAnimation(22, client.Aisling, client.Aisling);
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, client.Aisling.Serial));
             }
         }
 
@@ -139,7 +139,7 @@ public class Spell
             {
                 aisling.SpellBook.Set(spell);
                 aisling.Client.SendAddSpellToPane(spell);
-                aisling.SendAnimation(22, aisling, aisling);
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, aisling.Serial));
             }
         }
 

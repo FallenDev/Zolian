@@ -16,6 +16,8 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
+using static ServiceStack.Diagnostics.Events;
+
 namespace Darkages.Types;
 
 public class Skill
@@ -87,7 +89,7 @@ public class Skill
             {
                 client.Aisling.SkillBook.Set(skill);
                 client.SendAddSkillToPane(skill);
-                client.Aisling.SendAnimation(22, client.Aisling, client.Aisling);
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, client.Aisling.Serial));
             }
         }
 
@@ -156,7 +158,7 @@ public class Skill
             {
                 aisling.SkillBook.Set(skill);
                 aisling.Client.SendAddSkillToPane(skill);
-                aisling.SendAnimation(22, aisling, aisling);
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, aisling.Serial));
             }
         }
 
@@ -220,7 +222,7 @@ public class Skill
 
         // Swap sprites reversing damage 
         (damageDealingSprite, enemy) = (enemy, damageDealingSprite);
-        enemy.Animate(27);
+        enemy.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, enemy.Serial));
         if (damageDealingSprite is Aisling)
             damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
 

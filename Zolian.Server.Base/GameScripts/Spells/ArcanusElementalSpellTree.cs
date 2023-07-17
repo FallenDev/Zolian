@@ -638,7 +638,7 @@ public class Gust
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Gust.");
@@ -648,7 +648,7 @@ public class Gust
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Gust.");
@@ -678,11 +678,9 @@ public class Gust
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a gust of wind.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Gust);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Wind, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(29, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(29, target.Serial));
     }
 }
 
@@ -699,7 +697,7 @@ public class Quake
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Quake.");
@@ -709,7 +707,7 @@ public class Quake
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Quake.");
@@ -739,11 +737,9 @@ public class Quake
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a tremor.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Quake);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Earth, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(77, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(77, target.Serial));
     }
 }
 
@@ -760,7 +756,7 @@ public class Rain
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Rain.");
@@ -770,7 +766,7 @@ public class Rain
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Rain.");
@@ -800,11 +796,9 @@ public class Rain
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a storm.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Rain);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Water, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(9, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(9, target.Serial));
     }
 }
 
@@ -821,7 +815,7 @@ public class Flame
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Flame.");
@@ -831,7 +825,7 @@ public class Flame
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Flame.");
@@ -861,11 +855,9 @@ public class Flame
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon spews forth flames.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Flame);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Fire, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(12, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(12, target.Serial));
     }
 }
 
@@ -882,7 +874,7 @@ public class Dusk
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Dusk.");
@@ -892,7 +884,7 @@ public class Dusk
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Dusk.");
@@ -922,11 +914,9 @@ public class Dusk
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the night.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dusk);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Void, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(76, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, target.Serial));
     }
 }
 
@@ -943,7 +933,7 @@ public class Dawn
 
         if (target.SpellReflect)
         {
-            target.Animate(184);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You negated Dawn.");
@@ -952,7 +942,7 @@ public class Dawn
 
         if (target.SpellNegate)
         {
-            target.Animate(64);
+            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You deflected Dawn.");
@@ -982,11 +972,9 @@ public class Dawn
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the light.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dawn);
-
         target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Holy, null);
-        aisling.Show(Scope.NearbyAislings, new ServerFormat19(73));
-
-        client.SendAnimation(78, target, aisling);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(73, false));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(78, target.Serial));
     }
 }
 
