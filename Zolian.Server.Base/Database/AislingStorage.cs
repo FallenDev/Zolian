@@ -148,10 +148,10 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Dex", SqlDbType.Int).Value = obj._Dex;
             cmd.Parameters.Add("@Luck", SqlDbType.Int).Value = obj._Luck;
             cmd.Parameters.Add("@ABL", SqlDbType.SmallInt).Value = obj.AbpLevel;
-            cmd.Parameters.Add("@ABN", SqlDbType.Int).Value = obj.AbpNext;
+            cmd.Parameters.Add("@ABN", SqlDbType.BigInt).Value = obj.AbpNext;
             cmd.Parameters.Add("@ABT", SqlDbType.BigInt).Value = obj.AbpTotal;
             cmd.Parameters.Add("@EXPL", SqlDbType.SmallInt).Value = obj.ExpLevel;
-            cmd.Parameters.Add("@EXPN", SqlDbType.Int).Value = obj.ExpNext;
+            cmd.Parameters.Add("@EXPN", SqlDbType.BigInt).Value = obj.ExpNext;
             cmd.Parameters.Add("@EXPT", SqlDbType.BigInt).Value = obj.ExpTotal;
             cmd.Parameters.Add("@Afflix", SqlDbType.VarChar).Value = obj.Afflictions;
             cmd.Parameters.Add("@HairColor", SqlDbType.TinyInt).Value = obj.HairColor;
@@ -159,12 +159,12 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@OldColor", SqlDbType.TinyInt).Value = obj.OldColor;
             cmd.Parameters.Add("@OldStyle", SqlDbType.TinyInt).Value = obj.OldStyle;
             cmd.Parameters.Add("@Animal", SqlDbType.VarChar).Value = obj.AnimalForm;
-            cmd.Parameters.Add("@Monster", SqlDbType.Int).Value = obj.MonsterForm;
+            cmd.Parameters.Add("@Monster", SqlDbType.SmallInt).Value = obj.MonsterForm;
             cmd.Parameters.Add("@Active", SqlDbType.VarChar).Value = obj.ActiveStatus;
             cmd.Parameters.Add("@Flags", SqlDbType.VarChar).Value = obj.Flags;
             cmd.Parameters.Add("@CurrentWeight", SqlDbType.Int).Value = obj.CurrentWeight;
             cmd.Parameters.Add("@World", SqlDbType.Int).Value = obj.World;
-            cmd.Parameters.Add("@Lantern", SqlDbType.Int).Value = obj.Lantern;
+            cmd.Parameters.Add("@Lantern", SqlDbType.TinyInt).Value = obj.Lantern;
             cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.IsInvisible;
             cmd.Parameters.Add("@Resting", SqlDbType.VarChar).Value = obj.Resting;
             cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
@@ -172,38 +172,38 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@StatPoints", SqlDbType.Int).Value = obj.StatPoints;
             cmd.Parameters.Add("@GamePoints", SqlDbType.BigInt).Value = obj.GamePoints;
             cmd.Parameters.Add("@BankedGold", SqlDbType.BigInt).Value = obj.BankedGold;
-            cmd.Parameters.Add("@ArmorImg", SqlDbType.SmallInt).Value = obj.ArmorImg;
-            cmd.Parameters.Add("@HelmetImg", SqlDbType.SmallInt).Value = obj.HelmetImg;
-            cmd.Parameters.Add("@ShieldImg", SqlDbType.SmallInt).Value = obj.ShieldImg;
-            cmd.Parameters.Add("@WeaponImg", SqlDbType.SmallInt).Value = obj.WeaponImg;
-            cmd.Parameters.Add("@BootsImg", SqlDbType.SmallInt).Value = obj.BootsImg;
-            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.SmallInt).Value = obj.HeadAccessoryImg;
-            cmd.Parameters.Add("@Accessory1Img", SqlDbType.SmallInt).Value = obj.Accessory1Img;
-            cmd.Parameters.Add("@Accessory2Img", SqlDbType.SmallInt).Value = obj.Accessory2Img;
-            cmd.Parameters.Add("@Accessory3Img", SqlDbType.SmallInt).Value = obj.Accessory3Img;
-            cmd.Parameters.Add("@Accessory1Color", SqlDbType.SmallInt).Value = obj.Accessory1Color;
-            cmd.Parameters.Add("@Accessory2Color", SqlDbType.SmallInt).Value = obj.Accessory2Color;
-            cmd.Parameters.Add("@Accessory3Color", SqlDbType.SmallInt).Value = obj.Accessory3Color;
-            cmd.Parameters.Add("@BodyColor", SqlDbType.SmallInt).Value = obj.BodyColor;
-            cmd.Parameters.Add("@BodySprite", SqlDbType.SmallInt).Value = obj.BodySprite;
-            cmd.Parameters.Add("@FaceSprite", SqlDbType.SmallInt).Value = obj.FaceSprite;
-            cmd.Parameters.Add("@OverCoatImg", SqlDbType.SmallInt).Value = obj.OverCoatImg;
-            cmd.Parameters.Add("@BootColor", SqlDbType.SmallInt).Value = obj.BootColor;
-            cmd.Parameters.Add("@OverCoatColor", SqlDbType.SmallInt).Value = obj.OverCoatColor;
-            cmd.Parameters.Add("@Pants", SqlDbType.SmallInt).Value = obj.Pants;
-            cmd.Parameters.Add("@Aegis", SqlDbType.SmallInt).Value = obj.Aegis;
-            cmd.Parameters.Add("@Bleeding", SqlDbType.SmallInt).Value = obj.Bleeding;
+            cmd.Parameters.Add("@ArmorImg", SqlDbType.BigInt).Value = obj.ArmorImg;
+            cmd.Parameters.Add("@HelmetImg", SqlDbType.BigInt).Value = obj.HelmetImg;
+            cmd.Parameters.Add("@ShieldImg", SqlDbType.BigInt).Value = obj.ShieldImg;
+            cmd.Parameters.Add("@WeaponImg", SqlDbType.BigInt).Value = obj.WeaponImg;
+            cmd.Parameters.Add("@BootsImg", SqlDbType.BigInt).Value = obj.BootsImg;
+            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.BigInt).Value = obj.HeadAccessoryImg;
+            cmd.Parameters.Add("@Accessory1Img", SqlDbType.BigInt).Value = obj.Accessory1Img;
+            cmd.Parameters.Add("@Accessory2Img", SqlDbType.BigInt).Value = obj.Accessory2Img;
+            cmd.Parameters.Add("@Accessory3Img", SqlDbType.BigInt).Value = obj.Accessory3Img;
+            cmd.Parameters.Add("@Accessory1Color", SqlDbType.BigInt).Value = obj.Accessory1Color;
+            cmd.Parameters.Add("@Accessory2Color", SqlDbType.BigInt).Value = obj.Accessory2Color;
+            cmd.Parameters.Add("@Accessory3Color", SqlDbType.BigInt).Value = obj.Accessory3Color;
+            cmd.Parameters.Add("@BodyColor", SqlDbType.TinyInt).Value = obj.BodyColor;
+            cmd.Parameters.Add("@BodySprite", SqlDbType.TinyInt).Value = obj.BodySprite;
+            cmd.Parameters.Add("@FaceSprite", SqlDbType.TinyInt).Value = obj.FaceSprite;
+            cmd.Parameters.Add("@OverCoatImg", SqlDbType.BigInt).Value = obj.OverCoatImg;
+            cmd.Parameters.Add("@BootColor", SqlDbType.TinyInt).Value = obj.BootColor;
+            cmd.Parameters.Add("@OverCoatColor", SqlDbType.TinyInt).Value = obj.OverCoatColor;
+            cmd.Parameters.Add("@Pants", SqlDbType.TinyInt).Value = obj.Pants;
+            cmd.Parameters.Add("@Aegis", SqlDbType.TinyInt).Value = obj.Aegis;
+            cmd.Parameters.Add("@Bleeding", SqlDbType.TinyInt).Value = obj.Bleeding;
             cmd.Parameters.Add("@Spikes", SqlDbType.Int).Value = obj.Spikes;
-            cmd.Parameters.Add("@Rending", SqlDbType.SmallInt).Value = obj.Rending;
-            cmd.Parameters.Add("@Reaping", SqlDbType.SmallInt).Value = obj.Reaping;
-            cmd.Parameters.Add("@Vampirism", SqlDbType.SmallInt).Value = obj.Vampirism;
-            cmd.Parameters.Add("@Haste", SqlDbType.SmallInt).Value = obj.Haste;
-            cmd.Parameters.Add("@Gust", SqlDbType.SmallInt).Value = obj.Gust;
-            cmd.Parameters.Add("@Quake", SqlDbType.SmallInt).Value = obj.Quake;
-            cmd.Parameters.Add("@Rain", SqlDbType.SmallInt).Value = obj.Rain;
-            cmd.Parameters.Add("@Flame", SqlDbType.SmallInt).Value = obj.Flame;
-            cmd.Parameters.Add("@Dusk", SqlDbType.SmallInt).Value = obj.Dusk;
-            cmd.Parameters.Add("@Dawn", SqlDbType.SmallInt).Value = obj.Dawn;
+            cmd.Parameters.Add("@Rending", SqlDbType.TinyInt).Value = obj.Rending;
+            cmd.Parameters.Add("@Reaping", SqlDbType.TinyInt).Value = obj.Reaping;
+            cmd.Parameters.Add("@Vampirism", SqlDbType.TinyInt).Value = obj.Vampirism;
+            cmd.Parameters.Add("@Haste", SqlDbType.TinyInt).Value = obj.Haste;
+            cmd.Parameters.Add("@Gust", SqlDbType.TinyInt).Value = obj.Gust;
+            cmd.Parameters.Add("@Quake", SqlDbType.TinyInt).Value = obj.Quake;
+            cmd.Parameters.Add("@Rain", SqlDbType.TinyInt).Value = obj.Rain;
+            cmd.Parameters.Add("@Flame", SqlDbType.TinyInt).Value = obj.Flame;
+            cmd.Parameters.Add("@Dusk", SqlDbType.TinyInt).Value = obj.Dusk;
+            cmd.Parameters.Add("@Dawn", SqlDbType.TinyInt).Value = obj.Dawn;
             
             #endregion
 
@@ -266,7 +266,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@PastClass", SqlDbType.VarChar).Value = obj.PastClass;
             cmd.Parameters.Add("@Race", SqlDbType.VarChar).Value = obj.Race;
             cmd.Parameters.Add("@Gender", SqlDbType.VarChar).Value = SpriteMaker.GenderValue(obj.Gender);
-            cmd.Parameters.Add("@NameColor", SqlDbType.Int).Value = obj.NameColor;
+            cmd.Parameters.Add("@NameColor", SqlDbType.TinyInt).Value = obj.NameColor;
             cmd.Parameters.Add("@Profile", SqlDbType.VarChar).Value = obj.ProfileMessage ?? "";
             cmd.Parameters.Add("@Nation", SqlDbType.VarChar).Value = obj.Nation;
             cmd.Parameters.Add("@Clan", SqlDbType.VarChar).Value = obj.Clan ?? "";
@@ -294,7 +294,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #region Parameters
 
-            cmd2.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
+            cmd2.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
             cmd2.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = obj.QuestManager.TutorialCompleted;
             cmd2.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = obj.QuestManager.BetaReset;
             cmd2.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = obj.QuestManager.StoneSmithing;
@@ -362,7 +362,7 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSkills", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
@@ -403,7 +403,7 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSpells", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
@@ -457,9 +457,9 @@ public record AislingStorage : Sql, IAislingStorage
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
 
-                cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = item.ItemId;
+                cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = item.ItemId;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
                 cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
                 cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
                 cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
@@ -546,7 +546,7 @@ public record AislingStorage : Sql, IAislingStorage
             var sConn = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerHashExists", sConn);
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
             var reader = await cmd.ExecuteReaderAsync();
             var userFound = false;
 
@@ -616,8 +616,8 @@ public record AislingStorage : Sql, IAislingStorage
         {
             var sConn = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
-            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = playerSerial;
+            cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = playerSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
 
@@ -654,7 +654,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             var sConn = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExistsElsewhere", sConn);
-            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = itemSerial;
+            cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
 
@@ -690,9 +690,7 @@ public record AislingStorage : Sql, IAislingStorage
         await CreateLock.WaitAsync().ConfigureAwait(false);
 
         var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        var discovered = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         var item = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        var skills = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         try
         {
@@ -702,7 +700,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #region Parameters
 
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
             cmd.Parameters.Add("@Created", SqlDbType.DateTime).Value = obj.Created;
             cmd.Parameters.Add("@UserName", SqlDbType.VarChar).Value = obj.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = obj.Password;
@@ -712,8 +710,8 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@CurrentMp", SqlDbType.Int).Value = obj.CurrentMp;
             cmd.Parameters.Add("@BaseMp", SqlDbType.Int).Value = obj.BaseMp;
             cmd.Parameters.Add("@Gender", SqlDbType.VarChar).Value = SpriteMaker.GenderValue(obj.Gender);
-            cmd.Parameters.Add("@HairColor", SqlDbType.Int).Value = obj.HairColor;
-            cmd.Parameters.Add("@HairStyle", SqlDbType.Int).Value = obj.HairStyle;
+            cmd.Parameters.Add("@HairColor", SqlDbType.TinyInt).Value = obj.HairColor;
+            cmd.Parameters.Add("@HairStyle", SqlDbType.TinyInt).Value = obj.HairStyle;
 
             #endregion
 
@@ -726,8 +724,8 @@ public record AislingStorage : Sql, IAislingStorage
 
             // Discovered
             var playerDiscoveredMaps =
-                "INSERT INTO ZolianPlayers.dbo.PlayersDiscoveredMaps (DiscoveredId, Serial, MapId) VALUES " +
-                $"('{discovered}','{serial}','{obj.CurrentMapId}')";
+                "INSERT INTO ZolianPlayers.dbo.PlayersDiscoveredMaps (Serial, MapId) VALUES " +
+                $"('{serial}','{obj.CurrentMapId}')";
 
             var cmd2 = new SqlCommand(playerDiscoveredMaps, sConn);
             cmd2.CommandTimeout = 5;
@@ -737,8 +735,8 @@ public record AislingStorage : Sql, IAislingStorage
 
             // PlayersSkills
             var playerSkillBook =
-                "INSERT INTO ZolianPlayers.dbo.PlayersSkillBook (SkillId, Serial, Level, Slot, SkillName, Uses, CurrentCooldown) VALUES " +
-                $"('{skills}','{serial}','{0}','{73}','Assail','{0}','{0}')";
+                "INSERT INTO ZolianPlayers.dbo.PlayersSkillBook (Serial, Level, Slot, SkillName, Uses, CurrentCooldown) VALUES " +
+                $"('{serial}','{0}','{73}','Assail','{0}','{0}')";
 
             var cmd3 = new SqlCommand(playerSkillBook, sConn);
             cmd3.CommandTimeout = 5;
@@ -764,7 +762,7 @@ public record AislingStorage : Sql, IAislingStorage
             #region Parameters
 
             cmd5.Parameters.Add("@QuestId", SqlDbType.Int).Value = serial;
-            cmd5.Parameters.Add("@Serial", SqlDbType.Int).Value = serial;
+            cmd5.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
             cmd5.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = 0;

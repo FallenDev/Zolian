@@ -1460,6 +1460,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
 
             client.Aisling = aisling;
+            SetPriorToLoad(client);
             client.Aisling.Serial = aisling.Serial;
             client.Aisling.Pos = new Vector2(aisling.X, aisling.Y);
             aisling.Client = client as WorldClient;
@@ -1474,7 +1475,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return;
             }
 
-            CheckOnLoad(client);
             if (client.Aisling.Map != null) client.Aisling.CurrentMapId = client.Aisling.Map.ID;
             client.LoggedIn(false);
             client.Aisling.EquipmentManager.Client = client as WorldClient;
@@ -1532,7 +1532,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static void CheckOnLoad(IWorldClient client)
+    private static void SetPriorToLoad(IWorldClient client)
     {
         var aisling = client.Aisling;
 
