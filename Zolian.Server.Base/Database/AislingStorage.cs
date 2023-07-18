@@ -19,7 +19,7 @@ public record AislingStorage : Sql, IAislingStorage
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
     private SemaphoreSlim CreateLock { get; } = new(1, 1);
 
-    public async Task<Aisling> LoadAisling(string name, uint serial)
+    public async Task<Aisling> LoadAisling(string name, long serial)
     {
         await LoadLock.WaitAsync().ConfigureAwait(false);
 
@@ -59,7 +59,7 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, (uint)obj.Serial);
+        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
@@ -107,7 +107,7 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return;
         if (obj.Loading) return;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, (uint)obj.Serial);
+        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
@@ -148,11 +148,11 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Dex", SqlDbType.Int).Value = obj._Dex;
             cmd.Parameters.Add("@Luck", SqlDbType.Int).Value = obj._Luck;
             cmd.Parameters.Add("@ABL", SqlDbType.SmallInt).Value = obj.AbpLevel;
-            cmd.Parameters.Add("@ABN", SqlDbType.BigInt).Value = obj.AbpNext;
-            cmd.Parameters.Add("@ABT", SqlDbType.BigInt).Value = obj.AbpTotal;
+            cmd.Parameters.Add("@ABN", SqlDbType.Int).Value = obj.AbpNext;
+            cmd.Parameters.Add("@ABT", SqlDbType.Int).Value = obj.AbpTotal;
             cmd.Parameters.Add("@EXPL", SqlDbType.SmallInt).Value = obj.ExpLevel;
-            cmd.Parameters.Add("@EXPN", SqlDbType.BigInt).Value = obj.ExpNext;
-            cmd.Parameters.Add("@EXPT", SqlDbType.BigInt).Value = obj.ExpTotal;
+            cmd.Parameters.Add("@EXPN", SqlDbType.Int).Value = obj.ExpNext;
+            cmd.Parameters.Add("@EXPT", SqlDbType.Int).Value = obj.ExpTotal;
             cmd.Parameters.Add("@Afflix", SqlDbType.VarChar).Value = obj.Afflictions;
             cmd.Parameters.Add("@HairColor", SqlDbType.TinyInt).Value = obj.HairColor;
             cmd.Parameters.Add("@HairStyle", SqlDbType.TinyInt).Value = obj.HairStyle;
@@ -168,26 +168,26 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.IsInvisible;
             cmd.Parameters.Add("@Resting", SqlDbType.VarChar).Value = obj.Resting;
             cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
-            cmd.Parameters.Add("@GoldPoints", SqlDbType.BigInt).Value = obj.GoldPoints;
+            cmd.Parameters.Add("@GoldPoints", SqlDbType.Int).Value = obj.GoldPoints;
             cmd.Parameters.Add("@StatPoints", SqlDbType.Int).Value = obj.StatPoints;
-            cmd.Parameters.Add("@GamePoints", SqlDbType.BigInt).Value = obj.GamePoints;
-            cmd.Parameters.Add("@BankedGold", SqlDbType.BigInt).Value = obj.BankedGold;
-            cmd.Parameters.Add("@ArmorImg", SqlDbType.BigInt).Value = obj.ArmorImg;
-            cmd.Parameters.Add("@HelmetImg", SqlDbType.BigInt).Value = obj.HelmetImg;
-            cmd.Parameters.Add("@ShieldImg", SqlDbType.BigInt).Value = obj.ShieldImg;
-            cmd.Parameters.Add("@WeaponImg", SqlDbType.BigInt).Value = obj.WeaponImg;
-            cmd.Parameters.Add("@BootsImg", SqlDbType.BigInt).Value = obj.BootsImg;
-            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.BigInt).Value = obj.HeadAccessoryImg;
-            cmd.Parameters.Add("@Accessory1Img", SqlDbType.BigInt).Value = obj.Accessory1Img;
-            cmd.Parameters.Add("@Accessory2Img", SqlDbType.BigInt).Value = obj.Accessory2Img;
-            cmd.Parameters.Add("@Accessory3Img", SqlDbType.BigInt).Value = obj.Accessory3Img;
-            cmd.Parameters.Add("@Accessory1Color", SqlDbType.BigInt).Value = obj.Accessory1Color;
-            cmd.Parameters.Add("@Accessory2Color", SqlDbType.BigInt).Value = obj.Accessory2Color;
-            cmd.Parameters.Add("@Accessory3Color", SqlDbType.BigInt).Value = obj.Accessory3Color;
+            cmd.Parameters.Add("@GamePoints", SqlDbType.Int).Value = obj.GamePoints;
+            cmd.Parameters.Add("@BankedGold", SqlDbType.Int).Value = obj.BankedGold;
+            cmd.Parameters.Add("@ArmorImg", SqlDbType.Int).Value = obj.ArmorImg;
+            cmd.Parameters.Add("@HelmetImg", SqlDbType.Int).Value = obj.HelmetImg;
+            cmd.Parameters.Add("@ShieldImg", SqlDbType.Int).Value = obj.ShieldImg;
+            cmd.Parameters.Add("@WeaponImg", SqlDbType.Int).Value = obj.WeaponImg;
+            cmd.Parameters.Add("@BootsImg", SqlDbType.Int).Value = obj.BootsImg;
+            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.Int).Value = obj.HeadAccessoryImg;
+            cmd.Parameters.Add("@Accessory1Img", SqlDbType.Int).Value = obj.Accessory1Img;
+            cmd.Parameters.Add("@Accessory2Img", SqlDbType.Int).Value = obj.Accessory2Img;
+            cmd.Parameters.Add("@Accessory3Img", SqlDbType.Int).Value = obj.Accessory3Img;
+            cmd.Parameters.Add("@Accessory1Color", SqlDbType.Int).Value = obj.Accessory1Color;
+            cmd.Parameters.Add("@Accessory2Color", SqlDbType.Int).Value = obj.Accessory2Color;
+            cmd.Parameters.Add("@Accessory3Color", SqlDbType.Int).Value = obj.Accessory3Color;
             cmd.Parameters.Add("@BodyColor", SqlDbType.TinyInt).Value = obj.BodyColor;
             cmd.Parameters.Add("@BodySprite", SqlDbType.TinyInt).Value = obj.BodySprite;
             cmd.Parameters.Add("@FaceSprite", SqlDbType.TinyInt).Value = obj.FaceSprite;
-            cmd.Parameters.Add("@OverCoatImg", SqlDbType.BigInt).Value = obj.OverCoatImg;
+            cmd.Parameters.Add("@OverCoatImg", SqlDbType.Int).Value = obj.OverCoatImg;
             cmd.Parameters.Add("@BootColor", SqlDbType.TinyInt).Value = obj.BootColor;
             cmd.Parameters.Add("@OverCoatColor", SqlDbType.TinyInt).Value = obj.OverCoatColor;
             cmd.Parameters.Add("@Pants", SqlDbType.TinyInt).Value = obj.Pants;
@@ -245,7 +245,7 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, (uint)obj.Serial);
+        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
@@ -294,7 +294,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #region Parameters
 
-            cmd2.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
+            cmd2.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
             cmd2.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = obj.QuestManager.TutorialCompleted;
             cmd2.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = obj.QuestManager.BetaReset;
             cmd2.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = obj.QuestManager.StoneSmithing;
@@ -362,7 +362,7 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSkills", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
@@ -403,7 +403,7 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }))
             {
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSpells", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
                 cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
                 cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
@@ -457,9 +457,9 @@ public record AislingStorage : Sql, IAislingStorage
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
 
-                cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = item.ItemId;
+                cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = (long)item.ItemId;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = obj.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
                 cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
                 cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
                 cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
@@ -539,7 +539,7 @@ public record AislingStorage : Sql, IAislingStorage
         return false;
     }
 
-    public async Task<bool> CheckIfPlayerExists(string name, uint serial)
+    public async Task<bool> CheckIfPlayerExists(string name, long serial)
     {
         try
         {
@@ -610,7 +610,7 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public async Task<bool> CheckIfInventoryItemExists(uint itemSerial, uint playerSerial)
+    public async Task<bool> CheckIfInventoryItemExists(long itemSerial, long playerSerial)
     {
         try
         {
@@ -623,7 +623,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             while (reader.Read())
             {
-                var dbId = (int)reader["ItemId"];
+                var dbId = (long)reader["ItemId"];
                 if (itemSerial != dbId) continue;
                 itemFound = true;
             }
@@ -648,7 +648,7 @@ public record AislingStorage : Sql, IAislingStorage
         return false;
     }
 
-    public async Task<bool> CheckIfInventoryItemExistsElsewhere(uint itemSerial)
+    public async Task<bool> CheckIfInventoryItemExistsElsewhere(long itemSerial)
     {
         try
         {
@@ -660,7 +660,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             while (reader.Read())
             {
-                var dbId = (int)reader["ItemId"];
+                var dbId = (long)reader["ItemId"];
                 if (itemSerial != dbId) continue;
                 itemFound = true;
             }
@@ -700,7 +700,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #region Parameters
 
-            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)serial;
             cmd.Parameters.Add("@Created", SqlDbType.DateTime).Value = obj.Created;
             cmd.Parameters.Add("@UserName", SqlDbType.VarChar).Value = obj.Username;
             cmd.Parameters.Add("@Password", SqlDbType.VarChar).Value = obj.Password;
@@ -725,7 +725,7 @@ public record AislingStorage : Sql, IAislingStorage
             // Discovered
             var playerDiscoveredMaps =
                 "INSERT INTO ZolianPlayers.dbo.PlayersDiscoveredMaps (Serial, MapId) VALUES " +
-                $"('{serial}','{obj.CurrentMapId}')";
+                $"('{(long)serial}','{obj.CurrentMapId}')";
 
             var cmd2 = new SqlCommand(playerDiscoveredMaps, sConn);
             cmd2.CommandTimeout = 5;
@@ -736,7 +736,7 @@ public record AislingStorage : Sql, IAislingStorage
             // PlayersSkills
             var playerSkillBook =
                 "INSERT INTO ZolianPlayers.dbo.PlayersSkillBook (Serial, Level, Slot, SkillName, Uses, CurrentCooldown) VALUES " +
-                $"('{serial}','{0}','{73}','Assail','{0}','{0}')";
+                $"('{(long)serial}','{0}','{73}','Assail','{0}','{0}')";
 
             var cmd3 = new SqlCommand(playerSkillBook, sConn);
             cmd3.CommandTimeout = 5;
@@ -747,7 +747,7 @@ public record AislingStorage : Sql, IAislingStorage
             // PlayerInventory
             var playerInventory =
                 "INSERT INTO ZolianPlayers.dbo.PlayersInventory (ItemId, Name, Serial, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, InventorySlot, Stacks, Enchantable) VALUES " +
-                $"('{item}','Zolian Guide','{serial}','{0}','False','{0}','True','None','None','Common','Common','{24}','{1}','False')";
+                $"('{(long)item}','Zolian Guide','{(long)serial}','{0}','False','{0}','True','None','None','Common','Common','{24}','{1}','False')";
 
             var cmd4 = new SqlCommand(playerInventory, sConn);
             cmd4.CommandTimeout = 5;
@@ -761,8 +761,7 @@ public record AislingStorage : Sql, IAislingStorage
 
             #region Parameters
 
-            cmd5.Parameters.Add("@QuestId", SqlDbType.Int).Value = serial;
-            cmd5.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
+            cmd5.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)serial;
             cmd5.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = 0;

@@ -5,7 +5,7 @@ namespace Darkages.Interfaces;
 
 public interface IAislingStorage
 {
-    Task<Aisling> LoadAisling(string name, uint serial);
+    Task<Aisling> LoadAisling(string name, long serial);
     /// <summary>
     /// Save method for password attempts & password change
     /// </summary>
@@ -22,9 +22,9 @@ public interface IAislingStorage
     Task<bool> SaveSpells(Aisling obj, SqlConnection connection);
     Task<bool> SaveInventory(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
-    Task<bool> CheckIfPlayerExists(string name, uint serial);
+    Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);
-    Task<bool> CheckIfInventoryItemExists(uint itemSerial, uint playerSerial);
-    Task<bool> CheckIfInventoryItemExistsElsewhere(uint itemSerial);
+    Task<bool> CheckIfInventoryItemExists(long itemSerial, long playerSerial);
+    Task<bool> CheckIfInventoryItemExistsElsewhere(long itemSerial);
     Task Create(Aisling obj);
 }

@@ -119,11 +119,11 @@ CREATE TABLE Players
 	[_Dex] INT NOT NULL DEFAULT 0,
 	[_Luck] INT NOT NULL DEFAULT 0,
 	[AbpLevel] SMALLINT NOT NULL DEFAULT 0,
-	[AbpNext] BIGINT NOT NULL DEFAULT 0,
-	[AbpTotal] BIGINT NOT NULL DEFAULT 0,
+	[AbpNext] INT NOT NULL DEFAULT 0,
+	[AbpTotal] INT NOT NULL DEFAULT 0,
 	[ExpLevel] SMALLINT NOT NULL DEFAULT 1,
-	[ExpNext] BIGINT NOT NULL DEFAULT 0,
-	[ExpTotal] BIGINT NOT NULL DEFAULT 0,
+	[ExpNext] INT NOT NULL DEFAULT 0,
+	[ExpTotal] INT NOT NULL DEFAULT 0,
 	[Stage] VARCHAR(10) NOT NULL,
 	[Path] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
 	[PastClass] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
@@ -165,27 +165,27 @@ CREATE TABLE Players
 	[Developer] BIT NOT NULL DEFAULT 0,
 	[Ranger] BIT NOT NULL DEFAULT 0,
 	[Knight] BIT NOT NULL DEFAULT 0,
-	[GoldPoints] BIGINT NOT NULL DEFAULT 0,
+	[GoldPoints] INT NOT NULL DEFAULT 0,
 	[StatPoints] INT NOT NULL DEFAULT 0,
-	[GamePoints] BIGINT NOT NULL DEFAULT 0,
-	[BankedGold] BIGINT NOT NULL DEFAULT 0,
+	[GamePoints] INT NOT NULL DEFAULT 0,
+	[BankedGold] INT NOT NULL DEFAULT 0,
 	[Display] VARCHAR(12) NOT NULL DEFAULT 'None',
-	[ArmorImg] BIGINT NOT NULL DEFAULT 0,
-	[HelmetImg] BIGINT NOT NULL DEFAULT 0,
-	[ShieldImg] BIGINT NOT NULL DEFAULT 0,
-	[WeaponImg] BIGINT NOT NULL DEFAULT 0,
-	[BootsImg] BIGINT NOT NULL DEFAULT 0,
-    [HeadAccessoryImg] BIGINT NOT NULL DEFAULT 0,
-	[Accessory1Img] BIGINT NOT NULL DEFAULT 0,
-	[Accessory2Img] BIGINT NOT NULL DEFAULT 0,
-    [Accessory3Img] BIGINT NOT NULL DEFAULT 0,
-    [Accessory1Color] BIGINT NOT NULL DEFAULT 0,
-    [Accessory2Color] BIGINT NOT NULL DEFAULT 0,
-    [Accessory3Color] BIGINT NOT NULL DEFAULT 0,
+	[ArmorImg] INT NOT NULL DEFAULT 0,
+	[HelmetImg] INT NOT NULL DEFAULT 0,
+	[ShieldImg] INT NOT NULL DEFAULT 0,
+	[WeaponImg] INT NOT NULL DEFAULT 0,
+	[BootsImg] INT NOT NULL DEFAULT 0,
+    [HeadAccessoryImg] INT NOT NULL DEFAULT 0,
+	[Accessory1Img] INT NOT NULL DEFAULT 0,
+	[Accessory2Img] INT NOT NULL DEFAULT 0,
+    [Accessory3Img] INT NOT NULL DEFAULT 0,
+    [Accessory1Color] INT NOT NULL DEFAULT 0,
+    [Accessory2Color] INT NOT NULL DEFAULT 0,
+    [Accessory3Color] INT NOT NULL DEFAULT 0,
     [BodyColor] TINYINT NOT NULL DEFAULT 0,
     [BodySprite] TINYINT NOT NULL DEFAULT 0,
     [FaceSprite] TINYINT NOT NULL DEFAULT 0,
-    [OverCoatImg] BIGINT NOT NULL DEFAULT 0,
+    [OverCoatImg] INT NOT NULL DEFAULT 0,
 	[BootColor] TINYINT NOT NULL DEFAULT 0,
 	[OverCoatColor] TINYINT NOT NULL DEFAULT 0,
 	[Pants] TINYINT NOT NULL DEFAULT 0,
@@ -317,7 +317,6 @@ CREATE TABLE PlayersEquipped
 
 CREATE TABLE PlayersQuests
 (
-	[QuestId] INT NOT NULL PRIMARY KEY,
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
 	[TutorialCompleted] BIT NULL,
 	[BetaReset] BIT NULL,
@@ -587,15 +586,15 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InsertQuests]
-@QuestId INT, @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, @CamilleGreeting BIT,
+@Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, @CamilleGreeting BIT,
 @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT,
 @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20),
 @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([QuestId], [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount])
-    VALUES                                            (@QuestId, @Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount);
+    INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount])
+    VALUES                                            (@Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount);
 END
 GO
 
@@ -787,13 +786,13 @@ GO
 CREATE PROCEDURE [dbo].[PlayerQuickSave]
 @Name VARCHAR (12), @X INT, @Y INT, @CurrentMap INT, @OffensePrimary VARCHAR (15), @DefensePrimary VARCHAR (15), @OffenseSecondary VARCHAR (15),
 @DefenseSecondary VARCHAR (15), @Direction INT, @CurrentHp INT, @BaseHp INT, @CurrentMp INT, @BaseMp INT, @AC INT, @Regen INT, @Dmg INT,
-@Hit INT, @Mr INT, @Str INT, @Int INT, @Wis INT, @Con INT, @Dex INT, @Luck INT, @ABL SMALLINT, @ABN BIGINT, @ABT BIGINT, @EXPL SMALLINT,
-@EXPN BIGINT, @EXPT BIGINT, @Afflix VARCHAR (10), @HairColor TINYINT, @HairStyle TINYINT, @OldColor TINYINT, @OldStyle TINYINT, @Animal VARCHAR (10),
+@Hit INT, @Mr INT, @Str INT, @Int INT, @Wis INT, @Con INT, @Dex INT, @Luck INT, @ABL SMALLINT, @ABN INT, @ABT INT, @EXPL SMALLINT,
+@EXPN INT, @EXPT INT, @Afflix VARCHAR (10), @HairColor TINYINT, @HairStyle TINYINT, @OldColor TINYINT, @OldStyle TINYINT, @Animal VARCHAR (10),
 @Monster SMALLINT, @Active VARCHAR (15), @Flags VARCHAR (6), @CurrentWeight INT, @World INT, @Lantern TINYINT, @Invisible BIT, @Resting VARCHAR (13),
-@PartyStatus VARCHAR (21), @GoldPoints BIGINT, @StatPoints INT, @GamePoints BIGINT, @BankedGold BIGINT, @ArmorImg BIGINT, @HelmetImg BIGINT,
-@ShieldImg BIGINT, @WeaponImg BIGINT, @BootsImg BIGINT, @HeadAccessoryImg BIGINT, @Accessory1Img BIGINT, @Accessory2Img BIGINT, @Accessory3Img BIGINT,
-@Accessory1Color BIGINT, @Accessory2Color BIGINT, @Accessory3Color BIGINT, @BodyColor TINYINT, @BodySprite TINYINT, @FaceSprite TINYINT,
-@OverCoatImg BIGINT, @BootColor TINYINT, @OverCoatColor TINYINT, @Pants TINYINT, @Aegis TINYINT, @Bleeding TINYINT, @Spikes INT, @Rending TINYINT,
+@PartyStatus VARCHAR (21), @GoldPoints INT, @StatPoints INT, @GamePoints INT, @BankedGold INT, @ArmorImg INT, @HelmetImg INT,
+@ShieldImg INT, @WeaponImg INT, @BootsImg INT, @HeadAccessoryImg INT, @Accessory1Img INT, @Accessory2Img INT, @Accessory3Img INT,
+@Accessory1Color INT, @Accessory2Color INT, @Accessory3Color INT, @BodyColor TINYINT, @BodySprite TINYINT, @FaceSprite TINYINT,
+@OverCoatImg INT, @BootColor TINYINT, @OverCoatColor TINYINT, @Pants TINYINT, @Aegis TINYINT, @Bleeding TINYINT, @Spikes INT, @Rending TINYINT,
 @Reaping TINYINT, @Vampirism TINYINT, @Haste TINYINT, @Gust TINYINT, @Quake TINYINT, @Rain TINYINT, @Flame TINYINT, @Dusk TINYINT, @Dawn TINYINT
 AS
 BEGIN

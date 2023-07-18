@@ -107,7 +107,7 @@ public class Quests
     public bool BetaReset { get; set; }
     public int StoneSmithing { get; set; }
     public int MilethReputation { get; set; }
-    public byte ArtursGift { get; set; }
+    public int ArtursGift { get; set; }
     public bool CamilleGreetingComplete { get; set; }
     public bool ConnPotions { get; set; }
     public bool CryptTerror { get; set; }

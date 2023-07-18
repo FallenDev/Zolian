@@ -41,6 +41,7 @@ using Darkages.GameScripts.Formulas;
 using System.Collections.Concurrent;
 using Chaos.Common.Identity;
 using System.Globalization;
+using Chaos.Networking.Definitions;
 
 namespace Darkages.Network.Client
 {
@@ -323,7 +324,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectEquipped]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -393,7 +394,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectSkills]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var skillList = sConn.Query<Skill>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -447,7 +448,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectSpells]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var spellList = sConn.Query<Spell>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -501,7 +502,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectInventory]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.InventorySlot);
@@ -612,7 +613,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectBuffs]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var buffs = sConn.Query<Buff>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -672,7 +673,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectDeBuffs]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var deBuffs = sConn.Query<Debuff>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -731,7 +732,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectDiscoveredMaps]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var discovered = sConn.Query<DiscoveredMap>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -770,7 +771,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectIgnoredPlayers]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var ignoredRecords = sConn.Query<IgnoredRecord>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -811,7 +812,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectLegends]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 var legends = sConn.Query<Legend.LegendItem>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
@@ -855,7 +856,7 @@ namespace Darkages.Network.Client
             try
             {
                 const string procedure = "[SelectQuests]";
-                var values = new { Aisling.Serial };
+                var values = new { Serial = (long)Aisling.Serial };
                 using var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
                 Aisling.QuestManager = sConn.QueryFirst<Quests>(procedure, values, commandType: CommandType.StoredProcedure);
@@ -996,9 +997,9 @@ namespace Darkages.Network.Client
                     Count = item.Stacks,
                     CurrentDurability = (int)item.Durability,
                     MaxDurability = (int)item.MaxDurability,
-                    Name = item.Name,
-                    Slot = item.Slot,
-                    Sprite = item.DisplayImage,
+                    Name = item.DisplayName,
+                    Slot = item.InventorySlot,
+                    Sprite = (ushort)(item.DisplayImage - 32768),
                     Stackable = item.Template.CanStack
                 }
             };
@@ -1998,15 +1999,14 @@ namespace Darkages.Network.Client
 
                 legendMarks.Add(legends);
             }
-
-
+            
             var args = new SelfProfileArgs
             {
                 AdvClass = AdvClass.None,
                 BaseClass = (BaseClass)playerClass,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
-                GroupString = Aisling.PartyMembers.ToString(),
+                GroupString = Aisling.PartyMembers?.ToString(),
                 GuildName = Aisling.Clan,
                 GuildRank = Aisling.ClanRank,
                 IsMaster = Aisling.Stage >= ClassStage.Master,
