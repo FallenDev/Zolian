@@ -1,10 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using Chaos.Networking.Abstractions;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -30,14 +32,14 @@ public class ServerSetup : IServerContext
     private static Board[] _serverUpdates = new Board[1];
     private static ILogger<ServerSetup> _log;
     public static IOptions<ServerOptions> ServerOptions;
-    private static LobbyServer _lobby;
-    private static LoginServer _login;
 
     #region Properties
 
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
     public WorldServer Game { get; set; }
+    public LoginServer LoginServer { get; set; }
+    public LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
@@ -280,8 +282,6 @@ public class ServerSetup : IServerContext
     {
         try
         {
-            Game.Start();
-            
             Console.ForegroundColor = ConsoleColor.Green;
             Logger("Server is now online.");
         }

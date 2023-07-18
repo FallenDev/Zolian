@@ -10,6 +10,7 @@ using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
+using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
@@ -40,6 +41,7 @@ using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
+using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using Stat = Chaos.Common.Definitions.Stat;
 
 namespace Darkages.Network.Server;
@@ -65,16 +67,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         IClientFactory<WorldClient> clientProvider,
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
-        Microsoft.Extensions.Options.IOptions<Chaos.Networking.Options.ServerOptions> options,
         ILogger<WorldServer> logger
     )
         : base(
             redirectManager,
             packetSerializer,
             clientRegistry,
-            options,
+            Microsoft.Extensions.Options.Options.Create(new ServerOptions
+            {
+                Address = ServerSetup.Instance.IpAddress,
+                Port = ServerSetup.Instance.Config.SERVER_PORT
+            }),
             logger)
     {
+        ServerSetup.Instance.Game = this;
         ClientProvider = clientProvider;
         IndexHandlers();
         SkillMapper();
@@ -82,6 +88,27 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     #region Server Init
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            ServerSetup.Instance.Running = true;
+            UpdateComponentsRoutine();
+            UpdateObjectsRoutine();
+            UpdateMapsRoutine();
+            NightlyServerReset();
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+            ServerSetup.Instance.Running = false;
+        }
+
+        return base.ExecuteAsync(stoppingToken);
+    }
 
     private void RegisterServerComponents()
     {
@@ -513,26 +540,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private Task SaveUserAsync(Aisling aisling) => StorageManager.AislingBucket.Save(aisling);
 
-    public void Start()
-    {
-        try
-        {
-            ServerSetup.Instance.Running = true;
-            UpdateComponentsRoutine();
-            UpdateObjectsRoutine();
-            UpdateMapsRoutine();
-            NightlyServerReset();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
-            ServerSetup.Instance.Running = false;
-        }
-    }
-
-    private void UpdateComponentsRoutine()
+    private async void UpdateComponentsRoutine()
     {
         _gameSpeed = DateTime.UtcNow;
 
@@ -541,20 +549,27 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _gameSpeed;
 
-            var components = _serverComponents.Select(i => i.Value);
-
-            foreach (var component in components)
+            try
             {
-                component?.Update(gameTime);
+                var components = _serverComponents.Select(i => i.Value);
+
+                foreach (var component in components)
+                {
+                    component?.Update(gameTime);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
             _gameSpeed += gameTime;
 
-            Task.Delay(GameSpeed).ConfigureAwait(false);
+            await Task.Delay(GameSpeed);
         }
     }
 
-    private void UpdateObjectsRoutine()
+    private async void UpdateObjectsRoutine()
     {
         _spriteSpeed = DateTime.UtcNow;
 
@@ -563,17 +578,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _spriteSpeed;
 
-            UpdateClients(gameTime);
-            UpdateMonsters(gameTime);
-            UpdateMundanes(gameTime);
+            try
+            {
+                UpdateClients(gameTime);
+                UpdateMonsters(gameTime);
+                UpdateMundanes(gameTime);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             _spriteSpeed += gameTime;
 
-            Task.Delay(SpriteSpeed).ConfigureAwait(false);
+            await Task.Delay(SpriteSpeed);
         }
     }
 
-    private void UpdateMapsRoutine()
+    private async void UpdateMapsRoutine()
     {
         _gameSpeed = DateTime.UtcNow;
 
@@ -582,24 +604,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _gameSpeed;
 
-            UpdateMaps(gameTime);
+            try
+            {
+                UpdateMaps(gameTime);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             _gameSpeed += gameTime;
 
-            Task.Delay(GameSpeed).ConfigureAwait(false);
+            await Task.Delay(GameSpeed);
         }
     }
 
-    private void NightlyServerReset()
+    private async void NightlyServerReset()
     {
-        var currentTime = DateTime.UtcNow;
-        var midnight = DateTime.Today;
+        var now = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            if (!currentTime.Equals(midnight)) continue;
-            Commander.Restart(null, null);
-            break;
+            await Task.Delay(GameSpeed);
+
+            if (now is { Hour: 0, Minute: 0, Second: 0 })
+                Commander.Restart(null, null);
         }
     }
 

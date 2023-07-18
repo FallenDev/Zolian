@@ -83,6 +83,7 @@ public class ServerConstants : IServerConstants
     public double PingInterval { get; set; }
     public int SERVER_PORT { get; set; }
     public int LOGIN_PORT { get; set; }
+    public int LOBBY_PORT { get; set; }
     public string SERVER_TITLE { get; set; }
     public string ServerWelcomeMessage { get; set; }
     public IEnumerable<string> GameMasters { get; set; }

@@ -41,11 +41,15 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         IClientFactory<LoginClient> clientProvider,
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
-        IOptions<Chaos.Networking.Options.ServerOptions> options,
         ILogger<LoginServer> logger
     )
-        : base(redirectManager, packetSerializer, clientRegistry, options, logger)
+        : base(redirectManager, packetSerializer, clientRegistry, Microsoft.Extensions.Options.Options.Create(new ServerOptions
+        {
+            Address = ServerSetup.Instance.IpAddress,
+            Port = ServerSetup.Instance.Config.LOGIN_PORT
+        }), logger)
     {
+        ServerSetup.Instance.LoginServer = this;
         _clientProvider = clientProvider;
         _notification = Notification.FromFile("Notification.txt");
         CreateCharRequests = new ConcurrentDictionary<uint, CreateCharRequestArgs>();

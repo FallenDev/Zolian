@@ -29,7 +29,7 @@ namespace Darkages.Network.Client
 
             if (isEncrypted)
                 Crypto.Decrypt(ref packet);
-            
+
             return _server.HandlePacketAsync(this, in packet);
         }
 

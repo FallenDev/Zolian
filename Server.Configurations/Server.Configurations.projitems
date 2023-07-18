@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)MServerTable.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Notification.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -167,9 +167,10 @@
     "PingInterval": 7.0,
     // Default Ports for the server
     // Default: 2615
-    "SERVER_PORT": 2615,
+    "SERVER_PORT": 4202,
     // Default: 2610
-    "LOGIN_PORT": 2610,
+    "LOGIN_PORT": 4201,
+    "LOBBY_PORT": 4200,
     // Name of the server
     "SERVER_TITLE": "Zolian",
     // Welcome messages shown to players upon login
@@ -215,7 +216,7 @@
     // Forces the client to send a clear message every set seconds
     // Default: 1 minute (60.0)
     "MessageClearInterval": 60.0,
-    
+
     // Various Hard-Coded Server Messages
     "BadRequestMessage": "(Invalid Request)",
     "CantAttack": "I can't attack that.",

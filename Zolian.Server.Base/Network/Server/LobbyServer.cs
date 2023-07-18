@@ -9,6 +9,7 @@ using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
+
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
@@ -25,6 +26,8 @@ using Newtonsoft.Json;
 
 using RestSharp;
 
+using ServerOptions = Chaos.Networking.Options.ServerOptions;
+
 namespace Darkages.Network.Server;
 
 public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
@@ -38,30 +41,19 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
         IClientRegistry<ILobbyClient> lobbyRegistry,
-        ILogger<LobbyServer> logger,
-        IOptions<Chaos.Networking.Options.ServerOptions> options
-    ) : base(redirectManager, packetSerializer, lobbyRegistry, options, logger)
+        ILogger<LobbyServer> logger) : base(redirectManager, packetSerializer, lobbyRegistry, Microsoft.Extensions.Options.Options.Create(new ServerOptions
+        {
+            Address = ServerSetup.Instance.IpAddress,
+            Port = ServerSetup.Instance.Config.LOBBY_PORT
+        }), logger)
     {
+        ServerSetup.Instance.LobbyServer = this;
         _clientProvider = clientProvider;
         _serverTable = MServerTable.FromFile("MServerTable.xml");
         IndexHandlers();
-
     }
 
     #region OnHandlers
-
-
-    public ValueTask OnConnectionInfoRequest(ILobbyClient client, in ClientPacket _)
-    {
-        ValueTask InnerOnConnectionInfoRequest(ILobbyClient localClient)
-        {
-            localClient.SendConnectionInfo(_serverTable.Hash);
-
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnConnectionInfoRequest);
-    }
 
     public ValueTask OnVersion(ILobbyClient client, in ClientPacket packet)
     {
@@ -134,18 +126,13 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var client = _clientProvider.CreateClient(clientSocket);
 
         // ToDo Client BadActor logic & Version Check
-        
+
         var badActor = ClientOnBlackList(client);
 
         if (badActor)
         {
             ServerSetup.Logger($"{client.RemoteIp} was detected as potentially malicious", LogLevel.Critical);
             client.Disconnect();
-            return;
-        }
-
-        if (client is not { Connected: true })
-        {
             return;
         }
 
@@ -218,7 +205,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             request.AddParameter("maxAgeInDays", "180");
 
             var response = _restClient.ExecuteGetAsync<Ipdb>(request, tokenSource.Token);
-            
+
             if (response.Result.IsSuccessful)
             {
                 var json = response.Result.Content;

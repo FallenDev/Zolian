@@ -2,8 +2,8 @@
 	<Servers>
 		<MServer>
 			<Addr>127.0.0.1</Addr>
-			<Port>2610</Port>
-			<Guid>1</Guid>
+			<Port>4201</Port>
+			<Guid>0</Guid>
 			<Name>Zolian</Name>
 			<Desc>Zolian Server</Desc>
 			<ID>1</ID>

@@ -45,6 +45,7 @@ public interface IServerConstants
     string AbilityUpMessage { get; }
     bool LogClientPackets { get; }
     int LOGIN_PORT { get; }
+    int LOBBY_PORT { get; }
     bool LogServerPackets { get; }
     int MaxCarryGold { get; }
     int MaxHP { get; }

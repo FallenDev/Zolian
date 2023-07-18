@@ -10,6 +10,8 @@ using Darkages.Meta;
 using Darkages.Network.Server;
 using Darkages.Systems.CLI;
 using System.Net;
+using Chaos.Networking.Abstractions;
+using Darkages.Network.Client;
 
 namespace Darkages.Interfaces;
 
@@ -51,6 +53,8 @@ public interface IServerContext
     bool Running { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }
+    LoginServer LoginServer { get; set; }
+    LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
