@@ -14,10 +14,6 @@
     // Set this address internally as a static IP behind your router, this will allow you to restrict Admin access
     "InternalIp": "192.168.50.1"
   },
-  "Editor": {
-    "Location": "Z:\\Zolian\\Data",
-    "GameLocation": "Z:\\Zolian\\game"
-  },
   "ServerConfig": {
     // Last Client Refresh rate delay
     // Default: 200 miliseconds

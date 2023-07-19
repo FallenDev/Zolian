@@ -79,6 +79,4 @@ public class TileGrid : ObjectManager
             }
         }
     }
-
-    public IEnumerable<Sprite> PlayersToAttack => GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive, Get.MonsterDamage);
 }

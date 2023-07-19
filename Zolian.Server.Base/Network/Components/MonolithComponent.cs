@@ -42,7 +42,7 @@ public class MonolithComponent : WorldServerComponent
 
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
-            if (map == null || map.Rows == 0 || map.Cols == 0) return;
+            if (map == null || map.Height == 0 || map.Width == 0) return;
 
             var temps = templates.Where(i => i.Value.AreaID == map.ID);
 
@@ -52,7 +52,7 @@ public class MonolithComponent : WorldServerComponent
 
                 if (!monster.ReadyToSpawn()) continue;
                 if (count >= monster.SpawnMax) continue;
-                if (count >= map.Rows * map.Cols / 6) continue;
+                if (count >= map.Height * map.Width / 6) continue;
 
                 PlaceNode(map);
                 CreateFromTemplate(monster, map);
@@ -62,7 +62,7 @@ public class MonolithComponent : WorldServerComponent
 
     private void PlaceNode(Area map)
     {
-        if (map.Rows < 25 || map.Cols < 25) return;
+        if (map.Height < 25 || map.Width < 25) return;
 
         map.MiningNodes = Server.ObjectHandlers.GetObjects<Item>(map, i => i.Template is { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
             or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }).Count();
@@ -77,8 +77,8 @@ public class MonolithComponent : WorldServerComponent
                 try
                 {
                     var node = MiningNode(map);
-                    var x = Generator.GenerateMapLocation(map.Rows);
-                    var y = Generator.GenerateMapLocation(map.Cols);
+                    var x = Generator.GenerateMapLocation(map.Height);
+                    var y = Generator.GenerateMapLocation(map.Width);
 
                     for (var i = 0; i < 10; i++)
                     {

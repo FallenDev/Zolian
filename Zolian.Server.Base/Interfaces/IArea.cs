@@ -16,13 +16,13 @@ public interface IArea
 
     Vector2 GetPosFromLoc(Vector2 location);
     bool IsLocationOnMap(Sprite sprite);
-    byte[] GetRowData(int row);
+    IEnumerable<byte> GetRowData(int row);
     bool IsWall(int x, int y);
     bool IsAStarWall(Sprite sprite, int x, int y);
     bool IsAStarSprite(Sprite sprite, int x, int y);
     bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y);
     bool OnLoaded();
-    bool ParseMapWalls(short lWall, short rWall);
+    bool ParseMapWalls(int lWall, int rWall);
     void Update(in TimeSpan elapsedTime);
     Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end);
     void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable,

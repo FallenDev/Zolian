@@ -1685,13 +1685,13 @@ namespace Darkages.Network.Client
         {
             var mapTemplate = Aisling.Map;
 
-            for (byte y = 0; y < mapTemplate.Rows; y++)
+            for (byte y = 0; y < mapTemplate.Height; y++)
             {
                 var args = new MapDataArgs
                 {
                     CurrentYIndex = y,
-                    Width = (byte)mapTemplate.Cols,
-                    MapData = Enumerable.ToArray(mapTemplate.GetRowData(y))
+                    Width = (byte)mapTemplate.Width,
+                    MapData = mapTemplate.GetRowData(y).ToArray()
                 };
 
                 Send(args);
@@ -1707,10 +1707,10 @@ namespace Darkages.Network.Client
             {
                 CheckSum = Aisling.Map.Hash,
                 Flags = (byte)Aisling.Map.Flags,
-                Height = (byte)Aisling.Map.Cols,
+                Height = (byte)Aisling.Map.Height,
                 MapId = (short)Aisling.Map.ID,
                 Name = Aisling.Map.Name,
-                Width = (byte)Aisling.Map.Rows
+                Width = (byte)Aisling.Map.Width
             };
 
             Send(args);

@@ -162,8 +162,8 @@ public class CreateMonster : MonsterCreateScript
     {
         if (_monsterTemplate.SpawnType == SpawnQualifer.Random)
         {
-            var x = Generator.GenerateMapLocation(_map.Rows);
-            var y = Generator.GenerateMapLocation(_map.Cols);
+            var x = Generator.GenerateMapLocation(_map.Height);
+            var y = Generator.GenerateMapLocation(_map.Width);
             obj.Pos = new Vector2(x, y);
         }
         else

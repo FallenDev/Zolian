@@ -51,37 +51,40 @@ public class Area : Map, IArea
         return xTrue && yTrue;
     }
 
-    public byte[] GetRowData(int row)
+    public IEnumerable<byte> GetRowData(int row)
     {
-        var buffer = new byte[Cols * 6];
-        var bPos = 0;
-        var dPos = row * Cols * 6;
-
-        lock (ServerSetup.SyncLock)
+        try
         {
-            for (var i = 0; i < Cols; i++, bPos += 6, dPos += 6)
+            var buffer = new byte[Width * 6];
+            var bPos = 0;
+            var dPos = row * Width * 6;
+
+            for (var i = 0; i < Width; i++, bPos += 6, dPos += 6)
             {
                 buffer[bPos + 0] = Data[dPos + 1];
-
                 buffer[bPos + 1] = Data[dPos + 0];
-
                 buffer[bPos + 2] = Data[dPos + 3];
-
                 buffer[bPos + 3] = Data[dPos + 2];
-
                 buffer[bPos + 4] = Data[dPos + 5];
-
                 buffer[bPos + 5] = Data[dPos + 4];
             }
+
+            return buffer;
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
+            Crashes.TrackError(ex);
         }
 
-        return buffer;
+        return default;
     }
 
     public bool IsWall(int x, int y)
     {
-        if (x < 0 || x >= Cols) return true;
-        if (y < 0 || y >= Rows) return true;
+        if (x < 0 || x >= Width) return true;
+        if (y < 0 || y >= Height) return true;
 
         var isWall = TileContent[x, y] == Enums.TileContent.Wall;
         return isWall;
@@ -89,8 +92,8 @@ public class Area : Map, IArea
 
     public bool IsAStarWall(Sprite sprite, int x, int y)
     {
-        if (x < 0 || x >= sprite.Map.Cols) return true;
-        if (y < 0 || y >= sprite.Map.Rows) return true;
+        if (x < 0 || x >= sprite.Map.Width) return true;
+        if (y < 0 || y >= sprite.Map.Height) return true;
 
         var isWall = sprite.Map.TileContent[x, y] == Enums.TileContent.Wall;
         return isWall;
@@ -100,8 +103,8 @@ public class Area : Map, IArea
     {
         if (sprite is null || sprite.CurrentHp <= 0) return false;
         if ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y) return false;
-        if (x < 0 || x >= sprite.Map.Cols) return true;
-        if (y < 0 || y >= sprite.Map.Rows) return true;
+        if (x < 0 || x >= sprite.Map.Width) return true;
+        if (y < 0 || y >= sprite.Map.Height) return true;
 
         try
         {
@@ -125,8 +128,8 @@ public class Area : Map, IArea
 
     public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
-        if (x < 0 || x >= sprite.Map.Cols) return true;
-        if (y < 0 || y >= sprite.Map.Rows) return true;
+        if (x < 0 || x >= sprite.Map.Width) return true;
+        if (y < 0 || y >= sprite.Map.Height) return true;
 
         try
         {
@@ -152,8 +155,8 @@ public class Area : Map, IArea
     {
         lock (ServerSetup.SyncLock)
         {
-            TileContent = new TileContent[Cols, Rows];
-            ObjectGrid = new TileGrid[Cols, Rows];
+            TileContent = new TileContent[Width, Height];
+            ObjectGrid = new TileGrid[Width, Height];
 
             using var stream = new MemoryStream(Data);
             using var reader = new BinaryReader(stream);
@@ -162,11 +165,11 @@ public class Area : Map, IArea
             {
                 reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                for (var y = 0; y < Rows; y++)
+                for (byte y = 0; y < Height; y++)
                 {
                     _tiles.Add(new List<TileGrid>());
 
-                    for (var x = 0; x < Cols; x++)
+                    for (byte x = 0; x < Width; x++)
                     {
                         _tiles[y].Add(new TileGrid(x));
                         ObjectGrid[x, y] = new TileGrid(this, x, y);
@@ -204,12 +207,10 @@ public class Area : Map, IArea
         return Ready;
     }
 
-    public bool ParseMapWalls(short lWall, short rWall)
+    public bool ParseMapWalls(int lWall, int rWall)
     {
         if (lWall == 0 && rWall == 0) return false;
-
         if (lWall == 0) return _sotp[rWall - 1] == 0x0F;
-
         if (rWall == 0) return _sotp[lWall - 1] == 0x0F;
 
         var left = _sotp[lWall - 1];

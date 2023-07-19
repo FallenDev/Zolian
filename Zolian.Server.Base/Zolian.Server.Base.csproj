@@ -2,6 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
+		<Authors>Zolian Contributors</Authors>
+		<Copyright>(C) TheBuckNetwork</Copyright>
+		<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+		<PackageProjectUrl>https://www.thebucknetwork.com</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/FallenDev/Zolian</RepositoryUrl>
 		<AssemblyName>Darkages.Server</AssemblyName>
 		<RootNamespace>Darkages</RootNamespace>
 		<Nullable>disable</Nullable>

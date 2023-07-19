@@ -42,8 +42,8 @@ public record AreaStorage : IAreaStorage
                     ID = (int)reader["MapId"],
                     Flags = flags,
                     Music = (int)reader["Music"],
-                    Rows = (ushort)rows,
-                    Cols = (ushort)cols,
+                    Height = (ushort)rows,
+                    Width = (ushort)cols,
                     ScriptKey = reader["ScriptKey"].ToString(),
                     Name = reader["Name"].ToString()
                 };

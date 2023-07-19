@@ -2,6 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
+		<Authors>Zolian Contributors</Authors>
+		<Copyright>(C) TheBuckNetwork</Copyright>
+		<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+		<PackageProjectUrl>https://www.thebucknetwork.com</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/FallenDev/Zolian</RepositoryUrl>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
 		<PlatformTarget>x64</PlatformTarget>
