@@ -118,8 +118,7 @@ public record AislingStorage : Sql, IAislingStorage
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuickSave", connection);
             var skills = await SaveSkills(obj, connection);
             var spells = await SaveSpells(obj, connection);
-            var inventory = await SaveInventory(obj, connection);
-            //await SaveEquipment(obj, connection);
+            var inventory = await SaveItemsForPlayer(obj, connection);
 
             #region Parameters
 
@@ -435,22 +434,20 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
-    public async Task<bool> SaveInventory(Aisling obj, SqlConnection connection)
+    public async Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection)
     {
         if (obj?.Inventory == null) return false;
-        var rows = 0;
-
+        var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
+        itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+        itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
+        
         try
         {
-            foreach (var item in obj.Inventory.Items.Values.Where(i => i is not null))
+            foreach (var item in itemList.Where(i => i is not null))
             {
-                var updateIfExists = await CheckIfInventoryItemExists(item.ItemId, obj.Serial);
-                var checkIfAnotherPlayerHas = await CheckIfInventoryItemExistsElsewhere(item.ItemId);
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "InventoryUpdate" : "InventoryInsert", connection);
-
-                if (!updateIfExists && checkIfAnotherPlayerHas)
-                    item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
+                var updateIfExists = await CheckIfItemExists(item.ItemId, obj.Serial);
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "ItemUpdate" : "ItemInsert", connection);
+                var pane = ItemEnumConverters.PaneToString(item.ItemPane);
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
                 var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
                 var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
@@ -460,6 +457,8 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = (long)item.ItemId;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
                 cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
+                cmd.Parameters.Add("@Pane", SqlDbType.VarChar).Value = pane;
+                cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = item.Slot;
                 cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
                 cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
                 cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
@@ -468,12 +467,10 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
                 cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
                 cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
-                cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
                 cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
                 cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
                 cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
                 await cmd.ExecuteNonQueryAsync();
-                rows++;
             }
         }
         catch (SqlException e)
@@ -482,21 +479,22 @@ public record AislingStorage : Sql, IAislingStorage
             {
                 obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item did not save correctly. Contact GM (Code: Lost Dwarf)");
                 Crashes.TrackError(e);
-                return false;
             }
 
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
+            return false;
         }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
+            return false;
         }
 
-        return rows >= 1;
+        return true;
     }
 
     public async Task<bool> CheckIfPlayerExists(string name)
@@ -610,51 +608,14 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public async Task<bool> CheckIfInventoryItemExists(long itemSerial, long playerSerial)
+    public async Task<bool> CheckIfItemExists(long itemSerial, long playerSerial)
     {
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExists", sConn);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfItemExists", sConn);
             cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
             cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = playerSerial;
-            var reader = await cmd.ExecuteReaderAsync();
-            var itemFound = false;
-
-            while (reader.Read())
-            {
-                var dbId = (long)reader["ItemId"];
-                if (itemSerial != dbId) continue;
-                itemFound = true;
-            }
-
-            reader.Close();
-            sConn.Close();
-            return itemFound;
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-
-        return false;
-    }
-
-    public async Task<bool> CheckIfInventoryItemExistsElsewhere(long itemSerial)
-    {
-        try
-        {
-            var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfInventoryItemExistsElsewhere", sConn);
-            cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
 
@@ -746,8 +707,8 @@ public record AislingStorage : Sql, IAislingStorage
 
             // PlayerInventory
             var playerInventory =
-                "INSERT INTO ZolianPlayers.dbo.PlayersInventory (ItemId, Name, Serial, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, InventorySlot, Stacks, Enchantable) VALUES " +
-                $"('{(long)item}','Zolian Guide','{(long)serial}','{0}','False','{0}','True','None','None','Common','Common','{24}','{1}','False')";
+                "INSERT INTO ZolianPlayers.dbo.PlayersItems (ItemId, Name, Serial, Pane, Slot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished) VALUES " +
+                $"('{(long)item}','Zolian Guide','{(long)serial}','Inventory','{24}','{0}','False','{0}','True','None','None','Common','Common','{1}','False', 'False')";
 
             var cmd4 = new SqlCommand(playerInventory, sConn);
             cmd4.CommandTimeout = 5;

@@ -10,27 +10,25 @@ namespace Darkages.Interfaces;
 
 public interface IItem : ISprite
 {
-    Sprite[] AuthenticatedAislings { get; set; }
+    uint ItemId { get; set; }
+    ItemTemplate Template { get; set; }
+    string Name { get; set; }
+    byte Slot { get; set; }
     byte Color { get; set; }
     bool Cursed { get; set; }
-    ushort DisplayImage { get; init; }
-    string Name { get; set; }
     uint Durability { get; set; }
     uint MaxDurability { get; set; }
-    bool Equipped { get; set; }
     bool Identified { get; init; }
-    ushort Image { get; init; }
-    uint ItemId { get; set; }
-    uint Owner { get; set; }
+    ushort Stacks { get; set; }
+    bool Enchantable { get; set; }
+    bool Tarnished { get; set; }
+
+    Sprite[] AuthenticatedAislings { get; set; }
     ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
-    byte InventorySlot { get; set; }
-    byte Slot { get; set; }
-    ushort Stacks { get; set; }
+
     int Dropping { get; set; }
-    ItemTemplate Template { get; set; }
-    bool Enchantable { get; set; }
-    bool[] Warnings { get; init; }
+    bool[] Warnings { get; set; }
 
     string GetDisplayName();
     string NoColorGetDisplayName();

@@ -26,7 +26,7 @@ public class Inventory : ObjectManager, IInventory
 
     public bool IsValidSlot(byte slot) => slot is > 0 and < Length && !_invalidSlots.Contains(slot);
 
-    public IEnumerable<byte> BankList => (Items.Where(i => i.Value is {Template: not null } && i.Value.Template.Flags.FlagIsSet(ItemFlags.Bankable))).Select(i => i.Value.InventorySlot);
+    public IEnumerable<Item> BankList => Items.Values.Where(i => i is {Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
 
     public int TotalItems => Items.Count;
         
@@ -124,6 +124,10 @@ public class Inventory : ObjectManager, IInventory
         return null;
     }
 
+    /// <summary>
+    /// Removes the item from inventory (Only used when item is destroyed or dropped on the ground)
+    /// Deletes the record from the database, as well as removes it from the players inventory
+    /// </summary>
     public void RemoveFromInventory(WorldClient client, Item item)
     {
         if (item != null && client.Aisling.Inventory.Remove(item.InventorySlot) == null) return;

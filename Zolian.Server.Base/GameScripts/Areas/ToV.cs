@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Client;
 using Darkages.Scripting;

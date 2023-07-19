@@ -16,8 +16,6 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
-using static ServiceStack.Diagnostics.Events;
-
 namespace Darkages.Types;
 
 public class Skill

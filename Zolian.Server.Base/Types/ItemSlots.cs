@@ -17,7 +17,8 @@ public static class ItemSlots
     public const int Leg = 12;
     public const int Foot = 13;
     public const int FirstAcc = 14;
-    public const int Trousers = 15;
-    public const int Coat = 16;
+    public const int OverCoat = 15;
+    public const int OverHelm = 16;
     public const int SecondAcc = 17;
+    public const int ThirdAcc = 18;
 }

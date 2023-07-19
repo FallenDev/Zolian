@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Network.Client;

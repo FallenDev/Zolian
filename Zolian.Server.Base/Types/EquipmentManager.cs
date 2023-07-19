@@ -23,14 +23,13 @@ public class EquipmentManager
         Client = client;
         Equipment = new ConcurrentDictionary<int, EquipmentSlot>();
 
-        for (byte i = 1; i < 18; i++)
+        for (byte i = 1; i < 19; i++)
             Equipment[i] = null;
     }
 
     public WorldClient Client { get; set; }
     public int Length => Equipment?.Count ?? 0;
     public ConcurrentDictionary<int, EquipmentSlot> Equipment { get; set; }
-    private SemaphoreSlim CreateLock { get; } = new(1, 1);
 
     public EquipmentSlot Weapon => Equipment[ItemSlots.Weapon];
     public EquipmentSlot Armor => Equipment[ItemSlots.Armor];
@@ -46,9 +45,10 @@ public class EquipmentManager
     public EquipmentSlot Leg => Equipment[ItemSlots.Leg];
     public EquipmentSlot Foot => Equipment[ItemSlots.Foot];
     public EquipmentSlot FirstAcc => Equipment[ItemSlots.FirstAcc];
-    public EquipmentSlot Trousers => Equipment[ItemSlots.Trousers];
-    public EquipmentSlot Coat => Equipment[ItemSlots.Coat];
+    public EquipmentSlot OverCoat => Equipment[ItemSlots.OverCoat];
+    public EquipmentSlot OverHelm => Equipment[ItemSlots.OverHelm];
     public EquipmentSlot SecondAcc => Equipment[ItemSlots.SecondAcc];
+    public EquipmentSlot ThirdAcc => Equipment[ItemSlots.ThirdAcc];
 
     public void Add(int displaySlot, Item item)
     {
@@ -63,8 +63,7 @@ public class EquipmentManager
     private void AddEquipment(int displaySlot, Item item, bool remove = true)
     {
         Equipment[displaySlot] = new EquipmentSlot(displaySlot, item);
-        if (remove) RemoveFromInventory(item);
-        AddToAislingDb(Client.Aisling, item, displaySlot);
+        if (remove) RemoveFromInventoryToEquip(item);
         DisplayToEquipment((byte)displaySlot, item);
         OnEquipmentAdded((byte)displaySlot);
     }
@@ -122,7 +121,6 @@ public class EquipmentManager
 
         if (itemObj == null) return false;
 
-        DeleteFromAislingDb(itemObj);
         RemoveFromSlot(displaySlot);
 
         if (!returnIt) return HandleUnreturnedItem(itemObj);
@@ -137,7 +135,6 @@ public class EquipmentManager
         if (Equipment[displaySlot] != null)
         {
             itemObj = Equipment[displaySlot].Item;
-            DeleteFromAislingDb(itemObj);
         }
 
         if (item == null) return;
@@ -149,7 +146,7 @@ public class EquipmentManager
         itemObj?.GiveTo(Client.Aisling, false);
     }
 
-    public bool RemoveFromInventory(Item item, bool handleWeight = false)
+    public bool RemoveFromInventoryToEquip(Item item, bool handleWeight = false)
     {
         if (item != null && Client.Aisling.Inventory.Remove(item.InventorySlot) == null) return true;
         if (item == null) return true;
@@ -163,9 +160,7 @@ public class EquipmentManager
                 Client.Aisling.CurrentWeight = 0;
         }
 
-        Client.LastItemDropped = item;
         Client.SendAttributes(StatUpdateType.Primary);
-        item.DeleteFromAislingDb();
 
         return true;
     }
@@ -229,7 +224,7 @@ public class EquipmentManager
         var item = Equipment[displaySlot].Item;
         if (item != null)
         {
-            item.Equipped = true;
+            item.ItemPane = Item.ItemPanes.Equip;
             item.ReapplyItemModifiers(Client);
         }
 
@@ -250,7 +245,7 @@ public class EquipmentManager
         }
 
         var item = Equipment[displaySlot].Item;
-        if (item != null) item.Equipped = false;
+        if (item != null) item.ItemPane = Item.ItemPanes.Inventory;
 
         Client.SendAttributes(StatUpdateType.Full);
         Client.UpdateDisplay();
@@ -263,93 +258,5 @@ public class EquipmentManager
         Equipment[displaySlot] = null;
         var item = new Item();
         item.ReapplyItemModifiers(Client);
-    }
-
-    private async void AddToAislingDb(ISprite aisling, Item item, int slot)
-    {
-        await CreateLock.WaitAsync().ConfigureAwait(false);
-
-        try
-        {
-            var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            var cmd = new SqlCommand("ItemToEquipped", sConn);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            var color = ItemColors.ItemColorsToInt(item.Template.Color);
-            var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
-            var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
-            var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
-            var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-
-            cmd.Parameters.Add("@ItemId", SqlDbType.Int).Value = item.ItemId;
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
-            cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
-            cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
-            cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
-            cmd.Parameters.Add("@Identified", SqlDbType.Bit).Value = item.Identified;
-            cmd.Parameters.Add("@ItemVariance", SqlDbType.VarChar).Value = itemVariance;
-            cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
-            cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
-            cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
-            cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = slot;
-            cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
-            cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
-            cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
-
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue equipping gear and saving. Contact GM");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        finally
-        {
-            CreateLock.Release();
-        }
-    }
-
-    private static async void DeleteFromAislingDb(Item item)
-    {
-        if (item.ItemId == 0) return;
-
-        try
-        {
-            var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersEquipped WHERE ItemId = @ItemId";
-            await sConn.ExecuteAsync(cmd, new { item.ItemId });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
     }
 }

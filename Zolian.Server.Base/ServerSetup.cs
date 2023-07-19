@@ -1,12 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using Chaos.Networking.Abstractions;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
-using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;

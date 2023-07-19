@@ -20,8 +20,6 @@ using Microsoft.AppCenter.Analytics;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 using Newtonsoft.Json;
 
 using RestSharp;

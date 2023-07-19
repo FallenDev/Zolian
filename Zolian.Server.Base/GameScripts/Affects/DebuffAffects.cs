@@ -8,8 +8,6 @@ using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using Newtonsoft.Json.Linq;
-
 namespace Darkages.GameScripts.Affects;
 
 #region Armor

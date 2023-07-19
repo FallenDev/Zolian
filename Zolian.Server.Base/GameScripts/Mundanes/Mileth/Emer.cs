@@ -1,6 +1,5 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
-using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -124,7 +123,7 @@ public class Emer : MundaneScript
                         ServerSetup.Instance.Config.MaxCarryGold)
                     {
                         client.Aisling.GoldPoints += Convert.ToUInt32(offer);
-                        client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
                         client.SendAttributes(StatUpdateType.WeightGold);
 
                         client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantTradeCompletedMessage);

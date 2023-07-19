@@ -37,7 +37,7 @@ public sealed class Aisling : Player, IAisling
     public uint MaximumWeight => GameMaster switch
     {
         true => 999,
-        false => (uint)(Math.Round(ExpLevel / 2d) + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer)
+        false => (uint)(Math.Round(ExpLevel / 2d) + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer + 200)
     };
 
     public bool Dead => IsDead();

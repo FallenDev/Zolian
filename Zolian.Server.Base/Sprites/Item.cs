@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Dapper;
 
 using Darkages.Database;
@@ -21,6 +23,15 @@ namespace Darkages.Sprites;
 
 public sealed class Item : Sprite, IItem, IDialogSourceEntity
 {
+    public enum ItemPanes
+    {
+        Ground,
+        Inventory,
+        Equip,
+        Bank,
+        Archived
+    }
+
     public enum Quality
     {
         Damaged,
@@ -95,40 +106,52 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         SunStone,
         Runic
     }
-
-    public Sprite[] AuthenticatedAislings { get; set; }
-    public byte Color { get; set; }
-    public EntityType EntityType => EntityType.Item;
-    public uint Id => Serial;
-    public bool Cursed { get; set; }
-    public ushort DisplayImage { get; init; }
-    DisplayColor IDialogSourceEntity.Color => (DisplayColor)Color;
+    public uint ItemId { get; set; }
+    public ItemTemplate Template { get; set; }
     public string Name { get; set; }
-    public ushort Sprite => Template.Image;
-    public void Activate(Aisling source) => Scripts.First().Value.OnUse(source, Slot);
     public string DisplayName => GetDisplayName();
     public string NoColorDisplayName => NoColorGetDisplayName();
+    public uint Id => Serial;
+    public ItemPanes ItemPane { get; set; }
+    public byte Slot { get; set; }
+    public byte InventorySlot => Slot;
+    public byte Color { get; set; }
+    public bool Cursed { get; set; }
     public uint Durability { get; set; }
     public uint MaxDurability { get; set; }
-    public bool Equipped { get; set; }
     public bool Identified { get; init; }
-    public ushort Image { get; init; }
     public Variance ItemVariance { get; set; }
     public WeaponVariance WeapVariance { get; set; }
-    public bool Tarnished { get; set; }
     public Quality ItemQuality { get; set; }
     public Quality OriginalQuality { get; set; }
-    public uint ItemId { get; set; }
-    public uint Owner { get; set; }
-    public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
-    public byte InventorySlot { get; set; }
-    public byte Slot { get; set; }
     public ushort Stacks { get; set; }
-    public int Dropping { get; set; }
-    public ItemTemplate Template { get; set; }
     public bool Enchantable { get; set; }
-    public bool[] Warnings { get; init; }
+    public bool Tarnished { get; set; }
+
+    public Sprite[] AuthenticatedAislings { get; set; }
+    public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
+    public int Dropping { get; set; }
+    public bool[] Warnings { get; set; }
+
+    public EntityType EntityType => EntityType.Item;
+    DisplayColor IDialogSourceEntity.Color => (DisplayColor)Color;
+    public ushort Sprite => Template.Image;
+    public void Activate(Aisling source) => Scripts.First().Value.OnUse(source, Slot);
+
+
+    public uint Owner { get; set; }
+    public ushort Image { get; init; }
+    public ushort DisplayImage { get; init; }
+    public bool Equipped => ItemPane switch
+    {
+        ItemPanes.Ground => false,
+        ItemPanes.Inventory => false,
+        ItemPanes.Equip => true,
+        ItemPanes.Bank => false,
+        ItemPanes.Archived => false,
+        _ => false
+    };
 
     public string GetDisplayName()
     {
@@ -533,6 +556,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     {
         if (sprite is not Aisling aisling) return false;
         Owner = aisling.Serial;
+        ItemPane = ItemPanes.Inventory;
 
         #region stackable items
 
@@ -561,7 +585,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                 if (!CanCarry(aisling))
                     return false;
 
-            InventorySlot = aisling.Inventory.FindEmpty();
+            Slot = aisling.Inventory.FindEmpty();
 
             if (InventorySlot >= 60)
             {
@@ -583,7 +607,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         #region not stackable items
 
         {
-            InventorySlot = aisling.Inventory.FindEmpty();
+            Slot = aisling.Inventory.FindEmpty();
 
             if (InventorySlot == byte.MaxValue)
             {
@@ -610,6 +634,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public void Release(Sprite owner, Position position, bool delete = true)
     {
         Pos = new Vector2(position.X, position.Y);
+        ItemPane = ItemPanes.Ground;
 
         var readyTime = DateTime.UtcNow;
         CurrentMapId = owner.CurrentMapId;
@@ -634,13 +659,15 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public void DeleteFromAislingDb()
     {
         if (ItemId == 0) return;
+        var itemId = (long)ItemId;
+        ItemPane = ItemPanes.Ground;
 
         try
         {
             var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersInventory WHERE ItemId = @ItemId";
-            sConn.Execute(cmd, new { ItemId });
+            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
+            sConn.Execute(cmd, new { itemId });
             sConn.Close();
         }
         catch (SqlException e)
@@ -663,6 +690,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public void ReapplyItemModifiers(WorldClient client)
     {
         if (client?.Aisling == null) return;
+        ItemPane = ItemPanes.Equip;
 
         lock (client.SyncClient)
         {

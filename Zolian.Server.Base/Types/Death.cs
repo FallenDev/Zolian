@@ -63,7 +63,7 @@ public class Death
                 obj.Tarnished = true;
             }
 
-            Owner.EquipmentManager.RemoveFromInventory(obj, true);
+            // ToDo: Create method to drop items from Equipped
             ReleaseInventory(obj);
         }
 

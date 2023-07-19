@@ -24,8 +24,6 @@ using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Network.Server;

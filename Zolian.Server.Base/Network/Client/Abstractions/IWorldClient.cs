@@ -5,7 +5,6 @@ using Chaos.Packets;
 using Darkages.Sprites;
 using Darkages.Types;
 using Chaos.Geometry.Abstractions.Definitions;
-using Darkages.Enums;
 using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;

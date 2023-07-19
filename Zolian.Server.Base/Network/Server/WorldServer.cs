@@ -3,14 +3,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 
-using Chaos.Collections.Common;
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
-using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
@@ -1100,23 +1098,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (remaining == 0)
                 {
-                    if (localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true))
-                    {
-                        item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                    localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                    item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
-                        // Mileth Altar 
-                        if (localClient.Aisling.Map.ID == 500)
-                        {
-                            if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
-                                item.Remove();
-                        }
+                    // Mileth Altar 
+                    if (localClient.Aisling.Map.ID == 500)
+                    {
+                        if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
+                            item.Remove();
                     }
                 }
                 else
                 {
                     var temp = new Item
                     {
-                        Slot = item.Slot,
+                        Slot = sourceSlot,
                         Image = item.Image,
                         DisplayImage = item.DisplayImage,
                         Durability = item.Durability,
@@ -1124,7 +1120,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         WeapVariance = item.WeapVariance,
                         ItemQuality = item.ItemQuality,
                         OriginalQuality = item.OriginalQuality,
-                        InventorySlot = sourceSlot,
                         Stacks = (ushort)count,
                         Template = item.Template
                     };
@@ -1147,17 +1142,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             else
             {
                 if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
-                    if (localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true))
-                    {
-                        item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                {
+                    localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                    item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
-                        // Mileth Altar 
-                        if (localClient.Aisling.Map.ID == 500)
-                        {
-                            if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
-                                item.Remove();
-                        }
+                    // Mileth Altar 
+                    if (localClient.Aisling.Map.ID == 500)
+                    {
+                        if (itemPosition.X == 31 && itemPosition.Y == 52 ||
+                            itemPosition.X == 31 && itemPosition.Y == 53)
+                            item.Remove();
                     }
+                }
             }
 
             localClient.Aisling.Inventory.UpdatePlayersWeight(localClient.Aisling.Client);
@@ -1850,7 +1846,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             else
             {
-                localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
             }
 
             return default;
@@ -1965,7 +1961,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         {
                             var script = monster.Scripts.Values.First();
                             var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                            localClient.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                            localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                             script?.OnItemDropped(localClient.Aisling.Client, item);
                             break;
                         }

@@ -19,6 +19,18 @@ public static class ItemEnumConverters
         };
     }
 
+    public static string PaneToString(Item.ItemPanes e)
+    {
+        return e switch
+        {
+            Item.ItemPanes.Ground => "Ground",
+            Item.ItemPanes.Inventory => "Inventory",
+            Item.ItemPanes.Equip => "Equip",
+            Item.ItemPanes.Bank => "Bank",
+            Item.ItemPanes.Archived => "Archived"
+        };
+    }
+
     public static string ArmorVarianceToString(Item.Variance e)
     {
         return e switch

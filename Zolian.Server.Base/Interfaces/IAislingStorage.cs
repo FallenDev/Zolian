@@ -20,11 +20,10 @@ public interface IAislingStorage
     Task<bool> Save(Aisling obj);
     Task<bool> SaveSkills(Aisling obj, SqlConnection connection);
     Task<bool> SaveSpells(Aisling obj, SqlConnection connection);
-    Task<bool> SaveInventory(Aisling obj, SqlConnection connection);
+    Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);
-    Task<bool> CheckIfInventoryItemExists(long itemSerial, long playerSerial);
-    Task<bool> CheckIfInventoryItemExistsElsewhere(long itemSerial);
+    Task<bool> CheckIfItemExists(long itemSerial, long playerSerial);
     Task Create(Aisling obj);
 }

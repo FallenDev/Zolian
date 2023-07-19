@@ -291,7 +291,7 @@ public class Eireann : MundaneScript
                     if (client.Aisling.GoldPoints + offer <= ServerSetup.Instance.Config.MaxCarryGold)
                     {
                         client.Aisling.GoldPoints += offer;
-                        client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.PendingItemSessions = null;
                         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cSee you around.");

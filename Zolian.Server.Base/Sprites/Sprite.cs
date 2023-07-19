@@ -14,9 +14,9 @@ using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Spells;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
-using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Scripting;
 using Darkages.Types;
@@ -43,7 +43,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private int _frozenStack;
     public bool IsWeakened => (CurrentHp <= MaximumHp * .05);
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
-    public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") || HasBuff("Iron Skin") || HasBuff("Wings of Protection");
+
+    public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
+                            HasBuff("Iron Skin") || HasBuff("Wings of Protection");
+
     public bool SpellReflect => HasBuff("Deireas Faileas");
     public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
     public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
@@ -61,6 +64,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsSleeping => HasDebuff("Sleep");
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
+
     public bool CanSeeInvisible
     {
         get
@@ -102,11 +106,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int Con => (_Con + BonusCon).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Dex => (_Dex + BonusDex).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Luck => _Luck + BonusLuck;
+
     public Area Map => ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var mapId)
         ? mapId
         : null;
 
     public Position Position => new(Pos);
+
     public ushort Level => TileType switch
     {
         TileContent.Aisling => ((Aisling)this).ExpLevel,
@@ -117,17 +123,17 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     private static readonly int[][] Directions =
     {
-        new[] {+0, -1},
-        new[] {+1, +0},
-        new[] {+0, +1},
-        new[] {-1, +0}
+        new[] { +0, -1 },
+        new[] { +1, +0 },
+        new[] { +0, +1 },
+        new[] { -1, +0 }
     };
 
     private static int[][] DirectionTable { get; } =
     {
-        new[] {-1, +3, -1},
-        new[] {+0, -1, +2},
-        new[] {-1, +1, -1}
+        new[] { -1, +3, -1 },
+        new[] { +0, -1, +2 },
+        new[] { -1, +1, -1 }
     };
 
     private double TargetDistance { get; set; }

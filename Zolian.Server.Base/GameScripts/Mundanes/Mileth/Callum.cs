@@ -1,6 +1,5 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
-using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Network.Client;

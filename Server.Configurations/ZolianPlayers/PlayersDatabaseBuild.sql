@@ -19,7 +19,6 @@ GO
 USE [ZolianPlayers]
 GO
 
-DROP PROCEDURE [dbo].[WithdrawItemList]
 DROP PROCEDURE [dbo].[SpellToPlayer]
 DROP PROCEDURE [dbo].[SkillToPlayer]
 DROP PROCEDURE [dbo].[SelectSpells]
@@ -27,15 +26,15 @@ DROP PROCEDURE [dbo].[SelectSkills]
 DROP PROCEDURE [dbo].[SelectQuests]
 DROP PROCEDURE [dbo].[SelectPlayer]
 DROP PROCEDURE [dbo].[SelectLegends]
-DROP PROCEDURE [dbo].[SelectInventory]
 DROP PROCEDURE [dbo].[SelectIgnoredPlayers]
-DROP PROCEDURE [dbo].[SelectEquipped]
 DROP PROCEDURE [dbo].[SelectDiscoveredMaps]
+DROP PROCEDURE [dbo].[SelectInventory]
+DROP PROCEDURE [dbo].[SelectEquipped]
+DROP PROCEDURE [dbo].[SelectBanked]
 DROP PROCEDURE [dbo].[SelectDeBuffsCheck]
 DROP PROCEDURE [dbo].[SelectDeBuffs]
 DROP PROCEDURE [dbo].[SelectBuffsCheck]
 DROP PROCEDURE [dbo].[SelectBuffs]
-DROP PROCEDURE [dbo].[SelectBanked]
 DROP PROCEDURE [dbo].[PlayerSecurity]
 DROP PROCEDURE [dbo].[PlayerSaveSpells]
 DROP PROCEDURE [dbo].[PlayerSaveSkills]
@@ -44,10 +43,8 @@ DROP PROCEDURE [dbo].[PlayerQuickSave]
 DROP PROCEDURE [dbo].[PlayerQuestSave]
 DROP PROCEDURE [dbo].[PlayerCreation]
 DROP PROCEDURE [dbo].[PasswordSave]
-DROP PROCEDURE [dbo].[ItemToEquipped]
-DROP PROCEDURE [dbo].[ItemToBank]
-DROP PROCEDURE [dbo].[InventoryUpdate]
-DROP PROCEDURE [dbo].[InventoryInsert]
+DROP PROCEDURE [dbo].[ItemUpdate]
+DROP PROCEDURE [dbo].[ItemInsert]
 DROP PROCEDURE [dbo].[InsertQuests]
 DROP PROCEDURE [dbo].[InsertDeBuff]
 DROP PROCEDURE [dbo].[InsertBuff]
@@ -57,16 +54,11 @@ DROP PROCEDURE [dbo].[DeBuffSave]
 DROP PROCEDURE [dbo].[CheckIfPlayerHashExists]
 DROP PROCEDURE [dbo].[CheckIfPlayerExists]
 DROP PROCEDURE [dbo].[CheckIfItemExists]
-DROP PROCEDURE [dbo].[CheckIfInventoryItemExists]
 DROP PROCEDURE [dbo].[BuffSave]
-DROP PROCEDURE [dbo].[BankItemSaveStacked]
-DROP PROCEDURE [dbo].[BankItemSave]
 DROP PROCEDURE [dbo].[AddLegendMark]
 GO
 
-DROP TABLE PlayersEquipped;
-DROP TABLE PlayersInventory;
-DROP TABLE PlayersBanked;
+DROP TABLE PlayersItems;
 DROP TABLE PlayersLegend;
 DROP TABLE PlayersSkillBook;
 DROP TABLE PlayersSpellBook;
@@ -258,49 +250,12 @@ CREATE TABLE PlayersLegend
 	[Value] VARCHAR(50) NOT NULL
 )
 
-CREATE TABLE PlayersBanked
+CREATE TABLE PlayersItems
 (
 	[ItemId] BIGINT NOT NULL PRIMARY KEY,
 	[Name] VARCHAR(45) NOT NULL,
-	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[Color] INT NOT NULL DEFAULT 0, 
-	[Cursed] BIT NOT NULL DEFAULT 0,
-	[Durability] INT NOT NULL DEFAULT 0,
-	[Identified] BIT NOT NULL DEFAULT 0,
-	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
-	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
-	[ItemQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
-	[OriginalQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
-	[Stacks] INT NOT NULL DEFAULT 0,
-	[Enchantable] BIT NOT NULL DEFAULT 0,
-	[Stackable] BIT NULL,
-    [Tarnished] BIT NOT NULL DEFAULT 0
-)
-
-CREATE TABLE PlayersInventory
-(
-	[ItemId] BIGINT NOT NULL PRIMARY KEY,
-	[Name] VARCHAR(45) NOT NULL,
-	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[Color] INT NOT NULL DEFAULT 0, 
-	[Cursed] BIT NOT NULL DEFAULT 0,
-	[Durability] INT NOT NULL DEFAULT 0,
-	[Identified] BIT NOT NULL DEFAULT 0,
-	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
-	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
-	[ItemQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
-	[OriginalQuality] VARCHAR(10) NOT NULL DEFAULT 'Damaged',
-	[InventorySlot] INT NOT NULL DEFAULT 0,
-	[Stacks] INT NOT NULL DEFAULT 0,
-	[Enchantable] BIT NOT NULL DEFAULT 0,
-    [Tarnished] BIT NOT NULL DEFAULT 0
-)
-
-CREATE TABLE PlayersEquipped
-(
-	[ItemId] BIGINT NOT NULL PRIMARY KEY,
-	[Name] VARCHAR(45) NOT NULL,
-	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
+	[Serial] BIGINT NOT NULL DEFAULT 0,
+	[Pane] VARCHAR(9) NOT NULL DEFAULT 'Ground',
 	[Slot] INT NOT NULL DEFAULT 0,
 	[Color] INT NOT NULL DEFAULT 0,
 	[Cursed] BIT NOT NULL DEFAULT 0,
@@ -370,66 +325,6 @@ BEGIN
 END
 GO
 
--- BankItemSave
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[BankItemSave]
-@ItemId BIGINT, @Name VARCHAR(45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersBanked]
-    SET
-	[Name] = @Name,
-	[Color] = @Color,
-	[Cursed] = @Cursed,
-	[Durability] = @Durability,
-	[Identified] = @Identified,
-	[ItemVariance] = @ItemVariance,
-	[WeapVariance] = @WeapVariance,
-	[ItemQuality] = @ItemQuality,
-	[OriginalQuality] = @OriginalQuality,
-	[Stacks] = @Stacks,
-	[Enchantable] = @Enchantable,
-	[Stackable] = @CanStack,
-    [Tarnished] = @Tarnished
-    WHERE  Serial = @Serial AND ItemId = @ItemId;
-END
-GO
-
--- BankItemSaveStacked
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[BankItemSaveStacked]
-@ItemId BIGINT, @Name VARCHAR(45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersBanked]
-    SET
-	[Name] = @Name,
-	[Color] = @Color,
-	[Cursed] = @Cursed,
-	[Durability] = @Durability,
-	[Identified] = @Identified,
-	[ItemVariance] = @ItemVariance,
-	[WeapVariance] = @WeapVariance,
-	[ItemQuality] = @ItemQuality,
-	[OriginalQuality] = @OriginalQuality,
-	[Stacks] = @Stacks,
-	[Enchantable] = @Enchantable,
-	[Stackable] = @CanStack,
-    [Tarnished] = @Tarnished
-    WHERE  Serial = @Serial AND [Name] = @Name;
-END
-GO
-
 -- BuffSave
 SET ANSI_NULLS ON
 GO
@@ -447,33 +342,20 @@ BEGIN
 END
 GO
 
--- CheckIfInventoryItemExists
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[CheckIfInventoryItemExists]
-@ItemId BIGINT, @Serial BIGINT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT *
-    FROM   ZolianPlayers.dbo.PlayersInventory
-    WHERE  [ItemId] = @ItemId
-           AND Serial = @Serial;
-END
-GO
-
 -- CheckIfItemExists
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[CheckIfItemExists] @Name NVARCHAR(45), @Serial BIGINT
+CREATE PROCEDURE [dbo].[CheckIfItemExists]
+@ItemId BIGINT, @Serial BIGINT
 AS
 BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersBanked WHERE [Name] = @Name AND Serial = @Serial
+    SET NOCOUNT ON;
+    SELECT *
+    FROM   ZolianPlayers.dbo.PlayersItems
+    WHERE  [ItemId] = @ItemId
+           AND Serial = @Serial;
 END
 GO
 
@@ -598,37 +480,39 @@ BEGIN
 END
 GO
 
--- InventoryInsert
+-- Item Create
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[InventoryInsert]
-@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
+CREATE PROCEDURE [dbo].[ItemInsert]
+@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @Pane VARCHAR(9), @Slot INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
+@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersInventory] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [InventorySlot], [Stacks], [Enchantable], [Tarnished])
-    VALUES                                               (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @InventorySlot, @Stacks, @Enchantable, @Tarnished);
+    INSERT  INTO [ZolianPlayers].[dbo].[PlayersItems] ([ItemId], [Name], [Serial], [Pane], [Slot], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Stacks], [Enchantable], [Tarnished])
+    VALUES                                               (@ItemId, @Name, @Serial, @Pane, @Slot, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @Stacks, @Enchantable, @Tarnished);
 END
 GO
 
--- InventoryUpdate
+-- Item Update
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[InventoryUpdate]
-@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @InventorySlot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
+CREATE PROCEDURE [dbo].[ItemUpdate]
+@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @Pane VARCHAR(9), @Slot INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
+@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @Tarnished BIT
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersInventory]
+    UPDATE [ZolianPlayers].[dbo].[PlayersItems]
     SET    [ItemId]          = @ItemId,
            [Name]            = @Name,
            [Serial]          = @Serial,
+		   [Pane]			 = @Pane,
+		   [Slot]			 = @Slot,
            [Color]           = @Color,
            [Cursed]          = @Cursed,
            [Durability]      = @Durability,
@@ -637,49 +521,11 @@ BEGIN
            [WeapVariance]    = @WeapVariance,
            [ItemQuality]     = @ItemQuality,
            [OriginalQuality] = @OriginalQuality,
-           [InventorySlot]   = @InventorySlot,
            [Stacks]          = @Stacks,
            [Enchantable]     = @Enchantable,
            [Tarnished]       = @Tarnished
     WHERE  Serial = @Serial
            AND ItemId = @ItemId;
-END
-GO
-
--- ItemToBank
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemToBank]
-@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @CanStack BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersBanked] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability],
-	[Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Stacks], [Enchantable], [Stackable], [Tarnished])
-    VALUES	(@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, 
-	@Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, 
-	@Stacks, @Enchantable, @CanStack, @Tarnished);
-END
-GO
-
--- ItemToEquipped
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemToEquipped]
-@ItemId BIGINT, @Name VARCHAR(45), @Serial BIGINT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR(15),
-@WeapVariance VARCHAR(15), @ItemQuality VARCHAR(10), @OriginalQuality VARCHAR(10), @Slot INT, @Stacks INT, @Enchantable BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersEquipped] ([ItemId], [Name], [Serial], [Color], [Cursed], [Durability], [Identified],
-	[ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Slot], [Stacks], [Enchantable], [Tarnished])
-    VALUES (@ItemId, @Name, @Serial, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality,
-	@Slot, @Stacks, @Enchantable, @Tarnished);
 END
 GO
 
@@ -981,19 +827,6 @@ BEGIN
 END
 GO
 
--- SelectBanked
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[SelectBanked] @Serial BIGINT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersBanked WHERE Serial = @Serial
-END
-GO
-
 -- SelectBuffs
 SET ANSI_NULLS ON
 GO
@@ -1059,6 +892,19 @@ BEGIN
 END
 GO
 
+-- SelectInventory
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SelectInventory] @Serial BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND Pane = 'Inventory'
+END
+GO
+
 -- SelectEquipped
 SET ANSI_NULLS ON
 GO
@@ -1068,7 +914,20 @@ CREATE PROCEDURE [dbo].[SelectEquipped] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersEquipped WHERE Serial = @Serial
+	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND Pane = 'Equip'
+END
+GO
+
+-- SelectBanked
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SelectBanked] @Serial BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND Pane = 'Bank'
 END
 GO
 
@@ -1082,19 +941,6 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	SELECT * FROM ZolianPlayers.dbo.PlayersIgnoreList WHERE Serial = @Serial
-END
-GO
-
--- SelectInventory
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[SelectInventory] @Serial BIGINT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersInventory WHERE Serial = @Serial
 END
 GO
 
@@ -1338,18 +1184,5 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersSpellBook]
 	([Serial], [Level], [Slot], [SpellName], [Casts], [CurrentCooldown])
     VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
-END
-GO
-
--- WithdrawItemList
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[WithdrawItemList] @Serial BIGINT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersBanked WHERE Serial = @Serial
 END
 GO

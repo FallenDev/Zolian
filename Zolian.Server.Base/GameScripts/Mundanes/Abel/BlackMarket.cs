@@ -281,7 +281,7 @@ public class BlackMarket : MundaneScript
                         ServerSetup.Instance.Config.MaxCarryGold)
                     {
                         client.Aisling.GoldPoints += Convert.ToUInt32(offer);
-                        client.Aisling.EquipmentManager.RemoveFromInventory(item, true);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
                         client.SendAttributes(StatUpdateType.WeightGold);
 
                         client.SendOptionsDialog(Mundane, "Eh, I could have found better in the gutter.");
