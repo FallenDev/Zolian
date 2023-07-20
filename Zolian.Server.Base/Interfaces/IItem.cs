@@ -14,6 +14,7 @@ public interface IItem : ISprite
     ItemTemplate Template { get; set; }
     string Name { get; set; }
     byte Slot { get; set; }
+    byte InventorySlot { get; set; }
     byte Color { get; set; }
     bool Cursed { get; set; }
     uint Durability { get; set; }

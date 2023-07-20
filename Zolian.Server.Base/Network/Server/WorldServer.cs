@@ -1186,6 +1186,27 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnExitRequest(IWorldClient localClient, ExitRequestArgs localArgs)
         {
+            if (localClient?.Aisling == null) return default;
+            // Close Popups
+            localClient.CloseDialog();
+            localClient.Aisling.CancelExchange();
+
+            // Exit Party
+            if (localClient.Aisling.GroupId != 0)
+                Party.RemovePartyMember(localClient.Aisling);
+
+            // Set Timestamps
+            localClient.Aisling.LastLogged = DateTime.UtcNow;
+            localClient.Aisling.LoggedIn = false;
+
+            // Save
+            localClient.Save();
+
+            // Cleanup
+            localClient.Aisling.Remove(true);
+            ClientRegistry.TryRemove(localClient.Id, out _);
+            ServerSetup.Logger($"{localClient.Aisling.Username} either logged out or was removed from the server.");
+
             if (localArgs.IsRequest)
                 localClient.SendConfirmExit();
             else
@@ -1449,9 +1470,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
     {
+        client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
+
         try
         {
-            client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
             var exists = await StorageManager.AislingBucket.CheckPassword(redirect.Name);
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
 
@@ -2933,9 +2955,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     protected override void IndexHandlers()
     {
-        if (ClientHandlers == null!)
-            return;
-
         base.IndexHandlers();
 
         //ClientHandlers[(byte)ClientOpCode.] =
@@ -2944,7 +2963,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup;
         ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped;
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
-        //ClientHandlers[(byte)ClientOpCode.DisplayObjectRequest] =
         ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore;
         ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage;
         ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell;
@@ -2993,7 +3011,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var client = ClientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
-        Logger.LogDebug("Connection established with {@ClientIp}", client.RemoteIp.ToString());
+        ServerSetup.Logger($"Connection established with {client.RemoteIp}");
 
         if (!ClientRegistry.TryAdd(client))
         {
@@ -3013,25 +3031,26 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            //remove client from client list
-            ClientRegistry.TryRemove(client.Id, out _);
-            client.SendServerMessage(ServerMessageType.ClosePopup, string.Empty);
-
             if (aisling == null) return;
-            //if the player has an exchange open, cancel it so items are returned
-            aisling.CancelExchange();
+            // Close Popups
+            client.CloseDialog();
+            client.Aisling.CancelExchange();
 
-            //leave the group if in one
-            if (aisling.GroupId != 0)
-                Party.RemovePartyMember(aisling);
+            // Exit Party
+            if (client.Aisling.GroupId != 0)
+                Party.RemovePartyMember(client.Aisling);
 
-            //save aisling
-            aisling.LastLogged = DateTime.UtcNow;
-            aisling.LoggedIn = false;
-            await SaveUserAsync(client.Aisling);
+            // Set Timestamps
+            client.Aisling.LastLogged = DateTime.UtcNow;
+            client.Aisling.LoggedIn = false;
 
-            //remove aisling from map
-            client.SendRemoveObject((uint)aisling.Serial);
+            // Save
+            await client.Save();
+
+            // Cleanup
+            client.Aisling.Remove(true);
+            ClientRegistry.TryRemove(client.Id, out _);
+            ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
         }
         catch (Exception ex)
         {

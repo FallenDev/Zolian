@@ -95,7 +95,7 @@ public class Buff : IBuff
             var buffNameReplaced = buff.Name;
 
             cmd.Parameters.Add("@BuffId", SqlDbType.Int).Value = buffId;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = buffNameReplaced;
             cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = buff.TimeLeft;
 
@@ -136,7 +136,7 @@ public class Buff : IBuff
                 var cmd = new SqlCommand("BuffSave", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = buff.Name;
                 cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = buff.TimeLeft;
 
@@ -166,10 +166,10 @@ public class Buff : IBuff
         {
             var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
-            const string playerBuffs = "DELETE FROM ZolianPlayers.dbo.PlayersBuffs WHERE Serial = @Serial AND Name = @Name";
+            const string playerBuffs = "DELETE FROM ZolianPlayers.dbo.PlayersBuffs WHERE Serial = @AislingSerial AND Name = @Name";
             await sConn.ExecuteAsync(playerBuffs, new
             {
-                aisling.Serial,
+                AislingSerial = (long)aisling.Serial,
                 buff.Name
             });
             sConn.Close();
@@ -200,7 +200,7 @@ public class Buff : IBuff
                 CommandType = CommandType.StoredProcedure
             };
             cmd.CommandTimeout = 5;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)client.Aisling.Serial;
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
 
             var reader = await cmd.ExecuteReaderAsync();

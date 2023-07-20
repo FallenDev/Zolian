@@ -457,8 +457,9 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = (long)item.ItemId;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
                 cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
-                cmd.Parameters.Add("@Pane", SqlDbType.VarChar).Value = pane;
+                cmd.Parameters.Add("@ItemPane", SqlDbType.VarChar).Value = pane;
                 cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = item.Slot;
+                cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
                 cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
                 cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
                 cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
@@ -707,8 +708,8 @@ public record AislingStorage : Sql, IAislingStorage
 
             // PlayerInventory
             var playerInventory =
-                "INSERT INTO ZolianPlayers.dbo.PlayersItems (ItemId, Name, Serial, Pane, Slot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished) VALUES " +
-                $"('{(long)item}','Zolian Guide','{(long)serial}','Inventory','{24}','{0}','False','{0}','True','None','None','Common','Common','{1}','False', 'False')";
+                "INSERT INTO ZolianPlayers.dbo.PlayersItems (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished) VALUES " +
+                $"('{(long)item}','Zolian Guide','{(long)serial}','Inventory','{0}','{24}','{0}','False','{0}','True','None','None','Common','Common','{1}','False', 'False')";
 
             var cmd4 = new SqlCommand(playerInventory, sConn);
             cmd4.CommandTimeout = 5;

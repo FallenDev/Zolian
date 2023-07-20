@@ -69,6 +69,8 @@ public class TrainingDummy : MonsterScript
 
     public override void Update(TimeSpan elapsedTime)
     {
+        Monster.Client = ServerSetup.Instance.Game.Aislings.FirstOrDefault()?.Client;
+
         if (Monster.CurrentHp < Monster.MaximumHp)
             Monster.CurrentHp = Monster.MaximumHp;
     }

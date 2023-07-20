@@ -58,9 +58,6 @@ namespace Darkages.Network.Client
         public bool MapOpen { get; set; }
         private SemaphoreSlim CreateLock { get; } = new(1, 1);
         private SemaphoreSlim LoadLock { get; } = new(1, 1);
-        public bool SerialSent { get; set; }
-        public bool Authenticated { get; set; }
-        public bool EncryptPass { get; set; }
         public DateTime BoardOpened { get; set; }
         public DialogSession DlgSession { get; set; }
 
@@ -353,6 +350,7 @@ namespace Darkages.Network.Client
                         Owner = item.Serial,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
+                        InventorySlot = item.InventorySlot,
                         Color = color,
                         Durability = item.Durability,
                         Identified = item.Identified,
@@ -550,6 +548,7 @@ namespace Darkages.Network.Client
                         Owner = item.Serial,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
+                        InventorySlot = item.InventorySlot,
                         Color = color,
                         Durability = item.Durability,
                         Identified = item.Identified,
@@ -1409,7 +1408,7 @@ namespace Darkages.Network.Client
                 Y = aisling.Y
             };
 
-            //we can always see ourselves, and we're never hostile to ourself
+            //we can always see ourselves, and we're never hostile to our self
             if (!Aisling.Equals(aisling))
             {
                 if (Aisling.Map.Flags.MapFlagIsSet(Darkages.Enums.MapFlags.PlayerKill))
@@ -1573,7 +1572,7 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// Forced Client Packet -- Exchange / Pursuit / NPC Reply
+        /// Forced Client Packet
         /// </summary>
         public void SendForcedClientPacket(ref ClientPacket clientPacket)
         {
@@ -1789,17 +1788,6 @@ namespace Darkages.Network.Client
         /// <param name="aisling">Target Player</param>
         public void SendProfile(Aisling aisling)
         {
-            var playerClass = aisling.Path switch
-            {
-                Class.Peasant => 0,
-                Class.Berserker => 1,
-                Class.Defender => 1,
-                Class.Assassin => 2,
-                Class.Cleric => 3,
-                Class.Arcanus => 4,
-                Class.Monk => 5
-            };
-
             var equipment = new Dictionary<EquipmentSlot, ItemInfo>();
             var partyOpen = aisling.PartyStatus == (GroupStatus)1;
             var legendMarks = new List<LegendMarkInfo>();
@@ -2181,7 +2169,7 @@ namespace Darkages.Network.Client
             var args = new ProfileArgs
             {
                 AdvClass = AdvClass.None,
-                BaseClass = (BaseClass)playerClass,
+                BaseClass = (BaseClass)Aisling.Path,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
                 GuildName = aisling.Clan,
@@ -2299,17 +2287,6 @@ namespace Darkages.Network.Client
         public void SendSelfProfile()
         {
             if (Aisling.ProfileOpen) return;
-
-            var playerClass = Aisling.Path switch
-            {
-                Class.Peasant => 0,
-                Class.Berserker => 1,
-                Class.Defender => 1,
-                Class.Assassin => 2,
-                Class.Cleric => 3,
-                Class.Arcanus => 4,
-                Class.Monk => 5
-            };
 
             var equipment = new Dictionary<EquipmentSlot, ItemInfo>();
             var partyOpen = Aisling.PartyStatus == (GroupStatus)1;
@@ -2692,7 +2669,7 @@ namespace Darkages.Network.Client
             var args = new SelfProfileArgs
             {
                 AdvClass = AdvClass.None,
-                BaseClass = (BaseClass)playerClass,
+                BaseClass = (BaseClass)Aisling.Path,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
                 GroupString = Aisling.PartyMembers?.ToString(),
@@ -2761,10 +2738,10 @@ namespace Darkages.Network.Client
         {
             var args = new UserIdArgs
             {
-                BaseClass = BaseClass.Rogue,
+                BaseClass = (BaseClass)2,
                 Direction = (Direction)Aisling.Direction,
                 Gender = (Gender)Aisling.Gender,
-                Id = (uint)Aisling.Serial
+                Id = Aisling.Serial
             };
 
             Send(args);

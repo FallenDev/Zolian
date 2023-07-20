@@ -18,9 +18,6 @@ public interface IWorldClient : ISocketClient
     bool MapUpdating { get; set; }
     bool MapOpen { get; set; }
     Aisling Aisling { get; set; }
-    bool SerialSent { get; set; }
-    bool Authenticated { get; set; }
-    bool EncryptPass { get; set; }
     DateTime BoardOpened { get; set; }
     DialogSession DlgSession { get; set; }
     bool CanSendLocation { get; }

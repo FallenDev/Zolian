@@ -42,7 +42,6 @@ public class ObjectComponent : WorldServerComponent
 
         if (user?.Map == null) return;
         if (!user.LoggedIn || !user.Map.Ready) return;
-        if (!user.Client.SerialSent) return;
 
         var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToArray();
         var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToArray();

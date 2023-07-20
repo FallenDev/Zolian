@@ -101,7 +101,7 @@ public class Debuff : IDebuff
             var debuffNameReplaced = debuff.Name;
 
             cmd.Parameters.Add("@DebuffId", SqlDbType.Int).Value = deBuffId;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = debuffNameReplaced;
             cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = debuff.TimeLeft;
 
@@ -142,7 +142,7 @@ public class Debuff : IDebuff
                 var cmd = new SqlCommand("DeBuffSave", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
                 cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = deBuff.Name;
                 cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = deBuff.TimeLeft;
 
@@ -172,10 +172,10 @@ public class Debuff : IDebuff
         {
             var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
-            const string playerDeBuffs = "DELETE FROM ZolianPlayers.dbo.PlayersDebuffs WHERE Serial = @Serial AND Name = @Name";
+            const string playerDeBuffs = "DELETE FROM ZolianPlayers.dbo.PlayersDebuffs WHERE Serial = @AislingSerial AND Name = @Name";
             await sConn.ExecuteAsync(playerDeBuffs, new
             {
-                aisling.Serial,
+                AislingSerial = (long)aisling.Serial,
                 debuff.Name
             });
             sConn.Close();
@@ -206,7 +206,7 @@ public class Debuff : IDebuff
                 CommandType = CommandType.StoredProcedure
             };
             cmd.CommandTimeout = 5;
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)client.Aisling.Serial;
             cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
 
             var reader = await cmd.ExecuteReaderAsync();

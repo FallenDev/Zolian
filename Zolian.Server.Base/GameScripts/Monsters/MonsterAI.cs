@@ -33,6 +33,7 @@ public class MonsterBaseIntelligence : MonsterScript
         if (Monster is null) return;
         if (!Monster.IsAlive) return;
 
+        Monster.Client = ServerSetup.Instance.Game.Aislings.FirstOrDefault()?.Client;
         var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
@@ -571,6 +572,7 @@ public class MonsterShadowSight : MonsterScript
         if (Monster is null) return;
         if (!Monster.IsAlive) return;
 
+        Monster.Client = ServerSetup.Instance.Game.Aislings.FirstOrDefault()?.Client;
         var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try

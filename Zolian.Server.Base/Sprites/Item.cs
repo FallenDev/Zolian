@@ -114,7 +114,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public uint Id => Serial;
     public ItemPanes ItemPane { get; set; }
     public byte Slot { get; set; }
-    public byte InventorySlot => Slot;
+    public byte InventorySlot { get; set; }
     public byte Color { get; set; }
     public bool Cursed { get; set; }
     public uint Durability { get; set; }
@@ -585,7 +585,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                 if (!CanCarry(aisling))
                     return false;
 
-            Slot = aisling.Inventory.FindEmpty();
+            InventorySlot = aisling.Inventory.FindEmpty();
 
             if (InventorySlot >= 60)
             {
@@ -607,7 +607,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         #region not stackable items
 
         {
-            Slot = aisling.Inventory.FindEmpty();
+            InventorySlot = aisling.Inventory.FindEmpty();
 
             if (InventorySlot == byte.MaxValue)
             {
