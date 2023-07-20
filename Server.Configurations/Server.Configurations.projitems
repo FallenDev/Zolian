@@ -13,20 +13,34 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Notification.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\Zolian.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianAbilities.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMaps.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMonsters.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMundanes.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianWorldMaps.sql" />
-    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\PlayersDatabaseBuild.sql" />
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\Zolian.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianAbilities.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMaps.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMonsters.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMundanes.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianWorldMaps.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\PlayersDatabaseBuild.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)ServerConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)sotp.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
