@@ -20,6 +20,7 @@ using Microsoft.AppCenter.Analytics;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json;
 
 using RestSharp;
@@ -33,6 +34,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     private readonly IClientFactory<LobbyClient> _clientProvider;
     private readonly MServerTable _serverTable;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
+    private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
 
     public LobbyServer(
         IClientFactory<LobbyClient> clientProvider,
@@ -129,7 +131,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         if (badActor)
         {
-            ServerSetup.Logger($"{client.RemoteIp} was detected as potentially malicious", LogLevel.Critical);
             client.Disconnect();
             return;
         }
@@ -152,17 +153,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     private bool ClientOnBlackList(ISocketClient client)
     {
         if (client == null) return true;
-        const char delimiter = ':';
-        var ipToString = client.Socket.RemoteEndPoint?.ToString();
-        var ipSplit = ipToString?.Split(delimiter);
-        var ip = ipSplit?[0];
         var tokenSource = new CancellationTokenSource(5000);
 
-        switch (ip)
+        switch (client.RemoteIp.ToString())
         {
-            case null:
-                return true;
-            case "208.115.199.29": // uptimerrobot ipaddress - Do not allow it to go further than just pinging our IP
+            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
                 try
                 {
                     client.Socket.Shutdown(SocketShutdown.Both);
@@ -173,15 +168,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 }
                 return false;
             case "127.0.0.1":
-            case "192.168.50.1": // Local Development Address withing your network
-                ServerSetup.Logger("-----------------------------------");
-                ServerSetup.Logger("Loopback IP & (Local) Authorized.");
+            case InternalIP:
                 return false;
         }
 
-        var bogonCheck = BogonCheck(client, ip);
+        var bogonCheck = BogonCheck(client, client.RemoteIp.ToString());
         if (bogonCheck)
         {
+            ServerSetup.Logger($"{client.RemoteIp} was blocked due to BOGON/Banned list restriction");
             return true;
         }
 
@@ -191,7 +185,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             if (keyCode is null || keyCode.Length == 0)
             {
                 ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
-                ServerSetup.Logger("Because of this, you're not protected from attackers");
                 return false;
             }
 
@@ -199,7 +192,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             var request = new RestRequest();
             request.AddHeader("Key", keyCode);
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("ipAddress", ip);
+            request.AddParameter("ipAddress", client.RemoteIp.ToString());
             request.AddParameter("maxAgeInDays", "180");
 
             var response = _restClient.ExecuteGetAsync<Ipdb>(request, tokenSource.Token);
@@ -210,8 +203,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger("-----------------------------------");
-                    ServerSetup.Logger("API Issue with IP database.");
+                    ServerSetup.Logger($"{client.RemoteIp} - API Issue with IP database");
                     return false;
                 }
 
@@ -221,38 +213,34 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 switch (ipdbResponse)
                 {
                     case >= 25:
-                        Analytics.TrackEvent(
-                            $"{ip} had a score of {ipdbResponse} and was blocked from accessing the server.");
+                        Analytics.TrackEvent($"{client.RemoteIp} had a score of {ipdbResponse} and was blocked from accessing the server");
                         ServerSetup.Logger("-----------------------------------");
-                        ServerSetup.Logger($"{ip} was blocked with a score of {ipdbResponse}.");
+                        ServerSetup.Logger($"{client.RemoteIp} was blocked with a score of {ipdbResponse}");
                         return true;
                     case >= 0:
-                        ServerSetup.Logger("-----------------------------------");
-                        ServerSetup.Logger($"{ip} had a score of {ipdbResponse}.");
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger("-----------------------------------");
-                        ServerSetup.Logger("API Issue with IP database.");
+                        ServerSetup.Logger($"{client.RemoteIp} - API Issue with IP database");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger("-----------------------------------");
-                ServerSetup.Logger("API Issue with IP database.");
+                ServerSetup.Logger($"{client.RemoteIp} - API Issue with IP database");
                 return false;
             }
         }
         catch (TaskCanceledException)
         {
-            ServerSetup.Logger("API Timed-out, continuing connection.");
+            ServerSetup.Logger("API Timed-out, continuing connection");
             if (tokenSource.Token.IsCancellationRequested) return false;
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger($"{ex}\nUnknown exception in ClientOnBlacklist method.");
+            ServerSetup.Logger("Unknown issue with IPDB, connections refused");
+            ServerSetup.Logger($"{ex}");
             Crashes.TrackError(ex);
             return true;
         }

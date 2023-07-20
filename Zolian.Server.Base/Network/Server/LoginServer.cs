@@ -117,6 +117,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                     Gender = (Gender)gender,
                     HairColor = (byte)hairColor,
                     HairStyle = hairStyle,
+                    BodyColor = 0,
                     SkillBook = new SkillBook(),
                     SpellBook = new SpellBook(),
                     Inventory = new Inventory(),

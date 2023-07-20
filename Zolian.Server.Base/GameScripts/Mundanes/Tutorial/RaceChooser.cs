@@ -196,42 +196,52 @@ public class RaceChooser : MundaneScript
                     switch (client.Aisling.Race)
                     {
                         case Race.Human:
+                            client.Aisling.BodyColor = 0;
                             if (client.Aisling.RaceSkill is not null)
                                 RacialBonus.HumanSkill(client, client.Aisling.RaceSkill);
                             if (client.Aisling.RaceSpell is not null)
                                 RacialBonus.HumanSpell(client, client.Aisling.RaceSpell);
                             break;
                         case Race.HalfElf:
+                            client.Aisling.BodyColor = 0;
                             if (client.Aisling.RaceSkill is not null)
                                 RacialBonus.HalfElfSkill(client, client.Aisling.RaceSkill);
                             if (client.Aisling.RaceSpell is not null)
                                 RacialBonus.HalfElfSpell(client, client.Aisling.RaceSpell);
                             break;
                         case Race.HighElf:
+                            client.Aisling.BodyColor = 1;
                             RacialBonus.HighElf(client);
                             break;
                         case Race.DarkElf:
+                            client.Aisling.BodyColor = 6;
                             RacialBonus.DarkElf(client);
                             break;
                         case Race.WoodElf:
+                            client.Aisling.BodyColor = 5;
                             RacialBonus.WoodElf(client);
                             break;
                         case Race.Orc:
+                            client.Aisling.BodyColor = 3;
                             RacialBonus.Orc(client);
                             break;
                         case Race.Dwarf:
+                            client.Aisling.BodyColor = 5;
                             RacialBonus.Dwarf(client);
                             break;
                         case Race.Halfling:
+                            client.Aisling.BodyColor = 0;
                             RacialBonus.Halfling(client);
                             break;
                         case Race.Dragonkin:
                             RacialBonus.Dragonkin(client, _dragonkin);
                             break;
                         case Race.HalfBeast:
+                            client.Aisling.BodyColor = 2;
                             RacialBonus.HalfBeast(client);
                             break;
                         case Race.Merfolk:
+                            client.Aisling.BodyColor = 7;
                             RacialBonus.Merfolk(client);
                             break;
                     }

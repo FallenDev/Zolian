@@ -1371,6 +1371,10 @@ namespace Darkages.Network.Client
         /// </summary>
         public void SendDisplayAisling(Aisling aisling)
         {
+            ushort? monsterForm = null;
+            if (aisling.MonsterForm != 0)
+                monsterForm = aisling.MonsterForm;
+
             var args = new DisplayAislingArgs
             {
                 AccessoryColor1 = (DisplayColor)aisling.Accessory1Color,
@@ -1382,31 +1386,49 @@ namespace Darkages.Network.Client
                 ArmorSprite1 = (ushort)aisling.ArmorImg,
                 ArmorSprite2 = (ushort)aisling.ArmorImg,
                 BodyColor = (BodyColor)aisling.BodyColor,
-                BodySprite = (BodySprite)aisling.BodySprite,
                 BootsColor = (DisplayColor)aisling.BootColor,
                 BootsSprite = (byte)aisling.BootsImg,
                 Direction = (Direction)aisling.Direction,
-                FaceSprite = aisling.FaceSprite,
+                FaceSprite = 0,
                 Gender = (Gender)aisling.Gender,
-                GroupBoxText = null, // Not built out
+                GroupBoxText = "",
                 HeadColor = (DisplayColor)aisling.HairColor,
-                HeadSprite = aisling.HairStyle,
-                Id = (uint)aisling.Serial,
+                Id = aisling.Serial,
                 IsDead = aisling.IsDead(),
-                IsHidden = false, // Not sure the difference between hidden and transparent (perhaps GM hide?)
                 IsTransparent = aisling.IsInvisible,
                 LanternSize = (LanternSize)aisling.Lantern,
                 Name = aisling.Username,
-                NameTagStyle = (NameTagStyle)aisling.NameStyle,
+                NameTagStyle = 0,
                 OvercoatColor = (DisplayColor)aisling.OverCoatColor,
                 OvercoatSprite = (ushort)aisling.OverCoatImg,
                 RestPosition = (RestPosition)aisling.Resting,
                 ShieldSprite = (byte)aisling.ShieldImg,
-                Sprite = aisling.MonsterForm,
+                Sprite = monsterForm,
                 WeaponSprite = (ushort)aisling.WeaponImg,
                 X = aisling.X,
                 Y = aisling.Y
             };
+
+            if (aisling.EquipmentManager.Helmet != null)
+                args.HeadSprite = (ushort)aisling.HelmetImg;
+            else
+                args.HeadSprite = aisling.HairStyle;
+
+            if (aisling.Gender == Enums.Gender.Male)
+            {
+                if (aisling.IsInvisible)
+                    args.BodySprite = BodySprite.MaleInvis;
+                else
+                    args.BodySprite = aisling.IsDead() ? BodySprite.MaleGhost : BodySprite.Male;
+            }
+            else
+            {
+                if (aisling.IsInvisible)
+                    args.BodySprite = BodySprite.FemaleInvis;
+                else
+                    args.BodySprite = aisling.IsDead() ? BodySprite.FemaleGhost : BodySprite.Female;
+            }                
+            
 
             //we can always see ourselves, and we're never hostile to our self
             if (!Aisling.Equals(aisling))
@@ -1421,7 +1443,9 @@ namespace Darkages.Network.Client
 
                     //if we cant see the aisling, hide it (it is otherwise transparent)
                     if (!Aisling.CanSeeInvisible)
+                    {
                         args.IsHidden = true;
+                    }
                 }
             }
 

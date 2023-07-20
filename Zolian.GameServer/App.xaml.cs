@@ -30,6 +30,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
+using Serilog.Sinks.SystemConsole.Themes;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Zolian.GameServer;
@@ -66,7 +67,7 @@ public partial class App
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.File("Zolian_General.txt", LogEventLevel.Verbose, logTemplate)
-            .WriteTo.Console(LogEventLevel.Verbose, logTemplate)
+            .WriteTo.Async(wt => wt.Console(LogEventLevel.Verbose, logTemplate, theme: AnsiConsoleTheme.Literate))
             .CreateLogger();
 
         Win32.AllocConsole();

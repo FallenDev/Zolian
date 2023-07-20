@@ -10,6 +10,7 @@ using Darkages.Meta;
 using Darkages.Network.Server;
 using Darkages.Systems.CLI;
 using System.Net;
+using Darkages.Network.Client;
 
 namespace Darkages.Interfaces;
 
@@ -26,7 +27,6 @@ public interface IServerContext
     void LoadExtensions();
     void CacheBuffs();
     void CacheDebuffs();
-    void StartServers();
     void CommandHandler();
     ConcurrentDictionary<int, byte> EncryptKeyConDict { get; set; }
     List<Metafile> GlobalMetaCache { get; set; }
@@ -51,6 +51,7 @@ public interface IServerContext
     bool Running { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }
+    WorldClient NpcClient { get; set; }
     LoginServer LoginServer { get; set; }
     LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }

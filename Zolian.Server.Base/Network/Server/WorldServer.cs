@@ -83,6 +83,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         IndexHandlers();
         SkillMapper();
         RegisterServerComponents();
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Server is now Online\n");
     }
 
     #region Server Init
@@ -125,10 +127,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
             };
 
+            Console.WriteLine();
             ServerSetup.Logger($"Server Components Loaded: {_serverComponents.Count}");
         }
     }
-
+    
     private static void SkillMapper()
     {
         _skillMap = new Dictionary<(Race race, Class path, Class pastClass), string>

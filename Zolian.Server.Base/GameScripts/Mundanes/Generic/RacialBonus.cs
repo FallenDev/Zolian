@@ -147,51 +147,61 @@ public static class RacialBonus
         switch (dragonkin)
         {
             case SubClassDragonkin.Red:
+                client.Aisling.BodyColor = 8;
                 client.Aisling.FireImmunity = true;
                 client.Aisling.RaceSkill = "Fire Breath";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Blue:
+                client.Aisling.BodyColor = 7;
                 client.Aisling.WaterImmunity = true;
                 client.Aisling.RaceSkill = "Bubble Burst";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Green:
+                client.Aisling.BodyColor = 3;
                 client.Aisling.EarthImmunity = true;
                 client.Aisling.RaceSkill = "Earthly Delights";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Black:
+                client.Aisling.BodyColor = 9;
                 client.Aisling.PoisonImmunity = true;
                 client.Aisling.RaceSkill = "Poison Talon";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.White:
+                client.Aisling.BodyColor = 1;
                 client.Aisling.EnticeImmunity = true;
                 client.Aisling.RaceSkill = "Icy Blast";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Brass:
+                client.Aisling.BodyColor = 4;
                 client.Aisling.FireImmunity = true;
                 client.Aisling.RaceSkill = "Silent Siren";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Bronze:
+                client.Aisling.BodyColor = 5;
                 client.Aisling.WindImmunity = true;
                 client.Aisling.RaceSkill = "Toxic Breath";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Copper:
+                client.Aisling.BodyColor = 2;
                 client.Aisling.EarthImmunity = true;
                 client.Aisling.RaceSkill = "Vicious Roar";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Gold:
+                client.Aisling.BodyColor = 4;
                 client.Aisling.DarkImmunity = true;
                 client.Aisling.RaceSkill = "Golden Lair";
                 client.Aisling.RaceSpell = null;
                 break;
             case SubClassDragonkin.Silver:
+                client.Aisling.BodyColor = 1;
                 client.Aisling.LightImmunity = true;
                 client.Aisling.RaceSkill = "Heavenly Gaze";
                 client.Aisling.RaceSpell = null;

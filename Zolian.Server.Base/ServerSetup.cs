@@ -5,6 +5,7 @@ using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -36,6 +37,7 @@ public class ServerSetup : IServerContext
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
     public WorldServer Game { get; set; }
+    public WorldClient NpcClient { get; set; }
     public LoginServer LoginServer { get; set; }
     public LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }
@@ -115,7 +117,6 @@ public class ServerSetup : IServerContext
         try
         {
             LoadAndCacheStorage();
-            StartServers();
         }
         catch (Exception ex)
         {
@@ -271,37 +272,17 @@ public class ServerSetup : IServerContext
         }
     }
 
-    /// <summary>
-    /// Game.Start starts the game server from WorldServer.cs it then calls the Start method from
-    /// NetworkServer to enable the socket. _lobby.Start starts the lobby server from directly
-    /// calling NetworkServer to enable the socket.
-    /// </summary>
-    public void StartServers()
-    {
-        try
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Logger("Server is now online.");
-        }
-        catch (SocketException ex)
-        {
-            Logger(ex.Message, LogLevel.Error);
-            Logger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
-        }
-    }
-
     public void CommandHandler()
     {
-        Console.WriteLine("\n");
+        Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.DarkBlue;
         Console.WriteLine("GM Commands");
+        Console.ForegroundColor = ConsoleColor.Magenta;
 
         foreach (var command in Parser.Commands)
         {
-            Logger(command.ShowHelp(), LogLevel.Warning);
+            Console.WriteLine(command.ShowHelp(), LogLevel.Debug);
         }
-        Console.ForegroundColor = ConsoleColor.Cyan;
     }
 
     public static void SaveCommunityAssets()

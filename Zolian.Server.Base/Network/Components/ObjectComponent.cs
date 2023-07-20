@@ -89,8 +89,8 @@ public class ObjectComponent : WorldServerComponent
 
         foreach (var obj in objectsToAdd)
         {
-            if (obj.Serial == self.Serial) continue;
-            if (self.View.ContainsKey(obj.Serial)) continue;
+            //if (obj.Serial == self.Serial) continue;
+            //if (self.View.ContainsKey(obj.Serial)) continue;
             // If object is not an item or money, try to add it; If you cannot add it, continue
             if (obj is not Item or Money)
                 if (!self.View.TryAdd(obj.Serial, obj)) continue;
