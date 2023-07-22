@@ -683,7 +683,7 @@ public sealed class Aisling : Player, IAisling
         if (update)
         {
             var players = AislingsNearby();
-            foreach (var player in players.Where(s => s.Serial != Serial))
+            foreach (var player in players.Where(s => s != null && s.Serial != Serial))
             {
                 player.Client.SendRemoveObject(Serial);
             }

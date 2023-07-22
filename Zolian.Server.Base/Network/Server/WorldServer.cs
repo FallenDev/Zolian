@@ -2525,8 +2525,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             //if player is not in a world map, return
             if (worldMap == null) return default;
 
-            localClient.Aisling.Client.PendingNode =
-                worldMap.Portals.Find(i => i.Destination.AreaID == localArgs.MapId);
+            localClient.Aisling.Client.PendingNode = worldMap.Portals.Find(i => i.Destination.AreaID == localArgs.MapId);
 
             if (!localClient.Aisling.Client.MapOpen) return default;
             var selectedPortalNode = localClient.Aisling.Client.PendingNode;

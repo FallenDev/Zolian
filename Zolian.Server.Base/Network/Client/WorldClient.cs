@@ -2949,21 +2949,24 @@ namespace Darkages.Network.Client
         /// <param name="worldMap"></param>
         public void SendWorldMap()
         {
-            var portal = ServerSetup.Instance.GlobalWorldMapTemplateCache[Aisling.World];
-            var warpsList = new List<WorldMapNodeInfo>();
+            if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(Aisling.World)) return;
+            
             MapOpen = true;
+            var portal = ServerSetup.Instance.GlobalWorldMapTemplateCache[Aisling.World];
+            var name = $"field{portal.FieldNumber:000}";
+            var warpsList = new List<WorldMapNodeInfo>();
 
             foreach (var warp in portal.Portals.Where(warps => warps?.Destination != null))
             {
-                var map = warp.Destination.AreaID.ToString();
+                var map = ServerSetup.Instance.GlobalMapCache[warp.Destination.AreaID];
                 var x = warp.Destination.Location.X;
                 var y = warp.Destination.Location.Y;
                 var addWarp = new WorldMapNodeInfo
                 {
-                    Destination = new Location(map, x, y),
-                    ScreenPosition = new Point(warp.PointX, warp.PointY),
+                    Destination = new Location(warp.Destination.AreaID.ToString(), new Point(x, y)),
+                    ScreenPosition = new Point(warp.PointY, warp.PointX), // Client expects this backwards
                     Text = warp.DisplayName,
-                    UniqueId = (ushort)EphemeralRandomIdGenerator<uint>.Shared.NextId
+                    UniqueId = EphemeralRandomIdGenerator<ushort>.Shared.NextId
                 };
 
                 warpsList.Add(addWarp);
@@ -2972,7 +2975,7 @@ namespace Darkages.Network.Client
             var args = new WorldMapArgs
             {
                 FieldIndex = (byte)portal.FieldNumber,
-                FieldName = portal.Name,
+                FieldName = name,
                 Nodes = warpsList
             };
 
