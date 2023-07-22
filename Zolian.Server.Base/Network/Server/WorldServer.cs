@@ -1214,14 +1214,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.SendConfirmExit();
             else
             {
-                var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
-                var redirect = new Redirect(
+                    var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
+                    var redirect = new Redirect(
                     EphemeralRandomIdGenerator<uint>.Shared.NextId,
                     new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                     ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
 
-                RedirectManager.Add(redirect);
-                localClient.SendRedirect(redirect);
+                    RedirectManager.Add(redirect);
+                    localClient.SendRedirect(redirect);
             }
 
             return default;
@@ -1461,10 +1461,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var existingAisling = Aislings.FirstOrDefault(user => user.Username.EqualsI(redirect.Name));
 
             //double logon, disconnect both clients
-            if (existingAisling == null) return LoadAislingAsync(localClient, redirect);
-            ServerSetup.Logger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
-            existingAisling.Client.Disconnect();
+            if (existingAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
             localClient.Disconnect();
+            if (redirect.Type == ServerType.Lobby) return default;
+            ServerSetup.Logger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
+            existingAisling?.Client.Disconnect();
             return default;
         }
 

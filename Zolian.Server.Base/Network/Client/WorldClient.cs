@@ -230,7 +230,7 @@ namespace Darkages.Network.Client
             // ToDo: Enable this once stable
             // Lag disconnector and routine update for client
             //if (!Aisling.GameMaster)
-                //VariableLagDisconnector(30);
+            //VariableLagDisconnector(30);
             DoUpdate(elapsedTime);
         }
 
@@ -1295,6 +1295,9 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
+        /// <summary>
+        /// 0x4C - Reconnect
+        /// </summary>
         public void SendConfirmExit()
         {
             var args = new ConfirmExitArgs
@@ -1427,8 +1430,8 @@ namespace Darkages.Network.Client
                     args.BodySprite = BodySprite.FemaleInvis;
                 else
                     args.BodySprite = aisling.IsDead() ? BodySprite.FemaleGhost : BodySprite.Female;
-            }                
-            
+            }
+
 
             //we can always see ourselves, and we're never hostile to our self
             if (!Aisling.Equals(aisling))
@@ -1816,361 +1819,361 @@ namespace Darkages.Network.Client
             var partyOpen = aisling.PartyStatus == (GroupStatus)1;
             var legendMarks = new List<LegendMarkInfo>();
 
-            if (aisling.EquipmentManager.Weapon != null)
+            if (Aisling.EquipmentManager.Weapon != null)
             {
-                var equip = aisling.EquipmentManager.Weapon.Item;
+                var equip = Aisling.EquipmentManager.Weapon;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Armor != null)
+            if (Aisling.EquipmentManager.Armor != null)
             {
-                var equip = aisling.EquipmentManager.Armor.Item;
+                var equip = Aisling.EquipmentManager.Armor;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Shield != null)
+            if (Aisling.EquipmentManager.Shield != null)
             {
-                var equip = aisling.EquipmentManager.Shield.Item;
+                var equip = Aisling.EquipmentManager.Shield;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Helmet != null)
+            if (Aisling.EquipmentManager.Helmet != null)
             {
-                var equip = aisling.EquipmentManager.Helmet.Item;
+                var equip = Aisling.EquipmentManager.Helmet;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Earring != null)
+            if (Aisling.EquipmentManager.Earring != null)
             {
-                var equip = aisling.EquipmentManager.Earring.Item;
+                var equip = Aisling.EquipmentManager.Earring;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Necklace != null)
+            if (Aisling.EquipmentManager.Necklace != null)
             {
-                var equip = aisling.EquipmentManager.Necklace.Item;
+                var equip = Aisling.EquipmentManager.Necklace;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.LHand != null)
+            if (Aisling.EquipmentManager.LHand != null)
             {
-                var equip = aisling.EquipmentManager.LHand.Item;
+                var equip = Aisling.EquipmentManager.LHand;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.RHand != null)
+            if (Aisling.EquipmentManager.RHand != null)
             {
-                var equip = aisling.EquipmentManager.RHand.Item;
+                var equip = Aisling.EquipmentManager.RHand;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.LArm != null)
+            if (Aisling.EquipmentManager.LArm != null)
             {
-                var equip = aisling.EquipmentManager.LArm.Item;
+                var equip = Aisling.EquipmentManager.LArm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.RArm != null)
+            if (Aisling.EquipmentManager.RArm != null)
             {
-                var equip = aisling.EquipmentManager.RArm.Item;
+                var equip = Aisling.EquipmentManager.RArm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Waist != null)
+            if (Aisling.EquipmentManager.Waist != null)
             {
-                var equip = aisling.EquipmentManager.Waist.Item;
+                var equip = Aisling.EquipmentManager.Waist;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Leg != null)
+            if (Aisling.EquipmentManager.Leg != null)
             {
-                var equip = aisling.EquipmentManager.Leg.Item;
+                var equip = Aisling.EquipmentManager.Leg;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.Foot != null)
+            if (Aisling.EquipmentManager.Foot != null)
             {
-                var equip = aisling.EquipmentManager.Foot.Item;
+                var equip = Aisling.EquipmentManager.Foot;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.FirstAcc != null)
+            if (Aisling.EquipmentManager.FirstAcc != null)
             {
-                var equip = aisling.EquipmentManager.FirstAcc.Item;
+                var equip = Aisling.EquipmentManager.FirstAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.OverCoat != null)
+            if (Aisling.EquipmentManager.OverCoat != null)
             {
-                var equip = aisling.EquipmentManager.OverCoat.Item;
+                var equip = Aisling.EquipmentManager.OverCoat;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.OverHelm != null)
+            if (Aisling.EquipmentManager.OverHelm != null)
             {
-                var equip = aisling.EquipmentManager.OverHelm.Item;
+                var equip = Aisling.EquipmentManager.OverHelm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.SecondAcc != null)
+            if (Aisling.EquipmentManager.SecondAcc != null)
             {
-                var equip = aisling.EquipmentManager.SecondAcc.Item;
+                var equip = Aisling.EquipmentManager.SecondAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (aisling.EquipmentManager.ThirdAcc != null)
+            if (Aisling.EquipmentManager.ThirdAcc != null)
             {
-                var equip = aisling.EquipmentManager.ThirdAcc.Item;
+                var equip = Aisling.EquipmentManager.ThirdAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2318,19 +2321,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Weapon != null)
             {
-                var equip = Aisling.EquipmentManager.Weapon.Item;
+                var equip = Aisling.EquipmentManager.Weapon;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2338,19 +2341,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Armor != null)
             {
-                var equip = Aisling.EquipmentManager.Armor.Item;
+                var equip = Aisling.EquipmentManager.Armor;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2358,19 +2361,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Shield != null)
             {
-                var equip = Aisling.EquipmentManager.Shield.Item;
+                var equip = Aisling.EquipmentManager.Shield;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2378,19 +2381,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Helmet != null)
             {
-                var equip = Aisling.EquipmentManager.Helmet.Item;
+                var equip = Aisling.EquipmentManager.Helmet;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2398,19 +2401,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Earring != null)
             {
-                var equip = Aisling.EquipmentManager.Earring.Item;
+                var equip = Aisling.EquipmentManager.Earring;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2418,19 +2421,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Necklace != null)
             {
-                var equip = Aisling.EquipmentManager.Necklace.Item;
+                var equip = Aisling.EquipmentManager.Necklace;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2438,19 +2441,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.LHand != null)
             {
-                var equip = Aisling.EquipmentManager.LHand.Item;
+                var equip = Aisling.EquipmentManager.LHand;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2458,19 +2461,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.RHand != null)
             {
-                var equip = Aisling.EquipmentManager.RHand.Item;
+                var equip = Aisling.EquipmentManager.RHand;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2478,19 +2481,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.LArm != null)
             {
-                var equip = Aisling.EquipmentManager.LArm.Item;
+                var equip = Aisling.EquipmentManager.LArm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2498,19 +2501,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.RArm != null)
             {
-                var equip = Aisling.EquipmentManager.RArm.Item;
+                var equip = Aisling.EquipmentManager.RArm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2518,19 +2521,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Waist != null)
             {
-                var equip = Aisling.EquipmentManager.Waist.Item;
+                var equip = Aisling.EquipmentManager.Waist;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2538,19 +2541,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Leg != null)
             {
-                var equip = Aisling.EquipmentManager.Leg.Item;
+                var equip = Aisling.EquipmentManager.Leg;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2558,19 +2561,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.Foot != null)
             {
-                var equip = Aisling.EquipmentManager.Foot.Item;
+                var equip = Aisling.EquipmentManager.Foot;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2578,19 +2581,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.FirstAcc != null)
             {
-                var equip = Aisling.EquipmentManager.FirstAcc.Item;
+                var equip = Aisling.EquipmentManager.FirstAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2598,19 +2601,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.OverCoat != null)
             {
-                var equip = Aisling.EquipmentManager.OverCoat.Item;
+                var equip = Aisling.EquipmentManager.OverCoat;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2618,19 +2621,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.OverHelm != null)
             {
-                var equip = Aisling.EquipmentManager.OverHelm.Item;
+                var equip = Aisling.EquipmentManager.OverHelm;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2638,19 +2641,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.SecondAcc != null)
             {
-                var equip = Aisling.EquipmentManager.SecondAcc.Item;
+                var equip = Aisling.EquipmentManager.SecondAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2658,19 +2661,19 @@ namespace Darkages.Network.Client
 
             if (Aisling.EquipmentManager.ThirdAcc != null)
             {
-                var equip = Aisling.EquipmentManager.ThirdAcc.Item;
+                var equip = Aisling.EquipmentManager.ThirdAcc;
 
                 var item = new ItemInfo
                 {
-                    Color = (DisplayColor)equip.Color,
-                    Cost = (int?)equip.Template.Value,
-                    Count = equip.Stacks,
-                    CurrentDurability = (int)equip.Durability,
-                    MaxDurability = (int)equip.MaxDurability,
-                    Name = equip.NoColorDisplayName,
-                    Slot = equip.Slot,
-                    Sprite = equip.DisplayImage,
-                    Stackable = equip.Template.CanStack
+                    Color = (DisplayColor)equip.Item.Color,
+                    Cost = (int?)equip.Item.Template.Value,
+                    Count = equip.Item.Stacks,
+                    CurrentDurability = (int)equip.Item.Durability,
+                    MaxDurability = (int)equip.Item.MaxDurability,
+                    Name = equip.Item.NoColorDisplayName,
+                    Slot = (byte)equip.Slot,
+                    Sprite = equip.Item.DisplayImage,
+                    Stackable = equip.Item.Template.CanStack
                 };
 
                 equipment.Add((EquipmentSlot)item.Slot, item);
@@ -2950,7 +2953,7 @@ namespace Darkages.Network.Client
         public void SendWorldMap()
         {
             if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(Aisling.World)) return;
-            
+
             MapOpen = true;
             var portal = ServerSetup.Instance.GlobalWorldMapTemplateCache[Aisling.World];
             var name = $"field{portal.FieldNumber:000}";
