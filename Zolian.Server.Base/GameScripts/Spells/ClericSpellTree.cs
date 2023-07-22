@@ -36,7 +36,7 @@ public class Spectral_Shield : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
+            aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -70,7 +70,7 @@ public class Aite : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
+            aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -104,7 +104,7 @@ public class Mor_Dion : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
+            aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
@@ -200,7 +200,7 @@ public class Pramh : SpellScript
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
+            aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         };
 
@@ -235,7 +235,7 @@ public class Detect : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
         }
 
         var title = $"{"{=bDetect",33}";
@@ -283,19 +283,13 @@ public class Detect : SpellScript
         switch (_spell.Level)
         {
             case < 10:
-                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
-                    $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}");
+                aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}");
                 break;
             case >= 11 and <= 40:
-                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
-                    $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" +
-                    $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac}");
+                aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" + $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac}");
                 break;
             default:
-                aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" +
-                                                 $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac} {{=aRegen: {{=s{monster.Regen}\n" +
-                                                 $"{{=aSTR:{{=s{monster.Str} {{=aINT:{{=s{monster.Int} {{=aWIS:{{=s{monster.Wis} {{=aCON:{{=s{monster.Con} {{=aDEX:{{=s{monster.Dex}\n" +
-                                                 $"{{=aRace:{{=s{monster.Template.MonsterRace} {{=aFortitude:{{=s{monster.Fortitude} {{=aReflex:{{=s{monster.Reflex} {{=aWill:{{=s{monster.Will}");
+                aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}\n" + $"{{=c{monster.Template.BaseName} {{=aSize: {{=s{monster.Size} {{=aAC: {{=s{monster.Ac} {{=aRegen: {{=s{monster.Regen}\n" + $"{{=aSTR:{{=s{monster.Str} {{=aINT:{{=s{monster.Int} {{=aWIS:{{=s{monster.Wis} {{=aCON:{{=s{monster.Con} {{=aDEX:{{=s{monster.Dex}\n" + $"{{=aRace:{{=s{monster.Template.MonsterRace} {{=aFortitude:{{=s{monster.Fortitude} {{=aReflex:{{=s{monster.Reflex} {{=aWill:{{=s{monster.Will}");
                 break;
         }
     }
@@ -413,7 +407,7 @@ public class Heal_Minor : SpellScript
 
             aisling.Client.SendHealthBar(target, _spell.Template.Sound);
             if (target is Aisling)
-                target.Client.SendAttributes(StatUpdateType.FullVitality);
+                target.PlayerNearby?.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -523,10 +517,10 @@ public class Heal_Major : SpellScript
             if (target.CurrentHp > target.MaximumHp)
                 target.CurrentHp = target.MaximumHp;
 
-            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
             if (target is Aisling)
-                target.Client.SendAttributes(StatUpdateType.FullVitality);
+                target.PlayerNearby?.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -636,10 +630,10 @@ public class Heal_Critical : SpellScript
             if (target.CurrentHp > target.MaximumHp)
                 target.CurrentHp = target.MaximumHp;
 
-            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
             if (target is Aisling)
-                target.Client.SendAttributes(StatUpdateType.FullVitality);
+                target.PlayerNearby?.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -753,17 +747,17 @@ public class Dire_Aid : SpellScript
             if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
             {
                 if (target is Aisling)
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is applied.");
+                    aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is applied.");
             }
             else
             {
                 _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
             }
 
-            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(target, 8));
 
             if (target is Aisling)
-                target.Client.SendAttributes(StatUpdateType.FullVitality);
+                target.PlayerNearby?.Client.SendAttributes(StatUpdateType.FullVitality);
         }
         else
         {
@@ -878,10 +872,10 @@ public class Healing_Winds : SpellScript
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
 
-                target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
 
                 partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(267, partyMember.Serial));
-                partyMember.Client.SendAttributes(StatUpdateType.Vitality);
+                partyMember.PlayerNearby?.Client.SendAttributes(StatUpdateType.Vitality);
             }
         }
         else
@@ -891,7 +885,7 @@ public class Healing_Winds : SpellScript
                 aisling.CurrentHp = aisling.MaximumHp;
 
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(aisling, 8));
-            aisling.Client.SendAttributes(StatUpdateType.Vitality);
+            aisling.PlayerNearby?.Client.SendAttributes(StatUpdateType.Vitality);
         }
     }
 
@@ -1066,9 +1060,9 @@ public class Raise_Ally : SpellScript
             foreach (var deadPartyMember in aisling.PartyMembers.Where(m => m is { Dead: true }))
             {
                 deadPartyMember.Client.Revive();
-                deadPartyMember.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
-                deadPartyMember.Client.SendAttributes(StatUpdateType.Full);
-                deadPartyMember.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
+                deadPartyMember.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
+                deadPartyMember.PlayerNearby?.Client.SendAttributes(StatUpdateType.Full);
+                deadPartyMember.PlayerNearby?.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
                 Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, deadPartyMember.Serial)); });
                 break;
             }
@@ -1453,7 +1447,7 @@ public class AoPuinsein : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -1560,7 +1554,7 @@ public class AoDall : SpellScript
 
         if (blind)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -1667,7 +1661,7 @@ public class AoBeagCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -1774,7 +1768,7 @@ public class AoCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -1881,7 +1875,7 @@ public class AoMorCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -1988,7 +1982,7 @@ public class AoArdCradh : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);
@@ -2095,7 +2089,7 @@ public class AoSuain : SpellScript
 
         if (cursed)
             if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
+                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
         aisling.CastAnimation(Spell, target);

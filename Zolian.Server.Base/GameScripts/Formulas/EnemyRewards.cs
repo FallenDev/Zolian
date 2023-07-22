@@ -110,7 +110,7 @@ public class EnemyRewards : RewardScript
         //    AbUp(player);
     }
 
-    private static void AbUp(Player player)
+    private static void AbUp(Aisling player)
     {
         if (player.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
             return;
@@ -140,7 +140,7 @@ public class EnemyRewards : RewardScript
         });
     }
 
-    private void DetermineRandomSpecialDrop(Monster monster, Sprite player)
+    private void DetermineRandomSpecialDrop(Monster monster, Aisling player)
     {
         var dropList = JoinList(monster);
         if (dropList.Count <= 0) return;
@@ -258,7 +258,7 @@ public class EnemyRewards : RewardScript
         }
     }
 
-    private void GenerateDrops(Monster monster, Sprite player)
+    private void GenerateDrops(Monster monster, Aisling player)
     {
         DetermineRandomSpecialDrop(monster, player);
     }

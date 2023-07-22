@@ -213,16 +213,24 @@ public class Skill
     {
         if (enemy == null) return null;
         if (!enemy.SkillReflect) return enemy;
+        Aisling sender = null;
 
         var reflect = Generator.RandNumGen100();
-
         if (reflect > 45) return enemy;
 
         // Swap sprites reversing damage 
         (damageDealingSprite, enemy) = (enemy, damageDealingSprite);
-        enemy.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, enemy.Serial));
-        if (damageDealingSprite is Aisling)
-            damageDealingSprite.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
+
+        if (damageDealingSprite is Aisling aisling)
+        {
+            sender = aisling;
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You deflected {skill.Template.Name}.");
+        }
+
+        if (enemy is Aisling enemyAisling)
+            sender = enemyAisling;
+
+        sender?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, enemy.Serial));
 
         return enemy;
     }

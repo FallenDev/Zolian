@@ -10,9 +10,9 @@ namespace Darkages.Interfaces;
 
 public interface ISprite
 {
-    WorldClient Client { get; set; }
     uint Serial { get; set; }
     int CurrentMapId { get; set; }
+    Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
     double Amplified { get; set; }
     ElementManager.Element OffenseElement { get; set; }
     ElementManager.Element SecondaryOffensiveElement { get; set; }

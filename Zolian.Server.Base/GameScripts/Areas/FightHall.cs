@@ -9,7 +9,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Fight Hall")]
 public class FightHall : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
 
     public FightHall(Area area) : base(area)
     {

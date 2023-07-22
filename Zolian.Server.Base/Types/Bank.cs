@@ -121,7 +121,7 @@ public class Bank : IBank
         return true;
     }
 
-    public async void AddToAislingDb(ISprite aisling, Item item)
+    public async void AddToAislingDb(Aisling aisling, Item item)
     {
         await CreateLock2.WaitAsync().ConfigureAwait(false);
 
@@ -184,7 +184,7 @@ public class Bank : IBank
         }
     }
 
-    public async Task UpdateBanked(ISprite aisling, Item item)
+    public async Task UpdateBanked(Aisling aisling, Item item)
     {
         if (item == null) return;
 
@@ -292,35 +292,35 @@ public class Bank : IBank
         // weight check
         if (client.Aisling.CurrentWeight + client.PendingBankedSession.SelectedItem.Template.CarryWeight > client.Aisling.MaximumWeight)
         {
-            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{client.PendingBankedSession.SelectedItem.Template.Name} is too heavy for you."));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{client.PendingBankedSession.SelectedItem.Template.Name} is too heavy for you."));
             return false;
         }
 
         // max stack check
         if (pullStack > client.PendingBankedSession.SelectedItem.Template.MaxStack && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Well, that's impossible. Can you even hold that?"));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Well, that's impossible. Can you even hold that?"));
             return false;
         }
 
         // banked check
         if (client.PendingBankedSession.ArgsQuantity > client.PendingBankedSession.SelectedItem.Stacks && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "You don't have that many banked with us."));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "You don't have that many banked with us."));
             return false;
         }
 
         // prevent 0 on stacked check
         if (client.PendingBankedSession.ArgsQuantity == 0 && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Zero? You sure?"));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "Zero? You sure?"));
             return false;
         }
 
         // dup & fraud check
         if (client.PendingBankedSession.ArgsQuantity < 0 && client.PendingBankedSession.SelectedItem.Template.CanStack)
         {
-            mundane.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "What? Should I call a guard?"));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, "What? Should I call a guard?"));
             return false;
         }
 

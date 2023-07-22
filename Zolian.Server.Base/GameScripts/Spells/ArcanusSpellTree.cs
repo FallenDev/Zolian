@@ -75,10 +75,10 @@ public class Mor_Strioch_Pian_Gar : SpellScript
 
         if (target.SpellNegate)
         {
-            target.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
+                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
 
             return;
         }

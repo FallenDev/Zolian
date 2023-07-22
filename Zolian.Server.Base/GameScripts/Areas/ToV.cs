@@ -10,7 +10,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("ToV")] // Temple of Void Area Map
 public class ToV : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
     private WorldServerTimer AnimTimer { get; set; }
     private WorldServerTimer AnimTimer2 { get; set; }
     private bool _animate;

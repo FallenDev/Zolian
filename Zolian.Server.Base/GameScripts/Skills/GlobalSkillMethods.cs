@@ -158,11 +158,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
-        attacker.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
+        attacker.PlayerNearby?.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
     }
 
     public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit)
@@ -180,10 +180,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
     }
 
     public int Thrown(WorldClient client, Skill skill, bool crit)
@@ -203,7 +203,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
     public void FailedAttempt(Sprite sprite, Skill skill, BodyAnimationArgs action)
     {
-        sprite.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
+        sprite.PlayerNearby?.Client.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound);
     }
 
     public (bool, int) OnCrit(int dmg)

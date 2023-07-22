@@ -6,6 +6,8 @@ using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
+using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Templates;
 using Darkages.Types;
 
@@ -25,6 +27,7 @@ public class IgnoredRecord
 
 public sealed class Aisling : Player, IAisling
 {
+    public WorldClient Client { get; set; }
     public int EquipmentDamageTaken = 0;
     public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
@@ -222,6 +225,136 @@ public sealed class Aisling : Player, IAisling
             }
 
             return bowWielder;
+        }
+    }
+
+        /// <summary>
+    /// Sends a ServerFormat to target players using a scope or definer
+    /// </summary>
+    /// <param name="op">Scope of the method call</param>
+    /// <param name="method">IWorldClient method to send</param>
+    /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
+    public void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
+    {
+        switch (op)
+        {
+            case Scope.Self:
+                method(Client);
+                return;
+            case Scope.NearbyAislingsExludingSelf:
+                {
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
+                    {
+                        if (gc == null || gc.Serial == Serial) continue;
+                        if (gc.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.NearbyAislings:
+                {
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.Clan:
+                {
+                    if (this is not Aisling playerTalking) return;
+
+                    foreach (var gc in GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, playerTalking.Clan, StringComparison.CurrentCultureIgnoreCase)))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.VeryNearbyAislings:
+                {
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.AislingsOnSameMap:
+                {
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.GroupMembers:
+                {
+                    if (this is not Aisling playersTalking) return;
+
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && playersTalking.GroupParty.Has(otherPlayers)))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.NearbyGroupMembersExcludingSelf:
+                {
+                    if (this is not Aisling playersTalking) return;
+
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && otherPlayers.WithinRangeOf(playersTalking) && playersTalking.GroupParty.Has(otherPlayers)))
+                    {
+                        if (gc == null || gc.Serial == Serial) continue;
+                        if (gc.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.NearbyGroupMembers:
+                {
+                    if (this is not Aisling playersTalking) return;
+
+                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && otherPlayers.WithinRangeOf(playersTalking) && playersTalking.GroupParty.Has(otherPlayers)))
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.DefinedAislings when definer == null:
+                return;
+            case Scope.DefinedAislings:
+                {
+                    foreach (var gc in definer)
+                    {
+                        if (gc?.Client == null) continue;
+                        method(gc.Client);
+                    }
+
+                    return;
+                }
+            case Scope.All:
+                var players = ServerSetup.Instance.Game.Aislings;
+                foreach (var p in players)
+                {
+                    if (p?.Client == null) continue;
+                    method(p.Client);
+                }
+
+                return;
+            default:
+                method(Client);
+                return;
         }
     }
 

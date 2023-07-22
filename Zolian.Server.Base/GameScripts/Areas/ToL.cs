@@ -10,7 +10,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("ToL")] // Temple of Light Area Map
 public class ToL : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
     private WorldServerTimer AnimTimer { get; set; }
     private WorldServerTimer AnimTimer2 { get; set; }
     private bool _animate;

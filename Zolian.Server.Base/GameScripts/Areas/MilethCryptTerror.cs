@@ -11,7 +11,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Shrouded Crypt")]
 public class MilethCryptTerror : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
     private WorldServerTimer AnimTimer { get; }
     private bool _animate;
 

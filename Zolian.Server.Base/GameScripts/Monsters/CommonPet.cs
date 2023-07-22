@@ -26,9 +26,9 @@ public class CommonPet : MonsterScript
             foreach (var spellScriptStr in Monster.Template.SpellScripts)
                 LoadSpellScript(spellScriptStr);
 
-        if (Monster.Template.SkillScripts != null)
-            foreach (var skillScriptStr in Monster.Template.SkillScripts)
-                LoadSkillScript(skillScriptStr);
+        if (Monster.Template.SkillScripts == null) return;
+        foreach (var skillScriptStr in Monster.Template.SkillScripts)
+            LoadSkillScript(skillScriptStr);
     }
 
     public override void OnDeath(WorldClient client)
@@ -61,81 +61,72 @@ public class CommonPet : MonsterScript
 
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        #region actions
         void UpdateTarget()
         {
             Monster.Target = Monster.Summoner.Target ?? GetObjects(Monster.Map,
-                    p => p.Target != null && Monster.Summoner.Serial != p.Serial && p.Target.Serial == Monster.Summoner?.Serial &&
-                         p.Target.Serial != Monster.Serial, Get.All)
-                .OrderBy(i => i.Position.DistanceFrom(Monster.Summoner.Position))
-                .FirstOrDefault();
+                p => p.Target != null && Monster.Summoner.Serial != p.Serial && p.Target.Serial == Monster.Summoner?.Serial &&
+                     p.Target.Serial != Monster.Serial, Get.All).MinBy(i => i.Position.DistanceFrom(Monster.Summoner.Position));
 
 
-            if (Monster.Target != null)
-            {
-                if (Monster.Target.CurrentHp == 0 ||
-                    !Monster.WithinRangeOf(Monster.Target) ||
-                    Monster.Target != null &&
-                    Monster.Summoner != null &&
-                    Monster.Target.Serial == Monster.Summoner.Serial)
-                    Monster.Target = null;
-            }
+            if (Monster.Target == null) return;
+            if (Monster.Target.CurrentHp == 0 ||
+                !Monster.WithinRangeOf(Monster.Target) ||
+                Monster.Target != null &&
+                Monster.Summoner != null &&
+                Monster.Target.Serial == Monster.Summoner.Serial)
+                Monster.Target = null;
         }
 
         void PetMove()
         {
-            if (Monster.WalkTimer.Update(elapsedTime))
+            if (!Monster.WalkTimer.Update(elapsedTime)) return;
+
+            try
             {
-                try
+                // get target.
+                UpdateTarget();
+
+                if (Monster.Target == null)
                 {
-                    // get target.
-                    UpdateTarget();
+                    // get the summoner from the obj manager, in case state was lost (summoner re-logged during lifecycle)
+                    var summoner = GetObject<Aisling>(null,
+                        i => string.Equals(i.Username, Monster.Summoner.Username, StringComparison.CurrentCultureIgnoreCase));
 
-                    if (Monster.Target == null)
+                    if (summoner != null && Monster.Position.DistanceFrom(summoner.Position) > 2)
                     {
-                        // get the summoner from the obj manager, in case state was lost (summoner re-logged during lifecycle)
-                        var summoner = GetObject<Aisling>(null,
-                            i => i.Username.ToLower() == Monster.Summoner.Username.ToLower());
-
-                        if (summoner != null && Monster.Position.DistanceFrom(summoner.Position) > 2)
-                        {
-                            Monster.WalkTo(summoner.X, summoner.Y);
-                        }
-                    }
-                    else
-                    {
-                        Monster.WalkTo(Monster.Target.X, Monster.Target.Y);
+                        Monster.WalkTo(summoner.X, summoner.Y);
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Crashes.TrackError(ex);
+                    Monster.WalkTo(Monster.Target.X, Monster.Target.Y);
                 }
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
             }
         }
 
         void PetCast()
         {
-            if (Monster.CastTimer.Update(elapsedTime))
-            {
-                UpdateTarget();
+            if (!Monster.CastTimer.Update(elapsedTime)) return;
 
-                if (Monster.CantCast)
-                    return;
+            UpdateTarget();
 
-                if (Monster.Target == null)
-                    return;
+            if (Monster.CantCast)
+                return;
 
-                if (!Monster.Target.WithinRangeOf(Monster))
-                    return;
+            if (Monster.Target == null)
+                return;
 
-                if (Monster?.Target != null && _spellScripts.Count > 0)
-                {
-                    var spellIdx = RandomNumberGenerator.GetInt32(_spellScripts.Count);
-                    if (_spellScripts[spellIdx] != null)
-                        _spellScripts[spellIdx].OnUse(Monster, Monster.Target);
-                }
-            }
+            if (!Monster.Target.WithinRangeOf(Monster))
+                return;
+
+            if (Monster?.Target == null || _spellScripts.Count <= 0) return;
+            var spellIdx = RandomNumberGenerator.GetInt32(_spellScripts.Count);
+            if (_spellScripts[spellIdx] == null) return;
+            _spellScripts[spellIdx].OnUse(Monster, Monster.Target);
         }
 
         void PetAttack()
@@ -183,7 +174,6 @@ public class CommonPet : MonsterScript
             skill.InUse = false;
             return false;
         }
-        #endregion
 
         PetAttack();
         PetMove();

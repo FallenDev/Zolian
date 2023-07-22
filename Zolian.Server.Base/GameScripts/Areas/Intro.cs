@@ -10,7 +10,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Intro")]
 public class Intro : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
     private Item _item;
     private bool _givenClothes;
 

@@ -34,14 +34,11 @@ public class buff_DiaAite : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -85,13 +82,10 @@ public class buff_aite : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -138,13 +132,10 @@ public class buff_SpectralShield : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -193,13 +184,10 @@ public class buff_DefenseUp : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
         }
     }
 
@@ -250,13 +238,10 @@ public class buff_Hasten : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -280,12 +265,9 @@ public class buff_Hasten : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Serial));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Serial));
         }
     }
 }
@@ -314,13 +296,10 @@ public class buff_clawfist : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -365,13 +344,10 @@ public class buff_wingsOfProtect : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -415,13 +391,10 @@ public class buff_ArdDion : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -465,13 +438,10 @@ public class buff_MorDion : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -515,13 +485,10 @@ public class buff_dion : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -565,13 +532,10 @@ public class buff_IronSkin : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -615,13 +579,10 @@ public class buff_StoneSkin : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -666,12 +627,9 @@ public class buff_hide : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
         }
     }
 
@@ -718,12 +676,9 @@ public class buff_ShadowFade : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
         }
     }
 
@@ -772,13 +727,10 @@ public class buff_DexUp : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -828,13 +780,10 @@ public class buff_randWeaponElement : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, affected.Serial));
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -921,12 +870,9 @@ public class buff_skill_reflect : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -969,12 +915,9 @@ public class buff_spell_reflect : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1017,12 +960,9 @@ public class buff_PerfectDefense : Buff
         }
         else
         {
-            var nearby = affected.GetObjects<Aisling>(affected.Map, i => i.WithinRangeOf(affected));
-
-            foreach (var near in nearby)
-            {
-                near.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
-            }
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 

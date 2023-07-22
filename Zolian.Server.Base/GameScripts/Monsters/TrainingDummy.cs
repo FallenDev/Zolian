@@ -29,6 +29,7 @@ public class TrainingDummy : MonsterScript
 
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
+        if (source is not Aisling aisling) return;
         _incoming.What = client.Aisling.ActionUsed;
 
         if (dmg > int.MaxValue)
@@ -40,7 +41,7 @@ public class TrainingDummy : MonsterScript
         _incoming.Damage = convDmg;
         var dmgDisplay = _incoming.Damage.ToString();
 
-        Monster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n"));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n"));
         Monster.Facing((int)source.Pos.X, (int)source.Pos.Y, out var direction);
 
         if (!Monster.Position.IsNextTo(source.Position)) return;
@@ -65,12 +66,10 @@ public class TrainingDummy : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(WorldClient client) => Monster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, Monster.Serial));
+    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, Monster.Serial));
 
     public override void Update(TimeSpan elapsedTime)
     {
-        Monster.Client = ServerSetup.Instance.Game.Aislings.FirstOrDefault()?.Client;
-
         if (Monster.CurrentHp < Monster.MaximumHp)
             Monster.CurrentHp = Monster.MaximumHp;
     }

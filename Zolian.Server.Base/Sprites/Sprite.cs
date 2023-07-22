@@ -36,6 +36,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private readonly WorldServerTimer _buffAndDebuffTimer;
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
+    public Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
     public Trackers Trackers { get; set; }
 
     #region Buffs Debuffs
@@ -164,7 +165,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         LastPosition = new Position(Vector2.Zero);
     }
 
-    public WorldClient Client { get; set; }
     public uint Serial { get; set; }
     public int CurrentMapId { get; set; }
     public double Amplified { get; set; }
@@ -267,136 +267,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public TSprite CastSpriteToType<TSprite>() where TSprite : Sprite
     {
         return this as TSprite;
-    }
-
-    /// <summary>
-    /// Sends a ServerFormat to target players using a scope or definer
-    /// </summary>
-    /// <param name="op">Scope of the method call</param>
-    /// <param name="method">IWorldClient method to send</param>
-    /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
-    public void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Sprite> definer = null)
-    {
-        switch (op)
-        {
-            case Scope.Self:
-                method(Client);
-                return;
-            case Scope.NearbyAislingsExludingSelf:
-                {
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
-                    {
-                        if (gc == null || gc.Serial == Serial) continue;
-                        if (gc.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.NearbyAislings:
-                {
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.Clan:
-                {
-                    if (this is not Aisling playerTalking) return;
-
-                    foreach (var gc in GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, playerTalking.Clan, StringComparison.CurrentCultureIgnoreCase)))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.VeryNearbyAislings:
-                {
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.AislingsOnSameMap:
-                {
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.GroupMembers:
-                {
-                    if (this is not Aisling playersTalking) return;
-
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && playersTalking.GroupParty.Has(otherPlayers)))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.NearbyGroupMembersExcludingSelf:
-                {
-                    if (this is not Aisling playersTalking) return;
-
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && otherPlayers.WithinRangeOf(playersTalking) && playersTalking.GroupParty.Has(otherPlayers)))
-                    {
-                        if (gc == null || gc.Serial == Serial) continue;
-                        if (gc.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.NearbyGroupMembers:
-                {
-                    if (this is not Aisling playersTalking) return;
-
-                    foreach (var gc in GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && otherPlayers.WithinRangeOf(playersTalking) && playersTalking.GroupParty.Has(otherPlayers)))
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.DefinedAislings when definer == null:
-                return;
-            case Scope.DefinedAislings:
-                {
-                    foreach (var gc in definer)
-                    {
-                        if (gc?.Client == null) continue;
-                        method(gc.Client);
-                    }
-
-                    return;
-                }
-            case Scope.All:
-                var players = ServerSetup.Instance.Game.Aislings;
-                foreach (var p in players)
-                {
-                    if (p?.Client == null) continue;
-                    method(p.Client);
-                }
-
-                return;
-            default:
-                method(Client);
-                return;
-        }
     }
 
     public void ShowTo(Aisling nearbyAisling)
@@ -740,7 +610,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingY--;
@@ -753,7 +623,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingX++;
@@ -766,7 +636,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingY++;
@@ -779,7 +649,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                sprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
                 continue;
             }
             pendingX--;
@@ -969,14 +839,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         void Step0B(int x, int y)
         {
-            Client.SendConfirmClientWalk(new Position(x, y), (Direction)Direction);
+            if (this is Aisling aisling)
+                aisling.Client.SendConfirmClientWalk(new Position(x, y), (Direction)Direction);
         }
 
         void Step0C(int x, int y)
         {
             var readyTime = DateTime.UtcNow;
             Pos = new Vector2(PendingX, PendingY);
-            Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+            PlayerNearby?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
             LastMovementChanged = readyTime;
             LastPosition = new Position(x, y);
         }
@@ -1108,14 +979,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (Direction != savedDirection) update = true;
 
         if (Walk() || !update) return;
-        Client.SendCreatureTurn(Serial, (Direction)Direction);
+        PlayerNearby?.Client.SendCreatureTurn(Serial, (Direction)Direction);
         LastTurnUpdated = DateTime.UtcNow;
     }
 
     public void Turn()
     {
         if (!CanUpdate()) return;
-        Client.SendCreatureTurn(Serial, (Direction)Direction);
+        PlayerNearby?.Client.SendCreatureTurn(Serial, (Direction)Direction);
         LastTurnUpdated = DateTime.UtcNow;
     }
 
@@ -1397,7 +1268,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             if (hit <= Reflex)
             {
-                Client.SendHealthBar(this);
+                PlayerNearby?.Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, aisling.Serial));
             }
@@ -1425,15 +1296,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void Thorns(Sprite damageDealingSprite, long dmg)
     {
-        if (Client is null) return;
+        if (PlayerNearby.Client is null) return;
         if (damageDealingSprite is null) return;
         var thornsTargetList = damageDealingSprite.DamageableGetInFront(1);
 
         foreach (var i in thornsTargetList.Where(i => i is { Attackable: true }))
         {
-            if (i.Client == null) continue;
-            if (i.Client.Aisling.Spikes == 0) continue;
-            var thornsDmg = i.Client.Aisling.Spikes * 0.03;
+            if (i is not Aisling aisling) continue;
+            if (aisling.Client == null) continue;
+            if (aisling.Client.Aisling.Spikes == 0) continue;
+            var thornsDmg = aisling.Client.Aisling.Spikes * 0.03;
             Math.Clamp(thornsDmg, 1, int.MaxValue);
             dmg = (long)(thornsDmg * dmg);
 
@@ -1444,7 +1316,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             var convDmg = (int)dmg;
 
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Serial));
             damageDealingSprite.CurrentHp -= convDmg;
         }
     }
@@ -1725,7 +1597,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             ShowDmg(aisling, estTime);
         }
 
-        Client.SendHealthBar(this, sound);
+        PlayerNearby?.Client.SendHealthBar(this, sound);
         dmgcb?.Invoke(convDmg);
 
         return convDmg;
@@ -1737,7 +1609,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
 
         var dmgShow = aisling.DamageCounter.ToString();
-        Client.SendPublicMessage(Serial, PublicMessageType.Chant, $"{dmgShow}");
+        aisling.Client.SendPublicMessage(Serial, PublicMessageType.Chant, $"{dmgShow}");
         aisling.DamageCounter = 0;
     }
 
@@ -1772,7 +1644,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
             {
-                Client.SendHealthBar(this, sound);
+                aislingTarget.Client.SendHealthBar(this, sound);
                 return false;
             }
         }
@@ -1789,7 +1661,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (Immunity && !forced)
         {
-            Client.SendHealthBar(this, sound);
+            PlayerNearby?.Client.SendHealthBar(this, sound);
             return false;
         }
 
@@ -2004,9 +1876,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void UpdateAddAndRemove()
     {
-        Client.SendRemoveObject(Serial);
+        PlayerNearby?.Client.SendRemoveObject(Serial);
         var obj = new List<Sprite> { this };
-        Client.SendVisibleEntities(obj);
+        PlayerNearby?.Client.SendVisibleEntities(obj);
     }
 
     public void UpdateBuffs(TimeSpan elapsedTime)

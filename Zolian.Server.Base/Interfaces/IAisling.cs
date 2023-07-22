@@ -4,6 +4,8 @@ using System.Numerics;
 using Darkages.Enums;
 using Darkages.Infrastructure;
 using Darkages.Models;
+using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
@@ -12,6 +14,7 @@ namespace Darkages.Interfaces;
 
 public interface IAisling : ISprite
 {
+    WorldClient Client { get; set; }
     bool Loading { get; set; }
     long DamageCounter { get; set; }
     uint ThreatMeter { get; set; }
@@ -44,6 +47,7 @@ public interface IAisling : ISprite
     List<string> IgnoredList { get; set; }
     ConcurrentDictionary<string, string> ExplorePositions { get; set; }
 
+    void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null);
     void AStarPath(List<Vector2> pathList);
     void CancelExchange();
     bool CanSeeGhosts();

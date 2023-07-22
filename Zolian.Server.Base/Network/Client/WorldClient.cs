@@ -3745,7 +3745,7 @@ namespace Darkages.Network.Client
             SendAttributes(StatUpdateType.ExpGold);
         }
 
-        public void LevelUp(Player player)
+        public void LevelUp(Aisling player)
         {
             if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
             player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);

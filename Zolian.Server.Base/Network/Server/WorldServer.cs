@@ -683,9 +683,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 UpdateKillCounters(monster);
                 monster.Skulled = true;
 
-                if (monster.Target?.Client != null)
+                if (monster.Target is Aisling aisling)
                 {
-                    monster.Scripts.Values.First().OnDeath(monster.Target.Client);
+                    monster.Scripts.Values.First().OnDeath(aisling.Client);
                 }
                 else
                 {

@@ -156,7 +156,7 @@ public interface IWorldClient : ISocketClient
     void GiveCon(byte v = 1);
     void GiveDex(byte v = 1);
     void GiveExp(uint exp);
-    void LevelUp(Player player);
+    void LevelUp(Aisling player);
     void GiveAp(uint a);
     WorldClient RefreshMap(bool updateView = false);
     WorldClient TransitionToMap(Area area, Position position);
