@@ -1,6 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+
 using Chaos.Common.Definitions;
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Infrastructure;
@@ -228,7 +232,7 @@ public sealed class Aisling : Player, IAisling
         }
     }
 
-        /// <summary>
+    /// <summary>
     /// Sends a ServerFormat to target players using a scope or definer
     /// </summary>
     /// <param name="op">Scope of the method call</param>
@@ -479,7 +483,7 @@ public sealed class Aisling : Player, IAisling
                 if (target != null)
                 {
                     spell.InUse = true;
-                    
+
                     Client.PlayerCastBodyAnimationSoundAndMessageOnPosition(spell, target);
 
                     foreach (var script in spell.Scripts.Values)
@@ -779,5 +783,69 @@ public sealed class Aisling : Player, IAisling
         Client.Enter();
 
         UpdateStats();
+    }
+
+    public bool Walk()
+    {
+        if (CantMove)
+        {
+            Client.ClientRefreshed();
+            return false;
+        }
+
+        var oldPosX = X;
+        var oldPosY = Y;
+
+        PendingX = X;
+        PendingY = Y;
+
+        var allowGhostWalk = this is Aisling { GameMaster: true, Dead: true };
+
+        // Check position before we add direction, add direction, check position to see if we can commit
+        if (!allowGhostWalk)
+        {
+            if (Map.IsWall(oldPosX, oldPosY)) return false;
+            if (Map.IsAStarSprite(this, PendingX, PendingY)) return false;
+        }
+
+        switch (Direction)
+        {
+            case 0:
+                PendingY--;
+                break;
+            case 1:
+                PendingX++;
+                break;
+            case 2:
+                PendingY++;
+                break;
+            case 3:
+                PendingX--;
+                break;
+        }
+
+        if (!allowGhostWalk)
+        {
+            if (Map.IsWall(PendingX, PendingY)) return false;
+            if (Map.IsAStarSprite(this, PendingX, PendingY)) return false;
+        }
+
+        foreach (var player in AislingsNearby())
+        {
+            if (player.Serial == Serial) continue;
+            player.Client.SendCreatureWalk(Serial, new Point(oldPosX, oldPosY), (Direction)Direction);
+        }
+
+        LastPosition = new Position(oldPosX, oldPosY);
+        Pos = new Vector2(PendingX, PendingY);
+        LastMovementChanged = DateTime.UtcNow;
+
+        Client.SendConfirmClientWalk(new Position(oldPosX, oldPosY), (Direction)Direction);
+
+        // Reset our PendingX & PendingY
+        PendingX = oldPosX;
+        PendingY = oldPosY;
+
+        return true;
     }
 }

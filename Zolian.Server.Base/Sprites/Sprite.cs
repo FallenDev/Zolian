@@ -835,19 +835,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool Walk()
     {
-        if (Map == null) return false;
-
-        void Step0B(int x, int y)
-        {
-            if (this is Aisling aisling)
-                aisling.Client.SendConfirmClientWalk(new Position(x, y), (Direction)Direction);
-        }
-
         void Step0C(int x, int y)
         {
             var readyTime = DateTime.UtcNow;
             Pos = new Vector2(PendingX, PendingY);
-            PlayerNearby?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+
+            foreach (var player in AislingsNearby())
+            {
+                player.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+            }
+
             LastMovementChanged = readyTime;
             LastPosition = new Position(x, y);
         }
@@ -896,9 +893,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (Map.IsWall(PendingX, PendingY)) return false;
                 if (Map.IsAStarSprite(this, PendingX, PendingY)) return false;
             }
-
-            // Commit Walk to Client
-            if (this is Aisling) Step0B(currentPosX, currentPosY);
 
             // Commit Walk to other Player Clients
             Step0C(currentPosX, currentPosY);
@@ -979,14 +973,24 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (Direction != savedDirection) update = true;
 
         if (Walk() || !update) return;
-        PlayerNearby?.Client.SendCreatureTurn(Serial, (Direction)Direction);
+
+        foreach (var player in AislingsNearby())
+        {
+            player?.Client.SendCreatureTurn(Serial, (Direction)Direction);
+        }
+        
         LastTurnUpdated = DateTime.UtcNow;
     }
 
     public void Turn()
     {
         if (!CanUpdate()) return;
-        PlayerNearby?.Client.SendCreatureTurn(Serial, (Direction)Direction);
+
+        foreach (var player in AislingsNearby())
+        {
+            player?.Client.SendCreatureTurn(Serial, (Direction)Direction);
+        }
+
         LastTurnUpdated = DateTime.UtcNow;
     }
 

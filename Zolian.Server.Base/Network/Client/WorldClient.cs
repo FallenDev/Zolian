@@ -3049,6 +3049,7 @@ namespace Darkages.Network.Client
 
             SendMapInfo();
             SendLocation();
+            SendAttributes(StatUpdateType.Full);
             UpdateDisplay(true);
 
             var objects = ObjectHandlers.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
@@ -3062,9 +3063,6 @@ namespace Darkages.Network.Client
             SendMapLoadComplete();
             SendDisplayAisling(Aisling);
             SendRefreshResponse();
-
-            if (Aisling.Blind == 0x08)
-                SendAttributes(StatUpdateType.Secondary);
 
             Aisling.Client.LastMapUpdated = DateTime.UtcNow;
             Aisling.Client.LastLocationSent = DateTime.UtcNow;
