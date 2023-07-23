@@ -73,7 +73,7 @@ public interface IWorldClient : ISocketClient
     void SendDisplayAisling(Aisling aisling);
     //void SendDoors(IEnumerable<Door> doors);
     void SendEffect(EffectColor effectColor, byte effectIcon);
-    void SendEquipment(Item item);
+    void SendEquipment(byte displaySlot, Item item);
     void SendExchangeAccepted(bool persistExchange);
     void SendExchangeAddItem(bool rightSide, byte index, Item item);
     void SendExchangeCancel(bool rightSide);

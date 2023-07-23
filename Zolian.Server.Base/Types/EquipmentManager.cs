@@ -110,7 +110,7 @@ public class EquipmentManager
     private void DisplayToEquipment(byte displaySlot, Item item)
     {
         if (item != null)
-            Client.SendEquipment(item);
+            Client.SendEquipment(displaySlot, item);
     }
 
     public bool RemoveFromExisting(int displaySlot, bool returnIt = true)

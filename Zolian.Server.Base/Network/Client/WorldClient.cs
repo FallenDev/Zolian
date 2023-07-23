@@ -956,7 +956,7 @@ namespace Darkages.Network.Client
                 if (equipment.Item.CanCarry(Aisling))
                 {
                     Aisling.CurrentWeight += equipment.Item.Template.CarryWeight;
-                    SendEquipment(equipment.Item);
+                    SendEquipment(equipment.Item.Slot, equipment.Item);
                 }
 
                 equipment.Item.Scripts = ScriptManager.Load<ItemScript>(equipment.Item.Template.ScriptName, equipment.Item);
@@ -1005,7 +1005,7 @@ namespace Darkages.Network.Client
                     MaxDurability = (int)item.MaxDurability,
                     Name = item.DisplayName,
                     Slot = item.InventorySlot,
-                    Sprite = (ushort)(item.DisplayImage - 32768),
+                    Sprite = item.DisplayImage,
                     Stackable = item.Template.CanStack
                 }
             };
@@ -1483,11 +1483,15 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x37 - Add Equipment
         /// </summary>
-        public void SendEquipment(Item item)
+        public void SendEquipment(byte displaySlot, Item item)
         {
+            if (displaySlot == 0) return;
+
+            item.Slot = displaySlot;
+
             var args = new EquipmentArgs
             {
-                Slot = (EquipmentSlot)item.Slot,
+                Slot = (EquipmentSlot)displaySlot,
                 Item = new ItemInfo
                 {
                     Color = (DisplayColor)item.Color,
@@ -1496,7 +1500,7 @@ namespace Darkages.Network.Client
                     CurrentDurability = (int)item.Durability,
                     MaxDurability = (int)item.MaxDurability,
                     Name = item.NoColorDisplayName,
-                    Slot = item.Slot,
+                    Slot = displaySlot,
                     Sprite = item.DisplayImage,
                     Stackable = item.Template.CanStack
                 }
@@ -1769,12 +1773,51 @@ namespace Darkages.Network.Client
                     {
                         ArgumentNullException.ThrowIfNull(name);
                         var metaData = metaDataStore.GetMetaFile(name);
+
+                        if (!name.Contains("Class"))
+                        {
+                            args.MetaDataInfo = new MetaDataInfo
+                            {
+                                Name = metaData.Name,
+                                Data = metaData.DeflatedData,
+                                CheckSum = metaData.Hash
+                            };
+                            break;
+                        }
+
+                        var orgFileName = metaData.Name;
+
+                        switch (Aisling.Path)
+                        {
+                            case Class.Berserker:
+                                metaData.Name = "SClass1";
+                                break;
+                            case Class.Defender:
+                                metaData.Name = "SClass2";
+                                break;
+                            case Class.Assassin:
+                                metaData.Name = "SClass3";
+                                break;
+                            case Class.Cleric:
+                                metaData.Name = "SClass4";
+                                break;
+                            case Class.Arcanus:
+                                metaData.Name = "SClass5";
+                                break;
+                            case Class.Monk:
+                                metaData.Name = "SClass6";
+                                break;
+                        }
+
                         args.MetaDataInfo = new MetaDataInfo
                         {
                             Name = metaData.Name,
                             Data = metaData.DeflatedData,
                             CheckSum = metaData.Hash
                         };
+
+                        metaData.Name = orgFileName;
+
                         break;
                     }
                 case MetaDataRequestType.AllCheckSums:
@@ -1785,6 +1828,7 @@ namespace Darkages.Network.Client
                             Data = i.DeflatedData,
                             CheckSum = i.Hash
                         }).ToList();
+
                         break;
                     }
                 default:
@@ -1819,9 +1863,9 @@ namespace Darkages.Network.Client
             var partyOpen = aisling.PartyStatus == (GroupStatus)1;
             var legendMarks = new List<LegendMarkInfo>();
 
-            if (Aisling.EquipmentManager.Weapon != null)
+            if (aisling.EquipmentManager.Weapon != null)
             {
-                var equip = Aisling.EquipmentManager.Weapon;
+                var equip = aisling.EquipmentManager.Weapon;
 
                 var item = new ItemInfo
                 {
@@ -1839,9 +1883,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Armor != null)
+            if (aisling.EquipmentManager.Armor != null)
             {
-                var equip = Aisling.EquipmentManager.Armor;
+                var equip = aisling.EquipmentManager.Armor;
 
                 var item = new ItemInfo
                 {
@@ -1859,9 +1903,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Shield != null)
+            if (aisling.EquipmentManager.Shield != null)
             {
-                var equip = Aisling.EquipmentManager.Shield;
+                var equip = aisling.EquipmentManager.Shield;
 
                 var item = new ItemInfo
                 {
@@ -1879,9 +1923,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Helmet != null)
+            if (aisling.EquipmentManager.Helmet != null)
             {
-                var equip = Aisling.EquipmentManager.Helmet;
+                var equip = aisling.EquipmentManager.Helmet;
 
                 var item = new ItemInfo
                 {
@@ -1899,9 +1943,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Earring != null)
+            if (aisling.EquipmentManager.Earring != null)
             {
-                var equip = Aisling.EquipmentManager.Earring;
+                var equip = aisling.EquipmentManager.Earring;
 
                 var item = new ItemInfo
                 {
@@ -1919,9 +1963,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Necklace != null)
+            if (aisling.EquipmentManager.Necklace != null)
             {
-                var equip = Aisling.EquipmentManager.Necklace;
+                var equip = aisling.EquipmentManager.Necklace;
 
                 var item = new ItemInfo
                 {
@@ -1939,9 +1983,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.LHand != null)
+            if (aisling.EquipmentManager.LHand != null)
             {
-                var equip = Aisling.EquipmentManager.LHand;
+                var equip = aisling.EquipmentManager.LHand;
 
                 var item = new ItemInfo
                 {
@@ -1959,9 +2003,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.RHand != null)
+            if (aisling.EquipmentManager.RHand != null)
             {
-                var equip = Aisling.EquipmentManager.RHand;
+                var equip = aisling.EquipmentManager.RHand;
 
                 var item = new ItemInfo
                 {
@@ -1979,9 +2023,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.LArm != null)
+            if (aisling.EquipmentManager.LArm != null)
             {
-                var equip = Aisling.EquipmentManager.LArm;
+                var equip = aisling.EquipmentManager.LArm;
 
                 var item = new ItemInfo
                 {
@@ -1999,9 +2043,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.RArm != null)
+            if (aisling.EquipmentManager.RArm != null)
             {
-                var equip = Aisling.EquipmentManager.RArm;
+                var equip = aisling.EquipmentManager.RArm;
 
                 var item = new ItemInfo
                 {
@@ -2019,9 +2063,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Waist != null)
+            if (aisling.EquipmentManager.Waist != null)
             {
-                var equip = Aisling.EquipmentManager.Waist;
+                var equip = aisling.EquipmentManager.Waist;
 
                 var item = new ItemInfo
                 {
@@ -2039,9 +2083,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Leg != null)
+            if (aisling.EquipmentManager.Leg != null)
             {
-                var equip = Aisling.EquipmentManager.Leg;
+                var equip = aisling.EquipmentManager.Leg;
 
                 var item = new ItemInfo
                 {
@@ -2059,9 +2103,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.Foot != null)
+            if (aisling.EquipmentManager.Foot != null)
             {
-                var equip = Aisling.EquipmentManager.Foot;
+                var equip = aisling.EquipmentManager.Foot;
 
                 var item = new ItemInfo
                 {
@@ -2079,9 +2123,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.FirstAcc != null)
+            if (aisling.EquipmentManager.FirstAcc != null)
             {
-                var equip = Aisling.EquipmentManager.FirstAcc;
+                var equip = aisling.EquipmentManager.FirstAcc;
 
                 var item = new ItemInfo
                 {
@@ -2099,9 +2143,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.OverCoat != null)
+            if (aisling.EquipmentManager.OverCoat != null)
             {
-                var equip = Aisling.EquipmentManager.OverCoat;
+                var equip = aisling.EquipmentManager.OverCoat;
 
                 var item = new ItemInfo
                 {
@@ -2119,9 +2163,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.OverHelm != null)
+            if (aisling.EquipmentManager.OverHelm != null)
             {
-                var equip = Aisling.EquipmentManager.OverHelm;
+                var equip = aisling.EquipmentManager.OverHelm;
 
                 var item = new ItemInfo
                 {
@@ -2139,9 +2183,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.SecondAcc != null)
+            if (aisling.EquipmentManager.SecondAcc != null)
             {
-                var equip = Aisling.EquipmentManager.SecondAcc;
+                var equip = aisling.EquipmentManager.SecondAcc;
 
                 var item = new ItemInfo
                 {
@@ -2159,9 +2203,9 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
-            if (Aisling.EquipmentManager.ThirdAcc != null)
+            if (aisling.EquipmentManager.ThirdAcc != null)
             {
-                var equip = Aisling.EquipmentManager.ThirdAcc;
+                var equip = aisling.EquipmentManager.ThirdAcc;
 
                 var item = new ItemInfo
                 {
@@ -2196,7 +2240,7 @@ namespace Darkages.Network.Client
             var args = new ProfileArgs
             {
                 AdvClass = AdvClass.None,
-                BaseClass = (BaseClass)Aisling.Path,
+                BaseClass = (BaseClass)aisling.Path,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
                 GuildName = aisling.Clan,
@@ -3618,7 +3662,7 @@ namespace Darkages.Network.Client
                 item.ItemQuality = item.OriginalQuality == Item.Quality.Damaged ? Item.Quality.Common : item.OriginalQuality;
                 item.Tarnished = false;
                 ItemQualityVariance.ItemDurability(item, item.ItemQuality);
-                SendEquipment(item);
+                SendEquipment((byte)key, item);
             }
 
             var reapplyMods = new Item();
