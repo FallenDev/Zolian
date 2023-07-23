@@ -51,11 +51,13 @@ public enum ItemFlags
     NormalMonsterDrop = Stackable | Dropable | Sellable | Tradeable | Bankable | QuestRelated,
     // 2320
     NonDropableQuest = Bankable | Consumable | QuestRelated,
-    // 264464
-    NonDropableQuestUnique = Bankable | Consumable | QuestRelated | Unique,
     // 2064
     NonDropableQuestNoConsume = Bankable | QuestRelated,
-
+    // 264464
+    NonDropableQuestUnique = Bankable | Consumable | QuestRelated | Unique,
+    // 264208
+    NonDropableQuestUniqueNoConsume = Bankable | QuestRelated | Unique,
+    // 524552
     DropScriptConsumable = Consumable | Dropable | DropScript,
 
     // 4221 Dirk -> Loures Saber & Claidheamh, Broad Sword & Battle Sword -> Masquerade & 
