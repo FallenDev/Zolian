@@ -561,7 +561,7 @@ public sealed class Aisling : Player, IAisling
 
     public IEnumerable<Skill> GetAssails()
     {
-        return SkillBook.GetSkills(i => i?.Template != null && i.Template.SkillType == SkillScope.Assail);
+        return SkillBook.GetSkills(i => i?.Template is { SkillType: SkillScope.Assail });
     }
 
     public bool GiveGold(uint offer, bool sendClientUpdate = true)

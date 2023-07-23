@@ -1601,7 +1601,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (ServerSetup.Instance.Config.AssailsCancelSpells)
         {
             client.SendCancelCasting();
-            return default;
         }
 
         if (client.Aisling.Skulled)
@@ -1628,28 +1627,29 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static void AssailRoutine(IWorldClient lpClient)
     {
         var lastTemplate = string.Empty;
+        var skills = lpClient.Aisling.GetAssails();
 
-        foreach (var skill in lpClient.Aisling.GetAssails())
+        Parallel.ForEach(skills.OrderBy(s => s.Name), (s) =>
         {
             // Skill exists check
-            if (skill?.Template == null) continue;
-            if (lastTemplate == skill.Template.Name) continue;
-            if (skill.Scripts == null) continue;
+            if (s?.Template == null) return;
+            if (lastTemplate == s.Template.Name) return;
+            if (s.Scripts == null) return;
 
             // Skill can be used check
-            if (!skill.Ready && skill.InUse) continue;
+            if (!s.Ready || s.InUse) return;
 
-            skill.InUse = true;
+            s.InUse = true;
             // Skill animation and execute
-            ExecuteAbility(lpClient, skill);
-            skill.InUse = false;
+            ExecuteAbility(lpClient, s);
+            s.InUse = false;
 
             // Skill cleanup
-            skill.CurrentCooldown = skill.Template.Cooldown;
-            lpClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-            lastTemplate = skill.Template.Name;
+            s.CurrentCooldown = s.Template.Cooldown;
+            lpClient.SendCooldown(true, s.Slot, s.CurrentCooldown);
+            lastTemplate = s.Template.Name;
             lpClient.LastAssail = DateTime.UtcNow;
-        }
+        });
     }
 
     private static void ExecuteAbility(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
