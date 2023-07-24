@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Darkages.Network.Client;
 
 namespace Darkages.Types;
 
@@ -22,7 +21,6 @@ public class Board
         IsMail = isMail;
     }
 
-    [JsonIgnore] public WorldClient Client { get; set; }
     public ushort Index { get; set; }
     public bool IsMail { get; set; }
     public ushort LetterId { get; set; }

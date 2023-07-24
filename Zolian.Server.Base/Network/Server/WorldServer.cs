@@ -131,7 +131,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.Logger($"Server Components Loaded: {_serverComponents.Count}");
         }
     }
-    
+
     private static void SkillMapper()
     {
         _skillMap = new Dictionary<(Race race, Class path, Class pastClass), string>
@@ -1214,14 +1214,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.SendConfirmExit();
             else
             {
-                    var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
-                    var redirect = new Redirect(
-                    EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                    new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                    ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
+                var redirect = new Redirect(
+                EphemeralRandomIdGenerator<uint>.Shared.NextId,
+                new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
+                ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
 
-                    RedirectManager.Add(redirect);
-                    localClient.SendRedirect(redirect);
+                RedirectManager.Add(redirect);
+                localClient.SendRedirect(redirect);
             }
 
             return default;
@@ -2392,88 +2392,123 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// </summary>
     public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
     {
-        static ValueTask InnerOnBoardRequest(IWorldClient localClient)
+        var args = PacketSerializer.Deserialize<BoardRequestArgs>(in clientPacket);
+
+        ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardRequestArgs localArgs)
         {
-            //localClient.SendBoard();
-
-            return default;
-        }
-
-        /*
-        //this packet is literally retarded
-        private void Board(Client client, ClientPacket packet)
-        {
-            var type = (BoardRequestType)packet.ReadByte();
-
-            switch (type) //request type
+            switch (localArgs.BoardRequestType)
             {
                 case BoardRequestType.BoardList:
-                    //Board List
-                    //client.Enqueue(client.ServerPackets.BulletinBoard);
-                    break;
+                    {
+                        ServerSetup.Instance.GlobalBoardCache.TryGetValue("Personal", out var boards);
+                        localClient.SendBoardList(boards);
+
+                        break;
+                    }
                 case BoardRequestType.ViewBoard:
                     {
-                        //Post list for boardNum
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort startPostNum = packet.ReadUInt16(); //you send the newest mail first, which will have the highest number. startPostNum counts down.
-                        //packet.ReadByte() is always 0xF0(240) ???
-                        //the client spam requests this like holy fuck, put a timer on this so you only send 1 packet
+                        if (localArgs.BoardId <= 2)
+                        {
+                            localClient.SendBoard("Personal", (ushort)localArgs.BoardId);
+
+                            break;
+                        }
+
+                        var board = ServerSetup.Instance.GlobalBoardCache.Select(i => i.Value)
+                            .SelectMany(i => i.Where(n => n.Index == localArgs.BoardId))
+                            .FirstOrDefault();
+
+                        if (board != null)
+                            localClient.SendBoard(board.Subject);
+
                         break;
                     }
                 case BoardRequestType.ViewPost:
                     {
-                        //Post
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16(); //the post number they want, counting up (what the fuck?)
-                        //mailbox = boardNum 0
-                        //otherwise boardnum is the index of the board you're accessing
-                        switch (packet.ReadSByte()) //board controls
-                        {
-                            case -1: //clicked next for older post
-                                break;
-                            case 0: //requested a specific post from the post list
-                                break;
-                            case 1: //clicked previous for newer post
-                                break;
-                        }
-                        break;
-                    }
-                case BoardRequestType.NewPost: //new post
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        string subject = packet.ReadString8();
-                        string message = packet.ReadString16();
-                        break;
-                    }
-                case BoardRequestType.Delete: //delete post
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16(); //the post number they want to delete, counting up
-                        break;
-                    }
+                        //if (!TryGetBoard(localClient, localArgs, out var board))
+                        //    return default;
 
-                case BoardRequestType.SendMail: //send mail
-                    {
-                        ushort boardNum = packet.ReadUInt16();
-                        string targetName = packet.ReadString8();
-                        string subject = packet.ReadString8();
-                        string message = packet.ReadString16();
+                        //board.ShowPost(localClient.Aisling, localArgs.PostId!.Value, localArgs.Controls!.Value);
+
                         break;
                     }
-                case BoardRequestType.Highlight: //highlight message
+                case BoardRequestType.NewPost:
                     {
-                        ushort boardNum = packet.ReadUInt16();
-                        ushort postId = packet.ReadUInt16();
+                        //if (!TryGetBoard(localClient, localArgs, out var board))
+                        //    return default;
+
+                        ////mailboxes use a different boardRequestType for sending mail
+                        //if (board is MailBox)
+                        //{
+                        //    Logger.WithProperty(client)
+                        //          .LogError(
+                        //              "{@AislingName} requested an invalid board id for request type {@BoardRequestType}: {@BoardId}",
+                        //              client.Aisling.Name,
+                        //              localArgs.BoardRequestType,
+                        //              args.BoardId);
+
+                        //    return default;
+                        //}
+
+                        //board.Post(
+                        //    localClient.Aisling,
+                        //    localClient.Aisling.Name,
+                        //    localArgs.Subject!,
+                        //    localArgs.Message!);
+
+                        break;
+                    }
+                case BoardRequestType.Delete:
+                    {
+                        //if (!TryGetBoard(localClient, localArgs, out var board))
+                        //    return default;
+
+                        //board.Delete(localClient.Aisling, localArgs.PostId!.Value);
+
+                        break;
+                    }
+                case BoardRequestType.SendMail:
+                    {
+                        //if (!TryGetBoard(localClient, localArgs, out var board))
+                        //    return default;
+
+                        //board.Post(
+                        //    localClient.Aisling,
+                        //    localClient.Aisling.Name,
+                        //    localArgs.Subject!,
+                        //    localArgs.Message!,
+                        //    true);
+
+                        break;
+                    }
+                case BoardRequestType.Highlight:
+                    {
+                        //if (!TryGetBoard(localClient, localArgs, out var board))
+                        //    return default;
+
+                        ////you cant highlight mail messages
+                        //if (board is MailBox)
+                        //{
+                        //    Logger.WithProperty(client)
+                        //          .LogError(
+                        //              "{@AislingName} requested an invalid board id for request type {@BoardRequestType}: {@BoardId}",
+                        //              client.Aisling.Name,
+                        //              localArgs.BoardRequestType,
+                        //              args.BoardId);
+
+                        //    return default;
+                        //}
+
+                        //board.Highlight(localClient.Aisling, localArgs.PostId!.Value);
+
                         break;
                     }
             }
 
-            Server.WriteLogAsync($@"Recv [{(ClientOpCodes)packet.OpCode}] TYPE: {type}", client);
-            Game.Boards(client);
+            return default;
         }
-         */
 
-        return ExecuteHandler(client, InnerOnBoardRequest);
+        return ExecuteHandler(client, args, InnerOnBoardRequest);
     }
 
     /// <summary>
@@ -2574,7 +2609,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     Serial = uint.MaxValue,
                     Template = value
                 });
-                
+
                 helper.OnClick(localClient.Aisling.Client, (uint)targetId);
                 return default;
             }

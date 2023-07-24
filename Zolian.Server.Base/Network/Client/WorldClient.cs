@@ -1163,65 +1163,86 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x31 - Show Board
         /// </summary>
-        public void SendBoard(string boardName)
+        public void SendBoard(string boardName, int index = 0)
         {
             if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardList))
             {
-                foreach (var board in boardList)
+                ICollection<PostInfo> postsCollection = new List<PostInfo>();
+                var board = boardList[index];
+
+                foreach (var postFormat in board.Posts)
                 {
-                    var post = new PostInfo();
-                    ICollection<PostInfo> postsCollection = new List<PostInfo>();
-
-                    foreach (var postFormat in board.Posts)
+                    var post = new PostInfo
                     {
-                        post = new PostInfo
-                        {
-                            Author = postFormat.Sender,
-                            CreationDate = postFormat.DatePosted,
-                            IsHighlighted = postFormat.HighLighted,
-                            Message = postFormat.Message,
-                            PostId = (short)postFormat.PostId,
-                            Subject = postFormat.Subject
-                        };
-
-                        postsCollection.Add(post);
-                    }
-
-                    var boardInfo = new BoardInfo
-                    {
-                        BoardId = board.Index,
-                        Name = boardName,
-                        Posts = postsCollection
+                        Author = postFormat.Sender,
+                        CreationDate = postFormat.DatePosted,
+                        IsHighlighted = postFormat.HighLighted,
+                        Message = postFormat.Message,
+                        PostId = (short)postFormat.PostId,
+                        Subject = postFormat.Subject
                     };
 
-                    var args = new BoardArgs
-                    {
-                        Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
-                        Board = boardInfo,
-                        StartPostId = postsCollection.First().PostId
-                    };
-
-                    Send(args);
+                    postsCollection.Add(post);
                 }
+
+                var boardInfo = new BoardInfo
+                {
+                    BoardId = board.Index,
+                    Name = boardName,
+                    Posts = postsCollection
+                };
+
+                var args = new BoardArgs
+                {
+                    Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
+                    Board = boardInfo,
+                    StartPostId = postsCollection.First().PostId
+                };
+
+                Send(args);
             }
         }
 
         public void SendBoardList(IEnumerable<Board> boards)
         {
-            IEnumerable<Board> boardList;
+            var boardInfoList = new List<BoardInfo>();
 
-            foreach (var board in ServerSetup.Instance.GlobalBoardCache.Values)
+            foreach (var board in boards)
             {
+                ICollection<PostInfo> postsCollection = new List<PostInfo>();
 
+                foreach (var postFormat in board.Posts)
+                {
+                    var post = new PostInfo
+                    {
+                        Author = postFormat.Sender,
+                        CreationDate = postFormat.DatePosted,
+                        IsHighlighted = postFormat.HighLighted,
+                        Message = postFormat.Message,
+                        PostId = (short)postFormat.PostId,
+                        Subject = postFormat.Subject
+                    };
+
+                    postsCollection.Add(post);
+                }
+
+                var boardInfo = new BoardInfo
+                {
+                    BoardId = board.Index,
+                    Name = board.Subject,
+                    Posts = postsCollection
+                };
+
+                boardInfoList.Add(boardInfo);
             }
 
-            //var args = new BoardArgs
-            //{
-            //    Type = BoardOrResponseType.BoardList,
-            //    Boards = ServerSetup.Instance.GlobalBoardCache
-            //};
+            var args = new BoardArgs
+            {
+                Boards = boardInfoList,
+                Type = BoardOrResponseType.BoardList
+            };
 
-            //Send(args);
+            Send(args);
         }
 
         public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
@@ -1471,34 +1492,20 @@ namespace Darkages.Network.Client
                     args.BodySprite = aisling.IsDead() ? BodySprite.FemaleGhost : BodySprite.Female;
             }
 
-
-            //we can always see ourselves, and we're never hostile to our self
             if (!Aisling.Equals(aisling))
             {
-                if (Aisling.Map.Flags.MapFlagIsSet(Darkages.Enums.MapFlags.PlayerKill))
+                if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
                     args.NameTagStyle = !Aisling.Clan.IsNullOrEmpty() && Aisling.Clan == aisling.Clan ? NameTagStyle.Neutral : NameTagStyle.Hostile;
                 else if (!Aisling.Clan.IsNullOrEmpty() && Aisling.Clan == aisling.Clan)
                     args.NameTagStyle = NameTagStyle.FriendlyHover;
                 else
                     args.NameTagStyle = NameTagStyle.NeutralHover;
-                
-                //if we're not an admin, and the aisling is not visible
-                if (!Aisling.GameMaster && aisling.IsInvisible)
-                {
-                    //remove the name
-                    args.Name = string.Empty;
-
-                    //if we cant see the aisling, hide it (it is otherwise transparent)
-                    if (!Aisling.CanSeeInvisible)
-                    {
-                        args.IsHidden = true;
-                    }
-                }
             }
 
             Send(args);
         }
 
+        // ToDo: Create Doors Class, and Implement a Dictionary with the values 
         //public void SendDoors(IEnumerable<Door> doors)
         //{
         //    var args = new DoorArgs
