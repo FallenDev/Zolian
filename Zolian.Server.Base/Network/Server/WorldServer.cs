@@ -121,7 +121,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 [typeof(MonolithComponent)] = new MonolithComponent(this),
                 [typeof(MundaneComponent)] = new MundaneComponent(this),
                 [typeof(ObjectComponent)] = new ObjectComponent(this),
-                [typeof(PingComponent)] = new PingComponent(this),
+                //[typeof(PingComponent)] = new PingComponent(this),
                 [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
                 [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
                 [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
