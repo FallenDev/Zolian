@@ -35,11 +35,7 @@ public sealed class Aisling : Player, IAisling
     public int EquipmentDamageTaken = 0;
     public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
-    public new AislingTrackers Trackers
-    {
-        get => (AislingTrackers)base.Trackers;
-        private set => base.Trackers = value;
-    }
+    public new AislingTrackers AislingTrackers { get; }
 
     public uint MaximumWeight => GameMaster switch
     {
@@ -79,11 +75,12 @@ public sealed class Aisling : Player, IAisling
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         ChantTimer = new ChantTimer(1500);
         TileType = TileContent.Aisling;
+        AislingTrackers = new AislingTrackers(TimeSpan.FromSeconds(1));
     }
 
     public bool Loading { get; set; }
     public long DamageCounter { get; set; }
-    public uint ThreatMeter { get; set; }
+    public long ThreatMeter { get; set; }
     public ReactorTemplate ActiveReactor { get; set; }
     public DialogSequence ActiveSequence { get; set; }
     public ExchangeSession Exchange { get; set; }
@@ -96,7 +93,7 @@ public sealed class Aisling : Player, IAisling
     public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
     public ChantTimer ChantTimer { get; }
-    public UserOptions GameSettings { get; init; }
+    public UserOptions GameSettings { get; init; } = new();
     public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }
     public SpellBook SpellBook { get; set; }

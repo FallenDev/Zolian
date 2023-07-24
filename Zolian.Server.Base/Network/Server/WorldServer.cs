@@ -637,7 +637,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var players = Aislings;
 
-        foreach (var player in players.Where(player => player != null))
+        foreach (var player in players.Where(player => player is { Client: not null }))
         {
             try
             {
@@ -2550,7 +2550,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x43 - Client Click
+    /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
     public ValueTask OnClick(IWorldClient client, in ClientPacket clientPacket)
     {
@@ -2563,7 +2563,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (targetPoint != null)
                 localClient.Aisling.Map.Script.Item2.OnMapClick(localClient.Aisling.Client, targetPoint.X, targetPoint.Y);
 
-            if (targetId == ServerSetup.Instance.Config.HelperMenuId &&
+            if (targetId == uint.MaxValue &&
                 ServerSetup.Instance.GlobalMundaneTemplateCache.TryGetValue(ServerSetup.Instance.Config
                     .HelperMenuTemplateKey, out var value))
             {
@@ -2571,12 +2571,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 var helper = new UserHelper(this, new Mundane
                 {
-                    Serial = (uint)ServerSetup.Instance.Config.HelperMenuId,
+                    Serial = uint.MaxValue,
                     Template = value
                 });
-
-                if (targetId != null)
-                    helper.OnClick(localClient.Aisling.Client, (uint)targetId);
+                
+                helper.OnClick(localClient.Aisling.Client, (uint)targetId);
                 return default;
             }
 
@@ -2948,7 +2947,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var handler = ClientHandlers[(byte)packet.OpCode];
 
-        var trackers = client.Aisling?.Trackers;
+        var trackers = client.Aisling?.AislingTrackers;
 
         if ((trackers != null) && IsManualAction(packet.OpCode))
             trackers.LastManualAction = DateTime.UtcNow;

@@ -23,8 +23,8 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         WalkEnabled = false;
         ObjectUpdateEnabled = false;
         WaypointIndex = 0;
-        TaggedAislings = new HashSet<uint>();
-        AggroList = new List<uint>();
+        TaggedAislings = new ConcurrentDictionary<long, bool>();
+        AggroList = new List<long>();
         TileType = TileContent.Monster;
     }
 
@@ -52,15 +52,15 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     public readonly List<SkillScript> SkillScripts = new();
     public readonly List<SkillScript> AbilityScripts = new();
     public readonly List<SpellScript> SpellScripts = new();
-    public List<uint> AggroList { get; init; }
+    public List<long> AggroList { get; init; }
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
     public bool Blind => HasDebuff("Blind");
-    public HashSet<uint> TaggedAislings { get; set; }
+    public ConcurrentDictionary<long, bool> TaggedAislings { get; set; }
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
-    public uint SummonerId { get; set; }
+    public long SummonerId { get; set; }
 
     public static Monster Create(MonsterTemplate template, Area map)
     {
@@ -79,24 +79,45 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             ServerSetup.Instance.GlobalMonsterScriptCache.TryAdd(obj.Template.Name, obj.Scripts.Values.FirstOrDefault());
     }
 
-    public void AppendTags(Sprite target)
+    public void TryAddTryRemoveTagging(Sprite target)
     {
-        TaggedAislings ??= new HashSet<uint>();
+        TaggedAislings ??= new ConcurrentDictionary<long, bool>();
 
-        if (target is not Aisling aisling)
-            return;
+        if (target is not Aisling aisling) return;
 
-        if (!TaggedAislings.Contains(aisling.Serial))
-            TaggedAislings.Add(aisling.Serial);
+        var alreadyTagged = TaggedAislings.TryGetValue(aisling.Serial, out var taggedNearby);
+        var playerNearby = AislingsEarShotNearby().Contains(aisling);
 
-        if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.Count - 1 <= 0)
-            return;
+        switch (alreadyTagged)
+        {
+            case false:
+                TaggedAislings.TryAdd(aisling.Serial, true);
+                break;
+            case true:
+                if (!playerNearby)
+                    TaggedAislings.TryRemove(aisling.Serial, out _);
+                break;
+        }
 
+        if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.Count - 1 <= 0) return;
         if (aisling.GroupParty == null) return;
 
-        foreach (var member in aisling.GroupParty.PartyMembers.Where(member =>
-                     !TaggedAislings.Contains(member.Serial)))
-            TaggedAislings.Add(member.Serial);
+        foreach (var member in aisling.GroupParty.PartyMembers.Where(member => member != null))
+        {
+            var memberTagged = TaggedAislings.TryGetValue(member.Serial, out _);
+            var playersNearby = AislingsEarShotNearby().Contains(member);
+
+            switch (memberTagged)
+            {
+                case false:
+                    TaggedAislings.TryAdd(member.Serial, true);
+                    break;
+                case true:
+                    if (!playersNearby)
+                        TaggedAislings.TryRemove(member.Serial, out _);
+                    break;
+            }
+        }
     }
 
     public void GenerateRewards(Aisling player)
@@ -112,14 +133,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         player.UpdateStats();
     }
 
-    public IEnumerable<Aisling> GetTaggedAislings()
-    {
-        if (TaggedAislings.Any())
-            return TaggedAislings.Select(b => GetObject<Aisling>(Map, n => n.Serial == b)).Where(i => i != null)
-                .ToList();
-
-        return new List<Aisling>();
-    }
+    public IEnumerable<Aisling> GetTaggedAislings() => TaggedAislings.Any() ? TaggedAislings.Select(b => GetObject<Aisling>(Map, n => n.Serial == b.Key)).Where(i => i != null).ToList() : new List<Aisling>();
 
     public void Patrol()
     {

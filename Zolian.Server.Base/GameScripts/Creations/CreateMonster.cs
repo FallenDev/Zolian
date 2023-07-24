@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Concurrent;
+using System.Numerics;
 using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
@@ -41,8 +42,8 @@ public class CreateMonster : MonsterCreateScript
             WalkTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.MovementSpeed)),
             ObjectUpdateTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay)),
             CastEnabled = true,
-            TaggedAislings = new HashSet<uint>(),
-            AggroList = new List<uint>(),
+            TaggedAislings = new ConcurrentDictionary<long, bool>(),
+            AggroList = new List<long>(),
             Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
             Size = "",
             CurrentMapId = _map.ID

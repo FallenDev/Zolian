@@ -17,7 +17,7 @@ public interface IAisling : ISprite
     WorldClient Client { get; set; }
     bool Loading { get; set; }
     long DamageCounter { get; set; }
-    uint ThreatMeter { get; set; }
+    long ThreatMeter { get; set; }
     ReactorTemplate ActiveReactor { get; set; }
     DialogSequence ActiveSequence { get; set; }
     ExchangeSession Exchange { get; set; }

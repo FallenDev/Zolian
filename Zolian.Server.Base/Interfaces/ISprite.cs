@@ -103,11 +103,15 @@ public interface ISprite
     Position GetPendingThrowPosition(int warp, Sprite sprite);
     bool GetPendingThrowIsWall(int warp, Sprite sprite);
     bool WithinRangeOf(Sprite other, bool checkMap = true);
+    bool WithinEarShotOf(Sprite other, bool checkMap = true);
+    bool WithinRangeOf(int x, int y, int subjectLength);
     bool WithinRangeOf(Sprite other, int distance, bool checkMap = true);
     bool TrapsAreNearby();
     Aisling[] AislingsNearby();
+    Aisling[] AislingsEarShotNearby();
     IEnumerable<Monster> MonstersNearby();
     IEnumerable<Mundane> MundanesNearby();
+    IEnumerable<Sprite> SpritesNearby();
     bool NextTo(int x, int y);
     bool Facing(int x, int y, out int direction);
     bool FacingFarAway(int x, int y, out int direction);

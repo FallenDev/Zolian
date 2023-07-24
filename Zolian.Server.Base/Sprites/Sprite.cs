@@ -163,6 +163,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         LastTurnUpdated = readyTime;
         LastUpdated = readyTime;
         LastPosition = new Position(Vector2.Zero);
+        Trackers = new Trackers(TimeSpan.FromSeconds(1));
     }
 
     public uint Serial { get; set; }
@@ -697,21 +698,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.MonsterDamage);
     public bool WithinRangeOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity, checkMap);
     public bool WithinEarShotOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, 16, checkMap);
-    private bool WithinRangeOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
-
+    public bool WithinRangeOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
     public bool WithinRangeOf(Sprite other, int distance, bool checkMap = true)
     {
-        if (other == null)
-            return false;
-
-        if (!checkMap)
-            return WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
-
+        if (other == null) return false;
+        if (!checkMap) return WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
         return CurrentMapId == other.CurrentMapId && WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
-
     public bool TrapsAreNearby() => Trap.Traps.Select(i => i.Value).Any(i => i.CurrentMapId == CurrentMapId);
     public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
+    public Aisling[] AislingsEarShotNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 16)).ToArray();
     public IEnumerable<Monster> MonstersNearby() => GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
     public IEnumerable<Mundane> MundanesNearby() => GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
@@ -782,51 +778,29 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return Direction == direction;
     }
 
-    private bool CanTag(Sprite attackingPlayer, bool force = false)
+    private bool CanAttack(Sprite attackingPlayer, bool force = false)
     {
-        var canTag = false;
+        if (force) return false;
+        if (this is not Monster monster) return false;
+        if (monster.Template.BaseName == "Training Dummy") return true;
 
-        if (this is not Monster monster)
-            return false;
-
-        if (monster.TaggedAislings.Any(i => i == attackingPlayer.Serial))
-            canTag = true;
-
-        if (monster.TaggedAislings.Count == 0)
-            canTag = true;
-
-        var tagstoRemove = new List<uint>();
-        foreach (var userId in monster.TaggedAislings.Where(i => i != attackingPlayer.Serial))
+        // If the dictionary is empty, add the player
+        if (monster.TaggedAislings.IsEmpty)
         {
-            var taggedUser = GetObject<Aisling>(Map, i => i.Serial == userId);
-
-            if (taggedUser == null) continue;
-            if (taggedUser.WithinRangeOf(this))
-            {
-                canTag = attackingPlayer.GroupId == taggedUser.GroupId;
-            }
-            else
-            {
-                tagstoRemove.Add(taggedUser.Serial);
-                canTag = true;
-            }
+            monster.TryAddTryRemoveTagging(attackingPlayer);
+            return true;
         }
 
-        var lostTags = monster.AislingsNearby().Where(i => monster.TaggedAislings.Contains(i.Serial));
-
-        if (!lostTags.Any()) canTag = true;
-
-        monster.TaggedAislings.RemoveWhere(n => tagstoRemove.Contains(n));
-
-        if (canTag)
+        var taggedMemberSerial = monster.TaggedAislings.Keys.FirstOrDefault();
+        var taggedMember = GetObject<Aisling>(Map, i => i.Serial == taggedMemberSerial);
+        if (taggedMember.GroupParty == null) return false;
+        if (attackingPlayer.GroupId == taggedMember.GroupId)
         {
-            monster.AppendTags(attackingPlayer);
-            monster.Target ??= attackingPlayer;
+            monster.TryAddTryRemoveTagging(attackingPlayer);
+            return true;
         }
 
-        if (force) canTag = false;
-
-        return canTag;
+        return false;
     }
 
     #endregion
@@ -1578,7 +1552,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             CurrentHp = MaximumHp;
 
         var dmgApplied = (long)Math.Abs(dmg * amplifier);
-
+        
+        // ToDo: Create logic for "Over Damage"
         if (dmgApplied > int.MaxValue)
         {
             dmgApplied = int.MaxValue;
@@ -1593,12 +1568,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             var time = DateTime.UtcNow;
             var estTime = time.TimeOfDay;
             aisling.DamageCounter += convDmg;
-            if (aisling.ThreatMeter + (uint)convDmg >= uint.MaxValue)
+            if (aisling.ThreatMeter + dmg >= long.MaxValue)
                 aisling.ThreatMeter = 500000;
-            aisling.ThreatMeter += (uint)convDmg;
+            aisling.ThreatMeter += dmg;
             aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
-
-            ShowDmg(aisling, estTime);
         }
 
         PlayerNearby?.Client.SendHealthBar(this, sound);
@@ -1655,12 +1628,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (this is Monster)
         {
-            if (damageDealingSprite is Aisling aisling)
-                if (!CanTag(aisling, forced))
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
-                    return false;
-                }
+            var tagHpPoint = (uint)(MaximumHp * .50);
+
+            if (CurrentHp <= tagHpPoint)
+                if (damageDealingSprite is Aisling aisling)
+                    if (!CanAttack(aisling, forced))
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
+                        return false;
+                    }
         }
 
         if (Immunity && !forced)

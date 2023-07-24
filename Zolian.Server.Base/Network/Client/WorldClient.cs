@@ -51,8 +51,17 @@ namespace Darkages.Network.Client
         public readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
+        public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
+        private static readonly SortedDictionary<long, string> AggroColors = new()
+        {
+            {100, "b"},
+            {90, "s"},
+            {75, "c"},
+            {25, "g"}
+        };
+
         public Aisling Aisling { get; set; }
         public bool MapUpdating { get; set; }
         public bool MapOpen { get; set; }
@@ -234,12 +243,41 @@ namespace Darkages.Network.Client
             DoUpdate(elapsedTime);
         }
 
-        public void DoUpdate(TimeSpan elapsedTime)
+        private void DoUpdate(TimeSpan elapsedTime)
         {
             HandleBadTrades();
             DeathStatusCheck();
             UpdateStatusBarAndThreat(elapsedTime);
             UpdateSkillSpellCooldown(elapsedTime);
+            ShowAggro(elapsedTime);
+        }
+
+        private void ShowAggro(TimeSpan elapsedTime)
+        {
+            if (!AggroTimer.Update(elapsedTime)) return;
+            AggroTimer.Delay = elapsedTime + TimeSpan.FromSeconds(7);
+
+            var color = "a";
+            var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
+            var group = Aisling.GroupParty?.PartyMembers;
+
+            if (group?.Count > 0)
+            {
+                var target = group.MaxBy(dmg => dmg.ThreatMeter);
+                if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
+                var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
+                aggro = (long)Math.Clamp(percent, 0, 100);
+            }
+
+            foreach (var key in AggroColors.Keys.Reverse())
+            {
+                if (aggro < key) continue;
+                color = AggroColors[key];
+                break;
+            }
+
+            Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage,
+                Aisling.ThreatMeter == 0 ? "" : $"{{=gAggro: {{={color}{aggro}%");
         }
 
         #region Player Load
@@ -3124,7 +3162,7 @@ namespace Darkages.Network.Client
             var readyTime = DateTime.UtcNow;
 
             if (Aisling.ActiveStatus == ActivityStatus.DayDreaming) return;
-            if (!((readyTime - LastMovement).TotalMinutes > 2)) return;
+            if (!((readyTime - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
             if (!(_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)) return;
             if (!Socket.Connected || !IsDayDreaming) return;
 
