@@ -42,6 +42,7 @@ using System.Collections.Concurrent;
 using Chaos.Common.Identity;
 using System.Globalization;
 using Darkages.Interfaces;
+using ServiceStack;
 using ServiceStack.Text.Common;
 
 namespace Darkages.Network.Client
@@ -1426,6 +1427,7 @@ namespace Darkages.Network.Client
                 AccessorySprite3 = (ushort)aisling.Accessory3Img,
                 ArmorSprite1 = (ushort)aisling.ArmorImg,
                 ArmorSprite2 = (ushort)aisling.ArmorImg,
+                PantsColor = (DisplayColor?)aisling.Pants,
                 BodyColor = (BodyColor)aisling.BodyColor,
                 BootsColor = (DisplayColor)aisling.BootColor,
                 BootsSprite = (byte)aisling.BootsImg,
@@ -1439,7 +1441,6 @@ namespace Darkages.Network.Client
                 IsTransparent = aisling.IsInvisible,
                 LanternSize = (LanternSize)aisling.Lantern,
                 Name = aisling.Username,
-                NameTagStyle = 0,
                 OvercoatColor = (DisplayColor)aisling.OverCoatColor,
                 OvercoatSprite = (ushort)aisling.OverCoatImg,
                 RestPosition = (RestPosition)aisling.Resting,
@@ -1475,8 +1476,8 @@ namespace Darkages.Network.Client
             if (!Aisling.Equals(aisling))
             {
                 if (Aisling.Map.Flags.MapFlagIsSet(Darkages.Enums.MapFlags.PlayerKill))
-                    args.NameTagStyle = Aisling.Clan == aisling.Clan ? NameTagStyle.Neutral : NameTagStyle.Hostile;
-                else if (Aisling.Clan == aisling.Clan)
+                    args.NameTagStyle = !Aisling.Clan.IsNullOrEmpty() && Aisling.Clan == aisling.Clan ? NameTagStyle.Neutral : NameTagStyle.Hostile;
+                else if (!Aisling.Clan.IsNullOrEmpty() && Aisling.Clan == aisling.Clan)
                     args.NameTagStyle = NameTagStyle.FriendlyHover;
                 else
                     args.NameTagStyle = NameTagStyle.NeutralHover;
@@ -3053,10 +3054,11 @@ namespace Darkages.Network.Client
                 var y = warp.Destination.Location.Y;
                 var addWarp = new WorldMapNodeInfo
                 {
-                    Destination = new Location(warp.Destination.AreaID.ToString(), new Point(x, y)),
+                    CheckSum = EphemeralRandomIdGenerator<ushort>.Shared.NextId, // map.Hash
+                    DestinationPoint = new Point(x, y),
+                    MapId = (ushort)map.ID,
                     ScreenPosition = new Point(warp.PointY, warp.PointX), // Client expects this backwards
                     Text = warp.DisplayName,
-                    UniqueId = EphemeralRandomIdGenerator<ushort>.Shared.NextId
                 };
 
                 warpsList.Add(addWarp);
