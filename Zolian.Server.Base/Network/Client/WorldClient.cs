@@ -1475,7 +1475,12 @@ namespace Darkages.Network.Client
             if (!Aisling.Equals(aisling))
             {
                 if (Aisling.Map.Flags.MapFlagIsSet(Darkages.Enums.MapFlags.PlayerKill))
-                    args.NameTagStyle = NameTagStyle.Hostile;
+                    args.NameTagStyle = Aisling.Clan == aisling.Clan ? NameTagStyle.Neutral : NameTagStyle.Hostile;
+                else if (Aisling.Clan == aisling.Clan)
+                    args.NameTagStyle = NameTagStyle.FriendlyHover;
+                else
+                    args.NameTagStyle = NameTagStyle.NeutralHover;
+                
                 //if we're not an admin, and the aisling is not visible
                 if (!Aisling.GameMaster && aisling.IsInvisible)
                 {
