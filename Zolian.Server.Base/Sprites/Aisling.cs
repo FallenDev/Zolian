@@ -473,19 +473,15 @@ public sealed class Aisling : Player, IAisling
                 foreach (var script in spell.Scripts.Values)
                     script.Arguments = info.Data;
 
-            var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
-
             if (spell.Scripts != null)
             {
-                if (target != null)
+                if (info.Target != 0)
                 {
                     spell.InUse = true;
-
-                    Client.PlayerCastBodyAnimationSoundAndMessageOnPosition(spell, target);
-
-                    foreach (var script in spell.Scripts.Values)
-                        script.OnUse(this, target);
-
+                    var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
+                    Client.PlayerCastBodyAnimationSoundAndMessageOnPosition(spell, target, info);
+                    var script = spell.Scripts.Values.FirstOrDefault();
+                    script?.OnUse(this, target);
                     spell.InUse = false;
                 }
                 else

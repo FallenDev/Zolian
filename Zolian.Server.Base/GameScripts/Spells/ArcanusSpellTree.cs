@@ -41,6 +41,19 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         foreach (var targetObj in targets)
         {
             if (targetObj.Serial == aisling.Serial) continue;
+
+            if (targetObj.SpellNegate)
+            {
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, targetObj.Serial));
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+                
+                if (targetObj is Aisling player)
+                    player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}");
+
+                continue;
+            }
+
+            aisling.CastAnimation(_spell, targetObj);
             client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, targetObj.Serial));
             targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, _spell);
         }
@@ -67,21 +80,11 @@ public class Mor_Strioch_Pian_Gar : SpellScript
             OnFailed(sprite, target);
             return;
         }
-
+            
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
         if (aisling.CurrentHp < 0)
             aisling.CurrentHp = 1;
-
-        if (target.SpellNegate)
-        {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");
-
-            return;
-        }
 
         var mR = Generator.RandNumGen100();
 

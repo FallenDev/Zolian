@@ -62,7 +62,8 @@ public interface IWorldClient : ISocketClient
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
     bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target);
     void PlayerCastBodyAnimationSoundAndMessage(Spell spell, Sprite target, byte actionSpeed = 30);
-    void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, byte actionSpeed = 30);
+    void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, CastInfo info,
+        byte actionSpeed = 30);
     void SendCancelCasting();
     void SendConfirmClientWalk(Position oldPoint, Direction direction);
     void SendConfirmExit();

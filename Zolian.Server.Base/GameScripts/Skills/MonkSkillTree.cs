@@ -1185,12 +1185,6 @@ public class EmberStrike : SkillScript
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[1] == null) return;
-            if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
-            {
-                return;
-            }
-
             _success = _skillMethod.OnUse(aisling, _skill);
 
             if (_success)
@@ -1235,13 +1229,13 @@ public class EmberStrike : SkillScript
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + _skill.Level;
-            dmg = client.Aisling.Con * 3;
+            dmg = client.Aisling.Con * 9;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Con * 3;
+            dmg = damageMonster.Con * 9;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);

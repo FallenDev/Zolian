@@ -1316,7 +1316,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// Displays player's body animation, sends sound, messages, and displays spells animation on target position
         /// </summary>
-        public void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, byte actionSpeed = 30)
+        public void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, CastInfo info, byte actionSpeed = 30)
         {
             switch (target)
             {
@@ -1329,7 +1329,7 @@ namespace Darkages.Network.Client
 
             SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
             Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound));
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Serial, 100, spell.Template.Animation, Aisling.Serial, SpellCastInfo.Position));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Aisling.Serial, info.Position));
         }
 
         /// <summary>
