@@ -2877,7 +2877,7 @@ namespace Darkages.Network.Client
         {
             if (objects.Count <= 0) return;
 
-            //split this into chunks so as not to crash the client
+            // Split this into chunks so as not to crash the client
             foreach (var chunk in objects.OrderBy(o => o.AbandonedDate).Chunk(500))
             {
                 var args = new DisplayVisibleEntitiesArgs();
@@ -2890,20 +2890,12 @@ namespace Darkages.Network.Client
                         case Item groundItem:
                             var groundItemInfo = new GroundItemInfo
                             {
-                                Id = (uint)groundItem.Serial,
-                                Sprite = groundItem.Image,
+                                Id = groundItem.Serial,
+                                Sprite = groundItem.DisplayImage,
                                 X = groundItem.X,
                                 Y = groundItem.Y,
                                 Color = (DisplayColor)groundItem.Template.Color
                             };
-
-                            //non visible item that can be seen
-                            //if (groundItem.Visibility is not VisibilityType.Normal &&
-                            //    (Aisling.IsAdmin || Aisling.Script.CanSee(groundItem)))
-                            //{
-                            //    groundItemInfo.Sprite = 11978;
-                            //    groundItemInfo.Color = DisplayColor.Black;
-                            //}
 
                             visibleArgs.Add(groundItemInfo);
 
@@ -2911,18 +2903,13 @@ namespace Darkages.Network.Client
                         case Money money:
                             var moneyInfo = new GroundItemInfo
                             {
-                                Id = (uint)money.Serial,
+                                Id = money.Serial,
                                 Sprite = money.Image,
                                 X = money.X,
                                 Y = money.Y,
                                 Color = DisplayColor.Default
                             };
-
-                            //non visible money that can be seen
-                            //if (money.Visibility is not VisibilityType.Normal &&
-                            //    (Aisling.IsAdmin || Aisling.Script.CanSee(money)))
-                            //    moneyInfo.Sprite = 138;
-
+                            
                             visibleArgs.Add(moneyInfo);
 
                             break;
@@ -2944,12 +2931,7 @@ namespace Darkages.Network.Client
                                 Direction = (Direction)creature.Direction,
                                 Name = creature.Template.BaseName
                             };
-
-                            //none visible creature that can be seen
-                            //if (creature.Visibility is not VisibilityType.Normal &&
-                            //    (Aisling.IsAdmin || Aisling.Script.CanSee(creature)))
-                            //    creatureInfo.Sprite = 405;
-
+                            
                             visibleArgs.Add(creatureInfo);
 
                             break;
