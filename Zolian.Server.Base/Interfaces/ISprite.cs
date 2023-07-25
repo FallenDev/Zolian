@@ -123,18 +123,18 @@ public interface ISprite
     // Damage Begin -- Going to refactor damage out of sprite
     void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell);
     void ApplyElementalSkillDamage(Sprite source, long dmg, ElementManager.Element element, Skill skill);
-    void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, Action<int> dmgcb = null, bool forceTarget = false);
-    void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, Action<int> dmgcb = null, bool forceTarget = false);
+    void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false);
+    void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false);
     void ApplyEquipmentDurability(int dmg);
     long ApplyWeaponBonuses(Sprite source, long dmg);
     Sprite ApplyBuff(string buffName);
     Sprite ApplyDebuff(string debuffName);
     double CalculateElementalDamageMod(ElementManager.Element element);
-    long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, Action<int> dmgcb, double amplifier);
+    long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier);
     void ShowDmg(Aisling aisling, TimeSpan elapsedTime);
     void ThreatGeneratedSubsided(Aisling aisling, TimeSpan elapsedTime);
     long ComputeDmgFromAc(long dmg);
-    bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, Action<int> dmgcb, bool forced);
+    bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced);
     double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false);
     int GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type);
     void Thorns(Sprite damageDealingSprite, long dmg);

@@ -1121,7 +1121,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    public void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, Action<int> dmgcb = null, bool forceTarget = false)
+    public void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false)
     {
         if (!WithinRangeOf(damageDealingSprite)) return;
         if (!Attackable) return;
@@ -1177,18 +1177,18 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (skill == null)
         {
             // Thrown weapon scripts play the swoosh sound #9
-            if (!DamageTarget(damageDealingSprite, ref dmg, 9, dmgcb, forceTarget)) return;
+            if (!DamageTarget(damageDealingSprite, ref dmg, 9, forceTarget)) return;
         }
         else
         {
-            if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, dmgcb, forceTarget)) return;
+            if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, forceTarget)) return;
         }
 
         Thorns(damageDealingSprite, dmg);
         OnDamaged(damageDealingSprite, dmg);
     }
 
-    public void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, Action<int> dmgcb = null, bool forceTarget = false)
+    public void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false)
     {
         if (!WithinRangeOf(damageDealingSprite)) return;
         if (!Attackable) return;
@@ -1227,11 +1227,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (spell == null)
         {
-            if (!DamageTarget(damageDealingSprite, ref dmg, 0, dmgcb, forceTarget)) return;
+            if (!DamageTarget(damageDealingSprite, ref dmg, 0, forceTarget)) return;
         }
         else
         {
-            if (!DamageTarget(damageDealingSprite, ref dmg, spell.Template.Sound, dmgcb, forceTarget)) return;
+            if (!DamageTarget(damageDealingSprite, ref dmg, spell.Template.Sound, forceTarget)) return;
         }
 
         OnDamaged(damageDealingSprite, dmg);
@@ -1544,7 +1544,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    public long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, Action<int> dmgcb, double amplifier)
+    public long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
     {
         if (dmg <= 0) dmg = 1;
 
@@ -1575,7 +1575,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         PlayerNearby?.Client.SendHealthBar(this, sound);
-        dmgcb?.Invoke(convDmg);
 
         return convDmg;
     }
@@ -1615,7 +1614,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, Action<int> dmgcb, bool forced)
+    public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
         if (this is Aisling aislingTarget)
         {
@@ -1668,7 +1667,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg = LuckModifier(dmg);
         dmg = ComputeDmgFromAc(dmg);
-        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, dmgcb, amplifier);
+        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
         var convDmg = (int)dmg;
 
         if (convDmg > 0)
