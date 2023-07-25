@@ -564,6 +564,7 @@ namespace Darkages.Network.Client
                     if (Aisling.Inventory.Items[item.InventorySlot] != null)
                     {
                         var itemCheckCount = 0;
+                        var routineCheck = 0;
 
                         for (byte i = 1; i < 60; i++)
                         {
@@ -571,10 +572,19 @@ namespace Darkages.Network.Client
 
                             if (Aisling.Inventory.Items[i] == null)
                             {
-                                item.Slot = i;
+                                item.InventorySlot = i;
                             }
 
-                            if (itemCheckCount == 59) break;
+                            if (itemCheckCount == 59)
+                            {
+                                routineCheck++;
+                                itemCheckCount = 0;
+                            }
+
+                            if (routineCheck != 4) continue;
+                            ServerSetup.Logger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
+                            Disconnect();
+                            break;
                         }
                     }
 

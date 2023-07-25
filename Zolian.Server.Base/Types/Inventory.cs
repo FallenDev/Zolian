@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
+
 using Chaos.Common.Definitions;
 using Chaos.Extensions.Common;
+
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -14,7 +16,7 @@ namespace Darkages.Types;
 public class Inventory : ObjectManager, IInventory
 {
     private const int Length = 59;
-    private readonly int[] _invalidSlots = { 0, 60};
+    private readonly int[] _invalidSlots = { 0, 60 };
     public bool IsFull => TotalItems >= Length;
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
@@ -26,10 +28,10 @@ public class Inventory : ObjectManager, IInventory
 
     public bool IsValidSlot(byte slot) => slot is > 0 and < Length && !_invalidSlots.Contains(slot);
 
-    public IEnumerable<Item> BankList => Items.Values.Where(i => i is {Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
+    public IEnumerable<Item> BankList => Items.Values.Where(i => i is { Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
 
     public int TotalItems => Items.Count;
-        
+
     public bool CanPickup(Aisling player, Item lpItem)
     {
         if (player == null || lpItem == null) return false;
@@ -150,7 +152,7 @@ public class Inventory : ObjectManager, IInventory
         }
         else
         {
-            item.Stacks = (ushort) remaining;
+            item.Stacks = (ushort)remaining;
             client.SendRemoveItemFromPane(item.InventorySlot);
             client.Aisling.Inventory.Set(item);
             UpdateSlot(client, item);
@@ -241,66 +243,57 @@ public class Inventory : ObjectManager, IInventory
 
     public bool TrySwap(WorldClient client, byte slot1, byte slot2)
     {
-        lock (Items)
+        if (!IsValidSlot(slot1) || !IsValidSlot(slot2)) return false;
+
+        var item1 = FindInSlot(slot1);
+        var item2 = FindInSlot(slot2);
+
+        if ((item1 == null)
+            || (item2 == null)
+            || !item1.Template.CanStack
+            || !item2.Template.CanStack
+            || (item1.Stacks == item1.Template.MaxStack)
+            || (item2.Stacks == item2.Template.MaxStack)
+            || !item1.DisplayName.EqualsI(item2.DisplayName))
+            return AttemptSwap(client, item1, item2, slot1, slot2);
+
+        // Stacks remaining on an item
+        var stacksCanSupport = item2.Template.MaxStack - item2.Stacks;
+        
+        // Max number capable of stacking
+        var stacksToGive = Math.Min(stacksCanSupport, item1.Stacks);
+        
+        if (item1.Stacks > stacksToGive)
         {
-            var item1 = FindInSlot(slot1);
-            var item2 = FindInSlot(slot2);
-
-            if ((item1 == null)
-                || (item2 == null)
-                || !item1.Template.CanStack
-                || !item2.Template.CanStack
-                || (item1.Stacks == item1.Template.MaxStack)
-                || (item2.Stacks == item2.Template.MaxStack)
-                || !item1.DisplayName.EqualsI(item2.DisplayName))
-                return AttemptSwap(slot1, slot2);
-
-            // Total stacks an item can support, minus stack
-            var missingStacks = item2.Template.MaxStack - item2.Stacks;
-            // Available space that can be filled within the stack
-            var stacksToGive = Math.Min(missingStacks, item1.Stacks);
-            
-            if (item1.Stacks == stacksToGive)
-            {
-                AddRange(client, item2, item1.Stacks);
-                Remove(slot1);
-                return true;
-            }
-
-            if (item1.Stacks < stacksToGive)
-            {
-                AddRange(client, item2, item1.Stacks);
-            }
-            else if (item1.Stacks > stacksToGive)
-            {
-                return AttemptSwap(slot1, slot2);
-            }
-
-            return true;
+            return AttemptSwap(client, item1, item2, slot1, slot2);
         }
+
+        AddRange(client, item2, item1.Stacks);
+        RemoveFromInventory(client, item1);
+
+        return true;
     }
 
-    private bool AttemptSwap(byte item1, byte item2)
+    private bool AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
     {
-        if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
+        if (item1 != null)
+            client.SendRemoveItemFromPane(item1.InventorySlot);
+        if (item2 != null)
+            client.SendRemoveItemFromPane(item2.InventorySlot);
 
-        lock (Items)
+        if (item1 != null)
         {
-            var obj1 = FindInSlot(item1);
-            var obj2 = FindInSlot(item2);
-
-            if (obj1 != null)
-            {
-                obj1.Slot = item2;
-            }
-
-            if (obj2 != null)
-            {
-                obj2.Slot = item1;
-            }
-
-            return true;
+            item1.InventorySlot = slot2;
+            Set(item1);
+            UpdateSlot(client, item1);
         }
+
+        if (item2 == null) return true;
+        item2.InventorySlot = slot1;
+        Set(item2);
+        UpdateSlot(client, item2);
+
+        return true;
     }
 }
 

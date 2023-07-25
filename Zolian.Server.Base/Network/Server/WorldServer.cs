@@ -2248,7 +2248,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             switch (panelType)
             {
                 case PanelType.Inventory:
-                    localClient.Aisling.Inventory.TrySwap(localClient.Aisling.Client, slot1, slot2);
+                    var attempt = localClient.Aisling.Inventory.TrySwap(localClient.Aisling.Client, slot1, slot2);
+                    if (!attempt)
+                        ServerSetup.Logger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.SpellBook:
                     localClient.Aisling.SpellBook.AttemptSwap(slot1, slot2);
