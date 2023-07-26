@@ -827,6 +827,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             if (spell.Lines > spell.Template.MaxLines)
                 spell.Lines = spell.Template.MaxLines;
 
+            if (spell.Lines < 0) spell.Lines = 0;
+
             UpdateSpell(client, spell);
         }
     }

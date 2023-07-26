@@ -1092,7 +1092,7 @@ namespace Darkages.Network.Client
                     PanelName = spell.Name,
                     Slot = spell.Slot,
                     Sprite = spell.Icon,
-                    CastLines = (byte)spell.Lines,
+                    CastLines = Math.Clamp((byte)spell.Lines, (byte)0, (byte)9),
                     Prompt = string.Empty,
                     SpellType = (SpellType)spell.Template.TargetType
                 }

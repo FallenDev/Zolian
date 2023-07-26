@@ -2869,7 +2869,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.Aisling.ChantTimer.Start(localArgs.CastLineCount);
             localClient.SpellCastInfo ??= new CastInfo
             {
-                SpellLines = localArgs.CastLineCount,
+                SpellLines = Math.Clamp(localArgs.CastLineCount, (byte)0, (byte)9),
                 Started = DateTime.UtcNow
             };
             return default;
