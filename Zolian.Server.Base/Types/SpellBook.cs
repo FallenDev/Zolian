@@ -99,9 +99,9 @@ public class SpellBook : ObjectManager
         var spell2 = FindInSlot(toSlot);
 
         if (spell1 != null)
-            client.SendRemoveSkillFromPane(spell1.Slot);
+            client.SendRemoveSpellFromPane(spell1.Slot);
         if (spell2 != null)
-            client.SendRemoveSkillFromPane(spell2.Slot);
+            client.SendRemoveSpellFromPane(spell2.Slot);
 
         if (spell1 != null && spell2 != null)
         {
