@@ -241,9 +241,6 @@ public sealed class Aisling : Player, IAisling
 
         switch (op)
         {
-            case Scope.Self:
-                method(Client);
-                return;
             case Scope.NearbyAislingsExludingSelf:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
                 break;
@@ -276,6 +273,7 @@ public sealed class Aisling : Player, IAisling
             case Scope.All:
                 selectedPlayers.AddRange(ServerSetup.Instance.Game.Aislings);
                 break;
+            case Scope.Self:
             default:
                 method(Client);
                 return;
@@ -720,7 +718,7 @@ public sealed class Aisling : Player, IAisling
         PendingX = X;
         PendingY = Y;
 
-        var allowGhostWalk = this is Aisling { GameMaster: true, Dead: true };
+        var allowGhostWalk = GameMaster || Dead;
 
         // Check position before we add direction, add direction, check position to see if we can commit
         if (!allowGhostWalk)
