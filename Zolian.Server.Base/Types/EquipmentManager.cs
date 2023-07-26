@@ -240,12 +240,22 @@ public class EquipmentManager
         Client.UpdateDisplay();
     }
 
-    private void RemoveFromSlot(int displaySlot)
+    public void RemoveFromSlot(int displaySlot)
     {
         OnEquipmentRemoved((byte)displaySlot);
         Client.SendUnequip((Chaos.Common.Definitions.EquipmentSlot)displaySlot);
-        Equipment[displaySlot] = null;
+        Equipment.TryUpdate(displaySlot, null, FindInSlot(displaySlot));
         var item = new Item();
         item.ReapplyItemModifiers(Client);
+    }
+
+    private EquipmentSlot FindInSlot(int slot)
+    {
+        EquipmentSlot ret = null;
+
+        if (Equipment.TryGetValue(slot, out var item))
+            ret = item;
+
+        return ret?.Item is { Template: not null } ? ret : null;
     }
 }

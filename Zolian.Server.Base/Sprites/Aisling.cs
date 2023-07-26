@@ -109,6 +109,8 @@ public sealed class Aisling : Player, IAisling
     public List<int> DiscoveredMaps { get; set; }
     public List<string> IgnoredList { get; set; }
     public ConcurrentDictionary<string, string> ExplorePositions { get; set; }
+    public Vector2 DeathLocation { get; set; }
+    public int DeathMapId { get; set; }
 
     public NationTemplate PlayerNation
     {
@@ -668,7 +670,6 @@ public sealed class Aisling : Player, IAisling
         if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(ServerSetup.Instance.Config.DeathMap)) return;
         if (CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
 
-        Remains.Owner = this;
         Remains.Reap(this);
         RemoveBuffsAndDebuffs();
         WarpToHell();

@@ -30,7 +30,7 @@ public sealed class Money : Sprite
         money.Pos = new Vector2(location.X, location.Y);
         var mt = (int)money.Type;
 
-        if (mt > 0) money.Image = (ushort)(mt + 0x8000);
+        if (mt > 0) money.Image = (ushort)mt;
 
         parent.AddObject(money);
     }

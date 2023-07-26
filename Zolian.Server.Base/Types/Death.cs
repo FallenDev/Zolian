@@ -1,43 +1,30 @@
-﻿using System.Numerics;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
-using Dapper;
-using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
 
 namespace Darkages.Types;
 
 public class Death
 {
-    private Vector2 Location { get; set; }
-    private int MapId { get; set; }
-    public Aisling Owner { get; set; }
 
     public void Reap(Aisling player)
     {
-        Owner = player;
-        if (Owner == null) return;
+        if (player == null) return;
+        player.DeathLocation = player.Pos;
+        player.DeathMapId = player.CurrentMapId;
 
-        Location = Owner.Pos;
-        MapId = Owner.CurrentMapId;
+        ReapEquipment(player);
+        ReapInventory(player);
+        ReapGold(player);
 
-        ReapEquipment();
-        ReapInventory();
-        ReapGold();
-
-        Owner.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
-        Owner.Client.SendAttributes(StatUpdateType.Full);
-        Owner.Client.UpdateDisplay();
+        player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
+        player.CurrentWeight = 0;
     }
 
-    private void ReapInventory()
+    private void ReapInventory(Aisling player)
     {
-        var batch = Owner.Inventory.Items.Select(i => i.Value).Where(i => i != null).Where(i => i is { Template: not null }).ToList();
+        var batch = player.Inventory.Items.Select(i => i.Value).Where(i => i != null).Where(i => i is { Template: not null }).ToList();
 
         foreach (var obj in batch)
         {
@@ -63,30 +50,15 @@ public class Death
                 obj.Tarnished = true;
             }
 
-            // ToDo: Create method to drop items from Equipped
-            ReleaseInventory(obj);
-        }
-
-        foreach (var inventory in Owner.Inventory.Items)
-        {
-            if (inventory.Value == null) continue;
-            if (inventory.Value.Stacks > 1)
-            {
-                for (var i = 0; i < inventory.Value.Stacks; i++)
-                {
-                    Owner.CurrentWeight += inventory.Value.Template.CarryWeight;
-                }
-            }
-            else
-            {
-                Owner.CurrentWeight += inventory.Value.Template.CarryWeight;
-            }
+            player.Inventory.Items.TryUpdate(obj.InventorySlot, null, obj);
+            player.Client.SendRemoveItemFromPane(obj.InventorySlot);
+            ReleaseItem(player, obj);
         }
     }
 
-    private void ReapEquipment()
+    private void ReapEquipment(Aisling player)
     {
-        var batch = Owner.EquipmentManager.Equipment.Select(i => i.Value).Where(i => i != null).Where(i => i is { Item.Template: not null }).ToList();
+        var batch = player.EquipmentManager.Equipment.Select(i => i.Value).Where(i => i != null).Where(i => i is { Item.Template: not null }).ToList();
 
         foreach (var obj in batch)
         {
@@ -98,7 +70,7 @@ public class Death
 
             var duraLost = obj.Item.Durability * 10 / 100;
 
-            if (obj.Item.Durability >= duraLost)
+            if (obj.Item.Durability > duraLost)
             {
                 obj.Item.Durability -= duraLost;
             }
@@ -118,24 +90,23 @@ public class Death
                 obj.Item.Tarnished = true;
             }
 
-            Owner.EquipmentManager.RemoveFromExisting(obj.Slot, false);
-            ReleaseEquipment(obj.Item);
+            player.EquipmentManager.RemoveFromSlot(obj.Slot);
+            ReleaseItem(player, obj.Item);
         }
     }
 
-    private void ReapGold()
+    private void ReapGold(Aisling player)
     {
-        var gold = Owner.GoldPoints;
-        {
-            Money.Create(Owner, gold, Owner.Position);
-            Owner.GoldPoints = 0;
-        }
+        var gold = player.GoldPoints;
+        if (gold <= 0) return;
+        Money.Create(player, gold, new Position(player.DeathLocation));
+        player.GoldPoints = 0;
     }
 
-    private void ReleaseInventory(Item item)
+    private void ReleaseItem(Aisling player, Item item)
     {
-        item.Pos = Location;
-        item.CurrentMapId = MapId;
+        item.Pos = player.DeathLocation;
+        item.CurrentMapId = player.DeathMapId;
 
         var readyTime = DateTime.UtcNow;
         item.AbandonedDate = readyTime;
@@ -143,60 +114,11 @@ public class Death
 
         item.DeleteFromAislingDb();
         item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
         item.AddObject(item);
 
-        foreach (var player in item.AislingsNearby())
+        foreach (var aisling in item.PlayerNearby.AislingsNearby())
         {
-            item.ShowTo(player);
-        }
-    }
-
-    private void ReleaseEquipment(Item item)
-    {
-        item.Pos = Location;
-        item.CurrentMapId = MapId;
-
-        var readyTime = DateTime.UtcNow;
-        item.AbandonedDate = readyTime;
-        item.Cursed = false;
-
-        DeleteFromAislingDb(item);
-        item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        item.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
-        item.AddObject(item);
-
-        foreach (var player in item.AislingsNearby())
-        {
-            item.ShowTo(player);
-        }
-    }
-
-    private static async void DeleteFromAislingDb(Item item)
-    {
-        var sConn = new SqlConnection(AislingStorage.ConnectionString);
-        if (item.ItemId == 0) return;
-
-        try
-        {
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersEquipped WHERE ItemId = @ItemId";
-            await sConn.ExecuteAsync(cmd, new { item.ItemId });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            item.ShowTo(aisling);
         }
     }
 }

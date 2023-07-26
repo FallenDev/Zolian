@@ -46,6 +46,8 @@ public interface IAisling : ISprite
     List<int> DiscoveredMaps { get; set; }
     List<string> IgnoredList { get; set; }
     ConcurrentDictionary<string, string> ExplorePositions { get; set; }
+    Vector2 DeathLocation { get; set; }
+    int DeathMapId { get; set; }
 
     void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null);
     void AStarPath(List<Vector2> pathList);
