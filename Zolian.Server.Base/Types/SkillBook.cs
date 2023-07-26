@@ -79,10 +79,11 @@ public class SkillBook : ObjectManager
 
     public void Set(Skill s) => Skills[s.Slot] = s;
 
-    public bool AttemptSwap(byte item1, byte item2)
+    public bool AttemptSwap(WorldClient client, byte item1, byte item2)
     {
         if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
 
+        // Swap to advanced pane
         if (item2 == 35)
         {
             var skillSlot = FindEmpty(36);
@@ -95,20 +96,28 @@ public class SkillBook : ObjectManager
             item2 = (byte)skillSlot;
         }
 
+
         lock (Skills)
         {
             var obj1 = FindInSlot(item1);
             var obj2 = FindInSlot(item2);
 
             if (obj1 != null)
+                client.SendRemoveSkillFromPane(obj1.Slot);
+            if (obj2 != null)
+                client.SendRemoveSkillFromPane(obj2.Slot);
+
+            if (obj1 != null)
             {
                 obj1.Slot = item2;
+                Set(obj1);
+                client.SendAddSkillToPane(obj1);
             }
 
-            if (obj2 != null)
-            {
-                obj2.Slot = item1;
-            }
+            if (obj2 == null) return true;
+            obj2.Slot = item1;
+            Set(obj2);
+            client.SendAddSkillToPane(obj2);
 
             return true;
         }

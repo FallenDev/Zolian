@@ -11,6 +11,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using ServiceStack;
 
+using static ServiceStack.Diagnostics.Events;
+
 namespace Darkages.Types;
 
 public class SpellBook : ObjectManager
@@ -79,10 +81,11 @@ public class SpellBook : ObjectManager
 
     public void Set(Spell s) => Spells[s.Slot] = s;
 
-    public bool AttemptSwap(byte item1, byte item2)
+    public bool AttemptSwap(WorldClient client, byte item1, byte item2)
     {
         if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
 
+        // Swap to advanced pane
         if (item2 == 35)
         {
             var spellSlot = FindEmpty(36);
@@ -101,14 +104,21 @@ public class SpellBook : ObjectManager
             var obj2 = FindInSlot(item2);
 
             if (obj1 != null)
+                client.SendRemoveSpellFromPane(obj1.Slot);
+            if (obj2 != null)
+                client.SendRemoveSpellFromPane(obj2.Slot);
+
+            if (obj1 != null)
             {
                 obj1.Slot = item2;
+                Set(obj1);
+                client.SendAddSpellToPane(obj1);
             }
 
-            if (obj2 != null)
-            {
-                obj2.Slot = item1;
-            }
+            if (obj2 == null) return true;
+            obj2.Slot = item1;
+            Set(obj2);
+            client.SendAddSpellToPane(obj2);
 
             return true;
         }
