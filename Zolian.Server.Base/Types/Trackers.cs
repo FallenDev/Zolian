@@ -1,9 +1,6 @@
-﻿using Chaos.Collections.Common;
-using Chaos.Collections.Time;
-using Chaos.Geometry;
+﻿using Chaos.Geometry;
 
 using Darkages.Infrastructure;
-using Darkages.Interfaces;
 using Darkages.Sprites;
 
 namespace Darkages.Types;

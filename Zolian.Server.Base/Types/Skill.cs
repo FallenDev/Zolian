@@ -85,7 +85,7 @@ public class Skill
         {
             AttachScript(skill);
             {
-                client.Aisling.SkillBook.Set(skill);
+                client.Aisling.SkillBook.Set((byte)slot, skill, null);
                 client.SendAddSkillToPane(skill);
                 client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, client.Aisling.Serial));
             }
@@ -154,7 +154,7 @@ public class Skill
         {
             AttachScript(skill);
             {
-                aisling.SkillBook.Set(skill);
+                aisling.SkillBook.Set((byte)slot, skill, null);
                 aisling.Client.SendAddSkillToPane(skill);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, aisling.Serial));
             }

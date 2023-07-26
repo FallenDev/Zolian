@@ -160,8 +160,7 @@ public class Neal : MundaneScript
                         client.CloseDialog();
                     }
 
-                    client.Aisling.SkillBook.Remove(client, (byte)idx, true);
-                    client.SendRemoveSkillFromPane((byte)idx);
+                    client.Aisling.SkillBook.Remove(client, (byte)idx);
                     client.LoadSkillBook();
 
                     client.SendForgetSkills(Mundane,
@@ -318,8 +317,7 @@ public class Neal : MundaneScript
                         client.CloseDialog();
                     }
 
-                    client.Aisling.SpellBook.Remove(client, (byte)idx, true);
-                    client.SendRemoveSpellFromPane((byte)idx);
+                    client.Aisling.SpellBook.Remove(client, (byte)idx);
                     client.LoadSpellBook();
 
                     client.SendForgetSpells(Mundane, "It has been removed.\nRemember, This cannot be undone.", 0x0800);

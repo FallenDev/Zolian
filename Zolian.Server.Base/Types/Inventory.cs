@@ -105,25 +105,12 @@ public class Inventory : ObjectManager, IInventory
 
     public void Remove(WorldClient client, Item item)
     {
-        if (item == null)
-            return;
+        if (item == null) return;
 
-        if (Remove(item.InventorySlot) != null)
+        if (Items.TryUpdate(item.InventorySlot, null, item))
             client.SendRemoveItemFromPane(item.InventorySlot);
         client.SendAttributes(StatUpdateType.Primary);
         item.DeleteFromAislingDb();
-    }
-
-    public Item Remove(byte movingFrom)
-    {
-        if (Items.ContainsKey(movingFrom))
-        {
-            var copy = Items[movingFrom];
-            Items[movingFrom] = null;
-            return copy;
-        }
-
-        return null;
     }
 
     /// <summary>
@@ -132,10 +119,10 @@ public class Inventory : ObjectManager, IInventory
     /// </summary>
     public void RemoveFromInventory(WorldClient client, Item item)
     {
-        if (item != null && client.Aisling.Inventory.Remove(item.InventorySlot) == null) return;
         if (item == null) return;
 
-        client.SendRemoveItemFromPane(item.InventorySlot);
+        if (Items.TryUpdate(item.InventorySlot, null, item))
+            client.SendRemoveItemFromPane(item.InventorySlot);
         client.LastItemDropped = item;
         client.SendAttributes(StatUpdateType.Primary);
         item.DeleteFromAislingDb();
@@ -144,6 +131,7 @@ public class Inventory : ObjectManager, IInventory
     public void RemoveRange(WorldClient client, Item item, int range)
     {
         var remaining = Math.Abs(item.Stacks - range);
+        var original = item;
 
         if (remaining <= 0)
         {
@@ -154,7 +142,7 @@ public class Inventory : ObjectManager, IInventory
         {
             item.Stacks = (ushort)remaining;
             client.SendRemoveItemFromPane(item.InventorySlot);
-            client.Aisling.Inventory.Set(item);
+            client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
             UpdateSlot(client, item);
         }
 
@@ -164,6 +152,7 @@ public class Inventory : ObjectManager, IInventory
     public void AddRange(WorldClient client, Item item, int range)
     {
         var given = Math.Abs(item.Stacks + range);
+        var original = item;
 
         if (given <= 0)
         {
@@ -174,18 +163,11 @@ public class Inventory : ObjectManager, IInventory
         {
             item.Stacks = (ushort)given;
             client.SendRemoveItemFromPane(item.InventorySlot);
-            client.Aisling.Inventory.Set(item);
+            client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
             UpdateSlot(client, item);
         }
 
         UpdatePlayersWeight(client);
-    }
-
-    public void Set(Item s)
-    {
-        if (s == null) return;
-
-        if (Items.ContainsKey(s.InventorySlot)) Items[s.InventorySlot] = s;
     }
 
     public void UpdateSlot(WorldClient client, Item item)
@@ -244,6 +226,7 @@ public class Inventory : ObjectManager, IInventory
     public bool TrySwap(WorldClient client, byte slot1, byte slot2)
     {
         if (!IsValidSlot(slot1) || !IsValidSlot(slot2)) return false;
+        if (slot1 == slot2) return true;
 
         var item1 = FindInSlot(slot1);
         var item2 = FindInSlot(slot2);
@@ -259,10 +242,10 @@ public class Inventory : ObjectManager, IInventory
 
         // Stacks remaining on an item
         var stacksCanSupport = item2.Template.MaxStack - item2.Stacks;
-        
+
         // Max number capable of stacking
         var stacksToGive = Math.Min(stacksCanSupport, item1.Stacks);
-        
+
         if (item1.Stacks > stacksToGive)
         {
             return AttemptSwap(client, item1, item2, slot1, slot2);
@@ -276,27 +259,40 @@ public class Inventory : ObjectManager, IInventory
 
     private bool AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
     {
-        lock (Items)
+        if (item1 != null)
+            client.SendRemoveItemFromPane(item1.InventorySlot);
+        if (item2 != null)
+            client.SendRemoveItemFromPane(item2.InventorySlot);
+
+        if (item1 != null && item2 != null)
         {
-            if (item1 != null)
-                client.SendRemoveItemFromPane(item1.InventorySlot);
-            if (item2 != null)
-                client.SendRemoveItemFromPane(item2.InventorySlot);
-
-            if (item1 != null)
-            {
-                item1.InventorySlot = slot2;
-                Set(item1);
-                UpdateSlot(client, item1);
-            }
-
-            if (item2 == null) return true;
+            item1.InventorySlot = slot2;
             item2.InventorySlot = slot1;
-            Set(item2);
+            Items.TryUpdate(slot1, item2, item1);
+            Items.TryUpdate(slot2, item1, item2);
+            UpdateSlot(client, item1);
             UpdateSlot(client, item2);
-
             return true;
         }
+
+        switch (item1)
+        {
+            // Handle spaces with nulls
+            case null when item2 != null:
+                item2.InventorySlot = slot1;
+                Items.TryUpdate(slot1, item2, null);
+                Items.TryUpdate(slot2, null, item2);
+                UpdateSlot(client, item2);
+                return true;
+            case null:
+                return true;
+        }
+
+        item1.InventorySlot = slot2;
+        Items.TryUpdate(slot1, null, item1);
+        Items.TryUpdate(slot2, item1, null);
+        UpdateSlot(client, item1);
+        return true;
     }
 }
 

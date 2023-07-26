@@ -14,11 +14,9 @@ public interface IInventory
     int Has(Template templateContext);
     int HasCount(Template templateContext);
     void Remove(WorldClient client, Item item);
-    Item Remove(byte movingFrom);
     void RemoveFromInventory(WorldClient client, Item item);
     void RemoveRange(WorldClient client, Item item, int range);
     void AddRange(WorldClient client, Item item, int range);
-    void Set(Item s);
     void UpdateSlot(WorldClient client, Item item);
     void UpdatePlayersWeight(WorldClient client);
 }

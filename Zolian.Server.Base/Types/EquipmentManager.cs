@@ -1,17 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using System.Data;
 using Chaos.Common.Definitions;
-using Dapper;
-
-using Darkages.Database;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Types;
@@ -146,12 +137,12 @@ public class EquipmentManager
         itemObj?.GiveTo(Client.Aisling, false);
     }
 
-    public bool RemoveFromInventoryToEquip(Item item, bool handleWeight = false)
+    private void RemoveFromInventoryToEquip(Item item, bool handleWeight = false)
     {
-        if (item != null && Client.Aisling.Inventory.Remove(item.InventorySlot) == null) return true;
-        if (item == null) return true;
+        if (item == null) return;
 
-        Client.SendRemoveItemFromPane(item.InventorySlot);
+        if (Client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, null, item))
+            Client.SendRemoveItemFromPane(item.InventorySlot);
 
         if (handleWeight)
         {
@@ -161,8 +152,6 @@ public class EquipmentManager
         }
 
         Client.SendAttributes(StatUpdateType.Primary);
-
-        return true;
     }
 
     private bool HandleUnreturnedItem(Item itemObj)

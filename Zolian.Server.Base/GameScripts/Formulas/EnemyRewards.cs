@@ -6,7 +6,6 @@ using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
-using Darkages.Models;
 using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;

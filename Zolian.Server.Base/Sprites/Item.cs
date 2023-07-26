@@ -594,9 +594,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             }
 
             aisling.Client.SendRemoveItemFromPane(InventorySlot);
-            aisling.Inventory.Set(this);
+            aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
-            aisling.Inventory.UpdatePlayersWeight(aisling.Client);
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             aisling.Client.SendAttributes(StatUpdateType.ExpGold);
             return true;
@@ -619,9 +618,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                 if (!CanCarry(aisling))
                     return false;
 
-            aisling.Inventory.Set(this);
+            aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
-            aisling.Inventory.UpdatePlayersWeight(aisling.Client);
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             aisling.Client.SendAttributes(StatUpdateType.ExpGold);
             return true;
@@ -648,8 +646,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         }
 
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        //ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
         AddObject(this);
 
         if (owner is Aisling player)
@@ -831,7 +827,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             if (spell.Lines > spell.Template.MaxLines)
                 spell.Lines = spell.Template.MaxLines;
 
-            UpdateSpellSlot(client, spell.Slot);
+            UpdateSpell(client, spell);
         }
     }
 
@@ -917,15 +913,10 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     }
 
 
-    public void UpdateSpellSlot(WorldClient client, byte slot)
+    public void UpdateSpell(WorldClient client, Spell spell)
     {
-        var a = client.Aisling.SpellBook.Remove(client, slot);
-        client.SendRemoveSpellFromPane(slot);
-
-        if (a == null) return;
-        a.Slot = slot;
-        client.Aisling.SpellBook.Set(a);
-        client.SendAddSpellToPane(a);
+        client.SendRemoveSpellFromPane(spell.Slot);
+        client.SendAddSpellToPane(spell);
     }
 }
 

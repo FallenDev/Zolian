@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 
 using Darkages.Enums;
-using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 

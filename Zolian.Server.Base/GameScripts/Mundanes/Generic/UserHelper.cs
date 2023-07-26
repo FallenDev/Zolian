@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 
 using Chaos.Common.Definitions;
-using Chaos.Extensions.Common;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;

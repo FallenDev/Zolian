@@ -178,8 +178,7 @@ public class Dar : MundaneScript
                     client.CloseDialog();
                 }
 
-                client.Aisling.SkillBook.Remove(client, (byte)idx, true);
-                client.SendRemoveSkillFromPane((byte)idx);
+                client.Aisling.SkillBook.Remove(client, (byte)idx);
                 client.LoadSkillBook();
 
                 client.SendForgetSkills(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
@@ -335,8 +334,7 @@ public class Dar : MundaneScript
                     client.CloseDialog();
                 }
 
-                client.Aisling.SpellBook.Remove(client, (byte)idx, true);
-                client.SendRemoveSpellFromPane((byte)idx);
+                client.Aisling.SpellBook.Remove(client, (byte)idx);
                 client.LoadSpellBook();
 
                 client.SendForgetSpells(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);

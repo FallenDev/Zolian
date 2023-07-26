@@ -33,7 +33,6 @@ using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
 using ServiceStack;
 
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
@@ -1138,7 +1137,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                     item.Stacks = (ushort)remaining;
                     localClient.SendRemoveItemFromPane(item.InventorySlot);
-                    localClient.Aisling.Inventory.Set(item);
+                    localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, value);
                     localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
                 }
             }
@@ -1835,6 +1834,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
         {
             var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
+            var original = item;
             if (item?.Template == null) return default;
 
             if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
@@ -1867,7 +1867,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (stack >= 1)
             {
                 localClient.SendRemoveItemFromPane(item.InventorySlot);
-                localClient.Aisling.Inventory.Set(item);
+                localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
                 localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
             }
             else

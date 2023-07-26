@@ -41,9 +41,7 @@ using Darkages.GameScripts.Formulas;
 using System.Collections.Concurrent;
 using Chaos.Common.Identity;
 using System.Globalization;
-using Darkages.Interfaces;
 using ServiceStack;
-using ServiceStack.Text.Common;
 
 namespace Darkages.Network.Client
 {
@@ -644,7 +642,7 @@ namespace Darkages.Network.Client
                 if (item.CanCarry(Aisling))
                 {
                     Aisling.CurrentWeight += item.Template.CarryWeight;
-                    Aisling.Inventory.Set(item);
+                    Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, null);
                     Aisling.Inventory.UpdateSlot(Aisling.Client, item);
                 }
 
@@ -964,7 +962,7 @@ namespace Darkages.Network.Client
 
                 Skill.AttachScript(skill);
                 {
-                    Aisling.SkillBook.Set(skill);
+                    Aisling.SkillBook.Set(skill.Slot, skill, null);
                 }
             }
 
@@ -991,7 +989,7 @@ namespace Darkages.Network.Client
 
                 Spell.AttachScript(spell);
                 {
-                    Aisling.SpellBook.Set(spell);
+                    Aisling.SpellBook.Set(spell.Slot, spell, null);
                 }
             }
         }
@@ -3482,9 +3480,6 @@ namespace Darkages.Network.Client
         private void ForgetSkillSend(Skill skill)
         {
             Aisling.SkillBook.Remove(this, skill.Slot);
-            {
-                SendRemoveSkillFromPane(skill.Slot);
-            }
         }
 
         public void ForgetSpell(string s)
@@ -3520,9 +3515,6 @@ namespace Darkages.Network.Client
         public void ForgetSpellSend(Spell spell)
         {
             Aisling.SpellBook.Remove(this, spell.Slot);
-            {
-                SendRemoveSpellFromPane(spell.Slot);
-            }
         }
 
         public void TrainSkill(Skill skill)

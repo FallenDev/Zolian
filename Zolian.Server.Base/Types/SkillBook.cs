@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Dapper;
 
 using Darkages.Database;
@@ -9,6 +10,7 @@ using Darkages.Templates;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+
 using ServiceStack;
 
 namespace Darkages.Types;
@@ -16,7 +18,7 @@ namespace Darkages.Types;
 public class SkillBook : ObjectManager
 {
     private const int SkillLength = 88;
-    private readonly int[] _invalidSlots = { 0, 36, 72, 89};
+    private readonly int[] _invalidSlots = { 0, 36, 72, 89 };
     public readonly ConcurrentDictionary<int, Skill> Skills = new();
 
     public SkillBook()
@@ -64,63 +66,71 @@ public class SkillBook : ObjectManager
 
     public bool Has(SkillTemplate s) => Skills.Where(i => i.Value?.Template != null).Select(i => i.Value.Template).FirstOrDefault(i => i.Name.Equals(s.Name)) != null;
 
-    public Skill Remove(WorldClient client, byte movingFrom, bool skillDelete = false)
+    public void Remove(WorldClient client, byte movingFrom)
     {
-        if (!Skills.ContainsKey(movingFrom)) return null;
+        if (!Skills.ContainsKey(movingFrom)) return;
         var copy = Skills[movingFrom];
-        if (skillDelete)
-        {
-            DeleteFromAislingDb(client, copy);
-        }
-
-        Skills[movingFrom] = null;
-        return copy;
+        if (Skills.TryUpdate(movingFrom, null, copy))
+            client.SendRemoveSkillFromPane(movingFrom);
+        DeleteFromAislingDb(client, copy);
     }
 
-    public void Set(Skill s) => Skills[s.Slot] = s;
-
-    public bool AttemptSwap(WorldClient client, byte item1, byte item2)
+    public void Set(byte slot, Skill newSkill, Skill oldSkill) => Skills.TryUpdate(slot, newSkill, oldSkill);
+    
+    public bool AttemptSwap(WorldClient client, byte fromSlot, byte toSlot)
     {
-        if (!IsValidSlot(item1) || !IsValidSlot(item2)) return false;
+        if (!IsValidSlot(fromSlot) || !IsValidSlot(toSlot)) return false;
+        if (fromSlot == toSlot) return true;
 
         // Swap to advanced pane
-        if (item2 == 35)
+        if (toSlot == 35)
         {
             var skillSlot = FindEmpty(36);
-            item2 = (byte)skillSlot;
+            toSlot = (byte)skillSlot;
         }
 
-        if (item2 == 71)
+        if (toSlot == 71)
         {
             var skillSlot = FindEmpty();
-            item2 = (byte)skillSlot;
+            toSlot = (byte)skillSlot;
         }
 
+        var skill1 = FindInSlot(fromSlot);
+        var skill2 = FindInSlot(toSlot);
 
-        lock (Skills)
+        if (skill1 != null)
+            client.SendRemoveSkillFromPane(skill1.Slot);
+        if (skill2 != null)
+            client.SendRemoveSkillFromPane(skill2.Slot);
+
+        if (skill1 != null && skill2 != null)
         {
-            var obj1 = FindInSlot(item1);
-            var obj2 = FindInSlot(item2);
-
-            if (obj1 != null)
-                client.SendRemoveSkillFromPane(obj1.Slot);
-            if (obj2 != null)
-                client.SendRemoveSkillFromPane(obj2.Slot);
-
-            if (obj1 != null)
-            {
-                obj1.Slot = item2;
-                Set(obj1);
-                client.SendAddSkillToPane(obj1);
-            }
-
-            if (obj2 == null) return true;
-            obj2.Slot = item1;
-            Set(obj2);
-            client.SendAddSkillToPane(obj2);
-
+            skill1.Slot = toSlot;
+            skill2.Slot = fromSlot;
+            Skills.TryUpdate(fromSlot, skill2, skill1);
+            Skills.TryUpdate(toSlot, skill1, skill2);
+            client.SendAddSkillToPane(skill1);
+            client.SendAddSkillToPane(skill2);
             return true;
         }
+
+        switch (skill1)
+        {
+            case null when skill2 != null:
+                skill2.Slot = fromSlot;
+                Skills.TryUpdate(fromSlot, skill2, null);
+                Skills.TryUpdate(toSlot, null, skill2);
+                client.SendAddSkillToPane(skill2);
+                return true;
+            case null:
+                return true;
+        }
+
+        skill1.Slot = toSlot;
+        Skills.TryUpdate(fromSlot, null, skill1);
+        Skills.TryUpdate(toSlot, skill1, null);
+        client.SendAddSkillToPane(skill1);
+        return true;
     }
 
     private static void DeleteFromAislingDb(WorldClient client, Skill skill)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
-using System.Net.Sockets;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
