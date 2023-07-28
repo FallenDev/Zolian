@@ -2988,10 +2988,10 @@ namespace Darkages.Network.Client
                 {
                     Class.Peasant => 0,
                     Class.Berserker => 1,
-                    Class.Assassin => 2,
-                    Class.Arcanus => 3,
+                    Class.Defender => 2,
+                    Class.Assassin => 3,
                     Class.Cleric => 4,
-                    Class.Defender => 5,
+                    Class.Arcanus => 5,
                     Class.Monk => 6,
                     _ => 0
                 };
@@ -3003,7 +3003,9 @@ namespace Darkages.Network.Client
                     IsMaster = aisling.Stage >= ClassStage.Master,
                     Name = aisling.Username,
                     SocialStatus = (SocialStatus)aisling.ActiveStatus,
-                    Title = aisling.ClanTitle
+                    Title = aisling.GameMaster
+                        ? "Game Master"
+                        : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}"
                 };
 
                 worldList.Add(arg);
