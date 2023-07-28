@@ -30,80 +30,81 @@ public class Banker : MundaneScript
     {
         base.TopMenu(client);
 
-        client.Aisling.Client.LoadBank();
-        Refresh(client);
+        //client.Aisling.Client.LoadBank();
+        //Refresh(client);
 
-        var options = new List<Dialog.OptionsDataItem>
-        {
-            new (0x11, "Deposit Item")
-        };
+        //var options = new List<Dialog.OptionsDataItem>
+        //{
+        //    new (0x11, "Deposit Item")
+        //};
 
-        if (client.Aisling.BankManager.Items.Count > 0)
-        {
-            options.Add(new Dialog.OptionsDataItem(0x06, "Withdraw Item"));
-        }
+        //if (client.Aisling.BankManager.Items.Count > 0)
+        //{
+        //    options.Add(new Dialog.OptionsDataItem(0x06, "Withdraw Item"));
+        //}
 
-        if (client.Aisling.GoldPoints > 0)
-        {
-            options.Add(new Dialog.OptionsDataItem(0x07, "Deposit Gold"));
-        }
+        //if (client.Aisling.GoldPoints > 0)
+        //{
+        //    options.Add(new Dialog.OptionsDataItem(0x07, "Deposit Gold"));
+        //}
 
-        if (client.Aisling.BankedGold > 0)
-        {
-            options.Add(new Dialog.OptionsDataItem(0x08, "Withdraw Gold"));
-        }
+        //if (client.Aisling.BankedGold > 0)
+        //{
+        //    options.Add(new Dialog.OptionsDataItem(0x08, "Withdraw Gold"));
+        //}
 
-        client.SendOptionsDialog(Mundane, "We'll take real good care of your possessions.", options.ToArray());
+        //client.SendOptionsDialog(Mundane, "We'll take real good care of your possessions.", options.ToArray());
+        client.SendOptionsDialog(Mundane, "Sorry, our location is currently closed.");
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
     {
-        if (item == null) return;
-        if (!item.Template.Flags.FlagIsSet(ItemFlags.Bankable))
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "This item cannot be banked.");
-            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "We can't accept that."));
-            return;
-        }
+        //if (item == null) return;
+        //if (!item.Template.Flags.FlagIsSet(ItemFlags.Bankable))
+        //{
+        //    client.SendServerMessage(ServerMessageType.ActiveMessage, "This item cannot be banked.");
+        //    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "We can't accept that."));
+        //    return;
+        //}
 
-        Refresh(client);
-        client.PendingBankedSession.InventorySlot = item.InventorySlot;
-        client.PendingBankedSession.SelectedItem = item;
+        //Refresh(client);
+        //client.PendingBankedSession.InventorySlot = item.InventorySlot;
+        //client.PendingBankedSession.SelectedItem = item;
 
-        // Calculates and stores the cost to bank the item
-        var cost = (uint)(client.PendingBankedSession.SelectedItem.Template.Value > 1000 ? client.PendingBankedSession.SelectedItem.Template.Value / 30 : 128);
-        client.PendingBankedSession.Cost = cost;
+        //// Calculates and stores the cost to bank the item
+        //var cost = (uint)(client.PendingBankedSession.SelectedItem.Template.Value > 1000 ? client.PendingBankedSession.SelectedItem.Template.Value / 30 : 128);
+        //client.PendingBankedSession.Cost = cost;
 
-        if (client.PendingBankedSession.SelectedItem.Template.CanStack && client.PendingBankedSession.SelectedItem.Stacks > 1)
-        {
-            client.SendTextInput(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\nCurrently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.");
-            // Sets that the player is now committing to a stacked deposit
-            client.PendingBankedSession.DepositStackedItem = true;
-        }
-        else
-        {
-            var options = new List<Dialog.OptionsDataItem>
-            {
-                new (0x0051, "Confirm"),
-                new (0x0052, "Cancel")
-            };
+        //if (client.PendingBankedSession.SelectedItem.Template.CanStack && client.PendingBankedSession.SelectedItem.Stacks > 1)
+        //{
+        //    client.SendTextInput(Mundane, $"How many {client.PendingBankedSession.SelectedItem.Template.Name} would you like to deposit?\nCurrently have: {{=q{client.PendingBankedSession.SelectedItem.Stacks}{{=a, in this stack.");
+        //    // Sets that the player is now committing to a stacked deposit
+        //    client.PendingBankedSession.DepositStackedItem = true;
+        //}
+        //else
+        //{
+        //    var options = new List<Dialog.OptionsDataItem>
+        //    {
+        //        new (0x0051, "Confirm"),
+        //        new (0x0052, "Cancel")
+        //    };
 
-            client.SendOptionsDialog(Mundane, $"I can hold {{=c{client.PendingBankedSession.SelectedItem.DisplayName}{{=a, But it'll cost you {{=q{client.PendingBankedSession.Cost}{{=a gold.", options.ToArray());
-        }
+        //    client.SendOptionsDialog(Mundane, $"I can hold {{=c{client.PendingBankedSession.SelectedItem.DisplayName}{{=a, But it'll cost you {{=q{client.PendingBankedSession.Cost}{{=a gold.", options.ToArray());
+        //}
     }
 
     public override void OnGoldDropped(WorldClient client, uint money)
     {
-        if (money >= 1)
-        {
-            Refresh(client);
-            client.PendingBankedSession.TempGold = money;
-            OnResponse(client, 0x02, null);
-        }
-        else
-        {
-            client.SendOptionsDialog(Mundane, "I'm sorry, where is it?");
-        }
+        //if (money >= 1)
+        //{
+        //    Refresh(client);
+        //    client.PendingBankedSession.TempGold = money;
+        //    OnResponse(client, 0x02, null);
+        //}
+        //else
+        //{
+        //    client.SendOptionsDialog(Mundane, "I'm sorry, where is it?");
+        //}
     }
 
     public override async void OnResponse(WorldClient client, ushort responseID, string args)
