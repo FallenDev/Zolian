@@ -2314,7 +2314,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var script = npc.Scripts.FirstOrDefault();
 
             // Step in 0x3A is "DialogId" perhaps that also needs to go here for step?
-            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?.ToString());
+            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
 
             return default;
         }
@@ -3000,45 +3000,44 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         base.IndexHandlers();
 
-        //ClientHandlers[(byte)ClientOpCode.] =
-        ClientHandlers[(byte)ClientOpCode.RequestMapData] = OnMapDataRequest;
-        ClientHandlers[(byte)ClientOpCode.ClientWalk] = OnClientWalk;
-        ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup;
-        ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped;
-        ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
-        ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore;
-        ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage;
-        ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell;
-        ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
-        ClientHandlers[(byte)ClientOpCode.Turn] = OnTurn;
-        ClientHandlers[(byte)ClientOpCode.SpaceBar] = OnSpacebar;
-        ClientHandlers[(byte)ClientOpCode.WorldListRequest] = OnWorldListRequest;
-        ClientHandlers[(byte)ClientOpCode.Whisper] = OnWhisper;
-        ClientHandlers[(byte)ClientOpCode.UserOptionToggle] = OnUserOptionToggle;
-        ClientHandlers[(byte)ClientOpCode.UseItem] = OnUseItem;
-        ClientHandlers[(byte)ClientOpCode.Emote] = OnEmote;
-        ClientHandlers[(byte)ClientOpCode.GoldDrop] = OnGoldDropped;
-        ClientHandlers[(byte)ClientOpCode.ItemDroppedOnCreature] = OnItemDroppedOnCreature;
-        ClientHandlers[(byte)ClientOpCode.GoldDroppedOnCreature] = OnGoldDroppedOnCreature;
-        ClientHandlers[(byte)ClientOpCode.RequestProfile] = OnProfileRequest;
-        ClientHandlers[(byte)ClientOpCode.GroupRequest] = OnGroupRequest;
-        ClientHandlers[(byte)ClientOpCode.ToggleGroup] = OnToggleGroup;
-        ClientHandlers[(byte)ClientOpCode.SwapSlot] = OnSwapSlot;
-        ClientHandlers[(byte)ClientOpCode.RequestRefresh] = OnRefreshRequest;
-        ClientHandlers[(byte)ClientOpCode.PursuitRequest] = OnPursuitRequest;
-        ClientHandlers[(byte)ClientOpCode.DialogResponse] = OnDialogResponse;
-        ClientHandlers[(byte)ClientOpCode.BoardRequest] = OnBoardRequest;
-        ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill;
-        ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick;
-        ClientHandlers[(byte)ClientOpCode.Click] = OnClick;
-        ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip;
-        ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat;
-        ClientHandlers[(byte)ClientOpCode.Exchange] = OnExchange;
-        ClientHandlers[(byte)ClientOpCode.BeginChant] = OnBeginChant;
-        ClientHandlers[(byte)ClientOpCode.Chant] = OnChant;
-        ClientHandlers[(byte)ClientOpCode.Profile] = OnProfile;
-        ClientHandlers[(byte)ClientOpCode.SocialStatus] = OnSocialStatus;
-        ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest;
+        ClientHandlers[(byte)ClientOpCode.RequestMapData] = OnMapDataRequest; // 0x05
+        ClientHandlers[(byte)ClientOpCode.ClientWalk] = OnClientWalk; // 0x06
+        ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup; // 0x07
+        ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped; // 0x08
+        ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest; // 0x0B
+        ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore; // 0x0D
+        ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage; // 0x0E
+        ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell; // 0x0F
+        ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected; // 0x10
+        ClientHandlers[(byte)ClientOpCode.Turn] = OnTurn; // 0x11
+        ClientHandlers[(byte)ClientOpCode.SpaceBar] = OnSpacebar; // 0x13
+        ClientHandlers[(byte)ClientOpCode.WorldListRequest] = OnWorldListRequest; // 0x18
+        ClientHandlers[(byte)ClientOpCode.Whisper] = OnWhisper; // 0x19
+        ClientHandlers[(byte)ClientOpCode.UserOptionToggle] = OnUserOptionToggle; // 0x1B
+        ClientHandlers[(byte)ClientOpCode.UseItem] = OnUseItem; // 0x1C
+        ClientHandlers[(byte)ClientOpCode.Emote] = OnEmote; // 0x1D
+        ClientHandlers[(byte)ClientOpCode.GoldDrop] = OnGoldDropped; // 0x24
+        ClientHandlers[(byte)ClientOpCode.ItemDroppedOnCreature] = OnItemDroppedOnCreature; // 0x29
+        ClientHandlers[(byte)ClientOpCode.GoldDroppedOnCreature] = OnGoldDroppedOnCreature; // 0x2A
+        ClientHandlers[(byte)ClientOpCode.RequestProfile] = OnProfileRequest; // 0x2D
+        ClientHandlers[(byte)ClientOpCode.GroupRequest] = OnGroupRequest; // 0x2E
+        ClientHandlers[(byte)ClientOpCode.ToggleGroup] = OnToggleGroup; // 0x2F
+        ClientHandlers[(byte)ClientOpCode.SwapSlot] = OnSwapSlot; // 0x30
+        ClientHandlers[(byte)ClientOpCode.RequestRefresh] = OnRefreshRequest; // 0x38
+        ClientHandlers[(byte)ClientOpCode.PursuitRequest] = OnPursuitRequest; // 0x39
+        ClientHandlers[(byte)ClientOpCode.DialogResponse] = OnDialogResponse; // 0x3A
+        ClientHandlers[(byte)ClientOpCode.BoardRequest] = OnBoardRequest; // 0x3B
+        ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
+        ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
+        ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
+        ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
+        ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47
+        ClientHandlers[(byte)ClientOpCode.Exchange] = OnExchange; // 0x4A
+        ClientHandlers[(byte)ClientOpCode.BeginChant] = OnBeginChant; // 0x4D
+        ClientHandlers[(byte)ClientOpCode.Chant] = OnChant; // 0x4E
+        ClientHandlers[(byte)ClientOpCode.Profile] = OnProfile; // 0x4F
+        ClientHandlers[(byte)ClientOpCode.SocialStatus] = OnSocialStatus; // 0x79
+        ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest; // 0x7B
     }
 
     protected override void OnConnection(IAsyncResult ar)
@@ -3102,7 +3101,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private bool IsManualAction(ClientOpCode opCode) => opCode switch
+    private static bool IsManualAction(ClientOpCode opCode) => opCode switch
     {
         ClientOpCode.ClientWalk => true,
         ClientOpCode.Pickup => true,
