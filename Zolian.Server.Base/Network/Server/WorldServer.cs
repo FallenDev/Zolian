@@ -2354,7 +2354,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 //}
 
                 var script = npc.Scripts.FirstOrDefault();
-                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?.ToArray())?.ToString());
+                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?[0]));
                 return default;
             }
 

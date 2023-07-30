@@ -70,7 +70,6 @@ public interface IWorldClient : ISocketClient
     void SendCooldown(bool skill, byte slot, int cooldownSeconds);
     void SendCreatureTurn(uint id, Direction direction);
     void SendCreatureWalk(uint id, Point startPoint, Direction direction);
-    void SendDialog(Dialog dialog);
     void SendDisplayAisling(Aisling aisling);
     //void SendDoors(IEnumerable<Door> doors);
     void SendEffect(EffectColor effectColor, byte effectIcon);

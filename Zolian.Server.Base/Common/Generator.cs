@@ -5,27 +5,11 @@ namespace Darkages.Common;
 
 public static class Generator
 {
-    private static readonly List<int> GeneratedNumbers;
     private static readonly List<string> GeneratedStrings;
 
     static Generator()
     {
-        GeneratedNumbers = new List<int>();
         GeneratedStrings = new List<string>();
-    }
-
-    public static int GenerateNumber()
-    {
-        int id;
-
-        do
-        {
-            id = RandomNumberGenerator.GetInt32(int.MaxValue);
-        } while (GeneratedNumbers.Contains(id));
-
-        GeneratedNumbers.Add(id);
-
-        return id;
     }
 
     public static string GenerateString(int size)

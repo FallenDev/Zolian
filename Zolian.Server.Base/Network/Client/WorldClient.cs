@@ -1427,23 +1427,6 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x2F - Send Dialog
-        /// </summary>
-        public void SendDialog(Dialog dialog)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 0x2F - Send Dialog
-        /// </summary>
-        public void SendDialog(DialogArgs dialog)
-        {
-            if (dialog == null) return;
-            Send(dialog);
-        }
-
-        /// <summary>
         /// 0x33 - Display Player
         /// </summary>
         public void SendDisplayAisling(Aisling aisling)
