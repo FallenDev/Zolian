@@ -2358,34 +2358,34 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            var result = (DialogResult)localArgs.DialogId;
+            //var result = (DialogResult)localArgs.DialogId;
 
-            if (localArgs.PursuitId == ushort.MaxValue)
-            {
-                if (localClient.Aisling.ActiveReactor?.Decorators == null) return default;
+            //if (localArgs.PursuitId == ushort.MaxValue)
+            //{
+            //    if (localClient.Aisling.ActiveReactor?.Decorators == null) return default;
 
-                switch (result)
-                {
-                    case DialogResult.Previous:
-                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-                            script.OnBack(localClient.Aisling);
-                        break;
-                    case DialogResult.Next:
-                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-                            script.OnNext(localClient.Aisling);
-                        break;
-                    case DialogResult.Close:
-                        foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-                            script.OnClose(localClient.Aisling);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            else
-            {
-                localClient.DlgSession?.Callback?.Invoke(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args.ToString());
-            }
+            //    switch (result)
+            //    {
+            //        case DialogResult.Previous:
+            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+            //                script.OnBack(localClient.Aisling);
+            //            break;
+            //        case DialogResult.Next:
+            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+            //                script.OnNext(localClient.Aisling);
+            //            break;
+            //        case DialogResult.Close:
+            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
+            //                script.OnClose(localClient.Aisling);
+            //            break;
+            //        default:
+            //            throw new ArgumentOutOfRangeException();
+            //    }
+            //}
+            //else
+            //{
+            //    localClient.DlgSession?.Callback?.Invoke(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args.ToString());
+            //}
 
             return default;
         }
