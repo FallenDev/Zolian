@@ -95,6 +95,21 @@ public static class ItemQualityVariance
         };
     }
 
+    public static Item.Quality DetermineHighQuality()
+    {
+        var qualityGen = Generator.RandomNumPercentGen();
+
+        return qualityGen switch
+        {
+            >= 0 and <= .20 => Item.Quality.Rare,
+            > .77 and <= .89 => Item.Quality.Epic,
+            > .89 and <= .99 => Item.Quality.Legendary,
+            > .99 and <= .991 => Item.Quality.Forsaken,
+            > .991 and <= 1 => Item.Quality.Mythic,
+            _ => Item.Quality.Rare
+        };
+    }
+
     public static Item.Variance DetermineVariance() => Generator.RandomEnumValue<Item.Variance>();
 
     public static Item.WeaponVariance DetermineWeaponVariance()

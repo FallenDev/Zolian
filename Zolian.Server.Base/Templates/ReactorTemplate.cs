@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Chaos.Common.Identity;
+
 using Darkages.Common;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -10,13 +12,13 @@ namespace Darkages.Templates;
 
 public class ReactorTemplate : Template
 {
-    public readonly int Id;
+    public readonly uint Id;
 
     public List<DialogSequence> Sequences = new();
 
     public ReactorTemplate()
     {
-        Id = Generator.GenerateNumber();
+        Id = EphemeralRandomIdGenerator<uint>.Shared.NextId;
     }
 
     public string CallBackScriptKey { get; set; }

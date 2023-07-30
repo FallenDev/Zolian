@@ -254,6 +254,7 @@ namespace Darkages.Network.Client
         private void ShowAggro(TimeSpan elapsedTime)
         {
             if (!AggroTimer.Update(elapsedTime)) return;
+            Aisling.ThreatTimer = Aisling.Camouflage ? new WorldServerTimer(TimeSpan.FromSeconds(30)) : new WorldServerTimer(TimeSpan.FromSeconds(60));
             AggroTimer.Delay = elapsedTime + TimeSpan.FromSeconds(7);
 
             var color = "a";
@@ -266,6 +267,11 @@ namespace Darkages.Network.Client
                 if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
                 var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
                 aggro = (long)Math.Clamp(percent, 0, 100);
+            }
+            else
+            {
+                Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
+                return;
             }
 
             foreach (var key in AggroColors.Keys.Reverse())

@@ -150,7 +150,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             TileType = TileContent.Item;
         var readyTime = DateTime.UtcNow;
         _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
-
         Amplified = 0;
         Target = null;
         Buffs = new ConcurrentDictionary<string, Buff>();
@@ -1595,20 +1594,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             time = aisling.ThreatTimer.Update(elapsedTime);
         }
 
-
-        if (aisling.Camouflage)
-        {
-            aisling.ThreatTimer.Delay = elapsedTime + TimeSpan.FromSeconds(30);
-        }
-        else
-        {
-            aisling.ThreatTimer.Delay = elapsedTime + TimeSpan.FromSeconds(60);
-        }
-
-        if (time)
-        {
-            aisling.ThreatMeter = 0;
-        }
+        if (!time) return;
+        aisling.ThreatMeter = 0;
+        aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
     }
 
     public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)

@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Sprites;
@@ -8,6 +7,7 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Extensions.Logging;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Systems;
 
@@ -30,9 +30,9 @@ public static class Commander
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Teleport")
-            .AddAlias("map")
+            .AddAlias("t")
             .SetAction(OnTeleport)
-            .AddArgument(Argument.Create("map"))
+            .AddArgument(Argument.Create("t"))
             .AddArgument(Argument.Create("x"))
             .AddArgument(Argument.Create("y"))
         );
@@ -49,6 +49,14 @@ public static class Commander
             .AddAlias("p")
             .SetAction(OnPortToPlayer)
             .AddArgument(Argument.Create("who"))
+        );
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Sex Change")
+            .AddAlias("sex")
+            .SetAction(OnSexChange)
+            .AddArgument(Argument.Create("who"))
+            .AddArgument(Argument.Create("s"))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
@@ -98,10 +106,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Spell- on character: {client.Aisling.Username}");
-
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Spell- on character: {client.Aisling.Username}");
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
@@ -126,10 +131,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Skill- on character: {client.Aisling.Username}");
-
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Skill- on character: {client.Aisling.Username}");
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
@@ -153,20 +155,12 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-
         var who = args.FromName("who").Replace("\"", "");
-
         if (string.IsNullOrEmpty(who)) return;
-
         var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i =>
-            i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-
-        //summon player to my map and position.
+        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
         player?.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
     }
 
     /// <summary>
@@ -175,45 +169,45 @@ public static class Commander
     private static void OnPortToPlayer(Argument[] args, object arg)
     {
         var client = (WorldClient)arg;
-
         if (client == null) return;
         var who = args.FromName("who").Replace("\"", "");
-
-        if (string.IsNullOrEmpty(who))
-            return;
-
+        if (string.IsNullOrEmpty(who)) return;
         var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i =>
-            i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-
-        //summon myself to players area and position.
-        if (player != null)
-            client.TransitionToMap(player.Map, player.Position);
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
+        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        if (player != null) client.TransitionToMap(player.Map, player.Position);
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
     }
 
     /// <summary>
-    /// InGame Usage : /tp "Abel Dungeon 2-1" 35 36
+    /// InGame Usage : /sex "playerName" 1 
+    /// </summary>
+    private static void OnSexChange(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var who = args.FromName("who").Replace("\"", "");
+        if (!int.TryParse(args.FromName("s"), out var sResult)) return;
+        if (string.IsNullOrEmpty(who)) return;
+        var players = ServerSetup.Instance.Game.Aislings;
+        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        if (player != null) player.Gender = (Gender)sResult;
+        client.ClientRefreshed();
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
+    }
+
+    /// <summary>
+    /// InGame Usage : /t "Abel Dungeon 2-1" 35 36
     /// </summary>
     private static void OnTeleport(Argument[] args, object arg)
     {
         var client = (WorldClient)arg;
-
         if (client == null) return;
-        var mapName = args.FromName("map").Replace("\"", "");
-
-        if (!int.TryParse(args.FromName("x"), out var x) ||
-            !int.TryParse(args.FromName("y"), out var y)) return;
-
+        var mapName = args.FromName("t").Replace("\"", "");
+        if (!int.TryParse(args.FromName("x"), out var x) || !int.TryParse(args.FromName("y"), out var y)) return;
         var (_, area) = ServerSetup.Instance.GlobalMapCache.FirstOrDefault(i => i.Value.Name == mapName);
-
         if (area == null) return;
         client.TransitionToMap(area, new Position(x, y));
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Port- on character: {client.Aisling.Username}");
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
     }
 
     /// <summary>
@@ -225,9 +219,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        var ip = client.Socket.RemoteEndPoint as IPEndPoint;
-
-        Analytics.TrackEvent($"{ip!.Address} used GM Command -Item Create- on character: {client.Aisling.Username}");
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Item Create- on character: {client.Aisling.Username}");
 
         var name = args.FromName("item").Replace("\"", "");
         if (!int.TryParse(args.FromName("amount"), out var quantity)) return;
@@ -260,7 +252,7 @@ public static class Commander
         {
             for (var i = 0; i < quantity; i++)
             {
-                var quality = ItemQualityVariance.DetermineQuality();
+                var quality = ItemQualityVariance.DetermineHighQuality();
                 var variance = ItemQualityVariance.DetermineVariance();
                 var wVariance = ItemQualityVariance.DetermineWeaponVariance();
                 var item = new Item();
@@ -315,6 +307,5 @@ public static class Commander
 
     public static void ParseChatMessage(WorldClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
 
-    private static void OnParseError(object obj, string command) =>
-        ServerSetup.Logger($"[Chat Parser] Error: {command}");
+    private static void OnParseError(object obj, string command) => ServerSetup.Logger($"[Chat Parser] Error: {command}");
 }

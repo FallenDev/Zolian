@@ -367,18 +367,9 @@ public sealed class Aisling : Player, IAisling
         };
 
         SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed));
-
-        switch (target)
-        {
-            case null:
-                return this;
-            case Aisling:
-                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Username} Attacks you with {spell.Template.Name}.");
-                break;
-        }
-
-        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.Animation, target.Serial, 100, 0, Serial, new Position(target.Pos.X, target.Pos.Y)));
+        
+        if (target is Aisling aisling)
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Username} Attacks you with {spell.Template.Name}.");
 
         return this;
     }
