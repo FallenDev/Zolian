@@ -7,7 +7,6 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
-using Darkages.Templates;
 using Darkages.Types;
 
 namespace Darkages.Interfaces;

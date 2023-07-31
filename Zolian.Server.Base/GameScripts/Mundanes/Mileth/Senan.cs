@@ -29,7 +29,7 @@ public class Senan : MundaneScript
 
         switch (client.Aisling.QuestManager.CryptTerror)
         {
-            case false when (client.Aisling.Level >= 20 && client.Aisling.Level <= 40):
+            case false when (client.Aisling.Level >= 20):
                 options.Add(new(0x06, "{=qTerror of the Crypt"));
                 break;
             case true when (!client.Aisling.QuestManager.CryptTerrorSlayed):
@@ -98,9 +98,9 @@ public class Senan : MundaneScript
                 case 0x04:
                     {
                         var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x05, "Thank you.")
-                    };
+                        {
+                            new (0x05, "Thank you.")
+                        };
 
                         client.SendOptionsDialog(Mundane, $"Wow, I never thought I'd meet someone so generous.\n *mutters a moment*; I have something for you.   Hic!", options.ToArray());
                     }
@@ -117,10 +117,10 @@ public class Senan : MundaneScript
                 case 0x06:
                     {
                         var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x07, "I'll go."),
-                        new (0x02, "No time for this.")
-                    };
+                        {
+                            new (0x07, "I'll go."),
+                            new (0x02, "No time for this.")
+                        };
 
                         client.SendOptionsDialog(Mundane, $"The crypt is usually where I sleep, recently something has been terrifying me. Can you have a look?", options.ToArray());
                     }

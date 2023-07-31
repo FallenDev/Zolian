@@ -63,8 +63,8 @@ public static class NpcShopExtensions
             var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
             var opts = new List<Dialog.OptionsDataItem>
             {
-                new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
+                new(0x19, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
             };
 
             client.SendOptionsDialog(mundane, $"It will cost you a total of {cost} coins for {{=c1 {{=q{itemName}s{{=a. Is that a deal?", opts.ToArray());
@@ -85,8 +85,8 @@ public static class NpcShopExtensions
         var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
         var opts = new List<Dialog.OptionsDataItem>
         {
-            new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
-            new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
+            new(0x19, ServerSetup.Instance.Config.MerchantConfirmMessage),
+            new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
         };
 
         client.SendOptionsDialog(mundane, $"It will cost you a total of {cost} coins for {{=c{amount} {{=q{itemName}s{{=a. Is that a deal?", opts.ToArray());
@@ -180,8 +180,8 @@ public static class NpcShopExtensions
 
             var opts2 = new List<Dialog.OptionsDataItem>
             {
-                new(0x0030, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
+                new(0x30, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
             };
 
             client.SendOptionsDialog(mundane,
@@ -262,8 +262,8 @@ public static class NpcShopExtensions
 
             var opts2 = new List<Dialog.OptionsDataItem>
             {
-                new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
+                new(0x19, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
             };
 
             client.SendOptionsDialog(mundane,
@@ -303,10 +303,9 @@ public static class NpcShopExtensions
 
         return qualityGen switch
         {
-            >= 0 and <= .20 => Item.Quality.Common,
-            > .20 and <= .75 => Item.Quality.Uncommon,
-            > .75 and <= .90 => Item.Quality.Rare,
-            > .90 and <= 1 => Item.Quality.Epic,
+            >= 0 and <= .75 => Item.Quality.Uncommon,
+            > .75 and <= .99 => Item.Quality.Rare,
+            > .99 and <= 1 => Item.Quality.Epic,
             _ => Item.Quality.Damaged
         };
     }
@@ -321,8 +320,7 @@ public static class NpcShopExtensions
 
         return qualityGen switch
         {
-            >= 0 and <= .50 => Item.Quality.Uncommon,
-            > .50 and <= .88 => Item.Quality.Rare,
+            >= 0 and <= .88 => Item.Quality.Rare,
             > .88 and <= .98 => Item.Quality.Epic,
             > .98 and <= .9975 => Item.Quality.Legendary,
             > .9975 and <= 1 => Item.Quality.Forsaken,

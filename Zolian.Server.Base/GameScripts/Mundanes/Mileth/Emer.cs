@@ -1,7 +1,8 @@
 ﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
-using Darkages.Models;
+using Darkages.Enums;
+using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -27,7 +28,8 @@ public class Emer : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>
         {
-            new (0x01, "Buy")
+            new (0x02, "Buy"),
+            new (0x03, "Sell")
         };
 
         switch (client.Aisling.QuestManager.KillerBee)
@@ -36,13 +38,13 @@ public class Emer : MundaneScript
                 {
                     if (client.Aisling.Level >= 11 || client.Aisling.GameMaster)
                     {
-                        options.Add(new Dialog.OptionsDataItem(0x03, "Killer Bee Jam"));
+                        options.Add(new Dialog.OptionsDataItem(0x04, "Killer Bee Jam"));
                     }
 
                     break;
                 }
             case true:
-                options.Add(new Dialog.OptionsDataItem(0x06, "Here's the corpse"));
+                options.Add(new Dialog.OptionsDataItem(0x07, "Here's the corpse"));
                 break;
         }
 
@@ -55,185 +57,76 @@ public class Emer : MundaneScript
 
         switch (responseID)
         {
-            #region Buy
-            case 0x01:
-                client.SendItemShopDialog(Mundane, "Bon Appetite.", 0x02, NpcShopExtensions.BuyFromStoreInventory(Mundane));
-                break;
-            case 0x0000:
+            case 0x00:
                 {
                     if (string.IsNullOrEmpty(args)) return;
+                    var itemOrSlot = ushort.TryParse(args, out var slot);
 
-                    var itemOrSlot = ushort.TryParse(args, out var amountOrSlot);
-
-                    if (!itemOrSlot)
+                    switch (itemOrSlot)
                     {
-                        // ToDo: Add in reactor to buy multiple if a stackable item
-                        amountOrSlot = 1;
-
-                        ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(args, out var itemTemplate);
-                        if (itemTemplate == null)
-                        {
-                            client.SendOptionsDialog(Mundane, "I'm sorry, freshly sold out.");
-                            return;
-                        }
-
-                        client.PendingBuySessions = new PendingBuy
-                        {
-                            Name = itemTemplate.Name,
-                            Offer = (int)itemTemplate.Value,
-                            Quantity = 1
-                        };
-
-                        var itemName = client.PendingBuySessions.Name;
-
-                        if (itemName != null)
-                        {
-                            var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                            var opts = new List<Dialog.OptionsDataItem>
-                            {
-                                new(0x0019, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                                new(0x0020, ServerSetup.Instance.Config.MerchantCancelMessage)
-                            };
-                            client.SendOptionsDialog(Mundane, $"It will cost you a total of {cost} coins for {{=c{amountOrSlot} {{=q{itemName}s{{=a. Is that a deal?", opts.ToArray());
-                        }
+                        // Buying
+                        case false:
+                            NpcShopExtensions.BuyItemFromInventory(client, Mundane, args);
+                            break;
+                        // Selling
+                        case true when slot > 0:
+                            NpcShopExtensions.SellItemFromInventory(client, Mundane, args);
+                            break;
                     }
                 }
                 break;
-            case 0x0019:
+            case 0x01: // Follows Sequence to buy a stacked item from the vendor
+                var containsInt = ushort.TryParse(args, out var amount);
+                if (containsInt)
                 {
+                    if (client.PendingBuySessions == null && client.PendingItemSessions == null)
+                    {
+                        client.SendOptionsDialog(Mundane, "We just ran out.");
+                        return;
+                    }
+
                     if (client.PendingBuySessions != null)
                     {
-                        var quantity = client.PendingBuySessions.Quantity;
-                        var item = client.PendingBuySessions.Name;
-                        var cost = client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity;
-                        if (client.Aisling.GoldPoints >= cost)
-                        {
-                            client.Aisling.GoldPoints -= Convert.ToUInt32(cost);
-                            client.GiveQuantity(client.Aisling, item, quantity);
-                            client.SendAttributes(StatUpdateType.Full);
-                            client.PendingBuySessions = null;
-                            client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantTradeCompletedMessage);
-                        }
-                        else
-                        {
-                            client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                            client.PendingBuySessions = null;
-                        }
+                        client.PendingBuySessions.Quantity = amount;
+                        NpcShopExtensions.BuyStackedItemFromInventory(client, Mundane);
                     }
-                    else
+
+                    if (client.PendingItemSessions != null)
                     {
-                        var v = args;
-                        var item = client.Aisling.Inventory.Get(i => i != null && i.Template.Name == v)
-                            .FirstOrDefault();
-
-                        if (item == null)
-                            return;
-
-                        var offer = Convert.ToString((int)(item.Template.Value / 2));
-
-                        if (Convert.ToUInt32(offer) <= 0)
-                            return;
-
-                        if (Convert.ToUInt32(offer) > item.Template.Value)
-                            return;
-
-                        if (client.Aisling.GoldPoints + Convert.ToUInt32(offer) <=
-                            ServerSetup.Instance.Config.MaxCarryGold)
-                        {
-                            client.Aisling.GoldPoints += Convert.ToUInt32(offer);
-                            client.Aisling.Inventory.RemoveFromInventory(client, item);
-                            client.SendAttributes(StatUpdateType.WeightGold);
-
-                            client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantTradeCompletedMessage);
-                        }
+                        client.PendingItemSessions.Quantity = amount;
+                        NpcShopExtensions.SellStackedItemFromInventory(client, Mundane);
                     }
                 }
                 break;
-            case 0x0020:
-                {
-                    client.PendingItemSessions = null;
-                    client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
-                }
+            case 0x02:
+                client.SendItemShopDialog(Mundane, "Bon Appetite.", 0x02, NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
-            case 0x0002:
-                {
-                    if (string.IsNullOrEmpty(args)) return;
-                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(args)) return;
-
-                    var template = ServerSetup.Instance.GlobalItemTemplateCache[args];
-                    switch (template.CanStack)
-                    {
-                        case true:
-                            client.PendingBuySessions = new PendingBuy
-                            {
-                                Name = template.Name,
-                                Quantity = 0,
-                                Offer = (int)template.Value,
-                            };
-                            client.SendTextInput(Mundane, $"How many {template.Name} would you like to purchase?");
-                            break;
-                        case false when client.Aisling.GoldPoints >= template.Value:
-                            {
-                                var item = new Item();
-                                item = item.Create(client.Aisling, template, Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-                                if (item.GiveTo(client.Aisling))
-                                {
-                                    client.Aisling.GoldPoints -= template.Value;
-
-                                    client.SendAttributes(StatUpdateType.WeightGold);
-                                    client.SendOptionsDialog(Mundane, $"You've purchased: {{=c{args}");
-                                }
-                                else
-                                {
-                                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Yeah right, You can't even physically hold it.");
-                                }
-
-                                break;
-                            }
-                        case false:
-                            {
-                                if (ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey("Beag Cradh"))
-                                {
-                                    var scripts = ScriptManager.Load<SpellScript>("Beag Cradh",
-                                        Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache["Beag Cradh"]));
-                                    {
-                                        foreach (var script in scripts.Values)
-                                            script.OnUse(Mundane, client.Aisling);
-                                    }
-                                    client.SendOptionsDialog(Mundane, "Are you trying to rip me off?!");
-                                }
-
-                                break;
-                            }
-                    }
-                }
-
-                break;
-            #endregion
             case 0x03:
+                client.SendItemSellDialog(Mundane, "What do you want to sell?", NpcShopExtensions.GetCharacterSellInventoryByteList(client));
+                break;
+            case 0x04:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x04, "I'll take care of them."),
-                    new (0x05, "Sorry, I'm busy.")
-                };
+                    {
+                        new (0x05, "I'll take care of them."),
+                        new (0x06, "Sorry, I'm busy.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"Killer bees in the Eastern Woodlands have been causing our town some issues. Please go to \n{{=qPath 2 {{=a and bring me back a {{=vKiller Bee's Corpse{{=a.", options.ToArray());
                 }
                 break;
-            case 0x04:
+            case 0x05:
                 {
                     client.SendOptionsDialog(Mundane, "Thank you, it'll sure make some wicked jam.");
                     client.Aisling.QuestManager.KillerBee = true;
                     break;
                 }
-            case 0x05:
+            case 0x06:
                 {
                     client.SendOptionsDialog(Mundane, "Well someone has to do something..");
                     break;
                 }
-            case 0x06:
+            case 0x07:
                 {
                     if (client.Aisling.HasItem("Killer Bee Corpse"))
                     {
@@ -254,6 +147,95 @@ public class Emer : MundaneScript
 
                     break;
                 }
+            case 0x19:
+                {
+                    if (client.PendingBuySessions != null)
+                    {
+                        var quantity = client.PendingBuySessions.Quantity;
+                        var item = client.PendingBuySessions.Name;
+                        var cost = (uint)(client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity);
+                        if (client.Aisling.GoldPoints >= cost)
+                        {
+                            client.Aisling.GoldPoints -= cost;
+                            if (client.PendingBuySessions.Quantity > 1)
+                                client.GiveQuantity(client.Aisling, item, quantity);
+                            else
+                            {
+                                var itemCreated = new Item();
+                                var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
+                                itemCreated = itemCreated.Create(client.Aisling, template,
+                                    NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(),
+                                    ItemQualityVariance.DetermineWeaponVariance());
+                                itemCreated.GiveTo(client.Aisling);
+                            }
+                            client.SendAttributes(StatUpdateType.Primary);
+                            client.SendAttributes(StatUpdateType.ExpGold);
+                            client.PendingBuySessions = null;
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
+                            TopMenu(client);
+                        }
+                        else
+                        {
+                            client.SendOptionsDialog(Mundane, "Well? Where is it?");
+                            client.PendingBuySessions = null;
+                        }
+                    }
+
+                    if (client.PendingItemSessions != null)
+                    {
+                        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).First();
+
+                        if (item == null) return;
+
+                        var offer = item.Template.Value / 2;
+
+                        if (offer <= 0) return;
+                        if (offer > item.Template.Value) return;
+
+                        if (client.Aisling.GoldPoints + offer <= ServerSetup.Instance.Config.MaxCarryGold)
+                        {
+                            client.Aisling.GoldPoints += offer;
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
+                            client.SendAttributes(StatUpdateType.Primary);
+                            client.SendAttributes(StatUpdateType.ExpGold);
+                            client.PendingItemSessions = null;
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you!");
+                            TopMenu(client);
+                        }
+                    }
+                }
+                break;
+            case 0x20:
+                {
+                    client.PendingItemSessions = null;
+                    client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
+                }
+                break;
+            case 0x30:
+                {
+                    if (client.PendingItemSessions != null)
+                    {
+                        NpcShopExtensions.CompletePendingItemSell(client, Mundane);
+                    }
+
+                    TopMenu(client);
+                }
+                break;
+            case 0x500:
+                {
+                    NpcShopExtensions.SellItemDroppedFromInventory(client, Mundane, args);
+                }
+                break;
+        }
+    }
+
+    public override void OnItemDropped(WorldClient client, Item item)
+    {
+        if (client == null) return;
+        if (item == null) return;
+        if (item.Template.Flags.FlagIsSet(ItemFlags.Sellable))
+        {
+            OnResponse(client, 0x500, item.InventorySlot.ToString());
         }
     }
 }

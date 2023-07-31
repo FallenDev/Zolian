@@ -50,22 +50,22 @@ public class InnerHost : MundaneScript
 
         switch (responseID)
         {
-            case 1:
+            case 0x01:
                 {
                     var rand = Generator.RandNumGen100();
 
                     switch (rand)
                     {
-                        case >= 0 and <= 24:
+                        case <= 24:
                             client.WarpTo(new Position(4, 4), false);
                             break;
-                        case >= 25 and <= 49:
+                        case <= 49:
                             client.WarpTo(new Position(2, 6), false);
                             break;
-                        case >= 50 and <= 74:
+                        case <= 74:
                             client.WarpTo(new Position(6, 2), false);
                             break;
-                        case >= 75 and <= 100:
+                        case <= 100:
                             client.WarpTo(new Position(2, 2), false);
                             break;
                         default:
@@ -78,22 +78,22 @@ public class InnerHost : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
                     break;
                 }
-            case 2:
+            case 0x02:
                 {
                     var rand = Generator.RandNumGen100();
 
                     switch (rand)
                     {
-                        case >= 0 and <= 24:
+                        case <= 24:
                             client.WarpTo(new Position(51, 4), false);
                             break;
-                        case >= 25 and <= 49:
+                        case <= 49:
                             client.WarpTo(new Position(49, 2), false);
                             break;
-                        case >= 50 and <= 74:
+                        case <= 74:
                             client.WarpTo(new Position(53, 6), false);
                             break;
-                        case >= 75 and <= 100:
+                        case <= 100:
                             client.WarpTo(new Position(53, 2), false);
                             break;
                         default:
@@ -106,22 +106,22 @@ public class InnerHost : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
                     break;
                 }
-            case 3:
+            case 0x03:
                 {
                     var rand = Generator.RandNumGen100();
 
                     switch (rand)
                     {
-                        case >= 0 and <= 24:
+                        case <= 24:
                             client.WarpTo(new Position(51, 51), false);
                             break;
-                        case >= 25 and <= 49:
+                        case <= 49:
                             client.WarpTo(new Position(49, 53), false);
                             break;
-                        case >= 50 and <= 74:
+                        case <= 74:
                             client.WarpTo(new Position(53, 49), false);
                             break;
-                        case >= 75 and <= 100:
+                        case <= 100:
                             client.WarpTo(new Position(53, 53), false);
                             break;
                         default:
@@ -134,22 +134,22 @@ public class InnerHost : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
                     break;
                 }
-            case 4:
+            case 0x04:
                 {
                     var rand = Generator.RandNumGen100();
 
                     switch (rand)
                     {
-                        case >= 0 and <= 24:
+                        case <= 24:
                             client.WarpTo(new Position(4, 51), false);
                             break;
-                        case >= 25 and <= 49:
+                        case <= 49:
                             client.WarpTo(new Position(2, 53), false);
                             break;
-                        case >= 50 and <= 74:
+                        case <= 74:
                             client.WarpTo(new Position(2, 49), false);
                             break;
-                        case >= 75 and <= 100:
+                        case <= 100:
                             client.WarpTo(new Position(6, 53), false);
                             break;
                         default:
@@ -162,27 +162,27 @@ public class InnerHost : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
                     break;
                 }
-            case 5:
+            case 0x05:
                 {
                     client.CloseDialog();
                     break;
                 }
-            case 6:
+            case 0x06:
                 {
                     client.TransitionToMap(5232, new Position(3, 7));
                     client.CloseDialog();
                     client.SendAnimation(262, client.Aisling.Serial);
                     break;
                 }
-            case 9:
+            case 0x09:
                 {
                     _repairSum = NpcShopExtensions.GetRepairCosts(client);
 
                     var optsRepair = new List<Dialog.OptionsDataItem>
-                {
-                    new(20, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                    new(21, ServerSetup.Instance.Config.MerchantCancelMessage)
-                };
+                    {
+                        new(0x14, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                        new(0x15, ServerSetup.Instance.Config.MerchantCancelMessage)
+                    };
 
                     if (_repairSum == 0)
                     {
@@ -197,7 +197,7 @@ public class InnerHost : MundaneScript
 
                     break;
                 }
-            case 20:
+            case 0x14:
                 {
                     if (client.Aisling.GoldPoints >= Convert.ToUInt32(_repairSum))
                     {
@@ -212,12 +212,12 @@ public class InnerHost : MundaneScript
                     }
                     break;
                 }
-            case 21:
+            case 0x15:
                 {
                     client.SendOptionsDialog(Mundane, "Come back before anything breaks.");
                     break;
                 }
-            case 48:
+            case 0x30:
                 {
                     if (client.Aisling.IsDead())
                     {

@@ -2,6 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -31,9 +32,9 @@ public class ItemShop : MundaneScript
 
         var opts = new List<Dialog.OptionsDataItem>
         {
-            new (0x0002, "Buy"),
-            new (0x0003, "Sell"),
-            new (0x0004, "Repair all Items")
+            new (0x02, "Buy"),
+            new (0x03, "Sell"),
+            new (0x04, "Repair all Items")
         };
 
         client.SendOptionsDialog(Mundane, "Take a look, see what we have in stock.", opts.ToArray());
@@ -45,7 +46,7 @@ public class ItemShop : MundaneScript
 
         switch (responseID)
         {
-            case 0x0000:
+            case 0x00:
                 {
                     if (string.IsNullOrEmpty(args)) return;
                     var itemOrSlot = ushort.TryParse(args, out var slot);
@@ -63,7 +64,7 @@ public class ItemShop : MundaneScript
                     }
                 }
                 break;
-            case 0x0001: // Follows Sequence to buy a stacked item from the vendor
+            case 0x01: // Follows Sequence to buy a stacked item from the vendor
                 var containsInt = ushort.TryParse(args, out var amount);
                 if (containsInt)
                 {
@@ -86,20 +87,20 @@ public class ItemShop : MundaneScript
                     }
                 }
                 break;
-            case 0x0002:
+            case 0x02:
                 client.SendItemShopDialog(Mundane, "Here's what I have to offer.", NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
-            case 0x0003:
+            case 0x03:
                 client.SendItemSellDialog(Mundane, "What do you want to sell?", NpcShopExtensions.GetCharacterSellInventoryByteList(client));
                 break;
-            case 0x0004:
+            case 0x04:
                 {
                     _repairSum = NpcShopExtensions.GetRepairCosts(client);
 
                     var optsRepair = new List<Dialog.OptionsDataItem>
                     {
-                        new(0x0014, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                        new(0x0015, ServerSetup.Instance.Config.MerchantCancelMessage)
+                        new(0x14, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                        new(0x15, ServerSetup.Instance.Config.MerchantCancelMessage)
                     };
 
                     if (_repairSum == 0)
@@ -112,7 +113,7 @@ public class ItemShop : MundaneScript
                     }
                 }
                 break;
-            case 0x0014:
+            case 0x14:
                 {
                     if (client.Aisling.GoldPoints >= Convert.ToUInt32(_repairSum))
                     {
@@ -126,10 +127,10 @@ public class ItemShop : MundaneScript
                     }
                 }
                 break;
-            case 0x0015:
+            case 0x15:
                 client.SendOptionsDialog(Mundane, "Come back before anything breaks.");
                 break;
-            case 0x0019:
+            case 0x19:
                 {
                     if (client.PendingBuySessions != null)
                     {
@@ -139,7 +140,17 @@ public class ItemShop : MundaneScript
                         if (client.Aisling.GoldPoints >= cost)
                         {
                             client.Aisling.GoldPoints -= cost;
-                            client.GiveQuantity(client.Aisling, item, quantity);
+                            if (client.PendingBuySessions.Quantity > 1)
+                                client.GiveQuantity(client.Aisling, item, quantity);
+                            else
+                            {
+                                var itemCreated = new Item();
+                                var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
+                                itemCreated = itemCreated.Create(client.Aisling, template,
+                                    NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(),
+                                    ItemQualityVariance.DetermineWeaponVariance());
+                                itemCreated.GiveTo(client.Aisling);
+                            }
                             client.SendAttributes(StatUpdateType.Primary);
                             client.SendAttributes(StatUpdateType.ExpGold);
                             client.PendingBuySessions = null;
@@ -177,13 +188,13 @@ public class ItemShop : MundaneScript
                     }
                 }
                 break;
-            case 0x0020:
+            case 0x20:
                 {
                     client.PendingItemSessions = null;
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }
                 break;
-            case 0x0030:
+            case 0x30:
                 {
                     if (client.PendingItemSessions != null)
                     {
@@ -193,7 +204,7 @@ public class ItemShop : MundaneScript
                     TopMenu(client);
                 }
                 break;
-            case 0x0500:
+            case 0x500:
                 {
                     NpcShopExtensions.SellItemDroppedFromInventory(client, Mundane, args);
                 }
@@ -207,7 +218,7 @@ public class ItemShop : MundaneScript
         if (item == null) return;
         if (item.Template.Flags.FlagIsSet(ItemFlags.Sellable))
         {
-            OnResponse(client, 0x0500, item.InventorySlot.ToString());
+            OnResponse(client, 0x500, item.InventorySlot.ToString());
         }
     }
 }
