@@ -83,9 +83,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsBeagParalyzed);
     public bool HasDoT => (IsBleeding || IsPoisoned);
     private int CheckHp => BaseHp + BonusHp;
-    public int MaximumHp => CheckHp;
+    public int MaximumHp => Math.Clamp(CheckHp, 0, int.MaxValue);
     private int CheckMp => BaseMp + BonusMp;
-    public int MaximumMp => CheckMp;
+    public int MaximumMp => Math.Clamp(CheckMp, 0, int.MaxValue);
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
     public byte Dmg => (byte)(_Dmg + BonusDmg).IntClamp(0, 300);
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
@@ -778,6 +778,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         if (force) return false;
         if (this is not Monster monster) return false;
+        if (monster.TaggedAislings.ContainsKey(attackingPlayer.Serial)) return true;
         if (monster.Template.BaseName == "Training Dummy") return true;
 
         // If the dictionary is empty, add the player
@@ -1568,7 +1569,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         }
 
-        PlayerNearby?.Client.SendHealthBar(this, sound);
+        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return convDmg;
     }
