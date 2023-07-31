@@ -77,7 +77,6 @@ public class ClassChooser : MundaneScript
         }
         else
         {
-            var aislingEquipped = client.Aisling.EquipmentManager.Equipment;
             client.Aisling.Path = (Class)responseID;
             client.Aisling.Stage = ClassStage.Class;
 
@@ -85,32 +84,32 @@ public class ClassChooser : MundaneScript
             {
                 case Class.Berserker:
                 {
-                    Berzerker(client, aislingEquipped);
+                    Berzerker(client);
                     break;
                 }
                 case Class.Defender:
                 {
-                    Defender(client, aislingEquipped);
+                    Defender(client);
                     break;
                 }
                 case Class.Monk:
                 {
-                    Monk(client, aislingEquipped);
+                    Monk(client);
                     break;
                 }
                 case Class.Assassin:
                 {
-                    Assassin(client, aislingEquipped);
+                    Assassin(client);
                     break;
                 }
                 case Class.Cleric:
                 {
-                    Cleric(client, aislingEquipped);
+                    Cleric(client);
                     break;
                 }
                 case Class.Arcanus:
                 {
-                    Arcanus(client, aislingEquipped);
+                    Arcanus(client);
                     break;
                 }
                 case Class.Peasant:
@@ -171,225 +170,79 @@ public class ClassChooser : MundaneScript
         client.TransitionToMap(137, new Position(1, 4));
     }
 
-    private void Berzerker(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Berzerker(IWorldClient client)
     {
         Skill.GiveTo(client.Aisling, "Onslaught", 1);
-
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Leather Bliaut"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Leather Tunic"]);
-
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
-    private void Defender(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Defender(IWorldClient client)
     {
         Skill.GiveTo(client.Aisling, "Assault", 1);
-
         var item = new Item();
         item = item.Create(client.Aisling, client.Aisling.Gender == Gender.Female
             ? ServerSetup.Instance.GlobalItemTemplateCache["Leather Donet"]
             : ServerSetup.Instance.GlobalItemTemplateCache["Leather Guard"]);
-            
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-            
         var item2 = new Item();
         item2 = item2.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Wooden Shield"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
         item2.GiveTo(client.Aisling);
     }
 
-    private void Assassin(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Assassin(IWorldClient client)
     {
         Skill.GiveTo(client.Aisling, "Stab", 1);
-        
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Cotte"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Scout Leather"]);
-
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Snow Dagger"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
-    private void Monk(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Monk(IWorldClient client)
     {
         Skill.GiveTo(client.Aisling, "Punch", 1);
-
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Bodice"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Dobok"]);
-            
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Leather Bracer"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
-    private void Cleric(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Cleric(IWorldClient client)
     {
         Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
-
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Gorget Gown"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Cowl"]);
-
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
-    private void Arcanus(IWorldClient client, IDictionary<int, EquipmentSlot> aislingEquipped)
+    private static void Arcanus(IWorldClient client)
     {
         Spell.GiveTo(client.Aisling, "Beag Athar", 1);
         Spell.GiveTo(client.Aisling, "Beag Creag", 1);
@@ -397,43 +250,14 @@ public class ClassChooser : MundaneScript
         Spell.GiveTo(client.Aisling, "Beag Srad", 1);
         Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
         Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
-
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Magi Skirt"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Gardcorp"]);
-
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-
-        var equip = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Owner = item.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        var weightTest = item.Template.Weight + equip.Template.Weight + client.Aisling.CurrentWeight;
-
-        if (weightTest > client.Aisling.MaximumWeight)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can not hold anymore.");
-            return;
-        }
-
-        equip.GetDisplayName();
-        equip.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.Add(equip.Template.EquipmentSlot, equip);
+        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 }
