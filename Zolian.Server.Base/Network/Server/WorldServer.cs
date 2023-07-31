@@ -1314,11 +1314,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
-
-            foreach (var player in playersToShowList)
-            {
-                localClient.SendPublicMessage(player.Serial, publicMessageType, response);
-            }
+            var toShowList = playersToShowList as Aisling[] ?? playersToShowList.ToArray();
+            localClient.Aisling.SendTargetedClientMethod(Scope.DefinedAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, publicMessageType, response), toShowList);
 
             var nearbyMundanes = localClient.Aisling.MundanesNearby();
 
