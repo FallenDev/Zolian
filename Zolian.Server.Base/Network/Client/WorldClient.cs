@@ -3472,16 +3472,18 @@ namespace Darkages.Network.Client
                 }
             }
 
-            // Gender neutral check
-            if (item.Template.Gender == Aisling.Gender)
+            switch (item.Template.Gender)
             {
-                return true;
-            }
-
-            // Gender check
-            if (item.Template.Gender == Aisling.Gender)
-            {
-                return true;
+                case Enums.Gender.Male:
+                    var canUseMale = Aisling.Gender is Enums.Gender.Male;
+                    if (canUseMale) return true;
+                    break;
+                case Enums.Gender.Female:
+                    var canUseFemale = Aisling.Gender is Enums.Gender.Female;
+                    if (canUseFemale) return true;
+                    break;
+                case Enums.Gender.Unisex:
+                    return true;
             }
 
             client.SendServerMessage(ServerMessageType.OrangeBar1, "I can't seem to use this");

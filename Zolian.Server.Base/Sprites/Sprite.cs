@@ -948,7 +948,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             player?.Client.SendCreatureTurn(Serial, (Direction)Direction);
         }
-        
+
         LastTurnUpdated = DateTime.UtcNow;
     }
 
@@ -1548,7 +1548,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             CurrentHp = MaximumHp;
 
         var dmgApplied = (long)Math.Abs(dmg * amplifier);
-        
+
         // ToDo: Create logic for "Over Damage"
         if (dmgApplied > int.MaxValue)
         {
@@ -1561,8 +1561,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (damageDealingSprite is Aisling aisling)
         {
-            var time = DateTime.UtcNow;
-            var estTime = time.TimeOfDay;
             aisling.DamageCounter += convDmg;
             if (aisling.ThreatMeter + dmg >= long.MaxValue)
                 aisling.ThreatMeter = 500000;
@@ -1612,15 +1610,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (this is Monster)
         {
-            var tagHpPoint = (uint)(MaximumHp * .50);
-
-            if (CurrentHp <= tagHpPoint)
-                if (damageDealingSprite is Aisling aisling)
-                    if (!CanAttack(aisling, forced))
-                    {
-                        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
-                        return false;
-                    }
+            if (damageDealingSprite is Aisling aisling)
+                if (!CanAttack(aisling, forced))
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
+                    return false;
+                }
         }
 
         if (Immunity && !forced)
