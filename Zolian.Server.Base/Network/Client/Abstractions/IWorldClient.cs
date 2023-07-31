@@ -44,13 +44,15 @@ public interface IWorldClient : ISocketClient
     DateTime LastWhisperMessageSent { get; set; }
     PendingBuy PendingBuySessions { get; set; }
     PendingSell PendingItemSessions { get; set; }
-    PendingBanked PendingBankedSession { get; set; }
     bool ShouldUpdateMap { get; set; }
     DateTime LastNodeClicked { get; set; }
     WorldPortal PendingNode { get; set; }
     Position LastKnownPosition { get; set; }
     int MapClicks { get; set; }
     uint EntryCheck { get; set; }
+    WorldClient LoadEquipment();
+    WorldClient LoadInventory();
+    WorldClient LoadBank();
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
@@ -170,7 +172,6 @@ public interface IWorldClient : ISocketClient
     void CompleteMapTransition();
     void DeleteSkillFromDb(Skill skill);
     void DeleteSpellFromDb(Spell spell);
-    void LoadBank();
     Task AddDiscoveredMapToDb();
     Task AddToIgnoreListDb(string ignored);
     void RemoveFromIgnoreListDb(string ignored);

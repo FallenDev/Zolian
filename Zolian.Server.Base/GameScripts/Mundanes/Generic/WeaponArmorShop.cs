@@ -46,16 +46,16 @@ public class WeaponArmorShop : MundaneScript
         switch (responseID)
         {
             case 0x0001:
-                client.SendItemShopDialog(Mundane, "This is what I have on the racks.", ShopMethods.BuyFromStoreInventory(Mundane));
+                client.SendItemShopDialog(Mundane, "This is what I have on the racks.", NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
             case 0x0002:
-                client.SendItemSellDialog(Mundane, "What do you want to sell?", ShopMethods.GetCharacterSellInventoryByteList(client));
+                client.SendItemSellDialog(Mundane, "What do you want to sell?", NpcShopExtensions.GetCharacterSellInventoryByteList(client));
                 break;
             case 0x0030:
                 {
                     if (client.PendingItemSessions != null)
                     {
-                        ShopMethods.CompletePendingItemSell(client);
+                        NpcShopExtensions.CompletePendingItemSell(client, Mundane);
                     }
 
                     TopMenu(client);
@@ -277,7 +277,7 @@ public class WeaponArmorShop : MundaneScript
                         case false when client.Aisling.GoldPoints >= template.Value:
                             {
                                 var item = new Item();
-                                item = item.Create(client.Aisling, template, ShopMethods.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(), ItemQualityVariance.DetermineWeaponVariance());
+                                item = item.Create(client.Aisling, template, NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(), ItemQualityVariance.DetermineWeaponVariance());
 
                                 if (item.GiveTo(client.Aisling))
                                 {
@@ -305,7 +305,7 @@ public class WeaponArmorShop : MundaneScript
             #region Repair
             case 0x0003:
                 {
-                    _repairSum = ShopMethods.GetRepairCosts(client);
+                    _repairSum = NpcShopExtensions.GetRepairCosts(client);
 
                     var optsRepair = new List<Dialog.OptionsDataItem>
                 {

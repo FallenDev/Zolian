@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Chaos.Extensions.Common;
 
 using Darkages.Enums;
@@ -26,7 +27,7 @@ public class Inventory : ObjectManager, IInventory
         for (var i = 0; i < Length; i++) Items[i + 1] = null;
     }
 
-    public bool IsValidSlot(byte slot) => slot is > 0 and < Length && !_invalidSlots.Contains(slot);
+    public bool IsValidSlot(byte slot) => slot is > 0 and <= Length && !_invalidSlots.Contains(slot);
 
     public IEnumerable<Item> BankList => Items.Values.Where(i => i is { Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
 
@@ -230,6 +231,18 @@ public class Inventory : ObjectManager, IInventory
 
         var item1 = FindInSlot(slot1);
         var item2 = FindInSlot(slot2);
+
+        if (slot2 == 59)
+        {
+            if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return true;
+            item1.ItemPane = Item.ItemPanes.Bank;
+            if (client.Aisling.BankManager.Items.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, item1))
+                client.SendRemoveItemFromPane(item1.InventorySlot);
+            
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
+            UpdatePlayersWeight(client);
+            return true;
+        }
 
         if ((item1 == null)
             || (item2 == null)

@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
 using Chaos.Networking.Entities.Server;
+
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Templates;
@@ -10,6 +10,8 @@ namespace Darkages.Common;
 
 public static class WorldExtensions
 {
+    #region Options Dialog
+
     public static void SendOptionsDialog(this IWorldClient worldClient, Mundane npc, string message, params Dialog.OptionsDataItem[] options)
     {
         var args = new MenuArgs
@@ -102,6 +104,10 @@ public static class WorldExtensions
         worldClient.Send(args);
     }
 
+    #endregion
+
+    #region Buy/Sell Dialog
+
     public static void SendItemShopDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<ItemTemplate> item)
     {
         var args = new MenuArgs
@@ -118,7 +124,7 @@ public static class WorldExtensions
                 MaxDurability = 0,
                 Name = i.Name,
                 Slot = 0,
-                Sprite = i.Image,
+                Sprite = i.DisplayImage,
                 Stackable = i.CanStack
             }).ToList(),
             MenuType = MenuType.ShowItems,
@@ -152,7 +158,7 @@ public static class WorldExtensions
                 MaxDurability = 0,
                 Name = i.Name,
                 Slot = 0,
-                Sprite = i.Image,
+                Sprite = i.DisplayImage,
                 Stackable = i.CanStack
             }).ToList(),
             MenuType = MenuType.ShowItems,
@@ -216,59 +222,9 @@ public static class WorldExtensions
         worldClient.Send(args);
     }
 
-    public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message)
-    {
-        var args = new MenuArgs
-        {
-            Args = null,
-            Color = DisplayColor.Default,
-            EntityType = EntityType.Creature,
-            Items = null,
-            MenuType = MenuType.TextEntry,
-            Name = npc.Name,
-            Options = null,
-            PursuitId = 0,
-            Skills = null,
-            Slots = null,
-            SourceId = npc.Serial,
-            Spells = null,
-            Sprite = npc.Template.Image,
-            Text = message
-        };
+    #endregion
 
-        worldClient.Send(args);
-    }
-
-    /// <summary>
-    /// Reactor Input NPC Dialog
-    /// </summary>
-    /// <param name="worldClient">Player's client</param>
-    /// <param name="npc">NPC</param>
-    /// <param name="message">Message on lower bar</param>
-    /// <param name="textBoxMessage">Message within popup</param>
-    /// <param name="textBoxLength">Length of input box</param>
-    public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message, string textBoxMessage, ushort textBoxLength = 2)
-    {
-        var args = new DialogArgs
-        {
-            Color = DisplayColor.Default,
-            DialogId = 0,
-            EntityType = EntityType.Creature,
-            HasNextButton = false,
-            HasPreviousButton = false,
-            DialogType = DialogType.TextEntry,
-            Name = npc.Name,
-            Options = null,
-            PursuitId = 0,
-            SourceId = npc.Serial,
-            Sprite = npc.Template.Image,
-            Text = message,
-            TextBoxLength = textBoxLength,
-            TextBoxPrompt = textBoxMessage
-        };
-
-        worldClient.Send(args);
-    }
+    #region Skills/Spells Dialog
 
     public static void SendSkillLearnDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<SkillTemplate> skillTemplates)
     {
@@ -437,6 +393,66 @@ public static class WorldExtensions
 
         worldClient.Send(args);
     }
+
+    #endregion
+
+    #region PlayerInput
+
+    public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message)
+    {
+        var args = new MenuArgs
+        {
+            Args = null,
+            Color = DisplayColor.Default,
+            EntityType = EntityType.Creature,
+            Items = null,
+            MenuType = MenuType.TextEntry,
+            Name = npc.Name,
+            Options = null,
+            PursuitId = 0,
+            Skills = null,
+            Slots = null,
+            SourceId = npc.Serial,
+            Spells = null,
+            Sprite = npc.Template.Image,
+            Text = message
+        };
+
+        worldClient.Send(args);
+    }
+
+    /// <summary>
+    /// Reactor Input NPC Dialog
+    /// </summary>
+    /// <param name="worldClient">Player's client</param>
+    /// <param name="npc">NPC</param>
+    /// <param name="message">Message on lower bar</param>
+    /// <param name="textBoxMessage">Message within popup</param>
+    /// <param name="textBoxLength">Length of input box</param>
+    public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message, string textBoxMessage, ushort textBoxLength = 2)
+    {
+        var args = new DialogArgs
+        {
+            Color = DisplayColor.Default,
+            DialogId = 0,
+            EntityType = EntityType.Creature,
+            HasNextButton = false,
+            HasPreviousButton = false,
+            DialogType = DialogType.TextEntry,
+            Name = npc.Name,
+            Options = null,
+            PursuitId = 0,
+            SourceId = npc.Serial,
+            Sprite = npc.Template.Image,
+            Text = message,
+            TextBoxLength = textBoxLength,
+            TextBoxPrompt = textBoxMessage
+        };
+
+        worldClient.Send(args);
+    }
+
+    #endregion
 
     public static void CloseDialog(this IWorldClient worldClient)
     {

@@ -2,7 +2,6 @@
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -177,12 +176,12 @@ public class Eireann : MundaneScript
                 break;
             case 0x02:
                 {
-                    client.SendItemShopDialog(Mundane, "Only the finest.", 0x04, ShopMethods.BuyFromStoreInventory(Mundane));
+                    client.SendItemShopDialog(Mundane, "Only the finest.", 0x04, NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 }
                 break;
             case 0x03:
                 {
-                    client.SendItemSellDialog(Mundane, "What do you want to pawn?", 0x0005, ShopMethods.GetCharacterSellInventoryByteList(client));
+                    client.SendItemSellDialog(Mundane, "What do you want to pawn?", 0x0005, NpcShopExtensions.GetCharacterSellInventoryByteList(client));
                 }
                 break;
             case 0x04:
@@ -281,7 +280,7 @@ public class Eireann : MundaneScript
                 {
                     if (client.PendingItemSessions != null)
                     {
-                        ShopMethods.CompletePendingItemSell(client);
+                        NpcShopExtensions.CompletePendingItemSell(client, Mundane);
                     }
 
                     TopMenu(client);

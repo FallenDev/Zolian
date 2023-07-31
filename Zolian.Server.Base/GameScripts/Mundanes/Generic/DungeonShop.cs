@@ -142,12 +142,12 @@ public class DungeonShop : MundaneScript
                 break;
             case 0x02:
                 {
-                    client.SendItemShopDialog(Mundane, "Only the finest of gear is sold here.", 0x04, ShopMethods.BuyFromStoreInventory(Mundane));
+                    client.SendItemShopDialog(Mundane, "Only the finest of gear is sold here.", 0x04, NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 }
                 break;
             case 0x03:
                 {
-                    client.SendItemSellDialog(Mundane, "What do you want to pawn?", 0x0005, ShopMethods.GetCharacterSellInventoryByteList(client));
+                    client.SendItemSellDialog(Mundane, "What do you want to pawn?", 0x0005, NpcShopExtensions.GetCharacterSellInventoryByteList(client));
                 }
                 break;
             case 0x04:
@@ -171,7 +171,7 @@ public class DungeonShop : MundaneScript
                         case false when client.Aisling.GoldPoints >= template.Value:
                             {
                                 var item = new Item();
-                                item = item.Create(client.Aisling, template, ShopMethods.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(), ItemQualityVariance.DetermineWeaponVariance());
+                                item = item.Create(client.Aisling, template, NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(), ItemQualityVariance.DetermineWeaponVariance());
 
                                 if (item.GiveTo(client.Aisling))
                                 {
@@ -254,7 +254,7 @@ public class DungeonShop : MundaneScript
                 {
                     if (client.PendingItemSessions != null)
                     {
-                        ShopMethods.CompletePendingItemSell(client);
+                        NpcShopExtensions.CompletePendingItemSell(client, Mundane);
                     }
 
                     TopMenu(client);

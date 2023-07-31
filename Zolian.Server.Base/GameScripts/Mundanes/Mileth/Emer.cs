@@ -1,7 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
-using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -58,7 +57,7 @@ public class Emer : MundaneScript
         {
             #region Buy
             case 0x01:
-                client.SendItemShopDialog(Mundane, "Bon Appetite.", 0x02, ShopMethods.BuyFromStoreInventory(Mundane));
+                client.SendItemShopDialog(Mundane, "Bon Appetite.", 0x02, NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
             case 0x0000:
                 {

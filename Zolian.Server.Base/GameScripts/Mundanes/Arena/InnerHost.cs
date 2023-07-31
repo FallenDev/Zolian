@@ -2,7 +2,6 @@
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -177,7 +176,7 @@ public class InnerHost : MundaneScript
                 }
             case 9:
                 {
-                    _repairSum = ShopMethods.GetRepairCosts(client);
+                    _repairSum = NpcShopExtensions.GetRepairCosts(client);
 
                     var optsRepair = new List<Dialog.OptionsDataItem>
                 {

@@ -1,7 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.GameScripts.Formulas;
-using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Scripting;
@@ -61,7 +60,7 @@ public class Callum : MundaneScript
                 break;
             case 0x0003:
             {
-                var qualitySort = ShopMethods.GetCharacterDetailingByteListForLowGradePolish(client);
+                var qualitySort = NpcShopExtensions.GetCharacterDetailingByteListForLowGradePolish(client);
 
                 if (qualitySort.Count == 0)
                 {
@@ -75,8 +74,8 @@ public class Callum : MundaneScript
                 break;
             case 0x0500:
             {
-                _cost = ShopMethods.GetDetailCosts(client, args);
-                _itemDetail = ShopMethods.ItemDetail;
+                _cost = NpcShopExtensions.GetDetailCosts(client, args);
+                _itemDetail = NpcShopExtensions.ItemDetail;
 
                 if (_cost == 0)
                 {
@@ -109,7 +108,7 @@ public class Callum : MundaneScript
                 break;
             case 0x0019:
             {
-                _itemDetail = ShopMethods.ItemDetail;
+                _itemDetail = NpcShopExtensions.ItemDetail;
 
                 if (client.Aisling.GoldPoints >= _cost)
                 {

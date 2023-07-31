@@ -157,7 +157,6 @@ namespace Darkages.Network.Client
         public DateTime LastWhisperMessageSent { get; set; }
         public PendingBuy PendingBuySessions { get; set; }
         public PendingSell PendingItemSessions { get; set; }
-        public PendingBanked PendingBankedSession { get; set; }
         public bool ShouldUpdateMap { get; set; }
         public DateTime LastNodeClicked { get; set; }
         public WorldPortal PendingNode { get; set; }
@@ -302,7 +301,7 @@ namespace Darkages.Network.Client
                 Enter();
                 SendProfileRequest();
                 InitQuests();
-                LoadEquipment().LoadInventory().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
+                LoadEquipment().LoadInventory().LoadBank().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
                 SendAttributes(StatUpdateType.Full);
 
                 if (Aisling.IsDead())
@@ -436,114 +435,6 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient LoadSkillBook()
-        {
-            try
-            {
-                const string procedure = "[SelectSkills]";
-                var values = new { Serial = (long)Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var skillList = sConn.Query<Skill>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
-
-                foreach (var skill in skillList.Where(s => s is { SkillName: not null }))
-                {
-                    if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(skill.SkillName)) continue;
-
-                    var skillName = skill.SkillName;
-                    var template = ServerSetup.Instance.GlobalSkillTemplateCache[skillName];
-                    {
-                        skill.Template = template;
-                    }
-
-                    var newSkill = new Skill
-                    {
-                        Icon = skill.Template.Icon,
-                        Level = skill.Level,
-                        Slot = skill.Slot,
-                        SkillName = skill.SkillName,
-                        Uses = skill.Uses,
-                        CurrentCooldown = skill.CurrentCooldown,
-                        Template = skill.Template
-                    };
-
-                    Aisling.SkillBook.Skills[skill.Slot] = newSkill;
-                }
-
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-
-            SkillCleanup();
-
-            return this;
-        }
-
-        public WorldClient LoadSpellBook()
-        {
-            try
-            {
-                const string procedure = "[SelectSpells]";
-                var values = new { Serial = (long)Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var spellList = sConn.Query<Spell>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
-
-                foreach (var spell in spellList.Where(s => s is { SpellName: not null }))
-                {
-                    if (!ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey(spell.SpellName)) continue;
-
-                    var spellName = spell.SpellName;
-                    var template = ServerSetup.Instance.GlobalSpellTemplateCache[spellName];
-                    {
-                        spell.Template = template;
-                    }
-
-                    var newSpell = new Spell()
-                    {
-                        Icon = spell.Template.Icon,
-                        Level = spell.Level,
-                        Slot = spell.Slot,
-                        SpellName = spell.SpellName,
-                        Casts = spell.Casts,
-                        CurrentCooldown = spell.CurrentCooldown,
-                        Template = spell.Template
-                    };
-
-                    Aisling.SpellBook.Spells[spell.Slot] = newSpell;
-                }
-
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-
-            SpellCleanup();
-
-            return this;
-        }
-
         public WorldClient LoadInventory()
         {
             try
@@ -657,6 +548,185 @@ namespace Darkages.Network.Client
                 if (!string.IsNullOrEmpty(item.Template.WeaponScript))
                     item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
             }
+
+            return this;
+        }
+
+        public WorldClient LoadBank()
+        {
+            Aisling.BankManager = new Bank();
+
+            try
+            {
+                const string procedure = "[SelectBanked]";
+                var values = new { Serial = (long)Aisling.Serial };
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+                var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.Name);
+
+                foreach (var item in itemList)
+                {
+                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
+
+                    var itemName = item.Name;
+                    var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
+                    {
+                        item.Template = template;
+                    }
+
+                    var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
+
+                    var newItem = new Item
+                    {
+                        ItemId = item.ItemId,
+                        Template = item.Template,
+                        Owner = item.Serial,
+                        ItemPane = item.ItemPane,
+                        Slot = item.Slot,
+                        InventorySlot = item.InventorySlot,
+                        Color = color,
+                        Durability = item.Durability,
+                        Identified = item.Identified,
+                        ItemVariance = item.ItemVariance,
+                        WeapVariance = item.WeapVariance,
+                        ItemQuality = item.ItemQuality,
+                        OriginalQuality = item.OriginalQuality,
+                        Stacks = item.Stacks,
+                        Enchantable = item.Template.Enchantable,
+                        Tarnished = item.Tarnished,
+                        Image = item.Template.Image,
+                        DisplayImage = item.Template.DisplayImage
+                    };
+
+                    ItemQualityVariance.SetMaxItemDurability(newItem, newItem.ItemQuality);
+                    newItem.GetDisplayName();
+                    newItem.NoColorGetDisplayName();
+
+                    Aisling.BankManager.Items[newItem.ItemId] = newItem;
+                }
+
+                sConn.Close();
+            }
+            catch (SqlException e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+
+            return this;
+        }
+
+        public WorldClient LoadSkillBook()
+        {
+            try
+            {
+                const string procedure = "[SelectSkills]";
+                var values = new { Serial = (long)Aisling.Serial };
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+                var skillList = sConn.Query<Skill>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
+
+                foreach (var skill in skillList.Where(s => s is { SkillName: not null }))
+                {
+                    if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(skill.SkillName)) continue;
+
+                    var skillName = skill.SkillName;
+                    var template = ServerSetup.Instance.GlobalSkillTemplateCache[skillName];
+                    {
+                        skill.Template = template;
+                    }
+
+                    var newSkill = new Skill
+                    {
+                        Icon = skill.Template.Icon,
+                        Level = skill.Level,
+                        Slot = skill.Slot,
+                        SkillName = skill.SkillName,
+                        Uses = skill.Uses,
+                        CurrentCooldown = skill.CurrentCooldown,
+                        Template = skill.Template
+                    };
+
+                    Aisling.SkillBook.Skills[skill.Slot] = newSkill;
+                }
+
+                sConn.Close();
+            }
+            catch (SqlException e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+
+            SkillCleanup();
+
+            return this;
+        }
+
+        public WorldClient LoadSpellBook()
+        {
+            try
+            {
+                const string procedure = "[SelectSpells]";
+                var values = new { Serial = (long)Aisling.Serial };
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+                var spellList = sConn.Query<Spell>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
+
+                foreach (var spell in spellList.Where(s => s is { SpellName: not null }))
+                {
+                    if (!ServerSetup.Instance.GlobalSpellTemplateCache.ContainsKey(spell.SpellName)) continue;
+
+                    var spellName = spell.SpellName;
+                    var template = ServerSetup.Instance.GlobalSpellTemplateCache[spellName];
+                    {
+                        spell.Template = template;
+                    }
+
+                    var newSpell = new Spell()
+                    {
+                        Icon = spell.Template.Icon,
+                        Level = spell.Level,
+                        Slot = spell.Slot,
+                        SpellName = spell.SpellName,
+                        Casts = spell.Casts,
+                        CurrentCooldown = spell.CurrentCooldown,
+                        Template = spell.Template
+                    };
+
+                    Aisling.SpellBook.Spells[spell.Slot] = newSpell;
+                }
+
+                sConn.Close();
+            }
+            catch (SqlException e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger(e.Message, LogLevel.Error);
+                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                Crashes.TrackError(e);
+            }
+
+            SpellCleanup();
 
             return this;
         }
@@ -2906,7 +2976,7 @@ namespace Darkages.Network.Client
                                 Y = money.Y,
                                 Color = DisplayColor.Default
                             };
-                            
+
                             visibleArgs.Add(moneyInfo);
 
                             break;
@@ -2928,7 +2998,7 @@ namespace Darkages.Network.Client
                                 Direction = (Direction)creature.Direction,
                                 Name = creature.Template.BaseName
                             };
-                            
+
                             visibleArgs.Add(creatureInfo);
 
                             break;
@@ -4187,71 +4257,6 @@ namespace Darkages.Network.Client
                 sConn.Open();
                 const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellName = @SpellName AND Serial = @Serial";
                 sConn.Execute(cmd, new { spell.SpellName, Aisling.Serial });
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-            catch (Exception e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
-            }
-        }
-
-        public void LoadBank()
-        {
-            Aisling.BankManager = new Bank();
-
-            try
-            {
-                const string procedure = "[SelectBanked]";
-                var values = new { Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.InventorySlot);
-
-                foreach (var item in itemList)
-                {
-                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
-
-                    var itemName = item.Name;
-                    var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
-                    {
-                        item.Template = template;
-                    }
-
-                    var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
-
-                    var newItem = new Item
-                    {
-                        Template = item.Template,
-                        ItemId = item.ItemId,
-                        Image = item.Template.Image,
-                        DisplayImage = item.Template.DisplayImage,
-                        Durability = item.Durability,
-                        Owner = item.Serial,
-                        Identified = item.Identified,
-                        Stacks = item.Stacks,
-                        ItemQuality = item.ItemQuality,
-                        OriginalQuality = item.OriginalQuality,
-                        ItemVariance = item.ItemVariance,
-                        WeapVariance = item.WeapVariance,
-                        Enchantable = item.Template.Enchantable,
-                        Color = color
-                    };
-
-                    ItemQualityVariance.SetMaxItemDurability(newItem, newItem.ItemQuality);
-                    newItem.GetDisplayName();
-                    newItem.NoColorGetDisplayName();
-
-                    Aisling.BankManager.Items[newItem.ItemId] = newItem;
-                }
-
                 sConn.Close();
             }
             catch (SqlException e)

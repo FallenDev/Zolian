@@ -3,7 +3,6 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
-using Darkages.GameScripts.Mundanes.Generic;
 using Darkages.Network.Client;
 using Darkages.Scripting;
 using Darkages.Sprites;
@@ -127,7 +126,7 @@ public class Mileth : AreaScript
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You hear Ceannlaidir's voice as a weapon manifests before you.");
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
                     if (ceanWeapon != null)
-                        item = item.Create(client.Aisling, ceanWeapon, ShopMethods.DungeonHighQuality(), variance, wVariance);
+                        item = item.Create(client.Aisling, ceanWeapon, NpcShopExtensions.DungeonHighQuality(), variance, wVariance);
                     Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, client.Aisling.Serial)); });
                     break;
                 case >= 75 and < 95:
