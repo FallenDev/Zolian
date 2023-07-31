@@ -9,64 +9,87 @@ public class Party : ObjectManager
 {
     private int Id { get; set; }
     public string LeaderName { get; set; }
+    public string PartyMemberString
+    {
+        get
+        {
+            var stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.Append("Group members");
+
+            foreach (var member in PartyMembers)
+            {
+                var leader = " ";
+                if (string.Equals(LeaderName, member.Username, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    leader = "*";
+                }
+
+                stringBuilder.Append($"\n{leader} {member.Username}");
+            }
+
+            stringBuilder.Append($"\nTotal {PartyMembers.Count}");
+
+            return stringBuilder.ToString();
+        }
+    }
 
     public List<Aisling> PartyMembers => GetObjects<Aisling>(null, sprite => sprite.GroupId == Id).Where(i => i != null).Distinct().ToList();
-
-    public static bool AddPartyMember(Aisling partyLeader, Aisling playerToAdd)
+    
+    public static bool AddPartyMember(Aisling partyMember, Aisling playerToAdd)
     {
         if (playerToAdd == null) return false;
 
-        if (partyLeader.GroupId != 0)
+        if (partyMember.GroupId != 0)
         {
-            if (partyLeader.PartyMembers.Count() >= 13)
+            if (partyMember.PartyMembers.Count() >= 13)
             {
-                partyLeader.Client.SystemMessage(
+                partyMember.Client.SystemMessage(
                     $"Unable to add {playerToAdd.Username}. Your party is full.");
-                playerToAdd.Client.SystemMessage($"{partyLeader.Username}'s party is full.");
+                playerToAdd.Client.SystemMessage($"{partyMember.Username}'s party is full.");
 
                 return false;
             }
 
-            if (playerToAdd.GroupId != 0 && playerToAdd.GroupId != partyLeader.GroupId)
+            if (playerToAdd.GroupId != 0 && playerToAdd.GroupId != partyMember.GroupId)
             {
-                partyLeader.Client.SystemMessage(
+                partyMember.Client.SystemMessage(
                     $"{playerToAdd.Username} belongs to another party, and was not able to join your party.");
                 playerToAdd.Client.SystemMessage(
-                    $"{partyLeader.Username}'s requested you to join his party. However you belong to another party.");
+                    $"{partyMember.Username}'s requested you to join his party. However you belong to another party.");
 
                 return false;
             }
 
-            if (playerToAdd.GroupId != 0 || partyLeader.GroupId == 0)
+            if (playerToAdd.GroupId != 0 || partyMember.GroupId == 0)
                 return false;
 
-            playerToAdd.GroupId = partyLeader.GroupId;
-            partyLeader.Client.SystemMessage($"{playerToAdd.Username} has joined your party.");
-            playerToAdd.Client.SystemMessage($"You have joined {partyLeader.Username}'s party.");
+            playerToAdd.GroupId = partyMember.GroupId;
+            partyMember.Client.SystemMessage($"{playerToAdd.Username} has joined your party.");
+            playerToAdd.Client.SystemMessage($"You have joined {partyMember.Username}'s party.");
 
             return true;
         }
 
-        if (playerToAdd.GroupId != 0 && partyLeader.GroupId == 0)
+        if (playerToAdd.GroupId != 0 && partyMember.GroupId == 0)
         {
             playerToAdd.Client.SystemMessage(
-                $"{partyLeader.Username} belongs to another party, and was not able to join your party.");
+                $"{partyMember.Username} belongs to another party, and was not able to join your party.");
 
-            partyLeader.Client.SystemMessage(
+            partyMember.Client.SystemMessage(
                 $"{playerToAdd}'s requested you to join his party. However you belong to another party.");
 
             return false;
         }
 
-        if (playerToAdd.GroupId != 0 || partyLeader.GroupId != 0) return false;
+        if (playerToAdd.GroupId != 0 || partyMember.GroupId != 0) return false;
 
-        var party = CreateParty(partyLeader);
+        var party = CreateParty(partyMember);
         playerToAdd.GroupId = party.Id;
 
         foreach (var player in party.PartyMembers)
             player.Client.SystemMessage($"{playerToAdd.Username} has joined the party.");
 
-        playerToAdd.Client.SystemMessage($"You have joined {partyLeader.Username}'s party.");
+        playerToAdd.Client.SystemMessage($"You have joined {partyMember.Username}'s party.");
         playerToAdd.GroupId = party.Id;
 
         return true;

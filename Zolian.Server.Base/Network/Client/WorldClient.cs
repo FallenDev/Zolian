@@ -42,6 +42,7 @@ using System.Collections.Concurrent;
 using Chaos.Common.Identity;
 using System.Globalization;
 using ServiceStack;
+using Darkages.Interfaces;
 
 namespace Darkages.Network.Client
 {
@@ -1981,6 +1982,8 @@ namespace Darkages.Network.Client
             var partyOpen = aisling.PartyStatus == (GroupStatus)1;
             var legendMarks = new List<LegendMarkInfo>();
 
+            #region Gear
+
             if (aisling.EquipmentManager.Weapon != null)
             {
                 var equip = aisling.EquipmentManager.Weapon;
@@ -2341,6 +2344,8 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
+            #endregion
+
             foreach (var legendItem in aisling.LegendBook.LegendMarks)
             {
                 if (legendItem == null) continue;
@@ -2361,16 +2366,18 @@ namespace Darkages.Network.Client
                 BaseClass = (BaseClass)aisling.Path,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
-                GuildName = aisling.Clan,
-                GuildRank = aisling.ClanRank,
-                Id = (uint)aisling.Serial,
+                GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
+                GuildRank = aisling.GameMaster
+                    ? "Game Master"
+                    : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}",
+                Id = aisling.Serial,
                 LegendMarks = legendMarks,
                 Name = aisling.Username,
                 Nation = Nation.Mileth,
                 Portrait = aisling.PictureData,
                 ProfileText = aisling.ProfileMessage,
                 SocialStatus = (SocialStatus)aisling.ActiveStatus,
-                Title = aisling.ClanTitle
+                Title = $"Level: {aisling.ExpLevel}  DR: {aisling.AbpLevel}"
             };
 
             Send(args);
@@ -2480,6 +2487,8 @@ namespace Darkages.Network.Client
             var equipment = new Dictionary<EquipmentSlot, ItemInfo>();
             var partyOpen = Aisling.PartyStatus == (GroupStatus)1;
             var legendMarks = new List<LegendMarkInfo>();
+
+            #region Gear
 
             if (Aisling.EquipmentManager.Weapon != null)
             {
@@ -2841,6 +2850,8 @@ namespace Darkages.Network.Client
                 equipment.Add((EquipmentSlot)item.Slot, item);
             }
 
+            #endregion
+
             foreach (var legendItem in Aisling.LegendBook.LegendMarks)
             {
                 if (legendItem == null) continue;
@@ -2861,9 +2872,11 @@ namespace Darkages.Network.Client
                 BaseClass = (BaseClass)Aisling.Path,
                 Equipment = equipment,
                 GroupOpen = partyOpen,
-                GroupString = Aisling.PartyMembers?.ToString(),
-                GuildName = Aisling.Clan,
-                GuildRank = Aisling.ClanRank,
+                GroupString = Aisling.GroupParty?.PartyMemberString ?? "",
+                GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
+                GuildRank = Aisling.GameMaster
+                    ? "Game Master"
+                    : $"Vit: {Aisling.BaseHp + Aisling.BaseMp * 2}",
                 IsMaster = Aisling.Stage >= ClassStage.Master,
                 LegendMarks = legendMarks,
                 Name = Aisling.Username,
@@ -2872,7 +2885,7 @@ namespace Darkages.Network.Client
                 ProfileText = Aisling.ProfileMessage,
                 SocialStatus = (SocialStatus)Aisling.ActiveStatus,
                 SpouseName = null,
-                Title = Aisling.ClanTitle
+                Title = $"Level: {Aisling.ExpLevel}  DR: {Aisling.AbpLevel}"
             };
 
             Send(args);
