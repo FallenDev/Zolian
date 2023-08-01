@@ -52,6 +52,7 @@ public interface IAisling : ISprite
     void CancelExchange();
     bool CanSeeGhosts();
     void UsedSkill(Skill skill);
+    void CastTargetAnimation(Spell spell, Sprite target, CastInfo info);
     Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30);
     void CastDeath();
     void CastSpell(Spell spell, CastInfo info);

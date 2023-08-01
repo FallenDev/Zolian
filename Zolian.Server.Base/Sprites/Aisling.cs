@@ -354,6 +354,27 @@ public sealed class Aisling : Player, IAisling
             Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
     }
 
+    /// <summary>
+    /// Displays player's body animation, sends sound, messages, and displays spells animation on target position
+    /// </summary>
+    public void CastTargetAnimation(Spell spell, Sprite target, CastInfo info)
+    {
+        switch (target)
+        {
+            case null:
+                return;
+            case Aisling aislingTarget:
+                aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
+                break;
+        }
+
+        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Serial));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30)
     {
         var bodyAnim = Path switch
@@ -364,11 +385,8 @@ public sealed class Aisling : Player, IAisling
             _ => (BodyAnimation)6
         };
 
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed));
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
         
-        if (target is Aisling aisling)
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Username} Attacks you with {spell.Template.Name}.");
-
         return this;
     }
 
@@ -396,31 +414,13 @@ public sealed class Aisling : Player, IAisling
                 {
                     spell.InUse = true;
                     var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
-                    Client.PlayerCastBodyAnimationSoundAndMessageOnPosition(spell, target, info);
+                    CastTargetAnimation(spell, target, info);
                     var script = spell.Scripts.Values.FirstOrDefault();
                     script?.OnUse(this, target);
                     spell.InUse = false;
+                    spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
+                    Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
                 }
-                else
-                {
-                    if (spell.Template.TargetType != SpellTemplate.SpellUseType.NoTarget)
-                    {
-                        Client.SpellCastInfo = null;
-                        return;
-                    }
-
-                    spell.InUse = true;
-
-                    Client.PlayerCastBodyAnimationSoundAndMessage(spell, this);
-
-                    foreach (var script in spell.Scripts.Values)
-                        script.OnUse(this, this);
-
-                    spell.InUse = false;
-                }
-
-                spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
-                Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
             }
             else
             {

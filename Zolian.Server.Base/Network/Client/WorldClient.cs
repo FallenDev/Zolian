@@ -1380,44 +1380,6 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// Displays player's body animation, sends sound, messages, and displays spells animation on target
-        /// </summary>
-        public void PlayerCastBodyAnimationSoundAndMessage(Spell spell, Sprite target, byte actionSpeed = 30)
-        {
-            switch (target)
-            {
-                case null:
-                    return;
-                case Aisling aislingTarget:
-                    aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
-                    break;
-            }
-
-            SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound));
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Serial, 100, spell.Template.Animation, Aisling.Serial));
-        }
-
-        /// <summary>
-        /// Displays player's body animation, sends sound, messages, and displays spells animation on target position
-        /// </summary>
-        public void PlayerCastBodyAnimationSoundAndMessageOnPosition(Spell spell, Sprite target, CastInfo info, byte actionSpeed = 30)
-        {
-            switch (target)
-            {
-                case null:
-                    return;
-                case Aisling aislingTarget:
-                    aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
-                    break;
-            }
-
-            SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, BodyAnimation.HandsUp, actionSpeed, spell.Template.Sound));
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Aisling.Serial, info.Position));
-        }
-
-        /// <summary>
         /// 0x48 - Cancel Casting
         /// </summary>
         public void SendCancelCasting()
