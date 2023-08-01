@@ -17,7 +17,6 @@ public class PingComponent : WorldServerComponent
         foreach (var player in Server.Aislings)
         {
             player.Client.SendHeartBeat(0x20, 0x14);
-            player.Client.LastPing = DateTime.UtcNow;
         }
     }
 

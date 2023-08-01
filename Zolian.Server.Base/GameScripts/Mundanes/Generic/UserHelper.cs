@@ -79,10 +79,12 @@ public class UserHelper : MundaneScript
         var playerOffElement = ElementManager.ElementValue(client.Aisling.SecondaryOffensiveElement);
         var playerDefElement = ElementManager.ElementValue(client.Aisling.SecondaryDefensiveElement);
         var amplified = (client.Aisling.Amplified * 100).ToString(CultureInfo.CurrentCulture);
+        var latency = client.LastPingResponse - client.LastPing;
+        var latencyMs = $"{(uint)latency.TotalMilliseconds} ms";
+        var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
-
-
-        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum}     {{=gHostiles Nearby: {{=b{hostiles}\n" +
+        
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gHostiles Nearby: {{=b{hostiles} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
                                                                  $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +
                                                                  $"{{=gGear Stats| {{=cS:{{=a{gearStr}{{=c, I:{{=a{gearInt}{{=c, W:{{=a{gearWis}{{=c, C:{{=a{gearCon}{{=c, D:{{=a{gearDex}\n" +
                                                                  $"{{=gFull Stats| {{=cS:{{=a{playerStr}{{=c, I:{{=a{playerInt}{{=c, W:{{=a{playerWis}{{=c, C:{{=a{playerCon}{{=c, D:{{=a{playerDex}\n" +

@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
-
+using System.Runtime.ExceptionServices;
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -120,7 +120,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 [typeof(MonolithComponent)] = new MonolithComponent(this),
                 [typeof(MundaneComponent)] = new MundaneComponent(this),
                 [typeof(ObjectComponent)] = new ObjectComponent(this),
-                //[typeof(PingComponent)] = new PingComponent(this),
+                [typeof(PingComponent)] = new PingComponent(this),
                 [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
                 [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
                 [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
@@ -2682,6 +2682,26 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
+    /// 0x45 - Client Ping (Heartbeat)
+    /// </summary>
+    public override ValueTask OnHeartBeatAsync(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<HeartBeatArgs>(in clientPacket);
+
+        static ValueTask InnerOnHeartBeat(IWorldClient localClient, HeartBeatArgs localArgs)
+        {
+            var (first, second) = localArgs;
+
+            if (first != 20 || second != 32) return default;
+            localClient.LastPingResponse = DateTime.UtcNow;
+
+            return default;
+        }
+
+        return ExecuteHandler(client, args, InnerOnHeartBeat);
+    }
+
+    /// <summary>
     /// 0x47 - Stat Raised
     /// </summary>
     public ValueTask OnRaiseStat(IWorldClient client, in ClientPacket clientPacket)
@@ -3028,6 +3048,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
+        ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
         ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47
         ClientHandlers[(byte)ClientOpCode.Exchange] = OnExchange; // 0x4A
         ClientHandlers[(byte)ClientOpCode.BeginChant] = OnBeginChant; // 0x4D

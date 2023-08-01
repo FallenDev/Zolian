@@ -2355,6 +2355,18 @@ namespace Darkages.Network.Client
             Send(ref packet);
         }
 
+        public override void SendHeartBeat(byte first, byte second)
+        {
+            var args = new HeartBeatResponseArgs
+            {
+                First = first,
+                Second = second
+            };
+
+            LastPing = DateTime.UtcNow;
+            Send(args);
+        }
+
         /// <summary>
         /// 0x0A - Message
         /// </summary>
