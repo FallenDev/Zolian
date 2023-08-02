@@ -11,6 +11,14 @@ using Darkages.Types;
 
 namespace Darkages.Sprites;
 
+public record TargetRecord
+{
+    /// <summary>
+    /// Serial, Damage, Player, Nearby
+    /// </summary>
+    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)> TaggedAislings { get; set; }
+}
+
 public sealed class Monster : Sprite, IDialogSourceEntity
 {
     public Task<IList<Vector2>> Path;
@@ -23,11 +31,14 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         WalkEnabled = false;
         ObjectUpdateEnabled = false;
         WaypointIndex = 0;
-        TaggedAislings = new ConcurrentDictionary<long, bool>();
-        AggroList = new List<long>();
         TileType = TileContent.Monster;
+        TargetRecord = new TargetRecord
+        {
+            TaggedAislings = new ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)>()
+        };
     }
 
+    public TargetRecord TargetRecord { get; set; }
     public bool Aggressive { get; set; }
     public bool ThrownBack { get; set; }
     public bool AStar { get; set; }
@@ -46,17 +57,15 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     public WorldServerTimer WalkTimer { get; init; }
     public WorldServerTimer ObjectUpdateTimer { get; init; }
     public bool IsAlive => CurrentHp > 0;
-    public long DamageReceived { get; set; }
     private bool Rewarded { get; set; }
     public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
     public readonly List<SkillScript> SkillScripts = new();
     public readonly List<SkillScript> AbilityScripts = new();
     public readonly List<SpellScript> SpellScripts = new();
-    public List<long> AggroList { get; init; }
+
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
     public bool Blind => HasDebuff("Blind");
-    public ConcurrentDictionary<long, bool> TaggedAislings { get; set; }
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
@@ -81,21 +90,21 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
     public void TryAddTryRemoveTagging(Sprite target)
     {
-        TaggedAislings ??= new ConcurrentDictionary<long, bool>();
+        TargetRecord.TaggedAislings ??= new ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)>();
 
         if (target is not Aisling aisling) return;
 
-        var alreadyTagged = TaggedAislings.TryGetValue(aisling.Serial, out var taggedNearby);
+        var alreadyTagged = TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out _);
         var playerNearby = AislingsEarShotNearby().Contains(aisling);
 
         switch (alreadyTagged)
         {
             case false:
-                TaggedAislings.TryAdd(aisling.Serial, true);
+                TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, playerNearby));
                 break;
             case true:
                 if (!playerNearby)
-                    TaggedAislings.TryRemove(aisling.Serial, out _);
+                    TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
                 break;
         }
 
@@ -104,17 +113,17 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
         foreach (var member in aisling.GroupParty.PartyMembers.Where(member => member != null))
         {
-            var memberTagged = TaggedAislings.TryGetValue(member.Serial, out _);
+            var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
             var playersNearby = AislingsEarShotNearby().Contains(member);
 
             switch (memberTagged)
             {
                 case false:
-                    TaggedAislings.TryAdd(member.Serial, true);
+                    TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby));
                     break;
                 case true:
                     if (!playersNearby)
-                        TaggedAislings.TryRemove(member.Serial, out _);
+                        TargetRecord.TaggedAislings.TryRemove(member.Serial, out _);
                     break;
             }
         }
@@ -132,8 +141,6 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         Rewarded = true;
         player.UpdateStats();
     }
-
-    public IEnumerable<Aisling> GetTaggedAislings() => TaggedAislings.Any() ? TaggedAislings.Select(b => GetObject<Aisling>(Map, n => n.Serial == b.Key)).Where(i => i != null).ToList() : new List<Aisling>();
 
     public void Patrol()
     {

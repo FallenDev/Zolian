@@ -18,7 +18,6 @@ public class MonsterBaseIntelligence : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-    private Sprite Target => Monster.Target;
 
     public MonsterBaseIntelligence(Monster monster, Area map) : base(monster, map)
     {
@@ -121,19 +120,25 @@ public class MonsterBaseIntelligence : MonsterScript
             }
         }
 
-        if (Target is Aisling aisling)
+        if (Monster.Target is null)
+        {
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            Monster.Target = recordTuple.player;
+        }
+
+        if (Monster.Target is Aisling aisling)
         {
             Monster.GenerateRewards(aisling);
-            Monster.AggroList.Remove(Monster.Target.Serial);
         }
         else
         {
-            if (!Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold)) return;
-
-            var sum = (uint)Random.Shared.Next((int)(Monster.Template.Level * 13), (int)(Monster.Template.Level * 200));
+            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
 
             if (sum > 0)
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+            {
+                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
+                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+            }
         }
 
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
@@ -142,12 +147,10 @@ public class MonsterBaseIntelligence : MonsterScript
 
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Target is Aisling { LoggedIn: false })
-        {
-            Monster.AggroList.Remove(Monster.Target.Serial);
-        }
+        if (Monster.Target is Aisling { LoggedIn: false })
+            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
 
-        if (Target is not null && Monster.TaggedAislings.Count > 0 && Monster.Template.EngagedWalkingSpeed > 0)
+        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty && Monster.Template.EngagedWalkingSpeed > 0)
             Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
 
         var assail = Monster.BashTimer.Update(elapsedTime);
@@ -156,9 +159,9 @@ public class MonsterBaseIntelligence : MonsterScript
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
         // ToDo: Game Master Nullify damage
-        if (Target is Aisling aisling)
+        if (Monster.Target is Aisling aisling)
         {
-            if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Target.IsWeakened)
+            if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
                 ClearTarget();
@@ -213,7 +216,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
     public override void OnLeave(WorldClient client)
     {
-        Monster.AggroList.Remove(client.Aisling.Serial);
+        Monster.TargetRecord.TaggedAislings.TryRemove(client.Aisling.Serial, out _);
         if (Monster.Target == client.Aisling) ClearTarget();
     }
 
@@ -221,18 +224,19 @@ public class MonsterBaseIntelligence : MonsterScript
     {
         try
         {
-            Monster.DamageReceived += dmg;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, client.Aisling, true), player);
 
-            if (!Monster.AggroList.Contains(client.Aisling.Serial))
-                Monster.AggroList.Add(client.Aisling.Serial);
+            if (player.player == null)
+                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
+
+            Monster.Aggressive = true;
         }
         catch (Exception ex)
         {
             ServerSetup.Logger(ex.ToString());
             Crashes.TrackError(ex);
         }
-
-        Monster.Aggressive = true;
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -255,9 +259,7 @@ public class MonsterBaseIntelligence : MonsterScript
             return $"{{=k{Monster.Template.Level}{{=s";
         if (Monster.Template.Level <= client.Aisling.Level - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 10)
-            return $"{{=i{Monster.Template.Level}{{=s";
-        return $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Targeting
@@ -270,7 +272,7 @@ public class MonsterBaseIntelligence : MonsterScript
 
         if (Monster.Target is Aisling)
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
         }
 
         Monster.Target = null;
@@ -295,45 +297,28 @@ public class MonsterBaseIntelligence : MonsterScript
         {
             if (checkTarget.Skulled || checkTarget.IsInvisible)
             {
-                Monster.AggroList.Remove(Monster.Target.Serial);
+                Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                 Monster.Target = null;
             }
         }
 
         if (Monster.Aggressive)
         {
-            var targets = GetObjects(Map, i => i.WithinEarShotOf(Monster), Get.MonsterDamage);
-
-            foreach (var target in targets)
+            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
             {
-                if (target is Aisling { Skulled: true }) continue;
-                if (target is not Aisling aisling) continue;
-                if (aisling.IsInvisible) continue;
-                if (!Monster.AggroList.Contains(aisling.Serial))
-                    Monster.AggroList.Add(aisling.Serial);
-
-                foreach (var targetSerial in Monster.AggroList.Where(serial => aisling.Serial == serial))
-                {
-                    // if target is null, make player the target
-                    Monster.Target ??= aisling;
-
-                    if (targetSerial == Monster.Target.Serial) continue;
-                    if (Monster.Target is not Aisling currentTarget) continue;
-                    if (aisling.ThreatMeter <= currentTarget.ThreatMeter) continue;
-
-                    // if target is greater than current target's threat, then make target
-                    Monster.Target = aisling;
-                }
+                var targets = Monster.AislingsEarShotNearby();
+                var topDps = targets?.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
+            }
+            else
+            {
+                var tagged = Monster.TargetRecord.TaggedAislings.Values;
+                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= topTagged.player;
             }
         }
 
-        if (Target is not null) return;
-        if (Monster.Template.MoodType == MoodQualifer.Neutral |
-            Monster.Template.MoodType == MoodQualifer.Idle)
-        {
-            Monster.Aggressive = false;
-        }
-
+        if (Monster.Target is not null) return;
         ClearTarget();
     }
 
@@ -344,18 +329,22 @@ public class MonsterBaseIntelligence : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Target != null)
-            if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+        if (Monster.Target != null)
+            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
                 return;
             }
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
-        if (Target is not { CurrentHp: > 1 })
+        if (Monster.Target is not { CurrentHp: > 1 })
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
             return;
         }
 
@@ -388,42 +377,55 @@ public class MonsterBaseIntelligence : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Target != null)
-            if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+        if (Monster.Target != null)
+            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
                 return;
             }
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        if (Target is not { CurrentHp: > 1 })
+        if (Monster.Target is not { CurrentHp: > 1 })
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
             return;
         }
 
-        if (Monster.AbilityScripts.Count == 0) return;
         var abilityAttempt = Generator.RandNumGen100();
         if (abilityAttempt <= 60) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
-        if (Monster.AbilityScripts[abilityIdx] is not null)
-            Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        if (Monster.AbilityScripts[abilityIdx] is null) return;
+        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
     }
 
     private void CastSpell()
     {
         if (Monster.CantCast) return;
-        if (Monster.CantAttack) return;
-        if (Target is null) return;
-        if (!Target.WithinRangeOf(Monster)) return;
+        if (Monster.Target is null) return;
+        if (!Monster.Target.WithinRangeOf(Monster)) return;
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
+
+        if (Monster.Target is not { CurrentHp: > 1 })
+        {
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            return;
+        }
+
         if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
-        if (Monster.SpellScripts[spellIdx] is not null)
-            Monster.SpellScripts[spellIdx].OnUse(Monster, Target);
+        if (Monster.SpellScripts[spellIdx] is null) return;
+        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
     }
 
     private void Walk()
@@ -431,35 +433,35 @@ public class MonsterBaseIntelligence : MonsterScript
         if (Monster.CantMove) return;
         if (Monster.ThrownBack) return;
 
-        if (Target != null)
+        if (Monster.Target != null)
         {
-            if (Map.ID != Target.Map.ID)
-            {
-                Monster.AggroList.Remove(Monster.Target.Serial);
-                Monster.Wander();
-                return;
-            }
-
             if (Monster.Target is Aisling aisling)
             {
+                if (Map.ID != aisling.Map.ID)
+                {
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
+                    Monster.Wander();
+                    return;
+                }
+
                 if (!aisling.LoggedIn)
                 {
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
                     Monster.Wander();
                     return;
                 }
 
                 if (aisling.IsInvisible || aisling.Dead || aisling.Skulled)
                 {
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
                     Monster.Wander();
                     return;
                 }
             }
 
-            if (Monster.NextTo((int)Target.Pos.X, (int)Target.Pos.Y))
+            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
             {
-                if (Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+                if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
                 {
                     Monster.BashEnabled = true;
                     Monster.AbilityEnabled = true;
@@ -480,7 +482,7 @@ public class MonsterBaseIntelligence : MonsterScript
                 Monster.CastEnabled = true;
 
                 // Wander, AStar, and Standard Walk Methods
-                if (Target == null | !Monster.Aggressive)
+                if (Monster.Target == null | !Monster.Aggressive)
                 {
                     Monster.Wander();
                 }
@@ -488,7 +490,7 @@ public class MonsterBaseIntelligence : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
+                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
 
                     if (Monster.ThrownBack) return;
@@ -509,15 +511,15 @@ public class MonsterBaseIntelligence : MonsterScript
                     if (Monster.Path.Result.Count != 0) return;
                     Monster.AStar = false;
 
-                    if (Target == null)
+                    if (Monster.Target == null)
                     {
                         Monster.Wander();
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
 
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -556,7 +558,6 @@ public class MonsterShadowSight : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-    private Sprite Target => Monster.Target;
 
     public MonsterShadowSight(Monster monster, Area map) : base(monster, map)
     {
@@ -659,19 +660,25 @@ public class MonsterShadowSight : MonsterScript
             }
         }
 
-        if (Target is Aisling aisling)
+        if (Monster.Target is null)
+        {
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            Monster.Target = recordTuple.player;
+        }
+
+        if (Monster.Target is Aisling aisling)
         {
             Monster.GenerateRewards(aisling);
-            Monster.AggroList.Remove(Monster.Target.Serial);
         }
         else
         {
-            if (!Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold)) return;
-
-            var sum = (uint)Random.Shared.Next((int)(Monster.Template.Level * 13), (int)(Monster.Template.Level * 200));
+            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
 
             if (sum > 0)
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+            {
+                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
+                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+            }
         }
 
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
@@ -680,12 +687,10 @@ public class MonsterShadowSight : MonsterScript
 
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Target is Aisling { LoggedIn: false })
-        {
-            Monster.AggroList.Remove(Monster.Target.Serial);
-        }
+        if (Monster.Target is Aisling { LoggedIn: false })
+            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
 
-        if (Target is not null && Monster.TaggedAislings.Count > 0 && Monster.Template.EngagedWalkingSpeed > 0)
+        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty && Monster.Template.EngagedWalkingSpeed > 0)
             Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
 
         var assail = Monster.BashTimer.Update(elapsedTime);
@@ -694,9 +699,9 @@ public class MonsterShadowSight : MonsterScript
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
         // ToDo: Game Master Nullify damage
-        if (Target is Aisling aisling)
+        if (Monster.Target is Aisling aisling)
         {
-            if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Target.IsWeakened)
+            if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
                 ClearTarget();
@@ -751,7 +756,7 @@ public class MonsterShadowSight : MonsterScript
 
     public override void OnLeave(WorldClient client)
     {
-        Monster.AggroList.Remove(client.Aisling.Serial);
+        Monster.TargetRecord.TaggedAislings.TryRemove(client.Aisling.Serial, out _);
         if (Monster.Target == client.Aisling) ClearTarget();
     }
 
@@ -759,18 +764,19 @@ public class MonsterShadowSight : MonsterScript
     {
         try
         {
-            Monster.DamageReceived += dmg;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, client.Aisling, true), player);
 
-            if (!Monster.AggroList.Contains(client.Aisling.Serial))
-                Monster.AggroList.Add(client.Aisling.Serial);
+            if (player.player == null)
+                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
+
+            Monster.Aggressive = true;
         }
         catch (Exception ex)
         {
             ServerSetup.Logger(ex.ToString());
             Crashes.TrackError(ex);
         }
-
-        Monster.Aggressive = true;
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -793,9 +799,7 @@ public class MonsterShadowSight : MonsterScript
             return $"{{=k{Monster.Template.Level}{{=s";
         if (Monster.Template.Level <= client.Aisling.Level - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 10)
-            return $"{{=i{Monster.Template.Level}{{=s";
-        return $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Targeting
@@ -808,7 +812,7 @@ public class MonsterShadowSight : MonsterScript
 
         if (Monster.Target is Aisling)
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
         }
 
         Monster.Target = null;
@@ -829,45 +833,32 @@ public class MonsterShadowSight : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling { Skulled: true })
+        if (Monster.Target is Aisling checkTarget)
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
-            Monster.Target = null;
+            if (checkTarget.Skulled || checkTarget.IsInvisible)
+            {
+                Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+                Monster.Target = null;
+            }
         }
 
         if (Monster.Aggressive)
         {
-            var targets = GetObjects(Map, i => i.WithinEarShotOf(Monster), Get.MonsterDamage);
-
-            foreach (var target in targets)
+            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
             {
-                if (target is Aisling { Skulled: true }) continue;
-                if (target is not Aisling aisling) continue;
-                if (!Monster.AggroList.Contains(aisling.Serial))
-                    Monster.AggroList.Add(aisling.Serial);
-
-                foreach (var targetSerial in Monster.AggroList.Where(serial => aisling.Serial == serial))
-                {
-                    // if target is null, make player the target
-                    Monster.Target ??= aisling;
-
-                    if (targetSerial == Monster.Target.Serial) continue;
-                    if (Monster.Target is not Aisling currentTarget) continue;
-                    if (aisling.ThreatMeter <= currentTarget.ThreatMeter) continue;
-
-                    // if target is greater than current target's threat, then make target
-                    Monster.Target = aisling;
-                }
+                var targets = Monster.AislingsEarShotNearby();
+                var topDps = targets?.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
+            }
+            else
+            {
+                var tagged = Monster.TargetRecord.TaggedAislings.Values;
+                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= topTagged.player;
             }
         }
 
-        if (Target is not null) return;
-        if (Monster.Template.MoodType == MoodQualifer.Neutral |
-            Monster.Template.MoodType == MoodQualifer.Idle)
-        {
-            Monster.Aggressive = false;
-        }
-
+        if (Monster.Target is not null) return;
         ClearTarget();
     }
 
@@ -878,18 +869,22 @@ public class MonsterShadowSight : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Target != null)
-            if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+        if (Monster.Target != null)
+            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
                 return;
             }
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
-        if (Target is not { CurrentHp: > 1 })
+        if (Monster.Target is not { CurrentHp: > 1 })
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
             return;
         }
 
@@ -922,42 +917,55 @@ public class MonsterShadowSight : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Target != null)
-            if (!Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+        if (Monster.Target != null)
+            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
                 return;
             }
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        if (Target is not { CurrentHp: > 1 })
+        if (Monster.Target is not { CurrentHp: > 1 })
         {
-            Monster.AggroList.Remove(Monster.Target.Serial);
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
             return;
         }
 
-        if (Monster.AbilityScripts.Count == 0) return;
         var abilityAttempt = Generator.RandNumGen100();
         if (abilityAttempt <= 60) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
-        if (Monster.AbilityScripts[abilityIdx] is not null)
-            Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        if (Monster.AbilityScripts[abilityIdx] is null) return;
+        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
     }
 
     private void CastSpell()
     {
         if (Monster.CantCast) return;
-        if (Monster.CantAttack) return;
-        if (Target is null) return;
-        if (!Target.WithinRangeOf(Monster)) return;
+        if (Monster.Target is null) return;
+        if (!Monster.Target.WithinRangeOf(Monster)) return;
+
+        // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
+
+        if (Monster.Target is not { CurrentHp: > 1 })
+        {
+            if (Monster.Target is not Aisling aisling) return;
+            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            return;
+        }
+
         if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
-        if (Monster.SpellScripts[spellIdx] is not null)
-            Monster.SpellScripts[spellIdx].OnUse(Monster, Target);
+        if (Monster.SpellScripts[spellIdx] is null) return;
+        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
     }
 
     private void Walk()
@@ -965,35 +973,35 @@ public class MonsterShadowSight : MonsterScript
         if (Monster.CantMove) return;
         if (Monster.ThrownBack) return;
 
-        if (Target != null)
+        if (Monster.Target != null)
         {
-            if (Map.ID != Target.Map.ID)
-            {
-                Monster.AggroList.Remove(Monster.Target.Serial);
-                Monster.Wander();
-                return;
-            }
-
             if (Monster.Target is Aisling aisling)
             {
+                if (Map.ID != aisling.Map.ID)
+                {
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
+                    Monster.Wander();
+                    return;
+                }
+
                 if (!aisling.LoggedIn)
                 {
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
                     Monster.Wander();
                     return;
                 }
 
                 if (aisling.Dead || aisling.Skulled)
                 {
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
                     Monster.Wander();
                     return;
                 }
             }
 
-            if (Monster.NextTo((int)Target.Pos.X, (int)Target.Pos.Y))
+            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
             {
-                if (Monster.Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+                if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
                 {
                     Monster.BashEnabled = true;
                     Monster.AbilityEnabled = true;
@@ -1014,7 +1022,7 @@ public class MonsterShadowSight : MonsterScript
                 Monster.CastEnabled = true;
 
                 // Wander, AStar, and Standard Walk Methods
-                if (Target == null | !Monster.Aggressive)
+                if (Monster.Target == null | !Monster.Aggressive)
                 {
                     Monster.Wander();
                 }
@@ -1022,7 +1030,7 @@ public class MonsterShadowSight : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
+                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
 
                     if (Monster.ThrownBack) return;
@@ -1043,15 +1051,15 @@ public class MonsterShadowSight : MonsterScript
                     if (Monster.Path.Result.Count != 0) return;
                     Monster.AStar = false;
 
-                    if (Target == null)
+                    if (Monster.Target == null)
                     {
                         Monster.Wander();
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
 
-                    Monster.AggroList.Remove(Monster.Target.Serial);
+                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }

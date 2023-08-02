@@ -778,26 +778,25 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         if (force) return false;
         if (this is not Monster monster) return false;
-        if (monster.TaggedAislings.ContainsKey(attackingPlayer.Serial)) return true;
+        if (monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _)) return true;
         if (monster.Template.BaseName == "Training Dummy") return true;
 
         // If the dictionary is empty, add the player
-        if (monster.TaggedAislings.IsEmpty)
+        if (monster.TargetRecord.TaggedAislings.IsEmpty)
         {
             monster.TryAddTryRemoveTagging(attackingPlayer);
             return true;
         }
 
-        var taggedMemberSerial = monster.TaggedAislings.Keys.FirstOrDefault();
+        var taggedMemberSerial = monster.TargetRecord.TaggedAislings.Keys.FirstOrDefault();
+        if (taggedMemberSerial == 0) return false;
+
         var taggedMember = GetObject<Aisling>(Map, i => i.Serial == taggedMemberSerial);
         if (taggedMember.GroupParty == null) return false;
-        if (attackingPlayer.GroupId == taggedMember.GroupId)
-        {
-            monster.TryAddTryRemoveTagging(attackingPlayer);
-            return true;
-        }
 
-        return false;
+        if (attackingPlayer.GroupId != taggedMember.GroupId) return false;
+        monster.TryAddTryRemoveTagging(attackingPlayer);
+        return true;
     }
 
     #endregion
@@ -1942,11 +1941,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void Remove()
     {
-        var nearby = GetObjects<Aisling>(null, i => i is { LoggedIn: true });
+        var nearby = AislingsEarShotNearby();
 
         foreach (var o in nearby)
-            for (var i = 0; i < 2; i++)
-                o?.Client?.SendRemoveObject(Serial);
+            o?.Client?.SendRemoveObject(Serial);
 
         DeleteObject();
     }

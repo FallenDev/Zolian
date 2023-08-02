@@ -42,8 +42,6 @@ public class CreateMonster : MonsterCreateScript
             WalkTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.MovementSpeed)),
             ObjectUpdateTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay)),
             CastEnabled = true,
-            TaggedAislings = new ConcurrentDictionary<long, bool>(),
-            AggroList = new List<long>(),
             Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
             Size = "",
             CurrentMapId = _map.ID

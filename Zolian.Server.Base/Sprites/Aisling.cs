@@ -17,13 +17,13 @@ using Darkages.Types;
 
 namespace Darkages.Sprites;
 
-public class KillRecord
+public record KillRecord
 {
     public int TotalKills { get; set; }
     public DateTime TimeKilled { get; set; }
 }
 
-public class IgnoredRecord
+public record IgnoredRecord
 {
     public int Serial { get; init; }
     public string PlayerIgnored { get; init; }
