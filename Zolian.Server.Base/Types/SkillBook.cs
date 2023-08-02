@@ -1,16 +1,7 @@
 ﻿using System.Collections.Concurrent;
-
-using Dapper;
-
-using Darkages.Database;
 using Darkages.Network.Client;
 using Darkages.Object;
 using Darkages.Templates;
-
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-
 using ServiceStack;
 
 namespace Darkages.Types;
@@ -72,7 +63,7 @@ public class SkillBook : ObjectManager
         var copy = Skills[movingFrom];
         if (Skills.TryUpdate(movingFrom, null, copy))
             client.SendRemoveSkillFromPane(movingFrom);
-        DeleteFromAislingDb(client, copy);
+        client.DeleteSkillFromDb(copy);
     }
 
     public void Set(byte slot, Skill newSkill, Skill oldSkill) => Skills.TryUpdate(slot, newSkill, oldSkill);
@@ -131,29 +122,5 @@ public class SkillBook : ObjectManager
         Skills.TryUpdate(toSlot, skill1, null);
         client.SendAddSkillToPane(skill1);
         return true;
-    }
-
-    private static void DeleteFromAislingDb(WorldClient client, Skill skill)
-    {
-        try
-        {
-            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE Serial = @Serial AND SkillName = @SkillName";
-            sConn.Execute(cmd, new { client.Aisling.Serial, skill.SkillName });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
     }
 }

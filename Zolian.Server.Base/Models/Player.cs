@@ -18,7 +18,6 @@ public class Player : Sprite
     public uint AbpNext { get; set; }
     public uint AbpTotal { get; set; }
     public ushort ExpLevel { get; set; }
-    // Since this property needs to be used in negative calculations it must stay int
     public uint ExpNext { get; set; }
     public uint ExpTotal { get; set; }
     public ClassStage Stage { get; set; }
@@ -63,10 +62,10 @@ public class Player : Sprite
     public bool Developer { get; set; }
     public bool Ranger { get; set; }
     public bool Knight { get; set; }
-    public uint GoldPoints { get; set; }
+    public long GoldPoints { get; set; }
     public int StatPoints { get; set; }
-    public uint GamePoints { get; set; }
-    public uint BankedGold { get; set; }
+    public long GamePoints { get; set; }
+    public long BankedGold { get; set; }
     public uint ArmorImg { get; set; }
     public uint HelmetImg { get; set; }
     public uint ShieldImg { get; set; }

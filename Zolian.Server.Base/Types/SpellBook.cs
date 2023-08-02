@@ -1,16 +1,7 @@
 ﻿using System.Collections.Concurrent;
-
-using Dapper;
-
-using Darkages.Database;
 using Darkages.Network.Client;
 using Darkages.Object;
 using Darkages.Templates;
-
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-
 using ServiceStack;
 
 namespace Darkages.Types;
@@ -72,7 +63,7 @@ public class SpellBook : ObjectManager
         var copy = Spells[movingFrom];
         if (Spells.TryUpdate(movingFrom, null, copy))
             client.SendRemoveSpellFromPane(movingFrom);
-        DeleteFromAislingDb(client, copy);
+        client.DeleteSpellFromDb(copy);
     }
 
     public void Set(byte slot, Spell newSpell, Spell oldSpell) => Spells.TryUpdate(slot, newSpell, oldSpell);
@@ -131,29 +122,5 @@ public class SpellBook : ObjectManager
         Spells.TryUpdate(toSlot, spell1, null);
         client.SendAddSpellToPane(spell1);
         return true;
-    }
-
-    private static void DeleteFromAislingDb(WorldClient client, Spell spell)
-    {
-        try
-        {
-            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE Serial = @Serial AND SpellName = @SpellName";
-            sConn.Execute(cmd, new { client.Aisling.Serial, spell.SpellName });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
     }
 }

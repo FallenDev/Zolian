@@ -64,16 +64,15 @@ public class Gowther : MundaneScript
             case 0x0001:
             {
                 var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                var newSkills = _skillList.Except(learnedSkills).ToList();
+                var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                                                            || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                                                            || i.Prerequisites.ClassRequired == Class.Peasant).ToList();
 
                 newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
                 if (newSkills.Count > 0)
                 {
-                    client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003,
-                        newSkills.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                             || i.Prerequisites.ClassRequired == Class.Peasant));
+                    client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003, newSkills);
                 }
                 else
                 {
@@ -168,16 +167,15 @@ public class Gowther : MundaneScript
             case 0x0010:
             {
                 var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                var newSpells = _spellList.Except(learnedSpells).ToList();
+                var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
+                                                                            || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
+                                                                            || i.Prerequisites.ClassRequired == Class.Peasant).ToList();
 
                 newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
                 if (newSpells.Count > 0)
                 {
-                    client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012,
-                        newSpells.Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                                             || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                                             || i.Prerequisites.ClassRequired == Class.Peasant));
+                    client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012, newSpells);
                 }
                 else
                 {

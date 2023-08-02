@@ -169,7 +169,7 @@ public interface IWorldClient : ISocketClient
     void CompleteMapTransition();
     void DeleteSkillFromDb(Skill skill);
     void DeleteSpellFromDb(Spell spell);
-    Task AddDiscoveredMapToDb();
-    Task AddToIgnoreListDb(string ignored);
+    void AddDiscoveredMapToDb();
+    void AddToIgnoreListDb(string ignored);
     void RemoveFromIgnoreListDb(string ignored);
 }

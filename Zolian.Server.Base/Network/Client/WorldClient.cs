@@ -65,7 +65,6 @@ namespace Darkages.Network.Client
         public Aisling Aisling { get; set; }
         public bool MapUpdating { get; set; }
         public bool MapOpen { get; set; }
-        private SemaphoreSlim CreateLock { get; } = new(1, 1);
         private SemaphoreSlim LoadLock { get; } = new(1, 1);
         public DateTime BoardOpened { get; set; }
         public DialogSession DlgSession { get; set; }
@@ -1220,8 +1219,8 @@ namespace Darkages.Network.Client
                 DefenseElement = (Element)Aisling.DefenseElement,
                 Dex = (byte)Math.Clamp(Aisling.Dex, 0, 255),
                 Dmg = Math.Clamp(Aisling.Dmg, byte.MinValue, byte.MaxValue),
-                GamePoints = Aisling.GamePoints,
-                Gold = Aisling.GoldPoints,
+                GamePoints = (uint)Aisling.GamePoints,
+                Gold = (uint)Aisling.GoldPoints,
                 Hit = Math.Clamp(Aisling.Hit, byte.MinValue, byte.MaxValue),
                 Int = (byte)Math.Clamp(Aisling.Int, 0, 255),
                 IsAdmin = Aisling.GameMaster,
@@ -3153,12 +3152,9 @@ namespace Darkages.Network.Client
 
             var skill = Skill.GiveTo(this, subject.Name);
             if (skill) LoadSkillBook();
-            //SendOptionsDialog(source, message);
-
-            //Aisling.Show(Scope.NearbyAislings,
-            //    new ServerFormat29((uint)Aisling.Serial, (uint)source.Serial,
-            //        subject.TargetAnimation,
-            //        subject.TargetAnimation, 100));
+            
+            this.SendOptionsDialog(source, message);
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, Aisling.Serial));
 
             return this;
         }
@@ -3173,12 +3169,9 @@ namespace Darkages.Network.Client
 
             var spell = Spell.GiveTo(this, subject.Name);
             if (spell) LoadSpellBook();
-            //SendOptionsDialog(source, message);
 
-            //Aisling.Show(Scope.NearbyAislings,
-            //    new ServerFormat29((uint)Aisling.Serial, (uint)source.Serial,
-            //        subject.TargetAnimation,
-            //        subject.TargetAnimation, 100));
+            this.SendOptionsDialog(source, message);
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, Aisling.Serial));
 
             return this;
         }
@@ -3389,9 +3382,8 @@ namespace Darkages.Network.Client
             {
                 if (prerequisites.GoldRequired > 0)
                 {
+                    if (Aisling.GoldPoints < prerequisites.GoldRequired) return false;
                     Aisling.GoldPoints -= prerequisites.GoldRequired;
-                    if (Aisling.GoldPoints <= 0)
-                        Aisling.GoldPoints = 0;
                 }
 
                 SendAttributes(StatUpdateType.ExpGold);
@@ -4218,8 +4210,12 @@ namespace Darkages.Network.Client
             try
             {
                 sConn.Open();
-                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE SkillName = @SkillName AND Serial = @Serial";
-                sConn.Execute(cmd, new { skill.SkillName, Aisling.Serial });
+                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE SkillName = @SkillName AND Serial = @AislingSerial";
+                sConn.Execute(cmd, new
+                {
+                    skill.SkillName,
+                    AislingSerial = (long)Aisling.Serial
+                });
                 sConn.Close();
             }
             catch (SqlException e)
@@ -4244,8 +4240,12 @@ namespace Darkages.Network.Client
             try
             {
                 sConn.Open();
-                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellName = @SpellName AND Serial = @Serial";
-                sConn.Execute(cmd, new { spell.SpellName, Aisling.Serial });
+                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellName = @SpellName AND Serial = @AislingSerial";
+                sConn.Execute(cmd, new
+                {
+                    spell.SpellName,
+                    AislingSerial = (long)Aisling.Serial
+                });
                 sConn.Close();
             }
             catch (SqlException e)
@@ -4262,10 +4262,8 @@ namespace Darkages.Network.Client
             }
         }
 
-        public async Task AddDiscoveredMapToDb()
+        public void AddDiscoveredMapToDb()
         {
-            await CreateLock.WaitAsync().ConfigureAwait(false);
-
             try
             {
                 Aisling.DiscoveredMaps.Add(Aisling.CurrentMapId);
@@ -4274,7 +4272,7 @@ namespace Darkages.Network.Client
                 sConn.Open();
                 var cmd = new SqlCommand("FoundMap", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = Aisling.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)Aisling.Serial;
                 cmd.Parameters.Add("@MapId", SqlDbType.Int).Value = Aisling.CurrentMapId;
 
                 cmd.CommandTimeout = 5;
@@ -4300,16 +4298,10 @@ namespace Darkages.Network.Client
                 ServerSetup.Logger(e.StackTrace, LogLevel.Error);
                 Crashes.TrackError(e);
             }
-            finally
-            {
-                CreateLock.Release();
-            }
         }
 
-        public async Task AddToIgnoreListDb(string ignored)
+        public void AddToIgnoreListDb(string ignored)
         {
-            await CreateLock.WaitAsync().ConfigureAwait(false);
-
             try
             {
                 Aisling.IgnoredList.Add(ignored);
@@ -4318,7 +4310,7 @@ namespace Darkages.Network.Client
                 sConn.Open();
                 var cmd = new SqlCommand("IgnoredSave", sConn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = Aisling.Serial;
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)Aisling.Serial;
                 cmd.Parameters.Add("@PlayerIgnored", SqlDbType.VarChar).Value = ignored;
 
                 cmd.CommandTimeout = 5;
@@ -4344,10 +4336,6 @@ namespace Darkages.Network.Client
                 ServerSetup.Logger(e.StackTrace, LogLevel.Error);
                 Crashes.TrackError(e);
             }
-            finally
-            {
-                CreateLock.Release();
-            }
         }
 
         public void RemoveFromIgnoreListDb(string ignored)
@@ -4358,10 +4346,10 @@ namespace Darkages.Network.Client
 
                 var sConn = new SqlConnection(AislingStorage.ConnectionString);
                 sConn.Open();
-                const string playerIgnored = "DELETE FROM ZolianPlayers.dbo.PlayersIgnoreList WHERE Serial = @Serial AND PlayerIgnored = @ignored";
+                const string playerIgnored = "DELETE FROM ZolianPlayers.dbo.PlayersIgnoreList WHERE Serial = @AislingSerial AND PlayerIgnored = @ignored";
                 sConn.Execute(playerIgnored, new
                 {
-                    Aisling.Serial,
+                    AislingSerial = (long)Aisling.Serial,
                     ignored
                 });
                 sConn.Close();

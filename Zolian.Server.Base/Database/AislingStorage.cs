@@ -167,10 +167,10 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.IsInvisible;
             cmd.Parameters.Add("@Resting", SqlDbType.VarChar).Value = obj.Resting;
             cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
-            cmd.Parameters.Add("@GoldPoints", SqlDbType.Int).Value = obj.GoldPoints;
+            cmd.Parameters.Add("@GoldPoints", SqlDbType.BigInt).Value = obj.GoldPoints;
             cmd.Parameters.Add("@StatPoints", SqlDbType.Int).Value = obj.StatPoints;
-            cmd.Parameters.Add("@GamePoints", SqlDbType.Int).Value = obj.GamePoints;
-            cmd.Parameters.Add("@BankedGold", SqlDbType.Int).Value = obj.BankedGold;
+            cmd.Parameters.Add("@GamePoints", SqlDbType.BigInt).Value = obj.GamePoints;
+            cmd.Parameters.Add("@BankedGold", SqlDbType.BigInt).Value = obj.BankedGold;
             cmd.Parameters.Add("@ArmorImg", SqlDbType.Int).Value = obj.ArmorImg;
             cmd.Parameters.Add("@HelmetImg", SqlDbType.Int).Value = obj.HelmetImg;
             cmd.Parameters.Add("@ShieldImg", SqlDbType.Int).Value = obj.ShieldImg;

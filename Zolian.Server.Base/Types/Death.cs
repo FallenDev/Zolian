@@ -99,7 +99,7 @@ public class Death
     {
         var gold = player.GoldPoints;
         if (gold <= 0) return;
-        Money.Create(player, gold, new Position(player.DeathLocation));
+        Money.Create(player, (uint)gold, new Position(player.DeathLocation));
         player.GoldPoints = 0;
     }
 

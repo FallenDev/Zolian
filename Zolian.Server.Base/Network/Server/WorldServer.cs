@@ -1753,11 +1753,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (targetAisling.Equals(fromAisling))
             {
-                localClient.SendServerMessage(ServerMessageType.Whisper, "Talking to yourself?");
+                localClient.SendServerMessage(ServerMessageType.Whisper, "Little voice in yer head eh?");
                 return default;
             }
 
-            if (targetAisling.ActiveStatus == ActivityStatus.DoNotDisturb)
+            if (targetAisling.ActiveStatus == ActivityStatus.DoNotDisturb || targetAisling.IgnoredList.ListContains(fromAisling.Username))
             {
                 localClient.SendServerMessage(ServerMessageType.Whisper, $"{targetAisling.Username} doesn't want to be bothered");
                 return default;

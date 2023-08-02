@@ -98,14 +98,10 @@ public class Skill
             var cmd = new SqlCommand("SkillToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var skillId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-            var skillNameReplaced = skill.Template.ScriptName;
-
-            cmd.Parameters.Add("@SkillId", SqlDbType.Int).Value = skillId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
-            cmd.Parameters.Add("@SkillName", SqlDbType.VarChar).Value = skillNameReplaced;
+            cmd.Parameters.Add("@SkillName", SqlDbType.VarChar).Value = skill.Template.ScriptName;
             cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@CurrentCooldown", SqlDbType.Int).Value = 0;
 
@@ -167,12 +163,10 @@ public class Skill
             var cmd = new SqlCommand("SkillToPlayer", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            var skillNameReplaced = skill.Template.ScriptName;
-
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
-            cmd.Parameters.Add("@SkillName", SqlDbType.VarChar).Value = skillNameReplaced;
+            cmd.Parameters.Add("@SkillName", SqlDbType.VarChar).Value = skill.Template.ScriptName;
             cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@CurrentCooldown", SqlDbType.Int).Value = 0;
 

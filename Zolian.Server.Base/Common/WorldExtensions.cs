@@ -226,35 +226,6 @@ public static class WorldExtensions
 
     #region Skills/Spells Dialog
 
-    public static void SendSkillLearnDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<SkillTemplate> skillTemplates)
-    {
-        var args = new MenuArgs
-        {
-            Args = null,
-            Color = DisplayColor.Default,
-            EntityType = EntityType.Creature,
-            Items = null,
-            MenuType = MenuType.ShowSkills,
-            Name = npc.Name,
-            Options = null,
-            PursuitId = 0,
-            Skills = skillTemplates.Select(s => new SkillInfo
-            {
-                Name = s.Name,
-                PanelName = null,
-                Slot = 0,
-                Sprite = s.Icon
-            }).ToList(),
-            Slots = null,
-            SourceId = npc.Serial,
-            Spells = null,
-            Sprite = npc.Template.Image,
-            Text = message
-        };
-
-        worldClient.Send(args);
-    }
-
     public static void SendSkillLearnDialog(this IWorldClient worldClient, Mundane npc, string message, ushort pursuit, IEnumerable<SkillTemplate> skillTemplates)
     {
         var args = new MenuArgs
@@ -270,45 +241,13 @@ public static class WorldExtensions
             Skills = skillTemplates.Select(s => new SkillInfo
             {
                 Name = s.Name,
-                PanelName = null,
+                PanelName = s.Name,
                 Slot = 0,
                 Sprite = s.Icon
             }).ToList(),
             Slots = null,
             SourceId = npc.Serial,
             Spells = null,
-            Sprite = npc.Template.Image,
-            Text = message
-        };
-
-        worldClient.Send(args);
-    }
-
-    public static void SendSpellLearnDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<SpellTemplate> spellTemplates)
-    {
-        var args = new MenuArgs
-        {
-            Args = null,
-            Color = DisplayColor.Default,
-            EntityType = EntityType.Creature,
-            Items = null,
-            MenuType = MenuType.ShowSpells,
-            Name = npc.Name,
-            Options = null,
-            PursuitId = 0,
-            Skills = null,
-            Slots = null,
-            SourceId = npc.Serial,
-            Spells = spellTemplates.Select(s => new SpellInfo
-            {
-                CastLines = 0,
-                Name = null,
-                PanelName = null,
-                Prompt = null,
-                Slot = 0,
-                SpellType = SpellType.None,
-                Sprite = 0
-            }).ToList(),
             Sprite = npc.Template.Image,
             Text = message
         };
@@ -333,13 +272,13 @@ public static class WorldExtensions
             SourceId = npc.Serial,
             Spells = spellTemplates.Select(s => new SpellInfo
             {
-                CastLines = 0,
-                Name = null,
-                PanelName = null,
+                CastLines = (byte)s.BaseLines,
+                Name = s.Name,
+                PanelName = s.Name,
                 Prompt = null,
                 Slot = 0,
-                SpellType = SpellType.None,
-                Sprite = 0
+                SpellType = (SpellType)s.TargetType,
+                Sprite = s.Icon
             }).ToList(),
             Sprite = npc.Template.Image,
             Text = message
