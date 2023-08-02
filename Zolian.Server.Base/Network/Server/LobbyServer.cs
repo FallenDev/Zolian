@@ -158,15 +158,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         switch (client.RemoteIp.ToString())
         {
             case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
-                try
-                {
-                    client.Socket.Shutdown(SocketShutdown.Both);
-                }
-                finally
-                {
-                    client.Socket.Close();
-                }
-                return false;
+                return true;
             case "127.0.0.1":
             case InternalIP:
                 return false;
