@@ -224,24 +224,30 @@ public class Inventory : ObjectManager, IInventory
         }
     }
 
-    public bool TrySwap(WorldClient client, byte slot1, byte slot2)
+    public (bool, int) TrySwap(WorldClient client, byte slot1, byte slot2)
     {
-        if (!IsValidSlot(slot1) || !IsValidSlot(slot2)) return false;
-        if (slot1 == slot2) return true;
+        if (!IsValidSlot(slot1) || !IsValidSlot(slot2)) return (false, 0);
+        if (slot1 == slot2) return (true, 0);
 
         var item1 = FindInSlot(slot1);
         var item2 = FindInSlot(slot2);
 
         if (slot2 == 59)
         {
-            if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return true;
+            if (!item1.Template.Flags.FlagIsSet(ItemFlags.Bankable))
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bBound!");
+                return (false, 1);
+            }
+
+            if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return (true, 0);
             item1.ItemPane = Item.ItemPanes.Bank;
-            if (client.Aisling.BankManager.Items.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, item1))
+            if (client.Aisling.BankManager.Items.TryAdd(item1.ItemId, item1))
                 client.SendRemoveItemFromPane(item1.InventorySlot);
             
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
             UpdatePlayersWeight(client);
-            return true;
+            return (true, 0);
         }
 
         if ((item1 == null)
@@ -267,10 +273,10 @@ public class Inventory : ObjectManager, IInventory
         AddRange(client, item2, item1.Stacks);
         RemoveFromInventory(client, item1);
 
-        return true;
+        return (true, 0);
     }
 
-    private bool AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
+    private (bool, int) AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
     {
         if (item1 != null)
             client.SendRemoveItemFromPane(item1.InventorySlot);
@@ -285,7 +291,7 @@ public class Inventory : ObjectManager, IInventory
             Items.TryUpdate(slot2, item1, item2);
             UpdateSlot(client, item1);
             UpdateSlot(client, item2);
-            return true;
+            return (true, 0);
         }
 
         switch (item1)
@@ -296,16 +302,16 @@ public class Inventory : ObjectManager, IInventory
                 Items.TryUpdate(slot1, item2, null);
                 Items.TryUpdate(slot2, null, item2);
                 UpdateSlot(client, item2);
-                return true;
+                return (true, 0);
             case null:
-                return true;
+                return (true, 0);
         }
 
         item1.InventorySlot = slot2;
         Items.TryUpdate(slot1, null, item1);
         Items.TryUpdate(slot2, item1, null);
         UpdateSlot(client, item1);
-        return true;
+        return (true, 0);
     }
 }
 

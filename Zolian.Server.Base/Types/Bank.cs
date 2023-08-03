@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 using Darkages.Interfaces;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
@@ -9,10 +10,10 @@ public class Bank : IBank
 {
     public Bank()
     {
-        Items = new Dictionary<uint, Item>();
+        Items = new ConcurrentDictionary<uint, Item>();
     }
 
-    public Dictionary<uint, Item> Items { get; }
+    public ConcurrentDictionary<uint, Item> Items { get; }
     
     public void DepositGold(IWorldClient client, uint gold)
     {

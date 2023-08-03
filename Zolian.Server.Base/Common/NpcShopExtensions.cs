@@ -274,6 +274,29 @@ public static class NpcShopExtensions
 
     #endregion
 
+    #region Bank
+
+    /// <summary>
+    /// Looks through player's bankmanager for items and returns them
+    /// </summary>
+    /// <returns>List of ItemTemplates</returns>
+    public static IEnumerable<Item> WithdrawFromBank(WorldClient client)
+    {
+        return client.Aisling.BankManager.Items.Values;
+    }
+
+    /// <summary>
+    /// Returns a list of items from your inventory that are "Bankable"
+    /// </summary>
+    /// <returns>IEnumerable byte array</returns>
+    public static IEnumerable<byte> GetCharacterBankInventoryByteList(WorldClient client)
+    {
+        return client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList()
+            .Select(i => i.InventorySlot).ToList();
+    }
+
+    #endregion
+
     #region Item Quality Setters
 
     /// <summary>

@@ -558,7 +558,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         Owner = aisling.Serial;
         ItemPane = ItemPanes.Inventory;
 
-        #region stackable items
+        #region Stackable
 
         if (Template.Flags.FlagIsSet(ItemFlags.Stackable))
         {
@@ -603,7 +603,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
         #endregion
 
-        #region not stackable items
+        #region Non-Stackable
 
         {
             InventorySlot = aisling.Inventory.FindEmpty();
@@ -626,7 +626,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         }
 
         #endregion
-
     }
 
     public void Release(Sprite owner, Position position, bool delete = true)

@@ -99,7 +99,7 @@ public class Emer : MundaneScript
                 }
                 break;
             case 0x02:
-                client.SendItemShopDialog(Mundane, "Bon Appetite.", 0x02, NpcShopExtensions.BuyFromStoreInventory(Mundane));
+                client.SendItemShopDialog(Mundane, "Bon Appetite.", NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
             case 0x03:
                 client.SendItemSellDialog(Mundane, "What do you want to sell?", NpcShopExtensions.GetCharacterSellInventoryByteList(client));

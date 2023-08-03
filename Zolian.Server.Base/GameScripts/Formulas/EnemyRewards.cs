@@ -304,16 +304,16 @@ public class EnemyRewards : RewardScript
     {
         var dropList = new List<string>();
         var templateDrops = monster.Template.Drops;
-        var ring = GenerateRingDropsBasedOnLevel(monster);
-        var belt = GenerateBeltDropsBasedOnLevel(monster);
-        var boot = GenerateBootDropsBasedOnLevel(monster);
-        var earring = GenerateEarringDropsBasedOnLevel(monster);
-        var greaves = GenerateGreaveDropsBasedOnLevel(monster);
-        var hand = GenerateHandDropsBasedOnLevel(monster);
-        var necklace = GenerateNecklaceDropsBasedOnLevel(monster);
-        var offHand = GenerateOffHandDropsBasedOnLevel(monster);
-        var shield = GenerateShieldDropsBasedOnLevel(monster);
-        var wrist = GenerateWristDropsBasedOnLevel(monster);
+        var ring = GenerateDropsBasedOnLevel(monster, RingDrops);
+        var belt = GenerateDropsBasedOnLevel(monster, BeltDrops);
+        var boot = GenerateDropsBasedOnLevel(monster, BootDrops);
+        var earring = GenerateDropsBasedOnLevel(monster, EarringDrops);
+        var greaves = GenerateDropsBasedOnLevel(monster, GreaveDrops);
+        var hand = GenerateDropsBasedOnLevel(monster, HandDrops);
+        var necklace = GenerateDropsBasedOnLevel(monster, NecklaceDrops);
+        var offHand = GenerateDropsBasedOnLevel(monster, OffHandDrops);
+        var shield = GenerateDropsBasedOnLevel(monster, ShieldDrops);
+        var wrist = GenerateDropsBasedOnLevel(monster, WristDrops);
         if (templateDrops.Count > 0)
             dropList.AddRange(templateDrops);
         if (ring != null)

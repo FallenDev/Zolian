@@ -2367,11 +2367,11 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x0A - Message
+        /// 0x0D - Public Messages / Chant
         /// </summary>
         /// <param name="sourceId">Sprite Serial</param>
         /// <param name="publicMessageType">Message Type</param>
-        /// <param name="message">Value</param>
+        /// <param name="message">Message</param>
         public void SendPublicMessage(uint sourceId, PublicMessageType publicMessageType, string message)
         {
             var args = new PublicMessageArgs
@@ -2864,7 +2864,9 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
-
+        /// <summary>
+        /// 0x0A - System Messages / Private Messages
+        /// </summary>
         public void SendServerMessage(ServerMessageType serverMessageType, string message)
         {
             var args = new ServerMessageArgs
