@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
 using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
 using Chaos.Extensions.Common;
 
 using Darkages.Enums;
@@ -104,19 +103,21 @@ public class Inventory : ObjectManager, IInventory
         return items.Count;
     }
 
+    /// <summary>
+    /// Removes the item from inventory - Does not delete it from the database
+    /// </summary>
     public void Remove(WorldClient client, Item item)
     {
         if (item == null) return;
 
         if (Items.TryUpdate(item.InventorySlot, null, item))
             client.SendRemoveItemFromPane(item.InventorySlot);
-        client.SendAttributes(StatUpdateType.Primary);
-        item.DeleteFromAislingDb();
+        UpdatePlayersWeight(client);
     }
 
     /// <summary>
-    /// Removes the item from inventory (Only used when item is destroyed or dropped on the ground)
-    /// Deletes the record from the database, as well as removes it from the players inventory
+    /// Removes the item from inventory (Only used when item is destroyed or dropped on the ground) -
+    /// Deletes the record from the database
     /// </summary>
     public void RemoveFromInventory(WorldClient client, Item item)
     {
@@ -125,10 +126,16 @@ public class Inventory : ObjectManager, IInventory
         if (Items.TryUpdate(item.InventorySlot, null, item))
             client.SendRemoveItemFromPane(item.InventorySlot);
         client.LastItemDropped = item;
-        client.SendAttributes(StatUpdateType.Primary);
+        UpdatePlayersWeight(client);
         item.DeleteFromAislingDb();
     }
 
+    /// <summary>
+    /// Removes a specific amount from a stacked item - Deletes from database if no longer existing
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="item"></param>
+    /// <param name="range"></param>
     public void RemoveRange(WorldClient client, Item item, int range)
     {
         var remaining = Math.Abs(item.Stacks - range);
@@ -206,6 +213,8 @@ public class Inventory : ObjectManager, IInventory
             if (equipment.Value?.Item == null) continue;
             client.Aisling.CurrentWeight += equipment.Value.Item.Template.CarryWeight;
         }
+
+        client.SendAttributes(StatUpdateType.Primary);
     }
 
     public override bool Equals(object obj)
@@ -234,6 +243,7 @@ public class Inventory : ObjectManager, IInventory
 
         if (slot2 == 59)
         {
+            if (item1 == null) return (false, 0);
             if (!item1.Template.Flags.FlagIsSet(ItemFlags.Bankable))
             {
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bBound!");

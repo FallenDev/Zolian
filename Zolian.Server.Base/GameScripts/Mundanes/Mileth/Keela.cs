@@ -398,7 +398,7 @@ public class Keela : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Assassin Notes");
                             if (item == null) TopMenu(client);
-                            client.Aisling.Inventory.Remove(client, item);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
 
                             var skill = Skill.GiveTo(client.Aisling, "Sneak", 1);
                             if (skill) client.LoadSkillBook();

@@ -2,7 +2,6 @@
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.GameScripts.Formulas;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -15,7 +14,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Banker")]
 public class Banker : MundaneScript
 {
-    private Bank _bankTeller = new();
+    private readonly Bank _bankTeller = new();
 
     public Banker(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
@@ -36,7 +35,7 @@ public class Banker : MundaneScript
             options.Add(new Dialog.OptionsDataItem(0x03, "Deposit Item"));
         }
 
-        if (client.Aisling.BankManager.Items.Count > 0)
+        if (!client.Aisling.BankManager.Items.IsEmpty)
         {
             options.Add(new Dialog.OptionsDataItem(0x02, "Withdraw Item"));
         }
@@ -78,11 +77,11 @@ public class Banker : MundaneScript
         }
     }
 
-    public override void OnResponse(WorldClient client, ushort responseID, string args)
+    public override void OnResponse(WorldClient client, ushort responseId, string args)
     {
         if (!AuthenticateUser(client)) return;
 
-        switch (responseID)
+        switch (responseId)
         {
             case 0x00:
                 {
@@ -96,7 +95,7 @@ public class Banker : MundaneScript
                             var bankToInv = client.Aisling.BankManager.Items.Values.FirstOrDefault(x => x.NoColorDisplayName == args);
                             if (bankToInv != null)
                             {
-                                if (bankToInv.Stacks == 1 && bankToInv.Template.CanStack)
+                                if (bankToInv.Stacks >= 1 && bankToInv.Template.CanStack)
                                 {
                                     client.PendingItemSessions = new PendingSell
                                     {
@@ -108,6 +107,7 @@ public class Banker : MundaneScript
                                     client.SendTextInput(Mundane, "How many would you like back?", "Amount:", 3);
                                     break;
                                 }
+
                                 client.Aisling.BankManager.Items.TryRemove(bankToInv.ItemId, out var verifiedItem);
                                 verifiedItem?.GiveTo(client.Aisling);
                                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem?.DisplayName ?? ""}");
@@ -120,15 +120,44 @@ public class Banker : MundaneScript
                             client.Aisling.Inventory.Items.TryGetValue(slot, out var inventoryItem);
                             if (inventoryItem == null)
                             {
-                                client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                                client.PendingBuySessions = null; // might not need this yet
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Well? Where is it?");
+                                client.CloseDialog();
                                 return;
                             }
+
+                            if (inventoryItem.Stacks >= 1 && inventoryItem.Template.CanStack)
+                            {
+                                client.PendingBuySessions = new PendingBuy
+                                {
+                                    ID = inventoryItem.ItemId,
+                                    Name = inventoryItem.DisplayName,
+                                    Offer = inventoryItem.InventorySlot,
+                                    Quantity = 0
+                                };
+
+                                client.SendTextInput(Mundane, "How many would you like to deposit?", "Amount:", 3);
+                                break;
+                            }
+
+                            if (!client.Aisling.Inventory.Items.TryUpdate(inventoryItem.InventorySlot, null, inventoryItem))
+                            {
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Well? Where is it?");
+                                client.CloseDialog();
+                                return;
+                            }
+
+                            inventoryItem.ItemPane = Item.ItemPanes.Bank;
+                            if (client.Aisling.BankManager.Items.TryAdd(inventoryItem.ItemId, inventoryItem))
+                                client.SendRemoveItemFromPane(inventoryItem.InventorySlot);
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, thank you for trusting {inventoryItem.DisplayName} with us!");
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{inventoryItem.DisplayName}");
+                            client.Aisling.Inventory.UpdatePlayersWeight(client);
+                            TopMenu(client);
                             break;
                     }
                 }
                 break;
-            case 0x01: // Follows Sequence to withdraw a stacked item from the vendor
+            case 0x01:
                 var containsInt = ushort.TryParse(args, out var amount);
 
                 if (containsInt)
@@ -142,7 +171,7 @@ public class Banker : MundaneScript
                             options.Add(new Dialog.OptionsDataItem(0x03, "Deposit Item"));
                         }
 
-                        if (client.Aisling.BankManager.Items.Count > 0)
+                        if (!client.Aisling.BankManager.Items.IsEmpty)
                         {
                             options.Add(new Dialog.OptionsDataItem(0x02, "Withdraw Item"));
                         }
@@ -150,7 +179,7 @@ public class Banker : MundaneScript
                         client.SendOptionsDialog(Mundane, "We don't seem to have that. *checks ledger*", options.ToArray());
                         return;
                     }
-                    
+
                     // Withdraw
                     if (client.PendingItemSessions != null)
                     {
@@ -165,22 +194,20 @@ public class Banker : MundaneScript
 
                         if (amount == 0)
                         {
-                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats in the ledger");
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats on the ledger");
                             client.PendingItemSessions = null;
                             client.CloseDialog();
                             return;
                         }
 
-                        // Check stack size. If more than they have, display error and clear pendingitem, display public message that they don't have that much
                         if (itemInBank.Stacks < client.PendingItemSessions.Quantity)
                         {
-                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats in the ledger");
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats on the ledger");
                             client.PendingItemSessions = null;
                             client.CloseDialog();
                             return;
                         }
 
-                        // Check stack size. If equal, remove from bankmanager, and mimic logic above for a full item, clear pendingitem
                         if (itemInBank.Stacks == client.PendingItemSessions.Quantity)
                         {
                             client.Aisling.BankManager.Items.TryRemove(itemInBank.ItemId, out var verifiedItem);
@@ -192,8 +219,6 @@ public class Banker : MundaneScript
                             return;
                         }
 
-                        // Check stack size. If less than they have, tryUpdate bankmanger minus pendingitem.Quantity, then create a new item with the pendingitem data
-                        // send giveTo, send public message, clear pendingitem
                         if (itemInBank.Stacks > client.PendingItemSessions.Quantity)
                         {
                             // Modify Existing
@@ -209,15 +234,87 @@ public class Banker : MundaneScript
                             // Give
                             itemCreated.GiveTo(client.Aisling);
                             client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {itemCreated.DisplayName} x{itemCreated.Stacks}");
+                            client.Aisling.Inventory.UpdatePlayersWeight(client);
                             client.PendingItemSessions = null;
+                            TopMenu(client);
+                        }
+                    }
+
+                    // Deposit
+                    if (client.PendingBuySessions != null)
+                    {
+                        client.PendingBuySessions.Quantity = amount;
+                        client.Aisling.Inventory.Items.TryGetValue(client.PendingBuySessions.Offer, out var itemInInv);
+
+                        if (itemInInv == null)
+                        {
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Are you sure?");
+                            client.PendingBuySessions = null;
+                            client.CloseDialog();
+                            return;
+                        }
+
+                        if (amount == 0)
+                        {
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, Zero? Really?");
+                            client.PendingBuySessions = null;
+                            client.CloseDialog();
+                            return;
+                        }
+
+                        if (itemInInv.Stacks < client.PendingBuySessions.Quantity)
+                        {
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, where are they?");
+                            client.PendingBuySessions = null;
+                            client.CloseDialog();
+                            return;
+                        }
+
+                        if (itemInInv.Stacks == client.PendingBuySessions.Quantity)
+                        {
+                            if (!client.Aisling.Inventory.Items.TryUpdate(itemInInv.InventorySlot, null, itemInInv))
+                            {
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, where is it?");
+                                client.PendingBuySessions = null;
+                                client.CloseDialog();
+                                return;
+                            }
+
+                            itemInInv.ItemPane = Item.ItemPanes.Bank;
+                            if (client.Aisling.BankManager.Items.TryAdd(itemInInv.ItemId, itemInInv))
+                                client.SendRemoveItemFromPane(itemInInv.InventorySlot);
+
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{itemInInv.DisplayName}");
+                            client.Aisling.Inventory.UpdatePlayersWeight(client);
+                            client.PendingBuySessions = null;
+                            TopMenu(client);
+                            return;
+                        }
+
+                        if (itemInInv.Stacks > client.PendingBuySessions.Quantity)
+                        {
+                            // Modify Existing
+                            client.Aisling.Inventory.RemoveRange(client, itemInInv, client.PendingBuySessions.Quantity);
+
+                            // Create
+                            var itemCreateFromTemplate = new Item();
+                            var itemCreated = itemCreateFromTemplate.Create(client.Aisling, itemInInv.Template);
+                            itemCreated.Stacks = client.PendingBuySessions.Quantity;
+                            itemCreated.ItemPane = Item.ItemPanes.Bank;
+
+                            // Deposit
+                            client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{itemCreated.DisplayName}, x{client.PendingBuySessions.Quantity}");
+                            client.Aisling.Inventory.UpdatePlayersWeight(client);
+                            client.PendingBuySessions = null;
                             TopMenu(client);
                         }
                     }
                 }
                 else
                 {
-                    client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats in the ledger");
-                    client.PendingItemSessions = null;
+                    client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, that's not whats on the ledger");
+                    client.PendingBuySessions = null;
                     client.CloseDialog();
                 }
                 break;
@@ -231,19 +328,14 @@ public class Banker : MundaneScript
                     client.SendItemSellDialog(Mundane, "We deploy and guard all vaults with the strongest guards", NpcShopExtensions.GetCharacterBankInventoryByteList(client));
                 }
                 break;
-            case 0x19:
-                {
-                    
-                }
-                break;
-            case 0x20:
+            case 0x07:
                 {
 
                 }
                 break;
-            case 0x30:
+            case 0x08:
                 {
-                    
+
                 }
                 break;
             case 0x500: // OnItemDrop
@@ -255,14 +347,12 @@ public class Banker : MundaneScript
                         if (item == null)
                         {
                             client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                            client.PendingBuySessions = null;
                             return;
                         }
 
                         if (!client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, null, item))
                         {
                             client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                            client.PendingBuySessions = null;
                             return;
                         }
 

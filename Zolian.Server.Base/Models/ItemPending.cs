@@ -9,6 +9,7 @@ public class PendingSell
 
 public class PendingBuy
 {
+    public uint ID { get; init; }
     public string Name { get; init; }
     public int Offer { get; init; }
     public ushort Quantity { get; set; }
