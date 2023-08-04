@@ -1,54 +1,9 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace Darkages.Common;
 
 public static class Generator
 {
-    private static readonly List<string> GeneratedStrings;
-
-    static Generator()
-    {
-        GeneratedStrings = new List<string>();
-    }
-
-    public static string GenerateString(int size)
-    {
-        string str;
-
-        do
-        {
-            str = CreateString(size);
-        } while (GeneratedStrings.Contains(str));
-
-        GeneratedStrings.Add(str);
-
-        return str;
-    }
-
-    private static string CreateString(int size)
-    {
-        var value = new StringBuilder();
-
-        for (var i = 0; i < size; i++)
-        {
-            var binary = Random.Shared.Next(0, 2);
-
-            switch (binary)
-            {
-                case 0:
-                    value.Append(Convert.ToChar(Random.Shared.Next(65, 91)));
-                    break;
-
-                case 1:
-                    value.Append(Random.Shared.Next(1, 10));
-                    break;
-            }
-        }
-
-        return value.ToString();
-    }
-
     public static int GenerateDeterminedNumberRange(int min, int max) => Random.Shared.Next(min, max + 1);
 
     public static int GenerateMapLocation(int rowCol) => RandomNumberGenerator.GetInt32(rowCol + 1);

@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -7,11 +8,15 @@ using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
 
+using System.Security.Cryptography;
+
 namespace Darkages.Scripting;
 
 public abstract class MundaneScript : ObjectManager, IScriptBase
 {
     private long _onClickCheck;
+    private static string[] Messages => ServerSetup.Instance.Config.NpcInteraction.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private static int Count => Messages.Length;
 
     protected MundaneScript(WorldServer server, Mundane mundane)
     {
@@ -42,6 +47,8 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
 
     protected virtual void TopMenu(WorldClient client)
     {
+        client.PendingItemSessions = null;
+        client.PendingBuySessions = null;
         if (Mundane.Serial != client.EntryCheck) client.CloseDialog();
     }
 
@@ -66,9 +73,24 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
         return false;
     }
 
-    public virtual void OnGossip(WorldClient client, string message) { }
-    public virtual void TargetAcquired(Sprite target) { }
-    public virtual void OnItemDropped(WorldClient client, Item item) { }
+    public virtual void OnGossip(WorldClient client, string message)
+    {
+        var randomInteract = Generator.RandomNumPercentGen();
+
+        switch (randomInteract)
+        {
+            case >= 0 and <= .92:
+                break;
+            default:
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: {Messages[RandomNumberGenerator.GetInt32(Count + 1) % Messages.Length]}"));
+                break;
+        }
+    }
+
+    public virtual void OnItemDropped(WorldClient client, Item item)
+    {
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "What's this for? Thank you.");
+    }
 
     public virtual void OnGoldDropped(WorldClient client, uint gold)
     {

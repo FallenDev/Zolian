@@ -19,15 +19,6 @@ internal class GeneratorTest
     }
 
     [Test]
-    public void ShouldGenerateString()
-    {
-        const int testInt = 37;
-        var result = Generator.GenerateString(testInt);
-        var length = result.Length;
-        Assert.AreEqual(testInt, length);
-    }
-
-    [Test]
     public void ShouldGenerateDeterminedNumberRange()
     {
         for (var i = 0; i < 1000; i++)

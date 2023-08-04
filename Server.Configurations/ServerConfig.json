@@ -122,8 +122,8 @@
     // Default: 1.0 (100%)
     "GroupExpBonus": 1.0,
     // Max gold a player can carry on them
-    // Default: 500000000
-    "MaxCarryGold": 500000000,
+    // Default: 4294967295
+    "MaxCarryGold": 4294967295,
     // Max value a stat can have
     // Default: 1000
     "StatCap": 1000,
@@ -237,6 +237,7 @@
     "NoManaMessage": "My will is too weak.",
     "NotEnoughGoldToDropMsg": "I don't have enough gold.",
     "ReapMessage": "You are dying.|You cannot move nor raise your arms.|The Barron has missed you.|All things eventually come to an end.",
+    "NpcInteraction": "*nods*|*glares*|*smirks*|These aislings, always so full of life!|I wonder what it would be like to live an adventure|I got to thinking... maybe I am an aisling and I just don''t know it yet!|Let me guess... someone stole your sweetroll?|I used to be an adventurer like you, then I took an arrow to the knee|Psst! I know who you are...|Hail!|*laughs*",
     "DeathReapingMessage": "damn it all...",
     "ReapMessageDuringAction": "You can't do that, you are about to die!",
     "SomethingWentWrong": "Something went wrong.",

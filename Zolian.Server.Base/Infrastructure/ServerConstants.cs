@@ -69,7 +69,7 @@ public class ServerConstants : IServerConstants
     // Players
     public int PlayerLevelCap { get; set; }
     public double GroupExpBonus { get; set; }
-    public int MaxCarryGold { get; set; }
+    public uint MaxCarryGold { get; set; }
     public int StatCap { get; set; }
     public int StatsPerLevel { get; set; }
     public double WeightIncreaseModifer { get; set; }
@@ -119,6 +119,7 @@ public class ServerConstants : IServerConstants
     public string NoManaMessage { get; set; }
     public string NotEnoughGoldToDropMsg { get; set; }
     public string ReapMessage { get; set; }
+    public string NpcInteraction { get; set; }
     public string DeathReapingMessage { get; set; }
     public string ReapMessageDuringAction { get; set; }
     public string SomethingWentWrong { get; set; }

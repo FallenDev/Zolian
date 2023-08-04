@@ -47,7 +47,7 @@ public interface IServerConstants
     int LOGIN_PORT { get; }
     int LOBBY_PORT { get; }
     bool LogServerPackets { get; }
-    int MaxCarryGold { get; }
+    uint MaxCarryGold { get; }
     int MaxHP { get; }
     string MerchantCancelMessage { get; }
     string MerchantConfirmMessage { get; }
@@ -65,6 +65,7 @@ public interface IServerConstants
     double PingInterval { get; }
     int PlayerLevelCap { get; }
     string ReapMessage { get; }
+    string NpcInteraction { get; }
     string ReapMessageDuringAction { get; }
     int RefreshRate { get; }
     int SaveRate { get; }
