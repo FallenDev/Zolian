@@ -1269,19 +1269,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x0E - Public Chat
+    /// 0x0E - Public Chat (Limited to 3 times a second)
     /// </summary>
     public ValueTask OnPublicMessage(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsSilenced) return default;
-
         var args = PacketSerializer.Deserialize<PublicMessageArgs>(in clientPacket);
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastMessageSent).TotalSeconds < 0.30) return default;
 
-        async ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
+        ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
         {
             var (publicMessageType, message) = localArgs;
+            localClient.LastMessageSent = readyTime;
             string response;
             IEnumerable<Aisling> audience;
             bool ParseCommand()
@@ -1292,7 +1294,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return true;
             }
 
-            if (ParseCommand()) return;
+            if (ParseCommand()) return default;
 
             switch (publicMessageType)
             {
@@ -1310,7 +1312,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     break;
                 default:
                     localClient.Disconnect();
-                    return;
+                    return default;
             }
 
             var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
@@ -1328,20 +1330,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, message);
+
+            return default;
         }
 
         return ExecuteHandler(client, args, InnerOnPublicMessage);
     }
 
     /// <summary>
-    /// 0x0F - Spell Use
+    /// 0x0F - Spell Use (Limited to 4 times a second)
     /// </summary>
     public ValueTask OnUseSpell(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
-
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastSpellCast).TotalSeconds < 0.25) return default;
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
@@ -1363,6 +1368,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
             }
 
+            localClient.LastSpellCast = readyTime;
             var info = new CastInfo();
 
             if (localClient.SpellCastInfo is null)
@@ -1588,12 +1594,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x13 - On Spacebar
+    /// 0x13 - On Spacebar (Limited to 2 times a second)
     /// </summary>
     public ValueTask OnSpacebar(IWorldClient client, in ClientPacket clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastAssail).TotalSeconds < 0.50) return default;
         if (ServerSetup.Instance.Config.AssailsCancelSpells)
         {
             client.SendCancelCasting();
@@ -1612,6 +1620,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnSpacebar(IWorldClient localClient)
         {
+            localClient.LastAssail = DateTime.UtcNow;
             AssailRoutine(localClient);
 
             return default;
@@ -1644,7 +1653,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             s.CurrentCooldown = s.Template.Cooldown;
             lpClient.SendCooldown(true, s.Slot, s.CurrentCooldown);
             lastTemplate = s.Template.Name;
-            lpClient.LastAssail = DateTime.UtcNow;
         });
     }
 
@@ -1666,15 +1674,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x18 - Request World List
+    /// 0x18 - Request World List (Limited to 2 times a second)
     /// </summary>
     public ValueTask OnWorldListRequest(IWorldClient client, in ClientPacket clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
-
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50) return default;
+        
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
+            localClient.LastWorldListRequest = readyTime;
             localClient.SendWorldList(Aislings.ToList());
 
             return default;
@@ -1684,7 +1695,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x19 - Private Message
+    /// 0x19 - Private Message (Limited to 3 times a second)
     /// </summary>
     public ValueTask OnWhisper(IWorldClient client, in ClientPacket clientPacket)
     {
@@ -1708,36 +1719,35 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case "#" when client.Aisling.GameMaster:
                     foreach (var player in Aislings)
                     {
-                        if (player.Client is null) return default;
-                        player.Client.SendServerMessage(ServerMessageType.AdminMessage, $"{{=c{client.Aisling.Username}: {message}");
+                        player.Client?.SendServerMessage(ServerMessageType.AdminMessage, $"{{=c{client.Aisling.Username}: {message}");
                     }
-                    break;
+                    return default;
                 case "#" when client.Aisling.GameMaster != true:
                     client.SystemMessage("You cannot broadcast in this way.");
-                    break;
+                    return default;
                 case "!" when !string.IsNullOrEmpty(client.Aisling.Clan):
                     foreach (var player in Aislings)
                     {
-                        if (player.Client is null) return default;
+                        if (player.Client is null) continue;
                         if (player.Clan == client.Aisling.Clan)
                         {
                             player.Client.SendServerMessage(ServerMessageType.GuildChat, $"<!{client.Aisling.Username}> {message}");
                         }
                     }
-                    break;
+                    return default;
                 case "!" when string.IsNullOrEmpty(client.Aisling.Clan):
                     client.SystemMessage("{=eYou're not in a guild.");
                     return default;
                 case "!!" when client.Aisling.PartyMembers != null:
                     foreach (var player in Aislings)
                     {
-                        if (player.Client is null) return default;
+                        if (player.Client is null) continue;
                         if (player.GroupParty == client.Aisling.GroupParty)
                         {
                             player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {message}");
                         }
                     }
-                    break;
+                    return default;
                 case "!!" when client.Aisling.PartyMembers == null:
                     client.SystemMessage("{=eYou're not in a group or party.");
                     return default;
@@ -1800,40 +1810,43 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x1C - Item Usage
+    /// 0x1C - Item Usage (Limited to 3 times a second)
     /// </summary>
     public ValueTask OnUseItem(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client?.Aisling?.Map is not { Ready: true }) return default;
         if (!client.Aisling.LoggedIn) return default;
-
-        if (client.Aisling.IsDead())
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
-            return default;
-        }
-
-        if (client.Aisling.HasDebuff("Skulled") || client.Aisling.IsParalyzed || client.Aisling.IsFrozen || client.Aisling.IsStopped)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
-            return default;
-        }
-
-        // Speed equipping prevent (movement)
-        if (!client.IsEquipping)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
-            return default;
-        }
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastItemUsed).TotalSeconds < 0.33) return default;
 
         var args = PacketSerializer.Deserialize<ItemUseArgs>(in clientPacket);
 
         static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
         {
-            var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
-            var original = item;
-            if (item?.Template == null) return default;
+            localClient.LastItemUsed = DateTime.UtcNow;
 
+            if (localClient.Aisling.IsDead())
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+                return default;
+            }
+
+            if (localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsParalyzed || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped)
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+                return default;
+            }
+
+            // Speed equipping prevent (movement)
+            if (!localClient.IsEquipping)
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
+                return default;
+            }
+
+            var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
+            
+            if (item?.Template == null) return default;
             if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
                 localClient.LastEquip = DateTime.UtcNow;
 
@@ -2106,9 +2119,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
         if (client.Aisling.CantAttack) return default;
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastSelfProfileRequest).TotalSeconds < 1) return default;
 
         static ValueTask InnerOnProfileRequest(IWorldClient localClient)
         {
+            localClient.LastSelfProfileRequest = DateTime.UtcNow;
             localClient.SendSelfProfile();
             return default;
         }
@@ -2264,6 +2280,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.25) return default;
 
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {

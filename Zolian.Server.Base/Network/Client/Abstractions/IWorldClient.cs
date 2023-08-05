@@ -30,6 +30,10 @@ public interface IWorldClient : ISocketClient
     bool WasUpdatingMapRecently { get; }
     CastInfo SpellCastInfo { get; set; }
     DateTime LastAssail { get; set; }
+    DateTime LastSpellCast { get; set; }
+    DateTime LastItemUsed { get; set; }
+    DateTime LastSelfProfileRequest { get; set; }
+    DateTime LastWorldListRequest { get; set; }
     DateTime LastClientRefresh { get; set; }
     DateTime LastWarp { get; set; }
     Item LastItemDropped { get; set; }

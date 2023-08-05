@@ -143,6 +143,10 @@ namespace Darkages.Network.Client
 
         public CastInfo SpellCastInfo { get; set; }
         public DateTime LastAssail { get; set; }
+        public DateTime LastSpellCast { get; set; }
+        public DateTime LastSelfProfileRequest { get; set; }
+        public DateTime LastItemUsed { get; set; }
+        public DateTime LastWorldListRequest { get; set; }
         public DateTime LastClientRefresh { get; set; }
         public DateTime LastWarp { get; set; }
         public Item LastItemDropped { get; set; }
