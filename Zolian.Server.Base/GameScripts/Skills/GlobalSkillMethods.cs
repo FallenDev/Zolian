@@ -3,6 +3,7 @@ using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -112,7 +113,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var warpPos = new Position(savedXStep, savedYStep);
         damageDealingSprite.Client.WarpTo(warpPos, true);
         damageDealingSprite.Client.CheckWarpTransitions(damageDealingSprite.Client);
-        damageDealingSprite.UpdateAddAndRemove();
+        damageDealingSprite.Client.SendRemoveObject(damageDealingSprite.Serial);
         damageDealingSprite.Client.UpdateDisplay();
         damageDealingSprite.Client.LastMovement = DateTime.UtcNow;
     }
