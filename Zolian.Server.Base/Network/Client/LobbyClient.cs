@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using Chaos.Common.Definitions;
 using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
 using Chaos.Networking.Abstractions;
@@ -50,6 +51,17 @@ namespace Darkages.Network.Client
                 Key = Crypto.Key,
                 Seed = Crypto.Seed,
                 TableCheckSum = serverTableCheckSum
+            };
+
+            Send(args);
+        }
+
+        public void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null)
+        {
+            var args = new LoginMessageArgs
+            {
+                LoginMessageType = loginMessageType,
+                Message = message
             };
 
             Send(args);
