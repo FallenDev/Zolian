@@ -7,7 +7,6 @@ namespace Darkages.Interfaces;
 
 public interface IBuff
 {
-    ushort Animation { get; set; }
     bool Cancelled { get; set; }
     byte Icon { get; set; }
     int Length { get; set; }

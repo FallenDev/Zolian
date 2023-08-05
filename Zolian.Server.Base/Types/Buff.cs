@@ -17,7 +17,6 @@ namespace Darkages.Types;
 
 public class Buff : IBuff
 {
-    public virtual ushort Animation { get; set; }
     public bool Cancelled { get; set; }
     public virtual byte Icon { get; set; }
     public virtual int Length { get; set; }

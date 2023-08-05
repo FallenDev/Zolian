@@ -354,42 +354,6 @@ public sealed class Aisling : Player, IAisling
             Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
     }
 
-    /// <summary>
-    /// Displays player's body animation, sends sound, messages, and displays spells animation on target position
-    /// </summary>
-    public void CastTargetAnimation(Spell spell, Sprite target, CastInfo info)
-    {
-        switch (target)
-        {
-            case null:
-                return;
-            case Aisling aislingTarget:
-                aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
-                break;
-        }
-
-        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Serial));
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30)
-    {
-        var bodyAnim = Path switch
-        {
-            Class.Cleric => (BodyAnimation)128,
-            Class.Arcanus => (BodyAnimation)136,
-            Class.Monster => (BodyAnimation)1,
-            _ => (BodyAnimation)6
-        };
-
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
-        
-        return this;
-    }
-
     public void CastDeath()
     {
         if (Client.Aisling.Flags.PlayerFlagIsSet(AislingFlags.Ghost)) return;
@@ -402,6 +366,12 @@ public sealed class Aisling : Player, IAisling
 
     public void CastSpell(Spell spell, CastInfo info)
     {
+        if (CurrentMp < spell.Template.ManaCost)
+        {
+            Client.SendServerMessage(ServerMessageType.ActiveMessage, "I need more mana!");
+            return;
+        }
+
         if (info != null)
         {
             if (!string.IsNullOrEmpty(info.Data))
@@ -431,6 +401,42 @@ public sealed class Aisling : Player, IAisling
 
         Client.Aisling.IsCastingSpell = false;
         Client.SpellCastInfo = null;
+    }
+
+    /// <summary>
+    /// Displays target animation, messages
+    /// </summary>
+    public void CastTargetAnimation(Spell spell, Sprite target, CastInfo info)
+    {
+        switch (target)
+        {
+            case null:
+                return;
+            case Aisling aislingTarget:
+                aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
+                break;
+        }
+
+        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Serial));
+    }
+
+    /// <summary>
+    /// Displays player's body animation, spell's sound
+    /// </summary>
+    public Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30)
+    {
+        var bodyAnim = Path switch
+        {
+            Class.Cleric => (BodyAnimation)128,
+            Class.Arcanus => (BodyAnimation)136,
+            Class.Monster => (BodyAnimation)1,
+            _ => (BodyAnimation)6
+        };
+
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
+        
+        return this;
     }
 
     public void FinishExchange()

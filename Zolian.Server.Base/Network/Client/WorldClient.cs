@@ -763,7 +763,6 @@ namespace Darkages.Network.Client
                     if (!buffCheck) continue;
                     // Set script to Buff
                     var buff = buffDb.ObtainBuffName(Aisling, buffFromCache);
-                    buff.Animation = buffFromCache.Animation;
                     buff.BuffSpell = buffFromCache.BuffSpell;
                     buff.Icon = buffFromCache.Icon;
                     buff.Name = buffDb.Name;
@@ -822,7 +821,6 @@ namespace Darkages.Network.Client
                     if (!debuffCheck) continue;
                     // Set script to Debuff
                     var debuff = deBuffDb.ObtainDebuffName(Aisling, debuffFromCache);
-                    debuff.Animation = debuffFromCache.Animation;
                     debuff.DebuffSpell = debuffFromCache.DebuffSpell;
                     debuff.Icon = debuffFromCache.Icon;
                     debuff.Name = deBuffDb.Name;

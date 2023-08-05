@@ -1090,7 +1090,7 @@ public class debuff_ArdPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
             UpdateDebuff(aisling);
         }
@@ -1098,7 +1098,7 @@ public class debuff_ArdPoison : Debuff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
         }
     }
 
@@ -1171,7 +1171,7 @@ public class debuff_MorPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
             UpdateDebuff(aisling);
         }
@@ -1179,7 +1179,7 @@ public class debuff_MorPoison : Debuff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
         }
     }
 
@@ -1252,7 +1252,7 @@ public class debuff_Poison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
             UpdateDebuff(aisling);
         }
@@ -1260,7 +1260,7 @@ public class debuff_Poison : Debuff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
         }
     }
 
@@ -1333,7 +1333,7 @@ public class debuff_BeagPoison : Debuff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
             UpdateDebuff(aisling);
         }
@@ -1341,7 +1341,7 @@ public class debuff_BeagPoison : Debuff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Animation, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(25, affected.Serial));
         }
     }
 

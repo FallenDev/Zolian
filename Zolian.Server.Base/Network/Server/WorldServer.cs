@@ -1857,20 +1857,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (!activated) return default;
             if (!item.Template.Flags.FlagIsSet(ItemFlags.Consumable)) return default;
 
-            int stack = item.Stacks;
-            if (item.Stacks >= 1)
-                stack--;
-
-            if (stack >= 1)
-            {
-                localClient.SendRemoveItemFromPane(item.InventorySlot);
-                localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
-                localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
-            }
-            else
-            {
-                localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-            }
+            localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
 
             return default;
         }
