@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AppCenter.Crashes;
+using Newtonsoft.Json;
 
 namespace Darkages.Types;
 
@@ -71,10 +72,17 @@ public class Board
 
 public class PostFormat
 {
-    public PostFormat(ushort boardId, ushort topicId)
+    public PostFormat(ushort boardId)
     {
-        BoardId = boardId;
-        TopicId = topicId;
+        try
+        {
+            BoardId = boardId;
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger("Issue with PostFormat");
+            Crashes.TrackError(e);
+        }
     }
 
     public bool HighLighted { get; set; }
@@ -87,7 +95,6 @@ public class PostFormat
     public string Recipient { get; init; }
     public string Sender { get; init; }
     public string Subject { get; init; }
-    public ushort TopicId { get; set; }
 
     public void Associate(string username)
     {

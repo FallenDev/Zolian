@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Runtime.ExceptionServices;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -33,6 +34,7 @@ using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
+
 using ServiceStack;
 
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
@@ -1682,7 +1684,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50) return default;
-        
+
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
             localClient.LastWorldListRequest = readyTime;
@@ -1845,7 +1847,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
-            
+
             if (item?.Template == null) return default;
             if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
                 localClient.LastEquip = DateTime.UtcNow;
@@ -2306,16 +2308,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
             if (npc == null) return default;
 
-            // ToDo: Perform NPC ID == Stored Serial Check
-            //if (localClient.EntryCheck != npc.Serial)
-            //{
-            //    localClient.CloseDialog();
-            //    return default;
-            //}
-
             var script = npc.Scripts.FirstOrDefault();
-
-            // Step in 0x3A is "DialogId" perhaps that also needs to go here for step?
             script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
 
             return default;
@@ -2341,53 +2334,40 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            var objId = localArgs.EntityId;
+            ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
+            if (npc == null) return default;
 
-            if (objId is > 0 and < uint.MaxValue)
+            if (localArgs.EntityId is > 0 and < uint.MaxValue)
             {
-                ServerSetup.Instance.GlobalMundaneCache.TryGetValue(objId, out var npc);
-                if (npc == null) return default;
-
-                // ToDo: Perform NPC ID == Stored Serial Check
-                //if (localClient.EntryCheck != npc.Serial)
-                //{
-                //    localClient.CloseDialog();
-                //    return default;
-                //}
-
                 var script = npc.Scripts.FirstOrDefault();
                 script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?[0]));
+
                 return default;
             }
 
-            //var result = (DialogResult)localArgs.DialogId;
+            var result = (DialogResult)localArgs.DialogId;
 
-            //if (localArgs.PursuitId == ushort.MaxValue)
-            //{
-            //    if (localClient.Aisling.ActiveReactor?.Decorators == null) return default;
+            if (localArgs.PursuitId == ushort.MaxValue)
+            {
+                var pursuitScript = npc.Scripts.FirstOrDefault();
 
-            //    switch (result)
-            //    {
-            //        case DialogResult.Previous:
-            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-            //                script.OnBack(localClient.Aisling);
-            //            break;
-            //        case DialogResult.Next:
-            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-            //                script.OnNext(localClient.Aisling);
-            //            break;
-            //        case DialogResult.Close:
-            //            foreach (var script in localClient.Aisling.ActiveReactor.Decorators.Values)
-            //                script.OnClose(localClient.Aisling);
-            //            break;
-            //        default:
-            //            throw new ArgumentOutOfRangeException();
-            //    }
-            //}
-            //else
-            //{
-            //    localClient.DlgSession?.Callback?.Invoke(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args.ToString());
-            //}
+                switch (result)
+                {
+                    case DialogResult.Previous:
+                        pursuitScript.Value?.OnBack(localClient.Aisling);
+                        break;
+                    case DialogResult.Next:
+                        pursuitScript.Value?.OnNext(localClient.Aisling);
+                        break;
+                    case DialogResult.Close:
+                        pursuitScript.Value?.OnClose(localClient.Aisling);
+                        break;
+                }
+            }
+            else
+            {
+                localClient.DlgSession?.Callback?.Invoke(localClient.Aisling.Client, localArgs.DialogId, localArgs.Args?[0]);
+            }
 
             return default;
         }
@@ -2404,110 +2384,153 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardRequestArgs localArgs)
         {
+            ServerSetup.Instance.GlobalBoardCache.TryGetValue("Personal", out var personalBoards);
+            var board = ServerSetup.Instance.GlobalBoardCache.Select(i => i.Value)
+                .SelectMany(i => i.Where(n => n.Index == localArgs.BoardId))
+                .FirstOrDefault();
+            var readyTime = DateTime.UtcNow;
+
             switch (localArgs.BoardRequestType)
             {
                 case BoardRequestType.BoardList:
                     {
-                        ServerSetup.Instance.GlobalBoardCache.TryGetValue("Personal", out var boards);
-                        localClient.SendBoardList(boards);
-
+                        localClient.SendBoardList(personalBoards);
                         break;
                     }
                 case BoardRequestType.ViewBoard:
                     {
-                        if (localArgs.BoardId <= 2)
+                        var boardId = (int?)localArgs.BoardId;
+
+                        if (boardId <= 2)
                         {
-                            localClient.SendBoard("Personal", (ushort)localArgs.BoardId);
+                            if (personalBoards == null)
+                            {
+                                localClient.CloseDialog();
+                                break;
+                            }
+
+                            localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index);
 
                             break;
                         }
 
-                        var board = ServerSetup.Instance.GlobalBoardCache.Select(i => i.Value)
-                            .SelectMany(i => i.Where(n => n.Index == localArgs.BoardId))
-                            .FirstOrDefault();
-
-                        if (board != null)
-                            localClient.SendBoard(board.Subject);
-
+                        if (board == null) break;
+                        localClient.SendBoard(board.Subject);
                         break;
                     }
                 case BoardRequestType.ViewPost:
                     {
-                        //if (!TryGetBoard(localClient, localArgs, out var board))
-                        //    return default;
-
-                        //board.ShowPost(localClient.Aisling, localArgs.PostId!.Value, localArgs.Controls!.Value);
-
+                        var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
+                        if (post == null) break;
+                        var prevEnabled = post.PostId > 0;
+                        localClient.SendPost(post, board.IsMail, prevEnabled);
                         break;
                     }
                 case BoardRequestType.NewPost:
                     {
-                        //if (!TryGetBoard(localClient, localArgs, out var board))
-                        //    return default;
+                        if (board == null) break;
+                        // Mail uses a different boardRequestType for sending mail
+                        if (board.IsMail) break;
 
-                        ////mailboxes use a different boardRequestType for sending mail
-                        //if (board is MailBox)
-                        //{
-                        //    Logger.WithProperty(client)
-                        //          .LogError(
-                        //              "{@AislingName} requested an invalid board id for request type {@BoardRequestType}: {@BoardId}",
-                        //              client.Aisling.Name,
-                        //              localArgs.BoardRequestType,
-                        //              args.BoardId);
+                        var np = new PostFormat(localArgs.BoardId ?? 0)
+                        {
+                            DatePosted = readyTime,
+                            Message = localArgs.Message,
+                            Subject = localArgs.Subject,
+                            Read = false,
+                            Sender = client.Aisling.Username,
+                            PostId = (ushort)(board.Posts.Count + 1)
+                        };
 
-                        //    return default;
-                        //}
-
-                        //board.Post(
-                        //    localClient.Aisling,
-                        //    localClient.Aisling.Name,
-                        //    localArgs.Subject!,
-                        //    localArgs.Message!);
+                        np.Associate(client.Aisling.Username);
+                        board.Posts.Add(np);
+                        ServerSetup.SaveCommunityAssets();
+                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
 
                         break;
                     }
                 case BoardRequestType.Delete:
                     {
-                        //if (!TryGetBoard(localClient, localArgs, out var board))
-                        //    return default;
-
-                        //board.Delete(localClient.Aisling, localArgs.PostId!.Value);
+                        if (board == null || board.Posts.Count <= 0) break;
+                        try
+                        {
+                            if ((localArgs.BoardId == 0
+                                    ? board.Posts[(int)localArgs.PostId].Recipient
+                                    : board.Posts[(int)localArgs.PostId].Sender
+                                ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
+                            {
+                                board.Posts.RemoveAt((int)localArgs.PostId);
+                                ServerSetup.SaveCommunityAssets();
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
+                            }
+                            else
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ServerSetup.Logger(ex.Message, LogLevel.Error);
+                            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                            Crashes.TrackError(ex);
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                        }
 
                         break;
                     }
                 case BoardRequestType.SendMail:
                     {
-                        //if (!TryGetBoard(localClient, localArgs, out var board))
-                        //    return default;
+                        if (board == null) break;
+                        var np = new PostFormat(localArgs.BoardId ?? 0)
+                        {
+                            DatePosted = readyTime,
+                            Message = localArgs.Message,
+                            Subject = localArgs.Subject,
+                            Read = false,
+                            Sender = client.Aisling.Username,
+                            Recipient = localArgs.To,
+                            PostId = (ushort)(board.Posts.Count + 1)
+                        };
 
-                        //board.Post(
-                        //    localClient.Aisling,
-                        //    localClient.Aisling.Name,
-                        //    localArgs.Subject!,
-                        //    localArgs.Message!,
-                        //    true);
+                        np.Associate(client.Aisling.Username);
+                        board.Posts.Add(np);
+                        ServerSetup.SaveCommunityAssets();
+                        localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
+
+                        var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
+                        if (recipient == null) break;
+                        recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
+                        recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
 
                         break;
                     }
                 case BoardRequestType.Highlight:
                     {
-                        //if (!TryGetBoard(localClient, localArgs, out var board))
-                        //    return default;
+                        if (board == null) break;
+                        if (!localClient.Aisling.GameMaster)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
+                            break;
+                        }
 
                         ////you cant highlight mail messages
-                        //if (board is MailBox)
-                        //{
-                        //    Logger.WithProperty(client)
-                        //          .LogError(
-                        //              "{@AislingName} requested an invalid board id for request type {@BoardRequestType}: {@BoardId}",
-                        //              client.Aisling.Name,
-                        //              localArgs.BoardRequestType,
-                        //              args.BoardId);
+                        if (board.IsMail) break;
 
-                        //    return default;
-                        //}
+                        foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
+                        {
+                            if (ind.HighLighted)
+                            {
+                                ind.HighLighted = false;
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
+                            }
+                            else
+                            {
+                                ind.HighLighted = true;
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
+                            }
+                        }
 
-                        //board.Highlight(localClient.Aisling, localArgs.PostId!.Value);
+                        localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
 
                         break;
                     }

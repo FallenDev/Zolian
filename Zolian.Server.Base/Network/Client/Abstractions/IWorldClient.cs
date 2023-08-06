@@ -64,7 +64,9 @@ public interface IWorldClient : ISocketClient
     void SendAttributes(StatUpdateType statUpdateType);
     void SendBoard(string boardName, int index = 0);
     void SendBoardList(IEnumerable<Board> boards);
+    void SendEmbeddedBoard(int index = 0);
     void SendBoardResponse(BoardOrResponseType responseType, string message, bool success);
+    void SendPost(PostFormat post, bool isMail, bool enablePrevBtn = true);
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
     bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target);
     void SendCancelCasting();

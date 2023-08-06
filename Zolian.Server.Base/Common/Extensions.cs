@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 
 using Darkages.Enums;
 using Darkages.Sprites;
@@ -94,5 +95,63 @@ public static class Extensions
             || self.Race is Race.DarkElf or Race.WoodElf or Race.Dwarf) return true;
         return otherAisling.GameMaster || otherAisling.CanSeeInvisible || self.Path is Class.Assassin || self.PastClass is Class.Assassin
                || self.Race is Race.DarkElf or Race.WoodElf or Race.Dwarf;
+    }
+    
+    /// <summary>
+    ///     Finds the next highest number in a sequence from a given value
+    /// </summary>
+    /// <param name="enumerable">The sequence to search</param>
+    /// <param name="seed">The starting value</param>
+    /// <typeparam name="T">A numeric type</typeparam>
+    public static T NextHighest<T>(this IEnumerable<T> enumerable, T seed) where T: INumber<T>
+    {
+        var current = seed;
+
+        foreach (var number in enumerable)
+        {
+            //dont consider any numbers that are less than or equal to the seed
+            if (number <= seed)
+                continue;
+
+            //if the current number is the seed, take the first number that reaches this statement
+            //only numbers that are greater than the seed will reach this statement
+            if (current == seed)
+                current = number;
+            //otherwise, if the number is less than the current number, take it
+            //all numbers that reach this statement are greater than the seed
+            else if (number < current)
+                current = number;
+        }
+
+        return current;
+    }
+
+    /// <summary>
+    ///     Finds the next lowest number in a sequence from a given value
+    /// </summary>
+    /// <param name="enumerable">The sequence to search</param>
+    /// <param name="seed">The starting value</param>
+    /// <typeparam name="T">A numeric type</typeparam>
+    public static T NextLowest<T>(this IEnumerable<T> enumerable, T seed) where T: INumber<T>
+    {
+        var current = seed;
+
+        foreach (var number in enumerable)
+        {
+            //dont consider any numbers that are greater than or equal to the seed
+            if (number >= seed)
+                continue;
+
+            //if the current number is the seed, take the first number that reaches this statement
+            //only numbers that are less than the seed will reach this statement
+            if (current == seed)
+                current = number;
+            //otherwise, if the number is greater than the current number, take it
+            //all numbers that reach this statement are lower than the seed
+            else if (number > current)
+                current = number;
+        }
+
+        return current;
     }
 }

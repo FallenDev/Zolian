@@ -97,6 +97,21 @@ public abstract class MundaneScript : ObjectManager, IScriptBase
         client.SendServerMessage(ServerMessageType.ActiveMessage, "What's this for? Thank you.");
     }
 
+    public virtual void OnBack(Aisling aisling)
+    {
+
+    }
+
+    public virtual void OnNext(Aisling aisling)
+    {
+
+    }
+
+    public virtual void OnClose(Aisling aisling)
+    {
+        aisling.Client.CloseDialog();
+    }
+
     /// <summary>
     /// Skills NPC can teach
     /// </summary>

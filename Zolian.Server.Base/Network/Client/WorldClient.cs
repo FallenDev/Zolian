@@ -1251,10 +1251,10 @@ namespace Darkages.Network.Client
         /// </summary>
         public void SendBoard(string boardName, int index = 0)
         {
-            if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardList))
+            if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardIndex))
             {
                 ICollection<PostInfo> postsCollection = new List<PostInfo>();
-                var board = boardList[index];
+                var board = boardIndex[index];
 
                 foreach (var postFormat in board.Posts)
                 {
@@ -1282,13 +1282,17 @@ namespace Darkages.Network.Client
                 {
                     Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
                     Board = boardInfo,
-                    StartPostId = postsCollection.First().PostId
+                    StartPostId = postsCollection.FirstOrDefault()?.PostId
                 };
 
                 Send(args);
             }
         }
 
+        /// <summary>
+        /// Sends a list of boards
+        /// </summary>
+        /// <param name="boards"></param>
         public void SendBoardList(IEnumerable<Board> boards)
         {
             var boardInfoList = new List<BoardInfo>();
@@ -1331,6 +1335,55 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
+        /// <summary>
+        /// Used to display an embedded board - Example: "Personal" Board array (Mail, News, etc)
+        /// </summary>
+        public void SendEmbeddedBoard(int index = 0)
+        {
+            try
+            {
+                ICollection<PostInfo> postsCollection = new List<PostInfo>();
+                var personalBoard = ObjectHandlers.PersonalBoardJsonConvert<Board>(ServerSetup.PersonalBoards[index]);
+            
+                foreach (var postFormat in personalBoard.Posts)
+                {
+                    var post = new PostInfo
+                    {
+                        Author = postFormat.Sender,
+                        CreationDate = postFormat.DatePosted,
+                        IsHighlighted = postFormat.HighLighted,
+                        Message = postFormat.Message,
+                        PostId = (short)postFormat.PostId,
+                        Subject = postFormat.Subject
+                    };
+
+                    postsCollection.Add(post);
+                }
+
+                var boardInfo = new BoardInfo
+                {
+                    BoardId = personalBoard.Index,
+                    Name = personalBoard.Subject,
+                    Posts = postsCollection
+                };
+
+                var args = new BoardArgs
+                {
+                    Type = personalBoard.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
+                    Board = boardInfo,
+                    StartPostId = postsCollection.FirstOrDefault()?.PostId
+                };
+
+                Send(args);
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger($"{Aisling.Username}: Issue with opening board {index}");
+                Crashes.TrackError(e);
+                Aisling.Client.CloseDialog();
+            }
+        }
+
         public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
         {
             var args = new BoardArgs
@@ -1338,6 +1391,26 @@ namespace Darkages.Network.Client
                 Type = responseType,
                 ResponseMessage = message,
                 Success = success
+            };
+
+            Send(args);
+        }
+
+        public void SendPost(PostFormat post, bool isMail, bool enablePrevBtn = true)
+        {
+            var args = new BoardArgs
+            {
+                Type = isMail ? BoardOrResponseType.MailPost : BoardOrResponseType.PublicPost,
+                Post = new PostInfo
+                {
+                    Author = post.Owner,
+                    CreationDate = post.DatePosted,
+                    IsHighlighted = post.HighLighted,
+                    Message = post.Message,
+                    PostId = (short)post.PostId,
+                    Subject = post.Subject
+                },
+                EnablePrevBtn = enablePrevBtn
             };
 
             Send(args);

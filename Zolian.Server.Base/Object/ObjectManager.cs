@@ -15,7 +15,7 @@ public interface IObjectManager
     T GetObjectByName<T>(string name, Area map = null) where T : Sprite, new();
     IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite;
     IEnumerable<Sprite> GetObjects(Area map, Predicate<Sprite> p, ObjectManager.Get selections);
-    T PersonalMailJsonConvert<T>(object source);
+    T PersonalBoardJsonConvert<T>(object source);
     Aisling GetAislingForMailDeliveryMessage(string name);
 }
 
@@ -130,7 +130,7 @@ public class ObjectManager : IObjectManager
         return bucket;
     }
 
-    public T PersonalMailJsonConvert<T>(object source)
+    public T PersonalBoardJsonConvert<T>(object source)
     {
         var serialized = JsonConvert.SerializeObject(source, Formatting.Indented, Settings);
         return JsonConvert.DeserializeObject<T>(serialized, Settings);
