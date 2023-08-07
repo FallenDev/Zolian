@@ -14,6 +14,7 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Templates;
 using Darkages.Types;
+using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Sprites;
 
@@ -372,31 +373,42 @@ public sealed class Aisling : Player, IAisling
             return;
         }
 
-        if (info != null)
+        try
         {
-            if (!string.IsNullOrEmpty(info.Data))
-                foreach (var script in spell.Scripts.Values)
-                    script.Arguments = info.Data;
-
-            if (spell.Scripts != null)
+            if (info != null)
             {
-                if (info.Target != 0)
+                if (!string.IsNullOrEmpty(info.Data))
+                    foreach (var script in spell.Scripts.Values)
+                        script.Arguments = info.Data;
+
+                if (spell.Scripts != null)
                 {
-                    spell.InUse = true;
-                    var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
-                    CastTargetAnimation(spell, target, info);
-                    var script = spell.Scripts.Values.FirstOrDefault();
-                    script?.OnUse(this, target);
-                    spell.InUse = false;
-                    spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
-                    Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+                    if (info.Target != 0)
+                    {
+                        spell.InUse = true;
+                        var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
+                        CastTargetAnimation(spell, target, info);
+                        var script = spell.Scripts.Values.FirstOrDefault();
+                        script?.OnUse(this, target);
+                        spell.InUse = false;
+                        spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
+                        Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+                    }
+                }
+                else
+                {
+                    Client.SendServerMessage(ServerMessageType.OrangeBar2, "Issue casting spell; Code: Crocodile");
+                    Client.SpellCastInfo = null;
                 }
             }
-            else
-            {
-                Client.SendServerMessage(ServerMessageType.OrangeBar2, "Issue casting spell; Code: Crocodile");
-                Client.SpellCastInfo = null;
-            }
+        }
+        catch (Exception e)
+        {
+            if (info == null)
+                ServerSetup.Logger($"{Username} tried to cast {spell.Name} and info was null");
+            if (info?.Target == 0)
+                ServerSetup.Logger($"{Username} tried to cast {spell.Name} and target was 0");
+            Crashes.TrackError(e);
         }
 
         Client.Aisling.IsCastingSpell = false;
