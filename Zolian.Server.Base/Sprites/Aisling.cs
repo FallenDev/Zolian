@@ -523,7 +523,7 @@ public sealed class Aisling : Player, IAisling
             Client.Aisling.CurrentMapId = destinationMap;
         }
 
-        Client.LeaveArea(true, true);
+        Client.LeaveArea(destinationMap, true, true);
         Client.Enter();
     }
 
@@ -702,7 +702,7 @@ public sealed class Aisling : Player, IAisling
 
     public void WarpToHell()
     {
-        Client.LeaveArea(true, true);
+        Client.LeaveArea(ServerSetup.Instance.Config.DeathMap, true, true);
         Pos = new Vector2(ServerSetup.Instance.Config.DeathMapX, ServerSetup.Instance.Config.DeathMapY);
         Direction = 0;
         Client.Aisling.CurrentMapId = ServerSetup.Instance.Config.DeathMap;

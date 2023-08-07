@@ -13,28 +13,13 @@ public class AbelBarber : AreaScript
     public AbelBarber(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(WorldClient client)
-    {
-        if (client.Aisling.Map.ID == client.Aisling.LastMapId) return;
-        client.Aisling.OldStyle = client.Aisling.HairStyle;
-        client.Aisling.OldColor = client.Aisling.HairColor;
-    }
+    public override void OnMapEnter(WorldClient client) { }
 
     public override void OnMapExit(WorldClient client)
     {
-        if (client.Aisling.Coloring != 0)
-        {
-            client.Aisling.Coloring = 0;
-            client.Aisling.HairColor = client.Aisling.OldColor;
-            client.UpdateDisplay();
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
-        }
-
-        if (client.Aisling.Styling == 0) return;
-        client.Aisling.Styling = 0;
+        client.Aisling.HairColor = client.Aisling.OldColor;
         client.Aisling.HairStyle = client.Aisling.OldStyle;
         client.UpdateDisplay();
-        client.SendServerMessage(ServerMessageType.ActiveMessage, "Think you'd get it for free?");
     }
 
     public override void OnMapClick(WorldClient client, int x, int y) { }

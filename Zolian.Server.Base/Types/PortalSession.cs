@@ -9,7 +9,7 @@ public class PortalSession : IPortalSession
     {
         var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
-        client.LeaveArea(true, true);
+        client.LeaveArea(destinationMap, true, true);
         client.ResetLocation(client);
 
         if (destinationMap == 0)

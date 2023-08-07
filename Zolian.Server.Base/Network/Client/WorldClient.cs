@@ -340,7 +340,7 @@ namespace Darkages.Network.Client
             Aisling.Client = this;
             Aisling.BonusAc = 0;
             Aisling.Exchange = null;
-            Aisling.LastMapId = short.MaxValue;
+            Aisling.LastMapId = ushort.MaxValue;
             Aisling.Aegis = 0;
             Aisling.Bleeding = 0;
             Aisling.Rending = 0;
@@ -4028,7 +4028,7 @@ namespace Darkages.Network.Client
 
             if (area.ID != Aisling.CurrentMapId)
             {
-                LeaveArea(true, true);
+                LeaveArea(area.ID, true, true);
 
                 Aisling.LastPosition = new Position(Aisling.Pos);
                 Aisling.Pos = new Vector2(position.X, position.Y);
@@ -4055,7 +4055,7 @@ namespace Darkages.Network.Client
 
             if (Aisling.LastMapId != target.ID)
             {
-                LeaveArea(true, true);
+                LeaveArea(target.ID, true, true);
 
                 Aisling.LastPosition = new Position(Aisling.Pos);
                 Aisling.Pos = new Vector2(position.X, position.Y);
@@ -4196,13 +4196,13 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient LeaveArea(bool update = false, bool delete = false)
+        public WorldClient LeaveArea(int travelTo, bool update = false, bool delete = false)
         {
-            if (Aisling.LastMapId == short.MaxValue) Aisling.LastMapId = Aisling.CurrentMapId;
+            if (Aisling.LastMapId == ushort.MaxValue) Aisling.LastMapId = Aisling.CurrentMapId;
 
             Aisling.Remove(update, delete);
 
-            if (Aisling.LastMapId != Aisling.CurrentMapId && Aisling.Map.Script.Item2 != null)
+            if (Aisling.LastMapId != travelTo && Aisling.Map.Script.Item2 != null)
                 Aisling.Map.Script.Item2.OnMapExit(this);
 
             Aisling.View.Clear();

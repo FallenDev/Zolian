@@ -171,7 +171,7 @@ public interface IWorldClient : ISocketClient
     void CheckWarpTransitions(WorldClient client);
     void CheckWarpTransitions(WorldClient client, int x, int y);
     WorldClient Enter();
-    WorldClient LeaveArea(bool update = false, bool delete = false);
+    WorldClient LeaveArea(int travelTo, bool update = false, bool delete = false);
     void CompleteMapTransition();
     void DeleteSkillFromDb(Skill skill);
     void DeleteSpellFromDb(Spell spell);
