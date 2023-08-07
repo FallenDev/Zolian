@@ -1,6 +1,4 @@
-﻿using Darkages.Network.Server;
-
-namespace Darkages.Network;
+﻿namespace Darkages.Network.Server;
 
 public abstract class WorldServerComponent
 {

@@ -3,7 +3,7 @@ using Chaos.IO.Memory;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions.Definitions;
 
-namespace Darkages.Network;
+namespace Darkages.Network.Client;
 
 public static class ServerPacketEx
 {

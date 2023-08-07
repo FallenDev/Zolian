@@ -1,7 +1,7 @@
 ﻿using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 
-namespace Darkages.Network;
+namespace Darkages.Network.Components;
 
 public static class ZolianUpdateDelegate
 {
