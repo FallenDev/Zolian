@@ -25,7 +25,7 @@ public class Guide : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>
         {
-            new(0x01, "Basics"),
+            new(0x01, "Basic GUI"),
             new(0x02, "Mechanics"),
             new(0x03, "Lore"),
             new(0x29, "F1 - Advanced Stats"),
@@ -66,6 +66,7 @@ public class Guide : MundaneScript
                     new (0x20, "Item Quality"),
                     new (0x21, "Weapon Variances"),
                     new (0x22, "Armor Variances"),
+                    new (0x23, "Shield Variances"),
                     new (0x24, "Armor Class"),
                     new (0x25, "Bonus Stats"),
                     new (0x28, "{=q<- Back")
@@ -129,22 +130,6 @@ public class Guide : MundaneScript
             case 5:
                 client.CloseDialog();
                 break;
-            case 6:
-                //client.Aisling.BetaReset = false;
-                //client.CloseDialog();
-                break;
-            case 8:
-            {
-                //client.ForgetSkills();
-                //client.ForgetSpells();
-                //await Skill.GiveTo(client.Aisling, "Assail", 1);
-                //client.Aisling.Path = Class.Peasant;
-                //client.Aisling.BetaReset = true;
-                //client.CloseDialog();
-                //client.TransitionToMap(720, new Position(14, 9));
-                //client.SendServerMessage(ServerMessageType.OrangeBar1, "Character has been reset. Please re-login prior to changing class.");
-                break;
-            }
             case 9:
             {
                 var options = new List<Dialog.OptionsDataItem>
@@ -287,10 +272,10 @@ public class Guide : MundaneScript
                                                                           "\n\n{=gCommon:{=i No Enhancement" +
                                                                           "\n\n{=qUncommon:{=i +1 Stats, +1 DMG, 100 HP " +
                                                                           "\n\n{=cRare:{=i +1 Stats, 1 AC, 2 DMG, 1 Reflex, 1 Will, 500 HP, 100 MP  " +
-                                                                          "\n\n{=pEpic:{=i +2 Stats, 1 AC, 2 DMG, 2 Reflex, 1 Will, 5 Regen, 750 HP, 250 MP " +
-                                                                          "\n\n{=sLegendary:{=i +3 Stats, 2 AC, 15 DMG, 4 Reflex, 2 Will, 10 Regen, 1000 HP, 500 MP " +
-                                                                          "\n\n{=bForsaken:{=i +4 Stats, 3 AC, 20 DMG, 5 Reflex, 2 Will, 20 Regen, 1500 HP, 1000 MP " +
-                                                                          "\n\n{=fMythic:{=i +5 Stats, 5 AC, 25 DMG, 6 Reflex, 4 Will, 40 Regen, 2500 HP, 2000 MP ");
+                                                                          "\n\n{=pEpic:{=i +2 Stats, 1 AC, 2 DMG, 2 Reflex, 2 Will, 5 Regen, 750 HP, 250 MP " +
+                                                                          "\n\n{=sLegendary:{=i +3 Stats, 2 AC, 15 DMG, 4 Reflex, 4 Will, 10 Regen, 1000 HP, 500 MP " +
+                                                                          "\n\n{=bForsaken:{=i +4 Stats, 3 AC, 20 DMG, 5 Reflex, 5 Will, 20 Regen, 1500 HP, 1000 MP " +
+                                                                          "\n\n{=fMythic:{=i +5 Stats, 5 AC, 25 DMG, 6 Reflex, 6 Will, 30 Regen, 2500 HP, 2000 MP ");
                 client.SendOptionsDialog(Mundane, "Quality Enhancements", options.ToArray());
                 break;
             }
@@ -338,7 +323,19 @@ public class Guide : MundaneScript
             }
             case 35:
             {
+                var options = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x02, "{=q<- Back"),
+                    new (0x05, "{=bExit")
+                };
 
+                client.SendServerMessage(ServerMessageType.ScrollWindow, "{=qFloga:{=a Fire " +
+                                                                         "\n{=qZephyr:{=a Wind " +
+                                                                         "\n{=qLaspi:{=a Earth " +
+                                                                         "\n{=qThalassa:{=a Water " +
+                                                                         "\n{=qAgios:{=a Holy " +
+                                                                         "\n{=qSkia:{=a Void ");
+                client.SendOptionsDialog(Mundane, "Off-Hand Shields can provide immense defense, even elemental", options.ToArray());
                 break;
             }
             case 36:
@@ -360,7 +357,7 @@ public class Guide : MundaneScript
                     new (0x05, "{=bExit")
                 };
 
-                client.SendOptionsDialog(Mundane, "Bonus stats are viewed by pressing F1. They represent attributes that are granted by spells or equipment worn.", options.ToArray());
+                client.SendOptionsDialog(Mundane, "Advanced stats are viewed by pressing F1. They represent attributes that are granted by spells, equipment worn.", options.ToArray());
                 break;
             }
             case 38:
@@ -382,19 +379,25 @@ public class Guide : MundaneScript
                 };
 
                 client.SendServerMessage(ServerMessageType.NonScrollWindow,
-                    "{=qClient Latency{=g: {=aAnything below 100ms is considered instant, above 250ms you may experience lag.\n" +
-                    "{=qMap#{=g: {=aThis correlates to your current .map file in your installation folder.\n" +
-                    "{=qStats (Str, Int, Wis, Con, Dex){=g: {=aThese are stats given from gear, these are additional to your base.\n" +
-                    "{=qDMG{=g: {=aBoost to dps output after Armor is calculated.\n" +
-                    "{=qRegen{=g: {=aThe strength of your mana and health regeneration.\n" +
-                    "{=qArmor{=g: {=aYour armor class, mitigation is 1% per point.\n" +
-                    "{=qAmplified{=g: {=aYour elemental offenses and defenses are multiplied by this value.\n" +
-                    "{=qSupport Offense{=g: {=aThis is your secondary elemental for offense.\n" +
-                    "{=qSupport Defense{=g: {=aThis is your secondary elemental for defense.\n" +
-                    "{=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33%. (20% of Con)\n" +
-                    "{=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage.\n" +
-                    "{=qWill{=g: {=aIs the percentage of magical attacks you completely repel and receive no damage.\n" +
-                    "{=qEnhancements{=g: {=aThese are various equipment enhancements which grant you bonuses or effects.");
+                    "{=qMap#{=g: {=aThis correlates to your current .map file in your installation folder\n" +
+                    "{=qHostiles Nearby{=g: {=aNumber of enemies nearby\n" +
+                    "{=qLatency{=g: {=aConnection speed/quality to the server, values above 250ms might cause unfavorable game play\n" +
+                    "{=cBase Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your ungeared stats\n" +
+                    "{=cGear Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are the stats granted by your equipped items\n" +
+                    "{=cFull Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your geared stats (Base + Gear)\n\n" +
+                    "{=cOffense{=g:\n" +
+                    "   {=qDMG{=g: {=aBoost to dps output after Armor is calculated\n" +
+                    "   {=qAmp{=g: {=aYour elemental offenses and defenses are multiplied by this value\n" +
+                    "   {=qSupport Offense(Secondary){=g: {=aThis is your secondary equipped element for offense\n\n" +
+                    "{=cDefense{=g:\n" +
+                    "   {=qAC(Armor){=g: {=aYour armor class, mitigation is 1% per point\n" +
+                    "   {=qRegen{=g: {=aThe strength of your mana and health regeneration\n" +
+                    "   {=qSupport Defense(Secondary){=g: {=aThis is your secondary equipped element for defense\n\n" +
+                    "{=cSaving Throws{=g:\n" +
+                    "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (20% of Con)\n" +
+                    "   {=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage\n" +
+                    "   {=qWill{=g: {=aIs the percentage of magical attacks you completely repel and receive no damage\n" +
+                    "{=cEnhancements{=g: {=aThese are various equipment enhancements which grant you bonuses or effects.");
                 client.SendOptionsDialog(Mundane, "Scroll through the window to see details for each attribute.", options.ToArray());
                 break;
             }

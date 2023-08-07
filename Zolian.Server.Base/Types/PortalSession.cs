@@ -9,16 +9,14 @@ public class PortalSession : IPortalSession
     {
         var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
+        client.LeaveArea(true, true);
         client.ResetLocation(client);
 
         if (destinationMap == 0)
         {
-            client.Aisling.Abyss = true;
             ShowFieldMap(client);
             client.SendSound(42, true);
         }
-
-        client.Aisling.Abyss = false;
     }
 
     public void ShowFieldMap(WorldClient client)

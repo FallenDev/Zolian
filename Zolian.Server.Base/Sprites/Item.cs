@@ -905,10 +905,10 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             {Quality.Common, new QualityBonus(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
             {Quality.Uncommon, new QualityBonus(1, 1, 1, 1, 1, 1, 0, 0, 0, 100, 0, 0)},
             {Quality.Rare, new QualityBonus(1, 1, 1, 1, 1, 2, 5, 1, 5, 500, 100, 0)},
-            {Quality.Epic, new QualityBonus(2, 2, 2, 2, 2, 2, 10, 1, 5, 750, 250, 5)},
-            {Quality.Legendary, new QualityBonus(3, 3, 3, 3, 3, 15, 20, 2, 10, 1000, 500, 10)},
-            {Quality.Forsaken, new QualityBonus(4, 4, 4, 4, 4, 20, 25, 3, 10, 1500, 1000, 20)},
-            {Quality.Mythic, new QualityBonus(5, 5, 5, 5, 5, 25, 30, 5, 20, 2500, 2000, 40)}
+            {Quality.Epic, new QualityBonus(2, 2, 2, 2, 2, 2, 10, 1, 10, 750, 250, 5)},
+            {Quality.Legendary, new QualityBonus(3, 3, 3, 3, 3, 15, 20, 2, 20, 1000, 500, 10)},
+            {Quality.Forsaken, new QualityBonus(4, 4, 4, 4, 4, 20, 25, 3, 25, 1500, 1000, 20)},
+            {Quality.Mythic, new QualityBonus(5, 5, 5, 5, 5, 25, 30, 5, 30, 2500, 2000, 30)}
         };
 
         if (!qualityBonuses.TryGetValue(equipment.ItemQuality, out var bonus)) return;

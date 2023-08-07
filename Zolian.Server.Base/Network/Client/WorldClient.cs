@@ -3749,16 +3749,12 @@ namespace Darkages.Network.Client
 
         public void ResetLocation(WorldClient client)
         {
-            var map = client.Aisling.CurrentMapId;
-            var x = (int)client.Aisling.Pos.X;
-            var y = (int)client.Aisling.Pos.Y;
             var reset = 0;
 
             while (reset == 0)
             {
                 client.Aisling.Abyss = true;
                 client.Port(ServerSetup.Instance.Config.TransitionZone, ServerSetup.Instance.Config.TransitionPointX, ServerSetup.Instance.Config.TransitionPointY);
-                client.Port(map, x, y);
                 client.Aisling.Abyss = false;
                 reset++;
             }
