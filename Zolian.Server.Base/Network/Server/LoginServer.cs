@@ -188,6 +188,29 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                 localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
                 return;
             }
+
+            if (result.Password != password)
+            {
+                if (result.PasswordAttempts <= 9)
+                {
+                    ServerSetup.Logger($"{localClient.RemoteIp}: {result.Username} attempted an incorrect password.");
+                    result.LastIP = localClient.RemoteIp.ToString();
+                    result.LastAttemptIP = localClient.RemoteIp.ToString();
+                    result.PasswordAttempts += 1;
+                    await SavePassword(result);
+                    localClient.SendLoginMessage(LoginMessageType.WrongPassword, "Incorrect Information provided.");
+                }
+                else
+                {
+                    ServerSetup.Logger($"{result.Username} was locked to protect their account.");
+                    client.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
+                    result.LastIP = localClient.RemoteIp.ToString();
+                    result.LastAttemptIP = localClient.RemoteIp.ToString();
+                    result.Hacked = true;
+                    await SavePassword(result);
+                }
+                return;
+            }
             
             var maintCheck = name.ToLowerInvariant();
             var connInfo = new ConnectionInfo
@@ -216,8 +239,8 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
                     if (localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
                     {
-                        result.LastAttemptIP = ipLocal.ToString();
-                        result.LastIP = ipLocal.ToString();
+                        result.LastAttemptIP = localClient.RemoteIp.ToString();
+                        result.LastIP = localClient.RemoteIp.ToString();
                         if (result.Password == ServerSetup.Instance.Unlock)
                             result.PasswordAttempts = 0;
                         await SavePassword(result);
@@ -249,6 +272,11 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
                 "Redirecting {@ClientIp} to {@ServerIp}",
                 localClient.RemoteIp.ToString(),
                 connInfo.Address.ToString());
+
+            result.LastAttemptIP = localClient.RemoteIp.ToString();
+            result.LastIP = localClient.RemoteIp.ToString();
+            result.PasswordAttempts = 0;
+            await SavePassword(result);
 
             RedirectManager.Add(redirect);
             localClient.SendLoginMessage(LoginMessageType.Confirm);
@@ -359,7 +387,13 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
     public override ValueTask HandlePacketAsync(ILoginClient client, in ClientPacket packet)
     {
+        var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)packet.OpCode];
+
+        if (handler == null)
+        {
+            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}");
+        }
 
         return handler?.Invoke(client, in packet) ?? default;
     }
@@ -399,10 +433,6 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
 
     private async Task FinalizeConnectionAsync(Socket clientSocket)
     {
-        var ipAddress = ((IPEndPoint)clientSocket.RemoteEndPoint!).Address;
-
-        //ToDo: Access restriction - Add-in checks
-
         var client = _clientProvider.CreateClient(clientSocket);
 
         Logger.LogDebug("Connection established with {@ClientIp}", client.RemoteIp.ToString());

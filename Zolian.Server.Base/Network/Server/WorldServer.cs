@@ -3066,11 +3066,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     public override ValueTask HandlePacketAsync(IWorldClient client, in ClientPacket packet)
     {
+        var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)packet.OpCode];
-
         var trackers = client.Aisling?.AislingTrackers;
 
-        if ((trackers != null) && IsManualAction(packet.OpCode))
+        if (handler == null)
+        {
+            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}");
+        }
+
+        if (trackers != null && IsManualAction(packet.OpCode))
             trackers.LastManualAction = DateTime.UtcNow;
 
         return handler?.Invoke(client, in packet) ?? default;
@@ -3085,6 +3090,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup; // 0x07
         ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped; // 0x08
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest; // 0x0B
+        //ClientHandlers[(byte)ClientOpCode.DisplayObjectRequest] = // 0x0C
         ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore; // 0x0D
         ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage; // 0x0E
         ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell; // 0x0F

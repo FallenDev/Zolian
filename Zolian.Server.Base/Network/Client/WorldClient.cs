@@ -2931,7 +2931,6 @@ namespace Darkages.Network.Client
                 Nation = Nation.Mileth,
                 Portrait = Aisling.PictureData,
                 ProfileText = Aisling.ProfileMessage,
-                SocialStatus = (SocialStatus)Aisling.ActiveStatus,
                 SpouseName = null,
                 Title = $"Level: {Aisling.ExpLevel}  DR: {Aisling.AbpLevel}"
             };

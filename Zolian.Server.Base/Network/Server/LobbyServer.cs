@@ -119,7 +119,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
     public override ValueTask HandlePacketAsync(ILobbyClient client, in ClientPacket packet)
     {
+        var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)packet.OpCode];
+
+        if (handler == null)
+        {
+            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}");
+        }
+
         return handler?.Invoke(client, in packet) ?? default;
     }
 
@@ -137,7 +144,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var clientSocket = serverSocket.EndAccept(ar);
         serverSocket.BeginAccept(OnConnection, serverSocket);
         var client = _clientProvider.CreateClient(clientSocket);
-
         var badActor = ClientOnBlackList(client);
 
         if (badActor)
@@ -146,6 +152,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
+        if (!ClientRegistry.TryAdd(client))
+        {
+            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
+            client.Disconnect();
+            return;
+        }
+
+        client.OnDisconnected += OnDisconnect;
         client.BeginReceive();
         // 0x7E - Handshake
         client.SendAcceptConnection();
