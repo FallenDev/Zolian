@@ -24,6 +24,6 @@ public interface IAislingStorage
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);
-    Task<bool> CheckIfItemExists(long itemSerial, long playerSerial);
+    Task<bool> CheckIfItemExists(long itemSerial);
     Task Create(Aisling obj);
 }

@@ -349,14 +349,13 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[CheckIfItemExists]
-@ItemId BIGINT, @Serial BIGINT
+@ItemId BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
     SELECT *
     FROM   ZolianPlayers.dbo.PlayersItems
-    WHERE  [ItemId] = @ItemId
-           AND Serial = @Serial;
+    WHERE  [ItemId] = @ItemId;
 END
 GO
 

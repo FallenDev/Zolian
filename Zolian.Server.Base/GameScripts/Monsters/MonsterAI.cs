@@ -243,7 +243,7 @@ public class MonsterBaseIntelligence : MonsterScript
     {
         if (item == null) return;
         if (client == null) return;
-
+        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
         Monster.MonsterBank.Add(item);
     }
 
@@ -783,7 +783,7 @@ public class MonsterShadowSight : MonsterScript
     {
         if (item == null) return;
         if (client == null) return;
-
+        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
         Monster.MonsterBank.Add(item);
     }
 

@@ -11,6 +11,7 @@ using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -254,6 +255,12 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         TileType = TileContent.Item;
     }
 
+    private static uint CheckAndAmendItemIdIfItExists(IItem item)
+    {
+        var updateIfExists = WorldServer.CheckIfItemExists(item.ItemId);
+        return updateIfExists.Result ? EphemeralRandomIdGenerator<uint>.Shared.NextId : item.ItemId;
+    }
+
     public Item Create(Sprite owner, string item, Quality quality, Variance variance,
         WeaponVariance wVariance, bool curse = false)
     {
@@ -359,6 +366,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
+
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -432,6 +441,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
+
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -478,6 +489,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
+
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
@@ -540,6 +553,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         return obj;
     }

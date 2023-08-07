@@ -445,7 +445,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             foreach (var item in itemList.Where(i => i is not null))
             {
-                var updateIfExists = await CheckIfItemExists(item.ItemId, obj.Serial);
+                var updateIfExists = await CheckIfItemExists(item.ItemId);
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "ItemUpdate" : "ItemInsert", connection);
                 var pane = ItemEnumConverters.PaneToString(item.ItemPane);
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
@@ -609,14 +609,13 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public async Task<bool> CheckIfItemExists(long itemSerial, long playerSerial)
+    public async Task<bool> CheckIfItemExists(long itemSerial)
     {
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfItemExists", sConn);
             cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
-            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = playerSerial;
             var reader = await cmd.ExecuteReaderAsync();
             var itemFound = false;
 

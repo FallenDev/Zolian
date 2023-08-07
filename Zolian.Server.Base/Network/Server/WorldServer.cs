@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -11,6 +12,7 @@ using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
+
 using Darkages.CommandSystem;
 using Darkages.Common;
 using Darkages.Database;
@@ -538,6 +540,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     #region Server Loop
 
     private Task SaveUserAsync(Aisling aisling) => StorageManager.AislingBucket.Save(aisling);
+    public static Task<bool> CheckIfItemExists(long itemSerial) => StorageManager.AislingBucket.CheckIfItemExists(itemSerial);
 
     private async void UpdateComponentsRoutine()
     {
@@ -1983,7 +1986,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         {
                             var script = monster.Scripts.Values.First();
                             var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                            localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                             script?.OnItemDropped(localClient.Aisling.Client, item);
                             break;
                         }
@@ -2065,33 +2067,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     case Monster monster:
                         {
                             var script = monster.Scripts.Values.First();
-                            if (amount < 0) return default;
-                            if (localClient.Aisling.GoldPoints >= amount)
-                            {
-                                localClient.Aisling.GoldPoints -= (uint)amount;
-                                localClient.SendAttributes(StatUpdateType.ExpGold);
-                            }
-                            else
-                                break;
-
+                            if (amount <= 0) return default;
                             script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-
                             break;
                         }
                     case Mundane mundane:
                         {
                             var script = mundane.Scripts.Values.First();
-                            if (amount < 0) return default;
-                            if (localClient.Aisling.GoldPoints >= amount)
-                            {
-                                localClient.Aisling.GoldPoints -= (uint)amount;
-                                localClient.SendAttributes(StatUpdateType.ExpGold);
-                            }
-                            else
-                                break;
-
+                            if (amount <= 0) return default;
                             script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-
                             break;
                         }
                     case Aisling aisling:
@@ -2513,7 +2497,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             Recipient = localArgs.To,
                             PostId = (short)(board.Posts.Count + 1)
                         };
-                        
+
                         board.Posts ??= new List<PostFormat>();
                         var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
                         short startPostId = 1;
@@ -2522,7 +2506,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             post.PostId = startPostId;
                             startPostId++;
                         }
-                        
+
                         np.Associate(client.Aisling.Username);
                         board.Posts.Add(np);
                         ServerSetup.SaveCommunityAssets();
