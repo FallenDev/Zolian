@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -2409,19 +2410,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                                 break;
                             }
 
-                            localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index);
+                            localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
 
                             break;
                         }
 
                         if (board == null) break;
-                        localClient.SendBoard(board.Subject);
+                        localClient.SendBoard(board.Subject, localArgs.StartPostId);
                         break;
                     }
                 case BoardRequestType.ViewPost:
                     {
                         var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
-                        if (post == null) break;
+
+                        if (post == null)
+                        {
+                            var postId = localArgs.PostId - 1;
+                            post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
+                        }
+
+                        if (post == null)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
+                            break;
+                        }
+
                         var prevEnabled = post.PostId > 0;
                         localClient.SendPost(post, board.IsMail, prevEnabled);
                         break;
@@ -2439,8 +2452,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             Subject = localArgs.Subject,
                             Read = false,
                             Sender = client.Aisling.Username,
-                            PostId = (ushort)(board.Posts.Count + 1)
+                            PostId = (short)(board.Posts.Count + 1)
                         };
+
+                        board.Posts ??= new List<PostFormat>();
+                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                        short startPostId = 1;
+                        foreach (var post in postsOrdered)
+                        {
+                            post.PostId = startPostId;
+                            startPostId++;
+                        }
 
                         np.Associate(client.Aisling.Username);
                         board.Posts.Add(np);
@@ -2452,16 +2474,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case BoardRequestType.Delete:
                     {
                         if (board == null || board.Posts.Count <= 0) break;
+                        //var postId = localArgs.PostId - 1;
+                        //if (postId == null) break;
+
                         try
                         {
                             if ((localArgs.BoardId == 0
-                                    ? board.Posts[(int)localArgs.PostId].Recipient
-                                    : board.Posts[(int)localArgs.PostId].Sender
+                                    ? board.Posts[(short)localArgs.PostId].Recipient
+                                    : board.Posts[(short)localArgs.PostId].Sender
                                 ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
                             {
-                                board.Posts.RemoveAt((int)localArgs.PostId);
+                                board.Posts.RemoveAt((short)localArgs.PostId);
                                 ServerSetup.SaveCommunityAssets();
                                 localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
+                                localClient.SendBoard(board.Subject, localArgs.StartPostId);
                             }
                             else
                             {
@@ -2489,9 +2515,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             Read = false,
                             Sender = client.Aisling.Username,
                             Recipient = localArgs.To,
-                            PostId = (ushort)(board.Posts.Count + 1)
+                            PostId = (short)(board.Posts.Count + 1)
                         };
-
+                        
+                        board.Posts ??= new List<PostFormat>();
+                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                        short startPostId = 1;
+                        foreach (var post in postsOrdered)
+                        {
+                            post.PostId = startPostId;
+                            startPostId++;
+                        }
+                        
                         np.Associate(client.Aisling.Username);
                         board.Posts.Add(np);
                         ServerSetup.SaveCommunityAssets();

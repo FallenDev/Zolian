@@ -17,7 +17,7 @@ public class Pravat : AreaScript
     {
         if (x == 24 && y == 15 || x == 25 && y == 16)
         {
-            client.SendBoard("Server Updates");
+            client.SendBoard("Server Updates", null);
         }
     }
 

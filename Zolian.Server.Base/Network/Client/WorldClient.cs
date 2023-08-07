@@ -1249,7 +1249,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x31 - Show Board
         /// </summary>
-        public void SendBoard(string boardName, int index = 0)
+        public void SendBoard(string boardName, short? startPost, int index = 0)
         {
             if (ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardIndex))
             {
@@ -1282,7 +1282,7 @@ namespace Darkages.Network.Client
                 {
                     Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
                     Board = boardInfo,
-                    StartPostId = postsCollection.FirstOrDefault()?.PostId
+                    StartPostId = startPost
                 };
 
                 Send(args);
@@ -1338,7 +1338,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// Used to display an embedded board - Example: "Personal" Board array (Mail, News, etc)
         /// </summary>
-        public void SendEmbeddedBoard(int index = 0)
+        public void SendEmbeddedBoard(int index, short? startPost)
         {
             try
             {
@@ -1371,7 +1371,7 @@ namespace Darkages.Network.Client
                 {
                     Type = personalBoard.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
                     Board = boardInfo,
-                    StartPostId = postsCollection.FirstOrDefault()?.PostId
+                    StartPostId = startPost
                 };
 
                 Send(args);

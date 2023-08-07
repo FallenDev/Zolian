@@ -48,7 +48,7 @@ public class ToV : AreaScript
     {
         if (x == 15 && y == 52 || x == 14 && y == 51 || x == 14 && y == 50)
         {
-            client.SendBoard("Hunting");
+            client.SendBoard("Hunting", null);
         }
     }
 

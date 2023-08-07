@@ -1,4 +1,6 @@
-﻿using Microsoft.AppCenter.Crashes;
+﻿using Chaos.Common.Abstractions;
+using Chaos.Common.Identity;
+using Microsoft.AppCenter.Crashes;
 using Newtonsoft.Json;
 
 namespace Darkages.Types;
@@ -24,7 +26,6 @@ public class Board
 
     public ushort Index { get; set; }
     public bool IsMail { get; set; }
-    public ushort LetterId { get; set; }
     public string Subject { get; set; }
 
     public static List<Board> CacheFromStorage(string dir)
@@ -90,7 +91,7 @@ public class PostFormat
     public DateTime DatePosted { get; init; }
     public string Message { get; init; }
     public string Owner { get; set; }
-    public ushort PostId { get; init; }
+    public short PostId { get; set; }
     public bool Read { get; set; }
     public string Recipient { get; init; }
     public string Sender { get; init; }
