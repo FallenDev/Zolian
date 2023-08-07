@@ -1,7 +1,7 @@
 ﻿using Chaos.Cryptography;
 using Darkages.Enums;
 using Darkages.Interfaces;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Types;
 
 using Microsoft.Data.SqlClient;

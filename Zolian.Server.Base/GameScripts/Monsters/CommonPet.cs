@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 using Microsoft.AppCenter.Crashes;

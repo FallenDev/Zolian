@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Enums;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Items;

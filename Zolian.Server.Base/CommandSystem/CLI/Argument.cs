@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.RegularExpressions;
 
-namespace Darkages.Systems.CLI;
+namespace Darkages.CommandSystem.CLI;
 
 /// <summary>
 /// Represents a parameter that is passed with command. Arguments may be required or optional, may contain a restricted set

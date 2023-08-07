@@ -2,7 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

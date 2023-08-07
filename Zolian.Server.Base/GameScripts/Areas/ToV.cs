@@ -1,7 +1,7 @@
-﻿using Darkages.Enums;
-using Darkages.Infrastructure;
+﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

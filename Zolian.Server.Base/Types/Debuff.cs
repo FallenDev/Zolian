@@ -2,9 +2,9 @@
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Dapper;
+using Darkages.Common;
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
-using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;

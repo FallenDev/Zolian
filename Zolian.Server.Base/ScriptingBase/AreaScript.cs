@@ -1,10 +1,10 @@
-﻿using Darkages.Types;
-using Darkages.Infrastructure;
+﻿using Darkages.Common;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Sprites;
+using Darkages.Types;
 
-namespace Darkages.Scripting;
+namespace Darkages.ScriptingBase;
 
 public abstract class AreaScript : IScriptBase
 {

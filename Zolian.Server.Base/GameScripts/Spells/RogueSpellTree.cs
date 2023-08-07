@@ -1,7 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 using MapFlags = Darkages.Enums.MapFlags;

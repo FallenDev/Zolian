@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Darkages.Infrastructure;
+namespace Darkages.Common;
 
 public class WorldServerTimer
 {

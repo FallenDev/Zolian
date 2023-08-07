@@ -1,10 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
+﻿using System.Numerics;
 using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Infrastructure;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;

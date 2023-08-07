@@ -1,5 +1,5 @@
-﻿using Darkages.Database;
-using Darkages.Infrastructure;
+﻿using Darkages.Common;
+using Darkages.Database;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;

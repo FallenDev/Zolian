@@ -11,7 +11,7 @@ using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
 

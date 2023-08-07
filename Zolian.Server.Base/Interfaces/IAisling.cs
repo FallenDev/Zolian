@@ -1,8 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Infrastructure;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;

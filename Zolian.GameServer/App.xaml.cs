@@ -13,7 +13,6 @@ using Chaos.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
 using Darkages;
-using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -125,7 +124,7 @@ public partial class App
             await Task.Run(async () =>
             {
                 await Task.WhenAll(hostedServices.Select(svc => svc.StartAsync(ServerCtx.Token)));
-                await ServerCtx.Token.WaitTillCanceled();
+                await ServerCtx.Token.WaitTillCanceled().ConfigureAwait(false);
             });
         }
         catch (Exception exception)

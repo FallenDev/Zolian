@@ -3,7 +3,6 @@ using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Dapper;
 using Darkages.Database;
-using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.GameScripts.Affects;
 using Darkages.Network.Client.Abstractions;
@@ -12,6 +11,7 @@ using Darkages.Sprites;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using Darkages.Common;
 
 namespace Darkages.Types;
 

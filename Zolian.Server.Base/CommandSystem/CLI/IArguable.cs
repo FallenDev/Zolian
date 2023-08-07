@@ -1,4 +1,4 @@
-﻿namespace Darkages.Systems.CLI;
+﻿namespace Darkages.CommandSystem.CLI;
 
 /// <summary>
 /// Represents an object that has multiple arguments/parameters.

@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 
 using Darkages.Common;
-using Darkages.Infrastructure;
 using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;

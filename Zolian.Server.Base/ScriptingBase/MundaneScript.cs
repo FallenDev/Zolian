@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Security.Cryptography;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Interfaces;
@@ -8,9 +9,7 @@ using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
 
-using System.Security.Cryptography;
-
-namespace Darkages.Scripting;
+namespace Darkages.ScriptingBase;
 
 public abstract class MundaneScript : ObjectManager, IScriptBase
 {

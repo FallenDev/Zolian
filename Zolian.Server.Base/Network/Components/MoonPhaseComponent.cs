@@ -1,5 +1,4 @@
 ﻿using Darkages.Common;
-using Darkages.Infrastructure;
 using Darkages.Network.Server;
 using ServiceStack;
 using SunCalcNet;

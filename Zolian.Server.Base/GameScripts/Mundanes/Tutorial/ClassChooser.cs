@@ -4,10 +4,9 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-using EquipmentSlot = Darkages.Models.EquipmentSlot;
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.Tutorial;

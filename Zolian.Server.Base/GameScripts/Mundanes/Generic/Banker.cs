@@ -5,7 +5,7 @@ using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

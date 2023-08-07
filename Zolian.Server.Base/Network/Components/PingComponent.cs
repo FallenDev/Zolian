@@ -1,4 +1,4 @@
-﻿using Darkages.Infrastructure;
+﻿using Darkages.Common;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;

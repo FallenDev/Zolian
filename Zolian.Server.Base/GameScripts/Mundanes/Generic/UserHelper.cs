@@ -6,7 +6,7 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Mundanes.Generic;

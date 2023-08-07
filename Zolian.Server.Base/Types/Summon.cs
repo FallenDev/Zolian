@@ -1,5 +1,5 @@
-﻿using Darkages.Enums;
-using Darkages.Infrastructure;
+﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Object;
 using Darkages.Sprites;

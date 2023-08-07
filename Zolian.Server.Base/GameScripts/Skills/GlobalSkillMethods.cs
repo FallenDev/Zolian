@@ -3,7 +3,6 @@ using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;

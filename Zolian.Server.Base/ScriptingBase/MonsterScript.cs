@@ -4,7 +4,7 @@ using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.Scripting;
+namespace Darkages.ScriptingBase;
 
 public abstract class MonsterScript : ObjectManager, IScriptBase
 {

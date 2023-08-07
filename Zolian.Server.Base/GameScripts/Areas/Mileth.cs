@@ -4,7 +4,7 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

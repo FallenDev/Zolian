@@ -1,7 +1,7 @@
 ﻿using Darkages.Interfaces;
 using Darkages.Sprites;
 
-namespace Darkages.Scripting;
+namespace Darkages.ScriptingBase;
 
 public abstract class MonsterCreateScript : IScriptBase
 {

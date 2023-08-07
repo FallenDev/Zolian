@@ -1,5 +1,5 @@
 ﻿using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas;

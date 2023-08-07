@@ -1,12 +1,12 @@
 ﻿using Darkages.Network.Client;
 using Darkages.Network.Server;
-using Darkages.Scripting;
 using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
 using Chaos.Common.Definitions;
 using Darkages.Common;
+using Darkages.ScriptingBase;
 
 namespace Darkages.GameScripts.Mundanes.Tagor;
 

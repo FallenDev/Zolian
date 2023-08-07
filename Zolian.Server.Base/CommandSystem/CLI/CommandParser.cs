@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Darkages.Systems.CLI;
+namespace Darkages.CommandSystem.CLI;
 
 /// <summary>
 /// Handles and parses commands and their arguments.

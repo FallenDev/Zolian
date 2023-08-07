@@ -1,6 +1,5 @@
 ﻿using Chaos.Geometry;
-
-using Darkages.Infrastructure;
+using Darkages.Common;
 using Darkages.Sprites;
 
 namespace Darkages.Types;

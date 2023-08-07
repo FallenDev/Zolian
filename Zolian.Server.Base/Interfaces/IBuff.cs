@@ -1,4 +1,4 @@
-﻿using Darkages.Infrastructure;
+﻿using Darkages.Common;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;

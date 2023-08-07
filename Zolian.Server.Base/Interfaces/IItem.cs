@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;

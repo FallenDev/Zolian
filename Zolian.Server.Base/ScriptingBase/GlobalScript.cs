@@ -1,9 +1,9 @@
-﻿using Darkages.Infrastructure;
+﻿using Darkages.Common;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Object;
 
-namespace Darkages.Scripting;
+namespace Darkages.ScriptingBase;
 
 public abstract class GlobalScript : ObjectManager, IScriptBase
 {

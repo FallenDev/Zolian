@@ -1,7 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

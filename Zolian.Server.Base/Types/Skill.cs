@@ -2,13 +2,11 @@
 using System.ComponentModel;
 using System.Data;
 using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
-using Darkages.Infrastructure;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 

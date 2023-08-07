@@ -12,10 +12,9 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Spells;
-using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Object;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;

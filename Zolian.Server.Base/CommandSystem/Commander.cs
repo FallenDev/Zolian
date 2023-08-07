@@ -1,15 +1,14 @@
 ﻿using Chaos.Common.Definitions;
+using Darkages.CommandSystem.CLI;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Sprites;
-using Darkages.Systems.CLI;
 using Darkages.Types;
-
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Extensions.Logging;
 using Gender = Darkages.Enums.Gender;
 
-namespace Darkages.Systems;
+namespace Darkages.CommandSystem;
 
 public static class Commander
 {

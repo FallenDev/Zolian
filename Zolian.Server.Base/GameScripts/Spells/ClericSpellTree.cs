@@ -2,7 +2,7 @@
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.Network.Client;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 using MapFlags = Darkages.Enums.MapFlags;

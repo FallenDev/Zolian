@@ -32,17 +32,15 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Dapper;
 using Darkages.GameScripts.Affects;
-using Darkages.Infrastructure;
 using Darkages.Network.Server;
 using Darkages.Object;
-using Darkages.Scripting;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.GameScripts.Formulas;
 using System.Collections.Concurrent;
 using Chaos.Common.Identity;
 using System.Globalization;
 using ServiceStack;
-using Darkages.Interfaces;
+using Darkages.ScriptingBase;
 
 namespace Darkages.Network.Client
 {

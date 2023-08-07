@@ -7,7 +7,6 @@ using Chaos.Geometry.Abstractions.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Infrastructure;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;

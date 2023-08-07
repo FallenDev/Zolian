@@ -2,7 +2,7 @@
 using Darkages.Models;
 using Darkages.Types;
 
-namespace Darkages.Infrastructure;
+namespace Darkages;
 
 public class GameSetting
 {

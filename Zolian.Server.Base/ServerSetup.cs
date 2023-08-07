@@ -1,15 +1,15 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
+using Darkages.CommandSystem;
+using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
-using Darkages.Systems;
-using Darkages.Systems.CLI;
 using Darkages.Templates;
 using Darkages.Types;
 

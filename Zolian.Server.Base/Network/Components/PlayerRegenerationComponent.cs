@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Infrastructure;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Microsoft.AppCenter.Crashes;

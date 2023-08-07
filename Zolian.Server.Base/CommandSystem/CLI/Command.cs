@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Darkages.Systems.CLI;
+namespace Darkages.CommandSystem.CLI;
 
 /// <summary>
 /// Represents a command that when called by its alias(es), executes a command with the specified parameters.

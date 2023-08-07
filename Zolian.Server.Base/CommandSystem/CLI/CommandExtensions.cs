@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Darkages.Systems.CLI;
+namespace Darkages.CommandSystem.CLI;
 
 /// <summary>
 /// Provides extension methods for arguments and commands that can be used with the library.

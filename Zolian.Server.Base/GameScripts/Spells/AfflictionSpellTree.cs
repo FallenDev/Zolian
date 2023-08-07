@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.GameScripts.Affects;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 

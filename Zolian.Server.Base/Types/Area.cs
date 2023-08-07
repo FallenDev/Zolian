@@ -3,7 +3,7 @@
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Models;
-using Darkages.Scripting;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
