@@ -102,8 +102,8 @@ public class Dar : MundaneScript
         if (!AuthenticateUser(client)) return;
 
         var darkThings = Random.Shared.Next(1, 12);
-        var advExp = (uint)Random.Shared.Next(150000, 300000);
-        var advExp2 = (uint)Random.Shared.Next(500000, 1000000);
+        var advExp = Random.Shared.Next(150000, 300000);
+        var advExp2 = Random.Shared.Next(500000, 1000000);
 
         _retrieve = darkThings switch
         {

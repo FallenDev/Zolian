@@ -96,9 +96,9 @@ public class Neal : MundaneScript
 
         var warriorThings = Random.Shared.Next(1, 5);
         var countMon = Random.Shared.Next(6, 10);
-        var advExp = (uint)Random.Shared.Next(20000, 25000);
-        var advExp2 = (uint)Random.Shared.Next(750000, 1000000);
-        var advExp3 = (uint)Random.Shared.Next(3000000, 4500000);
+        var advExp = Random.Shared.Next(20000, 25000);
+        var advExp2 = Random.Shared.Next(750000, 1000000);
+        var advExp3 = Random.Shared.Next(3000000, 4500000);
 
         _kill = warriorThings switch
         {

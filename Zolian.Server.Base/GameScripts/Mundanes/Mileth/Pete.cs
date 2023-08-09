@@ -43,7 +43,7 @@ public class Pete : MundaneScript
     {
         if (!AuthenticateUser(client)) return;
 
-        var exp = (uint)Random.Shared.Next(1000, 5000);
+        var exp = Random.Shared.Next(1000, 5000);
 
         switch (responseID)
         {

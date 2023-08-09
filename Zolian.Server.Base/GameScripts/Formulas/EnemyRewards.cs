@@ -1,8 +1,4 @@
 ﻿using System.Security.Cryptography;
-
-using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
-
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
@@ -27,116 +23,6 @@ public class EnemyRewards : RewardScript
         GenerateExperience(player, true);
         GenerateGold();
         GenerateDrops(monster, player);
-    }
-
-    private void HandleExp(Aisling player, uint exp)
-    {
-        if (exp <= 0) exp = 1;
-
-        if (player.GroupParty != null)
-        {
-            var groupSize = player.GroupParty.PartyMembers.Count;
-            var adjustment = ServerSetup.Instance.Config.GroupExpBonus;
-
-            if (groupSize > 7)
-            {
-                adjustment = ServerSetup.Instance.Config.GroupExpBonus = (groupSize - 7) * 0.05;
-                if (adjustment < 0.75)
-                {
-                    adjustment = 0.75;
-                }
-            }
-
-            var bonus = exp * (1 + player.GroupParty.PartyMembers.Count - 1) * adjustment / 100;
-            if (bonus > 0)
-                exp += (uint)bonus;
-        }
-
-        var difference = (int)(player.ExpLevel - _monster.Template.Level);
-        exp = difference switch
-        {
-            // Monster is higher level than player
-            <= -30 => (uint)(exp * 0.25),
-            <= -15 => (uint)(exp * 0.5),
-            <= -10 => (uint)(exp * 0.75),
-            // Monster is lower level than player
-            >= 30 => 1,
-            >= 15 => (uint)(exp * 0.25),
-            >= 10 => (uint)(exp * 0.5),
-            _ => exp
-        };
-
-        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-        player.ExpTotal += exp;
-        player.ExpNext -= exp;
-
-        if (player.ExpNext >= int.MaxValue) player.ExpNext = 0;
-
-        var seed = player.ExpLevel * 0.1 + 0.5;
-        {
-            if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
-                return;
-        }
-
-        while (player.ExpNext <= 0 && player.ExpLevel < 500)
-        {
-            player.ExpNext = (uint)(player.ExpLevel * seed * 5000);
-
-            if (player.ExpLevel == 500)
-                break;
-
-            if (player.ExpTotal <= 0)
-                player.ExpTotal = uint.MaxValue;
-
-            if (player.ExpTotal >= uint.MaxValue)
-                player.ExpTotal = uint.MaxValue;
-
-            if (player.ExpNext <= 0)
-                player.ExpNext = 1;
-
-            if (player.ExpNext >= int.MaxValue)
-                player.ExpNext = int.MaxValue;
-
-            player.Client.LevelUp(player);
-        }
-
-        //while (player.AbpNext <= 0 && player.AbpLevel < 99)
-        //{
-        // Ab Up
-        //}
-        // ToDo: Forsaken Dark Ranks
-        //if (player.Stage == ClassStage.Forsaken)
-        //    AbUp(player);
-    }
-
-    private static void AbUp(Aisling player)
-    {
-        if (player.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
-            return;
-
-        var wisMod = (double)player._Wis / player.ExpLevel;
-        var conMod = (double)player._Con / player.ExpLevel;
-        var mpAdd = (int)Math.Round(wisMod * 100 + 25);
-        var hpAdd = (int)Math.Round(conMod * 150 + 25);
-
-        player.BaseHp += hpAdd;
-        player.BaseMp += mpAdd;
-        player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
-        player.AbpLevel++;
-
-        player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{string.Format(ServerSetup.Instance.Config.AbilityUpMessage, player.AbpLevel)}");
-        player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, player.Serial, 75, 0, player.Serial));
-        var item = new Item();
-        item = item.Create(player, "Dark Rank");
-        var x = player.Position.X - 2;
-        var y = player.Position.Y - 2;
-        var pos = new Position(x, y);
-        item.Release(player, pos, false);
-        player.Client.SendAttributes(StatUpdateType.Full);
-        Task.Delay(2500).ContinueWith(ct =>
-        {
-            item.Remove();
-        });
     }
 
     private void DetermineRandomSpecialDrop(Monster monster, Aisling player)
@@ -264,29 +150,44 @@ public class EnemyRewards : RewardScript
 
     private void GenerateExperience(Aisling player, bool canCrit = false)
     {
-        var exp = _monster.Experience;
+        var exp = (int)_monster.Experience;
 
         if (canCrit)
         {
-            var critical = Math.Abs(EphemeralRandomIdGenerator<uint>.Shared.NextId % 100);
+            var critical = Generator.RandomNumPercentGen();
 
-            if (critical >= 85)
+            if (critical >= .85)
             {
                 exp *= 2;
                 player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(341, player.Serial));
             }
         }
 
-        HandleExp(player, exp);
+        var difference = player.ExpLevel - _monster.Template.Level;
+        exp = difference switch
+        {
+            // Monster is higher level than player
+            <= -30 => (int)(exp * 0.25),
+            <= -15 => (int)(exp * 0.5),
+            <= -10 => (int)(exp * 0.75),
+            // Monster is lower level than player
+            >= 30 => 1,
+            >= 15 => (int)(exp * 0.25),
+            >= 10 => (int)(exp * 0.5),
+            _ => exp
+        };
 
-        // Distribute the experience to the rest of the team or return and send stats
+        // Enqueue experience event
+        player.Client.EnqueueExperienceEvent(player, exp, true, false);
+
         if (player.PartyMembers == null) return;
 
         foreach (var party in player.PartyMembers
                      .Where(party => party.Serial != player.Serial)
                      .Where(party => party.WithinRangeOf(player)))
         {
-            HandleExp(party, exp);
+            // Enqueue experience event for party members
+            party.Client.EnqueueExperienceEvent(party, exp, true, false);
         }
     }
 
@@ -294,7 +195,7 @@ public class EnemyRewards : RewardScript
     {
         if (!_monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold)) return;
 
-        var sum = (uint)Random.Shared.Next((int)(_monster.Template.Level * 13), (int)(_monster.Template.Level * 200));
+        var sum = (uint)Random.Shared.Next(_monster.Template.Level * 13, _monster.Template.Level * 200);
 
         if (sum > 0)
             Money.Create(_monster, sum, new Position(_monster.Pos.X, _monster.Pos.Y));

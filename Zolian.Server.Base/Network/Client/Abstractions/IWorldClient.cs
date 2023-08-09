@@ -160,9 +160,11 @@ public interface IWorldClient : ISocketClient
     void GiveWis(byte v = 1);
     void GiveCon(byte v = 1);
     void GiveDex(byte v = 1);
-    void GiveExp(uint exp);
+    void EnqueueExperienceEvent(Aisling player, int exp, bool hunting, bool overflow);
+    void GiveExp(int exp, bool overflow = false);
     void LevelUp(Aisling player);
-    void GiveAp(uint a);
+    void GiveAp(int a);
+    void DarkRankUp(Aisling player);
     WorldClient RefreshMap(bool updateView = false);
     WorldClient TransitionToMap(Area area, Position position);
     WorldClient TransitionToMap(int area, Position position);

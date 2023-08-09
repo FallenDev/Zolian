@@ -165,12 +165,16 @@ namespace Darkages.Network.Client
         public Position LastKnownPosition { get; set; }
         public int MapClicks { get; set; }
         public uint EntryCheck { get; set; }
+        private readonly Queue<ExperienceEvent> _expQueue = new();
+        private readonly object _queueLock = new();
+        private Task _experienceTask;
 
         public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
             [NotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
         {
             Server = server;
+            _experienceTask = Task.Run(ProcessExperienceEvents);
         }
 
         public void Update(TimeSpan elapsedTime)
@@ -241,6 +245,31 @@ namespace Darkages.Network.Client
             //if (!Aisling.GameMaster)
             //VariableLagDisconnector(30);
             DoUpdate(elapsedTime);
+        }
+
+        private void ProcessExperienceEvents()
+        {
+            while (ServerSetup.Instance.Running)
+            {
+                ExperienceEvent? expEvent = null;
+
+                lock (_queueLock)
+                {
+                    if (_expQueue.Any())
+                    {
+                        expEvent = _expQueue.Dequeue();
+                    }
+                }
+
+                if (expEvent.HasValue)
+                {
+                    HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting, expEvent.Value.Overflow);
+                }
+                else
+                {
+                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                }
+            }
         }
 
         private void DoUpdate(TimeSpan elapsedTime)
@@ -1233,8 +1262,8 @@ namespace Darkages.Network.Client
                 OffenseElement = (Element)Aisling.OffenseElement,
                 StatUpdateType = statUpdateType,
                 Str = (byte)Math.Clamp(Aisling.Str, byte.MinValue, byte.MaxValue),
-                ToNextAbility = Aisling.AbpNext,
-                ToNextLevel = Aisling.ExpNext,
+                ToNextAbility = (uint)Aisling.AbpNext,
+                ToNextLevel = (uint)Aisling.ExpNext,
                 TotalAbility = Aisling.AbpTotal,
                 TotalExp = Aisling.ExpTotal,
                 UnspentPoints = (byte)Aisling.StatPoints,
@@ -1342,7 +1371,7 @@ namespace Darkages.Network.Client
             {
                 ICollection<PostInfo> postsCollection = new List<PostInfo>();
                 var personalBoard = ObjectHandlers.PersonalBoardJsonConvert<Board>(ServerSetup.PersonalBoards[index]);
-            
+
                 foreach (var postFormat in personalBoard.Posts)
                 {
                     var post = new PostInfo
@@ -3226,7 +3255,7 @@ namespace Darkages.Network.Client
 
             var skill = Skill.GiveTo(this, subject.Name);
             if (skill) LoadSkillBook();
-            
+
             this.SendOptionsDialog(source, message);
             Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, Aisling.Serial));
 
@@ -3900,100 +3929,192 @@ namespace Darkages.Network.Client
             SendAttributes(StatUpdateType.Primary);
         }
 
-        public void GiveExp(uint exp)
+        public void EnqueueExperienceEvent(Aisling player, int exp, bool hunting, bool overflow)
+        {
+            lock (_queueLock)
+            {
+                _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting, overflow));
+            }
+        }
+
+        private void HandleExp(Aisling player, int exp, bool hunting, bool overflow)
         {
             if (exp <= 0) exp = 1;
 
-            SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-            Aisling.ExpTotal += exp;
-            Aisling.ExpNext -= exp;
-
-            if (Aisling.ExpNext >= int.MaxValue) Aisling.ExpNext = 0;
-
-            var seed = Aisling.ExpLevel * 0.1 + 0.5;
+            if (hunting)
             {
-                if (Aisling.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
-                    return;
+                if (player.GroupParty != null)
+                {
+                    var groupSize = player.GroupParty.PartyMembers.Count;
+                    var adjustment = ServerSetup.Instance.Config.GroupExpBonus;
+
+                    if (groupSize > 7)
+                    {
+                        adjustment = ServerSetup.Instance.Config.GroupExpBonus = (groupSize - 7) * 0.05;
+                        if (adjustment < 0.75)
+                        {
+                            adjustment = 0.75;
+                        }
+                    }
+
+                    var bonus = exp * (1 + player.GroupParty.PartyMembers.Count - 1) * adjustment / 100;
+                    if (bonus > 0)
+                        exp += (int)bonus;
+                }
             }
 
-            while (Aisling.ExpNext <= 0 && Aisling.ExpLevel < 500)
+            if (uint.MaxValue - player.ExpTotal < exp)
             {
-                Aisling.ExpNext = (uint)(Aisling.ExpLevel * seed * 5000);
-
-                if (Aisling.ExpLevel == 500)
-                    break;
-
-                if (Aisling.ExpTotal <= 0)
-                    Aisling.ExpTotal = uint.MaxValue;
-
-                if (Aisling.ExpTotal >= uint.MaxValue)
-                    Aisling.ExpTotal = uint.MaxValue;
-
-                if (Aisling.ExpNext <= 0)
-                    Aisling.ExpNext = 1;
-
-                if (Aisling.ExpNext >= int.MaxValue)
-                    Aisling.ExpNext = int.MaxValue;
-
-                Aisling.Client.LevelUp(Aisling);
+                if (!overflow)
+                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
+            }
+            else
+            {
+                if (!overflow)
+                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+                player.ExpTotal += (uint)exp;
             }
 
-            SendAttributes(StatUpdateType.ExpGold);
+            try
+            {
+                if (player.ExpLevel > 500) return;
+                
+                var expNext = player.ExpNext;
+                expNext -= exp;
+
+                if (expNext <= 0)
+                {
+                    var extraExp = Math.Abs(expNext);
+                    GiveExp(extraExp, true);
+                    player.Client.LevelUp(player);
+                }
+                else
+                    player.ExpNext = expNext;
+            }
+            catch (Exception e)
+            {
+                ServerSetup.Logger($"Issue giving {player.Username} experience.");
+                Crashes.TrackError(e);
+            }
+        }
+
+        public void GiveExp(int exp, bool overflow = false)
+        {
+            if (exp <= 0) exp = 1;
+            
+            // Enqueue experience event
+            EnqueueExperienceEvent(Aisling, exp, false, overflow);
         }
 
         public void LevelUp(Aisling player)
         {
-            if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
+            // Set next level
+            player.ExpLevel++;
+
+            var seed = player.ExpLevel * 0.1 + 0.5;
+            {
+                if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
+            }
+            player.ExpNext = (int)(player.ExpLevel * seed * 5000);
+
+            if (player.ExpNext <= 0)
+            {
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue leveling up; Error: Mt. Everest");
+                return;
+            }
+
+            if (player.ExpLevel >= 250)
+                player.StatPoints += 1;
+            else
+                player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
+
+            // Set vitality
             player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
             player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
-            player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
-            player.ExpLevel++;
             player.CurrentHp = player.MaximumHp;
             player.CurrentMp = player.MaximumMp;
+            player.Client.SendAttributes(StatUpdateType.Full);
 
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
             player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(79, player.Serial, 64));
-            player.Client.SendAttributes(StatUpdateType.ExpGold);
         }
 
-        public void GiveAp(uint a)
+        public void GiveAp(int exp)
         {
-            if (a <= 0) a = 1;
-            SendServerMessage(ServerMessageType.ActiveMessage, $"Received {a:n0} ability points!");
-            Aisling.AbpTotal += a;
-            Aisling.AbpNext -= a;
+            if (exp <= 0) exp = 1;
 
-            if (Aisling.AbpNext >= int.MaxValue) Aisling.AbpNext = 0;
-
-            var seed = Aisling.AbpLevel * 0.1 + 0.5;
+            if (exp + Aisling.AbpTotal >= uint.MaxValue)
             {
-                if (Aisling.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap)
-                    return;
+                Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your ability box is full, ascend to carry more");
+            }
+            else
+            {
+                Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
+                Aisling.AbpTotal += (uint)exp;
             }
 
-            while (Aisling.AbpNext <= 0 && Aisling.AbpLevel < 500)
+            while (exp > 0 && Aisling.AbpLevel < 500)
             {
-                Aisling.AbpNext = (uint)(Aisling.AbpLevel * seed * 5000);
+                if (Aisling.AbpLevel == 500) break;
 
-                if (Aisling.AbpLevel == 500)
-                    break;
+                // Chunk routine to save on performance
+                switch (exp)
+                {
+                    case > 100000 when Aisling.AbpNext > 100000:
+                        exp -= 100000;
+                        Aisling.AbpNext -= 100000;
+                        break;
+                    case > 50000 when Aisling.AbpNext > 50000:
+                        exp -= 50000;
+                        Aisling.AbpNext -= 50000;
+                        break;
+                    case > 10000 when Aisling.AbpNext > 10000:
+                        exp -= 10000;
+                        Aisling.AbpNext -= 10000;
+                        break;
+                    case > 1000 when Aisling.AbpNext > 1000:
+                        exp -= 1000;
+                        Aisling.AbpNext -= 1000;
+                        break;
+                    default:
+                        if (exp - 100 <= int.MinValue)
+                            exp = 0;
+                        else
+                            exp -= 100;
 
-                if (Aisling.AbpNext <= 0)
-                    Aisling.AbpNext = uint.MaxValue;
+                        if (Aisling.AbpNext - 100 <= int.MinValue)
+                            Aisling.AbpNext = 0;
+                        else
+                            Aisling.AbpNext -= 100;
+                        break;
+                }
 
-                if (Aisling.AbpNext >= uint.MaxValue)
-                    Aisling.AbpNext = uint.MaxValue;
+                if (Aisling.AbpNext == 0)
+                    DarkRankUp(Aisling);
+            }
+        }
 
-                if (Aisling.AbpNext <= 0)
-                    Aisling.AbpNext = 1;
-
-                if (Aisling.AbpNext >= int.MaxValue)
-                    Aisling.AbpNext = int.MaxValue;
-
-                Aisling.AbpLevel++;
+        public void DarkRankUp(Aisling player)
+        {
+            var seed = player.AbpLevel * 0.5 + 0.8;
+            {
+                if (player.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
             }
 
-            SendAttributes(StatUpdateType.ExpGold);
+            // Set next level
+            player.AbpLevel++;
+            player.AbpNext = (int)(player.AbpLevel * seed * 5000);
+            player.StatPoints += 1;
+
+            // Set vitality
+            player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23);
+            player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90);
+            player.CurrentHp = player.MaximumHp;
+            player.CurrentMp = player.MaximumMp;
+            player.Client.SendAttributes(StatUpdateType.Full);
+
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Dark Rank:{player.AbpLevel}");
+            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, player.Serial, 75));
         }
 
         #endregion

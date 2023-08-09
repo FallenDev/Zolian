@@ -55,7 +55,7 @@ public class Senan : MundaneScript
     {
         if (!AuthenticateUser(client)) return;
 
-        var exp = (uint)Random.Shared.Next(200000, 550000);
+        var exp = Random.Shared.Next(200000, 550000);
 
         while (true)
         {
