@@ -74,7 +74,7 @@ public class InnerHost : MundaneScript
                     }
 
                     client.CloseDialog();
-                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendAnimation(262, null, client.Aisling.Serial);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
                     break;
                 }
@@ -102,7 +102,7 @@ public class InnerHost : MundaneScript
                     }
 
                     client.CloseDialog();
-                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendAnimation(262, null, client.Aisling.Serial);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
                     break;
                 }
@@ -130,7 +130,7 @@ public class InnerHost : MundaneScript
                     }
 
                     client.CloseDialog();
-                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendAnimation(262, null, client.Aisling.Serial);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
                     break;
                 }
@@ -158,7 +158,7 @@ public class InnerHost : MundaneScript
                     }
 
                     client.CloseDialog();
-                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendAnimation(262, null, client.Aisling.Serial);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
                     break;
                 }
@@ -171,7 +171,7 @@ public class InnerHost : MundaneScript
                 {
                     client.TransitionToMap(5232, new Position(3, 7));
                     client.CloseDialog();
-                    client.SendAnimation(262, client.Aisling.Serial);
+                    client.SendAnimation(262, null, client.Aisling.Serial);
                     break;
                 }
             case 0x09:
@@ -231,7 +231,7 @@ public class InnerHost : MundaneScript
                         client.CloseDialog();
                         Task.Delay(350).ContinueWith(ct =>
                         {
-                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial));
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                         });
                     }
                     break;

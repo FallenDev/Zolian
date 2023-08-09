@@ -874,7 +874,7 @@ public class Healing_Winds : SpellScript
 
                 target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
 
-                partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(267, partyMember.Serial));
+                partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(267, null, partyMember.Serial));
                 partyMember.PlayerNearby?.Client.SendAttributes(StatUpdateType.Vitality);
             }
         }
@@ -1063,7 +1063,7 @@ public class Raise_Ally : SpellScript
                 deadPartyMember.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
                 deadPartyMember.PlayerNearby?.Client.SendAttributes(StatUpdateType.Full);
                 deadPartyMember.PlayerNearby?.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
-                Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, deadPartyMember.Serial)); });
+                Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, null, deadPartyMember.Serial)); });
                 break;
             }
         }
@@ -1449,7 +1449,7 @@ public class AoPuinsein : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -1556,7 +1556,7 @@ public class AoDall : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -1663,7 +1663,7 @@ public class AoBeagCradh : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -1770,7 +1770,7 @@ public class AoCradh : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -1877,7 +1877,7 @@ public class AoMorCradh : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -1984,7 +1984,7 @@ public class AoArdCradh : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
@@ -2091,7 +2091,7 @@ public class AoSuain : SpellScript
             if (target is Aisling targetAisling)
                 targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, target.Serial));
         aisling.CastAnimation(Spell, target);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 

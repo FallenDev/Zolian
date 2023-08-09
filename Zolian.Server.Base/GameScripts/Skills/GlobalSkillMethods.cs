@@ -158,11 +158,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
         attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
     public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit)
@@ -180,10 +180,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, enemy.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
     public int Thrown(WorldClient client, Skill skill, bool crit)

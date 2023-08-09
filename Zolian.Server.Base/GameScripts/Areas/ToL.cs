@@ -64,16 +64,16 @@ public class ToL : AreaScript
         if (_aisling?.Map.ID != 14758) return;
         if (a)
         {
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(15, 55)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(20, 55)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(21, 40)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(14, 40)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(15, 55)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(20, 55)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(21, 40)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(14, 40)));
         }
 
         if (b)
         {
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(17, 59)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, 0U, 100, 0, 0U, new Position(18, 59)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(17, 59)));
+            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(18, 59)));
         }
     }
 }

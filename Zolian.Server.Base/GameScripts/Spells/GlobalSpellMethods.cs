@@ -76,7 +76,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (!crit) return final;
 
-        damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, damageDealingAisling.Serial));
+        damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, damageDealingAisling.Serial));
         final *= CritDmg;
 
         return final;
@@ -94,7 +94,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (!crit) return final;
 
-        damageMonster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, damageMonster.Serial));
+        damageMonster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, damageMonster.Serial));
         final *= CritDmg;
 
         return final;
@@ -121,7 +121,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Monster"} Attacks you with {spell.Template.Name}.");
 
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
@@ -133,11 +133,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             case Aisling aisling:
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has been deflected.");
-                aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(115, aisling.Serial));
+                aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(115, null, aisling.Serial));
                 break;
             case Monster:
                 if (sprite.Target is Aisling player)
-                    player.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(115, player.Serial));
+                    player.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(115, null, player.Serial));
                 break;
         }
     }
@@ -154,7 +154,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (target.SpellReflect)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(184, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(184, null, target.Serial));
 
             if (sprite is Aisling)
                 sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
@@ -181,7 +181,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellNegate)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(64, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(64, null, target.Serial));
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
@@ -236,7 +236,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellReflect)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(184, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(184, null, target.Serial));
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
@@ -245,7 +245,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellNegate)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(64, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(64, null, target.Serial));
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
@@ -284,7 +284,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Monster"} Attacks you with {spell.Template.Name}.");
 
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
@@ -307,7 +307,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 targetPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{client.Aisling.Username} poisons you with {spell.Template.Name}.");
 
             client.SendServerMessage(ServerMessageType.OrangeBar1, $"You've cast {spell.Template.Name}");
-            aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(spell.Template.Sound, false));
         }
         else
@@ -317,7 +317,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Monster"} Attacks you with {spell.Template.Name}.");
 
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
@@ -336,7 +336,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Monster"} Attacks you with {spell.Template.Name}.");
 
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
@@ -348,22 +348,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             case Aisling aisling:
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has failed.");
-                aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, target.Serial));
+                aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
                 break;
             case Monster:
-                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, target.Serial));
+                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
                 break;
-        }
-
-        if (sprite.Map.Flags.MapFlagIsSet(MapFlags.Snow))
-        {
-            Task.Delay(30000).ContinueWith(ct =>
-            {
-                if (sprite.Map.Flags.MapFlagIsSet(MapFlags.Snow))
-                    sprite.Map.Flags &= ~MapFlags.Snow;
-
-                sprite.PlayerNearby?.Client.ClientRefreshed();
-            });
         }
     }
 
@@ -379,7 +368,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (target.SpellReflect)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
             if (sprite is Aisling)
                 sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
@@ -405,7 +394,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellNegate)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
@@ -467,7 +456,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellReflect)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
 
@@ -476,7 +465,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             if (target.SpellNegate)
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
                 if (target is Aisling)
                     target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
 
@@ -525,7 +514,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         else
         {
             buff.OnApplied(sprite, buff);
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
@@ -611,5 +600,19 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         var diffY = Math.Abs(spriteY - inputY);
 
         return diffX + diffY;
+    }
+
+    public void RemoveFakeSnow(Sprite sprite)
+    {
+        if (sprite.Map.Flags.MapFlagIsSet(MapFlags.Snow))
+        {
+            Task.Delay(30000).ContinueWith(ct =>
+            {
+                if (sprite.Map.Flags.MapFlagIsSet(MapFlags.Snow))
+                    sprite.Map.Flags &= ~MapFlags.Snow;
+
+                sprite.PlayerNearby?.Client.ClientRefreshed();
+            });
+        }
     }
 }

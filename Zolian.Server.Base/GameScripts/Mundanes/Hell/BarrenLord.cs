@@ -59,7 +59,7 @@ public class BarrenLord : MundaneScript
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You have lost some health.");
         client.SendAttributes(StatUpdateType.Full);
         client.TransitionToMap(136, new Position(4, 7));
-        Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, client.Aisling.Serial)); });
+        Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, null, client.Aisling.Serial)); });
         client.CloseDialog();
     }
 }

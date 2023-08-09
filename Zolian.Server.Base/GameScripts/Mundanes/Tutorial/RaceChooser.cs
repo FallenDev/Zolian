@@ -249,9 +249,9 @@ public class RaceChooser : MundaneScript
 
                 client.SendOptionsDialog(Mundane, "*raises a hand towards you*");
                 Task.Delay(1000).ContinueWith(ct => { client.TransitionToMap(720, new Position(14, 15)); });
-                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                 Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
-                Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, client.Aisling.Serial)); });
+                Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                 client.CloseDialog();
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
                 Task.Delay(2000).ContinueWith(ct => { client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });

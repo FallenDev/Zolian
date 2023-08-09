@@ -85,7 +85,7 @@ public class Skill
             {
                 client.Aisling.SkillBook.Set((byte)slot, skill, null);
                 client.SendAddSkillToPane(skill);
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, client.Aisling.Serial));
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
             }
         }
 
@@ -150,7 +150,7 @@ public class Skill
             {
                 aisling.SkillBook.Set((byte)slot, skill, null);
                 aisling.Client.SendAddSkillToPane(skill);
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, aisling.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
             }
         }
 
@@ -222,7 +222,7 @@ public class Skill
         if (enemy is Aisling enemyAisling)
             sender = enemyAisling;
 
-        sender?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, enemy.Serial));
+        sender?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, null, enemy.Serial));
 
         return enemy;
     }

@@ -76,7 +76,7 @@ public class Cloud : MundaneScript
                     client.Aisling.ExpTotal -= (uint)i;
                     client.Aisling.BaseHp += 50;
                     client.SendAttributes(StatUpdateType.ExpGold);
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(2, client.Aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(2, null, client.Aisling.Serial));
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(0, false));
                 }
                 else
@@ -106,7 +106,7 @@ public class Cloud : MundaneScript
                     client.Aisling.ExpTotal -= (uint)i;
                     client.Aisling.BaseHp += 500;
                     client.SendAttributes(StatUpdateType.ExpGold);
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(2, client.Aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(2, null, client.Aisling.Serial));
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(0, false));
                 }
                 else

@@ -53,7 +53,7 @@ public class Hell : AreaScript
         {
             var randA = RandomNumberGenerator.GetInt32(41);
             var randB = RandomNumberGenerator.GetInt32(41);
-            _aisling?.SendTargetedClientMethod(Scope.Self, client => client.SendAnimation(384, 0U, 100, 0, 0U, new Position(randA, randB)));
+            _aisling?.SendTargetedClientMethod(Scope.Self, client => client.SendAnimation(384, new Position(randA, randB)));
         }
     }
 }

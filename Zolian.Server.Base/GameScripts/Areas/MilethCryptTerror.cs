@@ -68,7 +68,7 @@ public class MilethCryptTerror : AreaScript
 
         if (_aisling.Map.ID != 8) return;
         if (!a) return;
-        _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, 0U, 100, 0, 0U, new Position(1, 19)));
+        _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 19)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

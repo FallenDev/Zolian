@@ -75,7 +75,7 @@ public class ArenaHost : MundaneScript
                 }
 
                 client.CloseDialog();
-                client.SendAnimation(262, client.Aisling.Serial);
+                client.SendAnimation(262, null, client.Aisling.Serial);
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
                 break;
             }
@@ -103,7 +103,7 @@ public class ArenaHost : MundaneScript
                 }
 
                 client.CloseDialog();
-                client.SendAnimation(262, client.Aisling.Serial);
+                client.SendAnimation(262, null, client.Aisling.Serial);
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
                 break;
             }
@@ -131,7 +131,7 @@ public class ArenaHost : MundaneScript
                 }
 
                 client.CloseDialog();
-                client.SendAnimation(262, client.Aisling.Serial);
+                client.SendAnimation(262, null, client.Aisling.Serial);
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
                 break;
             }
@@ -159,7 +159,7 @@ public class ArenaHost : MundaneScript
                 }
 
                 client.CloseDialog();
-                client.SendAnimation(262, client.Aisling.Serial);
+                client.SendAnimation(262, null, client.Aisling.Serial);
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
                 break;
             }

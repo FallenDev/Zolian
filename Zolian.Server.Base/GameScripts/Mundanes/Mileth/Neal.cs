@@ -215,7 +215,7 @@ public class Neal : MundaneScript
                     var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
                     if (subject == null) return;
 
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, null, client.Aisling.Serial));
                     client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
 
                     break;
@@ -287,7 +287,7 @@ public class Neal : MundaneScript
                     var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
                     if (subject == null) return;
 
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, client.Aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(109, null, client.Aisling.Serial));
                     client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
 
                     break;

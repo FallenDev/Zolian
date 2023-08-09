@@ -66,7 +66,7 @@ public class TrainingDummy : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, Monster.Serial));
+    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
 
     public override void Update(TimeSpan elapsedTime)
     {

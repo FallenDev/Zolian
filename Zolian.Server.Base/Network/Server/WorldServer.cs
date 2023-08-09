@@ -1515,7 +1515,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (aisling.Client.RemoteIp.Equals(ServerSetup.Instance.IpAddress) ||
                     aisling.Client.RemoteIp.Equals(ipLocal))
                 {
-                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, aisling.Serial));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, null, aisling.Serial));
                 }
                 else
                 {

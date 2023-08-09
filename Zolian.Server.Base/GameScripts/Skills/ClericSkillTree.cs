@@ -35,7 +35,7 @@ public class Blink : SkillScript
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
 
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
 
         _skillMethod.Train(client, _skill);
 
@@ -92,7 +92,7 @@ public class Blink : SkillScript
             }
 
             var newPos = orgPos with { Y = orgPos.Y + yDiffHold };
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, 0U, 100, 0, 0U, new Position(newPos.X, newPos.Y)));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
         }
 
         for (var i = 0; i < xGap; i++)
@@ -108,7 +108,7 @@ public class Blink : SkillScript
             }
 
             var newPos = orgPos with { X = orgPos.X + xDiffHold };
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, 0U, 100, 0, 0U, new Position(newPos.X, newPos.Y)));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
         }
     }
 }
@@ -134,7 +134,7 @@ public class Smite : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to purify.");
-        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingAisling.Serial));
+        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)

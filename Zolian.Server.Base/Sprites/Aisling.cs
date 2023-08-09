@@ -386,7 +386,24 @@ public sealed class Aisling : Player, IAisling
                     {
                         spell.InUse = true;
                         var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
-                        CastTargetAnimation(spell, target, info);
+                        //CastTargetAnimation(spell, target, info);
+
+                        //ToDo: Remove cloaks
+                        if (Client.Aisling.IsInvisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                        {
+                            if (Client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                            {
+                                hide.OnEnded(Client.Aisling, hide);
+                            }
+
+                            if (Client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                            {
+                                shadowFade.OnEnded(Client.Aisling, shadowFade);
+                            }
+
+                            Client.UpdateDisplay();
+                        }
+
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
                         spell.InUse = false;
@@ -429,7 +446,7 @@ public sealed class Aisling : Player, IAisling
         }
 
         Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Target, 100, spell.Template.Animation, Serial));
+        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Position, info.Target, 100, spell.Template.Animation, Serial));
     }
 
     /// <summary>
@@ -650,7 +667,7 @@ public sealed class Aisling : Player, IAisling
                 obj.RemoveDebuff("Skulled", true);
 
             obj.Client.Revive();
-            obj.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, obj.Serial));
+            obj.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, null, obj.Serial));
         }
 
         ApplyDamage(this, 0, null);
@@ -664,7 +681,7 @@ public sealed class Aisling : Player, IAisling
             aisling.RemoveDebuff("Skulled", true);
 
         aisling.Client.Revive();
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, null, aisling.Serial));
 
         ApplyDamage(this, 0, null);
         Client.SendSound(8, false);

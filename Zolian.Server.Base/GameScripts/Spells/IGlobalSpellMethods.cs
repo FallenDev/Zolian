@@ -23,4 +23,5 @@ public interface IGlobalSpellMethods
     void EnhancementOnSuccess(Sprite sprite, Sprite target, Spell spell, Buff buff);
     void Step(Sprite sprite, int savedXStep, int savedYStep);
     int DistanceTo(Position spritePos, Position inputPos);
+    void RemoveFakeSnow(Sprite sprite);
 }

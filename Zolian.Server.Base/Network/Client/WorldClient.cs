@@ -201,7 +201,7 @@ namespace Darkages.Network.Client
                     if (_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)
                     {
                         SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120);
-                        SendAnimation(32, 200, 0, 0, 0, new Position(Aisling.Pos));
+                        SendAnimation(32, null, Aisling.Serial, 200);
                     }
                     break;
                 case ActivityStatus.NeedGroup:
@@ -1209,7 +1209,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x29 - Animation
         /// </summary>
-        public void SendAnimation(ushort targetEffect, uint? targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint? casterSerial = 0, [CanBeNull] Position position = null)
+        public void SendAnimation(ushort targetEffect, Position position = null, uint targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint casterSerial = 0)
         {
             Point? point;
 
@@ -3257,7 +3257,7 @@ namespace Darkages.Network.Client
             if (skill) LoadSkillBook();
 
             this.SendOptionsDialog(source, message);
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, Aisling.Serial));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
             return this;
         }
@@ -3274,7 +3274,7 @@ namespace Darkages.Network.Client
             if (spell) LoadSpellBook();
 
             this.SendOptionsDialog(source, message);
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, Aisling.Serial));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
             return this;
         }
@@ -3315,7 +3315,7 @@ namespace Darkages.Network.Client
             if (!Socket.Connected || !IsDayDreaming) return;
 
             SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120);
-            SendAnimation(32, 200, 0, 0, 0, new Position(Aisling.Pos));
+            SendAnimation(32, null, Aisling.Serial, 200);
         }
 
         public void VariableLagDisconnector(int delay)
@@ -4036,7 +4036,7 @@ namespace Darkages.Network.Client
             player.Client.SendAttributes(StatUpdateType.Full);
 
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
-            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(79, player.Serial, 64));
+            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(79, null, player.Serial, 64));
         }
 
         public void GiveAp(int exp)
@@ -4114,7 +4114,7 @@ namespace Darkages.Network.Client
             player.Client.SendAttributes(StatUpdateType.Full);
 
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Dark Rank:{player.AbpLevel}");
-            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, player.Serial, 75));
+            player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, null, player.Serial, 75));
         }
 
         #endregion

@@ -606,7 +606,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingY--;
@@ -619,7 +619,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingX++;
@@ -632,7 +632,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingY++;
@@ -645,7 +645,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, sprite.Serial, 100, 0, 0U, pos));
+                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingX--;
@@ -1243,7 +1243,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 PlayerNearby?.Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, aisling.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, null, aisling.Serial));
             }
 
             if (fort <= Fortitude)
@@ -1289,7 +1289,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             var convDmg = (int)dmg;
 
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, null, damageDealingSprite.Serial));
             damageDealingSprite.CurrentHp -= convDmg;
         }
     }
@@ -1321,7 +1321,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_spell_reflect();
                     if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when aegisChance >= 97:
@@ -1329,7 +1329,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_spell_reflect();
                     if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -1343,7 +1343,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     damageDealingSprite.CurrentHp += (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when vampChance >= 97:
@@ -1353,7 +1353,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     damageDealingSprite.CurrentHp += (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -1364,7 +1364,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 {
                     client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                     break;
                 }
@@ -1372,7 +1372,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 {
                     client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                     break;
                 }
@@ -1391,7 +1391,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new debuff_bleeding();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has caused your target to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
                 }
             case 2 when bleedingChance >= 97:
@@ -1399,7 +1399,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new debuff_bleeding();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The weapon has caused your target to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
                 }
         }
@@ -1411,7 +1411,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new debuff_rending();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
                 }
             case 2 when rendingChance >= 97:
@@ -1419,7 +1419,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new debuff_rending();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
                 }
         }

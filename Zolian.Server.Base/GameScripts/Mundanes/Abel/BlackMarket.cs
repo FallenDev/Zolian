@@ -103,7 +103,7 @@ public class BlackMarket : MundaneScript
                     {
                         client.Recover();
                         client.TransitionToMap(3003, new Position(5, 9));
-                        Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, client.Aisling.Serial)); });
+                        Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial)); });
                         client.SendServerMessage(ServerMessageType.ActiveMessage, "Always watch your six.");
                     }
                 }

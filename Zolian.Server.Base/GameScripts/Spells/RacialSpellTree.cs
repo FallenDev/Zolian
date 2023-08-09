@@ -66,7 +66,7 @@ public class Caltrops : SpellScript
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
         target.MagicApplyDamage(sprite, 2500, Spell);
-        target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Serial));
+        target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -327,7 +327,7 @@ public class DestructiveForce : SpellScript
         {
             var stunned = new debuff_beagsuain();
             stunned.OnApplied(_target, stunned);
-            _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, _target.Serial));
+            _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
         }
 
         _target.Pos = new Vector2(targetPosition.X, targetPosition.Y);
@@ -380,7 +380,7 @@ public class Elemental_Bolt : SpellScript
 
         if (target.SpellReflect)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
             if (sprite is Aisling)
                 sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
@@ -405,7 +405,7 @@ public class Elemental_Bolt : SpellScript
 
         if (target.SpellNegate)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}.");

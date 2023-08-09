@@ -40,11 +40,11 @@ public class Remote_Bank : SpellScript
     {
         if (sprite.PlayerNearby?.Client != null)
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
         else
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
     }
 }
@@ -78,11 +78,11 @@ public class Needle_Trap : SpellScript
 
         if (sprite.PlayerNearby?.Client != null)
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
         else
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
     }
 
@@ -124,11 +124,11 @@ public class Stiletto_Trap : SpellScript
 
         if (sprite.PlayerNearby?.Client != null)
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
         else
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
     }
 
@@ -173,11 +173,11 @@ public class Poison_Trap : SpellScript
         {
             if (sprite.PlayerNearby?.Client != null)
             {
-                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
             }
             else
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, sprite.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
             }
         }
     }
@@ -223,11 +223,11 @@ public class Snare_Trap : SpellScript
         {
             if (sprite.PlayerNearby?.Client != null)
             {
-                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, sprite.Serial));
+                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, null, sprite.Serial));
             }
             else
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, sprite.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, null, sprite.Serial));
             }
         }
     }
@@ -273,11 +273,11 @@ public class Flash_Trap : SpellScript
         {
             if (sprite.PlayerNearby?.Client != null)
             {
-                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(18, sprite.Serial));
+                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(18, null, sprite.Serial));
             }
             else
             {
-                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(18, sprite.Serial));
+                target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(18, null, sprite.Serial));
             }
         }
     }
@@ -327,7 +327,7 @@ public class Hiraishin : SpellScript
         if (targetPos == null || targetPos == target.Position) return;
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
         client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
@@ -460,8 +460,8 @@ public class Shunshin : SpellScript
 
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, damageDealingSprite.Serial));
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, null, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();

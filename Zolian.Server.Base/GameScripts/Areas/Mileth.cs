@@ -127,7 +127,7 @@ public class Mileth : AreaScript
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
                     if (ceanWeapon != null)
                         item = item.Create(client.Aisling, ceanWeapon, NpcShopExtensions.DungeonHighQuality(), variance, wVariance);
-                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, client.Aisling.Serial)); });
+                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, client.Aisling.Serial)); });
                     break;
                 case >= 75 and < 95:
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a warmth placed on your shoulder. (100 Exp)");
@@ -165,7 +165,7 @@ public class Mileth : AreaScript
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue("Ard Ioc Deum", out var potion);
                     if (potion != null)
                         item = item.Create(client.Aisling, potion);
-                    Task.Delay(350).ContinueWith(ct => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(5, client.Aisling.Serial)));
+                    Task.Delay(350).ContinueWith(ct => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(5, null, client.Aisling.Serial)));
                     break;
             }
 

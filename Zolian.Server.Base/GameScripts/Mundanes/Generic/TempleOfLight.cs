@@ -65,7 +65,7 @@ public class TempleOfLight : MundaneScript
                         break;
                 }
 
-                client.SendAnimation(262, client.Aisling.Serial);
+                client.SendAnimation(262, null, client.Aisling.Serial);
                 break;
             }
             case 2:
