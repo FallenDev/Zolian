@@ -1600,7 +1600,9 @@ namespace Darkages.Network.Client
                 Y = aisling.Y
             };
 
-            if (aisling.EquipmentManager.Helmet != null)
+            if (aisling.EquipmentManager.OverHelm != null && aisling.HeadAccessoryImg != 0)
+                args.HeadSprite = (ushort)aisling.HeadAccessoryImg;
+            else if (aisling.EquipmentManager.Helmet != null && aisling.HelmetImg != 0)
                 args.HeadSprite = (ushort)aisling.HelmetImg;
             else
                 args.HeadSprite = aisling.HairStyle;
@@ -3389,7 +3391,8 @@ namespace Darkages.Network.Client
 
         public WorldClient UpdateDisplay(bool excludeSelf = false)
         {
-            if (!excludeSelf) SendDisplayAisling(Aisling);
+            if (!excludeSelf) 
+                SendDisplayAisling(Aisling);
 
             var nearbyAislings = Aisling.AislingsNearby();
 

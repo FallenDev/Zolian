@@ -31,9 +31,6 @@ public class Generic : ItemScript
         if (Item.Template.EquipmentSlot is ItemSlots.Leg)
             if (client.Aisling.EquipmentManager.Equipment[12] == null)
                 Item.Template.EquipmentSlot = ItemSlots.Leg;
-        if (Item.Template.EquipmentSlot is ItemSlots.FirstAcc)
-            if (client.Aisling.EquipmentManager.Equipment[14] == null)
-                Item.Template.EquipmentSlot = ItemSlots.FirstAcc;
 
         if (client.CheckReqs(client, Item))
             client.Aisling.EquipmentManager.Add(Item.Template.EquipmentSlot, Item);
