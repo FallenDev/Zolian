@@ -38,7 +38,6 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         var healthSap = (int)(aisling.MaximumHp * .33);
         var damage = (int)((healthSap + manaSap) * 0.01) * 200;
 
-        aisling.CastAnimation(_spell, null);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.Animation, null, aisling.Serial));
 
         foreach (var targetObj in targets)

@@ -131,21 +131,6 @@ public class Calming_Voice : SpellScript
 
         if (success)
         {
-            if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
-            {
-                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
-                {
-                    hide.OnEnded(client.Aisling, hide);
-                }
-
-                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
-                {
-                    shadowFade.OnEnded(client.Aisling, shadowFade);
-                }
-
-                client.UpdateDisplay();
-            }
-
             foreach (var monster in targetAisling.MonstersNearby())
             {
                 if (monster.Target is null) continue;
@@ -222,15 +207,22 @@ public class DestructiveForce : SpellScript
     {
         if (sprite is not Aisling damageDealingSprite) return;
         damageDealingSprite.ActionUsed = "Destructive Force";
-        damageDealingSprite.CastAnimation(_spell, target);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_spell.Template.Sound, false));
-
         if (target == null)
         {
             _spellMethod.SpellOnFailed(damageDealingSprite, null, _spell);
             return;
         }
 
+        if (target.CurrentHp > 0)
+        {
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+        }
+        else
+        {
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+        }
+        
         var mapCheck = damageDealingSprite.Map.ID;
         if (mapCheck != damageDealingSprite.Map.ID) return;
 
@@ -266,21 +258,6 @@ public class DestructiveForce : SpellScript
 
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
-
-        if (client.Aisling.IsInvisible && _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
-        {
-            if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
-            {
-                hide.OnEnded(client.Aisling, hide);
-            }
-
-            if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
-            {
-                shadowFade.OnEnded(client.Aisling, shadowFade);
-            }
-
-            client.UpdateDisplay();
-        }
 
         Target(aisling);
         client.SendAttributes(StatUpdateType.Vitality);
@@ -362,7 +339,16 @@ public class Elemental_Bolt : SpellScript
         dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, _spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
 
-        aisling.CastAnimation(_spell, target);
+        if (target.CurrentHp > 0)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+        }
+        else
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+        }
+        
         target.ApplyElementalSpellDamage(aisling, dmg, randomEle, _spell);
     }
 
@@ -424,27 +410,11 @@ public class Elemental_Bolt : SpellScript
 
             if (success)
             {
-                if (client.Aisling.IsInvisible &&
-                    _spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
-                {
-                    if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
-                    {
-                        hide.OnEnded(client.Aisling, hide);
-                    }
-
-                    if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
-                    {
-                        shadowFade.OnEnded(client.Aisling, shadowFade);
-                    }
-
-                    client.UpdateDisplay();
-                }
-
                 OnSuccess(aisling, target);
             }
             else
             {
-                _spellMethod.ElementalOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, _spell);
             }
         }
 

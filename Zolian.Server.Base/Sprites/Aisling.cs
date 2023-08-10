@@ -384,11 +384,6 @@ public sealed class Aisling : Player, IAisling
                 {
                     if (info.Target != 0)
                     {
-                        spell.InUse = true;
-                        var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
-                        //CastTargetAnimation(spell, target, info);
-
-                        //ToDo: Remove cloaks
                         if (Client.Aisling.IsInvisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
                         {
                             if (Client.Aisling.Buffs.TryRemove("Hide", out var hide))
@@ -404,9 +399,13 @@ public sealed class Aisling : Player, IAisling
                             Client.UpdateDisplay();
                         }
 
+                        spell.InUse = true;
+                        var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
+                        CastAnimation(spell);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
                         spell.InUse = false;
+
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
                         Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
                     }
@@ -432,27 +431,9 @@ public sealed class Aisling : Player, IAisling
     }
 
     /// <summary>
-    /// Displays target animation, messages
-    /// </summary>
-    public void CastTargetAnimation(Spell spell, Sprite target, CastInfo info)
-    {
-        switch (target)
-        {
-            case null:
-                return;
-            case Aisling aislingTarget:
-                aislingTarget.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aislingTarget.Username} cast {spell.Template.Name} on you.");
-                break;
-        }
-
-        Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've cast {spell.Template.Name}.");
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, info.Position, info.Target, 100, spell.Template.Animation, Serial));
-    }
-
-    /// <summary>
     /// Displays player's body animation, spell's sound
     /// </summary>
-    public Aisling CastAnimation(Spell spell, Sprite target, byte actionSpeed = 30)
+    public Aisling CastAnimation(Spell spell, byte actionSpeed = 30)
     {
         var bodyAnim = Path switch
         {
