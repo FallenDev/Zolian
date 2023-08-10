@@ -1556,9 +1556,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
                 client.SendAttributes(StatUpdateType.Full);
                 client.LoggedIn(true);
-                if (!client.Aisling.Dead) return;
-                client.Aisling.Flags = AislingFlags.Ghost;
-                client.Aisling.WarpToHell();
+                if (client.Aisling.IsDead())
+                {
+                    client.AislingToGhostForm();
+                    client.Aisling.WarpToHell();
+                }
             }
             catch (Exception e)
             {

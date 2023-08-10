@@ -329,14 +329,11 @@ namespace Darkages.Network.Client
             {
                 SetAislingStartupVariables();
                 SendUserId();
-                Enter();
                 SendProfileRequest();
                 InitQuests();
                 LoadEquipment().LoadInventory().LoadBank().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
-                SendAttributes(StatUpdateType.Full);
-
-                if (Aisling.IsDead())
-                    AislingToGhostForm();
+                SendDisplayAisling(Aisling);
+                Enter();
             }
             catch (Exception ex)
             {
