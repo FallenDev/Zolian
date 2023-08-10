@@ -38,6 +38,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Geometry.Abstractions", "..\Chaos-Server\Chaos.Geometry.Abstractions\Chaos.Geometry.Abstractions.csproj", "{35DEBFE4-4CB9-4AB6-8AFC-91BF27F2E7FF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.Time", "..\Chaos-Server\Chaos.Time\Chaos.Time.csproj", "{436697E2-5F21-4661-91B6-BFFA0F5BCE45}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A7B39433-B8CC-4DCB-A290-8185CA8FA920} = {A7B39433-B8CC-4DCB-A290-8185CA8FA920}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chaos.NLog.Logging", "..\Chaos-Server\Chaos.NLog.Logging\Chaos.NLog.Logging.csproj", "{A7B39433-B8CC-4DCB-A290-8185CA8FA920}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +118,10 @@ Global
 		{436697E2-5F21-4661-91B6-BFFA0F5BCE45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{436697E2-5F21-4661-91B6-BFFA0F5BCE45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{436697E2-5F21-4661-91B6-BFFA0F5BCE45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7B39433-B8CC-4DCB-A290-8185CA8FA920}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7B39433-B8CC-4DCB-A290-8185CA8FA920}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7B39433-B8CC-4DCB-A290-8185CA8FA920}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7B39433-B8CC-4DCB-A290-8185CA8FA920}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

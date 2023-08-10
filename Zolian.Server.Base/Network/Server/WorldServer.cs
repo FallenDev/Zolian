@@ -1232,6 +1232,29 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
+    /// 0x0C - Display Object Request
+    /// </summary>
+    public ValueTask OnDisplayEntityRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<DisplayEntityRequestArgs>(in clientPacket);
+
+        return ExecuteHandler(client, args, InnerOnDisplayEntityRequest);
+
+        ValueTask InnerOnDisplayEntityRequest(IWorldClient localClient, DisplayEntityRequestArgs localArgs)
+        {
+            var aisling = localClient.Aisling;
+            var mapInstance = aisling.Map;
+            var sprite = ObjectHandlers.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
+
+            if (aisling.CanSeeSprite(sprite)) return default;
+            ServerSetup.Logger($"Aisling {aisling.Username} attempted to forcefully display an entity {sprite?.Serial} that they cannot see: {localClient.RemoteIp}");
+            Analytics.TrackEvent($"Aisling {aisling.Username} attempted to forcefully display an entity {sprite?.Serial} that they cannot see: {localClient.RemoteIp}");
+
+            return default;
+        }
+    }
+
+    /// <summary>
     /// 0x0D - Ignore Player
     /// </summary>
     public ValueTask OnIgnore(IWorldClient client, in ClientPacket clientPacket)
@@ -3070,7 +3093,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup; // 0x07
         ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped; // 0x08
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest; // 0x0B
-        //ClientHandlers[(byte)ClientOpCode.DisplayObjectRequest] = // 0x0C
+        ClientHandlers[(byte)ClientOpCode.DisplayEntityRequest] = OnDisplayEntityRequest; // 0x0C
         ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore; // 0x0D
         ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage; // 0x0E
         ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell; // 0x0F
