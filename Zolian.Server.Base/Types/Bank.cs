@@ -14,15 +14,17 @@ public class Bank : IBank
     }
 
     public ConcurrentDictionary<uint, Item> Items { get; }
-    
-    public void DepositGold(IWorldClient client, uint gold)
+    public long TempGoldDeposit { get; set; }
+    public long TempGoldWithdraw { get; set; }
+
+    public void DepositGold(IWorldClient client, long gold)
     {
         client.Aisling.GoldPoints -= gold;
         client.Aisling.BankedGold += gold;
         client.SendAttributes(StatUpdateType.ExpGold);
     }
 
-    public void WithdrawGold(IWorldClient client, uint gold)
+    public void WithdrawGold(IWorldClient client, long gold)
     {
         client.Aisling.GoldPoints += gold;
         client.Aisling.BankedGold -= gold;

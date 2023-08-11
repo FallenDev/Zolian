@@ -40,15 +40,15 @@ public class Banker : MundaneScript
             options.Add(new Dialog.OptionsDataItem(0x02, "Withdraw Item"));
         }
 
-        //if (client.Aisling.GoldPoints > 0)
-        //{
-        //    options.Add(new Dialog.OptionsDataItem(0x07, "Deposit Gold"));
-        //}
+        if (client.Aisling.GoldPoints > 0)
+        {
+            options.Add(new Dialog.OptionsDataItem(0x07, "Deposit Gold"));
+        }
 
-        //if (client.Aisling.BankedGold > 0)
-        //{
-        //    options.Add(new Dialog.OptionsDataItem(0x08, "Withdraw Gold"));
-        //}
+        if (client.Aisling.BankedGold > 0)
+        {
+            options.Add(new Dialog.OptionsDataItem(0x0A, "Withdraw Gold"));
+        }
 
         client.SendOptionsDialog(Mundane, "Don't mind the goblins, they help around here", options.ToArray());
     }
@@ -329,14 +329,74 @@ public class Banker : MundaneScript
                 }
                 break;
             case 0x07:
-                {
-
-                }
+                client.SendTextInput(Mundane, $"{{=aInventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}", 0x07, "Deposit:", 10);
                 break;
             case 0x08:
                 {
+                    var correctDeposit = long.TryParse(args, out var depositAmount);
+                    if (correctDeposit)
+                    {
+                        if (client.Aisling.GoldPoints >= depositAmount)
+                            _bankTeller.TempGoldDeposit = depositAmount;
+                        else
+                        {
+                            client.SendOptionsDialog(Mundane, "Looks like you don't have enough, sorry.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "What was that again?");
+                        return;
+                    }
 
+                    var depositOptions = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x09, "Yes"),
+                        new (0x07, "No")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and deposit {_bankTeller.TempGoldDeposit}", depositOptions.ToArray());
                 }
+                break;
+            case 0x09:
+                _bankTeller.DepositGold(client, _bankTeller.TempGoldDeposit);
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {_bankTeller.TempGoldDeposit}");
+                client.CloseDialog();
+                break;
+            case 0x0A:
+                client.SendTextInput(Mundane, $"{{=Banked: {{=q{client.Aisling.BankedGold}\n{{=aInventory: {{=c{client.Aisling.GoldPoints}", 0x0A, "Withdraw:", 10);
+                break;
+            case 0x0B:
+                var correctWithdraw = long.TryParse(args, out var withdrawAmount);
+                if (correctWithdraw)
+                {
+                    if (client.Aisling.BankedGold >= withdrawAmount)
+                        _bankTeller.TempGoldWithdraw = withdrawAmount;
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "Looks like you don't have enough, sorry.");
+                        return;
+                    }
+                }
+                else
+                {
+                    client.SendOptionsDialog(Mundane, "What was that again?");
+                    return;
+                }
+
+                var withdrawOptions = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x0C, "Yes"),
+                    new (0x0A, "No")
+                };
+
+                client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and withdraw {_bankTeller.TempGoldWithdraw}", withdrawOptions.ToArray());
+                break;
+            case 0x0C:
+                _bankTeller.WithdrawGold(client, _bankTeller.TempGoldWithdraw);
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWithdrew: {_bankTeller.TempGoldWithdraw}");
+                client.CloseDialog();
                 break;
             case 0x500: // OnItemDrop
                 {

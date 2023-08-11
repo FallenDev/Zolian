@@ -83,6 +83,8 @@ public static class Extensions
     /// <param name="other">If not a Player, return true</param>
     public static bool CanSeeSprite(this Sprite source, Sprite other)
     {
+        if (source is null) return false;
+        if (other is null) return false;
         if (source == other) return true;
         if (!other.WithinRangeOf(source)) return false;
         if (other is not Aisling otherAisling) return true;

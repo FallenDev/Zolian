@@ -326,6 +326,35 @@ public static class WorldExtensions
         worldClient.Send(args);
     }
 
+    /// <summary>
+    /// Reactor Input NPC Dialog with Pursuit
+    /// </summary>
+    /// <summary>
+    /// Reactor Input NPC Dialog
+    /// </summary>
+    public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message, ushort dialogId, string textBoxMessage, ushort textBoxLength = 2)
+    {
+        var args = new DialogArgs
+        {
+            Color = DisplayColor.Default,
+            DialogId = dialogId,
+            EntityType = EntityType.Creature,
+            HasNextButton = false,
+            HasPreviousButton = false,
+            DialogType = DialogType.TextEntry,
+            Name = npc.Name,
+            Options = null,
+            PursuitId = 0,
+            SourceId = npc.Serial,
+            Sprite = npc.Template.Image,
+            Text = message,
+            TextBoxLength = textBoxLength,
+            TextBoxPrompt = textBoxMessage
+        };
+
+        worldClient.Send(args);
+    }
+
     #endregion
 
     public static void CloseDialog(this IWorldClient worldClient)

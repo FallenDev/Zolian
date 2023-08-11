@@ -1560,15 +1560,18 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (damageDealingSprite is Aisling aisling)
         {
+            var time = DateTime.UtcNow;
+            var estTime = time.TimeOfDay;
             aisling.DamageCounter += convDmg;
             if (aisling.ThreatMeter + dmg >= long.MaxValue)
                 aisling.ThreatMeter = 500000;
             aisling.ThreatMeter += dmg;
             aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
+            ShowDmg(aisling, estTime);
         }
 
         PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
-
+        
         return convDmg;
     }
 
@@ -1578,7 +1581,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
 
         var dmgShow = aisling.DamageCounter.ToString();
-        aisling.Client.SendPublicMessage(Serial, PublicMessageType.Chant, $"{dmgShow}");
+        aisling.Client.SendPublicMessage(aisling.Serial, PublicMessageType.Chant, $"{dmgShow}");
         aisling.DamageCounter = 0;
     }
 
