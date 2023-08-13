@@ -1851,7 +1851,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 secondaryCheck.SecondaryOffensiveElement = ElementManager.Element.None;
         }
 
-        foreach (var (_, buff) in Buffs)
+        foreach (var buff in Buffs.Values)
         {
             StatusBarDisplayUpdateBuff(buff, elapsedTime);
             buff.Update(this, elapsedTime);
@@ -1860,7 +1860,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void UpdateDebuffs(TimeSpan elapsedTime)
     {
-        foreach (var (_, debuff) in Debuffs)
+        foreach (var debuff in Debuffs.Values)
         {
             StatusBarDisplayUpdateDebuff(debuff, elapsedTime);
             debuff.Update(this, elapsedTime);

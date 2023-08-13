@@ -8,47 +8,6 @@ using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
-[Script("Remote Bank")]
-public class Remote_Bank : SpellScript
-{
-    public Remote_Bank(Spell spell) : base(spell)
-    {
-    }
-
-    public override void OnActivated(Sprite sprite)
-    {
-    }
-
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-    }
-
-    public override void OnSelectionToggle(Sprite sprite)
-    {
-    }
-
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-    }
-
-    public override void OnTriggeredBy(Sprite sprite, Sprite target)
-    {
-
-    }
-
-    public override void OnUse(Sprite sprite, Sprite target)
-    {
-        if (sprite.PlayerNearby?.Client != null)
-        {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
-        }
-        else
-        {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
-        }
-    }
-}
-
 [Script("Needle Trap")]
 public class Needle_Trap : SpellScript
 {
@@ -327,7 +286,7 @@ public class Hiraishin : SpellScript
         if (targetPos == null || targetPos == target.Position) return;
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
         client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
@@ -454,14 +413,16 @@ public class Shunshin : SpellScript
             return;
         }
 
+        var buff = new buff_hide();
+        buff.OnApplied(damageDealingSprite, buff);
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
         client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;
 
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, null, damageDealingSprite.Serial));
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, new Position(oldPos)));
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();

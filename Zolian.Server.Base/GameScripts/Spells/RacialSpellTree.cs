@@ -463,3 +463,45 @@ public class Magic_Missile : SpellScript
     }
 }
 
+// Halfling
+// Withdraw from the bank remotely
+[Script("Remote Bank")]
+public class Remote_Bank : SpellScript
+{
+    public Remote_Bank(Spell spell) : base(spell)
+    {
+    }
+
+    public override void OnActivated(Sprite sprite)
+    {
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target)
+    {
+    }
+
+    public override void OnSelectionToggle(Sprite sprite)
+    {
+    }
+
+    public override void OnSuccess(Sprite sprite, Sprite target)
+    {
+    }
+
+    public override void OnTriggeredBy(Sprite sprite, Sprite target)
+    {
+
+    }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite.PlayerNearby?.Client != null)
+        {
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
+        }
+        else
+        {
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
+        }
+    }
+}

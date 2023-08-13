@@ -768,39 +768,4 @@ public sealed class Aisling : Player, IAisling
 
         return true;
     }
-
-    public bool CantWalk()
-    {
-        PendingX = X;
-        PendingY = Y;
-
-        switch (Direction)
-        {
-            case 0:
-                PendingY--;
-                break;
-            case 1:
-                PendingX++;
-                break;
-            case 2:
-                PendingY++;
-                break;
-            case 3:
-                PendingX--;
-                break;
-        }
-
-        foreach (var player in AislingsNearby())
-        {
-            if (player.Serial == Serial) continue;
-            player.Client.SendCreatureWalk(Serial, new Point(X, Y), (Direction)Direction);
-        }
-
-        LastPosition = new Position(X, Y);
-        Pos = new Vector2(X, Y);
-        LastMovementChanged = DateTime.UtcNow;
-        Client.SendConfirmClientWalk(new Position(X, Y), (Direction)Direction);
-
-        return true;
-    }
 }
