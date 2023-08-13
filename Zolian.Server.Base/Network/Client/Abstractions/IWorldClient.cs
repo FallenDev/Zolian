@@ -129,6 +129,8 @@ public interface IWorldClient : ISocketClient
     WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
     bool PayPrerequisites(LearningPredicate prerequisites);
     bool CheckReqs(WorldClient client, Item item);
+    void CheckTraps();
+    void CheckDayDreaming(TimeSpan elapsedTime);
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);
     void Interrupt();

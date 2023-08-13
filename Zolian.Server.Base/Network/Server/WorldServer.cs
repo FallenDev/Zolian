@@ -7,6 +7,7 @@ using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
+using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
@@ -845,8 +846,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.CantMove)
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "{=bYou cannot feel your legs...");
-            client.SendLocation();
-            client.UpdateDisplay();
+            client.ClientRefreshed();
             return default;
         }
 
@@ -864,7 +864,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             CancelIfCasting(client.Aisling.Client);
             return default;
         }
-
 
         var args = PacketSerializer.Deserialize<ClientWalkArgs>(in clientPacket);
 
@@ -941,6 +940,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (!itemObjs.IsEmpty())
             {
+                if (localClient.Aisling.Inventory.IsFull)
+                {
+                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
+                    return default;
+                }
+
                 var obj = itemObjs.First();
                 if (obj?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
                 if (!(localClient.Aisling.Position.DistanceFrom(obj.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
@@ -2740,6 +2745,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnUnequip(IWorldClient localClient, UnequipArgs localArgs)
         {
+            if (localClient.Aisling.Inventory.IsFull)
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
+                return default;
+            }
+
             if (localClient.Aisling.EquipmentManager.Equipment.ContainsKey((int)localArgs.EquipmentSlot))
                 localClient.Aisling.EquipmentManager?.RemoveFromExisting((int)localArgs.EquipmentSlot);
 

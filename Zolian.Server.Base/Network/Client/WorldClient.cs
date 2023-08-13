@@ -90,7 +90,7 @@ namespace Darkages.Network.Client
             get
             {
                 var readyTime = DateTime.UtcNow;
-                return readyTime - LastClientRefresh > new TimeSpan(0, 0, 0, 0, 500);
+                return readyTime - LastClientRefresh > new TimeSpan(0, 0, 0, 0, 100);
             }
         }
 
@@ -181,14 +181,63 @@ namespace Darkages.Network.Client
         {
             if (Aisling is not { LoggedIn: true }) return;
 
+            DoUpdate(elapsedTime);
+
+            // ToDo: Enable this once stable
+            // Lag disconnector and routine update for client
+            //if (!Aisling.GameMaster)
+            //VariableLagDisconnector(30);
+        }
+
+        private void ProcessExperienceEvents()
+        {
+            while (ServerSetup.Instance.Running)
+            {
+                ExperienceEvent? expEvent = null;
+
+                lock (_queueLock)
+                {
+                    if (_expQueue.Any())
+                    {
+                        expEvent = _expQueue.Dequeue();
+                    }
+                }
+
+                if (expEvent.HasValue)
+                {
+                    HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting, expEvent.Value.Overflow);
+                }
+                else
+                {
+                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                }
+            }
+        }
+
+        private void DoUpdate(TimeSpan elapsedTime)
+        {
+            CheckTraps();
+            CheckDayDreaming(elapsedTime);
+            HandleBadTrades();
+            DeathStatusCheck();
+            UpdateStatusBarAndThreat(elapsedTime);
+            UpdateSkillSpellCooldown(elapsedTime);
+            ShowAggro(elapsedTime);
+        }
+
+        public void CheckTraps()
+        {
             lock (Trap.Traps)
             {
-                foreach (var trap in Trap.Traps.Select(i => i.Value))
+                foreach (var trap in Trap.Traps.Values)
                 {
                     trap?.Update();
                 }
             }
+        }
 
+        public void CheckDayDreaming(TimeSpan elapsedTime)
+        {
             // Logic based on player's set ActiveStatus
             switch (Aisling.ActiveStatus)
             {
@@ -220,65 +269,88 @@ namespace Darkages.Network.Client
                     DaydreamingRoutine(elapsedTime);
                     break;
             }
+        }
 
-            // Normal players without ghost walking, check for walls
-            if (!Aisling.GameMaster)
+        //ToDo; Fix Trading -- Handle Bad Trades
+        public void HandleBadTrades()
+        {
+            //if (Aisling.Exchange?.Trader2 == null) return;
+
+            //if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
+            //    Aisling.Client.SendExchangeCancel(true);
+        }
+
+        public void DeathStatusCheck()
+        {
+            var proceed = false;
+
+            if (Aisling.CurrentHp <= 0)
             {
-                if (Aisling.Map.IsAStarWall(Aisling, Aisling.X, Aisling.Y))
-                {
-                    if (LastKnownPosition != null)
-                    {
-                        Aisling.X = LastKnownPosition.X;
-                        Aisling.Y = LastKnownPosition.Y;
-                    }
+                Aisling.CurrentHp = 1;
+                proceed = true;
+            }
 
-                    SendLocation();
+            if (!proceed) return;
+            SendAttributes(StatUpdateType.Vitality);
+
+            if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+            {
+                for (var i = 0; i < 2; i++)
+                    Aisling.RemoveBuffsAndDebuffs();
+
+                // ToDo: Create a different method for player kills
+                Aisling.CastDeath();
+
+                var target = Aisling.Target;
+
+                if (target != null)
+                {
+                    if (target is Aisling aisling)
+                        aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
                 }
                 else
                 {
-                    LastKnownPosition = new Position(Aisling.X, Aisling.Y);
+                    Aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
                 }
+
+                return;
             }
 
-            // ToDo: Enable this once stable
-            // Lag disconnector and routine update for client
-            //if (!Aisling.GameMaster)
-            //VariableLagDisconnector(30);
-            DoUpdate(elapsedTime);
-        }
+            if (Aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
+            if (Aisling.Skulled) return;
 
-        private void ProcessExperienceEvents()
-        {
-            while (ServerSetup.Instance.Running)
+            var debuff = new debuff_reaping();
             {
-                ExperienceEvent? expEvent = null;
-
-                lock (_queueLock)
-                {
-                    if (_expQueue.Any())
-                    {
-                        expEvent = _expQueue.Dequeue();
-                    }
-                }
-
-                if (expEvent.HasValue)
-                {
-                    HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting, expEvent.Value.Overflow);
-                }
-                else
-                {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
-                }
+                debuff.OnApplied(Aisling, debuff);
             }
         }
 
-        private void DoUpdate(TimeSpan elapsedTime)
+        public void UpdateStatusBarAndThreat(TimeSpan elapsedTime)
         {
-            HandleBadTrades();
-            DeathStatusCheck();
-            UpdateStatusBarAndThreat(elapsedTime);
-            UpdateSkillSpellCooldown(elapsedTime);
-            ShowAggro(elapsedTime);
+            Aisling.UpdateBuffs(elapsedTime);
+            Aisling.UpdateDebuffs(elapsedTime);
+            Aisling.ThreatGeneratedSubsided(Aisling, elapsedTime);
+        }
+
+        public void UpdateSkillSpellCooldown(TimeSpan elapsedTime)
+        {
+            if (!SkillSpellTimer.Update(elapsedTime)) return;
+
+            foreach (var skill in Aisling.SkillBook.Skills.Values)
+            {
+                if (skill == null) continue;
+                skill.CurrentCooldown--;
+                if (skill.CurrentCooldown < 0)
+                    skill.CurrentCooldown = 0;
+            }
+
+            foreach (var spell in Aisling.SpellBook.Spells.Values)
+            {
+                if (spell == null) continue;
+                spell.CurrentCooldown--;
+                if (spell.CurrentCooldown < 0)
+                    spell.CurrentCooldown = 0;
+            }
         }
 
         private void ShowAggro(TimeSpan elapsedTime)
@@ -3344,54 +3416,9 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public void DeathStatusCheck()
-        {
-            var proceed = false;
-
-            if (Aisling.CurrentHp <= 0)
-            {
-                Aisling.CurrentHp = 1;
-                proceed = true;
-            }
-
-            if (!proceed) return;
-            SendAttributes(StatUpdateType.Vitality);
-
-            if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
-            {
-                for (var i = 0; i < 2; i++)
-                    Aisling.RemoveBuffsAndDebuffs();
-
-                // ToDo: Create a different method for player kills
-                Aisling.CastDeath();
-
-                var target = Aisling.Target;
-
-                if (target != null)
-                {
-                    if (target is Aisling aisling)
-                        aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
-                }
-                else
-                {
-                    Aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
-                }
-
-                return;
-            }
-
-            if (Aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
-            if (Aisling.Skulled) return;
-
-            var debuff = new debuff_reaping();
-            {
-                debuff.OnApplied(Aisling, debuff);
-            }
-        }
-
         public WorldClient UpdateDisplay(bool excludeSelf = false)
         {
-            if (!excludeSelf) 
+            if (!excludeSelf)
                 SendDisplayAisling(Aisling);
 
             var nearbyAislings = Aisling.AislingsNearby();
@@ -3417,37 +3444,6 @@ namespace Darkages.Network.Client
             }
 
             return this;
-        }
-
-        public void UpdateStatusBarAndThreat(TimeSpan elapsedTime)
-        {
-            lock (SyncClient)
-            {
-                Aisling.UpdateBuffs(elapsedTime);
-                Aisling.UpdateDebuffs(elapsedTime);
-                Aisling.ThreatGeneratedSubsided(Aisling, elapsedTime);
-            }
-        }
-
-        public void UpdateSkillSpellCooldown(TimeSpan elapsedTime)
-        {
-            if (!SkillSpellTimer.Update(elapsedTime)) return;
-
-            foreach (var skill in Aisling.SkillBook.Skills.Values)
-            {
-                if (skill == null) continue;
-                skill.CurrentCooldown--;
-                if (skill.CurrentCooldown < 0)
-                    skill.CurrentCooldown = 0;
-            }
-
-            foreach (var spell in Aisling.SpellBook.Spells.Values)
-            {
-                if (spell == null) continue;
-                spell.CurrentCooldown--;
-                if (spell.CurrentCooldown < 0)
-                    spell.CurrentCooldown = 0;
-            }
         }
 
         public WorldClient PayItemPrerequisites(LearningPredicate prerequisites)
@@ -3559,15 +3555,6 @@ namespace Darkages.Network.Client
             return false;
         }
 
-        //ToDo; Fix Trading -- Handle Bad Trades
-        public void HandleBadTrades()
-        {
-            //if (Aisling.Exchange?.Trader2 == null) return;
-
-            //if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
-            //    Aisling.Client.SendExchangeCancel(true);
-        }
-
         public WorldClient Insert(bool update, bool delete)
         {
             var obj = ObjectHandlers.GetObject<Aisling>(null, aisling => aisling.Serial == Aisling.Serial
@@ -3589,7 +3576,7 @@ namespace Darkages.Network.Client
         public void Interrupt()
         {
             WorldServer.CancelIfCasting(this);
-            SendLocation();
+            ClientRefreshed();
         }
 
         public void ForgetSkill(string s)
@@ -3978,7 +3965,7 @@ namespace Darkages.Network.Client
             try
             {
                 if (player.ExpLevel > 500) return;
-                
+
                 var expNext = player.ExpNext;
                 expNext -= exp;
 
@@ -4001,7 +3988,7 @@ namespace Darkages.Network.Client
         public void GiveExp(int exp, bool overflow = false)
         {
             if (exp <= 0) exp = 1;
-            
+
             // Enqueue experience event
             EnqueueExperienceEvent(Aisling, exp, false, overflow);
         }

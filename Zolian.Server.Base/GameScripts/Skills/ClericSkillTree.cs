@@ -36,9 +36,7 @@ public class Blink : SkillScript
         var client = damageDealingSprite.Client;
 
         damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
-
         _skillMethod.Train(client, _skill);
-
         damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_skill.Template.Sound, false));
     }
 

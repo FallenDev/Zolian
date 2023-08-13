@@ -140,7 +140,9 @@ public class WolfFangFist : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to incapacitate.");
-        sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, null, _target.Serial));
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -878,12 +880,7 @@ public class Kelberoth_Strike : SkillScript
         }
 
         var dmg = (int)(aisling.MaximumHp * 1.2);
-        
-        if (aisling.CurrentHp > criticalHp)
-        {
-            aisling.CurrentHp = criticalHp;
-        }
-
+        aisling.CurrentHp = criticalHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahhhhh!");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmg, false, action);
@@ -927,7 +924,6 @@ public class Kelberoth_Strike : SkillScript
             }
 
             var dmg = (int)(sprite.MaximumHp * 1.2);
-            sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmg, false, action);
         }
     }
@@ -1072,7 +1068,7 @@ public class Claw_Fist : SkillScript
         var client = damageDealingAisling.Client;
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance assails.");
-        damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, null, damageDealingAisling.Serial));
+        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, null, damageDealingAisling.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1172,7 +1168,7 @@ public class EmberStrike : SkillScript
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling,  1);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, _skill);
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(17, null, _target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(17, null, _target.Serial));
             _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, 0, _crit);
         }
 
