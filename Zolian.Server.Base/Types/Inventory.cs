@@ -30,7 +30,13 @@ public class Inventory : ObjectManager, IInventory
 
     public IEnumerable<Item> BankList => Items.Values.Where(i => i is { Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
 
-    public int TotalItems => Items.Count;
+    public int TotalItems
+    {
+        get
+        {
+            return Items.Values.Count(i => i != null);
+        }
+    }
 
     public bool CanPickup(Aisling player, Item lpItem)
     {
