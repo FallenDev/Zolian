@@ -108,15 +108,18 @@ public class Area : Map, IArea
 
         try
         {
-            var isWall = sprite.Map.ObjectGrid[x, y].Sprites.Any();
+            var isSprite = sprite.Map.ObjectGrid[x, y].Sprites.Any();
 
-            if (sprite.Target is null) return isWall;
+            if (sprite.Target is null) return isSprite;
+
+            // Logic sounds counter-intuitive, but if a target exists it needs
+            // to be set as not a sprite, so the enemy can path-find to it
             if ((int)sprite.Target.Pos.X == x && (int)sprite.Target.Pos.Y == y)
             {
-                isWall = false;
+                isSprite = false;
             }
 
-            return isWall;
+            return isSprite;
         }
         catch (AggregateException ex)
         {

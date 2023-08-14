@@ -883,10 +883,14 @@ public class debuff_reaping : Debuff
             return;
         }
 
+        aisling.Resting = Enums.RestPosition.MaximumChill;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(6, false));
         aisling.CurrentHp = 0;
         InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        aisling.Client.UpdateDisplay();
+        aisling.Client.SendDisplayAisling(aisling);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -951,7 +955,10 @@ public class debuff_reaping : Debuff
 
                 aisling.PrepareForHell();
                 aisling.CastDeath();
+                aisling.Resting = Enums.RestPosition.Standing;
                 aisling.Client.SendAttributes(StatUpdateType.Full);
+                aisling.Client.UpdateDisplay();
+                aisling.Client.SendDisplayAisling(aisling);
                 break;
             case Aisling savedAffected when debuff.Cancelled:
                 if (savedAffected.Debuffs.TryRemove(debuff.Name, out var saved))
@@ -962,7 +969,10 @@ public class debuff_reaping : Debuff
 
                 savedAffected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were saved.");
                 savedAffected.Client.Recover();
+                savedAffected.Resting = Enums.RestPosition.Standing;
                 savedAffected.Client.SendAttributes(StatUpdateType.Full);
+                savedAffected.Client.UpdateDisplay();
+                savedAffected.Client.SendDisplayAisling(savedAffected);
                 break;
         }
 

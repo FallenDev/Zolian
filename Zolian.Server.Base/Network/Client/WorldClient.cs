@@ -242,6 +242,11 @@ namespace Darkages.Network.Client
             switch (Aisling.ActiveStatus)
             {
                 case ActivityStatus.Awake:
+                case ActivityStatus.NeedGroup:
+                case ActivityStatus.Grouped:
+                case ActivityStatus.LoneHunter:
+                case ActivityStatus.GroupHunter:
+                case ActivityStatus.NeedHelp:
                     DaydreamingRoutine(elapsedTime);
                     break;
                 case ActivityStatus.DoNotDisturb:
@@ -251,22 +256,14 @@ namespace Darkages.Network.Client
                     {
                         SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120);
                         SendAnimation(32, null, Aisling.Serial, 200);
+                        if (Aisling.Resting != Enums.RestPosition.RestPosition1)
+                        {
+                            Aisling.Resting = Enums.RestPosition.RestPosition1;
+                            Aisling.Client.SendAttributes(StatUpdateType.Full);
+                            Aisling.Client.UpdateDisplay();
+                            Aisling.Client.SendDisplayAisling(Aisling);
+                        }
                     }
-                    break;
-                case ActivityStatus.NeedGroup:
-                    DaydreamingRoutine(elapsedTime);
-                    break;
-                case ActivityStatus.Grouped:
-                    DaydreamingRoutine(elapsedTime);
-                    break;
-                case ActivityStatus.LoneHunter:
-                    DaydreamingRoutine(elapsedTime);
-                    break;
-                case ActivityStatus.GroupHunter:
-                    DaydreamingRoutine(elapsedTime);
-                    break;
-                case ActivityStatus.NeedHelp:
-                    DaydreamingRoutine(elapsedTime);
                     break;
             }
         }

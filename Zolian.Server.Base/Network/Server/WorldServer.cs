@@ -1931,7 +1931,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
         {
             if ((int)localArgs.BodyAnimation <= 44)
-                localClient.SendBodyAnimation(localClient.Aisling.Serial, localArgs.BodyAnimation, 120);
+                localClient.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(localClient.Aisling.Serial, localArgs.BodyAnimation, 120));
 
             return default;
         }
