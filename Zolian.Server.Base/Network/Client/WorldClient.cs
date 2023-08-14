@@ -256,9 +256,9 @@ namespace Darkages.Network.Client
                     {
                         SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120);
                         SendAnimation(32, null, Aisling.Serial, 200);
-                        if (Aisling.Resting != Enums.RestPosition.RestPosition1)
+                        if (Aisling.Resting != Enums.RestPosition.RestPosition2)
                         {
-                            Aisling.Resting = Enums.RestPosition.RestPosition1;
+                            Aisling.Resting = Enums.RestPosition.RestPosition2;
                             Aisling.Client.SendAttributes(StatUpdateType.Full);
                             Aisling.Client.UpdateDisplay();
                             Aisling.Client.SendDisplayAisling(Aisling);
@@ -3395,8 +3395,13 @@ namespace Darkages.Network.Client
             if (!(_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)) return;
             if (!Socket.Connected || !IsDayDreaming) return;
 
-            SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120);
-            SendAnimation(32, null, Aisling.Serial, 200);
+            SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100);
+            SendAnimation(32, null, Aisling.Serial, 150);
+            if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
+            Aisling.Resting = Enums.RestPosition.RestPosition1;
+            Aisling.Client.SendAttributes(StatUpdateType.Full);
+            Aisling.Client.UpdateDisplay();
+            Aisling.Client.SendDisplayAisling(Aisling);
         }
 
         public void VariableLagDisconnector(int delay)
