@@ -5,11 +5,9 @@ using Darkages.Types;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
-using Darkages.Meta;
 using Darkages.Network.Server;
 using System.Net;
 using Darkages.CommandSystem.CLI;
-using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 
 namespace Darkages.Interfaces;
@@ -23,13 +21,10 @@ public interface IServerContext
     void EmptyCacheCollectors();
     void BindTemplates();
     void CacheCommunityAssets();
-    void LoadMetaDatabase();
     void LoadExtensions();
     void CacheBuffs();
     void CacheDebuffs();
     void CommandHandler();
-    ConcurrentDictionary<int, byte> EncryptKeyConDict { get; set; }
-    List<Metafile> GlobalMetaCache { get; set; }
     ConcurrentDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
     ConcurrentDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
     ConcurrentDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
@@ -51,7 +46,6 @@ public interface IServerContext
     bool Running { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }
-    WorldClient NpcClient { get; set; }
     LoginServer LoginServer { get; set; }
     LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }

@@ -4,9 +4,7 @@ using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Interfaces;
-using Darkages.Meta;
 using Darkages.Models;
-using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -36,7 +34,6 @@ public class ServerSetup : IServerContext
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
     public WorldServer Game { get; set; }
-    public WorldClient NpcClient { get; set; }
     public LoginServer LoginServer { get; set; }
     public LobbyServer LobbyServer { get; set; }
     public CommandParser Parser { get; set; }
@@ -46,8 +43,6 @@ public class ServerSetup : IServerContext
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
     public string InternalAddress { get; set; }
-    public ConcurrentDictionary<int, byte> EncryptKeyConDict { get; set; }
-    public List<Metafile> GlobalMetaCache { get; set; }
 
     // Template
     public ConcurrentDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
@@ -148,7 +143,6 @@ public class ServerSetup : IServerContext
 
             BindTemplates();
             // ToDo: If decompiling templates, comment out LoadMetaDatabase();
-            LoadMetaDatabase();
             //MetafileManager.DecompileTemplates();
             LoadExtensions();
         }
@@ -157,7 +151,6 @@ public class ServerSetup : IServerContext
     public void EmptyCacheCollectors()
     {
         GlobalMapCache = new ConcurrentDictionary<int, Area>();
-        GlobalMetaCache = new List<Metafile>();
         GlobalItemTemplateCache = new ConcurrentDictionary<string, ItemTemplate>();
         GlobalNationTemplateCache = new ConcurrentDictionary<string, NationTemplate>();
         GlobalMonsterTemplateCache = new ConcurrentDictionary<string, MonsterTemplate>();
@@ -216,22 +209,6 @@ public class ServerSetup : IServerContext
             if (!GlobalBoardCache.ContainsKey(key)) GlobalBoardCache[key] = new List<Board>();
 
             GlobalBoardCache[key].AddRange(value);
-        }
-    }
-
-    public void LoadMetaDatabase()
-    {
-        try
-        {
-            var metaFileManager = new MetafileManager();
-            var files = metaFileManager.GetMetaFiles();
-            if (files.Any()) GlobalMetaCache.AddRange(files);
-        }
-        catch (Exception ex)
-        {
-            Logger(ex.Message, LogLevel.Error);
-            Logger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
         }
     }
 

@@ -13,7 +13,7 @@ public class Node
 
 public class MetafileManager
 {
-    protected static readonly MetafileCollection Metafiles;
+    public static readonly MetafileCollection Metafiles;
 
     static MetafileManager()
     {
@@ -99,6 +99,17 @@ public class MetafileManager
     public Metafile GetMetaFile(string name) => Metafiles.Find(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
     public MetafileCollection GetMetaFiles() => Metafiles;
+
+    public MetafileCollection GetMetaFilesWithoutExtendedClasses()
+    {
+        var metaCollection = new MetafileCollection(short.MaxValue);
+        metaCollection.AddRange(Metafiles.Where(file => !file.Name.Contains("SClass")));
+        metaCollection.AddRange(Metafiles.Where(meta => meta.Name.Equals("SClass1") || meta.Name.Equals("SClass2") || 
+                                                        meta.Name.Equals("SClass3") || meta.Name.Equals("SClass4") || 
+                                                        meta.Name.Equals("SClass5") || meta.Name.Equals("SClass6")));
+
+        return metaCollection;
+    }
 
     protected static void CompileTemplate(Metafile metaFile)
     {

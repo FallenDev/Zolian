@@ -19,7 +19,7 @@ namespace Darkages.Network.Client
 
         public LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull] [ItemNotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
+            [NotNull][ItemNotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
         {
             _server = server;
         }
@@ -70,7 +70,7 @@ namespace Darkages.Network.Client
                 args.Data = notice.Data;
             else
                 args.CheckSum = notice.Hash;
-            
+
             Send(args);
         }
 
@@ -85,30 +85,36 @@ namespace Darkages.Network.Client
             switch (metaDataRequestType)
             {
                 case MetaDataRequestType.DataByName:
-                {
-                    ArgumentNullException.ThrowIfNull(name);
-                    var metaData = metaDataStore.GetMetaFile(name);
-                    args.MetaDataInfo = new MetaDataInfo
                     {
-                        Name = metaData.Name,
-                        Data = metaData.DeflatedData,
-                        CheckSum = metaData.Hash
-                    };
-                    break;
-                }
+                        ArgumentNullException.ThrowIfNull(name);
+                        var metaData = metaDataStore.GetMetaFile(name);
+                        args.MetaDataInfo = new MetaDataInfo
+                        {
+                            Name = metaData.Name,
+                            Data = metaData.DeflatedData,
+                            CheckSum = metaData.Hash
+                        };
+                        break;
+                    }
                 case MetaDataRequestType.AllCheckSums:
-                {
-                    args.MetaDataCollection = metaDataStore.GetMetaFiles().Select(i => new MetaDataInfo
                     {
-                        Name = i.Name,
-                        Data = i.DeflatedData,
-                        CheckSum = i.Hash
-                    }).ToList();
-                    break;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(metaDataRequestType), metaDataRequestType,
-                        "Unknown enum value");
+                        args.MetaDataCollection = new List<MetaDataInfo>();
+                        var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
+
+                        foreach (var file in metaFiles)
+                        {
+                            var metafileInfo = new MetaDataInfo
+                            {
+                                CheckSum = file.Hash,
+                                Data = file.DeflatedData,
+                                Name = file.Name
+                            };
+
+                            args.MetaDataCollection.Add(metafileInfo);
+                        }
+
+                        break;
+                    }
             }
 
             Send(args);

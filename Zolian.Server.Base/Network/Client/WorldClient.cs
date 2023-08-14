@@ -2075,18 +2075,23 @@ namespace Darkages.Network.Client
                     }
                 case MetaDataRequestType.AllCheckSums:
                     {
-                        args.MetaDataCollection = metaDataStore.GetMetaFiles().Select(i => new MetaDataInfo
+                        args.MetaDataCollection = new List<MetaDataInfo>();
+                        var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
+
+                        foreach (var file in metaFiles)
                         {
-                            Name = i.Name,
-                            Data = i.DeflatedData,
-                            CheckSum = i.Hash
-                        }).ToList();
+                            var metafileInfo = new MetaDataInfo
+                            {
+                                CheckSum = file.Hash,
+                                Data = file.DeflatedData,
+                                Name = file.Name
+                            };
+
+                            args.MetaDataCollection.Add(metafileInfo);
+                        }
 
                         break;
                     }
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(metaDataRequestType), metaDataRequestType,
-                        "Unknown enum value");
             }
 
             Send(args);
@@ -2480,18 +2485,22 @@ namespace Darkages.Network.Client
 
             #endregion
 
-            foreach (var legendItem in aisling.LegendBook.LegendMarks)
+            var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
+            var legendCount = Aisling.LegendBook.LegendMarks;
+
+            foreach (var legendItem in legends)
             {
                 if (legendItem == null) continue;
-                var legends = new LegendMarkInfo
+                var markCount = legendCount.Count(item => item.Value == legendItem.Value);
+                var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
                     Icon = (MarkIcon)legendItem.Icon,
                     Key = legendItem.Category,
-                    Text = legendItem.Value
+                    Text = $"{legendItem.Value} - {legendItem.Time.ToShortDateString()} ({markCount})"
                 };
 
-                legendMarks.Add(legends);
+                legendMarks.Add(legend);
             }
 
             var args = new ProfileArgs
@@ -2998,18 +3007,22 @@ namespace Darkages.Network.Client
 
             #endregion
 
-            foreach (var legendItem in Aisling.LegendBook.LegendMarks)
+            var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
+            var legendCount = Aisling.LegendBook.LegendMarks;
+
+            foreach (var legendItem in legends)
             {
                 if (legendItem == null) continue;
-                var legends = new LegendMarkInfo
+                var markCount = legendCount.Count(item => item.Value == legendItem.Value);
+                var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
                     Icon = (MarkIcon)legendItem.Icon,
                     Key = legendItem.Category,
-                    Text = legendItem.Value
+                    Text = $"{legendItem.Value} - {legendItem.Time.ToShortDateString()} ({markCount})"
                 };
 
-                legendMarks.Add(legends);
+                legendMarks.Add(legend);
             }
 
             var args = new SelfProfileArgs
