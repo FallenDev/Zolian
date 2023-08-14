@@ -724,6 +724,7 @@ public class Crasher : SkillScript
         aisling.ActionUsed = "Crasher";
 
         var criticalHp = (int)(aisling.MaximumHp * .95);
+        var crasherHp = (int)(aisling.MaximumHp * .05);
 
         var action = new BodyAnimationArgs
         {
@@ -743,8 +744,8 @@ public class Crasher : SkillScript
             return;
         }
 
-        var dmg = (int)(aisling.MaximumHp * 1.5);
-        aisling.CurrentHp -= criticalHp;
+        var dmg = (int)(criticalHp * 1.5);
+        aisling.CurrentHp = crasherHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel drained...");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmg, false, action);
@@ -787,7 +788,7 @@ public class Crasher : SkillScript
                 return;
             }
 
-            var dmg = (int)(sprite.MaximumHp * 1.2);
+            var dmg = (int)(sprite.CurrentHp * 1.5);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmg, false, action);
         }
     }

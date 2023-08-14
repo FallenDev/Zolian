@@ -859,7 +859,8 @@ public class Kelberoth_Strike : SkillScript
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Kelberoth Strike";
 
-        var criticalHp = (int)(aisling.MaximumHp * .10);
+        var criticalHp = (int)(aisling.MaximumHp * .33);
+        var kelbHp = (int)(aisling.MaximumHp * .66);
 
         var action = new BodyAnimationArgs
         {
@@ -879,8 +880,8 @@ public class Kelberoth_Strike : SkillScript
             return;
         }
 
-        var dmg = (int)(aisling.MaximumHp * 1.2);
-        aisling.CurrentHp = criticalHp;
+        var dmg = (int)(criticalHp * 2.5);
+        aisling.CurrentHp = kelbHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahhhhh!");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmg, false, action);
@@ -923,7 +924,7 @@ public class Kelberoth_Strike : SkillScript
                 return;
             }
 
-            var dmg = (int)(sprite.MaximumHp * 1.2);
+            var dmg = (int)(sprite.CurrentHp * 2.5);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmg, false, action);
         }
     }
