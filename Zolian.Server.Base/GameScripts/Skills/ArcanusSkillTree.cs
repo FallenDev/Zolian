@@ -184,10 +184,10 @@ public class Flame_Thrower : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;

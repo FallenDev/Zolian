@@ -71,10 +71,10 @@ public class Ambush : SkillScript
     }
 
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -312,10 +312,10 @@ public class KnifeHandStrike : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -434,10 +434,10 @@ public class PalmHeelStrike : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -554,10 +554,10 @@ public class HammerTwist : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -674,10 +674,10 @@ public class CrossBodyPunch : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -810,10 +810,10 @@ public class HurricaneKick : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1026,10 +1026,10 @@ public class Krane_Kick : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1218,10 +1218,10 @@ public class EmberStrike : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;

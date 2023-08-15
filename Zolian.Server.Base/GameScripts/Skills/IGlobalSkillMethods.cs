@@ -14,9 +14,10 @@ public interface IGlobalSkillMethods
     void Step(Sprite sprite, int savedXStep, int savedYStep);
     void Train(WorldClient client, Skill skill);
     bool OnUse(Aisling aisling, Skill skill);
-    void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, BodyAnimationArgs action);
-    void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit);
+    void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit, BodyAnimationArgs action);
+    void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit);
+    void OnSuccessWithoutActionAnimation(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit);
     int Thrown(WorldClient client, Skill skill, bool crit);
     void FailedAttempt(Sprite sprite, Skill skill, BodyAnimationArgs action);
-    (bool, int) OnCrit(int dmg);
+    (bool, long) OnCrit(long dmg);
 }

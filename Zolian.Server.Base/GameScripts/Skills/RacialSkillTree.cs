@@ -219,10 +219,10 @@ public class Archery : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -374,7 +374,11 @@ public class Slash : SkillScript
         
         aisling.ActionUsed = "Slash";
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, false, action);
+
+        // Second swing if crit
+        if (_crit)
+            _skillMethod.OnSuccessWithoutActionAnimation(_target, aisling, _skill, dmgCalc, _crit);
     }
 
     public override void OnUse(Sprite sprite)
@@ -419,10 +423,10 @@ public class Slash : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -982,10 +986,10 @@ public class Fire_Breath : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1162,10 +1166,10 @@ public class Bubble_Burst : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1344,10 +1348,10 @@ public class Icy_Blast : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1433,7 +1437,7 @@ public class Earthly_Delights : SkillScript
             if (_target.MaximumHp * 0.30 < dmgCalc)
                 dmgCalc = (int)(_target.MaximumHp * 0.30);
 
-            _target.CurrentHp += dmgCalc;
+            _target.CurrentHp += (int)dmgCalc;
 
             if (_target.CurrentHp > _target.MaximumHp)
                 _target.CurrentHp = _target.MaximumHp;
@@ -1481,7 +1485,7 @@ public class Earthly_Delights : SkillScript
                 if (_target.MaximumHp * 0.30 < dmgCalc)
                     dmgCalc = (int)(_target.MaximumHp * 0.30);
 
-                _target.CurrentHp += dmgCalc;
+                _target.CurrentHp += (int)dmgCalc;
 
                 if (_target.CurrentHp > _target.MaximumHp)
                     _target.CurrentHp = _target.MaximumHp;
@@ -1496,10 +1500,10 @@ public class Earthly_Delights : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1588,7 +1592,7 @@ public class Heavenly_Gaze : SkillScript
             }
             else
             {
-                _target.CurrentHp += dmgCalc;
+                _target.CurrentHp += (int)dmgCalc;
             }
 
             if (_target.MaximumMp * 0.20 < dmgCalc)
@@ -1597,7 +1601,7 @@ public class Heavenly_Gaze : SkillScript
             }
             else
             {
-                _target.CurrentMp += dmgCalc;
+                _target.CurrentMp += (int)dmgCalc;
             }
 
             if (_target.CurrentHp > _target.MaximumHp)
@@ -1652,7 +1656,7 @@ public class Heavenly_Gaze : SkillScript
                 }
                 else
                 {
-                    _target.CurrentHp += dmgCalc;
+                    _target.CurrentHp += (int)dmgCalc;
                 }
 
                 if (_target.MaximumMp * 0.20 < dmgCalc)
@@ -1661,7 +1665,7 @@ public class Heavenly_Gaze : SkillScript
                 }
                 else
                 {
-                    _target.CurrentMp += dmgCalc;
+                    _target.CurrentMp += (int)dmgCalc;
                 }
 
                 if (_target.CurrentHp > _target.MaximumHp)
@@ -1680,10 +1684,10 @@ public class Heavenly_Gaze : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -1862,10 +1866,10 @@ public class Silent_Siren : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2044,10 +2048,10 @@ public class Poison_Talon : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
@@ -2227,10 +2231,10 @@ public class Toxic_Breath : SkillScript
         }
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
-        int dmg;
+        long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;

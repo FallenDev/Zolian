@@ -61,7 +61,7 @@ public class Bite : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -129,7 +129,7 @@ public class BiteAndShake : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -200,7 +200,7 @@ public class CorrosiveTouch : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -264,7 +264,7 @@ public class Stomp : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -328,7 +328,7 @@ public class HeadButt : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -392,7 +392,7 @@ public class Claw : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
@@ -456,7 +456,7 @@ public class MuleKick : SkillScript
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
     }
 
-    private int DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;

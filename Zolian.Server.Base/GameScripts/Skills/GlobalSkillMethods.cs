@@ -143,7 +143,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         return Attempt(client, skill);
     }
 
-    public void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit, BodyAnimationArgs action)
+    public void OnSuccess(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit, BodyAnimationArgs action)
     {
         var target = enemy;
 
@@ -165,7 +165,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
-    public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, int dmg, bool crit)
+    public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit)
     {
         var target = enemy;
 
@@ -181,6 +181,25 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
         // Animation
         attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
+        skill.LastUsedSkill = DateTime.UtcNow;
+        if (!crit) return;
+        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+    }
+
+    public void OnSuccessWithoutActionAnimation(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit)
+    {
+        var target = enemy;
+
+        // Damage
+        target = Skill.Reflect(target, attacker, skill);
+
+        if (dmg > 0)
+            target.ApplyDamage(attacker, dmg, skill);
+
+        // Training
+        if (attacker is Aisling aisling)
+            Train(aisling.Client, skill);
+
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
         attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
@@ -206,7 +225,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
     }
 
-    public (bool, int) OnCrit(int dmg)
+    public (bool, long) OnCrit(long dmg)
     {
         var critRoll = Generator.RandNumGen100();
         if (critRoll < 99) return (false, dmg);
