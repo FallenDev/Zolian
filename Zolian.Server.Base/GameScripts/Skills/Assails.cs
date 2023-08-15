@@ -34,7 +34,6 @@ public class Assail : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Assail";
 
         var action = new BodyAnimationArgs
         {
@@ -54,6 +53,7 @@ public class Assail : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Assail";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -151,7 +151,6 @@ public class Assault : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Assault";
 
         var action = new BodyAnimationArgs
         {
@@ -170,7 +169,8 @@ public class Assault : SkillScript
             OnFailed(aisling);
             return;
         }
-        
+
+        aisling.ActionUsed = "Assault";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -267,7 +267,6 @@ public class Onslaught : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Onslaught";
 
         var action = new BodyAnimationArgs
         {
@@ -287,6 +286,7 @@ public class Onslaught : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Onslaught";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -384,7 +384,6 @@ public class Clobber : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Clobber";
 
         var action = new BodyAnimationArgs
         {
@@ -403,7 +402,8 @@ public class Clobber : SkillScript
             OnFailed(aisling);
             return;
         }
-        
+
+        aisling.ActionUsed = "Clobber";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -500,7 +500,6 @@ public class ClobberX2 : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Clobber x2";
 
         var action = new BodyAnimationArgs
         {
@@ -520,6 +519,7 @@ public class ClobberX2 : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Clobber x2";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -616,7 +616,6 @@ public class Thrust : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Thrust";
 
         var action = new BodyAnimationArgs
         {
@@ -634,6 +633,8 @@ public class Thrust : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Thrust";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -737,7 +738,6 @@ public class Wallop : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Wallop";
 
         var action = new BodyAnimationArgs
         {
@@ -757,6 +757,7 @@ public class Wallop : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Wallop";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -854,7 +855,6 @@ public class Thrash : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Thrash";
 
         var action = new BodyAnimationArgs
         {
@@ -874,6 +874,7 @@ public class Thrash : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Thrash";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -971,7 +972,6 @@ public class Punch : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Punch";
 
         var action = new BodyAnimationArgs
         {
@@ -991,6 +991,7 @@ public class Punch : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Punch";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -1087,7 +1088,6 @@ public class DoublePunch : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Double Punch";
 
         var action = new BodyAnimationArgs
         {
@@ -1107,6 +1107,7 @@ public class DoublePunch : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Double Punch";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
@@ -1203,7 +1204,6 @@ public class Throw : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Throw";
 
         var action = new BodyAnimationArgs
         {
@@ -1221,6 +1221,8 @@ public class Throw : SkillScript
             OnFailed(aisling);
             return;
         }
+        
+        aisling.ActionUsed = "Throw";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -1353,7 +1355,6 @@ public class Aim : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Aim";
 
         var action = new BodyAnimationArgs
         {
@@ -1371,6 +1372,8 @@ public class Aim : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Aim";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -1506,7 +1509,6 @@ public class TwoHandedAttack : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Two-handed Attack";
 
         var action = new BodyAnimationArgs
         {
@@ -1524,6 +1526,8 @@ public class TwoHandedAttack : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Two-handed Attack";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -1631,7 +1635,6 @@ public class Kobudo : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Kobudo";
 
         var action = new BodyAnimationArgs
         {
@@ -1649,6 +1652,8 @@ public class Kobudo : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Kobudo";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -1756,7 +1761,6 @@ public class AdvancedStaffTraining : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Advanced Staff Training";
 
         var action = new BodyAnimationArgs
         {
@@ -1774,6 +1778,8 @@ public class AdvancedStaffTraining : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Advanced Staff Training";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -1881,7 +1887,6 @@ public class DualWield : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Dual Wield";
 
         var action = new BodyAnimationArgs
         {
@@ -1899,6 +1904,8 @@ public class DualWield : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Dual Wield";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -2009,7 +2016,6 @@ public class Ambidextrous : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Ambidextrous";
 
         var action = new BodyAnimationArgs
         {
@@ -2027,6 +2033,8 @@ public class Ambidextrous : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Ambidextrous";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -2138,7 +2146,6 @@ public class LongStrike : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Long Strike";
 
         var action = new BodyAnimationArgs
         {
@@ -2156,6 +2163,8 @@ public class LongStrike : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Long Strike";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -2258,7 +2267,6 @@ public class DivineThrust : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Divine Thrust";
 
         var action = new BodyAnimationArgs
         {
@@ -2276,6 +2284,8 @@ public class DivineThrust : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Divine Thrust";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {

@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using System.Security.Cryptography;
+
 using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -348,30 +350,20 @@ public class MonsterBaseIntelligence : MonsterScript
             return;
         }
 
-        foreach (var skillScript in Monster.SkillScripts.Where(i => i.Skill.CanUse()))
-        {
-            skillScript.OnUse(Monster);
-            {
-                skillScript.Skill.InUse = true;
-                var readyTime = DateTime.UtcNow;
-                if (skillScript.Skill.Template.Cooldown > 0)
-                {
-                    skillScript.Skill.NextAvailableUse = readyTime.AddSeconds(skillScript.Skill.Template.Cooldown);
-                }
-                else
-                {
-                    skillScript.Skill.NextAvailableUse = readyTime.AddMilliseconds(
-                        Monster.Template.AttackSpeed > 0
-                            ? Monster.Template.AttackSpeed
-                            : 1500);
-                }
-            }
-        }
+        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
 
-        foreach (var skillScript in Monster.SkillScripts.Where(i => i.Skill.CanUse()))
+        Parallel.ForEach(assails, (s) =>
         {
-            skillScript.Skill.InUse = false;
-        }
+            s.Skill.InUse = true;
+            s.OnUse(Monster);
+            {
+                var readyTime = DateTime.UtcNow;
+                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
+                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
+                s.Skill.NextAvailableUse = readyTime;
+            }
+            s.Skill.InUse = false;
+        });
     }
 
     private void Ability()
@@ -888,30 +880,20 @@ public class MonsterShadowSight : MonsterScript
             return;
         }
 
-        foreach (var skillScript in Monster.SkillScripts.Where(i => i.Skill.CanUse()))
-        {
-            skillScript.OnUse(Monster);
-            {
-                skillScript.Skill.InUse = true;
-                var readyTime = DateTime.UtcNow;
-                if (skillScript.Skill.Template.Cooldown > 0)
-                {
-                    skillScript.Skill.NextAvailableUse = readyTime.AddSeconds(skillScript.Skill.Template.Cooldown);
-                }
-                else
-                {
-                    skillScript.Skill.NextAvailableUse = readyTime.AddMilliseconds(
-                        Monster.Template.AttackSpeed > 0
-                            ? Monster.Template.AttackSpeed
-                            : 1500);
-                }
-            }
-        }
+        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
 
-        foreach (var skillScript in Monster.SkillScripts.Where(i => i.Skill.CanUse()))
+        Parallel.ForEach(assails, (s) =>
         {
-            skillScript.Skill.InUse = false;
-        }
+            s.Skill.InUse = true;
+            s.OnUse(Monster);
+            {
+                var readyTime = DateTime.UtcNow;
+                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
+                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
+                s.Skill.NextAvailableUse = readyTime;
+            }
+            s.Skill.InUse = false;
+        });
     }
 
     private void Ability()

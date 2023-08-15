@@ -9,7 +9,6 @@ using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
 using Darkages.Templates;
-using JetBrains.Annotations;
 
 namespace Darkages.Network.Client.Abstractions;
 

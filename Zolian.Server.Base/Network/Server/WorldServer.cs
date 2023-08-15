@@ -7,7 +7,6 @@ using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
-using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
@@ -1666,7 +1665,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var lastTemplate = string.Empty;
         var skills = lpClient.Aisling.GetAssails();
 
-        Parallel.ForEach(skills.OrderBy(s => s.Name), (s) =>
+        Parallel.ForEach(skills.OrderBy(s => s.Slot), (s) =>
         {
             // Skill exists check
             if (s?.Template == null) return;

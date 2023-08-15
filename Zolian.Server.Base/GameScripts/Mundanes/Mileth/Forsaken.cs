@@ -327,7 +327,7 @@ public class Forsaken : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
-                                    Time = DateTime.Now,
+                                    Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
                                     Value = "Advanced to the path of Berserker"
@@ -391,7 +391,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Defender"
@@ -446,7 +446,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Assassin"
@@ -503,7 +503,7 @@ public class Forsaken : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
-                                    Time = DateTime.Now,
+                                    Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
                                     Value = "Advanced to the path of Cleric"
@@ -567,7 +567,7 @@ public class Forsaken : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "Class",
-                                Time = DateTime.Now,
+                                Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
                                 Value = "Advanced to the path of Arcanus"
@@ -624,7 +624,7 @@ public class Forsaken : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "Class",
-                                    Time = DateTime.Now,
+                                    Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
                                     Value = "Advanced to the path of Monk"
@@ -712,7 +712,7 @@ public class Forsaken : MundaneScript
                         var legend = new Legend.LegendItem
                         {
                             Category = "Class",
-                            Time = DateTime.Now,
+                            Time = DateTime.UtcNow,
                             Color = LegendColor.Yellow,
                             Icon = (byte)LegendIcon.Victory,
                             Value = $"Dedication to {client.Aisling.Path}"

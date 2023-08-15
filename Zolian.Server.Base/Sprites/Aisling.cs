@@ -136,15 +136,6 @@ public sealed class Aisling : Player, IAisling
     public bool Camouflage => SkillBook.HasSkill("Camouflage");
     public bool PainBane => SkillBook.HasSkill("Pain Bane");
 
-    public byte Blind
-    {
-        get
-        {
-            var blind = HasDebuff("Blind");
-            return blind ? (byte)0x08 : (byte)0x00;
-        }
-    }
-
     public bool Poisoned
     {
         get

@@ -4127,7 +4127,7 @@ namespace Darkages.Network.Client
         {
             MapUpdating = true;
 
-            if (Aisling.Blind == 0x08)
+            if (Aisling.IsBlind)
                 SendAttributes(StatUpdateType.Secondary);
 
             SendMapChangePending();

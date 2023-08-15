@@ -115,7 +115,6 @@ public class Archery : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Archery";
 
         var action = new BodyAnimationArgs
         {
@@ -133,6 +132,8 @@ public class Archery : SkillScript
             OnFailed(aisling);
             return;
         }
+
+        aisling.ActionUsed = "Archery";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
@@ -352,7 +353,6 @@ public class Slash : SkillScript
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Slash";
 
         var action = new BodyAnimationArgs
         {
@@ -372,6 +372,7 @@ public class Slash : SkillScript
             return;
         }
         
+        aisling.ActionUsed = "Slash";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, _skill, dmgCalc, _crit, action);
     }
