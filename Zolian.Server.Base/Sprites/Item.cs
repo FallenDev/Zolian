@@ -562,7 +562,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     {
         if (sprite is not Aisling aisling) return true;
         if (aisling.CurrentWeight + Template.CarryWeight <= aisling.MaximumWeight) return true;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.ToWeakToLift}");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You are now overburden");
         return false;
     }
 
@@ -595,10 +595,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             if (Stacks <= 0)
                 Stacks = 1;
 
-            if (checkWeight)
-                if (!CanCarry(aisling))
-                    return false;
-
             InventorySlot = aisling.Inventory.FindEmpty();
 
             if (InventorySlot >= 60)
@@ -627,10 +623,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
                 return false;
             }
-
-            if (checkWeight)
-                if (!CanCarry(aisling))
-                    return false;
 
             aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
             aisling.Inventory.UpdateSlot(aisling.Client, this);

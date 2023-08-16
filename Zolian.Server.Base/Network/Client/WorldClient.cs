@@ -331,6 +331,20 @@ namespace Darkages.Network.Client
 
         public void UpdateSkillSpellCooldown(TimeSpan elapsedTime)
         {
+            if (Aisling.Overburden)
+            {
+                SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(2000);
+                Aisling.OverburdenDelayed = true;
+            }
+            else
+            {
+                if (Aisling.OverburdenDelayed)
+                {
+                    SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(1000);
+                    Aisling.OverburdenDelayed = false;
+                }
+            }
+
             if (!SkillSpellTimer.Update(elapsedTime)) return;
 
             foreach (var skill in Aisling.SkillBook.Skills.Values)
@@ -633,13 +647,9 @@ namespace Darkages.Network.Client
                 if (item == null) continue;
                 if (string.IsNullOrEmpty(item.Template.Name)) continue;
 
-                if (item.CanCarry(Aisling))
-                {
-                    Aisling.CurrentWeight += item.Template.CarryWeight;
-                    Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, null);
-                    Aisling.Inventory.UpdateSlot(Aisling.Client, item);
-                }
-
+                Aisling.CurrentWeight += item.Template.CarryWeight;
+                Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, null);
+                Aisling.Inventory.UpdateSlot(Aisling.Client, item);
                 item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
 
                 if (!string.IsNullOrEmpty(item.Template.WeaponScript))
@@ -1171,12 +1181,8 @@ namespace Darkages.Network.Client
             {
                 if (equipment?.Item?.Template == null) continue;
 
-                if (equipment.Item.CanCarry(Aisling))
-                {
-                    Aisling.CurrentWeight += equipment.Item.Template.CarryWeight;
-                    SendEquipment(equipment.Item.Slot, equipment.Item);
-                }
-
+                Aisling.CurrentWeight += equipment.Item.Template.CarryWeight;
+                SendEquipment(equipment.Item.Slot, equipment.Item);
                 equipment.Item.Scripts = ScriptManager.Load<ItemScript>(equipment.Item.Template.ScriptName, equipment.Item);
 
                 if (!string.IsNullOrEmpty(equipment.Item.Template.WeaponScript))

@@ -1632,7 +1632,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastAssail).TotalSeconds < 0.50) return default;
+        var overburden = 0;
+        if (client.Aisling.Overburden)
+            overburden = 2;
+        if (readyTime.Subtract(client.LastAssail).TotalSeconds < 1 + overburden) return default;
         if (ServerSetup.Instance.Config.AssailsCancelSpells)
         {
             client.SendCancelCasting();
@@ -1651,7 +1654,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnSpacebar(IWorldClient localClient)
         {
-            localClient.LastAssail = DateTime.UtcNow;
             AssailRoutine(localClient);
 
             return default;
@@ -1663,28 +1665,34 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static void AssailRoutine(IWorldClient lpClient)
     {
         var lastTemplate = string.Empty;
-        var skills = lpClient.Aisling.GetAssails();
 
-        Parallel.ForEach(skills.OrderBy(s => s.Slot), (s) =>
+        foreach (var skill in lpClient.Aisling.GetAssails())
         {
             // Skill exists check
-            if (s?.Template == null) return;
-            if (lastTemplate == s.Template.Name) return;
-            if (s.Scripts == null) return;
+            if (skill?.Template == null) continue;
+            if (lastTemplate == skill.Template.Name) continue;
+            if (skill.Scripts == null) continue;
 
             // Skill can be used check
-            if (!s.Ready || s.InUse) return;
+            if (!skill.Ready && skill.InUse) continue;
 
-            s.InUse = true;
+            skill.InUse = true;
             // Skill animation and execute
-            ExecuteAbility(lpClient, s);
-            s.InUse = false;
+            ExecuteAbility(lpClient, skill);
+            skill.InUse = false;
 
             // Skill cleanup
-            s.CurrentCooldown = s.Template.Cooldown;
-            lpClient.SendCooldown(true, s.Slot, s.CurrentCooldown);
-            lastTemplate = s.Template.Name;
-        });
+            var overburden = 0;
+            if (lpClient.Aisling.Overburden)
+                overburden = 2;
+            skill.CurrentCooldown = skill.Template.Cooldown + overburden;
+            lpClient.SendCooldown(true, skill.Slot, skill.Template.Cooldown + overburden);
+            lastTemplate = skill.Template.Name;
+            lpClient.LastAssail = DateTime.UtcNow;
+        }
+
+        if (lpClient.Aisling.Overburden)
+            lpClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOverburdened!");
     }
 
     private static void ExecuteAbility(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)

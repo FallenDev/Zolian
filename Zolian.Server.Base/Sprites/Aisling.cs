@@ -35,7 +35,7 @@ public sealed class Aisling : Player, IAisling
     public int EquipmentDamageTaken = 0;
     public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
-    public new AislingTrackers AislingTrackers { get; }
+    public AislingTrackers AislingTrackers { get; }
 
     public uint MaximumWeight => GameMaster switch
     {
@@ -43,6 +43,8 @@ public sealed class Aisling : Player, IAisling
         false => (uint)(Math.Round(ExpLevel / 2d) + _Str + ServerSetup.Instance.Config.WeightIncreaseModifer + 200)
     };
 
+    public bool Overburden => CurrentWeight > MaximumWeight;
+    public bool OverburdenDelayed;
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
@@ -75,6 +77,7 @@ public sealed class Aisling : Player, IAisling
         ChantTimer = new ChantTimer(1500);
         TileType = TileContent.Aisling;
         AislingTrackers = new AislingTrackers(TimeSpan.FromSeconds(1));
+        OverburdenDelayed = false;
     }
 
     public bool Loading { get; set; }
@@ -341,7 +344,7 @@ public sealed class Aisling : Player, IAisling
     public void UsedSkill(Skill skill)
     {
         if (skill == null) return;
-        if (!skill.Ready && skill.Template.SkillType != SkillScope.Assail)
+        if (!skill.CanUse() && skill.Template.SkillType != SkillScope.Assail)
             Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{skill.Name} not ready yet.");
     }
 
