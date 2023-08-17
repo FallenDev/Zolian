@@ -85,7 +85,7 @@ public class Spell
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = spell.Slot;
-            cmd.Parameters.Add("@SpellName", SqlDbType.VarChar).Value = spell.Template.ScriptName;
+            cmd.Parameters.Add("@SpellName", SqlDbType.VarChar).Value = spell.Template.Name;
             cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@CurrentCooldown", SqlDbType.Int).Value = 0;
 
@@ -151,7 +151,7 @@ public class Spell
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = spell.Slot;
-            cmd.Parameters.Add("@SpellName", SqlDbType.VarChar).Value = spell.Template.ScriptName;
+            cmd.Parameters.Add("@SpellName", SqlDbType.VarChar).Value = spell.Template.Name;
             cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = 0;
             cmd.Parameters.Add("@CurrentCooldown", SqlDbType.Int).Value = 0;
 

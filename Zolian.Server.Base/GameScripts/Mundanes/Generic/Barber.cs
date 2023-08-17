@@ -86,14 +86,14 @@ public class Barber : MundaneScript
                         client.Aisling.Styling = 2;
                         client.Aisling.HairStyle = client.Aisling.OldStyle;
                         client.UpdateDisplay();
-                        client.SendTextInput(Mundane, "Which style are you interested in?", "1-65");
+                        client.SendTextInput(Mundane, "Which style are you interested in?", "1-60");
                     }
                     break;
                 case 0x0A:
                     {
-                        if (_styleNumber is 0 or > 65)
+                        if (_styleNumber is 0 or > 61)
                         {
-                            client.SendTextInput(Mundane, "Please select a valid hairstyle:", "1-65");
+                            client.SendTextInput(Mundane, "Please select a valid hairstyle:", "1-60");
                         }
                         else
                         {
@@ -138,7 +138,7 @@ public class Barber : MundaneScript
                     break;
                 case 0x0D:
                     {
-                        client.SendTextInput(Mundane, "Please select a valid hairstyle:", "1-65");
+                        client.SendTextInput(Mundane, "Please select a valid hairstyle:", "1-60");
                     }
                     break;
 
