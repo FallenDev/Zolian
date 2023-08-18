@@ -3,7 +3,6 @@ using Chaos.Common.Identity;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
-using JetBrains.Annotations;
 
 namespace Darkages.Types;
 

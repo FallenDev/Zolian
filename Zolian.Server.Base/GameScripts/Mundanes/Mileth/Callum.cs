@@ -67,10 +67,10 @@ public class Callum : MundaneScript
                     else
                     {
                         var opts2 = new List<Dialog.OptionsDataItem>
-                    {
-                        new(0x19, ServerSetup.Instance.Config.MerchantConfirmMessage),
-                        new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
-                    };
+                        {
+                            new(0x19, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                            new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
+                        };
 
                         client.SendOptionsDialog(Mundane, $"It'll cost you {_cost} gold for this service.", opts2.ToArray());
                     }
@@ -80,10 +80,10 @@ public class Callum : MundaneScript
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x03, "Let's do that."),
-                    new (0x02, "Not now.")
-                };
+                    {
+                        new (0x03, "Let's do that."),
+                        new (0x02, "Not now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, "You've heard of my service then? I'm able to increase the quality of an item for a fee.", options.ToArray());
                 }
@@ -203,6 +203,7 @@ public class Callum : MundaneScript
                         client.Aisling.Inventory.UpdateSlot(client, _itemDetail);
                         client.Aisling.GoldPoints -= _cost;
                         client.SendAttributes(StatUpdateType.WeightGold);
+                        client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, good as new!");
                         client.SendOptionsDialog(Mundane, $"I put a lot of work in your {_itemDetail?.DisplayName}{{=a, hope you like it.");
                     }
                     else
@@ -224,10 +225,18 @@ public class Callum : MundaneScript
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
-        if (item.Template.CanStack || !item.Template.Enchantable) return;
+        if (item.Template.CanStack || !item.Template.Enchantable)
+        {
+            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I can't polish that");
+            return;
+        }
+
         if (item.OriginalQuality is Item.Quality.Common or Item.Quality.Damaged)
         {
             OnResponse(client, 0x00, item.InventorySlot.ToString());
+            return;
         }
+
+        client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, sorry I don't have the skill to polish that");
     }
 }
