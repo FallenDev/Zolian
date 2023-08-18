@@ -2888,12 +2888,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
         {
-            //var otherPlayer = ObjectHandlers.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
-            //var localPlayer = localClient.Aisling;
-            //if (localPlayer == null || otherPlayer == null) return default;
-            //if (!localPlayer.WithinRangeOf(otherPlayer)) return default;
-            //localPlayer.Exchange = new ExchangeSession(otherPlayer);
-            //otherPlayer.Exchange = new ExchangeSession(localPlayer);
+            var otherPlayer = ObjectHandlers.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
+            var localPlayer = localClient.Aisling;
+            if (localPlayer == null || otherPlayer == null) return default;
+            if (!localPlayer.WithinRangeOf(otherPlayer)) return default;
+            localPlayer.Exchange = new ExchangeSession(otherPlayer);
+            otherPlayer.Exchange = new ExchangeSession(localPlayer);
 
             //switch (localArgs.ExchangeRequestType)
             //{

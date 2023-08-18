@@ -1766,14 +1766,15 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x42 - Accept Exchange 
+        /// 0x42 - Start Exchange 
         /// </summary>
-        public void SendExchangeAccepted(bool persistExchange)
+        public void SendExchangeStart(Aisling fromAisling)
         {
             var args = new ExchangeArgs
             {
-                ExchangeResponseType = ExchangeResponseType.Accept,
-                PersistExchange = persistExchange
+                ExchangeResponseType = ExchangeResponseType.StartExchange,
+                OtherUserId = (uint?)fromAisling.Serial,
+                OtherUserName = fromAisling.Username
             };
 
             Send(args);
@@ -1801,14 +1802,15 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x42 - Cancel Exchange 
+        /// 0x42 - Add Gold to Exchange 
         /// </summary>
-        public void SendExchangeCancel(bool rightSide)
+        public void SendExchangeSetGold(bool rightSide, uint amount)
         {
             var args = new ExchangeArgs
             {
-                ExchangeResponseType = ExchangeResponseType.Cancel,
-                RightSide = rightSide
+                ExchangeResponseType = ExchangeResponseType.SetGold,
+                RightSide = rightSide,
+                GoldAmount = (int)amount
             };
 
             Send(args);
@@ -1829,30 +1831,28 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x42 - Add Gold to Exchange 
+        /// 0x42 - Accept Exchange 
         /// </summary>
-        public void SendExchangeSetGold(bool rightSide, uint amount)
+        public void SendExchangeAccepted(bool persistExchange)
         {
             var args = new ExchangeArgs
             {
-                ExchangeResponseType = ExchangeResponseType.SetGold,
-                RightSide = rightSide,
-                GoldAmount = (int)amount
+                ExchangeResponseType = ExchangeResponseType.Accept,
+                PersistExchange = persistExchange
             };
 
             Send(args);
         }
 
         /// <summary>
-        /// 0x42 - Start Exchange 
+        /// 0x42 - Cancel Exchange 
         /// </summary>
-        public void SendExchangeStart(Aisling fromAisling)
+        public void SendExchangeCancel(bool rightSide)
         {
             var args = new ExchangeArgs
             {
-                ExchangeResponseType = ExchangeResponseType.StartExchange,
-                OtherUserId = (uint?)fromAisling.Serial,
-                OtherUserName = fromAisling.Username
+                ExchangeResponseType = ExchangeResponseType.Cancel,
+                RightSide = rightSide
             };
 
             Send(args);
