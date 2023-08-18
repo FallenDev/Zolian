@@ -28,27 +28,12 @@ public class Inventory : ObjectManager, IInventory
 
     public bool IsValidSlot(byte slot) => slot is > 0 and <= Length && !_invalidSlots.Contains(slot);
 
-    public IEnumerable<Item> BankList => Items.Values.Where(i => i is { Template: not null, ItemPane: Item.ItemPanes.Bank } && i.Template.Flags.FlagIsSet(ItemFlags.Bankable)).ToList();
-
     public int TotalItems
     {
         get
         {
             return Items.Values.Count(i => i != null);
         }
-    }
-
-    public bool CanPickup(Aisling player, Item lpItem)
-    {
-        if (player == null || lpItem == null) return false;
-        if (lpItem.Template == null) return false;
-
-        if (lpItem.Stacks <= 1)
-            return player.CurrentWeight + lpItem.Template.CarryWeight < player.MaximumWeight &&
-                   FindEmpty() != byte.MaxValue;
-
-        var weight = lpItem.Template.CarryWeight * lpItem.Stacks;
-        return player.CurrentWeight + weight < player.MaximumWeight && FindEmpty() != byte.MaxValue;
     }
 
     public byte FindEmpty()
@@ -107,18 +92,6 @@ public class Inventory : ObjectManager, IInventory
             .Select(i => i.Value).ToList();
 
         return items.Count;
-    }
-
-    /// <summary>
-    /// Removes the item from inventory - Does not delete it from the database
-    /// </summary>
-    public void Remove(WorldClient client, Item item)
-    {
-        if (item == null) return;
-
-        if (Items.TryUpdate(item.InventorySlot, null, item))
-            client.SendRemoveItemFromPane(item.InventorySlot);
-        UpdatePlayersWeight(client);
     }
 
     /// <summary>
@@ -197,27 +170,25 @@ public class Inventory : ObjectManager, IInventory
     {
         client.Aisling.CurrentWeight = 0;
 
-        foreach (var inventory in client.Aisling.Inventory.Items)
+        foreach (var (_, item) in client.Aisling.Inventory.Items)
         {
-            if (inventory.Value == null) continue;
-            if (inventory.Value.Stacks > 1)
+            if (item == null) continue;
+            if (item.Stacks > 1)
             {
-                for (var i = 0; i < inventory.Value.Stacks; i++)
-                {
-                    client.Aisling.CurrentWeight += inventory.Value.Template.CarryWeight;
-                }
+                var weight = item.Template.CarryWeight * item.Stacks;
+                client.Aisling.CurrentWeight += weight;
             }
             else
             {
-                client.Aisling.CurrentWeight += inventory.Value.Template.CarryWeight;
+                client.Aisling.CurrentWeight += item.Template.CarryWeight;
             }
         }
 
-        foreach (var equipment in client.Aisling.EquipmentManager.Equipment)
+        foreach (var (_, equipment) in client.Aisling.EquipmentManager.Equipment)
         {
-            if (equipment.Value?.Slot == 0) continue;
-            if (equipment.Value?.Item == null) continue;
-            client.Aisling.CurrentWeight += equipment.Value.Item.Template.CarryWeight;
+            if (equipment?.Slot == 0) continue;
+            if (equipment?.Item == null) continue;
+            client.Aisling.CurrentWeight += equipment.Item.Template.CarryWeight;
         }
 
         client.SendAttributes(StatUpdateType.Primary);

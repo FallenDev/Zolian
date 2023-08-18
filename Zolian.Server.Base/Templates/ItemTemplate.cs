@@ -37,7 +37,6 @@ public class ItemTemplate : Template
     public Element OffenseElement { get; init; }
     public Element SecondaryOffensiveElement { get; init; }
     public byte CarryWeight { get; init; }
-    public double Weight { get => DropRate; set { } }
     public ItemFlags Flags { get; init; }
     public uint MaxDurability { get; set; }
     public uint Value { get; set; }
