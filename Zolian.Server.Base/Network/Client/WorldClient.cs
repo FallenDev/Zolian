@@ -2488,8 +2488,8 @@ namespace Darkages.Network.Client
 
             #endregion
 
-            var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
-            var legendCount = Aisling.LegendBook.LegendMarks;
+            var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
+            var legendCount = aisling.LegendBook.LegendMarks;
 
             foreach (var legendItem in legends)
             {

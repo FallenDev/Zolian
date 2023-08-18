@@ -1,7 +1,9 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
+using JetBrains.Annotations;
 
 namespace Darkages.Types;
 
@@ -20,6 +22,7 @@ public class Death
 
         player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
         player.CurrentWeight = 0;
+        _ = StorageManager.AislingBucket.QuickSave(player);
     }
 
     private void ReapInventory(Aisling player)
@@ -93,6 +96,17 @@ public class Death
             player.EquipmentManager.RemoveFromSlot(obj.Slot);
             ReleaseItem(player, obj.Item);
         }
+
+        player.ArmorImg = 0;
+        player.WeaponImg = 0;
+        player.ShieldImg = 0;
+        player.HelmetImg = 0;
+        player.OverCoatImg = 0;
+        player.HeadAccessoryImg = 0;
+        player.Accessory1Img = 0;
+        player.Accessory2Img = 0;
+        player.Accessory3Img = 0;
+        player.BootsImg = 0;
     }
 
     private void ReapGold(Aisling player)
