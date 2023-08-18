@@ -18,8 +18,10 @@ public interface IAislingStorage
     /// Save method used to store properties that rarely change
     /// </summary>
     Task<bool> Save(Aisling obj);
-    Task<bool> SaveSkills(Aisling obj, SqlConnection connection);
-    Task<bool> SaveSpells(Aisling obj, SqlConnection connection);
+    void SaveSkills(Aisling obj, SqlConnection connection);
+    void SaveSpells(Aisling obj, SqlConnection connection);
+    void SaveBuffs(Aisling aisling, SqlConnection connection);
+    void SaveDebuffs(Aisling aisling, SqlConnection connection);
     Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);

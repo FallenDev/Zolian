@@ -24,6 +24,7 @@ public class Buff : IBuff
     public int TimeLeft { get; set; }
     public WorldServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
     public Buff BuffSpell { get; set; }
+    private readonly object _buffLock = new();
 
     public virtual void OnApplied(Sprite affected, Buff buff) { }
     public virtual void OnDurationUpdate(Sprite affected, Buff buff) { }
@@ -64,18 +65,21 @@ public class Buff : IBuff
 
     public void Update(Sprite affected, TimeSpan elapsedTime)
     {
-        if (Timer.Disabled) return;
-        if (!Timer.Update(elapsedTime)) return;
-        if (Length - Timer.Tick > 0)
-            OnDurationUpdate(affected, this);
-        else
+        lock (_buffLock)
         {
-            OnEnded(affected, this);
-            Timer.Tick = 0;
-            return;
-        }
+            if (Timer.Disabled) return;
+            if (!Timer.Update(elapsedTime)) return;
+            if (Length - Timer.Tick > 0)
+                OnDurationUpdate(affected, this);
+            else
+            {
+                OnEnded(affected, this);
+                Timer.Tick = 0;
+                return;
+            }
 
-        Timer.Tick++;
+            Timer.Tick++;
+        }
     }
 
     public async void InsertBuff(Aisling aisling, Buff buff)
@@ -111,42 +115,6 @@ public class Buff : IBuff
                 return;
             }
 
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-    }
-
-    public async void UpdateBuff(Aisling aisling)
-    {
-        try
-        {
-            await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-
-            foreach (var buff in aisling.Buffs.Values.Where(i => i is { Name: not null }))
-            {
-                var cmd = new SqlCommand("BuffSave", sConn);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
-                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = buff.Name;
-                cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = buff.TimeLeft;
-
-                cmd.CommandTimeout = 5;
-                cmd.ExecuteNonQuery();
-            }
-
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);

@@ -30,6 +30,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int RelicFinder;
     public event PropertyChangedEventHandler PropertyChanged;
     private readonly WorldServerTimer _buffAndDebuffTimer;
+    private readonly object _buffLock = new();
+    private readonly object _debuffLock = new();
+
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
     public Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
@@ -1851,19 +1854,29 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 secondaryCheck.SecondaryOffensiveElement = ElementManager.Element.None;
         }
 
-        foreach (var buff in Buffs.Values)
+        var buffs = Buffs.Values;
+
+        lock (_buffLock)
         {
-            StatusBarDisplayUpdateBuff(buff, elapsedTime);
-            buff.Update(this, elapsedTime);
+            Parallel.ForEach(buffs, (b) =>
+            {
+                StatusBarDisplayUpdateBuff(b, elapsedTime);
+                b.Update(this, elapsedTime);
+            });
         }
     }
 
     public void UpdateDebuffs(TimeSpan elapsedTime)
     {
-        foreach (var debuff in Debuffs.Values)
+        var debuffs = Debuffs.Values;
+
+        lock (_debuffLock)
         {
-            StatusBarDisplayUpdateDebuff(debuff, elapsedTime);
-            debuff.Update(this, elapsedTime);
+            Parallel.ForEach(debuffs, (d) =>
+            {
+                StatusBarDisplayUpdateDebuff(d, elapsedTime);
+                d.Update(this, elapsedTime);
+            });
         }
     }
 
@@ -1876,7 +1889,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         var countDown = buff.Length - buff.Timer.Tick;
         buff.TimeLeft = countDown;
 
-        if (buff.TimeLeft.IntIsWithin(0, 1))
+        if (buff.TimeLeft.IntIsWithin(-10, 1))
             colorInt = (byte)StatusBarColor.Off;
         else if (buff.TimeLeft.IntIsWithin(1, 10))
             colorInt = (byte)StatusBarColor.Blue;
@@ -1903,7 +1916,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         var countDown = debuff.Length - debuff.Timer.Tick;
         debuff.TimeLeft = countDown;
 
-        if (debuff.TimeLeft.IntIsWithin(0, 1))
+        if (debuff.TimeLeft.IntIsWithin(-10, 1))
             colorInt = (byte)StatusBarColor.Off;
         else if (debuff.TimeLeft.IntIsWithin(1, 10))
             colorInt = (byte)StatusBarColor.Blue;

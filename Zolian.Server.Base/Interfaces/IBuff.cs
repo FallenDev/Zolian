@@ -21,7 +21,6 @@ public interface IBuff
     Buff ObtainBuffName(Sprite affected, Buff buff);
     void Update(Sprite affected, TimeSpan elapsedTime);
     void InsertBuff(Aisling aisling, Buff buff);
-    void UpdateBuff(Aisling aisling);
     void DeleteBuff(Aisling aisling, Buff buff);
     Task<bool> CheckOnBuffAsync(IWorldClient client, string name);
 }

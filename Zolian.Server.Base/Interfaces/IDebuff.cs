@@ -21,7 +21,6 @@ public interface IDebuff
     Debuff ObtainDebuffName(Sprite affected, Debuff debuff);
     void Update(Sprite affected, TimeSpan elapsedTime);
     void InsertDebuff(Aisling aisling, Debuff debuff);
-    void UpdateDebuff(Aisling aisling);
     void DeleteDebuff(Aisling aisling, Debuff debuff);
     Task<bool> CheckOnDebuffAsync(IWorldClient client, string name);
 }

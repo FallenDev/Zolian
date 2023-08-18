@@ -42,11 +42,7 @@ public class buff_DiaAite : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -89,11 +85,7 @@ public class buff_aite : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -139,11 +131,7 @@ public class buff_SpectralShield : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -191,11 +179,7 @@ public class buff_DefenseUp : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -245,11 +229,7 @@ public class buff_Hasten : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -303,11 +283,7 @@ public class buff_clawfist : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -351,11 +327,7 @@ public class buff_wingsOfProtect : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -398,11 +370,7 @@ public class buff_ArdDion : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -445,11 +413,7 @@ public class buff_MorDion : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -492,11 +456,7 @@ public class buff_dion : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -539,11 +499,7 @@ public class buff_IronSkin : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -586,11 +542,7 @@ public class buff_StoneSkin : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -633,11 +585,7 @@ public class buff_hide : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -682,11 +630,7 @@ public class buff_ShadowFade : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -734,11 +678,7 @@ public class buff_DexUp : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -787,11 +727,7 @@ public class buff_randWeaponElement : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -826,11 +762,7 @@ public class buff_ElementalBane : Buff
         InsertBuff(aisling, buff);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -876,11 +808,7 @@ public class buff_skill_reflect : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -921,11 +849,7 @@ public class buff_spell_reflect : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -966,11 +890,7 @@ public class buff_PerfectDefense : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        if (affected is not Aisling aisling) return;
-        UpdateBuff(aisling);
-    }
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {

@@ -116,8 +116,10 @@ public record AislingStorage : Sql, IAislingStorage
         {
             var connection = ConnectToDatabase(ConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuickSave", connection);
-            var skills = await SaveSkills(obj, connection);
-            var spells = await SaveSpells(obj, connection);
+            SaveSkills(obj, connection);
+            SaveSpells(obj, connection);
+            SaveBuffs(obj, connection);
+            SaveDebuffs(obj, connection);
             var inventory = await SaveItemsForPlayer(obj, connection);
 
             #region Parameters
@@ -208,10 +210,6 @@ public record AislingStorage : Sql, IAislingStorage
 
             ExecuteAndCloseConnection(cmd, connection);
 
-            if (skills == false)
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with skills save. (Code: Morning Star)");
-            if (spells == false)
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with spells save. (Code: New Dawn)");
             if (inventory == false)
                 obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with inventory save. (Code: Dying Light)");
         }
@@ -352,9 +350,9 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
-    public async Task<bool> SaveSkills(Aisling obj, SqlConnection connection)
+    public void SaveSkills(Aisling obj, SqlConnection connection)
     {
-        if (obj?.SkillBook == null) return false;
+        if (obj?.SkillBook == null) return;
 
         try
         {
@@ -367,7 +365,7 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
                 cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = skill.Uses;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                await cmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
             }
         }
         catch (SqlException e)
@@ -376,7 +374,7 @@ public record AislingStorage : Sql, IAislingStorage
             {
                 obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skills did not save. Contact GM (Code: Slash)");
                 Crashes.TrackError(e);
-                return false;
+                return;
             }
 
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -389,13 +387,11 @@ public record AislingStorage : Sql, IAislingStorage
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
-
-        return true;
     }
 
-    public async Task<bool> SaveSpells(Aisling obj, SqlConnection connection)
+    public void SaveSpells(Aisling obj, SqlConnection connection)
     {
-        if (obj?.SpellBook == null) return false;
+        if (obj?.SpellBook == null) return;
 
         try
         {
@@ -408,7 +404,7 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
                 cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = skill.Casts;
                 cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                await cmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
             }
         }
         catch (SqlException e)
@@ -417,7 +413,7 @@ public record AislingStorage : Sql, IAislingStorage
             {
                 obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your spells did not save. Contact GM (Code: Blast)");
                 Crashes.TrackError(e);
-                return false;
+                return;
             }
 
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -430,8 +426,64 @@ public record AislingStorage : Sql, IAislingStorage
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
+    }
 
-        return true;
+    public void SaveBuffs(Aisling aisling, SqlConnection connection)
+    {
+        if (aisling.Buffs.IsEmpty) return;
+
+        try
+        {
+            foreach (var buff in aisling.Buffs.Values.Where(i => i is { Name: not null }))
+            {
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure("BuffSave", connection);
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
+                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = buff.Name;
+                cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = buff.TimeLeft;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+    }
+
+    public void SaveDebuffs(Aisling aisling, SqlConnection connection)
+    {
+        if (aisling.Debuffs.IsEmpty) return;
+
+        try
+        {
+            foreach (var deBuff in aisling.Debuffs.Values.Where(i => i is { Name: not null }))
+            {
+                var cmd = ConnectToDatabaseSqlCommandWithProcedure("DeBuffSave", connection);
+                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
+                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = deBuff.Name;
+                cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = deBuff.TimeLeft;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
     }
 
     public async Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection)
