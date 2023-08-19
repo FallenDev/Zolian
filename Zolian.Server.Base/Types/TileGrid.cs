@@ -2,6 +2,7 @@
 
 using Darkages.Object;
 using Darkages.Sprites;
+
 using Microsoft.Extensions.Logging;
 
 namespace Darkages.Types;
@@ -54,17 +55,15 @@ public class TileGrid : ObjectManager
         CurrentDist = currentDist;
     }
 
-    public IEnumerable<Sprite> Sprites {
+    public IEnumerable<Sprite> Sprites
+    {
         get
         {
-            try
+            const int maxAttempts = 3;
+            Exception lastException = null;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
-                return GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
-                    Get.Monsters | Get.Mundanes | Get.Aislings);
-            }
-            catch
-            {
-                // Re-run if Object no longer exists from original run
                 try
                 {
                     return GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
@@ -72,11 +71,39 @@ public class TileGrid : ObjectManager
                 }
                 catch (Exception e)
                 {
-                    ServerSetup.Logger(e.Message, LogLevel.Error);
-                    ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                    return null;
+                    lastException = e;
                 }
             }
+
+            ServerSetup.Logger(lastException?.Message, LogLevel.Error);
+            ServerSetup.Logger(lastException?.StackTrace, LogLevel.Error);
+            return null;
+        }
+    }
+
+    public List<Sprite> SpritesList
+    {
+        get
+        {
+            const int maxAttempts = 3;
+            Exception lastException = null;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                try
+                {
+                    return GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
+                        Get.Monsters | Get.Mundanes | Get.Aislings).ToList();
+                }
+                catch (Exception e)
+                {
+                    lastException = e;
+                }
+            }
+
+            ServerSetup.Logger(lastException?.Message, LogLevel.Error);
+            ServerSetup.Logger(lastException?.StackTrace, LogLevel.Error);
+            return null;
         }
     }
 }

@@ -7,6 +7,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
+
 using ServiceStack;
 
 namespace Darkages.Types;
@@ -19,6 +20,7 @@ public class Area : Map, IArea
     public bool Ready;
     private readonly List<List<TileGrid>> _tiles = new();
     private List<List<TileGrid>> _masterGrid = new();
+    private readonly object _mapLoadLock = new();
 
     public int MiningNodes { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }
@@ -99,64 +101,50 @@ public class Area : Map, IArea
         return isWall;
     }
 
+    /// <summary>
+    /// This method is called in real-time multiple times and calculates each grid square
+    /// and sprite positioned within each
+    /// </summary>
     public bool IsAStarSprite(Sprite sprite, int x, int y)
     {
         if (sprite is null || sprite.CurrentHp <= 0) return false;
         if ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y) return false;
-        if (x < 0 || x >= sprite.Map.Width) return true;
-        if (y < 0 || y >= sprite.Map.Height) return true;
+        if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
+        var grid = sprite.Map.ObjectGrid;
+        if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
 
-        try
-        {
-            var isSprite = sprite.Map.ObjectGrid[x, y].Sprites.Any();
+        var sprites = grid[x, y].SpritesList;
+        var isSprite = sprites.Count > 0 ? sprites[0] : null;
+        if (isSprite is null) return false;
 
-            if (sprite.Target is null) return isSprite;
-
-            // Logic sounds counter-intuitive, but if a target exists it needs
-            // to be set as not a sprite, so the enemy can path-find to it
-            if ((int)sprite.Target.Pos.X == x && (int)sprite.Target.Pos.Y == y)
-            {
-                isSprite = false;
-            }
-
-            return isSprite;
-        }
-        catch (AggregateException ex)
-        {
-            Crashes.TrackError(ex);
-        }
-
-        return false;
+        return sprite.Target.Pos != isSprite.Pos;
     }
 
+    /// <summary>
+    /// Similar to the IsAStarSprite method, this method is called on Monster creation to ensure monsters aren't created
+    /// on top of other sprites or walls
+    /// </summary>
     public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
-        if (x < 0 || x >= sprite.Map.Width) return true;
-        if (y < 0 || y >= sprite.Map.Height) return true;
+        if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
+        var grid = sprite.Map.ObjectGrid;
+        if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
 
-        try
+        var sprites = grid[x, y].SpritesList;
+        var isWall = sprites is { Count: > 0 };
+
+        if (sprite.Target is null) return isWall;
+        if ((int)sprite.Target.Pos.X == x && (int)sprite.Target.Pos.Y == y)
         {
-            var isWall = sprite.Map.ObjectGrid[x, y].Sprites.Any();
-
-            if (sprite.Target is null) return isWall;
-            if ((int)sprite.Target.Pos.X == x && (int)sprite.Target.Pos.Y == y)
-            {
-                isWall = false;
-            }
-
-            return isWall;
-        }
-        catch (AggregateException ex)
-        {
-            Crashes.TrackError(ex);
+            isWall = false;
         }
 
-        return false;
+        return isWall;
     }
 
     public bool OnLoaded()
     {
-        lock (ServerSetup.SyncLock)
+        lock (_mapLoadLock)
         {
             TileContent = new TileContent[Width, Height];
             ObjectGrid = new TileGrid[Width, Height];

@@ -32,6 +32,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private readonly WorldServerTimer _buffAndDebuffTimer;
     private readonly object _buffLock = new();
     private readonly object _debuffLock = new();
+    private readonly object _walkLock = new();
 
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
@@ -821,7 +822,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             LastPosition = new Position(x, y);
         }
 
-        lock (ServerSetup.SyncLock)
+        lock (_walkLock)
         {
             var currentPosX = X;
             var currentPosY = Y;

@@ -21,6 +21,7 @@ public class ServerSetup : IServerContext
 {
     public static ServerSetup Instance { get; private set; }
     public static readonly object SyncLock = new();
+    private static readonly object LogLock = new();
     private static Board[] _huntingToL = new Board[1];
     private static Board[] _trashTalk = new Board[1];
     private static Board[] _arenaUpdates = new Board[1];
@@ -80,7 +81,7 @@ public class ServerSetup : IServerContext
 
     public static void Logger(string logMessage, LogLevel logLevel = LogLevel.Information)
     {
-        lock (SyncLock)
+        lock (LogLock)
         {
             _log?.Log(logLevel, "{logMessage}", logMessage);
         }

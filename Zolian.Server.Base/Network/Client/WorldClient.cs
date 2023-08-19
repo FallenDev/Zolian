@@ -165,6 +165,7 @@ namespace Darkages.Network.Client
         public Position LastKnownPosition { get; set; }
         public int MapClicks { get; set; }
         public uint EntryCheck { get; set; }
+        private readonly object _warpCheckLock = new();
         private readonly Queue<ExperienceEvent> _expQueue = new();
         private readonly object _queueLock = new();
         private Task _experienceTask;
@@ -4246,7 +4247,7 @@ namespace Darkages.Network.Client
                 var breakOuterLoop = false;
                 if (value.ActivationMapId != client.Aisling.CurrentMapId) continue;
 
-                lock (ServerSetup.SyncLock)
+                lock (_warpCheckLock)
                 {
                     foreach (var _ in value.Activations.Where(o =>
                                  o.Location.X == (int)client.Aisling.Pos.X &&
@@ -4281,7 +4282,7 @@ namespace Darkages.Network.Client
                 var breakOuterLoop = false;
                 if (value.ActivationMapId != client.Aisling.CurrentMapId) continue;
 
-                lock (ServerSetup.SyncLock)
+                lock (_warpCheckLock)
                 {
                     foreach (var _ in value.Activations.Where(o =>
                                  o.Location.X == x &&
