@@ -1097,8 +1097,16 @@ public class debuff_ArdPoison : Debuff
             return;
         }
 
-        var cap = affected.CurrentHp - (int)(affected.CurrentHp * Modifier);
-        if (cap > 0) affected.CurrentHp = cap;
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 5000) cap = 5000;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
     }
 }
 
@@ -1177,8 +1185,16 @@ public class debuff_MorPoison : Debuff
             return;
         }
 
-        var cap = affected.CurrentHp - (int)(affected.CurrentHp * Modifier);
-        if (cap > 0) affected.CurrentHp = cap;
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 2500) cap = 2500;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
     }
 }
 
@@ -1257,8 +1273,16 @@ public class debuff_Poison : Debuff
             return;
         }
 
-        var cap = affected.CurrentHp - (int)(affected.CurrentHp * Modifier);
-        if (cap > 0) affected.CurrentHp = cap;
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 1000) cap = 1000;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
     }
 }
 
@@ -1337,8 +1361,16 @@ public class debuff_BeagPoison : Debuff
             return;
         }
 
-        var cap = affected.CurrentHp - (int)(affected.CurrentHp * Modifier);
-        if (cap > 0) affected.CurrentHp = cap;
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 500) cap = 500;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
     }
 }
 
