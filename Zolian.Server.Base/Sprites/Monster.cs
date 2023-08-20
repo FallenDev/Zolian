@@ -81,12 +81,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         return monsterCreateScript.Value?.Create();
     }
 
-    public static void InitScripting(MonsterTemplate template, Area map, Monster obj)
-    {
-        obj.Scripts = ScriptManager.Load<MonsterScript>(template.ScriptName, obj, map);
-        if (obj.Scripts != null)
-            ServerSetup.Instance.GlobalMonsterScriptCache.TryAdd(obj.Template.Name, obj.Scripts.Values.FirstOrDefault());
-    }
+    public static void InitScripting(MonsterTemplate template, Area map, Monster obj) => obj.Scripts = ScriptManager.Load<MonsterScript>(template.ScriptName, obj, map);
 
     public void TryAddTryRemoveTagging(Sprite target)
     {

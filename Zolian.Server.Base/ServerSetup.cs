@@ -61,9 +61,7 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = new();
     public ConcurrentDictionary<string, List<Board>> GlobalBoardCache { get; set; } = new();
     public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
-    public ConcurrentDictionary<string, MonsterScript> GlobalMonsterScriptCache { get; set; } = new();
     public ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; } = new();
-    public ConcurrentDictionary<string, MundaneScript> GlobalMundaneScriptCache { get; set; } = new();
     public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = new();
     public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = new();
 

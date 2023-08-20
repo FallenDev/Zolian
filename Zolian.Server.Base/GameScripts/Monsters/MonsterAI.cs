@@ -551,9 +551,13 @@ public class MonsterPirate : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _pirateSayings = "Get outta my way!|I bet yer sister is real nice|Gimmie yar gold|Bet yar can't take me Bucko|Hahahahahahaha!|Scallywag!|Shiver my timbers";
+    private string _pirateSayings = "Arrr!|Arr! Let's sing a sea shanty.|Out'a me way!|Aye, yer sister is real nice|Gimmie yar gold!|Bet yar can't take me Bucko|Look at me funny and I'll a slit yar throat!|Scallywag!|Shiver my timbers|A watery grave for anyone who make us angry!|Arrr! Out'a me way and gimme yar gold!";
+    private string _pirateChase = "Ya landlubber can't run from us!|Harhar!! Running away eh?|Time fer a plundering!";
     private string[] Arggh => _pirateSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private string[] Arrrgh => _pirateChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => Arggh.Length;
+    private int RunCount => Arrrgh.Length;
+    private bool _deathCry;
 
     public MonsterPirate(Monster monster, Area map) : base(monster, map)
     {
@@ -643,6 +647,7 @@ public class MonsterPirate : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
+        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Monster.Remove();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -697,22 +702,15 @@ public class MonsterPirate : MonsterScript
         // ToDo: Game Master Nullify damage
         if (Monster.Target is Aisling aisling)
         {
-            if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
+            if (Monster.Target.IsWeakened && !_deathCry)
             {
-                Monster.Aggressive = false;
-                ClearTarget();
+                _deathCry = true;
+                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
             {
                 if (!Monster.WalkEnabled) return;
-
-                if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
-                {
-                    Monster.Aggressive = false;
-                    ClearTarget();
-                }
-
                 if (Monster.CantMove || Monster.Blind) return;
                 if (walk) Walk();
 
@@ -936,6 +934,8 @@ public class MonsterPirate : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinRangeOf(Monster)) return;
 
+        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
+
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
@@ -956,7 +956,7 @@ public class MonsterPirate : MonsterScript
 
     private void Walk()
     {
-        if (!Monster.CantCast)
+        if (!Monster.CantCast && !Monster.Aggressive)
         {
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
@@ -966,7 +966,11 @@ public class MonsterPirate : MonsterScript
         }
 
         if (Monster.CantMove) return;
-        if (Monster.ThrownBack) return;
+        if (Monster.ThrownBack)
+        {
+            Monster.ThrownBack = false;
+            return;
+        }
 
         if (Monster.Target != null)
         {
@@ -1015,6 +1019,11 @@ public class MonsterPirate : MonsterScript
             {
                 Monster.BashEnabled = false;
                 Monster.CastEnabled = true;
+                var rand = Generator.RandomNumPercentGen();
+                if (rand >= 0.25)
+                {
+                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                }
 
                 // Wander, AStar, and Standard Walk Methods
                 if (Monster.Target == null | !Monster.Aggressive)

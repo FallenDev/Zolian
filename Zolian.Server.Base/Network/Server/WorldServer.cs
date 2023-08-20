@@ -744,10 +744,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (killed >= aisling.Client.Aisling.QuestManager.KeelaCount)
                 {
-                    const string script = "Nadia";
-                    var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
+                    var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
+                    var scriptObj = npc.Value.Scripts.FirstOrDefault();
                     scriptObj.Value?.OnResponse(aisling.Client, 0x01, null);
-
                     return;
                 }
 
@@ -763,10 +762,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (killed >= aisling.Client.Aisling.QuestManager.NealCount)
                 {
-                    const string script = "Nadia";
-                    var scriptObj = ServerSetup.Instance.GlobalMundaneScriptCache.FirstOrDefault(i => i.Key == script);
+                    var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
+                    var scriptObj = npc.Value.Scripts.FirstOrDefault();
                     scriptObj.Value?.OnResponse(aisling.Client, 0x03, null);
-
                     return;
                 }
 

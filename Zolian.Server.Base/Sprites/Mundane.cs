@@ -64,11 +64,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
 
         npc.DefenseElement = Generator.RandomEnumValue<ElementManager.Element>();
         npc.OffenseElement = Generator.RandomEnumValue<ElementManager.Element>();
-
         npc.Scripts = ScriptManager.Load<MundaneScript>(template.ScriptKey, ServerSetup.Instance.Game, npc);
-        if (npc.Scripts != null)
-            ServerSetup.Instance.GlobalMundaneScriptCache.TryAdd(npc.Template.Name, npc.Scripts.Values.FirstOrDefault());
-
         npc.Template.AttackTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(450));
         npc.Template.EnableTurning = false;
         npc.Template.WalkTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.WalkRate));

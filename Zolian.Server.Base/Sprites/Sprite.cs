@@ -1748,8 +1748,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is not Monster monster) return;
         if (source is not Aisling aisling) return;
         if (monster.Template?.ScriptName == null) return;
-
-        var scriptObj = ServerSetup.Instance.GlobalMonsterScriptCache.FirstOrDefault(i => i.Key == monster.Template.Name);
+        var scriptObj = monster.Scripts.FirstOrDefault();
         scriptObj.Value?.OnDamaged(aisling.Client, dmg, source);
     }
 

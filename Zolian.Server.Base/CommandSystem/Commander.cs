@@ -1,8 +1,12 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 using Darkages.CommandSystem.CLI;
+using Darkages.Database;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
+using Darkages.Object;
 using Darkages.Sprites;
+using Darkages.Templates;
 using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Extensions.Logging;
@@ -20,15 +24,14 @@ public static class Commander
     public static void CompileCommands()
     {
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Create Item")
-            .AddAlias("give")
+            .Create("Create Item", "give")
             .SetAction(OnItemCreate)
             .AddArgument(Argument.Create("item"))
             .AddArgument(Argument.Create("amount").MakeOptional().SetDefault(1))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Teleport")
+            .Create("Teleport", "map")
             .AddAlias("t")
             .SetAction(OnTeleport)
             .AddArgument(Argument.Create("t"))
@@ -37,47 +40,47 @@ public static class Commander
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Summon Player")
-            .AddAlias("s")
+            .Create("Summon Player", "s")
             .SetAction(OnSummonPlayer)
             .AddArgument(Argument.Create("who"))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Port to Player")
-            .AddAlias("p")
+            .Create("Teleport to Player", "p")
             .SetAction(OnPortToPlayer)
             .AddArgument(Argument.Create("who"))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Sex Change")
-            .AddAlias("sex")
+            .Create("Sex Change", "sex")
             .SetAction(OnSexChange)
             .AddArgument(Argument.Create("who"))
             .AddArgument(Argument.Create("s"))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Spell")
-            .AddAlias("spell")
+            .Create("Learn Spell", "spell")
             .SetAction(OnLearnSpell)
             .AddArgument(Argument.Create("name"))
             .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Skill")
-            .AddAlias("skill")
+            .Create("Learn Skill", "skill")
             .SetAction(OnLearnSkill)
             .AddArgument(Argument.Create("name"))
             .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
         );
         
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Restart")
-            .AddAlias("restart")
-            .SetAction(Restart));
+            .Create("Restart", "restart", "- Force restart and reload:")
+            .SetAction(Restart)
+        );
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Reload Maps", "rm", "- Reload all maps:")
+            .SetAction(OnMapReload)
+        );
     }
     
     public static void Restart(Argument[] args, object arg)
@@ -195,7 +198,7 @@ public static class Commander
     }
 
     /// <summary>
-    /// InGame Usage : /t "Abel Dungeon 2-1" 35 36
+    /// InGame Usage : /t or /map "Abel Dungeon 2-1" 35 36
     /// </summary>
     private static void OnTeleport(Argument[] args, object arg)
     {
@@ -207,6 +210,44 @@ public static class Commander
         if (area == null) return;
         client.TransitionToMap(area, new Position(x, y));
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
+    }
+
+    /// <summary>
+    /// In Game Usage : /rm
+    /// Reloads all maps
+    /// </summary>
+    private static void OnMapReload(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
+        var players = ServerSetup.Instance.Game.Aislings;
+        ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
+        ServerSetup.Logger("------------- Maps Reloaded -------------", LogLevel.Warning);
+
+        // Wipe
+        ServerSetup.Instance.GlobalMapCache = new ConcurrentDictionary<int, Area>();
+        ServerSetup.Instance.GlobalWarpTemplateCache = new ConcurrentDictionary<int, WarpTemplate>();
+        foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
+        {
+            ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
+        }
+        ServerSetup.Instance.GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
+        {
+            ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);
+        }
+        ServerSetup.Instance.GlobalMundaneCache = new ConcurrentDictionary<uint, Mundane>();
+
+        // Reload
+        AreaStorage.Instance.CacheFromDatabase();
+        DatabaseLoad.CacheFromDatabase(new WarpTemplate());
+
+        foreach (var connected in players)
+        {
+            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qDeath Invokes Reload Maps");
+            connected.Client.ClientRefreshed();
+        }
     }
 
     /// <summary>
