@@ -19,7 +19,7 @@ public interface IArea
     IEnumerable<byte> GetRowData(int row);
     bool IsWall(int x, int y);
     bool IsAStarWall(Sprite sprite, int x, int y);
-    bool IsAStarSprite(Sprite sprite, int x, int y);
+    bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y);
     bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y);
     bool OnLoaded();
     bool ParseMapWalls(int lWall, int rWall);

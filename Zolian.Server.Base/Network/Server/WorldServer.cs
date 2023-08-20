@@ -627,7 +627,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         while (ServerSetup.Instance.Running)
         {
-            await Task.Delay(GameSpeed);
+            await Task.Delay(800);
 
             if (now is { Hour: 0, Minute: 0, Second: 0 })
                 Commander.Restart(null, null);

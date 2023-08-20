@@ -105,7 +105,7 @@ public class Area : Map, IArea
     /// This method is called in real-time multiple times and calculates each grid square
     /// and sprite positioned within each
     /// </summary>
-    public bool IsAStarSprite(Sprite sprite, int x, int y)
+    public bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
     {
         if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
@@ -326,7 +326,7 @@ public class Area : Map, IArea
                 for (var y = 0; y < tempGrid.Count; y++)
                 {
                     var impassable = sprite.Map.IsAStarWall(sprite, x, y);
-                    var filled = sprite.Map.IsAStarSprite(sprite, x, y);
+                    var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);
                     var cost = 1;
 
                     if (filled)

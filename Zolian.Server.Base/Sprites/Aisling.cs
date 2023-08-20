@@ -727,7 +727,7 @@ public sealed class Aisling : Player, IAisling
         if (!allowGhostWalk)
         {
             if (Map.IsWall(oldPosX, oldPosY)) return false;
-            if (Map.IsAStarSprite(this, PendingX, PendingY)) return false;
+            if (Map.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
         }
 
         switch (Direction)
@@ -749,7 +749,7 @@ public sealed class Aisling : Player, IAisling
         if (!allowGhostWalk)
         {
             if (Map.IsWall(PendingX, PendingY)) return false;
-            if (Map.IsAStarSprite(this, PendingX, PendingY)) return false;
+            if (Map.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
         }
 
         foreach (var player in AislingsNearby())
