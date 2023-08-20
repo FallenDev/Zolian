@@ -681,31 +681,178 @@ public class CreateMonster : MonsterCreateScript
                 monster.BonusWis += (byte)(monster._Wis * 5);
                 monster.BonusMr += (byte)(monster._Mr * 5);
             },
-            [MonsterType.Forsaken] = monster =>
+            [MonsterType.Above150P] = monster =>
             {
-                monster.BonusStr += (byte)(monster._Str * 8);
-                monster.BonusInt += (byte)(monster._Int * 8);
-                monster.BonusWis += (byte)(monster._Wis * 8);
-                monster.BonusCon += (byte)(monster._Con * 8);
-                monster.BonusDex += (byte)(monster._Dex * 8);
-                monster.BonusMr += (byte)(monster._Mr * 5);
-                monster.BonusHit += (byte)(monster._Hit * 3);
-                monster.BonusDmg += (byte)(monster._Dmg * 3);
-                monster.BonusHp += monster.BaseHp * 4;
-                monster.BonusMp += monster.BaseMp * 4;
+                monster.BonusStr += (byte)(monster._Str * 7);
+                monster.BonusDex += (byte)(monster._Dex * 7);
+                monster.BonusDmg += (byte)(monster._Dmg * 7);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.05);
             },
-            [MonsterType.Boss] = monster =>
+            [MonsterType.Above150M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 7);
+                monster.BonusWis += (byte)(monster._Wis * 7);
+                monster.BonusMr += (byte)(monster._Mr * 7);
+            },
+            [MonsterType.Above200P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 9);
+                monster.BonusDex += (byte)(monster._Dex * 9);
+                monster.BonusDmg += (byte)(monster._Dmg * 9);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.07);
+            },
+            [MonsterType.Above200M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 9);
+                monster.BonusWis += (byte)(monster._Wis * 9);
+                monster.BonusMr += (byte)(monster._Mr * 9);
+            },
+            [MonsterType.Above250P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 11);
+                monster.BonusDex += (byte)(monster._Dex * 11);
+                monster.BonusDmg += (byte)(monster._Dmg * 11);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.09);
+            },
+            [MonsterType.Above250M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 11);
+                monster.BonusWis += (byte)(monster._Wis * 11);
+                monster.BonusMr += (byte)(monster._Mr * 11);
+            },
+            [MonsterType.MasterStr] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 12);
+                monster.BonusDex += (byte)(monster._Dex * 9);
+                monster.BonusDmg += (byte)(monster._Dmg * 12);
+            },
+            [MonsterType.MasterInt] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 12);
+                monster.BonusWis += (byte)(monster._Wis * 9);
+                monster.BonusMr += (byte)(monster._Mr * 12);
+            },
+            [MonsterType.MasterWis] = monster =>
+            {
+                monster.BonusWis += (byte)(monster._Wis * 12);
+                monster.BonusMp += monster.BaseMp * 12;
+            },
+            [MonsterType.MasterCon] = monster =>
+            {
+                monster.BonusCon += (byte)(monster._Con * 12);
+                monster.BonusHp += monster.BaseHp * 12;
+            },
+            [MonsterType.MasterDex] = monster =>
+            {
+                monster.BonusDex += (byte)(monster._Dex * 12);
+                monster.BonusHit += (byte)(monster._Hit * 12);
+                monster.BonusDmg += (byte)(monster._Dmg * 12);
+            },
+            [MonsterType.Forsaken] = monster =>
             {
                 monster.BonusStr += (byte)(monster._Str * 13);
                 monster.BonusInt += (byte)(monster._Int * 13);
                 monster.BonusWis += (byte)(monster._Wis * 13);
                 monster.BonusCon += (byte)(monster._Con * 13);
                 monster.BonusDex += (byte)(monster._Dex * 13);
-                monster.BonusMr += (byte)(monster._Mr * 9);
-                monster.BonusHit += (byte)(monster._Hit * 5);
-                monster.BonusDmg += (byte)(monster._Dmg * 5);
-                monster.BonusHp += monster.BaseHp * 15;
-                monster.BonusMp += monster.BaseMp * 8;
+                monster.BonusMr += (byte)(monster._Mr * 13);
+                monster.BonusHit += (byte)(monster._Hit * 13);
+                monster.BonusDmg += (byte)(monster._Dmg * 13);
+                monster.BonusHp += monster.BaseHp * 13;
+                monster.BonusMp += monster.BaseMp * 13;
+            },
+            [MonsterType.Above300P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 14);
+                monster.BonusDex += (byte)(monster._Dex * 14);
+                monster.BonusDmg += (byte)(monster._Dmg * 14);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.14);
+            },
+            [MonsterType.Above300M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 14);
+                monster.BonusWis += (byte)(monster._Wis * 14);
+                monster.BonusMr += (byte)(monster._Mr * 14);
+            },
+            [MonsterType.Above350P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 16);
+                monster.BonusDex += (byte)(monster._Dex * 16);
+                monster.BonusDmg += (byte)(monster._Dmg * 16);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.16);
+            },
+            [MonsterType.Above350M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 16);
+                monster.BonusWis += (byte)(monster._Wis * 16);
+                monster.BonusMr += (byte)(monster._Mr * 16);
+            },
+            [MonsterType.Above400P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 19);
+                monster.BonusDex += (byte)(monster._Dex * 19);
+                monster.BonusDmg += (byte)(monster._Dmg * 19);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.20);
+            },
+            [MonsterType.Above400M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 19);
+                monster.BonusWis += (byte)(monster._Wis * 19);
+                monster.BonusMr += (byte)(monster._Mr * 19);
+            },
+            [MonsterType.Above450P] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 22);
+                monster.BonusDex += (byte)(monster._Dex * 22);
+                monster.BonusDmg += (byte)(monster._Dmg * 22);
+                monster.BonusHp += (int)(monster.MaximumHp * 0.22);
+            },
+            [MonsterType.Above450M] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 22);
+                monster.BonusWis += (byte)(monster._Wis * 22);
+                monster.BonusMr += (byte)(monster._Mr * 22);
+            },
+            [MonsterType.DivineStr] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 25);
+                monster.BonusDex += (byte)(monster._Dex * 22);
+                monster.BonusDmg += (byte)(monster._Dmg * 22);
+            },
+            [MonsterType.DivineInt] = monster =>
+            {
+                monster.BonusInt += (byte)(monster._Int * 25);
+                monster.BonusWis += (byte)(monster._Wis * 22);
+                monster.BonusMr += (byte)(monster._Mr * 25);
+            },
+            [MonsterType.DivineWis] = monster =>
+            {
+                monster.BonusWis += (byte)(monster._Wis * 25);
+                monster.BonusMp += monster.BaseMp * 25;
+            },
+            [MonsterType.DivineCon] = monster =>
+            {
+                monster.BonusCon += (byte)(monster._Con * 25);
+                monster.BonusHp += monster.BaseHp * 25;
+            },
+            [MonsterType.DivineDex] = monster =>
+            {
+                monster.BonusDex += (byte)(monster._Dex * 25);
+                monster.BonusHit += (byte)(monster._Hit * 25);
+                monster.BonusDmg += (byte)(monster._Dmg * 25);
+            },
+            [MonsterType.Boss] = monster =>
+            {
+                monster.BonusStr += (byte)(monster._Str * 60);
+                monster.BonusInt += (byte)(monster._Int * 60);
+                monster.BonusWis += (byte)(monster._Wis * 45);
+                monster.BonusCon += (byte)(monster._Con * 45);
+                monster.BonusDex += (byte)(monster._Dex * 60);
+                monster.BonusMr += (byte)(monster._Mr * 45);
+                monster.BonusHit += (byte)(monster._Hit * 45);
+                monster.BonusDmg += (byte)(monster._Dmg * 45);
+                monster.BonusHp += monster.BaseHp * 80;
+                monster.BonusMp += monster.BaseMp * 60;
             },
         };
 
