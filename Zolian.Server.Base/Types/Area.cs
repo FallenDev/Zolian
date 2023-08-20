@@ -107,17 +107,16 @@ public class Area : Map, IArea
     /// </summary>
     public bool IsAStarSprite(Sprite sprite, int x, int y)
     {
-        if (sprite is null || sprite.CurrentHp <= 0) return false;
-        if ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y) return false;
+        if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
+        
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
 
         var sprites = grid[x, y].SpritesList;
-        var isSprite = sprites.Count > 0 ? sprites[0] : null;
-        if (isSprite is null) return false;
+        if (sprites.Count == 0) return false;
 
-        return sprite.Target.Pos != isSprite.Pos;
+        return sprite.Target?.Pos != sprites[0].Pos;
     }
 
     /// <summary>
@@ -127,19 +126,12 @@ public class Area : Map, IArea
     public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
+        
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
 
         var sprites = grid[x, y].SpritesList;
-        var isWall = sprites is { Count: > 0 };
-
-        if (sprite.Target is null) return isWall;
-        if ((int)sprite.Target.Pos.X == x && (int)sprite.Target.Pos.Y == y)
-        {
-            isWall = false;
-        }
-
-        return isWall;
+        return sprites is { Count: > 0 };
     }
 
     public bool OnLoaded()
