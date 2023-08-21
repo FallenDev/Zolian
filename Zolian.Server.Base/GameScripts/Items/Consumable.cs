@@ -39,6 +39,11 @@ public class Consumable : ItemScript
                 }
                 return;
             }
+            case "Captured Golden Floppy":
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
+                return;
+            }
             case "Raw Dark Iron":
             {
                 foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)

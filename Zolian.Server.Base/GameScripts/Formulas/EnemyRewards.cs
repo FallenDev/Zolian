@@ -21,7 +21,8 @@ public class EnemyRewards : RewardScript
     public override void GenerateRewards(Monster monster, Aisling player)
     {
         GenerateExperience(player, true);
-        GenerateAbility(player, true);
+        if (monster.Level >= 250 && player.ExpLevel >= 250 && player.Stage >= ClassStage.Master)
+            GenerateAbility(player, true);
         GenerateGold();
         GenerateDrops(monster, player);
     }
