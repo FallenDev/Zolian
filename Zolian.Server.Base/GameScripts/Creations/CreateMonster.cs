@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
+
 using Chaos.Common.Identity;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.ScriptingBase;
@@ -81,6 +83,7 @@ public class CreateMonster : MonsterCreateScript
         MonsterSize(obj);
         MonsterArmorClass(obj);
         MonsterExperience(obj);
+        MonsterAbility(obj);
 
         MonsterBaseAndSizeStats(obj);
         MonsterStatBoostOnPrimary(obj);
@@ -127,7 +130,7 @@ public class CreateMonster : MonsterCreateScript
     private void SetWalkEnabled(Monster obj)
     {
         var pathQualifier = _monsterTemplate.PathQualifer;
-    
+
         if ((pathQualifier & PathQualifer.Wander) == PathQualifer.Wander || (pathQualifier & PathQualifer.Patrol) == PathQualifer.Patrol)
         {
             obj.WalkEnabled = true;
@@ -359,12 +362,105 @@ public class CreateMonster : MonsterCreateScript
             { 190, (2500000, 2899999) },
             { 194, (2900000, 3499999) },
             { 200, (3500000, 3899999) },
-            { int.MaxValue, (3900000, 4200000) } // default case for level > 200
+            { 204, (3500000, 3899999) },
+            { 208, (3675000, 4172999) },
+            { 212, (3861250, 4463519) },
+            { 216, (4054312, 4774565) },
+            { 220, (4255028, 5111586) },
+            { 224, (4463780, 5470397) },
+            { 228, (4680824, 5850126) },
+            { 232, (4906865, 6258125) },
+            { 236, (5142408, 6693074) },
+            { 240, (5396038, 7157987) },
+            { 244, (5666840, 7654052) },
+            { 248, (5955332, 8183075) },
+            { 252, (6262104, 8746983) },
+            { int.MaxValue, (7000000, 10000000) }
         };
 
         var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
 
         obj.Experience = (uint)Generator.GenerateDeterminedNumberRange(start, end);
+    }
+
+    private static void MonsterAbility(Monster obj)
+    {
+        if (obj.Level < 250)
+        {
+            obj.Ability = 0;
+            return;
+        }
+
+        var levelExperienceRange = new SortedDictionary<int, (int start, int end)>
+        {
+            { 252, (1, 3) },
+            { 256, (1, 3) },
+            { 260, (1, 4) },
+            { 264, (1, 4) },
+            { 268, (2, 5) },
+            { 272, (2, 6) },
+            { 276, (2, 7) },
+            { 280, (3, 8) },
+            { 284, (3, 9) },
+            { 288, (4, 11) },
+            { 292, (4, 12) },
+            { 296, (5, 14) },
+            { 300, (5, 16) },
+            { 304, (6, 18) },
+            { 308, (7, 20) },
+            { 312, (8, 23) },
+            { 316, (8, 25) },
+            { 320, (9, 28) },
+            { 324, (10, 32) },
+            { 328, (11, 36) },
+            { 332, (12, 40) },
+            { 336, (13, 45) },
+            { 340, (14, 50) },
+            { 344, (16, 56) },
+            { 348, (17, 63) },
+            { 352, (19, 70) },
+            { 356, (21, 78) },
+            { 360, (23, 87) },
+            { 364, (25, 97) },
+            { 368, (27, 108) },
+            { 372, (29, 120) },
+            { 376, (32, 134) },
+            { 380, (34, 149) },
+            { 384, (37, 166) },
+            { 388, (40, 184) },
+            { 392, (43, 205) },
+            { 396, (47, 228) },
+            { 400, (50, 254) },
+            { 404, (54, 282) },
+            { 408, (58, 314) },
+            { 412, (63, 348) },
+            { 416, (67, 387) },
+            { 420, (73, 430) },
+            { 424, (78, 478) },
+            { 428, (84, 532) },
+            { 432, (91, 591) },
+            { 436, (97, 656) },
+            { 440, (104, 729) },
+            { 444, (112, 809) },
+            { 448, (120, 899) },
+            { 452, (128, 999) },
+            { 456, (138, 1110) },
+            { 460, (147, 1232) },
+            { 464, (158, 1370) },
+            { 468, (169, 1521) },
+            { 472, (182, 1689) },
+            { 476, (194, 1875) },
+            { 480, (209, 2082) },
+            { 484, (223, 2314) },
+            { 488, (239, 2571) },
+            { 492, (256, 2854) },
+            { 496, (275, 3170) },
+            { 500, (294, 3523) }
+        };
+
+        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+
+        obj.Ability = (uint)Generator.GenerateDeterminedNumberRange(start, end);
     }
 
     private static void MonsterElementalAlignment(Sprite obj)
@@ -481,6 +577,7 @@ public class CreateMonster : MonsterCreateScript
                 monster._Dex -= statGen1;
                 monster.BonusHp += (int)(monster.MaximumHp * 0.012);
                 monster.Experience += (uint)(monster.Experience * 0.02);
+                monster.Ability += (uint)(monster.Ability * 0.02);
             },
             ["Great"] = monster =>
             {
@@ -489,6 +586,7 @@ public class CreateMonster : MonsterCreateScript
                 monster._Dex -= statGen2;
                 monster.BonusHp += (int)(monster.MaximumHp * 0.024);
                 monster.Experience += (uint)(monster.Experience * 0.06);
+                monster.Ability += (uint)(monster.Ability * 0.06);
             },
             ["Colossal"] = monster =>
             {
@@ -497,6 +595,7 @@ public class CreateMonster : MonsterCreateScript
                 monster._Dex += statGen3;
                 monster.BonusHp += (int)(monster.MaximumHp * 0.036);
                 monster.Experience += (uint)(monster.Experience * 0.10);
+                monster.Ability += (uint)(monster.Ability * 0.10);
             },
             ["Deity"] = monster =>
             {
@@ -505,6 +604,7 @@ public class CreateMonster : MonsterCreateScript
                 monster._Dex += statGen4;
                 monster.BonusHp += (int)(monster.MaximumHp * 0.048);
                 monster.Experience += (uint)(monster.Experience * 0.15);
+                monster.Ability += (uint)(monster.Ability * 0.15);
             },
         };
 
@@ -1006,8 +1106,8 @@ public class CreateMonster : MonsterCreateScript
             > 60 and <= 75 => new List<string>
             {
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
-                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge", 
-                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", 
+                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge",
+                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over",
                 "Swallow Whole", "Tentacle", "Corrosive Touch"
             },
             > 75 and <= 120 => new List<string>

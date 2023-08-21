@@ -21,6 +21,7 @@ public class EnemyRewards : RewardScript
     public override void GenerateRewards(Monster monster, Aisling player)
     {
         GenerateExperience(player, true);
+        GenerateAbility(player, true);
         GenerateGold();
         GenerateDrops(monster, player);
     }
@@ -188,6 +189,49 @@ public class EnemyRewards : RewardScript
         {
             // Enqueue experience event for party members
             party.Client.EnqueueExperienceEvent(party, exp, true, false);
+        }
+    }
+
+    private void GenerateAbility(Aisling player, bool canCrit = false)
+    {
+        var ap = (int)_monster.Ability;
+
+        if (canCrit)
+        {
+            var critical = Generator.RandomNumPercentGen();
+
+            if (critical >= .85)
+            {
+                ap *= 2;
+                player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(386, null, player.Serial));
+            }
+        }
+
+        var difference = player.ExpLevel - _monster.Template.Level;
+        ap = difference switch
+        {
+            // Monster is higher level than player
+            <= -30 => (int)(ap * 0.25),
+            <= -15 => (int)(ap * 0.5),
+            <= -10 => (int)(ap * 0.75),
+            // Monster is lower level than player
+            >= 30 => 1,
+            >= 15 => (int)(ap * 0.25),
+            >= 10 => (int)(ap * 0.5),
+            _ => ap
+        };
+
+        // Enqueue experience event
+        player.Client.EnqueueAbilityEvent(player, ap, true, false);
+
+        if (player.PartyMembers == null) return;
+
+        foreach (var party in player.PartyMembers
+                     .Where(party => party.Serial != player.Serial)
+                     .Where(party => party.WithinRangeOf(player)))
+        {
+            // Enqueue experience event for party members
+            party.Client.EnqueueAbilityEvent(party, ap, true, false);
         }
     }
 

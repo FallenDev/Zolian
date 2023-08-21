@@ -47,6 +47,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     public bool CastEnabled { get; set; }
     public bool ObjectUpdateEnabled { get; set; }
     public uint Experience { get; set; }
+    public uint Ability { get; set; }
     public string Size { get; set; }
     public ushort Image { get; set; }
     public bool WalkEnabled { get; set; }

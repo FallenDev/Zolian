@@ -162,10 +162,11 @@ public interface IWorldClient : ISocketClient
     void GiveCon(byte v = 1);
     void GiveDex(byte v = 1);
     void EnqueueExperienceEvent(Aisling player, int exp, bool hunting, bool overflow);
+    void EnqueueAbilityEvent(Aisling player, int exp, bool hunting, bool overflow);
     void GiveExp(int exp, bool overflow = false);
-    void LevelUp(Aisling player);
-    void GiveAp(int a);
-    void DarkRankUp(Aisling player);
+    void LevelUp(Aisling player, int extraExp);
+    void GiveAp(int a, bool overflow = false);
+    void DarkRankUp(Aisling player, int extraExp);
     WorldClient RefreshMap(bool updateView = false);
     WorldClient TransitionToMap(Area area, Position position);
     WorldClient TransitionToMap(int area, Position position);
