@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
@@ -231,6 +232,12 @@ public class EnemyRewards : RewardScript
                      .Where(party => party.Serial != player.Serial)
                      .Where(party => party.WithinRangeOf(player)))
         {
+            if (party.ExpLevel < 250 || party.Stage < ClassStage.Master)
+            {
+                party.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sNot able to earn ability points yet");
+                continue;
+            }
+
             // Enqueue experience event for party members
             party.Client.EnqueueAbilityEvent(party, ap, true, false);
         }
