@@ -141,8 +141,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target == null) return;
         if (!spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -346,8 +346,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target == null) return;
         if (!spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -482,8 +482,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target == null) return;
         if (!spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 

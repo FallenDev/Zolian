@@ -346,8 +346,8 @@ public class Detect : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -477,8 +477,8 @@ public class Heal_Minor : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -592,8 +592,8 @@ public class Heal_Major : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -707,8 +707,8 @@ public class Heal_Critical : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -833,8 +833,8 @@ public class Dire_Aid : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -948,8 +948,8 @@ public class Healing_Winds : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1045,7 +1045,8 @@ public class Forestall : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1132,8 +1133,8 @@ public class Raise_Ally : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1215,8 +1216,8 @@ public class Turn_Undead : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1294,8 +1295,8 @@ public class Turn_Critter : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1373,8 +1374,8 @@ public class Turn_Greater_Undead : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1452,8 +1453,8 @@ public class Turn_Greater_Critter : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1529,8 +1530,8 @@ public class AoPuinsein : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1625,8 +1626,8 @@ public class AoDall : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1721,8 +1722,8 @@ public class AoBeagCradh : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1817,8 +1818,8 @@ public class AoCradh : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -1913,8 +1914,8 @@ public class AoMorCradh : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -2009,8 +2010,8 @@ public class AoArdCradh : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
@@ -2105,8 +2106,8 @@ public class AoSuain : SpellScript
         if (target == null) return;
         if (!_spell.CanUse())
         {
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 

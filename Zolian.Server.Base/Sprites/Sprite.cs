@@ -1042,31 +1042,37 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
             }
@@ -1086,31 +1092,37 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
                 if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                    source.OffenseElement = saved;
                     return;
                 }
             }
