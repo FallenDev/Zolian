@@ -210,19 +210,19 @@ public class Smite : SkillScript
                     return;
                 case Aisling player:
                     {
-                        if (_target.HasDebuff("Beag Suain"))
-                            _target.RemoveDebuff("Beag Suain");
+                        if (player.HasDebuff("Beag Suain"))
+                            player.RemoveDebuff("Beag Suain");
 
                         var debuff = new debuff_frozen();
                         {
-                            if (_target.HasDebuff(debuff.Name))
-                                _target.RemoveDebuff(debuff.Name);
+                            if (player.HasDebuff(debuff.Name))
+                                player.RemoveDebuff(debuff.Name);
 
-                            _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, _target, _skill);
+                            _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, player, _skill);
                         }
 
                         var dmgCalc = DamageCalc(sprite);
-                        _skillMethod.OnSuccessWithoutAction(_target, sprite, _skill, dmgCalc, _crit);
+                        _skillMethod.OnSuccessWithoutAction(player, sprite, _skill, dmgCalc, _crit);
                         break;
                     }
             }
