@@ -265,11 +265,12 @@ public class Inventory : ObjectManager, IInventory
 
     private (bool, int) AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
     {
-        if (item1 != null)
+        if (item1 != null && slot2 != 0)
             client.SendRemoveItemFromPane(item1.InventorySlot);
         if (item2 != null)
             client.SendRemoveItemFromPane(item2.InventorySlot);
-
+        Console.WriteLine($"Slot1:{slot1}");
+        Console.WriteLine($"Slot2:{slot2}");
         if (item1 != null && item2 != null)
         {
             item1.InventorySlot = slot2;

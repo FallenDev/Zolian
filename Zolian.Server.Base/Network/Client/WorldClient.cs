@@ -590,7 +590,8 @@ namespace Darkages.Network.Client
                 foreach (var item in itemList)
                 {
                     if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
-                    if (item.InventorySlot is 0 or 60) continue;
+                    if (item.InventorySlot is <= 0 or >= 60)
+                        item.InventorySlot = Aisling.Inventory.FindEmpty();
 
                     var itemName = item.Name;
                     var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
@@ -606,12 +607,8 @@ namespace Darkages.Network.Client
                         for (byte i = 1; i < 60; i++)
                         {
                             itemCheckCount++;
-
-                            if (Aisling.Inventory.Items[i] == null)
-                            {
-                                item.InventorySlot = i;
-                            }
-
+                            item.InventorySlot = i;
+                            
                             if (itemCheckCount == 59)
                             {
                                 routineCheck++;
