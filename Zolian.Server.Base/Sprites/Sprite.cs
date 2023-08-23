@@ -55,7 +55,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
-    public bool IsCursed => HasDebuff(i => i.Name.Contains("Cradh"));
+    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Dark Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsCharmed => HasDebuff("Entice");
@@ -1676,7 +1676,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void ApplyEquipmentDurability(int dmg)
     {
-        if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 0)
+        if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
             aisling.EquipmentManager.DecreaseDurability();
     }
 

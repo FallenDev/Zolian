@@ -39,8 +39,8 @@ public class Ac : FormulaScript
             return value;
         }
 
-        if (dmgMitigation >= 0.90f)
-            dmgMitigation = 0.90f;
+        if (dmgMitigation >= 0.98f)
+            dmgMitigation = 0.98f;
 
         var dmgReducedByMitigation = dmgMitigation * value;
         value -= (int)dmgReducedByMitigation;
@@ -48,9 +48,7 @@ public class Ac : FormulaScript
         if (value <= 0)
             value = 1;
 
-        if (obj.Dmg <= 0) return value;
-
-        var dmgAboveAcModifier = obj.Dmg * 0.25;
+        var dmgAboveAcModifier = obj.Str * 0.25;
         dmgAboveAcModifier /= 100;
         var dmgAboveAcBoost = dmgAboveAcModifier * value;
         value += (int)dmgAboveAcBoost;

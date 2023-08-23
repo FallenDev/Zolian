@@ -725,9 +725,49 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             }
         }
 
+        if (client.Aisling.IsArmorReduced)
+        {
+            ReapplyReducedArmor(client);
+        }
+
         var ac = client.Aisling.Ac.ToString();
         var regen = client.Aisling.Regen.ToString();
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
+    }
+
+    private void ReapplyReducedArmor(WorldClient client)
+    {
+        foreach (var debuff in client.Aisling.Debuffs)
+        {
+            if (debuff.Value == null) continue;
+            switch (debuff.Value.Name)
+            {
+                case "Ard Cradh":
+                    client.Aisling.BonusAc -= 50;
+                    break;
+                case "Mor Cradh":
+                    client.Aisling.BonusAc -= 40;
+                    break;
+                case "Cradh":
+                    client.Aisling.BonusAc -= 30;
+                    break;
+                case "Beag Cradh":
+                    client.Aisling.BonusAc -= 20;
+                    break;
+                case "Decay":
+                    client.Aisling.BonusAc -= 40;
+                    break;
+                case "Rending":
+                    client.Aisling.BonusAc -= 10;
+                    break;
+                case "Rend":
+                    client.Aisling.BonusAc -= 45;
+                    break;
+                case "Hurricane":
+                    client.Aisling.BonusAc -= 30;
+                    break;
+            }
+        }
     }
 
     public void RemoveModifiers(WorldClient client)
@@ -889,7 +929,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
     public void QualityVarianceCalc(WorldClient client, Item equipment)
     {
-        if (Tarnished) return;
+        if (Tarnished && equipment.ItemQuality != Quality.Damaged) return;
 
         Dictionary<Quality, QualityBonus> qualityBonuses = new()
         {
