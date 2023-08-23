@@ -12,7 +12,7 @@ namespace Darkages.GameScripts.Affects;
 
 #region Armor
 
-public class debuff_ardcradh : Debuff
+public class DebuffArdcradh : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 50);
     public override byte Icon => 84;
@@ -48,7 +48,7 @@ public class debuff_ardcradh : Debuff
     }
 }
 
-public class debuff_morcradh : Debuff
+public class DebuffMorcradh : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 40);
     public override byte Icon => 83;
@@ -84,7 +84,7 @@ public class debuff_morcradh : Debuff
     }
 }
 
-public class debuff_decay : Debuff
+public class DebuffDecay : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 40);
     public override byte Icon => 110;
@@ -123,7 +123,7 @@ public class debuff_decay : Debuff
     }
 }
 
-public class debuff_cradh : Debuff
+public class DebuffCradh : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 30);
     public override byte Icon => 82;
@@ -159,7 +159,7 @@ public class debuff_cradh : Debuff
     }
 }
 
-public class debuff_beagcradh : Debuff
+public class DebuffBeagcradh : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 20);
     public override byte Icon => 5;
@@ -195,7 +195,7 @@ public class debuff_beagcradh : Debuff
     }
 }
 
-public class debuff_rending : Debuff
+public class DebuffRending : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 10);
     public override byte Icon => 189;
@@ -255,7 +255,7 @@ public class debuff_rending : Debuff
     }
 }
 
-public class debuff_rend : Debuff
+public class DebuffRend : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 45);
     public override byte Icon => 110;
@@ -315,7 +315,7 @@ public class debuff_rend : Debuff
     }
 }
 
-public class debuff_hurricane : Debuff
+public class DebuffHurricane : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 30);
     public override byte Icon => 116;
@@ -378,7 +378,7 @@ public class debuff_hurricane : Debuff
 #endregion
 
 #region Movement
-public class debuff_beagsuain : Debuff
+public class DebuffBeagsuain : Debuff
 {
     public override byte Icon => 38;
     public override int Length => 7;
@@ -432,7 +432,7 @@ public class debuff_beagsuain : Debuff
     }
 }
 
-public class debuff_DarkChain : Debuff
+public class DebuffDarkChain : Debuff
 {
     public override byte Icon => 50;
     public override int Length => 18;
@@ -486,7 +486,7 @@ public class debuff_DarkChain : Debuff
     }
 }
 
-public class debuff_Silence : Debuff
+public class DebuffSilence : Debuff
 {
     public override byte Icon => 112;
     public override int Length => 21;
@@ -539,7 +539,7 @@ public class debuff_Silence : Debuff
     }
 }
 
-public class debuff_Halt : Debuff
+public class DebuffHalt : Debuff
 {
     public override byte Icon => 106;
     public override int Length => 10;
@@ -593,7 +593,7 @@ public class debuff_Halt : Debuff
     }
 }
 
-public class debuff_beagsuaingar : Debuff
+public class DebuffBeagsuaingar : Debuff
 {
     public override byte Icon => 38;
     public override int Length => 10;
@@ -647,7 +647,7 @@ public class debuff_beagsuaingar : Debuff
     }
 }
 
-public class debuff_charmed : Debuff
+public class DebuffCharmed : Debuff
 {
     public override byte Icon => 71;
     public override int Length => 7;
@@ -701,7 +701,7 @@ public class debuff_charmed : Debuff
     }
 }
 
-public class debuff_frozen : Debuff
+public class DebuffFrozen : Debuff
 {
     public override byte Icon => 50;
     public override int Length => 8;
@@ -757,7 +757,7 @@ public class debuff_frozen : Debuff
     }
 }
 
-public class debuff_sleep : Debuff
+public class DebuffSleep : Debuff
 {
     public override byte Icon => 90;
     public override int Length => 12;
@@ -817,7 +817,7 @@ public class debuff_sleep : Debuff
 #endregion
 
 #region Reaping
-public class debuff_reaping : Debuff
+public class DebuffReaping : Debuff
 {
     public override byte Icon => 89;
     public override int Length => _afflicted is Aisling ? 15 : 5;
@@ -952,7 +952,7 @@ public class debuff_reaping : Debuff
 #endregion
 
 #region DoT
-public class debuff_bleeding : Debuff
+public class DebuffBleeding : Debuff
 {
     private static double Modifier => .07;
     public override byte Icon => 111;
@@ -1022,7 +1022,7 @@ public class debuff_bleeding : Debuff
     }
 }
 
-public class debuff_ArdPoison : Debuff
+public class DebuffArdPoison : Debuff
 {
     private static double Modifier => 0.08;
     public override byte Icon => 35;
@@ -1110,7 +1110,7 @@ public class debuff_ArdPoison : Debuff
     }
 }
 
-public class debuff_MorPoison : Debuff
+public class DebuffMorPoison : Debuff
 {
     private static double Modifier => 0.05;
     public override byte Icon => 35;
@@ -1198,7 +1198,7 @@ public class debuff_MorPoison : Debuff
     }
 }
 
-public class debuff_Poison : Debuff
+public class DebuffPoison : Debuff
 {
     private static double Modifier => 0.04;
     public override byte Icon => 35;
@@ -1286,7 +1286,7 @@ public class debuff_Poison : Debuff
     }
 }
 
-public class debuff_BeagPoison : Debuff
+public class DebuffBeagPoison : Debuff
 {
     private static double Modifier => 0.03;
     public override byte Icon => 35;
@@ -1374,7 +1374,7 @@ public class debuff_BeagPoison : Debuff
     }
 }
 
-public class debuff_blind : Debuff
+public class DebuffBlind : Debuff
 {
     public override byte Icon => 114;
     public override int Length => 25;
@@ -1432,7 +1432,7 @@ public class debuff_blind : Debuff
 #endregion
 
 #region Fas
-public class debuff_ardfasnadur : Debuff
+public class DebuffArdfasnadur : Debuff
 {
     public override byte Icon => 219;
     public override int Length => 640;
@@ -1470,7 +1470,7 @@ public class debuff_ardfasnadur : Debuff
     }
 }
 
-public class debuff_morfasnadur : Debuff
+public class DebuffMorfasnadur : Debuff
 {
     public override byte Icon => 218;
     public override int Length => 320;
@@ -1508,7 +1508,7 @@ public class debuff_morfasnadur : Debuff
     }
 }
 
-public class debuff_fasnadur : Debuff
+public class DebuffFasnadur : Debuff
 {
     public override byte Icon => 119;
     public override int Length => 120;
@@ -1546,7 +1546,7 @@ public class debuff_fasnadur : Debuff
     }
 }
 
-public class debuff_fasspiorad : Debuff
+public class DebuffFasspiorad : Debuff
 {
     public override byte Icon => 26;
     public override int Length => 2;

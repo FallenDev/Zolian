@@ -252,9 +252,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool CanBeAttackedHere(Sprite source)
     {
         if (source is not Sprites.Aisling || this is not Sprites.Aisling) return true;
-        if (CurrentMapId <= 0 || !ServerSetup.Instance.GlobalMapCache.ContainsKey(CurrentMapId)) return true;
+        if (CurrentMapId <= 0 || !ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var value)) return true;
 
-        return ServerSetup.Instance.GlobalMapCache[CurrentMapId].Flags.MapFlagIsSet(MapFlags.PlayerKill);
+        return value.Flags.MapFlagIsSet(MapFlags.PlayerKill);
     }
 
     public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
@@ -1008,27 +1008,17 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public Sprite ApplyBuff(string buffName)
     {
-        if (!ServerSetup.Instance.GlobalBuffCache.ContainsKey(buffName)) return this;
-        var buff = ServerSetup.Instance.GlobalBuffCache[buffName];
-
-        if (buff == null || string.IsNullOrEmpty(buff.Name)) return null;
-
-        if (!HasBuff(buff.Name))
-            buff.OnApplied(this, buff);
-
+        if (!ServerSetup.Instance.GlobalBuffCache.TryGetValue(buffName, out var value)) return this;
+        if (value == null || string.IsNullOrEmpty(value.Name)) return null;
+        if (!HasBuff(value.Name)) value.OnApplied(this, value);
         return this;
     }
 
     public Sprite ApplyDebuff(string debuffName)
     {
-        if (!ServerSetup.Instance.GlobalDeBuffCache.ContainsKey(debuffName)) return this;
-        var debuff = ServerSetup.Instance.GlobalDeBuffCache[debuffName];
-
-        if (debuff == null || string.IsNullOrEmpty(debuff.Name)) return null;
-
-        if (!HasDebuff(debuff.Name))
-            debuff.OnApplied(this, debuff);
-
+        if (!ServerSetup.Instance.GlobalDeBuffCache.TryGetValue(debuffName, out var value)) return this;
+        if (value == null || string.IsNullOrEmpty(value.Name)) return null;
+        if (!HasDebuff(value.Name)) value.OnApplied(this, value);
         return this;
     }
 
@@ -1404,7 +1394,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when bleedingChance >= 99:
                 {
-                    var deBuff = new debuff_bleeding();
+                    var deBuff = new DebuffBleeding();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
@@ -1412,7 +1402,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 }
             case 2 when bleedingChance >= 97:
                 {
-                    var deBuff = new debuff_bleeding();
+                    var deBuff = new DebuffBleeding();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
@@ -1424,7 +1414,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when rendingChance >= 99:
                 {
-                    var deBuff = new debuff_rending();
+                    var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
@@ -1432,7 +1422,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 }
             case 2 when rendingChance >= 97:
                 {
-                    var deBuff = new debuff_rending();
+                    var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
@@ -1456,7 +1446,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         return;
                     }
 
-                    var deBuff = new debuff_reaping();
+                    var deBuff = new DebuffReaping();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
@@ -1475,7 +1465,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         return;
                     }
 
-                    var deBuff = new debuff_reaping();
+                    var deBuff = new DebuffReaping();
                     if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
@@ -1760,8 +1750,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is not Monster monster) return;
         if (source is not Aisling aisling) return;
         if (monster.Template?.ScriptName == null) return;
-        var scriptObj = monster.Scripts.FirstOrDefault();
-        scriptObj.Value?.OnDamaged(aisling.Client, dmg, source);
+        var scriptObj = monster.Scripts?.FirstOrDefault();
+        scriptObj?.Value.OnDamaged(aisling.Client, dmg, source);
     }
 
     public string GetDebuffName(Func<Debuff, bool> p)

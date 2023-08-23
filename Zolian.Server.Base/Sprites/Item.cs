@@ -261,22 +261,16 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         return updateIfExists.Result ? EphemeralRandomIdGenerator<uint>.Shared.NextId : item.ItemId;
     }
 
-    public Item Create(Sprite owner, string item, Quality quality, Variance variance,
-        WeaponVariance wVariance, bool curse = false)
-    {
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item))
-            return null;
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
-        return Create(owner, template, quality, variance, wVariance, curse);
-    }
+    public Item Create(Sprite owner, string item, Quality quality, Variance variance, WeaponVariance wVariance, bool curse = false) => !ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var value) ? null : Create(owner, value, quality, variance, wVariance, curse);
+    public Item Create(Sprite owner, string item, bool curse = false) => !ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var value) ? null : Create(owner, value, curse);
 
     public Item Create(Sprite owner, ItemTemplate itemTemplate, Quality quality, Variance variance,
         WeaponVariance wVariance, bool curse = false)
     {
         if (owner == null) return null;
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
+        if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(itemTemplate.Name, out var value)) return null;
 
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
+        var template = value ?? itemTemplate;
         var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
@@ -375,20 +369,12 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         return obj;
     }
 
-    public Item Create(Sprite owner, string item, bool curse = false)
-    {
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item))
-            return null;
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
-        return Create(owner, template, curse);
-    }
-
     public Item Create(Sprite owner, ItemTemplate itemTemplate, bool curse = false)
     {
         if (owner == null) return null;
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
+        if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(itemTemplate.Name, out var value)) return null;
 
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
+        var template = value ?? itemTemplate;
         var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
@@ -452,9 +438,9 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
 
     public Item Create(Area map, ItemTemplate itemTemplate)
     {
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(itemTemplate.Name)) return null;
+        if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(itemTemplate.Name, out var value)) return null;
 
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[itemTemplate.Name] ?? itemTemplate;
+        var template = value ?? itemTemplate;
         var readyTime = DateTime.UtcNow;
         var obj = new Item
         {
@@ -548,11 +534,11 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             ItemQuality = Quality.Common,
             OriginalQuality = Quality.Common,
             ItemVariance = Variance.None,
-            WeapVariance = WeaponVariance.None
+            WeapVariance = WeaponVariance.None,
+            Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
+            ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId
         };
 
-        obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         return obj;
@@ -735,7 +721,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
     }
 
-    private void ReapplyReducedArmor(WorldClient client)
+    private static void ReapplyReducedArmor(WorldClient client)
     {
         foreach (var debuff in client.Aisling.Debuffs)
         {

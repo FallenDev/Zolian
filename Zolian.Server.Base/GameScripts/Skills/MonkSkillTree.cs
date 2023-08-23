@@ -171,7 +171,7 @@ public class WolfFangFist : SkillScript
         if (_target.HasDebuff("Beag Suain"))
             _target.RemoveDebuff("Beag Suain");
 
-        var debuff = new debuff_frozen();
+        var debuff = new DebuffFrozen();
         {
             if (_target.HasDebuff(debuff.Name))
                 _target.RemoveDebuff(debuff.Name);
@@ -209,7 +209,7 @@ public class WolfFangFist : SkillScript
                     return;
                 case Aisling damageDealingTarget:
                 {
-                    var debuff = new debuff_frozen();
+                    var debuff = new DebuffFrozen();
                     {
                         if (!damageDealingTarget.HasDebuff(debuff.Name))
                             _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);
@@ -747,7 +747,7 @@ public class HurricaneKick : SkillScript
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            var debuff = new debuff_hurricane();
+            var debuff = new DebuffHurricane();
 
             if (!_target.HasDebuff(debuff.Name)) 
                 debuff.OnApplied(_target, debuff);
@@ -797,7 +797,7 @@ public class HurricaneKick : SkillScript
                 return;
             }
 
-            var debuff = new debuff_hurricane();
+            var debuff = new DebuffHurricane();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Rend")) 
                 debuff.OnApplied(_target, debuff);

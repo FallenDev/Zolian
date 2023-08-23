@@ -167,7 +167,7 @@ public class Smite : SkillScript
                 if (_target.HasDebuff("Beag Suain"))
                     _target.RemoveDebuff("Beag Suain");
 
-                var debuff = new debuff_frozen();
+                var debuff = new DebuffFrozen();
                 {
                     if (_target.HasDebuff(debuff.Name))
                         _target.RemoveDebuff(debuff.Name);
@@ -213,7 +213,7 @@ public class Smite : SkillScript
                         if (player.HasDebuff("Beag Suain"))
                             player.RemoveDebuff("Beag Suain");
 
-                        var debuff = new debuff_frozen();
+                        var debuff = new DebuffFrozen();
                         {
                             if (player.HasDebuff(debuff.Name))
                                 player.RemoveDebuff(debuff.Name);

@@ -539,7 +539,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private Task SaveUserAsync(Aisling aisling) => StorageManager.AislingBucket.Save(aisling);
     public static Task<bool> CheckIfItemExists(long itemSerial) => StorageManager.AislingBucket.CheckIfItemExists(itemSerial);
 
     private async void UpdateComponentsRoutine()
@@ -621,7 +620,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private async void NightlyServerReset()
+    private static async void NightlyServerReset()
     {
         var now = DateTime.UtcNow;
 
@@ -716,7 +715,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (monster.Target is not Aisling aisling) return;
         var readyTime = DateTime.UtcNow;
 
-        if (!aisling.MonsterKillCounters.ContainsKey(monster.Template.BaseName))
+        if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out KillRecord value))
         {
             aisling.MonsterKillCounters[monster.Template.BaseName] =
                 new KillRecord
@@ -727,8 +726,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         else
         {
-            aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills++;
-            aisling.MonsterKillCounters[monster.Template.BaseName].TimeKilled = readyTime;
+            value.TotalKills++;
+            value.TimeKilled = readyTime;
         }
 
         QuestHandling(aisling, monster);
@@ -1501,7 +1500,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         return ExecuteHandler(client, args, InnerOnClientRedirected);
     }
 
-    private async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
+    private static async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
     {
         client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
 
@@ -2319,7 +2318,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
 
-        ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
+        static ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
         {
             ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
             if (npc == null) return default;
@@ -2342,7 +2341,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
 
-        ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
+        static ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
         {
             if (localArgs.DialogId == 0 && localArgs.PursuitId == ushort.MaxValue)
             {
@@ -2854,8 +2853,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             localClient.Aisling._Dex++;
                             localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"Base dexterity now {localClient.Aisling._Dex}");
                             break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
                     }
 
                     if (!localClient.Aisling.GameMaster)

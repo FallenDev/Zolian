@@ -1199,7 +1199,7 @@ public class Icy_Blast : SkillScript
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new debuff_frozen();
+    private readonly Debuff _debuff = new DebuffFrozen();
     private readonly GlobalSkillMethods _skillMethod;
 
     public Icy_Blast(Skill skill) : base(skill)
@@ -1717,7 +1717,7 @@ public class Silent_Siren : SkillScript
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new debuff_Silence();
+    private readonly Debuff _debuff = new DebuffSilence();
     private readonly GlobalSkillMethods _skillMethod;
 
     public Silent_Siren(Skill skill) : base(skill)
@@ -1899,7 +1899,7 @@ public class Poison_Talon : SkillScript
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new debuff_Poison();
+    private readonly Debuff _debuff = new DebuffPoison();
     private readonly GlobalSkillMethods _skillMethod;
 
     public Poison_Talon(Skill skill) : base(skill)
@@ -2081,7 +2081,7 @@ public class Toxic_Breath : SkillScript
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new debuff_Poison();
+    private readonly Debuff _debuff = new DebuffPoison();
     private readonly GlobalSkillMethods _skillMethod;
 
     public Toxic_Breath(Skill skill) : base(skill)

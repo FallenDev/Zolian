@@ -517,7 +517,7 @@ public class Lullaby_Strike : SkillScript
         if (_target.HasDebuff("Beag Suain"))
             _target.RemoveDebuff("Beag Suain");
 
-        var debuff = new debuff_frozen();
+        var debuff = new DebuffFrozen();
         {
             if (_target.HasDebuff(debuff.Name))
                 _target.RemoveDebuff(debuff.Name);
@@ -555,7 +555,7 @@ public class Lullaby_Strike : SkillScript
                     return;
                 case Aisling damageDealingTarget:
                     {
-                        var debuff = new debuff_frozen();
+                        var debuff = new DebuffFrozen();
                         {
                             if (!damageDealingTarget.HasDebuff(debuff.Name))
                                 _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);
@@ -1010,7 +1010,7 @@ public class Rush : SkillScript
             {
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
-                var stunned = new debuff_beagsuain();
+                var stunned = new DebuffBeagsuain();
                 stunned.OnApplied(aisling, stunned);
 
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
@@ -1091,7 +1091,7 @@ public class Rush : SkillScript
 
             if (wallPos <= 2)
             {
-                var stunned = new debuff_beagsuain();
+                var stunned = new DebuffBeagsuain();
                 stunned.OnApplied(aisling, stunned);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
@@ -1391,7 +1391,7 @@ public class Beag_Suain : SkillScript
             return;
         }
 
-        var debuff = new debuff_frozen();
+        var debuff = new DebuffFrozen();
         {
             if (_target.HasDebuff(debuff.Name))
                 _target.RemoveDebuff(debuff.Name);
@@ -1429,7 +1429,7 @@ public class Beag_Suain : SkillScript
                     return;
                 case Aisling damageDealingTarget:
                     {
-                        var debuff = new debuff_beagsuain();
+                        var debuff = new DebuffBeagsuain();
                         {
                             if (!damageDealingTarget.HasDebuff(debuff.Name))
                                 _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);
@@ -1659,7 +1659,7 @@ public class Charge : SkillScript
             {
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
-                var stunned = new debuff_beagsuain();
+                var stunned = new DebuffBeagsuain();
                 stunned.OnApplied(aisling, stunned);
 
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
@@ -1740,7 +1740,7 @@ public class Charge : SkillScript
 
             if (wallPos <= 6)
             {
-                var stunned = new debuff_beagsuain();
+                var stunned = new DebuffBeagsuain();
                 stunned.OnApplied(aisling, stunned);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
@@ -1812,7 +1812,7 @@ public class Titans_Cleave : SkillScript
         {
             _target = i;
             var dmgCalc = DamageCalc(aisling);
-            var debuff = new debuff_rend();
+            var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name)) 
                 debuff.OnApplied(_target, debuff);
@@ -1862,7 +1862,7 @@ public class Titans_Cleave : SkillScript
                 return;
             }
 
-            var debuff = new debuff_rend();
+            var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name)) 
                 debuff.OnApplied(_target, debuff);
@@ -1949,7 +1949,7 @@ public class Retribution : SkillScript
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            var debuff = new debuff_rend();
+            var debuff = new DebuffRend();
             if (!_target.HasDebuff(debuff.Name)) 
                 debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
@@ -2065,7 +2065,7 @@ public class Beag_Suain_Ia_Gar : SkillScript
 
         foreach (var target in list.Where(i => i.Attackable))
         {
-            var debuff = new debuff_beagsuaingar();
+            var debuff = new DebuffBeagsuaingar();
             {
                 if (target.HasDebuff(debuff.Name))
                     target.RemoveDebuff(debuff.Name);
@@ -2104,7 +2104,7 @@ public class Beag_Suain_Ia_Gar : SkillScript
                     return;
                 case Aisling damageDealingTarget:
                     {
-                        var debuff = new debuff_beagsuaingar();
+                        var debuff = new DebuffBeagsuaingar();
                         {
                             if (!damageDealingTarget.HasDebuff(debuff.Name))
                                 _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);

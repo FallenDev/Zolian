@@ -17,6 +17,7 @@ public class EnemyRewards : RewardScript
     public EnemyRewards(Monster monster, Aisling player)
     {
         _monster = monster;
+        _ = player;
     }
 
     public override void GenerateRewards(Monster monster, Aisling player)
@@ -128,7 +129,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(361, null, monster.Serial));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(361, null, item.Serial));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
@@ -138,7 +139,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(359, null, monster.Serial));
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(359, null, item.Serial));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
@@ -253,7 +254,7 @@ public class EnemyRewards : RewardScript
             Money.Create(_monster, sum, new Position(_monster.Pos.X, _monster.Pos.Y));
     }
 
-    private List<string> JoinList(Monster monster)
+    private static List<string> JoinList(Monster monster)
     {
         var dropList = new List<string>();
         var templateDrops = monster.Template.Drops;

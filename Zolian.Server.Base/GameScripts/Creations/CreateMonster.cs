@@ -116,7 +116,7 @@ public class CreateMonster : MonsterCreateScript
         return obj;
     }
 
-    private void SetElementalAlignment(Monster obj)
+    private static void SetElementalAlignment(Monster obj)
     {
         switch (obj.Template.ElementType)
         {

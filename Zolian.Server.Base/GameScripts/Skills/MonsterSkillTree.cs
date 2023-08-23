@@ -120,7 +120,7 @@ public class BiteAndShake : SkillScript
             return;
         }
 
-        var debuff = new debuff_beagsuain();
+        var debuff = new DebuffBeagsuain();
 
         if (!_target.HasDebuff(debuff.Name))
             debuff.OnApplied(_target, debuff);
@@ -146,7 +146,6 @@ public class CorrosiveTouch : SkillScript
     private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
     public CorrosiveTouch(Skill skill) : base(skill)
@@ -189,7 +188,7 @@ public class CorrosiveTouch : SkillScript
             return;
         }
 
-        var debuff = new debuff_rend();
+        var debuff = new DebuffRend();
 
         if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
             debuff.OnApplied(_target, debuff);
@@ -217,7 +216,6 @@ public class Stomp : SkillScript
     private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
     public Stomp(Skill skill) : base(skill)
@@ -281,7 +279,6 @@ public class HeadButt : SkillScript
     private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
     public HeadButt(Skill skill) : base(skill)
@@ -345,7 +342,6 @@ public class Claw : SkillScript
     private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
     public Claw(Skill skill) : base(skill)
@@ -409,7 +405,6 @@ public class MuleKick : SkillScript
     private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod;
 
     public MuleKick(Skill skill) : base(skill)

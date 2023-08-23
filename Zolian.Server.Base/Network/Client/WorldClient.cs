@@ -346,7 +346,7 @@ namespace Darkages.Network.Client
             if (Aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
             if (Aisling.Skulled) return;
 
-            var debuff = new debuff_reaping();
+            var debuff = new DebuffReaping();
             {
                 debuff.OnApplied(Aisling, debuff);
             }

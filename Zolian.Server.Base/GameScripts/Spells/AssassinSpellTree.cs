@@ -125,7 +125,7 @@ public class Poison_Trap : SpellScript
 
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
-        var debuff = new debuff_Poison();
+        var debuff = new DebuffPoison();
 
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);
@@ -175,7 +175,7 @@ public class Snare_Trap : SpellScript
 
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
-        var debuff = new debuff_sleep();
+        var debuff = new DebuffSleep();
 
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);
@@ -225,7 +225,7 @@ public class Flash_Trap : SpellScript
 
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
-        var debuff = new debuff_blind();
+        var debuff = new DebuffBlind();
 
         if (target.HasBuff(debuff.Name)) return;
         debuff.OnApplied(target, debuff);

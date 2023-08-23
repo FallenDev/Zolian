@@ -300,7 +300,7 @@ public class Stab_and_Twist : SkillScript
             if (aisling.IsInvisible)
                 dmgCalc *= 2;
 
-            var debuff = new debuff_rend();
+            var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
                 debuff.OnApplied(_target, debuff);
@@ -350,7 +350,7 @@ public class Stab_and_Twist : SkillScript
                 return;
             }
 
-            var debuff = new debuff_hurricane();
+            var debuff = new DebuffHurricane();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
                 debuff.OnApplied(_target, debuff);
@@ -663,7 +663,7 @@ public class Enticed : SkillScript
             if (target.HasDebuff("Frozen"))
                 target.RemoveDebuff("Frozen");
 
-            var debuff = new debuff_charmed();
+            var debuff = new DebuffCharmed();
             {
                 if (target.HasDebuff(debuff.Name))
                     target.RemoveDebuff(debuff.Name);
@@ -709,7 +709,7 @@ public class Enticed : SkillScript
                             return;
                         }
 
-                        var debuff = new debuff_charmed();
+                        var debuff = new DebuffCharmed();
                         {
                             if (!damageDealingTarget.HasDebuff(debuff.Name))
                                 _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, _skill);

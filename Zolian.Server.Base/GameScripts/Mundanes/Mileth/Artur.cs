@@ -106,7 +106,7 @@ public class Artur : MundaneScript
             }
             case 5:
             {
-                var debuff = new debuff_ardcradh();
+                var debuff = new DebuffArdcradh();
                 debuff.OnApplied(client.Aisling, debuff);
                 client.SendOptionsDialog(Mundane, "Scram or you will be.");
                 break;

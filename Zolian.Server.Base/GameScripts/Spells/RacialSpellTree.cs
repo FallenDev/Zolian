@@ -302,7 +302,7 @@ public class DestructiveForce : SpellScript
 
         if (hasHitOffWall)
         {
-            var stunned = new debuff_beagsuain();
+            var stunned = new DebuffBeagsuain();
             stunned.OnApplied(_target, stunned);
             _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
         }

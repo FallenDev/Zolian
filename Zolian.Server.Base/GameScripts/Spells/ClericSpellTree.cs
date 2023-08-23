@@ -152,7 +152,7 @@ public class Mor_Dion : SpellScript
 public class Dark_Chain : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_DarkChain();
+    private readonly Debuff _debuff = new DebuffDarkChain();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Dark_Chain(Spell spell) : base(spell)
@@ -182,7 +182,7 @@ public class Dark_Chain : SpellScript
 public class Halt : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_Halt();
+    private readonly Debuff _debuff = new DebuffHalt();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Halt(Spell spell) : base(spell)
@@ -208,7 +208,7 @@ public class Halt : SpellScript
 public class Pramh : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_sleep();
+    private readonly Debuff _debuff = new DebuffSleep();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Pramh(Spell spell) : base(spell)
@@ -1175,7 +1175,7 @@ public class Raise_Ally : SpellScript
 public class Turn_Undead : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_rending();
+    private readonly Debuff _debuff = new DebuffRending();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Turn_Undead(Spell spell) : base(spell)
@@ -1254,7 +1254,7 @@ public class Turn_Undead : SpellScript
 public class Turn_Critter : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_rending();
+    private readonly Debuff _debuff = new DebuffRending();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Turn_Critter(Spell spell) : base(spell)
@@ -1333,7 +1333,7 @@ public class Turn_Critter : SpellScript
 public class Turn_Greater_Undead : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_rending();
+    private readonly Debuff _debuff = new DebuffRending();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Turn_Greater_Undead(Spell spell) : base(spell)
@@ -1412,7 +1412,7 @@ public class Turn_Greater_Undead : SpellScript
 public class Turn_Greater_Critter : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_rending();
+    private readonly Debuff _debuff = new DebuffRending();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Turn_Greater_Critter(Spell spell) : base(spell)

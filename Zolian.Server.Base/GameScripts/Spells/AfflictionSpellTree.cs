@@ -12,7 +12,7 @@ namespace Darkages.GameScripts.Spells;
 public class Ard_Fas_Nadur : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_ardfasnadur();
+    private readonly Debuff _debuff = new DebuffArdfasnadur();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Ard_Fas_Nadur(Spell spell) : base(spell)
@@ -54,7 +54,7 @@ public class Ard_Fas_Nadur : SpellScript
 public class Ard_Cradh : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_ardcradh();
+    private readonly Debuff _debuff = new DebuffArdcradh();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Ard_Cradh(Spell spell) : base(spell)
@@ -96,7 +96,7 @@ public class Ard_Cradh : SpellScript
 public class Ard_Puinsein : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_ArdPoison();
+    private readonly Debuff _debuff = new DebuffArdPoison();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Ard_Puinsein(Spell spell) : base(spell)
@@ -142,7 +142,7 @@ public class Ard_Puinsein : SpellScript
 public class Mor_Fas_Nadur : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_morfasnadur();
+    private readonly Debuff _debuff = new DebuffMorfasnadur();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Mor_Fas_Nadur(Spell spell) : base(spell)
@@ -192,7 +192,7 @@ public class Mor_Fas_Nadur : SpellScript
 public class Mor_Cradh : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_morcradh();
+    private readonly Debuff _debuff = new DebuffMorcradh();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Mor_Cradh(Spell spell) : base(spell)
@@ -242,7 +242,7 @@ public class Mor_Cradh : SpellScript
 public class Mor_Puinsein : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_MorPoison();
+    private readonly Debuff _debuff = new DebuffMorPoison();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Mor_Puinsein(Spell spell) : base(spell)
@@ -296,7 +296,7 @@ public class Mor_Puinsein : SpellScript
 public class Silence : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_Silence();
+    private readonly Debuff _debuff = new DebuffSilence();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Silence(Spell spell) : base(spell)
@@ -322,7 +322,7 @@ public class Silence : SpellScript
 public class Fas_Nadur : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_fasnadur();
+    private readonly Debuff _debuff = new DebuffFasnadur();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Fas_Nadur(Spell spell) : base(spell)
@@ -372,7 +372,7 @@ public class Fas_Nadur : SpellScript
 public class Cradh : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_cradh();
+    private readonly Debuff _debuff = new DebuffCradh();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Cradh(Spell spell) : base(spell)
@@ -422,7 +422,7 @@ public class Cradh : SpellScript
 public class Puinsein : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_Poison();
+    private readonly Debuff _debuff = new DebuffPoison();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Puinsein(Spell spell) : base(spell)
@@ -472,7 +472,7 @@ public class Puinsein : SpellScript
 public class Blind : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_blind();
+    private readonly Debuff _debuff = new DebuffBlind();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Blind(Spell spell) : base(spell)
@@ -506,7 +506,7 @@ public class Blind : SpellScript
 public class Fas_Spiorad : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_fasspiorad();
+    private readonly Debuff _debuff = new DebuffFasspiorad();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Fas_Spiorad(Spell spell) : base(spell)
@@ -554,7 +554,7 @@ public class Fas_Spiorad : SpellScript
 public class Beag_Cradh : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_beagcradh();
+    private readonly Debuff _debuff = new DebuffBeagcradh();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Beag_Cradh(Spell spell) : base(spell)
@@ -596,7 +596,7 @@ public class Beag_Cradh : SpellScript
 public class Beag_Puinsein : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_BeagPoison();
+    private readonly Debuff _debuff = new DebuffBeagPoison();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Beag_Puinsein(Spell spell) : base(spell)

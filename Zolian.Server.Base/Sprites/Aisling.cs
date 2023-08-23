@@ -703,7 +703,7 @@ public sealed class Aisling : Player, IAisling
         UpdateStats();
     }
 
-    public bool Walk()
+    public new bool Walk()
     {
         if (CantMove) return false;
 

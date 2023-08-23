@@ -28,7 +28,7 @@ using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Network.Server;
 
-public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginClient>
+public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginClient>
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
@@ -66,7 +66,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         ValueTask InnerOnclientRedirect(ILoginClient localClient, ClientRedirectedArgs localArgs)
         {
             var reservedRedirect = ServerSetup.Instance.Config.ReservedRedirects
-                                          .FirstOrDefault(rr => (rr.Id == localArgs.Id) && rr.Name.EqualsI(localArgs.Name));
+                                          .FirstOrDefault(rr => rr.Id == localArgs.Id && rr.Name.EqualsI(localArgs.Name));
 
             if (reservedRedirect != null)
             {
@@ -293,7 +293,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
     {
         var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in packet);
 
-        ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
+        static ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
             var (metadataRequestType, name) = localArgs;
 
@@ -327,7 +327,7 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
     {
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
 
-        async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
+        static async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
             var (name, currentPassword, newPassword) = localArgs;
             var aisling = StorageManager.AislingBucket.CheckPassword(name);
@@ -449,13 +449,13 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         client.SendAcceptConnection();
     }
 
-    private void OnDisconnect(object? sender, EventArgs e)
+    private void OnDisconnect(object sender, EventArgs e)
     {
         var client = (ILoginClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);
     }
 
-    private async Task<bool> SavePassword(Aisling aisling)
+    private static async Task<bool> SavePassword(Aisling aisling)
     {
         if (aisling == null) return false;
 
@@ -473,10 +473,10 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         return true;
     }
 
-    private async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)
+    private static async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)
     {
         var aisling = await StorageManager.AislingBucket.CheckIfPlayerExists(name);
-        var regex = new Regex("(?:[^a-z]|(?<=['\"])s)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        var regex = PasswordRegex();
 
         if (aisling == false)
         {
@@ -501,5 +501,8 @@ public sealed class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginC
         client.SendLoginMessage(LoginMessageType.Confirm, "Character already exists.");
         return false;
     }
+
+    [GeneratedRegex("(?:[^a-z]|(?<=['\"])s)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex PasswordRegex();
     #endregion
 }

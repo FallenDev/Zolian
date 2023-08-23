@@ -9,7 +9,7 @@ namespace Darkages.GameScripts.Spells;
 public class Decay : SpellScript
 {
     private readonly Spell _spell;
-    private readonly Debuff _debuff = new debuff_decay();
+    private readonly Debuff _debuff = new DebuffDecay();
     private readonly GlobalSpellMethods _spellMethod;
 
     public Decay(Spell spell) : base(spell)
