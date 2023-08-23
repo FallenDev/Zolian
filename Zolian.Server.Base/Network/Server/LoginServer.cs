@@ -32,7 +32,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
-    public ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
+    private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
 
     public LoginServer(
         IClientRegistry<ILoginClient> clientRegistry,

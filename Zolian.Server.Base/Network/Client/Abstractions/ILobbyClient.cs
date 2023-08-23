@@ -7,5 +7,5 @@ public interface ILobbyClient : ISocketClient
 {
     void SendConnectionInfo(uint serverTableCheckSum);
     void SendServerTable(byte[] serverTableData);
-    void SendLoginMessage(LoginMessageType loginMessageType, string? message = null);
+    void SendLoginMessage(LoginMessageType loginMessageType, string message = null);
 }

@@ -27,7 +27,8 @@ public static class ItemEnumConverters
             Item.ItemPanes.Inventory => "Inventory",
             Item.ItemPanes.Equip => "Equip",
             Item.ItemPanes.Bank => "Bank",
-            Item.ItemPanes.Archived => "Archived"
+            Item.ItemPanes.Archived => "Archived",
+            _ => "Ground"
         };
     }
 

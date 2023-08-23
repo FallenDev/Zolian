@@ -165,7 +165,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         client.SendAcceptConnection();
     }
 
-    private void OnDisconnect(object? sender, EventArgs e)
+    private void OnDisconnect(object sender, EventArgs e)
     {
         var client = (ILobbyClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);

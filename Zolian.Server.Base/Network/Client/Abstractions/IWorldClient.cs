@@ -56,6 +56,7 @@ public interface IWorldClient : ISocketClient
     WorldClient LoadEquipment();
     WorldClient LoadInventory();
     WorldClient LoadBank();
+    void SendLoginMessage(LoginMessageType loginMessageType, string message = null);
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);
     void SendAddSpellToPane(Spell spell);
@@ -94,7 +95,7 @@ public interface IWorldClient : ISocketClient
     void SendMapData();
     void SendMapInfo();
     void SendMapLoadComplete();
-    void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string? name = null);
+    void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string name = null);
     void SendNotepad(byte identifier, NotepadType type, byte height, byte width, string message);
     void SendProfile(Aisling aisling);
     void SendProfileRequest();
@@ -120,7 +121,7 @@ public interface IWorldClient : ISocketClient
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);
     WorldClient SystemMessage(string message);
-    Task<WorldClient> Save();
+    Task<bool> Save();
     void DeathStatusCheck();
     WorldClient UpdateDisplay(bool excludeSelf = false);
     void UpdateStatusBarAndThreat(TimeSpan elapsedTime);

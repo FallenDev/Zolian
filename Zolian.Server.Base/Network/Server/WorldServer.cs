@@ -1192,28 +1192,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnExitRequest(IWorldClient localClient, ExitRequestArgs localArgs)
         {
             if (localClient?.Aisling == null) return default;
-            // Close Popups
-            localClient.CloseDialog();
-            localClient.Aisling.CancelExchange();
-
-            // Exit Party
-            if (localClient.Aisling.GroupId != 0)
-                Party.RemovePartyMember(localClient.Aisling);
-
-            // Set Timestamps
-            localClient.Aisling.LastLogged = DateTime.UtcNow;
-            localClient.Aisling.LoggedIn = false;
-
-            // Save
-            localClient.Save();
-
-            // Cleanup
-            localClient.Aisling.Remove(true);
-            ClientRegistry.TryRemove(localClient.Id, out _);
-            ServerSetup.Logger($"{localClient.Aisling.Username} either logged out or was removed from the server.");
 
             if (localArgs.IsRequest)
+            {
                 localClient.SendConfirmExit();
+                ClientRegistry.TryRemove(localClient.Id, out _);
+            }
             else
             {
                 var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
@@ -3171,14 +3155,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         client.BeginReceive();
     }
 
-    private async void OnDisconnect(object? sender, EventArgs e)
+    private async void OnDisconnect(object sender, EventArgs e)
     {
         var client = (IWorldClient)sender!;
         var aisling = client.Aisling;
+        if (aisling == null)
+        {
+            ClientRegistry.TryRemove(client.Id, out _);
+            return;
+        }
+
+        if (aisling.Client.ExitConfirmed)
+        {
+            ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
+            return;
+        }
 
         try
         {
-            if (aisling == null) return;
             // Close Popups
             client.CloseDialog();
             client.Aisling.CancelExchange();

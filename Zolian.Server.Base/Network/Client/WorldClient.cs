@@ -52,6 +52,7 @@ namespace Darkages.Network.Client
         public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
+        public bool ExitConfirmed;
         private static readonly SortedDictionary<long, string> AggroColors = new()
         {
             {100, "b"},
@@ -868,13 +869,13 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitSpellBar()
+        private WorldClient InitSpellBar()
         {
             return InitBuffs()
                 .InitDeBuffs();
         }
 
-        public WorldClient InitBuffs()
+        private WorldClient InitBuffs()
         {
             try
             {
@@ -933,7 +934,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitDeBuffs()
+        private WorldClient InitDeBuffs()
         {
             try
             {
@@ -991,7 +992,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitDiscoveredMaps()
+        private WorldClient InitDiscoveredMaps()
         {
             try
             {
@@ -1030,7 +1031,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitIgnoreList()
+        private WorldClient InitIgnoreList()
         {
             try
             {
@@ -1071,7 +1072,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitLegend()
+        private WorldClient InitLegend()
         {
             try
             {
@@ -1115,7 +1116,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient InitQuests()
+        private WorldClient InitQuests()
         {
             try
             {
@@ -1142,13 +1143,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public void SkillsAndSpellsCleanup()
-        {
-            SkillCleanup();
-            SpellCleanup();
-        }
-
-        public void SkillCleanup()
+        private void SkillCleanup()
         {
             var skillsAvailable = Aisling.SkillBook.Skills.Values.Where(i => i?.Template != null);
             var hasAssail = false;
@@ -1182,7 +1177,7 @@ namespace Darkages.Network.Client
             Skill.GiveTo(Aisling, "Assail", 1);
         }
 
-        public void SpellCleanup()
+        private void SpellCleanup()
         {
             var spellsAvailable = Aisling.SpellBook.Spells.Values.Where(i => i?.Template != null);
 
@@ -1205,7 +1200,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        public void EquipGearAndAttachScripts()
+        private void EquipGearAndAttachScripts()
         {
             foreach (var (_, equipment) in Aisling.EquipmentManager.Equipment)
             {
@@ -1244,9 +1239,23 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
+        /// 0x02 - Send Login Message
+        /// </summary>
+        public void SendLoginMessage(LoginMessageType loginMessageType, string message = null)
+        {
+            var args = new LoginMessageArgs
+            {
+                LoginMessageType = loginMessageType,
+                Message = message
+            };
+
+            Send(args);
+        }
+
+        /// <summary>
         /// 0x0F - Add Inventory
         /// </summary>
-        public void SendAddItemToPane([NotNull] Item item)
+        public void SendAddItemToPane(Item item)
         {
             var args = new AddItemToPaneArgs
             {
@@ -1270,7 +1279,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x2C - Add Skill
         /// </summary>
-        public void SendAddSkillToPane([NotNull] Skill skill)
+        public void SendAddSkillToPane(Skill skill)
         {
             var args = new AddSkillToPaneArgs
             {
@@ -1289,7 +1298,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x17 - Add Spell
         /// </summary>
-        public void SendAddSpellToPane([NotNull] Spell spell)
+        public void SendAddSpellToPane(Spell spell)
         {
             var args = new AddSpellToPaneArgs
             {
@@ -1610,9 +1619,28 @@ namespace Darkages.Network.Client
         /// </summary>
         public void SendConfirmExit()
         {
+            // Close Popups
+            this.CloseDialog();
+            Aisling.CancelExchange();
+
+            // Exit Party
+            if (Aisling.GroupId != 0)
+                Party.RemovePartyMember(Aisling);
+
+            // Set Timestamps
+            Aisling.LastLogged = DateTime.UtcNow;
+            Aisling.LoggedIn = false;
+
+            // Save
+            var saved = Save();
+            ExitConfirmed = saved.Result;
+
+            // Cleanup
+            Aisling.Remove(true);
+
             var args = new ConfirmExitArgs
             {
-                ExitConfirmed = true
+                ExitConfirmed = ExitConfirmed
             };
 
             Send(args);
@@ -2045,8 +2073,7 @@ namespace Darkages.Network.Client
         /// <summary>
         /// 0x6F - MapData Send
         /// </summary>
-        public void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore,
-            string? name = null)
+        public void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string name = null)
         {
             var args = new MetaDataArgs
             {
@@ -2130,7 +2157,7 @@ namespace Darkages.Network.Client
             Send(args);
         }
 
-        public void SendNotepad(byte identifier, NotepadType type, byte height, byte width, string? message)
+        public void SendNotepad(byte identifier, NotepadType type, byte height, byte width, string message)
         {
             var args = new NotepadArgs
             {
@@ -3455,16 +3482,16 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public async Task<WorldClient> Save()
+        public async Task<bool> Save()
         {
-            if (Aisling == null) return this;
+            if (Aisling == null) return false;
 
             var saved = await StorageManager.AislingBucket.Save(Aisling);
 
-            if (!saved) return this;
+            if (!saved) return false;
             LastSave = DateTime.UtcNow;
 
-            return this;
+            return true;
         }
 
         public WorldClient UpdateDisplay(bool excludeSelf = false)
