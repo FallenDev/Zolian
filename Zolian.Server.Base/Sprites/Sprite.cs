@@ -795,7 +795,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (taggedMemberSerial == 0) return false;
 
         var taggedMember = GetObject<Aisling>(Map, i => i.Serial == taggedMemberSerial);
-        if (taggedMember.GroupParty == null) return false;
+        if (taggedMember?.GroupParty == null) return false;
 
         if (attackingPlayer.GroupId != taggedMember.GroupId) return false;
         monster.TryAddTryRemoveTagging(attackingPlayer);

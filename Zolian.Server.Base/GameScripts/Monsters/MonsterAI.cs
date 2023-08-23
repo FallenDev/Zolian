@@ -12,6 +12,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+using ServiceStack;
 
 namespace Darkages.GameScripts.Monsters;
 
@@ -497,7 +498,8 @@ public class MonsterBaseIntelligence : MonsterScript
                     if (Monster.Path.Result.Count > 0)
                     {
                         Monster.AStarPath(Monster, Monster.Path.Result);
-                        Monster.Path.Result.RemoveAt(0);
+                        if (!Monster.Path.Result.IsEmpty())
+                            Monster.Path.Result.RemoveAt(0);
                     }
 
                     if (Monster.Path.Result.Count != 0) return;
@@ -1049,7 +1051,8 @@ public class MonsterPirate : MonsterScript
                     if (Monster.Path.Result.Count > 0)
                     {
                         Monster.AStarPath(Monster, Monster.Path.Result);
-                        Monster.Path.Result.RemoveAt(0);
+                        if (!Monster.Path.Result.IsEmpty())
+                            Monster.Path.Result.RemoveAt(0);
                     }
 
                     if (Monster.Path.Result.Count != 0) return;
@@ -1579,7 +1582,8 @@ public class MonsterShadowSight : MonsterScript
                     if (Monster.Path.Result.Count > 0)
                     {
                         Monster.AStarPath(Monster, Monster.Path.Result);
-                        Monster.Path.Result.RemoveAt(0);
+                        if (!Monster.Path.Result.IsEmpty())
+                            Monster.Path.Result.RemoveAt(0);
                     }
 
                     if (Monster.Path.Result.Count != 0) return;
