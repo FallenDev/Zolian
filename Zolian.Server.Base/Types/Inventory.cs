@@ -269,8 +269,7 @@ public class Inventory : ObjectManager, IInventory
             client.SendRemoveItemFromPane(item1.InventorySlot);
         if (item2 != null)
             client.SendRemoveItemFromPane(item2.InventorySlot);
-        Console.WriteLine($"Slot1:{slot1}");
-        Console.WriteLine($"Slot2:{slot2}");
+
         if (item1 != null && item2 != null)
         {
             item1.InventorySlot = slot2;

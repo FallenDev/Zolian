@@ -45,7 +45,7 @@ public class Trap
         {
             Name = "A Hidden Trap",
             Image = 500,
-            DisplayImage = 0x8000 + 500,
+            DisplayImage = 500,
             Flags = ItemFlags.Trap
         };
 
