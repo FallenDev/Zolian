@@ -309,13 +309,13 @@ public class MonsterBaseIntelligence : MonsterScript
         {
             if (Monster.TargetRecord.TaggedAislings.IsEmpty)
             {
-                var targets = Monster.AislingsEarShotNearby();
+                var targets = Monster.AislingsEarShotNearby().Where(player => !player.IsInvisible || !player.Skulled);
                 var topDps = targets?.MaxBy(c => c.ThreatMeter);
                 Monster.Target ??= topDps;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values;
+                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.IsInvisible || !value.player.Skulled);
                 var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
                 Monster.Target ??= topTagged.player;
             }
@@ -842,13 +842,13 @@ public class MonsterPirate : MonsterScript
         {
             if (Monster.TargetRecord.TaggedAislings.IsEmpty)
             {
-                var targets = Monster.AislingsEarShotNearby();
+                var targets = Monster.AislingsEarShotNearby().Where(player => !player.IsInvisible || !player.Skulled);
                 var topDps = targets?.MaxBy(c => c.ThreatMeter);
                 Monster.Target ??= topDps;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values;
+                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.IsInvisible || !value.player.Skulled);
                 var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
                 Monster.Target ??= topTagged.player;
             }
@@ -1380,26 +1380,23 @@ public class MonsterShadowSight : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling checkTarget)
+        if (Monster.Target is Aisling { Skulled: true })
         {
-            if (checkTarget.Skulled || checkTarget.IsInvisible)
-            {
-                Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-                Monster.Target = null;
-            }
+            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+            Monster.Target = null;
         }
 
         if (Monster.Aggressive)
         {
             if (Monster.TargetRecord.TaggedAislings.IsEmpty)
             {
-                var targets = Monster.AislingsEarShotNearby();
+                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled);
                 var topDps = targets?.MaxBy(c => c.ThreatMeter);
                 Monster.Target ??= topDps;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values;
+                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled);
                 var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
                 Monster.Target ??= topTagged.player;
             }
