@@ -300,7 +300,8 @@ CREATE TABLE PlayersQuests
 	[PeteKill] INT NULL,
 	[PeteComplete] BIT NULL,
 	[SwampAccess] BIT NULL,
-	[SwampCount] INT NULL
+	[SwampCount] INT NULL,
+    [TagorDungeonAccess] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
@@ -471,12 +472,12 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, @CamilleGreeting BIT,
 @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT,
 @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20),
-@AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT
+@AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount])
-    VALUES                                            (@Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount);
+    INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess])
+    VALUES                                            (@Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess);
 END
 GO
 
@@ -590,7 +591,11 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[PlayerQuestSave]
-@Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT
+@Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, 
+@CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), 
+@EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, 
+@KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, 
+@SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -620,7 +625,8 @@ BEGIN
            [PeteKill]                = @PeteKill,
            [PeteComplete]            = @PeteComplete,
            [SwampAccess]             = @SwampAccess,
-           [SwampCount]              = @SwampCount
+           [SwampCount]              = @SwampCount,
+		   [TagorDungeonAccess]		 = @TagorDungeonAccess
     WHERE  Serial = @Serial;
 END
 GO
@@ -1122,7 +1128,8 @@ BEGIN
            PeteKill,
            PeteComplete,
            SwampAccess,
-           SwampCount
+           SwampCount,
+           TagorDungeonAccess
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END
