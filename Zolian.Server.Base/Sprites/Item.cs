@@ -107,7 +107,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         SunStone,
         Runic
     }
-    public uint ItemId { get; set; }
+    public long ItemId { get; set; }
     public ItemTemplate Template { get; set; }
     public string Name { get; set; }
     public string DisplayName => GetDisplayName();
@@ -255,10 +255,10 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         TileType = TileContent.Item;
     }
 
-    private static uint CheckAndAmendItemIdIfItExists(IItem item)
+    private static long CheckAndAmendItemIdIfItExists(IItem item)
     {
         var updateIfExists = WorldServer.CheckIfItemExists(item.ItemId);
-        return updateIfExists.Result ? EphemeralRandomIdGenerator<uint>.Shared.NextId : item.ItemId;
+        return updateIfExists.Result ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
     }
 
     public Item Create(Sprite owner, string item, Quality quality, Variance variance, WeaponVariance wVariance, bool curse = false) => !ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var value) ? null : Create(owner, value, quality, variance, wVariance, curse);

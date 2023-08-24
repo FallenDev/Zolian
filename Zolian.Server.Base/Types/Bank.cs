@@ -10,10 +10,10 @@ public class Bank : IBank
 {
     public Bank()
     {
-        Items = new ConcurrentDictionary<uint, Item>();
+        Items = new ConcurrentDictionary<long, Item>();
     }
 
-    public ConcurrentDictionary<uint, Item> Items { get; }
+    public ConcurrentDictionary<long, Item> Items { get; }
     public long TempGoldDeposit { get; set; }
     public long TempGoldWithdraw { get; set; }
 

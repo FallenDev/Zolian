@@ -6,7 +6,7 @@ namespace Darkages.Interfaces;
 
 public interface IBank
 {
-    ConcurrentDictionary<uint, Item> Items { get; }
+    ConcurrentDictionary<long, Item> Items { get; }
     public long TempGoldDeposit { get; set; }
     public long TempGoldWithdraw { get; set; }
     void DepositGold(IWorldClient client, long gold);

@@ -10,7 +10,7 @@ namespace Darkages.Interfaces;
 
 public interface IItem : ISprite
 {
-    uint ItemId { get; set; }
+    long ItemId { get; set; }
     ItemTemplate Template { get; set; }
     string Name { get; set; }
     byte Slot { get; set; }
