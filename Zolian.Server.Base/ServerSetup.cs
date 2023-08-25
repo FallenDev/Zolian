@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
+using System.Reflection;
+
 using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
@@ -221,29 +223,35 @@ public class ServerSetup : IServerContext
 
     public void CacheBuffs()
     {
-        var listOfBuffs = from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-            from assemblyType in domainAssembly.GetTypes()
-            where typeof(Buff).IsAssignableFrom(assemblyType)
-            select assemblyType;
+        var buffType = typeof(Buff);
+        var listOfBuffs = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t => buffType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface);
 
         foreach (var buff in listOfBuffs)
         {
-            if (GlobalBuffCache != null)
-                GlobalBuffCache[buff.Name] = Activator.CreateInstance(buff) as Buff;
+            if (GlobalBuffCache == null) continue;
+            if (Activator.CreateInstance(buff) is Buff buffInstance)
+            {
+                GlobalBuffCache[buff.Name] = buffInstance;
+            }
         }
     }
 
     public void CacheDebuffs()
     {
-        var listOfDebuffs = from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-            from assemblyType in domainAssembly.GetTypes()
-            where typeof(Debuff).IsAssignableFrom(assemblyType)
-            select assemblyType;
+        var debuffType = typeof(Debuff);
+        var listOfDebuffs = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t => debuffType.IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface);
 
         foreach (var debuff in listOfDebuffs)
         {
-            if (GlobalDeBuffCache != null)
-                GlobalDeBuffCache[debuff.Name] = Activator.CreateInstance(debuff) as Debuff;
+            if (GlobalDeBuffCache == null) continue;
+            if (Activator.CreateInstance(debuff) is Debuff debuffInstance)
+            {
+                GlobalDeBuffCache[debuff.Name] = debuffInstance;
+            }
         }
     }
 

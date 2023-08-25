@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Authors>Zolian Contributors</Authors>
 		<Copyright>(C) TheBuckNetwork</Copyright>
 		<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
@@ -36,7 +36,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper.StrongName" Version="2.0.143" />
+		<PackageReference Include="Dapper.StrongName" Version="2.0.151" />
 		<PackageReference Include="Microsoft.AppCenter" Version="5.0.2" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.2" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.2" />
@@ -44,8 +44,8 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
-		<PackageReference Include="ServiceStack" Version="6.9.0" />
-		<PackageReference Include="ServiceStack.Text" Version="6.9.0" />
+		<PackageReference Include="ServiceStack" Version="6.10.0" />
+		<PackageReference Include="ServiceStack.Text" Version="6.10.0" />
 		<PackageReference Include="SunCalcNet" Version="1.2.2" />
 		<PackageReference Include="zlib.managed" Version="1.1.5-preview-99682104" />
 	</ItemGroup>
