@@ -1254,7 +1254,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
             if (fort <= Fortitude)
             {
-                dmg = (int)(dmg / 0.33);
+                dmg = (int)(dmg * 0.33);
             }
 
             return dmg;
