@@ -2079,31 +2079,37 @@ public class AoSuain : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        var cursed = target.HasDebuff("Suain");
+        
+        switch (target.IsFrozen)
+        {
+            case false:
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}, but it did nothing");
+                return;
+            case true:
+            {
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
-        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (cursed)
-            if (target is Aisling targetAisling)
-                targetAisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
+                if (target is Aisling targetAisling)
+                    targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
+                break;
+            }
+        }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
-        if (!cursed) return;
-        var aoDebuff = target.GetDebuffName(i => i.Name == "Suain");
-        if (aoDebuff == string.Empty) return;
-
-        foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
-        {
-            if (debuffs.Name != aoDebuff) continue;
-            debuffs.OnEnded(target, debuffs);
-        }
+        if (target.HasDebuff("Frozen"))
+            target.RemoveDebuff("Frozen");
+        if (target.HasDebuff("Dark Chain"))
+            target.RemoveDebuff("Dark Chain");
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
         if (!_spell.CanUse())
         {
             if (sprite is Aisling aisling2)
@@ -2111,49 +2117,32 @@ public class AoSuain : SpellScript
             return;
         }
 
-        if (sprite is Aisling aisling)
+        if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
         {
-            var client = aisling.Client;
-
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
-            {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
-            }
-            else
-            {
-                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                return;
-            }
-
-            if (aisling.CurrentMp < 0)
-                aisling.CurrentMp = 0;
-
-            var success = _spellMethod.Execute(client, _spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
-            }
-
-            client.SendAttributes(StatUpdateType.Vitality);
+            aisling.CurrentMp -= _spell.Template.ManaCost;
+            _spellMethod.Train(client, _spell);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
-            {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
-            }
-
-            if (sprite.CurrentMp < 0)
-                sprite.CurrentMp = 0;
-
-            OnSuccess(sprite, sprite);
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
         }
+
+        if (aisling.CurrentMp < 0)
+            aisling.CurrentMp = 0;
+
+        var success = _spellMethod.Execute(client, _spell);
+
+        if (success)
+        {
+            OnSuccess(sprite, target);
+        }
+        else
+        {
+            _spellMethod.SpellOnFailed(aisling, target, _spell);
+        }
+
+        client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 

@@ -1391,7 +1391,7 @@ public class Beag_Suain : SkillScript
             return;
         }
 
-        var debuff = new DebuffFrozen();
+        var debuff = new DebuffBeagsuain();
         {
             if (_target.HasDebuff(debuff.Name))
                 _target.RemoveDebuff(debuff.Name);

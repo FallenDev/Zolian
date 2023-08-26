@@ -57,9 +57,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsSilenced => HasDebuff("Silence");
     public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Dark Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
+    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsCharmed => HasDebuff("Entice");
-    public bool IsParalyzed => HasDebuff("Suain");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein"));
     public bool IsSleeping => HasDebuff("Sleep");
@@ -81,9 +81,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #endregion
 
-    public bool CantCast => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsSilenced);
-    public bool CantAttack => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsCharmed);
-    public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsParalyzed || IsBeagParalyzed);
+    public bool CantCast => (IsFrozen || IsStopped || IsSleeping || IsSilenced);
+    public bool CantAttack => (IsFrozen || IsStopped || IsSleeping || IsCharmed);
+    public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed);
     public bool HasDoT => (IsBleeding || IsPoisoned);
     private int CheckHp => BaseHp + BonusHp;
     public int MaximumHp => Math.Clamp(CheckHp, 0, int.MaxValue);
@@ -1240,7 +1240,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public long Vulnerable(long dmg)
     {
-        if (!Debuffs.ContainsKey("Frozen") && !Debuffs.ContainsKey("Sleep") && !Debuffs.ContainsKey("Dark Chain"))
+        if (!IsVulnerable)
         {
             double hit = Generator.RandNumGen100();
             double fort = Generator.RandNumGen100();
@@ -1249,7 +1249,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 PlayerNearby?.Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, null, aisling.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, aisling.Position));
             }
 
             if (fort <= Fortitude)
@@ -1263,13 +1263,18 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         dmg *= 2;
         _frozenStack += 1;
 
+        // Sleep gets removed on hit
         if (HasDebuff("Sleep")) RemoveDebuff("Sleep");
-        if (HasDebuff("Dark Chain")) RemoveDebuff("Dark Chain");
-        if (!HasDebuff("Frozen")) return dmg;
-        if (_frozenStack != 10) return dmg;
-        RemoveDebuff("Frozen");
-        _frozenStack = 0;
 
+        // Frozen status gets removed after five successful hits
+        if (!IsFrozen) return dmg;
+        if (_frozenStack != 5) return dmg;
+        if (HasDebuff("Frozen"))
+            RemoveDebuff("Frozen");
+        if (HasDebuff("Dark Chain"))
+            RemoveDebuff("Dark Chain");
+
+        _frozenStack = 0;
         return dmg;
     }
 

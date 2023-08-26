@@ -1370,7 +1370,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (localClient.Aisling.CantCast)
             {
-                if (spell.Template.ScriptName is not ("Ao Suain" or "Ao Sith"))
+                if (spell.Template.Name is not ("Ao Suain" or "Ao Sith"))
                 {
                     localClient.SendServerMessage(ServerMessageType.OrangeBar1, "I am unable to cast that spell..");
                     localClient.SendCancelCasting();
@@ -1851,7 +1851,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            if (localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsParalyzed || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped)
+            if (localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped)
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
                 return default;
