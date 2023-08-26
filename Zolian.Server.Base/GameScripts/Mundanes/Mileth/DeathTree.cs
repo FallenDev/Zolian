@@ -119,6 +119,16 @@ public class DeathTree : MundaneScript
                 
                 client.Aisling.QuestManager.TagorDungeonAccess = true;
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"You can now access {{=qTagor Dungeon");
+                var legend = new Legend.LegendItem
+                {
+                    Category = "LTodesbaum1",
+                    Time = DateTime.UtcNow,
+                    Color = LegendColor.Yellow,
+                    Icon = (byte)LegendIcon.Victory,
+                    Value = "Granted access to Tagor Dungeon"
+                };
+
+                client.Aisling.LegendBook.AddLegend(legend, client);
                 break;
             case 0x05:
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: So be it, if that changes, I'll be here");

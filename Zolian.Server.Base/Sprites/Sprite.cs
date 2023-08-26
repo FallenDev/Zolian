@@ -1275,29 +1275,26 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void Thorns(Sprite damageDealingSprite, long dmg)
     {
-        if (PlayerNearby.Client is null) return;
+        if (PlayerNearby?.Client is null) return;
         if (damageDealingSprite is null) return;
         var thornsTargetList = damageDealingSprite.DamageableGetInFront(1);
+        var target = thornsTargetList.FirstOrDefault(i => i is { Attackable: true });
+        if (target is not Aisling aisling) return;
+        if (aisling.Client.Aisling.Spikes == 0) return;
 
-        foreach (var i in thornsTargetList.Where(i => i is { Attackable: true }))
+        var thornsDmg = aisling.Client.Aisling.Spikes * 0.03;
+        Math.Clamp(thornsDmg, 1, int.MaxValue);
+        dmg = (long)(thornsDmg * dmg);
+
+        if (dmg > int.MaxValue)
         {
-            if (i is not Aisling aisling) continue;
-            if (aisling.Client == null) continue;
-            if (aisling.Client.Aisling.Spikes == 0) continue;
-            var thornsDmg = aisling.Client.Aisling.Spikes * 0.03;
-            Math.Clamp(thornsDmg, 1, int.MaxValue);
-            dmg = (long)(thornsDmg * dmg);
-
-            if (dmg > int.MaxValue)
-            {
-                dmg = int.MaxValue;
-            }
-
-            var convDmg = (int)dmg;
-
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, null, damageDealingSprite.Serial));
-            damageDealingSprite.CurrentHp -= convDmg;
+            dmg = int.MaxValue;
         }
+
+        var convDmg = (int)dmg;
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, null, damageDealingSprite.Serial));
+        damageDealingSprite.CurrentHp -= convDmg;
     }
 
     public void VarianceProc(Sprite sprite, long dmg)
@@ -1577,7 +1574,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
-        
+
         return convDmg;
     }
 
