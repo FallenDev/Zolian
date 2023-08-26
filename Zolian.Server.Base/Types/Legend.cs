@@ -44,7 +44,7 @@ public class Legend
     {
         public int LegendId { get; init; }
         public string Category { get; init; }
-        public DateTime Time { get; init; }
+        public DateTime? Time { get; init; }
         public LegendColor Color { get; init; }
         public byte Icon { get; init; }
         public string Value { get; init; }

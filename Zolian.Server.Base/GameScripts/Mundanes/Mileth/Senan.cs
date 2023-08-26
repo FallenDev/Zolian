@@ -142,7 +142,7 @@ public class Senan : MundaneScript
                             client.SendAttributes(StatUpdateType.ExpGold);
                             var item = new Legend.LegendItem
                             {
-                                Category = "Adventure",
+                                Category = "LBeggar1",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Yellow,
                                 Icon = (byte)LegendIcon.Warrior,

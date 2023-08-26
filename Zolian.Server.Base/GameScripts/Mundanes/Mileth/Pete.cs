@@ -95,7 +95,7 @@ public class Pete : MundaneScript
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "Adventure",
+                        Category = "LPete1",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.Brass,
                         Icon = (byte)LegendIcon.Heart,

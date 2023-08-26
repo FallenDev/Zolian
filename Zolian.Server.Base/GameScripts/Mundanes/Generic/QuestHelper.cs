@@ -10,12 +10,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Quest Helper")]
 public class QuestHelper : MundaneScript
 {
-    private readonly uint _entryCheck;
-
-    public QuestHelper(WorldServer server, Mundane mundane) : base(server, mundane)
-    {
-        _entryCheck = mundane.Serial;
-    }
+    public QuestHelper(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial) { }
 
@@ -23,12 +18,6 @@ public class QuestHelper : MundaneScript
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
-        if (Mundane.Serial != _entryCheck)
-        {
-            client.CloseDialog();
-            return;
-        }
-
         switch (responseID)
         {
             case 1:
@@ -45,6 +34,7 @@ public class QuestHelper : MundaneScript
             }
             case 2:
             {
+                client.CloseDialog();
                 client.TransitionToMap(400, new Position(7, 7));
                 break;
             }
@@ -62,6 +52,7 @@ public class QuestHelper : MundaneScript
             }
             case 4:
             {
+                client.CloseDialog();
                 client.TransitionToMap(301, new Position(7, 7));
                 break;
             }

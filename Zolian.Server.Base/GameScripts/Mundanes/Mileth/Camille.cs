@@ -99,6 +99,16 @@ public class Camille : MundaneScript
                     client.Aisling.QuestManager.CamilleGreetingComplete = true;
                     client.SendOptionsDialog(Mundane, "We're happy to hear!");
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel refreshed.");
+                    var legend = new Legend.LegendItem
+                    {
+                        Category = "LCamille1",
+                        Time = null,
+                        Color = LegendColor.White,
+                        Icon = (byte)9,
+                        Value = ""
+                    };
+
+                    client.Aisling.LegendBook.AddLegend(legend, client);
                     break;
                 case 6:
                     var item2 = new Item();

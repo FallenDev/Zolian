@@ -5,6 +5,7 @@ using Darkages.Common;
 using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
+using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -136,6 +137,51 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
         Rewarded = true;
         player.UpdateStats();
+    }
+
+    public static void UpdateKillCounters(Monster monster)
+    {
+        if (monster.Target is not Aisling aisling) return;
+        var readyTime = DateTime.UtcNow;
+
+        if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
+        {
+            aisling.MonsterKillCounters[monster.Template.BaseName] =
+                new KillRecord
+                {
+                    TotalKills = 1,
+                    TimeKilled = readyTime
+                };
+        }
+        else
+        {
+            value.TotalKills++;
+            value.TimeKilled = readyTime;
+        }
+
+        if (monster.Template.BaseName == aisling.QuestManager.KeelaKill)
+        {
+            var returnPlayer = aisling.QuestManager.KeelaCount <= value?.TotalKills;
+            QuestTracking(aisling, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+
+        if (monster.Template.BaseName == aisling.QuestManager.NealKill)
+        {
+            var returnPlayer = aisling.QuestManager.NealCount <= value?.TotalKills;
+            QuestTracking(aisling, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+
+        if (monster.Template.BaseName != "Mouse" || aisling.QuestManager.PeteComplete) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+    }
+
+    private static void QuestTracking(IAisling aisling, byte responseId, bool returnPlayer, string text = "")
+    {
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, text);
+        if (!returnPlayer) return;
+        var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
+        var scriptObj = npc.Value.Scripts.FirstOrDefault();
+        scriptObj.Value?.OnResponse(aisling.Client, responseId, $"{npc.Value.Serial}");
     }
 
     public void Patrol()

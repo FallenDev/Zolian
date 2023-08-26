@@ -680,7 +680,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (monster?.Scripts == null) continue;
             if (monster.CurrentHp <= 0)
             {
-                UpdateKillCounters(monster);
                 monster.Skulled = true;
 
                 if (monster.Target is Aisling aisling)
@@ -707,68 +706,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             monster.UpdateBuffs(elapsedTime);
             monster.UpdateDebuffs(elapsedTime);
             monster.LastUpdated = DateTime.UtcNow;
-        }
-    }
-
-    private static void UpdateKillCounters(Monster monster)
-    {
-        if (monster.Target is not Aisling aisling) return;
-        var readyTime = DateTime.UtcNow;
-
-        if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out KillRecord value))
-        {
-            aisling.MonsterKillCounters[monster.Template.BaseName] =
-                new KillRecord
-                {
-                    TotalKills = 1,
-                    TimeKilled = readyTime
-                };
-        }
-        else
-        {
-            value.TotalKills++;
-            value.TimeKilled = readyTime;
-        }
-
-        QuestHandling(aisling, monster);
-    }
-
-    private static void QuestHandling(Aisling aisling, Monster monster)
-    {
-        if (!aisling.Client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
-        {
-            if (aisling.Client.Aisling.QuestManager.KeelaKill == monster.Template.BaseName)
-            {
-                var killed = aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills;
-
-                if (killed >= aisling.Client.Aisling.QuestManager.KeelaCount)
-                {
-                    var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
-                    var scriptObj = npc.Value.Scripts.FirstOrDefault();
-                    scriptObj.Value?.OnResponse(aisling.Client, 0x01, null);
-                    return;
-                }
-
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin Quest: {{=q{killed}{{=a killed.");
-            }
-        }
-
-        if (!aisling.Client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
-        {
-            if (aisling.Client.Aisling.QuestManager.NealKill == monster.Template.BaseName)
-            {
-                var killed = aisling.MonsterKillCounters[monster.Template.BaseName].TotalKills;
-
-                if (killed >= aisling.Client.Aisling.QuestManager.NealCount)
-                {
-                    var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
-                    var scriptObj = npc.Value.Scripts.FirstOrDefault();
-                    scriptObj.Value?.OnResponse(aisling.Client, 0x03, null);
-                    return;
-                }
-
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aNeal Quest: {{=q{killed}{{=a killed.");
-            }
         }
     }
 

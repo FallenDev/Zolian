@@ -25,7 +25,7 @@ public class Artur : MundaneScript
     {
         base.TopMenu(client);
 
-        if (client.Aisling.Level == 99 && client.Aisling.QuestManager.ArtursGift == 0)
+        if (client.Aisling.Level >= 120 && client.Aisling.QuestManager.ArtursGift == 0 && client.Aisling.QuestManager.TagorDungeonAccess)
         {
             var options = new List<Dialog.OptionsDataItem>
             {
@@ -33,7 +33,7 @@ public class Artur : MundaneScript
                 new (0x03, "Ok...")
             };
 
-            client.SendOptionsDialog(Mundane, "You look more than capable.. but I wonder. {=c(({=qCompleting this quest will prevent you from subbing{=c.))", options.ToArray());
+            client.SendOptionsDialog(Mundane, "You look more than capable.. but I wonder", options.ToArray());
         }
         else switch (client.Aisling.QuestManager.ArtursGift)
         {
@@ -101,14 +101,20 @@ public class Artur : MundaneScript
             case 4:
             {
                 client.Aisling.QuestManager.ArtursGift = 1;
-                client.SendOptionsDialog(Mundane, $"Thank you, {client.Aisling.Username}.");
+                client.SendOptionsDialog(Mundane, "You will want to travel to Tagor, there you'll need to fight your way until the Lexicon reveals itself ~Dia Aite~!");
+                var buff = new buff_DiaAite();
+                buff.OnApplied(client.Aisling, buff);
                 break;
             }
             case 5:
             {
                 var debuff = new DebuffArdcradh();
                 debuff.OnApplied(client.Aisling, debuff);
-                client.SendOptionsDialog(Mundane, "Scram or you will be.");
+                var debuff2 = new DebuffDecay();
+                debuff2.OnApplied(client.Aisling, debuff2);
+                var debuff3 = new DebuffHalt();
+                debuff3.OnApplied(client.Aisling, debuff3);
+                client.SendOptionsDialog(Mundane, "Scram or there will be nothing left of you");
                 break;
             }
             case 6:
@@ -121,18 +127,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Berserker Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.GiveExp(35000000);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 35,000,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane, "I do not see that for which you need");
                         }
 
                         break;
@@ -143,18 +147,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Defender Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.GiveExp(35000000);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 35,000,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane, "I do not see that for which you need");
                         }
 
                         break;
@@ -165,18 +167,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Assassin Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.GiveExp(35000000);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 35,000,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane, "I do not see that for which you need");
                         }
 
                         break;
@@ -187,18 +187,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Cleric Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.GiveExp(35000000);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 35,000,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane, "I do not see that for which you need");
                         }
 
                         break;
@@ -209,18 +207,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Arcanus Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
+                            client.GiveExp(35000000);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 35,000,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane,"I do not see that for which you need");
                         }
 
                         break;
@@ -231,18 +227,16 @@ public class Artur : MundaneScript
                         {
                             var item = client.Aisling.HasItemReturnItem("Chadul's Monk Lexicon");
                             if (item == null) TopMenu(client);
+                            client.Aisling.Inventory.RemoveFromInventory(client, item);
                             client.Aisling.QuestManager.ArtursGift = 2;
-                            client.Aisling.Inventory.RemoveRange(client, item, 1);
-                            client.GiveExp(3500000);
+                            client.GiveExp(35000000);
                             client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 3,500,000 experience.");
                             client.SendAttributes(StatUpdateType.WeightGold);
-                            client.SendOptionsDialog(Mundane,
-                                "Great, give me a moment and I'll have something for you.");
+                            client.SendOptionsDialog(Mundane, "Great, give me a moment and I'll have something for you.");
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane,
-                                "Wrong lexicon, come back with the one for your path.");
+                            client.SendOptionsDialog(Mundane,"I do not see that for which you need");
                         }
 
                         break;
@@ -271,6 +265,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Warrior,
+                            Value = "Obtained Ceannlaidir's Tamed Sword"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     case Class.Defender:
@@ -281,6 +285,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Warrior,
+                            Value = "Obtained Ceannlaidir's Enchanted Sword"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     case Class.Assassin:
@@ -291,6 +305,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Rogue,
+                            Value = "Obtained Fiosachd's Lost Flute"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     case Class.Cleric:
@@ -301,6 +325,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Priest,
+                            Value = "Obtained Glioca's Secret"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     case Class.Arcanus:
@@ -311,6 +345,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Wizard,
+                            Value = "Obtained Luathas's Lost Relic"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     case Class.Monk:
@@ -321,6 +365,16 @@ public class Artur : MundaneScript
                             client.Aisling.QuestManager.ArtursGift = 3;
                             client.Aisling.QuestManager.MilethReputation += 1;
                         }
+                        var item = new Legend.LegendItem
+                        {
+                            Category = "LArtur1",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Monk,
+                            Value = "Obtained Cail's Hourglass"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(item, client);
                         break;
                     }
                     default:

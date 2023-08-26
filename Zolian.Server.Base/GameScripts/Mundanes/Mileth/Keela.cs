@@ -362,6 +362,17 @@ public class Keela : MundaneScript
                             client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                             client.SendAttributes(StatUpdateType.ExpGold);
                             client.SendOptionsDialog(Mundane, "Tougher than I thought you were.");
+
+                            var legend = new Legend.LegendItem
+                            {
+                                Category = "LKeela1",
+                                Time = null,
+                                Color = LegendColor.White,
+                                Icon = (byte)9,
+                                Value = ""
+                            };
+
+                            client.Aisling.LegendBook.AddLegend(legend, client);
                         }
                     }
                 }
@@ -413,7 +424,7 @@ public class Keela : MundaneScript
                             {
                                 var legend = new Legend.LegendItem
                                 {
-                                    Category = "Skill",
+                                    Category = "LKeela2",
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.Pink,
                                     Icon = (byte)LegendIcon.Rogue,
@@ -494,7 +505,7 @@ public class Keela : MundaneScript
                 {
                     var item = new Legend.LegendItem
                     {
-                        Category = "Adventure",
+                        Category = "LKeela3",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.Yellow,
                         Icon = (byte)LegendIcon.Victory,

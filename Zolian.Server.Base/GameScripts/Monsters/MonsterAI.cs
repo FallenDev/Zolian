@@ -132,6 +132,7 @@ public class MonsterBaseIntelligence : MonsterScript
         if (Monster.Target is Aisling aisling)
         {
             Monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(Monster);
         }
         else
         {
@@ -672,6 +673,7 @@ public class MonsterPirate : MonsterScript
         if (Monster.Target is Aisling aisling)
         {
             Monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(Monster);
         }
         else
         {
@@ -1216,6 +1218,7 @@ public class MonsterShadowSight : MonsterScript
         if (Monster.Target is Aisling aisling)
         {
             Monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(Monster);
         }
         else
         {

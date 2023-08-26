@@ -393,7 +393,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal1",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -442,7 +442,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal1",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -491,7 +491,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal1",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -540,7 +540,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal1",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -598,7 +598,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal2",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -631,7 +631,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal2",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -664,7 +664,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal2",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -697,7 +697,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Category = "LNeal2",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Pink,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -770,7 +770,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Adventure",
+                                        Category = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -817,7 +817,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Adventure",
+                                        Category = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -864,7 +864,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Adventure",
+                                        Category = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -911,7 +911,7 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Adventure",
+                                        Category = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,

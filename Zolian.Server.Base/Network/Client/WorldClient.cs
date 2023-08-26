@@ -2542,24 +2542,38 @@ namespace Darkages.Network.Client
 
             #endregion
 
-            var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
+            var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
+            var nullLegends = legends.Where(legend => legend.Value == null).ToList();
             var legendCount = aisling.LegendBook.LegendMarks;
+
+            foreach (var removeLegend in nullLegends)
+            {
+                legends.Remove(removeLegend);
+            }
 
             foreach (var legendItem in legends)
             {
                 if (legendItem == null) continue;
                 var markCount = legendCount.Count(item => item.Value == legendItem.Value);
+                var legendText = "";
+                if (!legendItem.Value.IsNullOrEmpty())
+                {
+                    legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
+                }
+                
                 var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
                     Icon = (MarkIcon)legendItem.Icon,
                     Key = legendItem.Category,
-                    Text = $"{legendItem.Value} - {legendItem.Time.ToShortDateString()} ({markCount})"
+                    Text = legendText
                 };
 
                 legendMarks.Add(legend);
             }
 
+            legendMarks.AddRange(from legendItem in nullLegends where legendItem != null select new LegendMarkInfo { Color = (MarkColor)legendItem.Color, Icon = (MarkIcon)legendItem.Icon, Key = legendItem.Category, Text = "" });
+            
             var args = new ProfileArgs
             {
                 AdvClass = AdvClass.None,
@@ -3064,23 +3078,37 @@ namespace Darkages.Network.Client
 
             #endregion
 
-            var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value);
+            var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
+            var nullLegends = legends.Where(legend => legend.Value == null).ToList();
             var legendCount = Aisling.LegendBook.LegendMarks;
+
+            foreach (var removeLegend in nullLegends)
+            {
+                legends.Remove(removeLegend);
+            }
 
             foreach (var legendItem in legends)
             {
                 if (legendItem == null) continue;
                 var markCount = legendCount.Count(item => item.Value == legendItem.Value);
+                var legendText = "";
+                if (!legendItem.Value.IsNullOrEmpty())
+                {
+                    legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
+                }
+                
                 var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
                     Icon = (MarkIcon)legendItem.Icon,
                     Key = legendItem.Category,
-                    Text = $"{legendItem.Value} - {legendItem.Time.ToShortDateString()} ({markCount})"
+                    Text = legendText
                 };
 
                 legendMarks.Add(legend);
             }
+
+            legendMarks.AddRange(from legendItem in nullLegends where legendItem != null select new LegendMarkInfo { Color = (MarkColor)legendItem.Color, Icon = (MarkIcon)legendItem.Icon, Key = legendItem.Category, Text = "" });
 
             var args = new SelfProfileArgs
             {
@@ -4654,5 +4682,13 @@ namespace Darkages.Network.Client
         }
 
         #endregion
+    }
+
+    public class NullsLastComparer<T> : IComparer<T?> where T : struct
+    {
+        public int Compare(T? x, T? y)
+        {
+            return Nullable.Compare(x, y);
+        }
     }
 }

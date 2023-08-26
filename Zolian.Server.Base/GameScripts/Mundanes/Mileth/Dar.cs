@@ -390,6 +390,19 @@ public class Dar : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, $"Ah, there it is.. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
+                    if (client.Aisling.QuestManager.Dar >= 7)
+                    {
+                        var legend = new Legend.LegendItem
+                        {
+                            Category = "LDar1",
+                            Time = null,
+                            Color = LegendColor.White,
+                            Icon = (byte)9,
+                            Value = ""
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                    }
                 }
                 else
                 {
@@ -428,6 +441,19 @@ public class Dar : MundaneScript
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendOptionsDialog(Mundane, $"Hic! That's what I was looking for. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
+                    if (client.Aisling.QuestManager.Dar >= 8)
+                    {
+                        var legend = new Legend.LegendItem
+                        {
+                            Category = "LDar2",
+                            Time = null,
+                            Color = LegendColor.White,
+                            Icon = (byte)9,
+                            Value = ""
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                    }
                 }
                 else
                 {
@@ -465,8 +491,7 @@ public class Dar : MundaneScript
                     client.GiveExp(advExp2);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
                     client.SendAttributes(StatUpdateType.WeightGold);
-                    client.SendOptionsDialog(Mundane,
-                        "I must of passed out again. Thank you, this will advance my research.");
+                    client.SendOptionsDialog(Mundane, "I must of passed out again. Thank you, this will advance my research.");
                 }
                 else
                 {
@@ -478,7 +503,7 @@ public class Dar : MundaneScript
                 {
                     var item = new Legend.LegendItem
                     {
-                        Category = "Adventure",
+                        Category = "LDar3",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.Blue,
                         Icon = (byte)LegendIcon.Wizard,
