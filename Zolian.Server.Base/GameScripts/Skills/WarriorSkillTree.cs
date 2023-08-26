@@ -724,7 +724,7 @@ public class Crasher : SkillScript
         aisling.ActionUsed = "Crasher";
 
         var criticalHp = (int)(aisling.MaximumHp * .95);
-        var crasherHp = (int)(aisling.MaximumHp * .05);
+        var crasherHp = (int)(aisling.CurrentHp * .05);
 
         var action = new BodyAnimationArgs
         {

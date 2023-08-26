@@ -21,6 +21,10 @@ public static class Generator
         return (T)v.GetValue(RandomNumberGenerator.GetInt32(v.Length));
     }
 
+    /// <summary>
+    /// Extension method for IEnumerables, pulls a random element from the collection
+    /// </summary>
+    /// <returns>Random element from collection</returns>
     public static T RandomIEnum<T>(this IEnumerable<T> enumerable)
     {
         return enumerable.RandomElementUsing<T>(new Random());

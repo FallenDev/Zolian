@@ -860,7 +860,7 @@ public class Kelberoth_Strike : SkillScript
         aisling.ActionUsed = "Kelberoth Strike";
 
         var criticalHp = (int)(aisling.MaximumHp * .33);
-        var kelbHp = (int)(aisling.MaximumHp * .66);
+        var kelbHp = (int)(aisling.CurrentHp * .66);
 
         var action = new BodyAnimationArgs
         {
