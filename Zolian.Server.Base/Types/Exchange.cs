@@ -1,9 +1,4 @@
-﻿using Chaos.Common.Identity;
-using Chaos.Common.Synchronization;
-using Darkages.Sprites;
-using Microsoft.Extensions.Logging;
-
-namespace Darkages.Types;
+﻿namespace Darkages.Types;
 
 public class Exchange
 {

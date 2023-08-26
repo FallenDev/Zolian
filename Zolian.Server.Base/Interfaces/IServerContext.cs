@@ -8,7 +8,6 @@ using System.Collections.Concurrent;
 using Darkages.Network.Server;
 using System.Net;
 using Darkages.CommandSystem.CLI;
-using Darkages.ScriptingBase;
 
 namespace Darkages.Interfaces;
 
@@ -49,6 +48,7 @@ public interface IServerContext
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
+    public byte LightLevel { get; set; }
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }

@@ -4,7 +4,6 @@ using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
-using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;

@@ -116,6 +116,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             _serverComponents = new ConcurrentDictionary<Type, WorldServerComponent>
             {
+                [typeof(DayLightComponent)] = new DayLightComponent(this),
                 [typeof(InterestAndCommunityComponent)] = new InterestAndCommunityComponent(this),
                 [typeof(MessageClearComponent)] = new MessageClearComponent(this),
                 [typeof(MonolithComponent)] = new MonolithComponent(this),

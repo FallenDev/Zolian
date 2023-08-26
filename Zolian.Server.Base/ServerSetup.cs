@@ -8,7 +8,6 @@ using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Server;
-using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
@@ -42,6 +41,7 @@ public class ServerSetup : IServerContext
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
+    public byte LightLevel { get; set; }
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
