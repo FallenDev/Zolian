@@ -19,6 +19,7 @@ public enum MapFlags : uint
 
     Darkness = Snow | Rain,
     Default = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | SendToHell | ShouldComa,
+    EvilReaches = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | SendToHell | ShouldComa | Rain,
     NoSkillSpell = CanSummon | CanLocate | CanTeleport | ShouldComa,
     SafeZone = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | ShouldComa
 }

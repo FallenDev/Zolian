@@ -550,20 +550,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _gameSpeed;
+            var components = _serverComponents.Select(i => i.Value);
 
-            try
+            Parallel.ForEach(components, (component) =>
             {
-                var components = _serverComponents.Select(i => i.Value);
-
-                foreach (var component in components)
-                {
-                    component?.Update(gameTime);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+                component.Update(gameTime);
+            });
 
             _gameSpeed += gameTime;
 

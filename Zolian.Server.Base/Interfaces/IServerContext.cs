@@ -48,6 +48,7 @@ public interface IServerContext
     public CommandParser Parser { get; set; }
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
+    public byte LightPhase { get; set; }
     public byte LightLevel { get; set; }
     public string KeyCode { get; set; }
     public string Unlock { get; set; }

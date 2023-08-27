@@ -49,6 +49,7 @@ namespace Darkages.Network.Client
         public readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
+        public readonly WorldServerTimer LanternCheckTimer = new(TimeSpan.FromSeconds(2));
         public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
@@ -247,6 +248,7 @@ namespace Darkages.Network.Client
 
         private void DoUpdate(TimeSpan elapsedTime)
         {
+            EquipLantern(elapsedTime);
             CheckTraps();
             CheckDayDreaming(elapsedTime);
             HandleBadTrades();
@@ -254,6 +256,20 @@ namespace Darkages.Network.Client
             UpdateStatusBarAndThreat(elapsedTime);
             UpdateSkillSpellCooldown(elapsedTime);
             ShowAggro(elapsedTime);
+        }
+
+        public void EquipLantern(TimeSpan elapsedTime)
+        {
+            if (!LanternCheckTimer.Update(elapsedTime)) return;
+            if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
+            {
+                Aisling.Lantern = 1;
+                SendDisplayAisling(Aisling);
+            }
+
+            if (Aisling.Lantern != 1 || Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness)) return;
+            Aisling.Lantern = 0;
+            SendDisplayAisling(Aisling);
         }
 
         public void CheckTraps()
@@ -608,7 +624,7 @@ namespace Darkages.Network.Client
                         {
                             itemCheckCount++;
                             item.InventorySlot = i;
-                            
+
                             if (itemCheckCount == 59)
                             {
                                 routineCheck++;
@@ -2560,7 +2576,7 @@ namespace Darkages.Network.Client
                 {
                     legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
                 }
-                
+
                 var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
@@ -2573,7 +2589,7 @@ namespace Darkages.Network.Client
             }
 
             legendMarks.AddRange(from legendItem in nullLegends where legendItem != null select new LegendMarkInfo { Color = (MarkColor)legendItem.Color, Icon = (MarkIcon)legendItem.Icon, Key = legendItem.Category, Text = "" });
-            
+
             var args = new ProfileArgs
             {
                 AdvClass = AdvClass.None,
@@ -3096,7 +3112,7 @@ namespace Darkages.Network.Client
                 {
                     legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
                 }
-                
+
                 var legend = new LegendMarkInfo
                 {
                     Color = (MarkColor)legendItem.Color,
