@@ -1,27 +1,19 @@
 ﻿namespace Darkages.Enums;
 
 [Flags]
-public enum MapFlags : uint
+public enum MapFlags : byte
 {
-    Snow = 1,
-    Rain = 2,
-    NoMap = 64,
-    Winter = 128,
-    CanSummon = 256,
-    CanLocate = 512,
-    CanTeleport = 1024,
-    CanUseSkill = 2048,
-    CanUseSpell = 4096,
-    ArenaTeam = 8192,
-    PlayerKill = 16384,
-    SendToHell = 32768,
-    ShouldComa = 65536,
-
-    Darkness = Snow | Rain,
-    Default = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | SendToHell | ShouldComa,
-    EvilReaches = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | SendToHell | ShouldComa | Rain,
-    NoSkillSpell = CanSummon | CanLocate | CanTeleport | ShouldComa,
-    SafeZone = CanSummon | CanLocate | CanTeleport | CanUseSkill | CanUseSpell | ShouldComa
+    Default = 0,
+    Snow = 1, // Actual Map Flag
+    Rain = 1 << 1, // Actual Map Flag
+    Darkness = Snow | Rain, // Actual Map Flag
+    ArenaTeam = 1 << 2,
+    PlayerKill = 1 << 3,
+    CantTeleport = 1 << 4,
+    EvilReaches = CantTeleport | Rain | PlayerKill,
+    CanUseAbilities = 1 << 5,
+    NoTabMap = 1 << 6, // Actual Map Flag
+    SnowTileSet = 1 << 7 // Actual Map Flag
 }
 
 public static class MapExtensions

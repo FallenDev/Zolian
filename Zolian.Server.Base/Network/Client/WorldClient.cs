@@ -260,6 +260,7 @@ namespace Darkages.Network.Client
 
         public void EquipLantern(TimeSpan elapsedTime)
         {
+            if (Aisling.Map == null) return;
             if (!LanternCheckTimer.Update(elapsedTime)) return;
             if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
             {

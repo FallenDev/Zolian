@@ -10,7 +10,7 @@ namespace Darkages.Network.Components;
 
 public class DayLightComponent : WorldServerComponent
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(5.0f));
+    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(15.0f));
     private static readonly SortedDictionary<int, (byte start, byte end)> Routine = new()
     {
         {0, (0, 0)},
