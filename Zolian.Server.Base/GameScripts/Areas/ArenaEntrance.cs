@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -41,14 +42,9 @@ public class ArenaEntrance : AreaScript
             case 13 when newLocation.Y == 8:
             case 13 when newLocation.Y == 9:
             case 13 when newLocation.Y == 10:
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Arena Host", out var scriptObj))
-                    {
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                    }
-                }
+                var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Arena Host");
+                var script = npc.Scripts.Values.First();
+                script.OnClick(client, npc.Serial);
                 break;
         }
     }

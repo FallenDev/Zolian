@@ -104,6 +104,7 @@ public class CreateMonster : MonsterCreateScript
         SetMood(obj);
         SetSpawn(obj);
 
+        if (obj.Map == null) return null;
         if (obj.Map.IsAStarWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
         if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
 

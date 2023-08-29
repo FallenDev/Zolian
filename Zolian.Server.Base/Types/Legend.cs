@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+using ServiceStack;
 
 namespace Darkages.Types;
 
@@ -64,11 +65,16 @@ public class Legend
             cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Category", SqlDbType.VarChar).Value = legend.Category;
-            cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
+            if (legend.Time != null)
+                cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
+            else
+                cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = DBNull.Value;
             cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
             cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;
-            cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = legend.Value;
-
+            if (!legend.Value.IsNullOrEmpty())
+                cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = legend.Value;
+            else
+                cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = DBNull.Value;
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
             sConn.Close();

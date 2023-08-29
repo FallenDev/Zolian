@@ -25,7 +25,7 @@ public class Artur : MundaneScript
     {
         base.TopMenu(client);
 
-        if (client.Aisling.Level >= 120 && client.Aisling.QuestManager.ArtursGift == 0 && client.Aisling.QuestManager.TagorDungeonAccess)
+        if (client.Aisling.Level >= 120 && client.Aisling.QuestManager.ArtursGift == 0)
         {
             var options = new List<Dialog.OptionsDataItem>
             {
@@ -87,12 +87,12 @@ public class Artur : MundaneScript
             {
                 var options = new List<Dialog.OptionsDataItem>
                 {
-                    new (0x04, "I'll try my best."),
-                    new (0x05, "What do I look like, your dog?"),
-                    new (0x03, "No.")
+                    new (0x04, "I'll try my best"),
+                    new (0x05, "What do I look like, your dog knight!?"),
+                    new (0x03, "No")
                 };
 
-                client.SendOptionsDialog(Mundane, "As you're aware, when the gods lost their powers; Chadul's servants placed their lexicons deep within the Tagor crypts. If you could bring me back one, I'll make it worth your effort.", options.ToArray());
+                client.SendOptionsDialog(Mundane, "As you're aware, when the gods lost their powers; Chadul's servants placed their lexicons deep within the Necropolis. If you could bring me back one, I'll make it worth your effort.", options.ToArray());
                 break;
             }
             case 3:
@@ -101,7 +101,7 @@ public class Artur : MundaneScript
             case 4:
             {
                 client.Aisling.QuestManager.ArtursGift = 1;
-                client.SendOptionsDialog(Mundane, "You will want to travel to Tagor, there you'll need to fight your way until the Lexicon reveals itself ~Dia Aite~!");
+                client.SendOptionsDialog(Mundane, "You will want to travel to Tagor, there you'll meet Tout. I have granted you access. After you enter, you'll need to fight your way until the Lexicon reveals itself ~Dia Aite~!");
                 var buff = new buff_DiaAite();
                 buff.OnApplied(client.Aisling, buff);
                 break;
@@ -250,7 +250,13 @@ public class Artur : MundaneScript
             }
             case 7:
             {
-                client.SendOptionsDialog(Mundane, "Come back when you have, they're located in {=bTagor{=a'{=bs Crypt{=a.");
+                if (!client.Aisling.HasBuff("Dia Aite"))
+                {
+                    var buff = new buff_DiaAite();
+                    buff.OnApplied(client.Aisling, buff);
+                }
+
+                client.SendOptionsDialog(Mundane, "Come back when you have, they're located in {=bTagor{=a'{=bs Shrouded Necropolis{=a. ~Dia Aite~");
                 break;
             }
             case 8:

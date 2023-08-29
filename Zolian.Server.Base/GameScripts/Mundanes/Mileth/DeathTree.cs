@@ -13,8 +13,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Death Tree")]
 public class DeathTree : MundaneScript
 {
-    private string _kill;
-
     public DeathTree(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
