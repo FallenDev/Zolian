@@ -10,7 +10,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Arena Entrance")]
 public class ArenaEntrance : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
 
     public ArenaEntrance(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }

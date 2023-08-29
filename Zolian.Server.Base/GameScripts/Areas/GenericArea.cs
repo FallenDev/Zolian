@@ -8,7 +8,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Generic Area")]
 public class GenericArea : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
 
     public GenericArea(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }

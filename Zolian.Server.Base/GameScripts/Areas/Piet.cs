@@ -9,7 +9,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Piet")]
 public class Piet : AreaScript
 {
-    private Sprite _aisling;
+    private Aisling _aisling;
 
     public Piet(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
