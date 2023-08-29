@@ -693,6 +693,143 @@ public class buff_DexUp : Buff
     }
 }
 
+public class buff_GryphonsGrace : Buff
+{
+    public override byte Icon => 216;
+    public override int Length => 300;
+    public override string Name => "Gryphons Grace";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.BonusDex += 50;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(139, false));
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(139, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.BonusDex -= 50;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Starting to feel heavier again");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Primary);
+    }
+}
+
+public class buff_OrcishStrength : Buff
+{
+    public override byte Icon => 215;
+    public override int Length => 300;
+    public override string Name => "Orcish Strength";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.BonusStr += 50;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(136, false));
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(34, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(136, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.BonusStr -= 50;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Muscles return to normal");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Primary);
+    }
+}
+
+public class buff_FeywildNectar : Buff
+{
+    public override byte Icon => 214;
+    public override int Length => 300;
+    public override string Name => "Feywild Nectar";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.BonusInt += 50;
+            affected.BonusWis += 50;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(165, false));
+            aisling.Client.SendAttributes(StatUpdateType.Primary);
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(35, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(165, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.BonusInt -= 50;
+        affected.BonusWis -= 50;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Feys disappear");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Primary);
+    }
+}
+
 public class buff_randWeaponElement : Buff
 {
     public override byte Icon => 110;

@@ -4,6 +4,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 
@@ -28,6 +29,7 @@ public class SarnathGraveyard : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (_aisling.Pos != vectorMap) return;
+        if (ReflexCheck(_aisling)) return;
         _debuff1 = new DebuffArdPoison();
         _debuff2 = new DebuffDecay();
 
@@ -277,5 +279,11 @@ public class SarnathGraveyard : AreaScript
         }
 
         _aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+    }
+
+    private static bool ReflexCheck(Aisling aisling)
+    {
+        var check = Generator.RandNumGen100();
+        return !(check > aisling.Reflex);
     }
 }

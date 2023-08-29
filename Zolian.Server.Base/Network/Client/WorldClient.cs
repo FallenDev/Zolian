@@ -264,11 +264,13 @@ namespace Darkages.Network.Client
             if (!LanternCheckTimer.Update(elapsedTime)) return;
             if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
             {
-                Aisling.Lantern = 1;
+                if (Aisling.Lantern == 2) return;
+                Aisling.Lantern = 2;
                 SendDisplayAisling(Aisling);
+                return;
             }
 
-            if (Aisling.Lantern != 1 || Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness)) return;
+            if (Aisling.Lantern != 2) return;
             Aisling.Lantern = 0;
             SendDisplayAisling(Aisling);
         }

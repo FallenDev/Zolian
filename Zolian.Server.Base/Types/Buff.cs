@@ -57,6 +57,9 @@ public class Buff : IBuff
             "Hasten" => new buff_Hasten(),
             "Hide" => new buff_hide(),
             "Shadowfade" => new buff_ShadowFade(),
+            "Gryphons Grace" => new buff_GryphonsGrace(),
+            "Orcish Strength" => new buff_OrcishStrength(),
+            "Feywild Nectar" => new buff_FeywildNectar(),
             _ => BuffSpell
         };
 
