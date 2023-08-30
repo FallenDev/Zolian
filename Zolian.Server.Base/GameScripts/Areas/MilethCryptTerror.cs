@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -11,7 +12,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Shrouded Crypt")]
 public class MilethCryptTerror : AreaScript
 {
-    private Aisling _aisling;
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     private WorldServerTimer AnimTimer { get; }
     private bool _animate;
 
@@ -23,8 +24,7 @@ public class MilethCryptTerror : AreaScript
 
     public override void Update(TimeSpan elapsedTime)
     {
-        if (_aisling == null) return;
-        if (_aisling.Map.ID != 8)
+        if (_playersOnMap.IsEmpty)
             _animate = false;
 
         if (_animate)
@@ -33,14 +33,18 @@ public class MilethCryptTerror : AreaScript
 
     public override void OnMapEnter(WorldClient client)
     {
-        _aisling = client.Aisling;
-        _animate = true;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
+        if (!_playersOnMap.IsEmpty)
+            _animate = true;
     }
 
     public override void OnMapExit(WorldClient client)
     {
-        _aisling = null;
-        _animate = false;
+        _playersOnMap.TryRemove(client.Aisling.Serial, out _);
+
+        if (_playersOnMap.IsEmpty)
+            _animate = false;
     }
 
     public override void OnMapClick(WorldClient client, int x, int y) { }
@@ -65,10 +69,8 @@ public class MilethCryptTerror : AreaScript
     private void HandleMapAnimations(TimeSpan elapsedTime)
     {
         var a = AnimTimer.Update(elapsedTime);
-
-        if (_aisling.Map.ID != 8) return;
         if (!a) return;
-        _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 19)));
+        _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 19)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

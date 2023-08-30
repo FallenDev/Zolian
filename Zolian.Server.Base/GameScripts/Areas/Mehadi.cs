@@ -1,5 +1,7 @@
-﻿using Darkages.Network.Client;
+﻿using System.Collections.Concurrent;
+using Darkages.Network.Client;
 using Darkages.ScriptingBase;
+using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas;
@@ -7,12 +9,14 @@ namespace Darkages.GameScripts.Areas;
 [Script("Mehadi")]
 public class Mehadi : AreaScript
 {
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     public Mehadi(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
     public override void OnMapEnter(WorldClient client)
     {
-        if (client == null) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (client.Aisling.QuestManager.SwampAccess) return;
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
@@ -26,6 +30,8 @@ public class Mehadi : AreaScript
 
         client.TransitionToMap(3071, new Position(3, 7));
     }
+
+    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {

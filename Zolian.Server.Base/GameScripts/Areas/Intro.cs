@@ -1,8 +1,12 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+
+using Chaos.Common.Definitions;
+
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Areas;
@@ -10,7 +14,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("Intro")]
 public class Intro : AreaScript
 {
-    private Aisling _aisling;
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     private Item _item;
     private bool _givenClothes;
 
@@ -20,9 +24,10 @@ public class Intro : AreaScript
 
     public override async void OnMapEnter(WorldClient client)
     {
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         await Task.Delay(250).ContinueWith(ct =>
         {
-            _aisling = client.Aisling;
             var item = new Item();
             item = item.Create(client.Aisling,
                 client.Aisling.Gender == Gender.Female
@@ -54,8 +59,9 @@ public class Intro : AreaScript
             _givenClothes = true;
         });
 
-        await Task.Delay(750).ContinueWith(ct => {
-            _aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow,
+        await Task.Delay(750).ContinueWith(ct =>
+        {
+            client.SendServerMessage(ServerMessageType.ScrollWindow,
                 "{=qWelcome!\n\n{=aThis private server that has been made possible due to countless hours of creation and inspiration.\n\n" +
                 "This server falls under Fair Use and accepts zero donations of any kind. With that said, art, music, and the client are property of Nexon Inc.\n\n" +
                 "{=bZolian{=a: is a server based on Dungeons & Dragons, Final Fantasy, Diablo 3, Zelda, Elder Scrolls, World of Warcraft and many other MMORPGs. Many " +
@@ -65,7 +71,7 @@ public class Intro : AreaScript
         }).ConfigureAwait(false);
     }
 
-    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
     public override void OnMapClick(WorldClient client, int x, int y) { }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)

@@ -14,14 +14,8 @@ public class DarkDistrict : AreaScript
 
     public override void OnMapEnter(WorldClient client)
     {
-        if (client.Aisling.QuestManager.AbelShopAccess == false)
-        {
-            client.TransitionToMap(502, new Position(12, 11));
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a presence nearby.");
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "I just don't feel right, being here.");
-        }
-
         client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a presence nearby.");
+        if (client.Aisling.QuestManager.AbelShopAccess == false) return;
         if (client.Aisling.QuestManager.Keela != 1 || !client.Aisling.QuestManager.KeelaQuesting) return;
         if (client.Aisling.HasItem("Assassin Notes")) return;
         client.SendServerMessage(ServerMessageType.ActiveMessage, "An assassin briefly appears and tucks some notes in your pocket.");

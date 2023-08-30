@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -13,6 +14,8 @@ namespace Darkages.GameScripts.Areas;
 [Script("Mileth")]
 public class Mileth : AreaScript
 {
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
+
     private readonly SortedDictionary<int, List<string>> _ceannlaidirWeaponDictionary = new()
     {
         { 7, new List<string> { "Loures Saber", "Holy Hermes", "Center Shuriken", "Centered Dagger", "Magus Ares" } },
@@ -42,8 +45,8 @@ public class Mileth : AreaScript
 
     public Mileth(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(WorldClient client) { }
-    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
     public override void OnMapClick(WorldClient client, int x, int y) { }
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
 
@@ -53,14 +56,14 @@ public class Mileth : AreaScript
         {
             case 31 when locationDropped.Y == 52:
             case 31 when locationDropped.Y == 53:
-                MilethAltar(client, itemDropped, locationDropped);
+                MilethAltar(client, itemDropped);
                 break;
         }
     }
 
     public override void OnGossip(WorldClient client, string message) { }
 
-    private void MilethAltar(WorldClient client, Item itemDropped, Position locationDropped)
+    private void MilethAltar(WorldClient client, Item itemDropped)
     {
         var loop = itemDropped.Dropping;
         var luck = 0 + client.Aisling.Luck;

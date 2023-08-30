@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using System.Collections.Concurrent;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
@@ -10,7 +11,7 @@ namespace Darkages.GameScripts.Areas;
 [Script("ToL")] // Temple of Light Area Map
 public class ToL : AreaScript
 {
-    private Aisling _aisling;
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     private WorldServerTimer AnimTimer { get; set; }
     private WorldServerTimer AnimTimer2 { get; set; }
     private bool _animate;
@@ -24,8 +25,7 @@ public class ToL : AreaScript
 
     public override void Update(TimeSpan elapsedTime)
     {
-        if (_aisling == null) return;
-        if (_aisling.Map.ID != 14758)
+        if (_playersOnMap.IsEmpty)
             _animate = false;
 
         if (_animate)
@@ -34,14 +34,18 @@ public class ToL : AreaScript
 
     public override void OnMapEnter(WorldClient client)
     {
-        _aisling = client.Aisling;
-        _animate = true;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
+        if (!_playersOnMap.IsEmpty)
+            _animate = true;
     }
 
     public override void OnMapExit(WorldClient client)
     {
-        _aisling = null;
-        _animate = false;
+        _playersOnMap.TryRemove(client.Aisling.Serial, out _);
+
+        if (_playersOnMap.IsEmpty)
+            _animate = false;
     }
 
     public override void OnMapClick(WorldClient client, int x, int y)
@@ -61,19 +65,18 @@ public class ToL : AreaScript
         var a = AnimTimer.Update(elapsedTime);
         var b = AnimTimer2.Update(elapsedTime);
 
-        if (_aisling?.Map.ID != 14758) return;
         if (a)
         {
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(15, 55)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(20, 55)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(21, 40)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(14, 40)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(15, 55)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(20, 55)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(21, 40)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(192, new Position(14, 40)));
         }
 
         if (b)
         {
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(17, 59)));
-            _aisling?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(18, 59)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(17, 59)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(96, new Position(18, 59)));
         }
     }
 }

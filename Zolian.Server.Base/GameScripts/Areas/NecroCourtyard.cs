@@ -7,29 +7,29 @@ using System.Numerics;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Areas;
 
 [Script("Necro Courtyard")]
 public class NecroCourtyard : AreaScript
 {
-    private Aisling _aisling;
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     private Debuff _debuff1;
     private Debuff _debuff2;
-
 
     public NecroCourtyard(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(WorldClient client) => _aisling = client.Aisling;
+    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
-    public override void OnMapClick(WorldClient client, int x, int y) => _aisling ??= client.Aisling;
+    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
-        if (_aisling.Pos != vectorMap) return;
-        if (ReflexCheck(_aisling)) return;
+        if (client.Aisling.Pos != vectorMap) return;
+        if (ReflexCheck(client.Aisling)) return;
         _debuff1 = new DebuffArdPoison();
         _debuff2 = new DebuffDecay();
 
@@ -40,14 +40,14 @@ public class NecroCourtyard : AreaScript
             vectorMap == new Vector2(16, 7) ||
             vectorMap == new Vector2(16, 5))
         {
-            _debuff1.OnApplied(_aisling, _debuff1);
-            _debuff2.OnApplied(_aisling, _debuff2);
-            foreach (var buff in _aisling.Buffs.Values)
+            _debuff1.OnApplied(client.Aisling, _debuff1);
+            _debuff2.OnApplied(client.Aisling, _debuff2);
+            foreach (var buff in client.Aisling.Buffs.Values)
             {
-                buff?.OnEnded(_aisling, buff);
+                buff?.OnEnded(client.Aisling, buff);
             }
 
-            _aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
         }
 
         // Poison Pool 2
@@ -57,14 +57,14 @@ public class NecroCourtyard : AreaScript
             vectorMap != new Vector2(22, 23) &&
             vectorMap != new Vector2(22, 21)) return;
 
-        _debuff1.OnApplied(_aisling, _debuff1);
-        _debuff2.OnApplied(_aisling, _debuff2);
-        foreach (var buff in _aisling.Buffs.Values)
+        _debuff1.OnApplied(client.Aisling, _debuff1);
+        _debuff2.OnApplied(client.Aisling, _debuff2);
+        foreach (var buff in client.Aisling.Buffs.Values)
         {
-            buff?.OnEnded(_aisling, buff);
+            buff?.OnEnded(client.Aisling, buff);
         }
 
-        _aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
     }
 
     private static bool ReflexCheck(Aisling aisling)

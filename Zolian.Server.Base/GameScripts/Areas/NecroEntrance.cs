@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Concurrent;
+using System.Numerics;
 
 using Chaos.Common.Definitions;
 
@@ -13,26 +14,25 @@ namespace Darkages.GameScripts.Areas;
 [Script("Necro Entrance")]
 public class NecroEntrance : AreaScript
 {
-    private Aisling _aisling;
-
+    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
     public NecroEntrance(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(WorldClient client) => _aisling = client.Aisling;
-    public override void OnMapExit(WorldClient client) { }
+    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
-        if (_aisling.Pos != vectorMap) return;
+        if (client.Aisling.Pos != vectorMap) return;
         switch (newLocation.X)
         {
             case 5 when newLocation.Y == 0:
             case 5 when newLocation.Y == 1:
-                if (_aisling.QuestManager.TagorDungeonAccess)
+                if (client.Aisling.QuestManager.TagorDungeonAccess)
                     client.TransitionToMap(1204, new Position(17, 37));
                 else
                 {
-                    _aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, _aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, client.Aisling.Serial));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou are forcibly repelled!");
                 }
 
