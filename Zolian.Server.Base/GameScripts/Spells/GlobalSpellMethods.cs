@@ -78,7 +78,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         if (!crit) return final;
 
-        damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, damageDealingAisling.Serial));
+        damageDealingAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, damageDealingAisling.Serial));
         final *= CritDmg;
 
         return final;
@@ -107,8 +107,8 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
-            var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
-            dmg = AislingSpellDamageCalc(sprite, dmg, spell, exp);
+            var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level); 
+            var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
 
             if (target.CurrentHp > 0)
             {

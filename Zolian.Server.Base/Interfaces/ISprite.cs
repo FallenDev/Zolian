@@ -133,9 +133,11 @@ public interface ISprite
     void ShowDmg(Aisling aisling, TimeSpan elapsedTime);
     void ThreatGeneratedSubsided(Aisling aisling, TimeSpan elapsedTime);
     long ComputeDmgFromAc(long dmg);
+    long ComputeDmgFromWillSavingThrow(long dmg);
     bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced);
+    bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced);
     double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false);
-    int GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type);
+    double GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type);
     void Thorns(Sprite damageDealingSprite, long dmg);
     long Vulnerable(long dmg);
     void VarianceProc(Sprite sprite, long dmg);

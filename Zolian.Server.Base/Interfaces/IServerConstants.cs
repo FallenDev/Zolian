@@ -92,7 +92,7 @@ public interface IServerConstants
     int WithinRangeProximity { get; }
     string YouDroppedGoldMsg { get; }
     double AiteDamageReductionMod { get; }
-    int BaseDamageMod { get; }
+    double BaseDamageMod { get; }
     string ACFormulaScript { get; }
     string ElementTableScript { get; }
     string MonsterRewardScript { get; }

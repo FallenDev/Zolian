@@ -978,6 +978,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
     }
 
+    public long ComputeDmgFromWillSavingThrow(long dmg)
+    {
+        var script = ScriptManager.Load<FormulaScript>("Will Saving Throw", this);
+
+        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
+    }
+
     private long LuckModifier(long dmg)
     {
         if (Luck <= 0) return dmg;
@@ -1128,15 +1135,41 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
-        // ToDo: GameMaster DMG Override
-        //if (damageDealingSprite is Aisling aisling)
-        //    if (aisling.GameMaster)
-        //        dmg *= 2000000;
-
         if (OffenseElement != ElementManager.Element.None)
         {
-            dmg += GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
         }
+        else
+        {
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
+        }
+
+        if (damageDealingSprite is Aisling)
+        {
+            dmg = ApplyPvpMod();
+            dmg = ApplyBehindTargetMod();
+            dmg = PainBane();
+            dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
+            if (damageDealingSprite.ClawFistEmpowerment)
+                dmg = (long)(dmg * 1.3);
+        }
+
+        dmg = Vulnerable(dmg);
+        VarianceProc(damageDealingSprite, dmg);
+
+        if (skill == null)
+        {
+            // Thrown weapon scripts play the swoosh sound #9
+            if (!DamageTarget(damageDealingSprite, ref dmg, 9, forceTarget)) return;
+        }
+        else
+        {
+            if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, forceTarget)) return;
+        }
+
+        Thorns(damageDealingSprite, dmg);
+        OnDamaged(damageDealingSprite, dmg);
+        return;
 
         long ApplyPvpMod()
         {
@@ -1160,33 +1193,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 return (long)(dmg * 0.95);
             return dmg;
         }
-
-        if (damageDealingSprite is Aisling)
-        {
-            dmg = ApplyPvpMod();
-            dmg = ApplyBehindTargetMod();
-            dmg = PainBane();
-            dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
-            if (damageDealingSprite.ClawFistEmpowerment)
-                dmg = (long)(dmg * 1.3);
-        }
-
-        dmg = Vulnerable(dmg);
-
-        VarianceProc(damageDealingSprite, dmg);
-
-        if (skill == null)
-        {
-            // Thrown weapon scripts play the swoosh sound #9
-            if (!DamageTarget(damageDealingSprite, ref dmg, 9, forceTarget)) return;
-        }
-        else
-        {
-            if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, forceTarget)) return;
-        }
-
-        Thorns(damageDealingSprite, dmg);
-        OnDamaged(damageDealingSprite, dmg);
     }
 
     public void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false)
@@ -1195,18 +1201,39 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
-        // ToDo: GameMaster DMG Override
-        //if (damageDealingSprite is Aisling aisling)
-        //    if (aisling.GameMaster)
-        //        dmg *= 2000000;
-
-        long ApplyPvpMod()
+        if (OffenseElement != ElementManager.Element.None)
         {
-            if (Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
-                dmg = (long)(dmg * 0.75);
-            return dmg;
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
+        }
+        else
+        {
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
         }
 
+        if (damageDealingSprite is Aisling)
+        {
+            dmg = PainBane();
+            dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
+        }
+
+        dmg = Vulnerable(dmg);
+        VarianceProc(damageDealingSprite, dmg);
+
+        if (this is Aisling)
+            dmg = (long)(dmg * 0.50);
+
+        if (spell == null)
+        {
+            if (!MagicDamageTarget(damageDealingSprite, ref dmg, 0, forceTarget)) return;
+        }
+        else
+        {
+            if (!MagicDamageTarget(damageDealingSprite, ref dmg, spell.Template.Sound, forceTarget)) return;
+        }
+
+        OnDamaged(damageDealingSprite, dmg);
+        return;
+        
         long PainBane()
         {
             if (damageDealingSprite is not Aisling aisling) return dmg;
@@ -1214,28 +1241,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 return (long)(dmg * 0.95);
             return dmg;
         }
-
-        if (damageDealingSprite is Aisling)
-        {
-            dmg = ApplyPvpMod();
-            dmg = PainBane();
-            dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
-        }
-
-        dmg = Vulnerable(dmg);
-
-        VarianceProc(damageDealingSprite, dmg);
-
-        if (spell == null)
-        {
-            if (!DamageTarget(damageDealingSprite, ref dmg, 0, forceTarget)) return;
-        }
-        else
-        {
-            if (!DamageTarget(damageDealingSprite, ref dmg, spell.Template.Sound, forceTarget)) return;
-        }
-
-        OnDamaged(damageDealingSprite, dmg);
     }
 
     public long Vulnerable(long dmg)
@@ -1280,14 +1285,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void Thorns(Sprite damageDealingSprite, long dmg)
     {
-        if (PlayerNearby?.Client is null) return;
         if (damageDealingSprite is null) return;
-        var thornsTargetList = damageDealingSprite.DamageableGetInFront(1);
-        var target = thornsTargetList.FirstOrDefault(i => i is { Attackable: true });
-        if (target is not Aisling aisling) return;
-        if (aisling.Client.Aisling.Spikes == 0) return;
+        if (this is not Aisling aisling) return;
+        if (aisling.Spikes == 0) return;
 
-        var thornsDmg = aisling.Client.Aisling.Spikes * 0.03;
+        var thornsDmg = aisling.Spikes * 0.03;
         Math.Clamp(thornsDmg, 1, int.MaxValue);
         dmg = (long)(thornsDmg * dmg);
 
@@ -1297,8 +1299,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         var convDmg = (int)dmg;
-
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, null, damageDealingSprite.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
         damageDealingSprite.CurrentHp -= convDmg;
     }
 
@@ -1666,6 +1667,65 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return true;
     }
 
+    public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
+    {
+        if (this is Aisling aislingTarget)
+        {
+            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
+            {
+                aislingTarget.Client.SendHealthBar(this, sound);
+                return false;
+            }
+        }
+
+        if (this is Monster)
+        {
+            if (damageDealingSprite is Aisling aisling)
+                if (!CanAttack(aisling, forced))
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
+                    return false;
+                }
+        }
+
+        if (Immunity && !forced)
+        {
+            PlayerNearby?.Client.SendHealthBar(this, sound);
+            return false;
+        }
+
+        if (IsAited && dmg > 100)
+            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
+
+        double secondary = 0;
+        var weak = false;
+
+        if (damageDealingSprite.SecondaryOffensiveElement != ElementManager.Element.None)
+        {
+            secondary = GetElementalModifier(damageDealingSprite, true);
+            if (secondary < 1.0) weak = true;
+            secondary /= 2;
+        }
+
+        var amplifier = GetElementalModifier(damageDealingSprite);
+        {
+            if (weak)
+                amplifier -= secondary;
+            else
+                amplifier += secondary;
+        }
+
+        dmg = LuckModifier(dmg);
+        dmg = ComputeDmgFromWillSavingThrow(dmg);
+        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
+        var convDmg = (int)dmg;
+
+        if (convDmg > 0)
+            ApplyEquipmentDurability(convDmg);
+
+        return true;
+    }
+
     public void ApplyEquipmentDurability(int dmg)
     {
         if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
@@ -1701,7 +1761,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return script?.Values.Sum(s => s.Calculate(this, element)) ?? 0.0;
     }
 
-    public int GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type)
+    public double GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type)
     {
         var script = ScriptManager.Load<DamageFormulaScript>(ServerSetup.Instance.Config.BaseDamageScript, this, target, type);
         return script?.Values.Sum(s => s.Calculate(damageDealingSprite, target, type)) ?? 1;

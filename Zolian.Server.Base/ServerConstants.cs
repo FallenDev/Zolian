@@ -60,7 +60,7 @@ public class ServerConstants : IServerConstants
     // Monsters | NPCs
     public double MundaneRespawnInterval { get; set; }
     public double GlobalSpawnTimer { get; set; }
-    public int BaseDamageMod { get; set; }
+    public double BaseDamageMod { get; set; }
     public int HpGainFactor { get; set; }
     public int MpGainFactor { get; set; }
     public int VeryNearByProximity { get; set; }
