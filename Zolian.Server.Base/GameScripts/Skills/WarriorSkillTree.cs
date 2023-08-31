@@ -956,14 +956,6 @@ public class Rush : SkillScript
         var client = aisling.Client;
         aisling.ActionUsed = "Rush";
 
-        var action = new BodyAnimationArgs
-        {
-            AnimationSpeed = 40,
-            BodyAnimation = BodyAnimation.Jump,
-            Sound = null,
-            SourceId = sprite.Serial
-        };
-
         foreach (var i in _enemyList.Where(i => i.Attackable))
         {
             if (i != _target) continue;
@@ -1016,8 +1008,6 @@ public class Rush : SkillScript
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
-
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -1063,14 +1053,6 @@ public class Rush : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new BodyAnimationArgs
-        {
-            AnimationSpeed = 40,
-            BodyAnimation = BodyAnimation.HandsUp,
-            Sound = null,
-            SourceId = sprite.Serial
-        };
-
         _enemyList = client.Aisling.DamageableGetInFront(3);
         _target = _enemyList.FirstOrDefault();
         _target = Skill.Reflect(_target, sprite, _skill);
@@ -1097,7 +1079,6 @@ public class Rush : SkillScript
             }
 
             aisling.UsedSkill(_skill);
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         else
         {
@@ -1604,15 +1585,7 @@ public class Charge : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         aisling.ActionUsed = "Charge";
-
-        var action = new BodyAnimationArgs
-        {
-            AnimationSpeed = 40,
-            BodyAnimation = BodyAnimation.Jump,
-            Sound = null,
-            SourceId = sprite.Serial
-        };
-
+        
         foreach (var i in _enemyList.Where(i => i.Attackable))
         {
             if (i != _target) continue;
@@ -1665,8 +1638,6 @@ public class Charge : SkillScript
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
-
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -1712,14 +1683,6 @@ public class Charge : SkillScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        var action = new BodyAnimationArgs
-        {
-            AnimationSpeed = 40,
-            BodyAnimation = BodyAnimation.HandsUp,
-            Sound = null,
-            SourceId = sprite.Serial
-        };
-
         _enemyList = client.Aisling.DamageableGetInFront(7);
         _target = _enemyList.FirstOrDefault();
         _target = Skill.Reflect(_target, sprite, _skill);
@@ -1746,7 +1709,6 @@ public class Charge : SkillScript
             }
 
             aisling.UsedSkill(_skill);
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         else
         {
