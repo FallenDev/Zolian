@@ -40,11 +40,19 @@ public class Needle_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 900, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -80,11 +88,19 @@ public class Stiletto_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 2206, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -120,11 +136,19 @@ public class Coiled_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 299, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -160,11 +184,19 @@ public class Spring_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 3197, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -200,11 +232,19 @@ public class Maiden_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 500, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -239,11 +279,19 @@ public class Poison_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 13652, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -278,11 +326,19 @@ public class Snare_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 264, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
@@ -317,11 +373,19 @@ public class Flash_Trap : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 3, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
-        _spellMethod.Train(aisling.Client, Spell);
+        Trap.Set(sprite, 263, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 

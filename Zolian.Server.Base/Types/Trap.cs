@@ -38,14 +38,14 @@ public class Trap
         return true;
     }
 
-    public static bool Set(Sprite obj, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
+    public static bool Set(Sprite obj, ushort image, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
     {
         var item = new Item();
         var itemTemplate = new ItemTemplate
         {
             Name = "A Hidden Trap",
-            Image = 500,
-            DisplayImage = 500,
+            Image = image,
+            DisplayImage = image,
             Flags = ItemFlags.Trap
         };
 
@@ -54,7 +54,6 @@ public class Trap
 
         if (obj is Aisling aisling)
         {
-            pos = !aisling.Client.IsMoving ? aisling.LastPosition : aisling.Position;
             aisling.ActionUsed = "Trap";
         }
 
@@ -85,5 +84,6 @@ public class Trap
         }
 
         _ticks++;
+        Task.Delay(1000).Wait();
     }
 }

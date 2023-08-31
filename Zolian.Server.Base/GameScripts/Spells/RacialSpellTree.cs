@@ -43,38 +43,48 @@ public class Tail_Flip : SpellScript
 [Script("Caltrops")]
 public class Caltrops : SpellScript
 {
+    private readonly GlobalSpellMethods _spellMethod;
+
     public Caltrops(Spell spell) : base(spell)
     {
+        _spellMethod = new GlobalSpellMethods();
     }
 
-    public override void OnActivated(Sprite sprite)
-    {
-    }
+    public override void OnActivated(Sprite sprite) { }
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    public override void OnSelectionToggle(Sprite sprite)
-    {
-    }
+    public override void OnSelectionToggle(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnTriggeredBy(Sprite sprite, Sprite target)
     {
-        target.MagicApplyDamage(sprite, 2500, Spell);
-        target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        var seed = Spell.Level / 100d;
+        var damageImp = 15000 * seed;
+        var dam = (int)(15000 + damageImp);
+        target.MagicApplyDamage(sprite, dam, Spell);
+        if (target.CurrentHp > 1)
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        else
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        Trap.Set(sprite, 3000, 1, OnTriggeredBy);
+        if (Spell.Template.ManaCost > sprite.CurrentMp)
+        {
+            sprite.CurrentMp -= Spell.Template.ManaCost;
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
+            return;
+        }
 
-        if (sprite is Aisling aisling)
-            aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You threw down {Spell.Template.Name}");
+        Trap.Set(sprite, 2270, 300, 1, OnTriggeredBy);
+
+        if (sprite is not Aisling aisling2) return;
+        aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You laid a {Spell.Template.Name}");
+        _spellMethod.Train(aisling2.Client, Spell);
     }
 }
 
