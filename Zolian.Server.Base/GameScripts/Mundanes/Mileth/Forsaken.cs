@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -22,14 +23,14 @@ public class Forsaken : MundaneScript
         { Class.Monk, (5, 5, 5, 40, 30, 528, 528) }
     };
 
-    private readonly SortedDictionary<Class, (int hp, int mp, string classItem, string abilityReq)> _mastering = new()
+    private readonly SortedDictionary<Class, (int hp, int mp, string classItem)> _mastering = new()
     {
-        { Class.Berserker, (7500, 5500, "Ceannlaidir's Tamed Sword", "Titan's Cleave") },
-        { Class.Defender, (10000, 5000, "Ceannlaidir's Enchanted Sword", "Perfect Defense") },
-        { Class.Assassin, (7000, 6000, "Fiosachd's Lost Flute", "Hiraishin") },
-        { Class.Cleric, (8000, 5750, "Glioca's Secret", "Disintegrate") },
-        { Class.Arcanus, (5500, 9000, "Luathas's Lost Relic", "Tabhair De Eadrom") },
-        { Class.Monk, (8000, 8000, "Cail's Hourglass", "Mor Dion") }
+        { Class.Berserker, (7500, 5500, "Ceannlaidir's Tamed Sword") },
+        { Class.Defender, (10000, 5000, "Ceannlaidir's Enchanted Sword") },
+        { Class.Assassin, (7000, 6000, "Fiosachd's Lost Flute") },
+        { Class.Cleric, (8000, 5750, "Glioca's Secret") },
+        { Class.Arcanus, (5500, 9000, "Luathas's Lost Relic") },
+        { Class.Monk, (8000, 8000, "Cail's Hourglass") }
     };
 
     private readonly SortedDictionary<Class, (int str, int intel, int wis, int con, int dex, string abilityReq)> _forsaking = new()
@@ -74,7 +75,7 @@ public class Forsaken : MundaneScript
                 client.SendOptionsDialog(Mundane, "Advanced one, what is it you wish to learn?", options.ToArray());
                 break;
             case ClassStage.Master:
-                options.Add(new Dialog.OptionsDataItem(0x04, "Reaching Zenith"));
+                options.Add(new Dialog.OptionsDataItem(0x05, "Reaching Zenith"));
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hope you are well, experienced one.", options.ToArray());
                 break;
@@ -83,13 +84,9 @@ public class Forsaken : MundaneScript
                 client.SendOptionsDialog(Mundane, "Ah, brother; What can I do for you?", options.ToArray());
                 break;
             case ClassStage.Quest:
-                break;
             case ClassStage.MasterLearn:
-                break;
             case ClassStage.DedicatedLearn:
-                break;
             case ClassStage.AdvanceLearn:
-                break;
             case ClassStage.ForsakenLearn:
                 break;
         }
@@ -105,10 +102,10 @@ public class Forsaken : MundaneScript
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x011, "I am ready"),
-                    new (0x05, "No")
-                };
+                    {
+                        new (0x011, "I am ready"),
+                        new (0x05, "No")
+                    };
 
                     client.SendOptionsDialog(Mundane,
                         "The title of {=bMaster{=a, is something that you should to be proud of. Only disciplined Aislings will pass the requirements needed to proceed. Do you wish to attempt?",
@@ -142,10 +139,10 @@ public class Forsaken : MundaneScript
             case 0x03:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x030, "I'm devote"),
-                    new (0x05, "No")
-                };
+                    {
+                        new (0x030, "I'm devote"),
+                        new (0x05, "No")
+                    };
 
                     client.SendOptionsDialog(Mundane,
                         $"Ah devotee, there is nothing wrong with honing your current abilities and sharpening them to learn anew.",
@@ -156,10 +153,10 @@ public class Forsaken : MundaneScript
             case 0x04:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x05, "I seek power"),
-                    new (0x05, "No")
-                };
+                    {
+                        new (0x05, "I seek power"),
+                        new (0x05, "No")
+                    };
 
                     var (str, intel, wis, con, dex, abilityReq) = _forsaking.First(x => client.Aisling.Path <= x.Key).Value;
 
@@ -177,16 +174,16 @@ public class Forsaken : MundaneScript
             case 0x011:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x05, "{=bI'm sorry not now")
-                };
+                    {
+                        new (0x032, "Attempt Mastering"),
+                        new (0x05, "{=bI'm sorry not now")
+                    };
 
-                    var (hp, mp, classItem, abilityReq) = _mastering.First(x => client.Aisling.Path <= x.Key).Value;
+                    var (hp, mp, classItem) = _mastering.First(x => client.Aisling.Path <= x.Key).Value;
 
                     client.SendOptionsDialog(Mundane,
                         $"To master the class of {{=b{client.Aisling.Path}{{=a,\nI require the item {{=q{classItem}{{=a.\n" +
-                        $"You must also have at least {{=q{hp} {{=aHealth and {{=q{mp} {{=aMana.\n" +
-                        $"Finally, You must have mastered this discipline {{=q{abilityReq}{{=a.",
+                        $"You must also have at least {{=q{hp} {{=aHealth and {{=q{mp} {{=aMana.\n",
                         options.ToArray());
                 }
                 break;
@@ -606,7 +603,7 @@ public class Forsaken : MundaneScript
                 break;
             case 0x0260:
                 {
-                    var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => Class.Monk<= x.Key).Value;
+                    var (str, intel, wis, con, dex, hp, mp) = _advancedClassing.First(x => Class.Monk <= x.Key).Value;
 
                     if (client.Aisling._Con >= con)
                     {
@@ -726,14 +723,46 @@ public class Forsaken : MundaneScript
                         }
 
                         var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x05, "Thank you")
-                    };
+                        {
+                            new (0x05, "Thank you")
+                        };
 
                         client.SendOptionsDialog(Mundane, "It's a long road to perfecting something. Perform it daily until it is unrecognizable.", options.ToArray());
                     }
                     break;
                 }
+            case 0x032:
+                if (client.Aisling.ExpLevel >= 120)
+                {
+                    client.Aisling._Dmg += 20;
+                    client.Aisling._Hit += 20;
+                    await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                    await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                    await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                    var legend = new Legend.LegendItem
+                    {
+                        Category = "Master",
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.Teal,
+                        Icon = (byte)LegendIcon.Victory,
+                        Value = $"Mastery of the path of {client.Aisling.Path}"
+                    };
+                    client.Aisling.LegendBook.AddLegend(legend, client);
+                    client.Aisling.Stage = ClassStage.Master;
+                    client.SendAttributes(StatUpdateType.Full);
+                    foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
+                    {
+                        announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has mastered the path of {client.Aisling.Path}");
+                    }
+
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x05, "Thank you")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "Outstanding work, you exhume the best of us! However, your road has just begun. There is a town called Rionnag, there master craftsmen can help you find new gear that would suit someone of your caliber better.", options.ToArray());
+                }
+                break;
         }
     }
 
