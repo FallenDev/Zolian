@@ -1471,10 +1471,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
                 client.SendAttributes(StatUpdateType.Full);
                 client.LoggedIn(true);
+
                 if (client.Aisling.IsDead())
                 {
                     client.AislingToGhostForm();
                     client.Aisling.WarpToHell();
+                }
+
+                if (client.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
+                {
+                    var portal = new PortalSession();
+                    portal.TransitionToMap(client.Aisling.Client);
                 }
             }
             catch (Exception e)
@@ -3097,6 +3104,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
+            await StorageManager.AislingBucket.QuickSave(client.Aisling);
             ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
             return;
         }
@@ -3116,6 +3124,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.LoggedIn = false;
 
             // Save
+            await StorageManager.AislingBucket.QuickSave(client.Aisling);
             await client.Save();
 
             // Cleanup
