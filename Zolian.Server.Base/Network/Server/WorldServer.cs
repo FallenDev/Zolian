@@ -1676,7 +1676,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case "#" when client.Aisling.GameMaster:
                     foreach (var player in Aislings)
                     {
-                        player.Client?.SendServerMessage(ServerMessageType.AdminMessage, $"{{=c{client.Aisling.Username}: {message}");
+                        player.Client?.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username}: {message}");
                     }
                     return default;
                 case "#" when client.Aisling.GameMaster != true:

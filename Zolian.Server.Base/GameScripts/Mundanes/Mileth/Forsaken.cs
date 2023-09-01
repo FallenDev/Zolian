@@ -734,33 +734,71 @@ public class Forsaken : MundaneScript
             case 0x032:
                 if (client.Aisling.ExpLevel >= 120)
                 {
-                    client.Aisling._Dmg += 20;
-                    client.Aisling._Hit += 20;
-                    await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                    await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
-                    await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                    var legend = new Legend.LegendItem
+                    var (hp, mp, classItem) = _mastering.First(x => client.Aisling.Path <= x.Key).Value;
+                    if (client.Aisling.HasItem(classItem))
                     {
-                        Category = "Master",
-                        Time = DateTime.UtcNow,
-                        Color = LegendColor.Teal,
-                        Icon = (byte)LegendIcon.Victory,
-                        Value = $"Mastery of the path of {client.Aisling.Path}"
-                    };
-                    client.Aisling.LegendBook.AddLegend(legend, client);
-                    client.Aisling.Stage = ClassStage.Master;
-                    client.SendAttributes(StatUpdateType.Full);
-                    foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                    {
-                        announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has mastered the path of {client.Aisling.Path}");
+                        if (client.Aisling.BaseHp < hp)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You do not have the required base health");
+                            client.CloseDialog();
+                            return;
+                        }
+                        if (client.Aisling.BaseMp < mp)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "You do not have the required base mana");
+                            client.CloseDialog();
+                            return;
+                        }
+                        var item = client.Aisling.HasItemReturnItem(classItem);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
+                        client.Aisling._Dmg += 20;
+                        client.Aisling._Hit += 20;
+                        await Task.Delay(250).ContinueWith(ct =>
+                        {
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings,
+                                c => c.SendAnimation(303, null, client.Aisling.Serial));
+                        });
+                        await Task.Delay(250).ContinueWith(ct =>
+                        {
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings,
+                                c => c.SendSound(97, false));
+                        });
+                        await Task.Delay(450).ContinueWith(ct =>
+                        {
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings,
+                                c => c.SendAnimation(303, null, client.Aisling.Serial));
+                        });
+                        var legend = new Legend.LegendItem
+                        {
+                            Category = "Master",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Teal,
+                            Icon = (byte)LegendIcon.Victory,
+                            Value = $"Mastery of the path of {client.Aisling.Path}"
+                        };
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                        client.Aisling.Stage = ClassStage.Master;
+                        client.SendAttributes(StatUpdateType.Full);
+                        foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
+                        {
+                            announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                                $"{{=c{client.Aisling.Username} has mastered the path of {client.Aisling.Path}");
+                        }
+
+                        var options = new List<Dialog.OptionsDataItem>
+                        {
+                            new(0x05, "Thank you")
+                        };
+
+                        client.SendOptionsDialog(Mundane,
+                            "Outstanding work, you exhume the best of us! However, your road has just begun. There is a town called Rionnag, there master craftsmen can help you find new gear that would suit someone of your caliber better.",
+                            options.ToArray());
                     }
-
-                    var options = new List<Dialog.OptionsDataItem>
+                    else
                     {
-                        new (0x05, "Thank you")
-                    };
-
-                    client.SendOptionsDialog(Mundane, "Outstanding work, you exhume the best of us! However, your road has just begun. There is a town called Rionnag, there master craftsmen can help you find new gear that would suit someone of your caliber better.", options.ToArray());
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "You're missing the artifact");
+                        client.CloseDialog();
+                    }
                 }
                 break;
         }
