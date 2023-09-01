@@ -31,7 +31,7 @@ public class Needle_Trap : SpellScript
         var seed = Spell.Level / 100d;
         var damageImp = 250 * seed;
         var dam = (int)(250 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -79,7 +79,7 @@ public class Stiletto_Trap : SpellScript
         var seed = Spell.Level / 100d;
         var damageImp = 750 * seed;
         var dam = (int)(750 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -127,7 +127,7 @@ public class Coiled_Trap : SpellScript
         var seed = Spell.Level / 100d;
         var damageImp = 6000 * seed;
         var dam = (int)(6000 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -175,7 +175,7 @@ public class Spring_Trap : SpellScript
         var seed = Spell.Level / 100d;
         var damageImp = 12000 * seed;
         var dam = (int)(12000 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -223,7 +223,7 @@ public class Maiden_Trap : SpellScript
         var seed = Spell.Level / 100d;
         var damageImp = 20000 * seed;
         var dam = (int)(20000 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else

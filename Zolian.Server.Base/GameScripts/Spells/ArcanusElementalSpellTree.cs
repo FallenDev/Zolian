@@ -661,7 +661,7 @@ public class Gust
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }
@@ -720,7 +720,7 @@ public class Quake
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }
@@ -779,7 +779,7 @@ public class Rain
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }
@@ -838,7 +838,7 @@ public class Flame
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }
@@ -897,7 +897,7 @@ public class Dusk
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }
@@ -955,7 +955,7 @@ public class Dawn
 
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Mr)
+        if (mR > target.Will)
         {
             OnSuccess(aisling, target);
         }

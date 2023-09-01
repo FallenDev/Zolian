@@ -100,7 +100,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private double _will => Mr * 0.2;
     public double Will => Math.Round(_will, 2);
     public byte Hit => (byte)(_Hit + BonusHit);
-    public byte Mr => (byte)(_Mr + BonusMr);
+    private byte Mr => (byte)(_Mr + BonusMr);
     public int Str => (_Str + BonusStr).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Int => (_Int + BonusInt).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Wis => (_Wis + BonusWis).IntClamp(0, ServerSetup.Instance.Config.StatCap);
@@ -994,19 +994,19 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case >= 1 and <= 5:
                 mod = (long)(dmg * 0.03);
-                dmg += mod;
+                dmg -= mod;
                 break;
             case >= 6 and <= 10:
                 mod = (long)(dmg * 0.05);
-                dmg += mod;
+                dmg -= mod;
                 break;
             case >= 11 and <= 15:
                 mod = (long)(dmg * 0.07);
-                dmg += mod;
+                dmg -= mod;
                 break;
             case >= 16:
                 mod = (long)(dmg * 0.10);
-                dmg += mod;
+                dmg -= mod;
                 break;
         }
 
@@ -1144,18 +1144,25 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
         }
 
+        // Apply modifiers for attacker
         if (damageDealingSprite is Aisling)
         {
-            dmg = ApplyPvpMod();
             dmg = ApplyBehindTargetMod();
-            dmg = PainBane();
             dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
             if (damageDealingSprite.ClawFistEmpowerment)
                 dmg = (long)(dmg * 1.3);
         }
 
+        // Check vulnerable and proc variances
         dmg = Vulnerable(dmg);
         VarianceProc(damageDealingSprite, dmg);
+
+        // Apply modifiers for defender
+        if (this is Aisling defender)
+        {
+            dmg = PainBane(defender);
+            dmg = ApplyPvpMod();
+        }
 
         if (skill == null)
         {
@@ -1167,7 +1174,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, forceTarget)) return;
         }
 
+        // Apply consequences
         Thorns(damageDealingSprite, dmg);
+        
+        // Run OnDamaged scripts
         OnDamaged(damageDealingSprite, dmg);
         return;
 
@@ -1183,6 +1193,69 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (damageDealingSprite is not Aisling aisling) return dmg;
             if (aisling.Client.IsBehind(this))
                 dmg += (long)((dmg + ServerSetup.Instance.Config.BehindDamageMod) / 1.99);
+            return dmg;
+        }
+
+        long PainBane(Aisling aisling)
+        {
+            if (aisling.PainBane)
+                return (long)(dmg * 0.95);
+            return dmg;
+        }
+    }
+
+    public void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound)
+    {
+        if (!Attackable) return;
+
+        if (Immunity)
+        {
+            PlayerNearby?.Client.SendHealthBar(this, sound);
+            return;
+        }
+
+        if (this is Aisling)
+        {
+            dmg = ApplyPvpMod();
+            dmg = PainBane();
+        }
+        
+        if (IsAited && dmg > 100)
+            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
+
+        dmg = LuckModifier(dmg);
+
+        if (CurrentHp > MaximumHp)
+            CurrentHp = MaximumHp;
+
+        // ToDo: Create logic for "Over Damage"
+
+        CurrentHp -= (int)dmg;
+
+        if (damageDealingSprite is Aisling aisling)
+        {
+            var time = DateTime.UtcNow;
+            var estTime = time.TimeOfDay;
+            aisling.DamageCounter += dmg;
+            if (aisling.ThreatMeter + dmg >= long.MaxValue)
+                aisling.ThreatMeter = 500000;
+            aisling.ThreatMeter += dmg;
+            aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
+            ShowDmg(aisling, estTime);
+        }
+
+        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+
+        if (dmg > 50)
+            ApplyEquipmentDurability((int)dmg);
+        
+        OnDamaged(damageDealingSprite, dmg);
+        return;
+
+        long ApplyPvpMod()
+        {
+            if (Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+                dmg = (long)(dmg * 0.75);
             return dmg;
         }
 
@@ -1233,7 +1306,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         OnDamaged(damageDealingSprite, dmg);
         return;
-        
+
         long PainBane()
         {
             if (damageDealingSprite is not Aisling aisling) return dmg;

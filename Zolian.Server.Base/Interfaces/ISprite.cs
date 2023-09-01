@@ -123,6 +123,7 @@ public interface ISprite
     void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell);
     void ApplyElementalSkillDamage(Sprite source, long dmg, ElementManager.Element element, Skill skill);
     void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false);
+    void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound);
     void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false);
     void ApplyEquipmentDurability(int dmg);
     long ApplyWeaponBonuses(Sprite source, long dmg);

@@ -84,6 +84,5 @@ public class Trap
         }
 
         _ticks++;
-        Task.Delay(1000).Wait();
     }
 }
