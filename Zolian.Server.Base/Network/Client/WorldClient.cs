@@ -4104,7 +4104,12 @@ namespace Darkages.Network.Client
 
             try
             {
-                if (player.ExpLevel > 500) return;
+                if (player.ExpLevel >= 500)
+                {
+                    player.ExpNext = 0;
+                    player.Client.SendAttributes(StatUpdateType.ExpGold);
+                    return;
+                }
 
                 var expNext = player.ExpNext;
                 expNext -= exp;
@@ -4115,7 +4120,10 @@ namespace Darkages.Network.Client
                     player.Client.LevelUp(player, extraExp);
                 }
                 else
+                {
                     player.ExpNext = expNext;
+                    player.Client.SendAttributes(StatUpdateType.ExpGold);
+                }
             }
             catch (Exception e)
             {
@@ -4208,7 +4216,12 @@ namespace Darkages.Network.Client
 
             try
             {
-                if (player.AbpLevel > 500) return;
+                if (player.AbpLevel >= 500)
+                {
+                    player.AbpNext = 0;
+                    player.Client.SendAttributes(StatUpdateType.ExpGold);
+                    return;
+                }
 
                 var expNext = player.AbpNext;
                 expNext -= exp;
@@ -4219,7 +4232,10 @@ namespace Darkages.Network.Client
                     player.Client.DarkRankUp(player, extraExp);
                 }
                 else
+                {
                     player.AbpNext = expNext;
+                    player.Client.SendAttributes(StatUpdateType.ExpGold);
+                }
             }
             catch (Exception e)
             {
