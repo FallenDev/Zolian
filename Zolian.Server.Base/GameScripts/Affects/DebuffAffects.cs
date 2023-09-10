@@ -1444,7 +1444,7 @@ public class DebuffArdfasnadur : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.Amplified = 3;
+            affected.Amplified = 2.5;
         }
 
         if (affected is not Aisling player) return;
@@ -1454,7 +1454,7 @@ public class DebuffArdfasnadur : Debuff
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
         if (affected is not Aisling aisling) return;
-        aisling.Amplified = 3;
+        aisling.Amplified = 2.5;
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)

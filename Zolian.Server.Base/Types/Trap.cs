@@ -8,22 +8,15 @@ namespace Darkages.Types;
 
 public class Trap
 {
-    public static readonly ConcurrentDictionary<uint, Trap> Traps = new();
     private int _ticks;
-
-    private Trap()
-    {
-        _ticks = 0;
-    }
-
     public int CurrentMapId { get; init; }
-    private int Duration { get; set; }
+    public int Duration { get; set; }
     public Position Location { get; init; }
     public Sprite Owner { get; init; }
-    private int Radius { get; set; }
-    private uint Serial { get; set; }
-    private Item TrapItem { get; set; }
-    private Action<Sprite, Sprite> Tripped { get; set; }
+    public int Radius { get; set; }
+    public uint Serial { get; set; }
+    public Item TrapItem { get; set; }
+    public Action<Sprite, Sprite> Tripped { get; set; }
 
     public static bool Activate(Trap trap, Sprite target)
     {
@@ -33,12 +26,12 @@ public class Trap
 
     private static bool RemoveTrap(Trap trapToRemove)
     {
-        if (!Traps.TryRemove(trapToRemove.Serial, out var trap)) return false;
+        if (!ServerSetup.Instance.Traps.TryRemove(trapToRemove.Serial, out var trap)) return false;
         trap.TrapItem?.Remove();
         return true;
     }
 
-    public static bool Set(Sprite obj, ushort image, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
+    public static void Set(Sprite obj, ushort image, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
     {
         var item = new Item();
         var itemTemplate = new ItemTemplate
@@ -57,22 +50,9 @@ public class Trap
             aisling.ActionUsed = "Trap";
         }
 
-        item = item.TrapCreate(obj, itemTemplate);
-        item.Release(obj, pos, false);
-
-        var id = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
-        return Traps.TryAdd(id, new Trap
-        {
-            Radius = radius,
-            Duration = duration,
-            CurrentMapId = obj.CurrentMapId,
-            Location = pos,
-            Owner = obj,
-            Tripped = cb,
-            Serial = id,
-            TrapItem = item
-        });
+        var trap = item.TrapCreate(obj, itemTemplate, duration, radius, cb);
+        trap.TrapItem.Release(obj, pos, false);
+        ServerSetup.Instance.Traps.TryAdd(trap.Serial, trap);
     }
 
     public void Update()

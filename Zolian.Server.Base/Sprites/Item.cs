@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Numerics;
 
 using Chaos.Common.Definitions;
@@ -19,6 +20,8 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+
+using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.Sprites;
 
@@ -512,7 +515,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         return item.ItemQuality;
     }
 
-    public Item TrapCreate(Sprite owner, ItemTemplate itemTemplate)
+    public Trap TrapCreate(Sprite owner, ItemTemplate itemTemplate, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
     {
         if (owner == null) return null;
 
@@ -535,13 +538,21 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             OriginalQuality = Quality.Common,
             ItemVariance = Variance.None,
             WeapVariance = WeaponVariance.None,
-            Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
+            Serial = owner.Serial,
             ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId
         };
 
-        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
-
-        return obj;
+        return new Trap
+        {
+            Radius = radius,
+            Duration = duration,
+            CurrentMapId = obj.CurrentMapId,
+            Location = obj.Position,
+            Owner = owner,
+            Tripped = cb,
+            Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
+            TrapItem = obj
+        };
     }
 
     public bool CanCarry(Sprite sprite)

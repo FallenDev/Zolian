@@ -704,7 +704,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (!checkMap) return WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
         return CurrentMapId == other.CurrentMapId && WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
-    public bool TrapsAreNearby() => Trap.Traps.Select(i => i.Value).Any(i => i.CurrentMapId == CurrentMapId);
+    public bool TrapsAreNearby() => ServerSetup.Instance.Traps.Select(i => i.Value).Any(i => i.CurrentMapId == CurrentMapId);
     public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
     public Aisling[] AislingsEarShotNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 16)).ToArray();
     public IEnumerable<Monster> MonstersNearby() => GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));

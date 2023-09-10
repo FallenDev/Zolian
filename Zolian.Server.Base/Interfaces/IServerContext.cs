@@ -40,6 +40,7 @@ public interface IServerContext
     ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; }
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
+    ConcurrentDictionary<uint, Trap> Traps { get; set; }
     bool Running { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }

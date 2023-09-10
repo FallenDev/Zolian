@@ -280,9 +280,9 @@ namespace Darkages.Network.Client
         {
             if (!TrapTimer.Update(elapsedTime)) return;
 
-            lock (Trap.Traps)
+            lock (ServerSetup.Instance.Traps)
             {
-                Parallel.ForEach(Trap.Traps.Values, (trap) =>
+                Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) =>
                 {
                     trap?.Update();
                 });

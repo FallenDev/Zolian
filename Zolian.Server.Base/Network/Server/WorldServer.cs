@@ -665,7 +665,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
         // Cache traps to reduce Select operation on each iteration
-        var traps = Trap.Traps.Values;
+        var traps = ServerSetup.Instance.Traps.Values;
         var updateList = ServerSetup.Instance.GlobalMonsterCache;
 
         foreach (var (_, monster) in updateList)
@@ -814,7 +814,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.Aisling.Map.Script.Item2.OnPlayerWalk(localClient.Aisling.Client, localClient.Aisling.LastPosition, localClient.Aisling.Position);
                 if (!localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) return default;
 
-                foreach (var trap in Trap.Traps.Select(i => i.Value))
+                foreach (var trap in ServerSetup.Instance.Traps.Select(i => i.Value))
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == localClient.Aisling.Serial ||
                         localClient.Aisling.X != trap.Location.X ||
@@ -1162,9 +1162,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var sprite = ObjectHandlers.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
 
             if (aisling.CanSeeSprite(sprite)) return default;
-            ServerSetup.Logger($"Aisling {aisling.Username} attempted to forcefully display an entity {sprite?.Serial} that they cannot see: {localClient.RemoteIp}");
-            Analytics.TrackEvent($"Aisling {aisling.Username} attempted to forcefully display an entity {sprite?.Serial} that they cannot see: {localClient.RemoteIp}");
-
+            if (sprite is not Monster monster) return default;
+            var script = monster.Scripts.First().Value;
+            script?.OnLeave(aisling.Client);
             return default;
         }
     }

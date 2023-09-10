@@ -12,6 +12,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+
 using ServiceStack;
 
 namespace Darkages.GameScripts.Monsters;
@@ -162,7 +163,6 @@ public class MonsterBaseIntelligence : MonsterScript
         var cast = Monster.CastTimer.Update(elapsedTime);
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
-        // ToDo: Game Master Nullify damage
         if (Monster.Target is Aisling aisling)
         {
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
@@ -171,7 +171,7 @@ public class MonsterBaseIntelligence : MonsterScript
                 ClearTarget();
             }
 
-            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
+            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
 
@@ -268,6 +268,15 @@ public class MonsterBaseIntelligence : MonsterScript
 
     #region Targeting
 
+    private void CheckTarget()
+    {
+        if (Monster.Target is not Aisling aisling) return;
+        if (!aisling.Skulled && aisling.LoggedIn) return;
+        if (!aisling.IsInvisible) return;
+        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+        Monster.Target = null;
+    }
+
     private void ClearTarget()
     {
         Monster.CastEnabled = false;
@@ -297,33 +306,29 @@ public class MonsterBaseIntelligence : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling checkTarget)
-        {
-            if (checkTarget.Skulled || checkTarget.IsInvisible)
-            {
-                Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-                Monster.Target = null;
-            }
-        }
+        CheckTarget();
 
         if (Monster.Aggressive)
         {
-            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => (!value.player.IsInvisible || !value.player.Skulled) && value.player.LoggedIn && value.nearby).ToList();
+            if (!tagged.IsEmpty())
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.IsInvisible || !player.Skulled);
-                var topDps = targets?.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= player;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.IsInvisible || !value.player.Skulled);
-                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= topTagged.player;
+                var targets = Monster.AislingsEarShotNearby().Where(player => (!player.IsInvisible || !player.Skulled) && player.LoggedIn);
+                var topDps = targets.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
             }
-        }
 
-        if (Monster.Target is not null) return;
-        ClearTarget();
+            CheckTarget();
+        }
+        else
+        {
+            ClearTarget();
+        }
     }
 
     #endregion
@@ -704,7 +709,6 @@ public class MonsterPirate : MonsterScript
         var cast = Monster.CastTimer.Update(elapsedTime);
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
-        // ToDo: Game Master Nullify damage
         if (Monster.Target is Aisling aisling)
         {
             if (Monster.Target.IsWeakened && !_deathCry)
@@ -713,7 +717,7 @@ public class MonsterPirate : MonsterScript
                 Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
-            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
+            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
                 if (Monster.CantMove || Monster.Blind) return;
@@ -803,6 +807,15 @@ public class MonsterPirate : MonsterScript
 
     #region Targeting
 
+    private void CheckTarget()
+    {
+        if (Monster.Target is not Aisling aisling) return;
+        if (!aisling.Skulled && aisling.LoggedIn) return;
+        if (!aisling.IsInvisible) return;
+        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+        Monster.Target = null;
+    }
+
     private void ClearTarget()
     {
         Monster.CastEnabled = false;
@@ -832,33 +845,29 @@ public class MonsterPirate : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling checkTarget)
-        {
-            if (checkTarget.Skulled || checkTarget.IsInvisible)
-            {
-                Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-                Monster.Target = null;
-            }
-        }
+        CheckTarget();
 
         if (Monster.Aggressive)
         {
-            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => (!value.player.IsInvisible || !value.player.Skulled) && value.player.LoggedIn && value.nearby).ToList();
+            if (!tagged.IsEmpty())
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.IsInvisible || !player.Skulled);
-                var topDps = targets?.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= player;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.IsInvisible || !value.player.Skulled);
-                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= topTagged.player;
+                var targets = Monster.AislingsEarShotNearby().Where(player => (!player.IsInvisible || !player.Skulled) && player.LoggedIn);
+                var topDps = targets.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
             }
-        }
 
-        if (Monster.Target is not null) return;
-        ClearTarget();
+            CheckTarget();
+        }
+        else
+        {
+            ClearTarget();
+        }
     }
 
     #endregion
@@ -1025,7 +1034,7 @@ public class MonsterPirate : MonsterScript
                 Monster.BashEnabled = false;
                 Monster.CastEnabled = true;
                 var rand = Generator.RandomNumPercentGen();
-                if (rand >= 0.25)
+                if (rand >= 0.80)
                 {
                     Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
@@ -1249,7 +1258,6 @@ public class MonsterShadowSight : MonsterScript
         var cast = Monster.CastTimer.Update(elapsedTime);
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
-        // ToDo: Game Master Nullify damage
         if (Monster.Target is Aisling aisling)
         {
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
@@ -1258,7 +1266,7 @@ public class MonsterShadowSight : MonsterScript
                 ClearTarget();
             }
 
-            if (aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
+            if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
 
@@ -1355,6 +1363,14 @@ public class MonsterShadowSight : MonsterScript
 
     #region Targeting
 
+    private void CheckTarget()
+    {
+        if (Monster.Target is not Aisling aisling) return;
+        if (!aisling.Skulled && aisling.LoggedIn) return;
+        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+        Monster.Target = null;
+    }
+
     private void ClearTarget()
     {
         Monster.CastEnabled = false;
@@ -1384,30 +1400,29 @@ public class MonsterShadowSight : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling { Skulled: true })
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-            Monster.Target = null;
-        }
+        CheckTarget();
 
         if (Monster.Aggressive)
         {
-            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled && value.player.LoggedIn && value.nearby).ToList();
+            if (!tagged.IsEmpty())
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled);
-                var topDps = targets?.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= player;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled);
-                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= topTagged.player;
+                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled && player.LoggedIn);
+                var topDps = targets.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
             }
-        }
 
-        if (Monster.Target is not null) return;
-        ClearTarget();
+            CheckTarget();
+        }
+        else
+        {
+            ClearTarget();
+        }
     }
 
     #endregion
@@ -1796,7 +1811,6 @@ public class AosdaRemnant : MonsterScript
         var cast = Monster.CastTimer.Update(elapsedTime);
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
-        // ToDo: Game Master Nullify damage
         if (Monster.Target is Aisling aisling)
         {
             if (Monster.Target.IsWeakened && !_deathCry)
@@ -1805,7 +1819,7 @@ public class AosdaRemnant : MonsterScript
                 Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
             }
 
-            if (aisling.IsInvisible || aisling.Skulled || aisling.Dead/*|| aisling.GameMaster*/)
+            if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
                 if (Monster.CantMove || Monster.Blind) return;
@@ -1895,6 +1909,14 @@ public class AosdaRemnant : MonsterScript
 
     #region Targeting
 
+    private void CheckTarget()
+    {
+        if (Monster.Target is not Aisling aisling) return;
+        if (!aisling.Skulled && aisling.LoggedIn) return;
+        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
+        Monster.Target = null;
+    }
+
     private void ClearTarget()
     {
         Monster.CastEnabled = false;
@@ -1924,30 +1946,29 @@ public class AosdaRemnant : MonsterScript
     {
         if (!Monster.ObjectUpdateEnabled) return;
 
-        if (Monster.Target is Aisling { Skulled: true })
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-            Monster.Target = null;
-        }
+        CheckTarget();
 
         if (Monster.Aggressive)
         {
-            if (Monster.TargetRecord.TaggedAislings.IsEmpty)
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled && value.player.LoggedIn && value.nearby).ToList();
+            if (!tagged.IsEmpty())
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled);
-                var topDps = targets?.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
+                Monster.Target ??= player;
             }
             else
             {
-                var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled);
-                var topTagged = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= topTagged.player;
+                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled && player.LoggedIn);
+                var topDps = targets.MaxBy(c => c.ThreatMeter);
+                Monster.Target ??= topDps;
             }
-        }
 
-        if (Monster.Target is not null) return;
-        ClearTarget();
+            CheckTarget();
+        }
+        else
+        {
+            ClearTarget();
+        }
     }
 
     #endregion
@@ -2114,7 +2135,7 @@ public class AosdaRemnant : MonsterScript
                 Monster.BashEnabled = false;
                 Monster.CastEnabled = true;
                 var rand = Generator.RandomNumPercentGen();
-                if (rand >= 0.25)
+                if (rand >= 0.80)
                 {
                     Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }

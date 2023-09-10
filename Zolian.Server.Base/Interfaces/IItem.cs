@@ -44,7 +44,7 @@ public interface IItem : ISprite
     Item Create(Sprite owner, ItemTemplate itemTemplate, bool curse = false);
     Item Create(Area map, ItemTemplate itemTemplate);
     Item.Quality QualityRestriction(Item item);
-    Item TrapCreate(Sprite owner, ItemTemplate itemTemplate);
+    Trap TrapCreate(Sprite owner, ItemTemplate itemTemplate, int duration, int radius = 1, Action<Sprite, Sprite> cb = null);
     bool CanCarry(Sprite sprite);
     bool GiveTo(Sprite sprite, bool checkWeight = true);
     void Release(Sprite owner, Position position, bool delete = true);

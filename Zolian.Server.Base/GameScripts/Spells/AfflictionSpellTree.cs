@@ -27,8 +27,15 @@ public class Ard_Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (sprite is Aisling playerAction)
-            playerAction.ActionUsed = "Ard Fas Nadur";
+        switch (sprite)
+        {
+            case Aisling playerAction:
+                playerAction.ActionUsed = "Ard Fas Nadur";
+                break;
+            case Monster monsterAction:
+                target = monsterAction;
+                break;
+        }
 
         if (target.HasDebuff("Ard Fas Nadur"))
         {
@@ -157,8 +164,15 @@ public class Mor_Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (sprite is Aisling playerAction)
-            playerAction.ActionUsed = "Mor Fas Nadur";
+        switch (sprite)
+        {
+            case Aisling playerAction:
+                playerAction.ActionUsed = "Mor Fas Nadur";
+                break;
+            case Monster monsterAction:
+                target = monsterAction;
+                break;
+        }
 
         if (target.HasDebuff("Ard Fas Nadur"))
         {
@@ -337,8 +351,15 @@ public class Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (sprite is Aisling playerAction)
-            playerAction.ActionUsed = "Fas Nadur";
+        switch (sprite)
+        {
+            case Aisling playerAction:
+                playerAction.ActionUsed = "Fas Nadur";
+                break;
+            case Monster monsterAction:
+                target = monsterAction;
+                break;
+        }
 
         if (target.HasDebuff("Ard Fas Nadur") || target.HasDebuff("Mor Fas Nadur"))
         {
