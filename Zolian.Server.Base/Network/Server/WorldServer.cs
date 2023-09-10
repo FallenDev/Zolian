@@ -1284,6 +1284,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
+        if (client.Aisling.IsDead() || client.Aisling.Skulled) return default;
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
         var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastSpellCast).TotalSeconds < 0.25) return default;
@@ -2519,7 +2520,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
-        if (client.Aisling.IsDead()) return default;
+        if (client.Aisling.IsDead() || client.Aisling.Skulled) return default;
         if (client.Aisling.CantAttack)
         {
             client.SendLocation();
