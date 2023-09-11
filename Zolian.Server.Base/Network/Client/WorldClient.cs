@@ -2599,7 +2599,7 @@ namespace Darkages.Network.Client
             var args = new ProfileArgs
             {
                 AdvClass = AdvClass.None,
-                BaseClass = (BaseClass)aisling.Path,
+                BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(ClassStrings.ClassValue(aisling.Path)),
                 Equipment = equipment,
                 GroupOpen = partyOpen,
                 GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
@@ -3135,7 +3135,7 @@ namespace Darkages.Network.Client
             var args = new SelfProfileArgs
             {
                 AdvClass = AdvClass.None,
-                BaseClass = (BaseClass)Aisling.Path,
+                BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(ClassStrings.ClassValue(Aisling.Path)),
                 Equipment = equipment,
                 GroupOpen = partyOpen,
                 GroupString = Aisling.GroupParty?.PartyMemberString ?? "",

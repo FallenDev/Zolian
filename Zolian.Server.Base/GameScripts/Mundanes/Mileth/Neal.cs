@@ -126,6 +126,8 @@ public class Neal : MundaneScript
                 {
                     var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
                     var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
                         || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
@@ -230,6 +232,8 @@ public class Neal : MundaneScript
                 {
                     var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
                     var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
                         || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();

@@ -3,18 +3,18 @@
 [Flags]
 public enum Class
 {
-    Peasant = 0,
-    Berserker = 1,
-    Defender = 2,
-    Assassin = 3,
-    Cleric = 4,
-    Arcanus = 5,
-    Monk = 6,
-    DualBash = 7,
-    DualCast = 8,
-    Racial = 9,
-    Monster = 10,
-    Quest = 11
+    Peasant = 1,
+    Berserker = 1 << 1,
+    Defender = 1 << 2,
+    Assassin = 1 << 3,
+    Cleric = 1 << 4,
+    Arcanus = 1 << 5,
+    Monk = 1 << 6,
+    DualBash = Berserker | Defender,
+    DualCast = Cleric | Arcanus,
+    Racial = 1 << 7,
+    Monster = 1 << 8,
+    Quest = 1 << 9
 }
 
 [Flags]
@@ -128,6 +128,26 @@ public static class ClassStrings
             Class.Monster => "Monster",
             Class.Quest => "Quest",
             _ => "Peasant"
+        };
+    }
+
+    public static int ClassDisplayInt(string c)
+    {
+        return c switch
+        {
+            "Peasant" => 0,
+            "Berserker" => 1,
+            "Defender" => 2,
+            "Assassin" => 3,
+            "Cleric" => 4,
+            "Arcanus" => 5,
+            "Monk" => 6,
+            "DualBash" => 7,
+            "DualCast" => 8,
+            "Racial" => 9,
+            "Monster" => 10,
+            "Quest" => 11,
+            _ => 0
         };
     }
 
