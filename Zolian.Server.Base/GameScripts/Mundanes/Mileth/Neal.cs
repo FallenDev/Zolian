@@ -125,9 +125,10 @@ public class Neal : MundaneScript
             case 0x0001:
                 {
                     var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                    var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                        || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                        || i.Prerequisites.ClassRequired == Class.Peasant).ToList();
+                    var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
 
                     newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
@@ -228,9 +229,10 @@ public class Neal : MundaneScript
             case 0x0010:
                 {
                     var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                    var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired == client.Aisling.Path
-                        || i.Prerequisites.SecondaryClassRequired == client.Aisling.PastClass
-                        || i.Prerequisites.ClassRequired == Class.Peasant).ToList();
+                    var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
+                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
 
                     newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 

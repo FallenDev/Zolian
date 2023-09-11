@@ -11,17 +11,12 @@ namespace Darkages.Templates;
 
 public class MundaneTemplate : Template
 {
-    public MundaneTemplate()
-    {
-        Speech = new List<string>();
-    }
-
     public ushort Image { get; set; }
     public string ScriptKey { get; set; }
     public bool EnableWalking { get; set; }
     public bool EnableTurning { get; set; }
     public bool EnableSpeech { get; set; }
-    public List<string> Speech { get; set; }
+    public List<string> Speech { get; set; } = new();
     public ushort X { get; set; }
     public ushort Y { get; set; }
     public int AreaID { get; set; }
