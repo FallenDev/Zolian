@@ -18,12 +18,6 @@ public class ItemPredicate
 public class LearningPredicate
 {
     private Template _template;
-
-    public LearningPredicate()
-    {
-        _template = null;
-    }
-
     public List<ItemPredicate> ItemsRequired = new();
     public string DisplayName { get; set; }
     public Class ClassRequired { get; set; }
@@ -49,7 +43,7 @@ public class LearningPredicate
             return StageRequired switch
             {
                 ClassStage.Master => $"{ExpLevelRequired}/1/0",
-                ClassStage.Forsaken => $"{ExpLevelRequired}/1/{ExpLevelRequired}",
+                ClassStage.Job => $"{ExpLevelRequired}/1/{ExpLevelRequired}",
                 _ => ExpLevelRequired switch
                 {
                     > 0 and < 500 => $"{ExpLevelRequired}/0/0",

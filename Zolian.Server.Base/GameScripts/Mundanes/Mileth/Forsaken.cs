@@ -79,7 +79,7 @@ public class Forsaken : MundaneScript
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hope you are well, experienced one.", options.ToArray());
                 break;
-            case ClassStage.Forsaken:
+            case ClassStage.Job:
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Ah, brother; What can I do for you?", options.ToArray());
                 break;

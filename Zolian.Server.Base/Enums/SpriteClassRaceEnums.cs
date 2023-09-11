@@ -18,6 +18,24 @@ public enum Class
 }
 
 [Flags]
+public enum Job
+{
+    Thief = 1,
+    DarkKnight = 1 << 1,
+    Templar = 1 << 2,
+    Knight = 1 << 3,
+    Ninja = 1 << 4,
+    SharpShooter = 1 << 5,
+    Oracle = 1 << 6,
+    Bard = 1 << 7,
+    Summoner = 1 << 8,
+    Samurai = 1 << 9,
+    ShaolinMonk = 1 << 10,
+    Necromancer = 1 << 11,
+    Dragoon = 1 << 12
+}
+
+[Flags]
 public enum Race
 {
     UnDecided = 0,
@@ -41,13 +59,13 @@ public enum ClassStage
     Dedicated = 1 << 1,
     Advance = 1 << 2,
     Master = 1 << 3,
-    Forsaken = 1 << 4,
+    Job = 1 << 4,
     Quest = 1 << 5,
 
     MasterLearn = Class | Dedicated | Advance | Master,
     DedicatedLearn = Class | Dedicated,
     AdvanceLearn = Class | Advance,
-    ForsakenLearn = Class | Dedicated | Advance | Master | Forsaken
+    ForsakenLearn = Class | Dedicated | Advance | Master | Job
 }
 
 [Flags]
@@ -121,7 +139,7 @@ public static class ClassStrings
             ClassStage.Dedicated => "Dedicated",
             ClassStage.Advance => "Advance",
             ClassStage.Master => "Master",
-            ClassStage.Forsaken => "Forsaken",
+            ClassStage.Job => "Job",
             ClassStage.Quest => "Quest",
             ClassStage.MasterLearn => "MasterLearn",
             ClassStage.DedicatedLearn => "DedicatedLearn",
