@@ -76,43 +76,47 @@ public class ClassChooser : MundaneScript
         }
         else
         {
-            client.Aisling.Path = (Class)responseID;
+            var pathEnum = (BaseClass)responseID;
             client.Aisling.Stage = ClassStage.Class;
 
-            switch (client.Aisling.Path)
+            switch (pathEnum)
             {
-                case Class.Berserker:
+                case BaseClass.Berserker:
                 {
+                    client.Aisling.Path = Class.Berserker;
                     Berzerker(client);
                     break;
                 }
-                case Class.Defender:
+                case BaseClass.Defender:
                 {
+                    client.Aisling.Path = Class.Defender;
                     Defender(client);
                     break;
                 }
-                case Class.Monk:
+                case BaseClass.Monk:
                 {
+                    client.Aisling.Path = Class.Monk;
                     Monk(client);
                     break;
                 }
-                case Class.Assassin:
+                case BaseClass.Assassin:
                 {
+                    client.Aisling.Path = Class.Assassin;
                     Assassin(client);
                     break;
                 }
-                case Class.Cleric:
+                case BaseClass.Cleric:
                 {
+                    client.Aisling.Path = Class.Cleric;
                     Cleric(client);
                     break;
                 }
-                case Class.Arcanus:
+                case BaseClass.Arcanus:
                 {
+                    client.Aisling.Path = Class.Arcanus;
                     Arcanus(client);
                     break;
                 }
-                case Class.Peasant:
-                    break;
             }
 
             var path = ClassStrings.ClassValue(client.Aisling.Path);
