@@ -2,6 +2,7 @@
 using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Templates;
 
@@ -158,11 +159,11 @@ public class LearningPredicate
     private static string NpcLocation(string npcKey)
     {
         if (string.IsNullOrEmpty(npcKey)) npcKey = "None";
-        if (!ServerSetup.Instance.GlobalMundaneTemplateCache.ContainsKey(npcKey)) return "\nThe location of this ability is not written on the scroll.\n";
+        if (!ServerSetup.Instance.GlobalMundaneTemplateCache.TryGetValue(npcKey, out _)) return "\nThe location of this ability is not written on the scroll.\n";
 
         var npc = ServerSetup.Instance.GlobalMundaneTemplateCache[npcKey];
 
-        if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(npc.AreaID)) return "\nThe location of this ability is not written on the scroll.\n";
+        if (!ServerSetup.Instance.GlobalMapCache.TryGetValue(npc.AreaID, out _)) return "\nThe location of this ability is not written on the scroll.\n";
 
         var map = ServerSetup.Instance.GlobalMapCache[npc.AreaID];
         {
@@ -170,91 +171,81 @@ public class LearningPredicate
         }
     }
 
-    private string DamageModifiers(Template temp)
+    private static string DamageModifiers(Template temp)
     {
         return temp is SkillTemplate ? $"\nSkill Modifiers: {temp.DamageMod ?? "None"}" : $"\nSpell Modifiers: {temp.DamageMod ?? "None"}";
     }
 
-    private int CheckAttributePredicates(Aisling player, IDictionary<int, Tuple<bool, object>> result, int n)
+    private int CheckAttributePredicates(Player player, IDictionary<int, Tuple<bool, object>> result, int n)
     {
-        result[n++] = new Tuple<bool, object>(player.ExpLevel >= ExpLevelRequired,
-            $"Come back when you're the appropriate insight. (Level {ExpLevelRequired.ToString()} Required)");
-        result[n++] = new Tuple<bool, object>(player.Str >= StrRequired,
-            $"Your muscle fibers aren't up for the task. ({StrRequired.ToString()} Str Required)");
-        result[n++] = new Tuple<bool, object>(player.Int >= IntRequired,
-            $"You must study harder and come back when you know more. ({IntRequired.ToString()} Int Required)");
-        result[n++] = new Tuple<bool, object>(player.Wis >= WisRequired,
-            $"You do not quite possess the wisdom to understand this. ({WisRequired.ToString()} Wis Required)");
-        result[n++] = new Tuple<bool, object>(player.Con >= ConRequired,
-            $"You lack stamina. ({ConRequired.ToString()} Con Required)");
-        result[n++] = new Tuple<bool, object>(player.Dex >= DexRequired,
-            $"You must increase your dexterity. ({DexRequired.ToString()} Dex Required)");
-        result[n++] = new Tuple<bool, object>(player.GoldPoints >= GoldRequired,
-            $"My services aren't free. ({GoldRequired.ToString()} Gold Required)");
+        result[n++] = new Tuple<bool, object>(player.ExpLevel >= ExpLevelRequired, $"Come back when you're the appropriate insight. (Level {ExpLevelRequired} Required)");
+        result[n++] = new Tuple<bool, object>(player.Str >= StrRequired, $"Your muscle fibers aren't up for the task. ({StrRequired} Str Required)");
+        result[n++] = new Tuple<bool, object>(player.Int >= IntRequired, $"You must study harder and come back when you know more. ({IntRequired} Int Required)");
+        result[n++] = new Tuple<bool, object>(player.Wis >= WisRequired, $"You do not quite possess the wisdom to understand this. ({WisRequired} Wis Required)");
+        result[n++] = new Tuple<bool, object>(player.Con >= ConRequired, $"You lack stamina. ({ConRequired} Con Required)");
+        result[n++] = new Tuple<bool, object>(player.Dex >= DexRequired, $"You must increase your dexterity. ({DexRequired} Dex Required)");
+        result[n++] = new Tuple<bool, object>(player.GoldPoints >= GoldRequired, $"My services aren't free. ({GoldRequired} Gold Required)");
         result[n++] = new Tuple<bool, object>(player.Stage >= StageRequired, "You must transcend further before you can learn this.");
-        result[n++] = new Tuple<bool, object>(player.Path == ClassRequired || player.PastClass == ClassRequired || ClassRequired == Class.Peasant || player.Path == SecondaryClassRequired, "I have nothing left to teach you, " + player.Path);
+        result[n++] = new Tuple<bool, object>(ClassRequired.ClassFlagIsSet(player.Path) || ClassRequired.ClassFlagIsSet(player.PastClass) || ClassRequired.ClassFlagIsSet(Class.Peasant) 
+                                              || SecondaryClassRequired.ClassFlagIsSet(player.Path) || SecondaryClassRequired.ClassFlagIsSet(player.PastClass) || SecondaryClassRequired.ClassFlagIsSet(Class.Peasant), "I have nothing left to teach you, " + player.Path);
         return n;
     }
 
     private int CheckItemPredicates(Aisling player, IDictionary<int, Tuple<bool, object>> result, int n)
     {
-        if (ItemsRequired is { Count: > 0 })
+        if (ItemsRequired is not { Count: > 0 }) return n;
+        var msg = new StringBuilder(ServerSetup.Instance.Config.ItemNotRequiredMsg);
+        var items = ItemsRequired.Select(i => $"{i.Item} ({i.AmountRequired}) ");
+
+        foreach (var itemStrings in items) msg.Append(itemStrings);
+
+        var errorMsg = msg.ToString();
+        var formatted = errorMsg.Replace(") ", "), ").TrimEnd(',', ' ');
+
+        foreach (var ir in ItemsRequired)
         {
-            var msg = new StringBuilder(ServerSetup.Instance.Config.ItemNotRequiredMsg);
-
-            var items = ItemsRequired.Select(i => $"{i.Item} ({i.AmountRequired.ToString()}) ");
-
-            foreach (var itemStrings in items) msg.Append(itemStrings);
-
-            var errorMsg = msg.ToString();
-
-            var formatted = errorMsg.Replace(") ", "), ").TrimEnd(',', ' ');
-
-            foreach (var ir in ItemsRequired)
+            if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(ir.Item))
             {
-                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(ir.Item))
-                {
-                    result[n] = new Tuple<bool, object>(false, formatted);
+                result[n] = new Tuple<bool, object>(false, formatted);
 
-                    break;
-                }
-
-                var item = ServerSetup.Instance.GlobalItemTemplateCache[ir.Item];
-
-                if (item == null)
-                {
-                    result[n] = new Tuple<bool, object>(false, formatted);
-                    break;
-                }
-
-                var itemObtained = player.Inventory.Get(i => i.Template.Name.Equals(item.Name));
-
-                var itemTotal = 0;
-
-                foreach (var itemObj in itemObtained)
-                {
-                    var itemCount = 0;
-                    if (itemObj.Template.CanStack)
-                        itemCount += itemObj.Stacks;
-                    else
-                        itemCount++;
-
-                    itemTotal += itemCount;
-                }
-
-                if (itemTotal >= ir.AmountRequired)
-                    result[n] = new Tuple<bool, object>(true, string.Empty);
-                else
-                    result[n] = new Tuple<bool, object>(false, formatted);
-
-                n++;
+                break;
             }
+
+            var item = ServerSetup.Instance.GlobalItemTemplateCache[ir.Item];
+
+            if (item == null)
+            {
+                result[n] = new Tuple<bool, object>(false, formatted);
+                break;
+            }
+
+            var itemObtained = player.Inventory.Get(i => i.Template.Name.Equals(item.Name));
+
+            var itemTotal = 0;
+
+            foreach (var itemObj in itemObtained)
+            {
+                var itemCount = 0;
+                if (itemObj.Template.CanStack)
+                    itemCount += itemObj.Stacks;
+                else
+                    itemCount++;
+
+                itemTotal += itemCount;
+            }
+
+            if (itemTotal >= ir.AmountRequired)
+                result[n] = new Tuple<bool, object>(true, string.Empty);
+            else
+                result[n] = new Tuple<bool, object>(false, formatted);
+
+            n++;
         }
 
         return n;
     }
 
-    private int CheckSpellandSkillPredicates(Aisling player, Dictionary<int, Tuple<bool, object>> result, int n)
+    private int CheckSpellandSkillPredicates(Aisling player, IDictionary<int, Tuple<bool, object>> result, int n)
     {
         if (SkillRequired is not (null or ""))
         {
@@ -272,7 +263,7 @@ public class LearningPredicate
             }
             else
             {
-                result[n++] = new Tuple<bool, object>(false, $"{skill.Name} Must be level {SkillLevelRequired.ToString()} - Enlighten {Math.Abs(skillRetainer.Level - SkillLevelRequired).ToString()} more levels.");
+                result[n++] = new Tuple<bool, object>(false, $"{skill.Name} Must be level {SkillLevelRequired} - Enlighten {Math.Abs(skillRetainer.Level - SkillLevelRequired)} more levels.");
             }
         }
 
@@ -291,7 +282,7 @@ public class LearningPredicate
             }
             else
             {
-                result[n++] = new Tuple<bool, object>(false, $"{spell.Name} Must be level {SpellLevelRequired.ToString()} - Enlighten {Math.Abs(spellRetainer.Level - SpellLevelRequired).ToString()} more levels.");
+                result[n++] = new Tuple<bool, object>(false, $"{spell.Name} Must be level {SpellLevelRequired} - Enlighten {Math.Abs(spellRetainer.Level - SpellLevelRequired)} more levels.");
             }
         }
 
