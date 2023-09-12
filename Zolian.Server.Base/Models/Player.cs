@@ -130,4 +130,5 @@ public class Quests
     public bool SwampAccess { get; set; }
     public int SwampCount { get; set; }
     public bool TagorDungeonAccess { get; set; }
+    public int Lau { get; set; }
 }

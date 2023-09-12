@@ -3587,6 +3587,7 @@ namespace Darkages.Network.Client
         public bool PayPrerequisites(LearningPredicate prerequisites)
         {
             if (prerequisites == null) return false;
+            if (Aisling.GameMaster) return true;
 
             PayItemPrerequisites(prerequisites);
             {

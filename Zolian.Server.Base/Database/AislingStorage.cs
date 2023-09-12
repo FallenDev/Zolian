@@ -319,6 +319,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd2.Parameters.Add("@SwampAccess", SqlDbType.Bit).Value = obj.QuestManager.SwampAccess;
             cmd2.Parameters.Add("@SwampCount", SqlDbType.Int).Value = obj.QuestManager.SwampCount;
             cmd2.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = obj.QuestManager.TagorDungeonAccess;
+            cmd2.Parameters.Add("@Lau", SqlDbType.Int).Value = obj.QuestManager.Lau;
 
             #endregion
 
@@ -803,7 +804,8 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@SwampAccess", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@SwampCount", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = false;
-
+            cmd5.Parameters.Add("@Lau", SqlDbType.Int).Value = 0;
+            
             #endregion
 
             ExecuteAndCloseConnection(cmd5, sConn);
