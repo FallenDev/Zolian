@@ -130,7 +130,6 @@ public interface IWorldClient : ISocketClient
     bool PayPrerequisites(LearningPredicate prerequisites);
     bool CheckReqs(WorldClient client, Item item);
     void EquipLantern(TimeSpan elapsedTime);
-    void CheckTraps(TimeSpan elapsedTime);
     void CheckDayDreaming(TimeSpan elapsedTime);
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);

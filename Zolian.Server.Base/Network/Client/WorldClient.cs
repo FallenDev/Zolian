@@ -49,7 +49,6 @@ namespace Darkages.Network.Client
         public readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
-        public readonly WorldServerTimer TrapTimer = new(TimeSpan.FromSeconds(1));
         public readonly WorldServerTimer LanternCheckTimer = new(TimeSpan.FromSeconds(2));
         public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
@@ -250,7 +249,6 @@ namespace Darkages.Network.Client
         private void DoUpdate(TimeSpan elapsedTime)
         {
             EquipLantern(elapsedTime);
-            CheckTraps(elapsedTime);
             CheckDayDreaming(elapsedTime);
             HandleBadTrades();
             DeathStatusCheck();
@@ -274,19 +272,6 @@ namespace Darkages.Network.Client
             if (Aisling.Lantern != 2) return;
             Aisling.Lantern = 0;
             SendDisplayAisling(Aisling);
-        }
-
-        public void CheckTraps(TimeSpan elapsedTime)
-        {
-            if (!TrapTimer.Update(elapsedTime)) return;
-
-            lock (ServerSetup.Instance.Traps)
-            {
-                Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) =>
-                {
-                    trap?.Update();
-                });
-            }
         }
 
         public void CheckDayDreaming(TimeSpan elapsedTime)

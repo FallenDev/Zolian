@@ -51,6 +51,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
+    public readonly WorldServerTimer TrapTimer = new(TimeSpan.FromSeconds(1));
     private DateTime _gameSpeed;
     private DateTime _spriteSpeed;
     private const int GameSpeed = 30;
@@ -601,6 +602,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 UpdateMaps(gameTime);
+                CheckTraps(gameTime);
             }
             catch (Exception e)
             {
@@ -690,7 +692,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             foreach (var trap in traps)
             {
                 if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                    monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
+                    monster.X != trap.Location.X || monster.Y != trap.Location.Y || 
+                    monster.Map != trap.TrapItem.Map) continue;
 
                 var triggered = Trap.Activate(trap, monster);
                 if (triggered) break;
@@ -709,6 +712,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (mundane == null) continue;
             mundane.Update(elapsedTime);
             mundane.LastUpdated = DateTime.UtcNow;
+        }
+    }
+
+    private void CheckTraps(TimeSpan elapsedTime)
+    {
+        if (!TrapTimer.Update(elapsedTime)) return;
+
+        lock (ServerSetup.Instance.Traps)
+        {
+            Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) =>
+            {
+                trap?.Update();
+            });
         }
     }
 
@@ -818,7 +834,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == localClient.Aisling.Serial ||
                         localClient.Aisling.X != trap.Location.X ||
-                        localClient.Aisling.Y != trap.Location.Y) continue;
+                        localClient.Aisling.Y != trap.Location.Y ||
+                        localClient.Aisling.Map != trap.TrapItem.Map) continue;
 
                     var triggered = Trap.Activate(trap, localClient.Aisling);
                     if (triggered) break;
