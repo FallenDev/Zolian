@@ -1368,6 +1368,7 @@ namespace Darkages.Network.Client
                 Hit = Math.Clamp(Aisling.Hit, byte.MinValue, byte.MaxValue),
                 Int = (byte)Math.Clamp(Aisling.Int, 0, 255),
                 IsAdmin = Aisling.GameMaster,
+                CanSwim = true,
                 Level = (byte)Aisling.ExpLevel,
                 MagicResistance = (byte)(Aisling.Regen / 10),
                 HasUnreadMail = Aisling.MailFlags == (Mail.Letter),
