@@ -787,19 +787,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         // If the dictionary is empty, add the player
         if (monster.TargetRecord.TaggedAislings.IsEmpty)
         {
-            monster.TryAddTryRemoveTagging(attackingPlayer);
+            monster.TryAddPlayerAndHisGroup(attackingPlayer);
             return true;
         }
 
-        var taggedMemberSerial = monster.TargetRecord.TaggedAislings.Keys.FirstOrDefault();
-        if (taggedMemberSerial == 0) return false;
+        var playerTagged = monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _);
+        if (playerTagged) return true;
 
-        var taggedMember = GetObject<Aisling>(Map, i => i.Serial == taggedMemberSerial);
-        if (taggedMember?.GroupParty == null) return false;
-
-        if (attackingPlayer.GroupId != taggedMember.GroupId) return false;
-        monster.TryAddTryRemoveTagging(attackingPlayer);
-        return true;
+        return monster.TryAddTagging(attackingPlayer); 
     }
 
     #endregion

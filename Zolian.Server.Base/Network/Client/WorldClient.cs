@@ -3784,13 +3784,45 @@ namespace Darkages.Network.Client
                     break;
             }
 
+            TrainSkillAnnounce(skill);
             SendAddSkillToPane(skill);
             skill.CurrentCooldown = skill.Template.Cooldown;
             SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-            SendServerMessage(ServerMessageType.ActiveMessage,
-                skill.Level >= 100
-                    ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", skill.Template.Name)
-                    : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", skill.Template.Name, skill.Level));
+        }
+
+        private void TrainSkillAnnounce(Skill skill)
+        {
+            if (Aisling.Stage < ClassStage.Master)
+            {
+                if (skill.Level > 100) skill.Level = 100;
+                SendServerMessage(ServerMessageType.ActiveMessage,
+                    skill.Level >= 100
+                        ? string.Format(CultureInfo.CurrentUICulture, "{0} locked until master", skill.Template.Name)
+                        : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                return;
+            }
+
+            switch (skill.Template.SkillType)
+            {
+                case SkillScope.Assail:
+                {
+                    if (skill.Level > 350) skill.Level = 350;
+                    SendServerMessage(ServerMessageType.ActiveMessage,
+                        skill.Level >= 350
+                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                    break;
+                }
+                case SkillScope.Ability:
+                {
+                    if (skill.Level > 500) skill.Level = 500;
+                    SendServerMessage(ServerMessageType.ActiveMessage,
+                        skill.Level >= 500
+                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                    break;
+                }
+            }
         }
 
         public void TrainSpell(Spell spell)

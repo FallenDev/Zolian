@@ -9,6 +9,7 @@ using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
+using ServiceStack;
 
 namespace Darkages.Sprites;
 
@@ -85,45 +86,37 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
     public static void InitScripting(MonsterTemplate template, Area map, Monster obj) => obj.Scripts = ScriptManager.Load<MonsterScript>(template.ScriptName, obj, map);
 
-    public void TryAddTryRemoveTagging(Sprite target)
+    public void TryAddPlayerAndHisGroup(Sprite target)
     {
-        TargetRecord.TaggedAislings ??= new ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)>();
-
-        if (target is not Aisling aisling) return;
-
-        var alreadyTagged = TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out _);
-        var playerNearby = AislingsEarShotNearby().Contains(aisling);
-
-        switch (alreadyTagged)
+        if (target is not Aisling aisling)
         {
-            case false:
-                TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, playerNearby));
-                break;
-            case true:
-                if (!playerNearby)
-                    TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
-                break;
+            Target = target;
+            return;
         }
-
-        if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.Count - 1 <= 0) return;
+        
+        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true));
+        
+        if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.IsEmpty()) return;
         if (aisling.GroupParty == null) return;
-
+        
         foreach (var member in aisling.GroupParty.PartyMembers.Where(member => member != null))
         {
             var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
             var playersNearby = AislingsEarShotNearby().Contains(member);
 
-            switch (memberTagged)
-            {
-                case false:
-                    TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby));
-                    break;
-                case true:
-                    if (!playersNearby)
-                        TargetRecord.TaggedAislings.TryRemove(member.Serial, out _);
-                    break;
-            }
+            if (!memberTagged)
+                TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby));
         }
+    }
+
+    public bool TryAddTagging(Sprite target)
+    {
+        if (target is not Aisling aisling) return true;
+        var checkGroup = TargetRecord.TaggedAislings.FirstOrDefault().Value;
+
+        if (checkGroup.player.GroupId != aisling.GroupId) return false;
+        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true));
+        return true;
     }
 
     public void GenerateRewards(Aisling player)

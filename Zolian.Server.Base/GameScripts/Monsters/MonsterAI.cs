@@ -314,13 +314,19 @@ public class MonsterBaseIntelligence : MonsterScript
             if (!tagged.IsEmpty())
             {
                 var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= player;
+                Monster.Target = player;
             }
             else
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => (!player.IsInvisible || !player.Skulled) && player.LoggedIn);
-                var topDps = targets.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var targets = Monster.AislingsEarShotNearby().ToList();
+                var topDps = targets.OrderBy(c => c.ThreatMeter);
+                
+                foreach (var target in topDps)
+                {
+                    if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                    Monster.Target = target;
+                    break;
+                }
             }
 
             CheckTarget();
@@ -853,13 +859,19 @@ public class MonsterPirate : MonsterScript
             if (!tagged.IsEmpty())
             {
                 var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= player;
+                Monster.Target = player;
             }
             else
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => (!player.IsInvisible || !player.Skulled) && player.LoggedIn);
-                var topDps = targets.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var targets = Monster.AislingsEarShotNearby().ToList();
+                var topDps = targets.OrderBy(c => c.ThreatMeter);
+                
+                foreach (var target in topDps)
+                {
+                    if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                    Monster.Target = target;
+                    break;
+                }
             }
 
             CheckTarget();
@@ -1404,17 +1416,23 @@ public class MonsterShadowSight : MonsterScript
 
         if (Monster.Aggressive)
         {
-            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled && value.player.LoggedIn && value.nearby).ToList();
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => (!value.player.Skulled) && value.player.LoggedIn && value.nearby).ToList();
             if (!tagged.IsEmpty())
             {
                 var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= player;
+                Monster.Target = player;
             }
             else
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled && player.LoggedIn);
-                var topDps = targets.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var targets = Monster.AislingsEarShotNearby().ToList();
+                var topDps = targets.OrderBy(c => c.ThreatMeter);
+                
+                foreach (var target in topDps)
+                {
+                    if (target.Skulled || !target.LoggedIn) continue;
+                    Monster.Target = target;
+                    break;
+                }
             }
 
             CheckTarget();
@@ -1950,18 +1968,26 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.Aggressive)
         {
-            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => !value.player.Skulled && value.player.LoggedIn && value.nearby).ToList();
+            var tagged = Monster.TargetRecord.TaggedAislings.Values.Where(value => (!value.player.Skulled) && value.player.LoggedIn && value.nearby).ToList();
             if (!tagged.IsEmpty())
             {
                 var (_, player, _) = tagged.MaxBy(c => c.player.ThreatMeter);
-                Monster.Target ??= player;
+                Monster.Target = player;
             }
             else
             {
-                var targets = Monster.AislingsEarShotNearby().Where(player => !player.Skulled && player.LoggedIn);
-                var topDps = targets.MaxBy(c => c.ThreatMeter);
-                Monster.Target ??= topDps;
+                var targets = Monster.AislingsEarShotNearby().ToList();
+                var topDps = targets.OrderBy(c => c.ThreatMeter);
+                
+                foreach (var target in topDps)
+                {
+                    if (target.Skulled || !target.LoggedIn) continue;
+                    Monster.Target = target;
+                    break;
+                }
             }
+
+            CheckTarget();
 
             CheckTarget();
         }
