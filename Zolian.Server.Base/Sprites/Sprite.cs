@@ -226,8 +226,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public byte _Hit { get; set; }
     public byte BonusHit { get; set; }
 
-    public byte _Mr { get; set; }
-    public byte BonusMr { get; set; }
+    public int _Mr { get; set; }
+    public int BonusMr { get; set; }
 
     public int _Str { get; set; }
     public int BonusStr { get; set; }
@@ -1140,6 +1140,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         // Apply modifiers for attacker
+        dmg = ApplyPhysicalModifier();
+
         if (damageDealingSprite is Aisling)
         {
             dmg = ApplyBehindTargetMod();
@@ -1175,6 +1177,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         // Run OnDamaged scripts
         OnDamaged(damageDealingSprite, dmg);
         return;
+
+        long ApplyPhysicalModifier()
+        {
+            var dmgAboveAcModifier = damageDealingSprite.Str * 0.25;
+            dmgAboveAcModifier /= 100;
+            var dmgAboveAcBoost = dmgAboveAcModifier * dmg;
+            dmg += (long)dmgAboveAcBoost;
+            return dmg;
+        }
 
         long ApplyPvpMod()
         {
@@ -1278,6 +1289,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
         }
 
+        dmg = ApplyMagicalModifier();
+
         if (damageDealingSprite is Aisling)
         {
             dmg = PainBane();
@@ -1301,6 +1314,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         OnDamaged(damageDealingSprite, dmg);
         return;
+
+        long ApplyMagicalModifier()
+        {
+            var dmgAboveAcModifier = damageDealingSprite.Int * 0.05;
+            dmgAboveAcModifier /= 100;
+            var dmgAboveAcBoost = dmgAboveAcModifier * dmg;
+            dmg += (long)dmgAboveAcBoost;
+            return dmg;
+        }
 
         long PainBane()
         {

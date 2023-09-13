@@ -86,6 +86,7 @@ public class CreateMonster : MonsterCreateScript
 
         obj.BaseHp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * hpMultiplier);
         obj.BaseMp = Generator.RandomMonsterStatVariance((int)obj.Template.Level * mpMultiplier);
+        obj._Mr = 50;
 
         MonsterSize(obj);
         MonsterArmorClass(obj);
@@ -329,6 +330,9 @@ public class CreateMonster : MonsterCreateScript
         var (start, end) = levelArmorClassRange.First(x => obj.Template.Level <= x.Key).Value;
 
         obj.BonusAc = Generator.GenerateDeterminedNumberRange(start, end);
+        var mrBonus = Generator.GenerateDeterminedNumberRange(start, end);
+        mrBonus *= 2;
+        obj.BonusMr = mrBonus;
     }
 
     private static void MonsterExperience(Monster obj)

@@ -26,10 +26,10 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
         return success switch
         {
-            <= 25 when spell.Level <= 29 => false,
-            <= 15 when spell.Level <= 49 => false,
-            <= 10 when spell.Level <= 74 => false,
-            <= 5 when spell.Level <= 99 => false,
+            <= 20 when spell.Level <= 29 => false,
+            <= 10 when spell.Level <= 49 => false,
+            <= 7 when spell.Level <= 74 => false,
+            <= 3 when spell.Level <= 99 => false,
             _ => true
         };
     }
@@ -71,7 +71,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is not Aisling damageDealingAisling) return dmg;
         var spellLevelOffset = spell.Level + 1;
         var client = damageDealingAisling.Client;
-        var bonus = baseDmg + 2.0 * spellLevelOffset / 100;
+        var bonus = baseDmg + 2.0 * spellLevelOffset;
         var amp = client.Aisling.Int / 2.0 * exp;
         var final = (int)(amp + bonus);
         var crit = CritStrike();

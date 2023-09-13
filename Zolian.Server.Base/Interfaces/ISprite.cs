@@ -60,8 +60,8 @@ public interface ISprite
     byte _Hit { get; set; }
     byte BonusHit { get; set; }
 
-    byte _Mr { get; set; }
-    byte BonusMr { get; set; }
+    int _Mr { get; set; }
+    int BonusMr { get; set; }
 
     int _Str { get; set; }
     int BonusStr { get; set; }

@@ -47,15 +47,7 @@ public class Ac : FormulaScript
 
         if (value <= 0)
             value = 1;
-
-        var dmgAboveAcModifier = obj.Str * 0.25;
-        dmgAboveAcModifier /= 100;
-        var dmgAboveAcBoost = dmgAboveAcModifier * value;
-        value += (int)dmgAboveAcBoost;
-
-        if (value <= 0)
-            value = 1;
-
+        
         return value;
     }
 }
