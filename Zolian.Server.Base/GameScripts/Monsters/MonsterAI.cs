@@ -25,7 +25,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
     public BaseMonsterIntelligence(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -331,7 +331,7 @@ public class BaseMonsterIntelligence : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on highest threat
-                var groupAttacking = tagged.OrderByDescending(c => c.dmg);
+                var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {
@@ -600,7 +600,7 @@ public class WeakCommon : MonsterScript
 
     public WeakCommon(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -906,7 +906,7 @@ public class WeakCommon : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on lowest threat
-                var groupAttacking = tagged.OrderBy(c => c.dmg);
+                var groupAttacking = tagged.OrderBy(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {
@@ -1183,7 +1183,7 @@ public class GeneralPirate : MonsterScript
 
     public GeneralPirate(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -1484,7 +1484,7 @@ public class GeneralPirate : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on highest threat
-                var groupAttacking = tagged.OrderByDescending(c => c.dmg);
+                var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {
@@ -1773,7 +1773,7 @@ public class ShadowSight : MonsterScript
 
     public ShadowSight(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -2078,7 +2078,7 @@ public class ShadowSight : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on highest threat
-                var groupAttacking = tagged.OrderByDescending(c => c.dmg);
+                var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {
@@ -2347,7 +2347,7 @@ public class WeakShadowSight : MonsterScript
 
     public WeakShadowSight(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -2652,7 +2652,7 @@ public class WeakShadowSight : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on lowest threat
-                var groupAttacking = tagged.OrderBy(c => c.dmg);
+                var groupAttacking = tagged.OrderBy(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {
@@ -2929,7 +2929,7 @@ public class AosdaRemnant : MonsterScript
 
     public AosdaRemnant(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = new List<Item>();
@@ -3237,7 +3237,7 @@ public class AosdaRemnant : MonsterScript
             if (!tagged.IsEmpty())
             {
                 // Sort group based on highest threat
-                var groupAttacking = tagged.OrderByDescending(c => c.dmg);
+                var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
                 foreach (var (_, player, nearby) in groupAttacking)
                 {

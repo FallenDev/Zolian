@@ -1437,6 +1437,7 @@ public class Earthly_Delights : SkillScript
             if (_target.MaximumHp * 0.30 < dmgCalc)
                 dmgCalc = (int)(_target.MaximumHp * 0.30);
 
+            aisling.ThreatMeter += dmgCalc;
             _target.CurrentHp += (int)dmgCalc;
 
             if (_target.CurrentHp > _target.MaximumHp)
@@ -1585,6 +1586,7 @@ public class Heavenly_Gaze : SkillScript
         {
             _target = entity;
             var dmgCalc = DamageCalc(sprite);
+            aisling.ThreatMeter += dmgCalc;
 
             if (_target.MaximumHp * 0.15 < dmgCalc)
             {

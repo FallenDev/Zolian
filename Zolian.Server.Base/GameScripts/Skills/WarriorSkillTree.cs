@@ -2230,7 +2230,7 @@ public class Raise_Threat : SkillScript
             SourceId = sprite.Serial
         };
 
-        aisling.ThreatMeter += 250000;
+        aisling.ThreatMeter *= 4;
 
         var enemies = aisling.MonstersNearby();
         foreach (var monster in enemies.Where(e => e is { IsAlive: true }))

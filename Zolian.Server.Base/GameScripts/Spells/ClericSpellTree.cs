@@ -442,8 +442,9 @@ public class Heal_Minor : SpellScript
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.15;
-
+                aisling.ThreatMeter += (long)healBase;
                 target.CurrentHp += (int)healBase;
+
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
@@ -557,8 +558,9 @@ public class Heal_Major : SpellScript
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.30;
-
+                aisling.ThreatMeter += (long)healBase;
                 target.CurrentHp += (int)healBase;
+
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
@@ -672,8 +674,9 @@ public class Heal_Critical : SpellScript
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.65;
-
+                aisling.ThreatMeter += (long)healBase;
                 target.CurrentHp += (int)healBase;
+
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
@@ -798,8 +801,9 @@ public class Dire_Aid : SpellScript
                 }
 
                 var healBase = target.MaximumHp * 0.80;
-
+                aisling.ThreatMeter += (long)healBase;
                 target.CurrentHp += (int)healBase;
+
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
@@ -922,7 +926,9 @@ public class Healing_Winds : SpellScript
             foreach (var partyMember in aisling.AislingsNearby().Where(i => i.GroupId == aisling.GroupId))
             {
                 if (partyMember.Dead) continue;
+                aisling.ThreatMeter += (long)healBase;
                 partyMember.CurrentHp += (int)healBase;
+
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
 
