@@ -765,7 +765,7 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient LoadSkillBook()
+        public void LoadSkillBook()
         {
             try
             {
@@ -815,11 +815,9 @@ namespace Darkages.Network.Client
             }
 
             SkillCleanup();
-
-            return this;
         }
 
-        public WorldClient LoadSpellBook()
+        public void LoadSpellBook()
         {
             try
             {
@@ -869,8 +867,6 @@ namespace Darkages.Network.Client
             }
 
             SpellCleanup();
-
-            return this;
         }
 
         private WorldClient InitSpellBar()

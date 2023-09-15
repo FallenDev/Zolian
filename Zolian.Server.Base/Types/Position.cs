@@ -78,21 +78,36 @@ public class Position
     {
         var list = new List<TileContentPosition>();
 
-        if (X > 0)
-            list.Add(new TileContentPosition(new Position(X - 1, Y),
-                !map.ObjectGrid[X - 1, Y].Sprites.Any() ? !map.IsWall(X - 1, Y) ? TileContent.None : TileContent.Wall : TileContent.Wall));
+        try
+        {
+            if (X > 0)
+                list.Add(new TileContentPosition(new Position(X - 1, Y),
+                    !map.ObjectGrid[X - 1, Y].Sprites.Any()
+                        ? !map.IsWall(X - 1, Y) ? TileContent.None : TileContent.Wall
+                        : TileContent.Wall));
 
-        if (Y > 0)
-            list.Add(new TileContentPosition(new Position(X, Y - 1),
-                !map.ObjectGrid[X, Y - 1].Sprites.Any() ? !map.IsWall(X, Y - 1) ? TileContent.None : TileContent.Wall : TileContent.Wall));
+            if (Y > 0)
+                list.Add(new TileContentPosition(new Position(X, Y - 1),
+                    !map.ObjectGrid[X, Y - 1].Sprites.Any()
+                        ? !map.IsWall(X, Y - 1) ? TileContent.None : TileContent.Wall
+                        : TileContent.Wall));
 
-        if (X < map.Height - 1)
-            list.Add(new TileContentPosition(new Position(X + 1, Y),
-                !map.ObjectGrid[X + 1, Y].Sprites.Any() ? !map.IsWall(X + 1, Y) ? TileContent.None : TileContent.Wall : TileContent.Wall));
+            if (X < map.Height - 1)
+                list.Add(new TileContentPosition(new Position(X + 1, Y),
+                    !map.ObjectGrid[X + 1, Y].Sprites.Any()
+                        ? !map.IsWall(X + 1, Y) ? TileContent.None : TileContent.Wall
+                        : TileContent.Wall));
 
-        if (Y < map.Width - 1)
-            list.Add(new TileContentPosition(new Position(X, Y + 1),
-                !map.ObjectGrid[X, Y + 1].Sprites.Any() ? !map.IsWall(X, Y + 1) ? TileContent.None : TileContent.Wall : TileContent.Wall));
+            if (Y < map.Width - 1)
+                list.Add(new TileContentPosition(new Position(X, Y + 1),
+                    !map.ObjectGrid[X, Y + 1].Sprites.Any()
+                        ? !map.IsWall(X, Y + 1) ? TileContent.None : TileContent.Wall
+                        : TileContent.Wall));
+        }
+        catch
+        {
+            return null;
+        }
 
         return list.ToArray();
     }

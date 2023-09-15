@@ -1313,6 +1313,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (spell == null)
             {
                 localClient.SendCancelCasting();
+                localClient.Aisling.SpellBook = new SpellBook();
+                localClient.LoadSpellBook();
                 return default;
             }
 
@@ -1331,20 +1333,33 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (localClient.SpellCastInfo is null)
             {
-                info = new CastInfo
+                if (argsData.IsEmpty())
                 {
-                    Slot = sourceSlot,
-                    Target = 0,
-                    Position = new Position(),
-                    Data = argsData.ToString(),
-                };
+                    info = new CastInfo
+                    {
+                        Slot = sourceSlot,
+                        Target = 0,
+                        Position = new Position()
+                    };
+                }
+                else
+                {
+                    info = new CastInfo
+                    {
+                        Slot = sourceSlot,
+                        Target = 0,
+                        Position = new Position(),
+                        Data = argsData.ToString()
+                    };
+                }
             }
             else
             {
                 info.Slot = localClient.SpellCastInfo.Slot;
                 info.Target = localClient.SpellCastInfo.Target;
                 info.Position = localClient.SpellCastInfo.Position;
-                info.Data = argsData.ToString();
+                if (!argsData.IsEmpty())
+                    info.Data = argsData.ToString();
             }
 
             var source = localClient.Aisling;
@@ -1359,22 +1374,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case SpellTemplate.SpellUseType.None:
                     return default;
                 case SpellTemplate.SpellUseType.Prompt:
-                    info.Data = PacketSerializer.Encoding.GetString(argsData);
+                    if (!argsData.IsEmpty())
+                        info.Data = PacketSerializer.Encoding.GetString(argsData);
                     break;
                 case SpellTemplate.SpellUseType.ChooseTarget:
-                    var targetIdSegment = new ArraySegment<byte>(argsData, 0, 4);
-                    var targetPointSegment = new ArraySegment<byte>(argsData, 4, 4);
-
-                    var targetId = (uint)((targetIdSegment[0] << 24)
-                                          | (targetIdSegment[1] << 16)
-                                          | (targetIdSegment[2] << 8)
-                                          | targetIdSegment[3]);
-
-                    var targetPoint = new Position(
-                        (targetPointSegment[0] << 8) | targetPointSegment[1],
-                        (targetPointSegment[2] << 8) | targetPointSegment[3]);
-                    info.Position = targetPoint;
-                    info.Target = (uint)targetId;
+                    if (!argsData.IsEmpty())
+                    {
+                        var targetIdSegment = new ArraySegment<byte>(argsData, 0, 4);
+                        var targetPointSegment = new ArraySegment<byte>(argsData, 4, 4);
+                        var targetId = (uint)((targetIdSegment[0] << 24)
+                                              | (targetIdSegment[1] << 16)
+                                              | (targetIdSegment[2] << 8)
+                                              | targetIdSegment[3]);
+                        var targetPoint = new Position((targetPointSegment[0] << 8) | targetPointSegment[1],
+                                            (targetPointSegment[2] << 8) | targetPointSegment[3]);
+                        info.Position = targetPoint;
+                        info.Target = targetId;
+                    }
                     break;
                 case SpellTemplate.SpellUseType.OneDigit:
                 case SpellTemplate.SpellUseType.TwoDigit:
@@ -2547,8 +2563,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnUseSkill(IWorldClient localClient, SkillUseArgs localArgs)
         {
+            if (localArgs.SourceSlot is 0) return default;
             var skill = localClient.Aisling.SkillBook.GetSkills(i => i.Slot == localArgs.SourceSlot).FirstOrDefault();
-            if (skill?.Template == null || skill.Scripts == null) return default;
+            if (skill == null)
+            {
+                localClient.Aisling.SkillBook = new SkillBook();
+                localClient.LoadSkillBook();
+                return default;
+            }
+
+            if (skill.Template == null || skill.Scripts == null) return default;
 
             if (!skill.CanUse()) return default;
 

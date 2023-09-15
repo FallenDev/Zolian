@@ -56,6 +56,8 @@ public interface IWorldClient : ISocketClient
     WorldClient LoadEquipment();
     WorldClient LoadInventory();
     WorldClient LoadBank();
+    void LoadSkillBook();
+    void LoadSpellBook();
     void SendLoginMessage(LoginMessageType loginMessageType, string message = null);
     void SendAddItemToPane(Item item);
     void SendAddSkillToPane(Skill skill);

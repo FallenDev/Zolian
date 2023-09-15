@@ -168,7 +168,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             Quality.Epic => "{=pEpic ",
             Quality.Legendary => "{=sLegendary ",
             Quality.Forsaken => "{=bForsaken ",
-            Quality.Mythic => "{=fMythic",
+            Quality.Mythic => "{=fMythic ",
             _ => ""
         };
 

@@ -2,8 +2,7 @@
 
 using Darkages.Object;
 using Darkages.Sprites;
-
-using Microsoft.Extensions.Logging;
+using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Types;
 
@@ -75,8 +74,7 @@ public class TileGrid : ObjectManager
                 }
             }
 
-            ServerSetup.Logger(lastException?.Message, LogLevel.Error);
-            ServerSetup.Logger(lastException?.StackTrace, LogLevel.Error);
+            Crashes.TrackError(lastException);
             return null;
         }
     }
@@ -101,8 +99,7 @@ public class TileGrid : ObjectManager
                 }
             }
 
-            ServerSetup.Logger(lastException?.Message, LogLevel.Error);
-            ServerSetup.Logger(lastException?.StackTrace, LogLevel.Error);
+            Crashes.TrackError(lastException);
             return null;
         }
     }
