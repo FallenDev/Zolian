@@ -124,9 +124,9 @@ public class Trainer : MundaneScript
                 }
             case 0x0003:
                 {
-                    if (client.Aisling.GoldPoints >= 100000)
-                    {
-                        client.Aisling.GoldPoints -= 100000;
+                    //if (client.Aisling.GoldPoints >= 100000)
+                    //{
+                    //    client.Aisling.GoldPoints -= 100000;
                         client.TransitionToMap(5257, new Position(17, 17));
                         await Task.Delay(100).ContinueWith(ct =>
                         {
@@ -144,11 +144,10 @@ public class Trainer : MundaneScript
                                 client.Aisling.Direction = (byte)direction;
                                 client.Aisling.Turn();
                             }
-
-
                         });
 
                         var monster = client.Aisling.MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(client.Aisling, 2));
+                        if (monster is null) break;
                         client.Aisling.Target = monster;
 
                         while (client.Aisling.NextTo(client.Aisling.Target!.X, client.Aisling.Target!.Y))
@@ -171,11 +170,11 @@ public class Trainer : MundaneScript
                                 }
                             });
                         }
-                    }
-                    else
-                    {
-                        client.SendOptionsDialog(Mundane, "Looks like you don't have enough, come back when you do. (100,000 gold)");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    client.SendOptionsDialog(Mundane, "Looks like you don't have enough, come back when you do. (100,000 gold)");
+                    //}
                     break;
                 }
             case 0x0004:
