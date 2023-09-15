@@ -542,7 +542,43 @@ public class Fas_Spiorad : SpellScript
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Your body is too weak.");
     }
 
-    public override void OnSuccess(Sprite sprite, Sprite target) { }
+    public override void OnSuccess(Sprite sprite, Sprite target)
+    {
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
+        if (target == null) return;
+        if (!_spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
+
+        if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= _spell.Template.ManaCost;
+            _spellMethod.Train(client, _spell);
+        }
+        else
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
+        var success = _spellMethod.Execute(client, _spell);
+
+        if (success)
+        {
+            _spellMethod.AfflictionOnSuccess(aisling, target, _spell, _debuff);
+        }
+        else
+        {
+            _spellMethod.SpellOnFailed(aisling, target, _spell);
+        }
+
+        client.SendAttributes(StatUpdateType.Vitality);
+    }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {

@@ -432,8 +432,30 @@ public class Lau : MundaneScript
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
                                 }
+
                                 break;
                             }
+                        }
+
+                        client.Aisling.QuestManager.Lau++;
+                        client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+                        client.GiveExp(advExp);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
+                        client.SendAttributes(StatUpdateType.ExpGold);
+                        client.SendOptionsDialog(Mundane, "Thank you, I have nothing to teach your kind, but I appreciate the assist");
+
+                        if (client.Aisling.QuestManager.Lau == 1)
+                        {
+                            var item = new Legend.LegendItem
+                            {
+                                Category = "LLau1",
+                                Time = DateTime.UtcNow,
+                                Color = LegendColor.White,
+                                Icon = (byte)LegendIcon.Warrior,
+                                Value = "Lau's Discipline"
+                            };
+
+                            client.Aisling.LegendBook.AddLegend(item, client);
                         }
                     }
                     else
