@@ -34,6 +34,10 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 
+using Newtonsoft.Json;
+
+using RestSharp;
+
 using ServiceStack;
 
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
@@ -47,6 +51,8 @@ namespace Darkages.Network.Server;
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> ClientProvider;
+    private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
+    private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
@@ -692,7 +698,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             foreach (var trap in traps)
             {
                 if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                    monster.X != trap.Location.X || monster.Y != trap.Location.Y || 
+                    monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
                     monster.Map != trap.TrapItem.Map) continue;
 
                 var triggered = Trap.Activate(trap, monster);
@@ -3120,13 +3126,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         serverSocket.BeginAccept(OnConnection, serverSocket);
 
-        var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        ServerSetup.Logger($"World connection from {ip}");
-
         var client = ClientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
-        ServerSetup.Logger($"Connection established with {client.RemoteIp}");
+        var badActor = ClientOnBlackList(client);
+
+        if (badActor)
+        {
+            client.Disconnect();
+            return;
+        }
+
+        ServerSetup.Logger($"World Connection established with {client.RemoteIp}");
 
         if (!ClientRegistry.TryAdd(client))
         {
@@ -3184,6 +3195,100 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.Logger($"Exception thrown while {aisling?.Username} was trying to disconnect");
             Crashes.TrackError(ex);
         }
+    }
+
+    private bool ClientOnBlackList(ISocketClient client)
+    {
+        if (client == null) return true;
+
+        switch (client.RemoteIp.ToString())
+        {
+            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
+                return true;
+            case "127.0.0.1":
+            case InternalIP:
+                return false;
+        }
+
+        try
+        {
+            var keyCode = ServerSetup.Instance.KeyCode;
+            if (keyCode is null || keyCode.Length == 0)
+            {
+                ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+                return false;
+            }
+
+            // BLACKLIST check
+            var request = new RestRequest("", Method.Get);
+            request.AddHeader("Key", keyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ipAddress", client.RemoteIp.ToString());
+            request.AddParameter("maxAgeInDays", "90");
+            request.AddParameter("verbose", "");
+            var response = _restClient.Execute<Ipdb>(request);
+
+            if (response.IsSuccessful)
+            {
+                var json = response.Content;
+
+                if (json is null || json.Length == 0)
+                {
+                    ServerSetup.Logger($"{client.RemoteIp} - API Issue, response is null or length is 0");
+                    return false;
+                }
+
+                var ipdb = JsonConvert.DeserializeObject<Ipdb>(json!);
+                var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
+                var tor = ipdb?.Data?.IsTor;
+                var usageType = ipdb?.Data?.UsageType;
+
+                Analytics.TrackEvent($"{client.RemoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+
+                if (tor == true)
+                {
+                    ServerSetup.Logger("-----------------------------------");
+                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked");
+                    return true;
+                }
+
+                if (usageType == "Reserved")
+                {
+                    ServerSetup.Logger("-----------------------------------");
+                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)");
+                    return true;
+                }
+
+                switch (abuseConfidenceScore)
+                {
+                    case >= 25:
+                        ServerSetup.Logger("-----------------------------------");
+                        ServerSetup.Logger($"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}");
+                        return true;
+                    case >= 0:
+                        return false;
+                    case null:
+                        // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
+                        ServerSetup.Logger($"{client.RemoteIp} - API Issue, confidence score was null");
+                        return false;
+                }
+            }
+            else
+            {
+                // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
+                ServerSetup.Logger($"{client.RemoteIp} - API Issue, response was not successful");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger("Unknown issue with IPDB, connections refused");
+            ServerSetup.Logger($"{ex}");
+            Crashes.TrackError(ex);
+            return true;
+        }
+
+        return true;
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

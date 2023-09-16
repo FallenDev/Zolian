@@ -8,7 +8,6 @@ using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
-using Chaos.Networking.Entities;
 using Chaos.Networking.Entities.Client;
 using Chaos.Networking.Options;
 using Chaos.Packets;
@@ -18,6 +17,7 @@ using Chaos.Packets.Abstractions.Definitions;
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
+using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
@@ -26,8 +26,11 @@ using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
+using Newtonsoft.Json;
+using RestSharp;
 using Gender = Darkages.Enums.Gender;
+using Redirect = Chaos.Networking.Entities.Redirect;
+using ServerOptions = Chaos.Networking.Options.ServerOptions;
 
 namespace Darkages.Network.Server;
 
@@ -35,6 +38,8 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
+    private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
+    private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
 
     public LoginServer(
@@ -404,6 +409,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
         serverSocket.BeginAccept(OnConnection, serverSocket);
+
         var ip = clientSocket.RemoteEndPoint as IPEndPoint;
         ServerSetup.Logger($"Incoming connection from {ip}");
 
@@ -421,6 +427,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private async Task FinalizeConnectionAsync(Socket clientSocket)
     {
         var client = _clientProvider.CreateClient(clientSocket);
+        var badActor = ClientOnBlackList(client);
+
+        if (badActor)
+        {
+            client.Disconnect();
+            return;
+        }
 
         if (!ClientRegistry.TryAdd(client))
         {
@@ -437,6 +450,100 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var client = (ILoginClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);
+    }
+
+    private bool ClientOnBlackList(ISocketClient client)
+    {
+        if (client == null) return true;
+
+        switch (client.RemoteIp.ToString())
+        {
+            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
+                return true;
+            case "127.0.0.1":
+            case InternalIP:
+                return false;
+        }
+
+        try
+        {
+            var keyCode = ServerSetup.Instance.KeyCode;
+            if (keyCode is null || keyCode.Length == 0)
+            {
+                ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+                return false;
+            }
+
+            // BLACKLIST check
+            var request = new RestRequest("", Method.Get);
+            request.AddHeader("Key", keyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ipAddress", client.RemoteIp.ToString());
+            request.AddParameter("maxAgeInDays", "90");
+            request.AddParameter("verbose", "");
+            var response = _restClient.Execute<Ipdb>(request);
+
+            if (response.IsSuccessful)
+            {
+                var json = response.Content;
+
+                if (json is null || json.Length == 0)
+                {
+                    ServerSetup.Logger($"{client.RemoteIp} - API Issue, response is null or length is 0");
+                    return false;
+                }
+
+                var ipdb = JsonConvert.DeserializeObject<Ipdb>(json!);
+                var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
+                var tor = ipdb?.Data?.IsTor;
+                var usageType = ipdb?.Data?.UsageType;
+
+                Analytics.TrackEvent($"{client.RemoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+
+                if (tor == true)
+                {
+                    ServerSetup.Logger("-----------------------------------");
+                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked");
+                    return true;
+                }
+
+                if (usageType == "Reserved")
+                {
+                    ServerSetup.Logger("-----------------------------------");
+                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)");
+                    return true;
+                }
+
+                switch (abuseConfidenceScore)
+                {
+                    case >= 25:
+                        ServerSetup.Logger("-----------------------------------");
+                        ServerSetup.Logger($"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}");
+                        return true;
+                    case >= 0:
+                        return false;
+                    case null:
+                        // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
+                        ServerSetup.Logger($"{client.RemoteIp} - API Issue, confidence score was null");
+                        return false;
+                }
+            }
+            else
+            {
+                // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
+                ServerSetup.Logger($"{client.RemoteIp} - API Issue, response was not successful");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger("Unknown issue with IPDB, connections refused");
+            ServerSetup.Logger($"{ex}");
+            Crashes.TrackError(ex);
+            return true;
+        }
+
+        return true;
     }
 
     private static async Task<bool> SavePassword(Aisling aisling)
