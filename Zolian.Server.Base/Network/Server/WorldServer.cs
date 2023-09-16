@@ -3121,7 +3121,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         serverSocket.BeginAccept(OnConnection, serverSocket);
 
         var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        Logger.LogDebug("Incoming connection from {@Ip}", ip!.ToString());
+        ServerSetup.Logger($"World connection from {ip}");
 
         var client = ClientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;

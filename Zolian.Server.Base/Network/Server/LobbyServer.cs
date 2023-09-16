@@ -136,6 +136,10 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
         serverSocket.BeginAccept(OnConnection, serverSocket);
+
+        var ip = clientSocket.RemoteEndPoint as IPEndPoint;
+        ServerSetup.Logger($"Lobby connection from {ip}");
+
         var client = _clientProvider.CreateClient(clientSocket);
         var badActor = ClientOnBlackList(client);
 

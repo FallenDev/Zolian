@@ -421,7 +421,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private async Task FinalizeConnectionAsync(Socket clientSocket)
     {
         var client = _clientProvider.CreateClient(clientSocket);
-        ServerSetup.Logger($"Connection established with {client.RemoteIp}");
 
         if (!ClientRegistry.TryAdd(client))
         {
