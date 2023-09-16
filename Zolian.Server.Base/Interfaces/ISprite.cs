@@ -49,8 +49,8 @@ public interface ISprite
     int _Regen { get; set; }
     int BonusRegen { get; set; }
 
-    byte _Dmg { get; set; }
-    byte BonusDmg { get; set; }
+    int _Dmg { get; set; }
+    int BonusDmg { get; set; }
 
     int BonusAc { get; set; }
     int _ac { get; set; }

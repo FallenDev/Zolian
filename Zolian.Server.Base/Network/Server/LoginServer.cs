@@ -14,6 +14,7 @@ using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
+
 using Darkages.Database;
 using Darkages.Interfaces;
 using Darkages.Meta;
@@ -21,9 +22,11 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Network.Server;
@@ -62,21 +65,24 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnClientRedirected(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnClientRedirect);
 
-        ValueTask InnerOnclientRedirect(ILoginClient localClient, ClientRedirectedArgs localArgs)
+        ValueTask InnerOnClientRedirect(ILoginClient localClient, ClientRedirectedArgs localArgs)
         {
             var reservedRedirect = ServerSetup.Instance.Config.ReservedRedirects
-                                          .FirstOrDefault(rr => rr.Id == localArgs.Id && rr.Name.EqualsI(localArgs.Name));
+                .FirstOrDefault(rr => rr.Id == localArgs.Id && rr.Name.EqualsI(localArgs.Name));
 
             if (reservedRedirect != null)
             {
                 localClient.Crypto = new Crypto(localArgs.Seed, localArgs.Key, string.Empty);
                 localClient.SendLoginNotice(false, _notification);
-            } else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
+            }
+            else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
                 localClient.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
                 localClient.SendLoginNotice(false, _notification);
-            } else
+            }
+            else
             {
                 ServerSetup.Logger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 Analytics.TrackEvent($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
@@ -85,8 +91,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnclientRedirect);
     }
 
     /// <summary>
@@ -95,6 +99,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnCreateCharFinalize(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<CreateCharFinalizeArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnCreateCharFinalize);
 
         async ValueTask InnerOnCreateCharFinalize(ILoginClient localClient, CreateCharFinalizeArgs localArgs)
         {
@@ -127,11 +132,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
                 localClient.SendLoginMessage(LoginMessageType.Confirm);
-            } else
+            }
+            else
                 localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unable to create character, bad request.");
         }
-
-        return ExecuteHandler(client, args, InnerOnCreateCharFinalize);
     }
 
     /// <summary>
@@ -140,6 +144,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnCreateCharRequest(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<CreateCharRequestArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnCreateCharRequest);
 
         async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharRequestArgs localArgs)
         {
@@ -149,26 +154,24 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
                 localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
-            } else
+            }
+            else
             {
                 ServerSetup.Logger($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
                 Analytics.TrackEvent($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
             }
         }
-
-        return ExecuteHandler(client, args, InnerOnCreateCharRequest);
     }
 
     public ValueTask OnHomepageRequest(ILoginClient client, in ClientPacket packet)
     {
+        return ExecuteHandler(client, InnerOnHomepageRequest);
+
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
             localClient.SendLoginControls(LoginControlsType.Homepage, "https://www.ZolianAoC.com");
-
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnHomepageRequest);
     }
 
     /// <summary>
@@ -177,10 +180,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnLogin(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnLogin);
 
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
             var (name, password) = localArgs;
+            if (name.IsNullOrEmpty() || password.IsNullOrEmpty()) return;
             var result = await StorageManager.AislingBucket.CheckPassword(name);
 
             if (result == null)
@@ -211,7 +216,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 }
                 return;
             }
-            
+
             var maintCheck = name.ToLowerInvariant();
             var connInfo = new ConnectionInfo
             {
@@ -234,30 +239,32 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     localClient.SendLoginMessage(LoginMessageType.Confirm, "Maintenance Account, denied access");
                     return;
                 case "death":
-                {
-                    var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
-
-                    if (localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
                     {
-                        result.LastAttemptIP = localClient.RemoteIp.ToString();
-                        result.LastIP = localClient.RemoteIp.ToString();
-                        if (result.Password == ServerSetup.Instance.Unlock)
-                            result.PasswordAttempts = 0;
-                        await SavePassword(result);
-                        RedirectManager.Add(redirect);
-                        localClient.SendLoginMessage(LoginMessageType.Confirm);
-                        localClient.SendRedirect(redirect);
+                        var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
+
+                        if (localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                        {
+                            result.LastAttemptIP = localClient.RemoteIp.ToString();
+                            result.LastIP = localClient.RemoteIp.ToString();
+                            if (result.Password == ServerSetup.Instance.Unlock)
+                                result.PasswordAttempts = 0;
+                            await SavePassword(result);
+                            RedirectManager.Add(redirect);
+                            localClient.SendLoginMessage(LoginMessageType.Confirm);
+                            localClient.SendRedirect(redirect);
+                            return;
+                        }
+
+                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
                         return;
                     }
-
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
-                    return;
-                }
                 default:
                     result.LastAttemptIP = localClient.RemoteIp.ToString();
                     result.LastIP = localClient.RemoteIp.ToString();
                     if (result.Password == ServerSetup.Instance.Unlock)
-                        result.PasswordAttempts = 0;
+                    {
+                        result.Hacked = false;
+                    }
                     await SavePassword(result);
                     break;
             }
@@ -268,22 +275,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 return;
             }
 
-            Logger.LogDebug(
-                "Redirecting {@ClientIp} to {@ServerIp}",
-                localClient.RemoteIp.ToString(),
-                connInfo.Address.ToString());
-
-            result.LastAttemptIP = localClient.RemoteIp.ToString();
-            result.LastIP = localClient.RemoteIp.ToString();
-            result.PasswordAttempts = 0;
-            await SavePassword(result);
-
             RedirectManager.Add(redirect);
             localClient.SendLoginMessage(LoginMessageType.Confirm);
             localClient.SendRedirect(redirect);
         }
-
-        return ExecuteHandler(client, args, InnerOnLogin);
     }
 
     /// <summary>
@@ -292,17 +287,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnMetaDataRequest(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
 
         static ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
             var (metadataRequestType, name) = localArgs;
-
             localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
-
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
     }
 
     /// <summary>
@@ -310,14 +302,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// </summary>
     public ValueTask OnNoticeRequest(ILoginClient client, in ClientPacket packet)
     {
+        return ExecuteHandler(client, InnerOnNoticeRequest);
+
         ValueTask InnerOnNoticeRequest(ILoginClient localClient)
         {
             localClient.SendLoginNotice(true, _notification);
-
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnNoticeRequest);
     }
 
     /// <summary>
@@ -326,10 +317,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnPasswordChange(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
+        return ExecuteHandler(client, args, InnerOnPasswordChange);
 
         static async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
             var (name, currentPassword, newPassword) = localArgs;
+            if (name.IsNullOrEmpty() || currentPassword.IsNullOrEmpty() || newPassword.IsNullOrEmpty()) return;
             var aisling = StorageManager.AislingBucket.CheckPassword(name);
 
             if (aisling.Result == null)
@@ -377,8 +370,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
             await SavePassword(aisling.Result).ConfigureAwait(false);
         }
-
-        return ExecuteHandler(client, args, InnerOnPasswordChange);
     }
 
     #endregion
@@ -389,19 +380,15 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)packet.OpCode];
-
-        if (handler == null)
-        {
-            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}");
-        }
-
-        return handler?.Invoke(client, in packet) ?? default;
+        if (handler != null) return handler(client, in packet);
+        ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
+        Analytics.TrackEvent($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
+        return default;
     }
 
     protected override void IndexHandlers()
     {
         base.IndexHandlers();
-
         ClientHandlers[(byte)ClientOpCode.CreateCharRequest] = OnCreateCharRequest;
         ClientHandlers[(byte)ClientOpCode.CreateCharFinalize] = OnCreateCharFinalize;
         ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
@@ -416,26 +403,25 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-
         serverSocket.BeginAccept(OnConnection, serverSocket);
-
         var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        Logger.LogDebug("Incoming connection from {@Ip}", ip!.ToString());
+        ServerSetup.Logger($"Incoming connection from {ip}");
 
         try
         {
             await FinalizeConnectionAsync(clientSocket);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            Logger.LogError(e, "Failed to finalize connection");
+            Analytics.TrackEvent($"Failed to finalize connection {ip}");
+            Crashes.TrackError(e);
         }
     }
 
     private async Task FinalizeConnectionAsync(Socket clientSocket)
     {
         var client = _clientProvider.CreateClient(clientSocket);
-
-        Logger.LogDebug("Connection established with {@ClientIp}", client.RemoteIp.ToString());
+        ServerSetup.Logger($"Connection established with {client.RemoteIp}");
 
         if (!ClientRegistry.TryAdd(client))
         {
@@ -444,7 +430,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
 
         client.OnDisconnected += OnDisconnect;
-
         client.BeginReceive();
         client.SendAcceptConnection();
     }

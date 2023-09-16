@@ -23,6 +23,13 @@ public static class Commander
     public static void CompileCommands()
     {
         ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Group", "group")
+            .AddAlias("party")
+            .SetAction(OnRemoteGroup)
+            .AddArgument(Argument.Create("name"))
+        );
+
+        ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Create Item", "give")
             .SetAction(OnItemCreate)
             .AddArgument(Argument.Create("item"))
@@ -196,6 +203,37 @@ public static class Commander
         if (player != null) player.Gender = (Gender)sResult;
         client.ClientRefreshed();
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
+    }
+
+    /// <summary>
+    /// InGame Usage : /group "playerName"  
+    /// </summary>
+    private static void OnRemoteGroup(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var who = args.FromName("who").Replace("\"", "");
+        if (string.IsNullOrEmpty(who)) return;
+        var players = ServerSetup.Instance.Game.Aislings;
+        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        if (player != null)
+        {
+            if (player.GroupParty != null)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "This player already belongs to a group");
+                return;
+            }
+
+            if (player.Map.ID is 23352 or 7000 or 7001 or 7002 or 3029 or 720 or 393)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "You can't seem to connect with them");
+                return;
+            }
+
+            Party.AddPartyMember(client.Aisling, player);
+        }
+
+        Analytics.TrackEvent($"{client.RemoteIp} remotely grouped character: {client.Aisling.Username}");
     }
 
     /// <summary>

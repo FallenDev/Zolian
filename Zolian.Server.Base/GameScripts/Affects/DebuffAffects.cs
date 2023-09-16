@@ -10,6 +10,561 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Affects;
 
+#region Afflictions
+
+public class Lycanisim : Debuff
+{
+    private static int DexModifier => 30;
+    private static byte DmgModifier => 50;
+    public override byte Icon => 183;
+    public override int Length => int.MaxValue;
+    public override string Name => "Lycanisim";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        var vamp = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Vampirisim);
+        
+        if (vamp)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bThey do not realize who they've bitten");
+            return;
+        }
+
+        aisling.BonusDex += DexModifier;
+        aisling.BonusDmg += DmgModifier;
+        aisling.Afflictions |= RacialAfflictions.Lycanisim;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusDex -= DexModifier;
+        aisling.BonusDmg -= DmgModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Lycanisim;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Vampirisim : Debuff
+{
+    private static int DexModifier => 30;
+    private static byte HitModifier => 50;
+    public override byte Icon => 172;
+    public override int Length => int.MaxValue;
+    public override string Name => "Vampirisim";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        var lycan = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Lycanisim);
+
+        if (lycan)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bClawing me? Hah!");
+            return;
+        }
+
+        aisling.BonusDex += DexModifier;
+        aisling.BonusDmg += HitModifier;
+        aisling.Afflictions |= RacialAfflictions.Vampirisim;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusDex -= DexModifier;
+        aisling.BonusDmg -= HitModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Vampirisim;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Plagued : Debuff
+{
+    private static int HpModifier => 500;
+    private static int MpModifier => 500;
+    private static int StatModifier => 5;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Plagued";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.BonusHp -= HpModifier;
+        aisling.BonusMp -= MpModifier;
+        aisling.BonusStr -= StatModifier;
+        aisling.BonusInt -= StatModifier;
+        aisling.BonusWis -= StatModifier;
+        aisling.BonusCon -= StatModifier;
+        aisling.BonusDex -= StatModifier;
+        aisling.Afflictions |= RacialAfflictions.Plagued;
+
+        var diseased = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.TheShakes);
+        if (diseased)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
+            var diseasedDebuff = new Diseased();
+            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        }
+
+        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Stricken);
+        if (hallowed)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
+            var hallowedDebuff = new Hallowed();
+            hallowedDebuff.OnApplied(affected, hallowedDebuff);
+        }
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusHp += HpModifier;
+        aisling.BonusMp += MpModifier;
+        aisling.BonusStr += StatModifier;
+        aisling.BonusInt += StatModifier;
+        aisling.BonusWis += StatModifier;
+        aisling.BonusCon += StatModifier;
+        aisling.BonusDex += StatModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Plagued;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class TheShakes : Debuff
+{
+    private static int ConModifier => 5;
+    private static int DexModifier => 5;
+    private static byte DmgModifier => 50;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "The Shakes";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.BonusCon -= ConModifier;
+        aisling.BonusDex -= DexModifier;
+        aisling.BonusDmg -= DmgModifier;
+        aisling.Afflictions |= RacialAfflictions.TheShakes;
+
+        var diseased = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued);
+        if (diseased)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
+            var diseasedDebuff = new Diseased();
+            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        }
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusCon += ConModifier;
+        aisling.BonusDex += DexModifier;
+        aisling.BonusDmg += DmgModifier;
+        aisling.Afflictions &= ~RacialAfflictions.TheShakes;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Stricken : Debuff
+{
+    private static int MpModifier => 1500;
+    private static int WisModifier => 10;
+    private static byte RegenModifier => 10;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Stricken";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.BonusMp -= MpModifier;
+        aisling.BonusWis -= WisModifier;
+        aisling.BonusRegen -= RegenModifier;
+        aisling.Afflictions |= RacialAfflictions.Stricken;
+
+        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued);
+        if (hallowed)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
+            var hallowedDebuff = new Hallowed();
+            hallowedDebuff.OnApplied(affected, hallowedDebuff);
+        }
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusMp += MpModifier;
+        aisling.BonusWis += WisModifier;
+        aisling.BonusRegen += RegenModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Stricken;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Rabies : Debuff
+{
+    public override byte Icon => 110;
+    public override int Length => 300;
+    public override string Name => "Rabies";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.Afflictions |= RacialAfflictions.Rabies;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+
+        if (aisling.GameMaster)
+        {
+            if (aisling.Debuffs.TryRemove(debuff.Name, out _))
+                aisling.Client.SendEffect(byte.MinValue, Icon);
+            return;
+        }
+
+        // ToDo: Will need to move this to a more perm cached location so it retains through relog
+        aisling.RabiesCountDown++;
+        if (aisling.RabiesCountDown >= Length) OnEnded(affected, debuff);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, null, aisling.Serial));
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        var death = new DebuffReaping();
+        death.OnApplied(affected, death);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class LockJoint : Debuff
+{
+    private static int DmgModifier => 30;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Lock Joint";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        var petrified = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.NumbFall);
+
+        if (petrified)
+        {
+            var diseasedDebuff = new Petrified();
+            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        }
+
+        aisling.BonusDmg -= DmgModifier;
+        aisling.Afflictions |= RacialAfflictions.LockJoint;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        var rand = Generator.RandNumGen20();
+        if (rand != 1) return;
+        var diseasedDebuff = new DebuffBeagsuain();
+        diseasedDebuff.OnApplied(affected, diseasedDebuff);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusDmg += DmgModifier;
+        aisling.Afflictions &= ~RacialAfflictions.LockJoint;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class NumbFall : Debuff
+{
+    private static int DmgModifier => 30;
+    private static byte HitModifier => 50;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Numb Fall";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        var petrified = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.LockJoint);
+
+        if (petrified)
+        {
+            var diseasedDebuff = new Petrified();
+            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        }
+
+        aisling.BonusHit -= HitModifier;
+        aisling.BonusDmg -= DmgModifier;
+        aisling.Afflictions |= RacialAfflictions.NumbFall;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusHit += HitModifier;
+        aisling.BonusDmg += DmgModifier;
+        aisling.Afflictions &= ~RacialAfflictions.NumbFall;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Diseased : Debuff
+{
+    private static int StatModifier => 10;
+    private static byte RegenModifier => 50;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Diseased";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.BonusRegen -= RegenModifier;
+        aisling.BonusStr -= StatModifier;
+        aisling.BonusInt -= StatModifier;
+        aisling.BonusWis -= StatModifier;
+        aisling.BonusCon -= StatModifier;
+        aisling.BonusDex -= StatModifier;
+        aisling.Afflictions |= RacialAfflictions.Diseased;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusRegen += RegenModifier;
+        aisling.BonusStr += StatModifier;
+        aisling.BonusInt += StatModifier;
+        aisling.BonusWis += StatModifier;
+        aisling.BonusCon += StatModifier;
+        aisling.BonusDex += StatModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Diseased;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Hallowed : Debuff
+{
+    private static int WillModifier => 80;
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Hallowed";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.BonusMr -= WillModifier;
+        aisling.Afflictions |= RacialAfflictions.Hallowed;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.BonusMr += WillModifier;
+        aisling.Afflictions &= ~RacialAfflictions.Hallowed;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+public class Petrified : Debuff
+{
+    public override byte Icon => 208;
+    public override int Length => int.MaxValue;
+    public override string Name => "Petrified";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        InsertDebuff(aisling, debuff);
+        aisling.Afflictions |= RacialAfflictions.Petrified;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        var rand = Generator.RandNumGen20();
+        if (rand != 1) return;
+        var diseasedDebuff = new DebuffHalt();
+        diseasedDebuff.OnApplied(affected, diseasedDebuff);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.Afflictions &= ~RacialAfflictions.Petrified;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+#endregion
+
 #region Armor
 
 public class DebuffArdcradh : Debuff

@@ -138,6 +138,18 @@ public sealed class Aisling : Player, IAisling
     public bool CantReact => CantAttack || CantCast || CantMove;
     public bool Camouflage => SkillBook.HasSkill("Camouflage");
     public bool PainBane => SkillBook.HasSkill("Pain Bane");
+    public bool Lycanisim => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Lycanisim);
+    public bool Vampirisim => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Vampirisim);
+    public bool Plagued => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued);
+    public bool TheShakes => Afflictions.AfflictionFlagIsSet(RacialAfflictions.TheShakes);
+    public bool Stricken => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Stricken);
+    public bool Rabies => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Rabies);
+    public int RabiesCountDown { get; set; }
+    public bool LockJoint => Afflictions.AfflictionFlagIsSet(RacialAfflictions.LockJoint);
+    public bool NumbFall => Afflictions.AfflictionFlagIsSet(RacialAfflictions.NumbFall);
+    public bool Diseased => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued) && Afflictions.AfflictionFlagIsSet(RacialAfflictions.TheShakes);
+    public bool Hallowed => Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued) && Afflictions.AfflictionFlagIsSet(RacialAfflictions.Stricken);
+    public bool Petrified => Afflictions.AfflictionFlagIsSet(RacialAfflictions.LockJoint) && Afflictions.AfflictionFlagIsSet(RacialAfflictions.NumbFall);
 
     public bool Poisoned
     {

@@ -75,10 +75,10 @@ public enum RacialAfflictions
     Lycanisim = 1 << 1,
     Vampirisim = 1 << 2,
     Plagued = 1 << 3, // -500 hp -500 mp -5 all stats
-    TheShakes = 1 << 4, // -5 Con, -5 Dex, -5% damage
+    TheShakes = 1 << 4, // -5 Con, -5 Dex, -50 dmg
     Stricken = 1 << 5, // -1500 mp, -10 Wis, -10 Regen
     Rabies = 1 << 6, // Death if not cured in an hour
-    LockJoint = 1 << 7, // -10% damage
+    LockJoint = 1 << 7, // -30 dmg, random beag suain
     NumbFall = 1 << 8, // -20 dmg, -20 hit
     Diseased = Plagued | TheShakes,
     Hallowed = Plagued | Stricken,
@@ -196,13 +196,15 @@ public static class ClassStrings
             RacialAfflictions.Normal => "Normal",
             RacialAfflictions.Lycanisim => "Lycanisim",
             RacialAfflictions.Vampirisim => "Vampirisim",
-            RacialAfflictions.Plagued => "Zombified",
-            RacialAfflictions.TheShakes => "Diseased",
-            RacialAfflictions.Stricken => "Diseased",
-            RacialAfflictions.Rabies => "Diseased",
-            RacialAfflictions.LockJoint => "Diseased",
-            RacialAfflictions.NumbFall => "Diseased",
+            RacialAfflictions.Plagued => "Plagued",
+            RacialAfflictions.TheShakes => "The Shakes",
+            RacialAfflictions.Stricken => "Stricken",
+            RacialAfflictions.Rabies => "Rabies",
+            RacialAfflictions.LockJoint => "Lock Joint",
+            RacialAfflictions.NumbFall => "Numb Fall",
+            RacialAfflictions.Diseased => "Diseased",
             RacialAfflictions.Hallowed => "Hallowed",
+            RacialAfflictions.Petrified => "Petrified",
             _ => "Normal"
         };
     }

@@ -259,8 +259,8 @@ namespace Darkages.Network.Client
 
         public void EquipLantern(TimeSpan elapsedTime)
         {
-            if (Aisling.Map == null) return;
             if (!LanternCheckTimer.Update(elapsedTime)) return;
+            if (Aisling.Map == null) return;
             if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
             {
                 if (Aisling.Lantern == 2) return;
@@ -280,6 +280,7 @@ namespace Darkages.Network.Client
             switch (Aisling.ActiveStatus)
             {
                 case ActivityStatus.Awake:
+                case ActivityStatus.DayDreaming:
                 case ActivityStatus.NeedGroup:
                 case ActivityStatus.Grouped:
                 case ActivityStatus.LoneHunter:
@@ -288,20 +289,6 @@ namespace Darkages.Network.Client
                     DaydreamingRoutine(elapsedTime);
                     break;
                 case ActivityStatus.DoNotDisturb:
-                    break;
-                case ActivityStatus.DayDreaming:
-                    if (_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)
-                    {
-                        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 120));
-                        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(32, null, Aisling.Serial, 200));
-                        if (Aisling.Resting != Enums.RestPosition.RestPosition2)
-                        {
-                            Aisling.Resting = Enums.RestPosition.RestPosition2;
-                            Aisling.Client.SendAttributes(StatUpdateType.Full);
-                            Aisling.Client.UpdateDisplay();
-                            Aisling.Client.SendDisplayAisling(Aisling);
-                        }
-                    }
                     break;
             }
         }
@@ -369,13 +356,16 @@ namespace Darkages.Network.Client
 
         public void UpdateSkillSpellCooldown(TimeSpan elapsedTime)
         {
+            // Checks in real-time if a player is overburdened
             if (Aisling.Overburden)
             {
                 SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(2000);
+                // If overburdened, set the trigger to remove it when not
                 Aisling.OverburdenDelayed = true;
             }
             else
             {
+                // When not overburdened, check if the player was, and return the delay to normal
                 if (Aisling.OverburdenDelayed)
                 {
                     SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(1000);
@@ -1358,7 +1348,7 @@ namespace Darkages.Network.Client
                 CurrentWeight = (short)Aisling.CurrentWeight,
                 DefenseElement = (Element)Aisling.DefenseElement,
                 Dex = (byte)Math.Clamp(Aisling.Dex, 0, 255),
-                Dmg = Math.Clamp(Aisling.Dmg, byte.MinValue, byte.MaxValue),
+                Dmg = Math.Clamp((byte)Aisling.Dmg, byte.MinValue, byte.MaxValue),
                 GamePoints = (uint)Aisling.GamePoints,
                 Gold = (uint)Aisling.GoldPoints,
                 Hit = Math.Clamp(Aisling.Hit, byte.MinValue, byte.MaxValue),
@@ -3480,18 +3470,14 @@ namespace Darkages.Network.Client
 
         public void DaydreamingRoutine(TimeSpan elapsedTime)
         {
-            var readyTime = DateTime.UtcNow;
-
-            if (Aisling.ActiveStatus == ActivityStatus.DayDreaming) return;
-            if (!((readyTime - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
             if (!(_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)) return;
+            if (!((DateTime.UtcNow - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
             if (!Socket.Connected || !IsDayDreaming) return;
 
             Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
-            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(32, null, Aisling.Serial, 150));
+            Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
             if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
             Aisling.Resting = Enums.RestPosition.RestPosition1;
-            Aisling.Client.SendAttributes(StatUpdateType.Full);
             Aisling.Client.UpdateDisplay();
             Aisling.Client.SendDisplayAisling(Aisling);
         }

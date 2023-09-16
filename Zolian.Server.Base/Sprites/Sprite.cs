@@ -90,7 +90,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private int CheckMp => BaseMp + BonusMp;
     public int MaximumMp => Math.Clamp(CheckMp, 0, int.MaxValue);
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
-    public byte Dmg => (byte)(_Dmg + BonusDmg).IntClamp(0, 300);
+    public int Dmg => _Dmg + BonusDmg;
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
     public int Ac => _ac + BonusAc + AcFromDex;
     private double _fortitude => Con * 0.2;
@@ -215,8 +215,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int _Regen { get; set; }
     public int BonusRegen { get; set; }
 
-    public byte _Dmg { get; set; }
-    public byte BonusDmg { get; set; }
+    public int _Dmg { get; set; }
+    public int BonusDmg { get; set; }
 
     public int BonusAc { get; set; }
     public int _ac { get; set; }
