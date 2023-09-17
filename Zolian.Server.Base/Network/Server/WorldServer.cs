@@ -3247,23 +3247,25 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (tor == true)
                 {
-                    ServerSetup.Logger("-----------------------------------");
-                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked");
+                    ServerSetup.Logger("---------World-Server---------");
+                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
-                    ServerSetup.Logger("-----------------------------------");
-                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)");
+                    ServerSetup.Logger("---------World-Server---------");
+                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
                 switch (abuseConfidenceScore)
                 {
                     case >= 25:
-                        ServerSetup.Logger("-----------------------------------");
-                        ServerSetup.Logger($"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}");
+                        ServerSetup.Logger("---------World-Server---------");
+                        var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
+                        ServerSetup.Logger(comment, LogLevel.Warning);
+                        ReportEndpoint(client, comment);
                         return true;
                     case >= 0:
                         return false;
@@ -3282,13 +3284,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger("Unknown issue with IPDB, connections refused");
+            ServerSetup.Logger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
             ServerSetup.Logger($"{ex}");
             Crashes.TrackError(ex);
             return true;
         }
 
         return true;
+    }
+
+    private void ReportEndpoint(ISocketClient client, string comment)
+    {
+        var keyCode = ServerSetup.Instance.KeyCode;
+        if (keyCode is null || keyCode.Length == 0)
+        {
+            ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+            return;
+        }
+
+        var request = new RestRequest("", Method.Post);
+        request.AddHeader("Key", keyCode);
+        request.AddHeader("Accept", "application/json");
+        request.AddParameter("ip", client.RemoteIp.ToString());
+        request.AddParameter("categories", "14, 15, 16, 21");
+        request.AddParameter("comment", comment);
+        _restClient.Execute<Ipdb>(request);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

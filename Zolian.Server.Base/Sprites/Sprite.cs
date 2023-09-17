@@ -1646,14 +1646,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             CurrentHp = MaximumHp;
 
         var dmgApplied = (long)Math.Abs(dmg * amplifier);
+        var finalDmg = LevelDamageMitigation(damageDealingSprite, dmgApplied);
 
         // ToDo: Create logic for "Over Damage"
-        if (dmgApplied > int.MaxValue)
+        if (finalDmg > int.MaxValue)
         {
-            dmgApplied = int.MaxValue;
+            finalDmg = int.MaxValue;
         }
 
-        var convDmg = (int)dmgApplied;
+        var convDmg = (int)finalDmg;
 
         CurrentHp -= convDmg;
 
@@ -1672,6 +1673,23 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return convDmg;
+    }
+
+    private long LevelDamageMitigation(Sprite damageDealingSprite, long dmg)
+    {
+        if (Level <= damageDealingSprite.Level) return dmg;
+        
+        var difference = Level - damageDealingSprite.Level;
+        dmg = difference switch
+            {
+                >= 50 => (int)(dmg * 0.75),
+                >= 25 => (int)(dmg * 0.85),
+                >= 10 => (int)(dmg * 0.90),
+                >= 5 => (int)(dmg * 0.95),
+                _ => dmg
+            };
+
+        return dmg;
     }
 
     public void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
