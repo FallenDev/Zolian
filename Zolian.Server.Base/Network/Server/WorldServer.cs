@@ -3308,7 +3308,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         request.AddParameter("ip", client.RemoteIp.ToString());
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restClient.Execute<Ipdb>(request);
+        _restClient.Execute(request);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

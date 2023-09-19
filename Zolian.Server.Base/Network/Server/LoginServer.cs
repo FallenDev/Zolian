@@ -563,7 +563,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         request.AddParameter("ip", client.RemoteIp.ToString());
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restClient.Execute<Ipdb>(request);
+        _restClient.Execute(request);
     }
 
     private static async Task<bool> SavePassword(Aisling aisling)
