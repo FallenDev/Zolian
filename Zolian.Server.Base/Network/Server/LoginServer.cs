@@ -40,6 +40,8 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private readonly Notification _notification;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
+    private const string GameMasterIpA = "75.226.159.140";
+    private const string GameMasterIpB = "24.137.144.53";
     private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
 
     public LoginServer(
@@ -263,6 +265,28 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
                         return;
                     }
+                case "scythe":
+                {
+                    var gmA = IPAddress.Parse(GameMasterIpA);
+                    var gmB = IPAddress.Parse(GameMasterIpB);
+                    var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
+
+                    if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                    {
+                        result.LastAttemptIP = localClient.RemoteIp.ToString();
+                        result.LastIP = localClient.RemoteIp.ToString();
+                        if (result.Password == ServerSetup.Instance.Unlock)
+                            result.PasswordAttempts = 0;
+                        await SavePassword(result);
+                        RedirectManager.Add(redirect);
+                        localClient.SendLoginMessage(LoginMessageType.Confirm);
+                        localClient.SendRedirect(redirect);
+                        return;
+                    }
+
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
+                    return;
+                }
                 default:
                     result.LastAttemptIP = localClient.RemoteIp.ToString();
                     result.LastIP = localClient.RemoteIp.ToString();

@@ -53,6 +53,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly IClientFactory<WorldClient> ClientProvider;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
+    private const string GameMasterIpA = "75.226.159.140";
+    private const string GameMasterIpB = "24.137.144.53";
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
@@ -1514,11 +1516,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (aisling.GameMaster)
             {
-                const string ip = "192.168.50.1";
-                var ipLocal = IPAddress.Parse(ip);
+                var gmA = IPAddress.Parse(GameMasterIpA);
+                var gmB = IPAddress.Parse(GameMasterIpB);
+                var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                if (aisling.Client.RemoteIp.Equals(ServerSetup.Instance.IpAddress) ||
-                    aisling.Client.RemoteIp.Equals(ipLocal))
+                if (client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal))
                 {
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, null, aisling.Serial));
                 }
