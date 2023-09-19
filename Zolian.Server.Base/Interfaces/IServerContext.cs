@@ -42,6 +42,9 @@ public interface IServerContext
     ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     ConcurrentDictionary<uint, Trap> Traps { get; set; }
+    ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; }
+    ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; }
+    ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; }
     bool Running { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }

@@ -441,6 +441,16 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             return;
         }
 
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+
+        if (!lobbyCheck)
+        {
+            client.Disconnect();
+            ServerSetup.Logger($"{client.RemoteIp} was blocked due to attempting bypass", LogLevel.Warning);
+            return;
+        }
+
+        ServerSetup.Instance.GlobalLoginConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.OnDisconnected += OnDisconnect;
         client.BeginReceive();
         client.SendAcceptConnection();

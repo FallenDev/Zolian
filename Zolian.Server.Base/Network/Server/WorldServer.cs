@@ -3168,7 +3168,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return;
         }
+        
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
 
+        if (!lobbyCheck || !loginCheck)
+        {
+            client.Disconnect();
+            ServerSetup.Logger($"{client.RemoteIp} was blocked due to attempting bypass", LogLevel.Warning);
+            return;
+        }
+
+        ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
     }
 
