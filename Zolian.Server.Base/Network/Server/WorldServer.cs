@@ -582,6 +582,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 UpdateClients(gameTime);
+                UpdateGroundItems();
                 UpdateMonsters(gameTime);
                 UpdateMundanes(gameTime);
             }
@@ -667,6 +668,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
                 player.Client.Disconnect();
             }
+        }
+    }
+
+    private static void UpdateGroundItems()
+    {
+        var items = ServerSetup.Instance.GlobalGroundItemCache;
+
+        foreach (var (serial, item) in items)
+        {
+            if (item.ItemPane != Item.ItemPanes.Ground) continue;
+            var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
+            if (abandonedDiff.Minutes <= 30) continue;
+            var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
+            if (!removed) continue;
+            itemToBeRemoved.Remove();
+            itemToBeRemoved.DelObject(itemToBeRemoved);
         }
     }
 
@@ -1029,6 +1046,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.CantDropItemMsg}");
                 return default;
             }
+
             var itemPosition = new Position(destinationPoint.X, destinationPoint.Y);
 
             if (localClient.Aisling.Position.DistanceFrom(itemPosition.X, itemPosition.Y) > 9)
@@ -1036,6 +1054,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can not do that. Too far.");
                 return default;
             }
+
             if (localClient.Aisling.Map.IsWall(destinationPoint.X, destinationPoint.Y))
                 if ((int)localClient.Aisling.Pos.X != destinationPoint.X || (int)localClient.Aisling.Pos.Y != destinationPoint.Y)
                 {
@@ -1057,6 +1076,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (remaining == 0)
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                    item.AbandonedDate = DateTime.UtcNow;
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
                     // Mileth Altar 
@@ -1082,6 +1102,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         Template = item.Template
                     };
 
+                    temp.AbandonedDate = DateTime.UtcNow;
                     temp.Release(localClient.Aisling, itemPosition);
 
                     // Mileth Altar 
@@ -1102,6 +1123,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                    item.AbandonedDate = DateTime.UtcNow;
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
                     // Mileth Altar 

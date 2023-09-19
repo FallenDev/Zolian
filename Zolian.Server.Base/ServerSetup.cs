@@ -6,7 +6,6 @@ using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Interfaces;
-using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Sprites;
@@ -67,6 +66,7 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
     public ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; } = new();
     public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = new();
+    public ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; } = new();
     public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = new();
     public ConcurrentDictionary<uint, Trap> Traps { get; set; } = new();
 

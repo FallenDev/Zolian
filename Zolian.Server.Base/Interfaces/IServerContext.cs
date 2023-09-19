@@ -39,6 +39,7 @@ public interface IServerContext
     ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; }
     ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; }
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
+    ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     ConcurrentDictionary<uint, Trap> Traps { get; set; }
     bool Running { get; set; }

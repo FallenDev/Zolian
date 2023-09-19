@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Numerics;
 
 using Chaos.Common.Definitions;
@@ -20,8 +19,6 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-
-using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.Sprites;
 
@@ -369,6 +366,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
+        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
@@ -436,6 +434,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
+        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
@@ -484,6 +483,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
+        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
