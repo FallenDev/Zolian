@@ -114,11 +114,11 @@ public abstract class RewardScript : IScriptBase
         [(55, 65)] = null,
         [(66, 76)] = new List<string> { "Leopo Glove", "Ringer Glove" },
         [(77, 87)] = new List<string> { "Leopo Glove", "Magic Glove" },
-        [(88, 99)] = null,
-        [(100, 109)] = null,
+        [(88, 99)] = new List<string> { "Mythril Gauntlet" },
+        [(100, 109)] = new List<string> { "Hybrasyl Gauntlet" },
         [(110, 119)] = null,
-        [(120, 149)] = null,
-        [(150, 179)] = null,
+        [(120, 149)] = new List<string> { "Scurvy Gauntlet", "Amorphous Gauntlet" },
+        [(150, 179)] = new List<string> { "Kandor Glove" },
         [(180, 200)] = null,
     };
 
@@ -132,13 +132,13 @@ public abstract class RewardScript : IScriptBase
         [(44, 54)] = null,
         [(55, 65)] = null,
         [(66, 76)] = null,
-        [(77, 87)] = null,
-        [(88, 99)] = new List<string> { "Fire Kanna Necklace", "Wind Kanna Necklace", "Earth Kanna Necklace", "Water Kanna Necklace", "Void Kanna Necklace", "Holy Kanna Necklace" },
-        [(100, 109)] = null,
+        [(77, 87)] = new List<string> { "Fire Kanna Necklace", "Wind Kanna Necklace", "Earth Kanna Necklace", "Water Kanna Necklace", "Void Kanna Necklace", "Holy Kanna Necklace" },
+        [(88, 99)] = null,
+        [(100, 109)] = new List<string> { "Fire Cascading Necklace", "Wind Cascading Necklace", "Earth Cascading Necklace", "Water Cascading Necklace", "Void Cascading Necklace", "Holy Cascading Necklace" },
         [(110, 119)] = null,
-        [(120, 149)] = null,
-        [(150, 179)] = null,
-        [(180, 200)] = null,
+        [(120, 149)] = new List<string> { "Fire Encrusted Necklace", "Wind Encrusted Necklace", "Earth Encrusted Necklace", "Water Encrusted Necklace", "Void Encrusted Necklace", "Holy Encrusted Necklace" },
+        [(150, 179)] = new List<string> { "Fire Diamat Necklace", "Wind Diamat Necklace", "Earth Diamat Necklace", "Water Diamat Necklace", "Void Diamat Necklace", "Holy Diamat Necklace" },
+        [(180, 200)] = new List<string> { "Children's Crux", "Fervent Mala" }
     };
 
     protected static readonly Dictionary<(int, int), List<string>> OffHandDrops = new()
@@ -194,7 +194,7 @@ public abstract class RewardScript : IScriptBase
         [(100, 109)] = null,
         [(110, 119)] = null,
         [(120, 149)] = null,
-        [(150, 179)] = null,
+        [(150, 179)] = new List<string> { "Scale Bracer" },
         [(180, 200)] = null,
     };
 
