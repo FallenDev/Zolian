@@ -156,12 +156,22 @@ public class AoSithGar : SpellScript
                 if (debuff.Name == "Skulled") continue;
                 debuff.OnEnded(targetObj, debuff);
             }
+
+            foreach (var buff in targetObj.Buffs.Values)
+            {
+                buff.OnEnded(targetObj, buff);
+            }
         }
 
         foreach (var debuff in aisling.Debuffs.Values)
         {
             if (debuff.Name == "Skulled") continue;
             debuff.OnEnded(aisling, debuff);
+        }
+
+        foreach (var buff in aisling.Buffs.Values)
+        {
+            buff.OnEnded(aisling, buff);
         }
     }
 

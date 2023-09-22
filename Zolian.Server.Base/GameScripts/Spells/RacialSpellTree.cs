@@ -34,7 +34,7 @@ public class Tail_Flip : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Tail Flip";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 105);
+        _spellMethod.ElementalOnUse(sprite, target, _spell, 290);
     }
 }
 
