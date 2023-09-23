@@ -170,9 +170,7 @@ public class Smite : SkillScript
                 var debuff = new DebuffFrozen();
                 {
                     if (_target.HasDebuff(debuff.Name))
-                        _target.RemoveDebuff(debuff.Name);
-
-                    _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
+                        _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
                 }
             }
 
@@ -215,10 +213,8 @@ public class Smite : SkillScript
 
                         var debuff = new DebuffFrozen();
                         {
-                            if (player.HasDebuff(debuff.Name))
-                                player.RemoveDebuff(debuff.Name);
-
-                            _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, player, _skill);
+                            if (!player.HasDebuff(debuff.Name))
+                                _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, player, _skill);
                         }
 
                         var dmgCalc = DamageCalc(sprite);
