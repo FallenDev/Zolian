@@ -103,7 +103,7 @@ public class Artur : MundaneScript
                 client.Aisling.QuestManager.ArtursGift = 1;
                 client.SendOptionsDialog(Mundane, "You will want to travel to Tagor, there you'll meet Tout. I have granted you access. After you enter, you'll need to fight your way until the Lexicon reveals itself ~Dia Aite~!");
                 var buff = new buff_DiaAite();
-                buff.OnApplied(client.Aisling, buff);
+                client.EnqueueBuffAppliedEvent(client.Aisling, buff, buff.TimeLeft);
                 break;
             }
             case 5:
@@ -253,7 +253,7 @@ public class Artur : MundaneScript
                 if (!client.Aisling.HasBuff("Dia Aite"))
                 {
                     var buff = new buff_DiaAite();
-                    buff.OnApplied(client.Aisling, buff);
+                    client.EnqueueBuffAppliedEvent(client.Aisling, buff, buff.TimeLeft);
                 }
 
                 client.SendOptionsDialog(Mundane, "Come back when you have, they're located in {=bTagor{=a'{=bs Shrouded Necropolis{=a. ~Dia Aite~");

@@ -439,14 +439,15 @@ public class Sneak : SkillScript
                     }
 
                     var buff = new buff_hide();
-                    buff.OnApplied(aisling, buff);
+                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, buff.TimeLeft);
                     _skillMethod.Train(aisling.Client, _skill);
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
                     break;
                 }
             case Monster monster:
                 {
-                    // ToDo: Add logic so monsters can hide here
+                    var buff = new buff_hide();
+                    buff.OnApplied(monster, buff);
                     break;
                 }
         }

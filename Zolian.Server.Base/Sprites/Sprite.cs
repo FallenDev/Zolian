@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -1402,7 +1403,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when aegisChance >= 99:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, buff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
@@ -1410,7 +1411,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when aegisChance >= 97:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) buff.OnApplied(damageDealingSprite, buff);
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, buff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;

@@ -574,7 +574,7 @@ public class Shunshin : SpellScript
         }
 
         var buff = new buff_hide();
-        buff.OnApplied(damageDealingSprite, buff);
+        client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, buff.TimeLeft);
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
         client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;

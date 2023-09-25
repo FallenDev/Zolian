@@ -472,11 +472,23 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
 
-            buff.OnApplied(target, buff);
+            aisling.Client.EnqueueBuffAppliedEvent(target, buff, buff.TimeLeft);
         }
         else
         {
-            buff.OnApplied(sprite, buff);
+            if (target is Aisling targetPlayer)
+            {
+                if (!target.HasDebuff(buff.Name))
+                {
+                    targetPlayer.Client.EnqueueBuffAppliedEvent(targetPlayer, buff, buff.TimeLeft);
+                }
+            }
+            else
+            {
+                if (!target.HasDebuff(buff.Name))
+                    buff.OnApplied(sprite, buff);
+            }
+
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));

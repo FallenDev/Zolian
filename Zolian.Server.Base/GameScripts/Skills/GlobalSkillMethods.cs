@@ -94,7 +94,9 @@ public class GlobalSkillMethods : IGlobalSkillMethods
                     : BodyAnimation.TwoHandAtk
                 : BodyAnimation.Assail;
 
+            aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, buff.TimeLeft);
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
+            return;
         }
 
         buff.OnApplied(target, buff);

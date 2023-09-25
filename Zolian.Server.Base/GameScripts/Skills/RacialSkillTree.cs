@@ -2,6 +2,7 @@
 using Chaos.Networking.Entities.Server;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -51,7 +52,7 @@ public class Shadowfade : SkillScript
                     }
 
                     var buff = new buff_hide();
-                    buff.OnApplied(aisling, buff);
+                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, buff.TimeLeft);
                     _skillMethod.Train(aisling.Client, _skill);
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
                     break;
@@ -2366,7 +2367,7 @@ public class Golden_Lair : SkillScript
 
         if (party == null || party.Count == 0)
         {
-            _buff.OnApplied(aisling, _buff);
+            aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff, _buff.TimeLeft);
             return;
         }
 
@@ -2374,7 +2375,7 @@ public class Golden_Lair : SkillScript
         {
             if (entity.Map.ID != aisling.Map.ID) continue;
             _target = entity;
-            _buff.OnApplied(_target, _buff);
+            aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, _buff.TimeLeft);
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, entity.Serial, 170));
         }
@@ -2478,7 +2479,7 @@ public class Vicious_Roar : SkillScript
         };
 
         _target = aisling;
-        _buff.OnApplied(_target, _buff);
+        aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, _buff.TimeLeft);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, _target.Serial, 170));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         _skill.LastUsedSkill = DateTime.UtcNow;
