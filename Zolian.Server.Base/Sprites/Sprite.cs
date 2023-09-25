@@ -1008,22 +1008,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return dmg;
     }
 
-    public Sprite ApplyBuff(string buffName)
-    {
-        if (!ServerSetup.Instance.GlobalBuffCache.TryGetValue(buffName, out var value)) return this;
-        if (value == null || string.IsNullOrEmpty(value.Name)) return null;
-        if (!HasBuff(value.Name)) value.OnApplied(this, value);
-        return this;
-    }
-
-    public Sprite ApplyDebuff(string debuffName)
-    {
-        if (!ServerSetup.Instance.GlobalDeBuffCache.TryGetValue(debuffName, out var value)) return this;
-        if (value == null || string.IsNullOrEmpty(value.Name)) return null;
-        if (!HasDebuff(value.Name)) value.OnApplied(this, value);
-        return this;
-    }
-
     public void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell)
     {
         var saved = source.OffenseElement;
@@ -1488,7 +1472,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when bleedingChance >= 99:
                 {
                     var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
@@ -1496,7 +1480,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when bleedingChance >= 97:
                 {
                     var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
@@ -1508,7 +1492,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when rendingChance >= 99:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
@@ -1516,7 +1500,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when rendingChance >= 97:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
@@ -1540,7 +1524,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }
@@ -1559,7 +1543,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) deBuff.OnApplied(target, deBuff);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }

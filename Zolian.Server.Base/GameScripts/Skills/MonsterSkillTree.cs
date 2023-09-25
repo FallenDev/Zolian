@@ -122,8 +122,18 @@ public class BiteAndShake : SkillScript
 
         var debuff = new DebuffBeagsuain();
 
-        if (!_target.HasDebuff(debuff.Name))
-            debuff.OnApplied(_target, debuff);
+        if (_target is Aisling targetPlayer)
+        {
+            if (!_target.HasDebuff(debuff.Name))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name))
+                debuff.OnApplied(_target, debuff);
+        }
 
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
@@ -190,10 +200,19 @@ public class CorrosiveTouch : SkillScript
 
         var debuff = new DebuffRend();
 
-        if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
-            debuff.OnApplied(_target, debuff);
         if (_target is Aisling targetPlayer)
-            targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+        {
+            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+                debuff.OnApplied(_target, debuff);
+        }
 
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);

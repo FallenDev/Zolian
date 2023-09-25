@@ -1003,8 +1003,7 @@ public class Rush : SkillScript
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
                 var stunned = new DebuffBeagsuain();
-                stunned.OnApplied(aisling, stunned);
-
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
@@ -1074,7 +1073,7 @@ public class Rush : SkillScript
             if (wallPos <= 2)
             {
                 var stunned = new DebuffBeagsuain();
-                stunned.OnApplied(aisling, stunned);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -1633,8 +1632,7 @@ public class Charge : SkillScript
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
                 var stunned = new DebuffBeagsuain();
-                stunned.OnApplied(aisling, stunned);
-
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
@@ -1704,7 +1702,7 @@ public class Charge : SkillScript
             if (wallPos <= 6)
             {
                 var stunned = new DebuffBeagsuain();
-                stunned.OnApplied(aisling, stunned);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -1777,7 +1775,7 @@ public class Titans_Cleave : SkillScript
             var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name)) 
-                debuff.OnApplied(_target, debuff);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1826,10 +1824,19 @@ public class Titans_Cleave : SkillScript
 
             var debuff = new DebuffRend();
 
-            if (!_target.HasDebuff(debuff.Name)) 
-                debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
-                targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
 
             var dmg = sprite.MaximumHp * 1;
             sprite.CurrentHp = (int)(sprite.CurrentHp * 0.3);
@@ -1912,8 +1919,9 @@ public class Retribution : SkillScript
             _target = i;
             var dmgCalc = DamageCalc(sprite);
             var debuff = new DebuffRend();
+
             if (!_target.HasDebuff(debuff.Name)) 
-                debuff.OnApplied(_target, debuff);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1958,6 +1966,22 @@ public class Retribution : SkillScript
                 _skillMethod.FailedAttempt(sprite, _skill, action);
                 OnFailed(sprite);
                 return;
+            }
+
+            var debuff = new DebuffRend();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
             }
 
             var dmgCalc = DamageCalc(sprite);

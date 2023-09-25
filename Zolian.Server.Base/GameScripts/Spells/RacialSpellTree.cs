@@ -313,8 +313,16 @@ public class DestructiveForce : SpellScript
         if (hasHitOffWall)
         {
             var stunned = new DebuffBeagsuain();
-            stunned.OnApplied(_target, stunned);
-            _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
+            if (_target is Aisling targetAisling)
+            {
+                targetAisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                targetAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
+            }
+            else
+            {
+                stunned.OnApplied(_target, stunned);
+                _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
+            }
         }
 
         _target.Pos = new Vector2(targetPosition.X, targetPosition.Y);

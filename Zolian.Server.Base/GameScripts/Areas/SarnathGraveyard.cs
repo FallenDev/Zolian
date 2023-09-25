@@ -57,8 +57,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(34, 47) &&
             location != new Vector2(34, 45)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -73,8 +73,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(36, 37) &&
             location != new Vector2(37, 37)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -91,8 +91,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(46, 37) &&
             location != new Vector2(46, 35)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -109,8 +109,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(40, 32) &&
             location != new Vector2(40, 30)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -127,8 +127,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(47, 22) &&
             location != new Vector2(47, 20)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -145,8 +145,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(18, 37) &&
             location != new Vector2(18, 35)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -163,8 +163,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(8, 34) &&
             location != new Vector2(8, 32)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -181,8 +181,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(6, 45) &&
             location != new Vector2(6, 43)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -199,8 +199,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(25, 28) &&
             location != new Vector2(25, 26)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -217,8 +217,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(38, 13) &&
             location != new Vector2(38, 11)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -235,8 +235,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(44, 4) &&
             location != new Vector2(44, 2)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -253,8 +253,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(18, 4) &&
             location != new Vector2(18, 2)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
@@ -271,8 +271,8 @@ public class SarnathGraveyard : AreaScript
             location != new Vector2(11, 13) &&
             location != new Vector2(11, 11)) return;
 
-        _debuff1.OnApplied(client.Aisling, _debuff1);
-        _debuff2.OnApplied(client.Aisling, _debuff2);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);

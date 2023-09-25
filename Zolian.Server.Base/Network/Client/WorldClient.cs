@@ -170,10 +170,20 @@ namespace Darkages.Network.Client
         private readonly object _warpCheckLock = new();
         private readonly Queue<ExperienceEvent> _expQueue = new();
         private readonly Queue<AbilityEvent> _apQueue = new();
+        private readonly Queue<DebuffEvent> _debuffQueue = new();
+        private readonly Queue<BuffEvent> _buffQueue = new();
         private readonly object _expQueueLock = new();
         private readonly object _apQueueLock = new();
+        private readonly object _buffQueueLockApply = new();
+        private readonly object _debuffQueueLockApply = new();
+        private readonly object _buffQueueLockUpdate = new();
+        private readonly object _debuffQueueLockUpdate = new();
         private Task _experienceTask;
         private Task _apTask;
+        private Task _applyBuff;
+        private Task _applyDebuff;
+        private Task _updateBuff;
+        private Task _updateDebuff;
 
         public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -182,6 +192,8 @@ namespace Darkages.Network.Client
             Server = server;
             _experienceTask = Task.Run(ProcessExperienceEvents);
             _apTask = Task.Run(ProcessAbilityEvents);
+            _applyBuff = Task.Run(ProcessApplyingBuffsEvent);
+            _applyDebuff = Task.Run(ProcessApplyingDebuffsEvent);
         }
 
         public void Update(TimeSpan elapsedTime)
@@ -196,6 +208,8 @@ namespace Darkages.Network.Client
             //VariableLagDisconnector(30);
         }
 
+        #region Events
+        
         private void ProcessExperienceEvents()
         {
             while (ServerSetup.Instance.Running)
@@ -204,7 +218,7 @@ namespace Darkages.Network.Client
 
                 lock (_expQueueLock)
                 {
-                    if (_expQueue.Any())
+                    if (_expQueue.Count > 0)
                     {
                         expEvent = _expQueue.Dequeue();
                     }
@@ -229,7 +243,7 @@ namespace Darkages.Network.Client
 
                 lock (_apQueueLock)
                 {
-                    if (_apQueue.Any())
+                    if (_apQueue.Count > 0)
                     {
                         apEvent = _apQueue.Dequeue();
                     }
@@ -245,6 +259,58 @@ namespace Darkages.Network.Client
                 }
             }
         }
+
+        private void ProcessApplyingDebuffsEvent()
+        {
+            while (ServerSetup.Instance.Running)
+            {
+                DebuffEvent? debuffEvent = null;
+
+                lock (_debuffQueueLockApply)
+                {
+                    if (_debuffQueue.Count > 0)
+                    {
+                        debuffEvent = _debuffQueue.Dequeue();
+                    }
+                }
+
+                if (debuffEvent.HasValue)
+                {
+                    debuffEvent.Value.Debuff.OnApplied(debuffEvent.Value.Affected, debuffEvent.Value.Debuff);
+                }
+                else
+                {
+                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                }
+            }
+        }
+
+        private void ProcessApplyingBuffsEvent()
+        {
+            while (ServerSetup.Instance.Running)
+            {
+                BuffEvent? buffEvent = null;
+
+                lock (_buffQueueLockApply)
+                {
+                    if (_buffQueue.Count > 0)
+                    {
+                        buffEvent = _buffQueue.Dequeue();
+                    }
+                }
+
+                if (buffEvent.HasValue)
+                {
+                    buffEvent.Value.Buff.OnApplied(buffEvent.Value.Affected, buffEvent.Value.Buff);
+                }
+                else
+                {
+                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                }
+            }
+        }
+
+        #endregion
 
         private void DoUpdate(TimeSpan elapsedTime)
         {
@@ -342,9 +408,7 @@ namespace Darkages.Network.Client
             if (Aisling.Skulled) return;
 
             var debuff = new DebuffReaping();
-            {
-                debuff.OnApplied(Aisling, debuff);
-            }
+            EnqueueDebuffAppliedEvent(Aisling, debuff, debuff.TimeLeft);
         }
 
         public void UpdateStatusBarAndThreat(TimeSpan elapsedTime)
@@ -891,13 +955,12 @@ namespace Darkages.Network.Client
                     if (!buffCheck) continue;
                     // Set script to Buff
                     var buff = buffDb.ObtainBuffName(Aisling, buffFromCache);
-                    buff.BuffSpell = buffFromCache.BuffSpell;
                     buff.Icon = buffFromCache.Icon;
                     buff.Name = buffDb.Name;
                     buff.Cancelled = buffFromCache.Cancelled;
                     buff.Length = buffFromCache.Length;
                     // Apply Buff on login
-                    buff.OnApplied(Aisling, buff);
+                    EnqueueBuffAppliedEvent(Aisling, buff, buff.Length);
                     // Set Timer & Time left
                     buff.TimeLeft = buffDb.TimeLeft;
                     buff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
@@ -949,13 +1012,12 @@ namespace Darkages.Network.Client
                     if (!debuffCheck) continue;
                     // Set script to Debuff
                     var debuff = deBuffDb.ObtainDebuffName(Aisling, debuffFromCache);
-                    debuff.DebuffSpell = debuffFromCache.DebuffSpell;
                     debuff.Icon = debuffFromCache.Icon;
                     debuff.Name = deBuffDb.Name;
                     debuff.Cancelled = debuffFromCache.Cancelled;
                     debuff.Length = debuffFromCache.Length;
                     // Apply Debuff on login
-                    debuff.OnApplied(Aisling, debuff);
+                    EnqueueDebuffAppliedEvent(Aisling, debuff, debuff.Length);
                     // Set Timer & Time left
                     debuff.TimeLeft = deBuffDb.TimeLeft;
                     debuff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
@@ -4057,6 +4119,23 @@ namespace Darkages.Network.Client
                 _apQueue.Enqueue(new AbilityEvent(player, exp, hunting, overflow));
             }
         }
+
+        public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff, int timeLeft)
+        {
+            lock (_debuffQueueLockApply)
+            {
+                _debuffQueue.Enqueue(new DebuffEvent(affected, debuff, timeLeft));
+            }
+        }
+
+        public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff, int timeLeft)
+        {
+            lock (_buffQueueLockApply)
+            {
+                _buffQueue.Enqueue(new BuffEvent(affected, buff, timeLeft));
+            }
+        }
+
         public void GiveExp(int exp, bool overflow = false)
         {
             if (exp <= 0) exp = 1;

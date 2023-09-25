@@ -270,9 +270,16 @@ public class Poison_Trap : SpellScript
     {
         var debuff = new DebuffPoison();
 
-        if (target.HasBuff(debuff.Name)) return;
-        debuff.OnApplied(target, debuff);
+        if (target is Aisling affected)
         {
+            if (!target.HasDebuff(debuff.Name))
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        }
+        else
+        {
+            if (!target.HasDebuff(debuff.Name))
+                debuff.OnApplied(target, debuff);
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
@@ -317,10 +324,17 @@ public class Snare_Trap : SpellScript
     {
         var debuff = new DebuffSleep();
 
-        if (target.HasBuff(debuff.Name)) return;
-        debuff.OnApplied(target, debuff);
+        if (target is Aisling affected)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, null, target.Serial));
+            if (!target.HasDebuff(debuff.Name))
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        }
+        else
+        {
+            if (!target.HasDebuff(debuff.Name))
+                debuff.OnApplied(target, debuff);
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
 
@@ -364,10 +378,17 @@ public class Flash_Trap : SpellScript
     {
         var debuff = new DebuffBlind();
 
-        if (target.HasBuff(debuff.Name)) return;
-        debuff.OnApplied(target, debuff);
+        if (target is Aisling affected)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(18, null, target.Serial));
+            if (!target.HasDebuff(debuff.Name))
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        }
+        else
+        {
+            if (!target.HasDebuff(debuff.Name))
+                debuff.OnApplied(target, debuff);
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
 

@@ -107,7 +107,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
-            var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level); 
+            var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
             var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
 
             if (target.CurrentHp > 0)
@@ -249,14 +249,17 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
 
-            debuff.OnApplied(target, debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
         }
         else
         {
-            debuff.OnApplied(target, debuff);
-
             if (target is Aisling targetAisling)
+            {
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Unknown"} afflicts you with {spell.Template.Name}");
+                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
+            }
+            else
+                debuff.OnApplied(target, debuff);
 
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
@@ -285,14 +288,17 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.Animation, target.Position));
             }
 
-            debuff.OnApplied(target, debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
         }
         else
         {
-            debuff.OnApplied(target, debuff);
-
             if (target is Aisling targetAisling)
+            {
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Unknown"} poisoned you with {spell.Template.Name}");
+                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
+            }
+            else
+                debuff.OnApplied(target, debuff);
 
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));

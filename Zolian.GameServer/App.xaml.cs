@@ -65,7 +65,7 @@ public partial class App
         const string logTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
 
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("Zolian_General.txt", LogEventLevel.Verbose, logTemplate)
+            .WriteTo.File("_Zolian_General.txt", LogEventLevel.Verbose, logTemplate)
             .WriteTo.Async(wt => wt.Console(LogEventLevel.Verbose, logTemplate, theme: AnsiConsoleTheme.Literate))
             .CreateLogger();
 

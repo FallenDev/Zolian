@@ -109,11 +109,11 @@ public class Artur : MundaneScript
             case 5:
             {
                 var debuff = new DebuffArdcradh();
-                debuff.OnApplied(client.Aisling, debuff);
+                client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, debuff.TimeLeft);
                 var debuff2 = new DebuffDecay();
-                debuff2.OnApplied(client.Aisling, debuff2);
+                client.EnqueueDebuffAppliedEvent(client.Aisling, debuff2, debuff2.TimeLeft);
                 var debuff3 = new DebuffHalt();
-                debuff3.OnApplied(client.Aisling, debuff3);
+                client.EnqueueDebuffAppliedEvent(client.Aisling, debuff3, debuff3.TimeLeft);
                 client.SendOptionsDialog(Mundane, "Scram or there will be nothing left of you");
                 break;
             }

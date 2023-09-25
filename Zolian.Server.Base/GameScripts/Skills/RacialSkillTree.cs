@@ -1275,6 +1275,7 @@ public class Icy_Blast : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, _skill);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
             _skillMethod.OnSuccess(_target, sprite, _skill, 0, false, action);
         }
     }
@@ -1334,7 +1335,17 @@ public class Icy_Blast : SkillScript
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, _skill);
-                _debuff.OnApplied(_target, _debuff);
+
+                if (_target is Aisling affected)
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                }
+                else
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        _debuff.OnApplied(_target, _debuff);
+                }
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -1794,7 +1805,7 @@ public class Silent_Siren : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, _skill);
-            _debuff.OnApplied(_target, _debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -1854,7 +1865,17 @@ public class Silent_Siren : SkillScript
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, _skill);
-                _debuff.OnApplied(_target, _debuff);
+
+                if (_target is Aisling affected)
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                }
+                else
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        _debuff.OnApplied(_target, _debuff);
+                }
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -1976,7 +1997,7 @@ public class Poison_Talon : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, _skill);
-            _debuff.OnApplied(_target, _debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -2036,7 +2057,17 @@ public class Poison_Talon : SkillScript
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, _skill);
-                _debuff.OnApplied(_target, _debuff);
+
+                if (_target is Aisling affected)
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                }
+                else
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        _debuff.OnApplied(_target, _debuff);
+                }
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -2159,7 +2190,7 @@ public class Toxic_Breath : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, _skill);
-            _debuff.OnApplied(_target, _debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -2219,7 +2250,17 @@ public class Toxic_Breath : SkillScript
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, _skill);
-                _debuff.OnApplied(_target, _debuff);
+
+                if (_target is Aisling affected)
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                }
+                else
+                {
+                    if (!_target.HasDebuff(_debuff.Name))
+                        _debuff.OnApplied(_target, _debuff);
+                }
 
                 if (_skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)

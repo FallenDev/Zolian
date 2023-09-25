@@ -63,6 +63,17 @@ public class Debuff : IDebuff
             "Fas Spiorad" => new DebuffFasspiorad(),
             "Dark Chain" => new DebuffDarkChain(),
             "Silence" => new DebuffSilence(),
+            "Lycanisim" => new Lycanisim(),
+            "Vampirisim" => new Vampirisim(),
+            "Plagued" => new Plagued(),
+            "The Shakes" => new TheShakes(),
+            "Stricken" => new Stricken(),
+            "Rabies" => new Rabies(),
+            "Lock Joint" => new LockJoint(),
+            "Numb Fall" => new NumbFall(),
+            "Diseased" => new Diseased(),
+            "Hallowed" => new Hallowed(),
+            "Petrified" => new Petrified(),
             _ => DebuffSpell
         };
 

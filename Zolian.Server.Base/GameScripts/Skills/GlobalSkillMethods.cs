@@ -67,7 +67,12 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             }
         }
 
-        debuff.OnApplied(target, debuff);
+        if (client != null)
+            client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
+        else if (target is Aisling targetPlayer)
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff, debuff.TimeLeft);
+        else
+            debuff.OnApplied(target, debuff);
 
         if (target is not Monster) return;
         var animationPick = client?.Aisling.Path == Class.Defender

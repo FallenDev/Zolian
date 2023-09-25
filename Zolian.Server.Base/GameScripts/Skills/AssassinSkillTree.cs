@@ -303,7 +303,8 @@ public class Stab_and_Twist : SkillScript
             var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
-                debuff.OnApplied(_target, debuff);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -352,10 +353,19 @@ public class Stab_and_Twist : SkillScript
 
             var debuff = new DebuffHurricane();
 
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
-                debuff.OnApplied(_target, debuff);
             if (_target is Aisling targetPlayer)
-                targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+            {
+                if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+                    debuff.OnApplied(_target, debuff);
+            }
 
             var dmg = (int)(sprite.MaximumHp * 1.2);
             sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
