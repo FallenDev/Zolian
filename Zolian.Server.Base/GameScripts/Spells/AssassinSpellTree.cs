@@ -42,12 +42,12 @@ public class Needle_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 900, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -90,12 +90,12 @@ public class Stiletto_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 2206, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -138,12 +138,12 @@ public class Coiled_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 299, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -186,12 +186,12 @@ public class Spring_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 3197, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -234,12 +234,12 @@ public class Maiden_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 500, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -288,12 +288,12 @@ public class Poison_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 13652, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -342,12 +342,12 @@ public class Snare_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 264, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -396,12 +396,12 @@ public class Flash_Trap : SpellScript
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 263, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
