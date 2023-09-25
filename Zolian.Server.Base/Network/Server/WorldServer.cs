@@ -810,6 +810,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnClientWalk(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client?.Aisling?.Map is not { Ready: true }) return default;
+        var readyTime = DateTime.UtcNow;
+        if (readyTime.Subtract(client.LastMapUpdated).TotalSeconds > 1)
+            if (readyTime.Subtract(client.LastMovement).TotalSeconds < 0.2) return default;
+
         if (client.Aisling.CantMove)
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "{=bYou cannot feel your legs...");
@@ -841,6 +845,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (success)
             {
+                localClient.LastMovement = DateTime.UtcNow;
+
                 if (localClient.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
                 {
                     var portal = new PortalSession();
@@ -853,6 +859,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (localClient.Aisling.Map?.Script.Item2 == null) return default;
 
                 localClient.Aisling.Map.Script.Item2.OnPlayerWalk(localClient.Aisling.Client, localClient.Aisling.LastPosition, localClient.Aisling.Position);
+
                 if (!localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) return default;
 
                 foreach (var trap in ServerSetup.Instance.Traps.Select(i => i.Value))
@@ -872,7 +879,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.CheckWarpTransitions(localClient.Aisling.Client);
             }
 
-            localClient.LastMovement = DateTime.UtcNow;
             return default;
         }
 
