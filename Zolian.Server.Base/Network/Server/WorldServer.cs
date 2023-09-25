@@ -2243,10 +2243,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.IsRefreshing) return default;
         if (client.Aisling.IsDead()) return default;
 
-        if (client.Aisling.CantAttack || client.Aisling.CantMove || client.Aisling.CantCast || client.Aisling.Skulled)
+        if (client.Aisling.Skulled)
         {
-            if (client.Aisling.Skulled)
-                client.SendServerMessage(ServerMessageType.OrangeBar1, ServerSetup.Instance.Config.ReapMessageDuringAction);
+            client.SendServerMessage(ServerMessageType.OrangeBar1, ServerSetup.Instance.Config.ReapMessageDuringAction);
             client.SendCancelCasting();
             client.SendLocation();
             return default;

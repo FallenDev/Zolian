@@ -166,6 +166,8 @@ public interface IWorldClient : ISocketClient
     void GiveDex(byte v = 1);
     void EnqueueExperienceEvent(Aisling player, int exp, bool hunting, bool overflow);
     void EnqueueAbilityEvent(Aisling player, int exp, bool hunting, bool overflow);
+    void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff, int timeLeft);
+    void EnqueueBuffAppliedEvent(Sprite affected, Buff buff, int timeLeft);
     void GiveExp(int exp, bool overflow = false);
     void LevelUp(Aisling player, int extraExp);
     void GiveAp(int a, bool overflow = false);
