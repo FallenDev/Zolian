@@ -169,7 +169,7 @@ public class Smite : SkillScript
 
                 var debuff = new DebuffFrozen();
                 {
-                    if (_target.HasDebuff(debuff.Name))
+                    if (!_target.HasDebuff(debuff.Name))
                         _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
                 }
             }

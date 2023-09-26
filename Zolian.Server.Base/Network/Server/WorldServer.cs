@@ -59,7 +59,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
-    public readonly WorldServerTimer TrapTimer = new(TimeSpan.FromSeconds(1));
+    private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private DateTime _gameSpeed;
     private DateTime _spriteSpeed;
     private const int GameSpeed = 30;
@@ -678,72 +678,74 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var items = ServerSetup.Instance.GlobalGroundItemCache;
 
-        foreach (var (serial, item) in items)
+        Parallel.ForEach(items, (item) =>
         {
-            if (item.ItemPane != Item.ItemPanes.Ground) continue;
-            var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
-            if (abandonedDiff.Minutes <= 30) continue;
+            var (serial, i) = item;
+            if (i.ItemPane != Item.ItemPanes.Ground) return;
+            var abandonedDiff = DateTime.UtcNow.Subtract(i.AbandonedDate);
+            if (abandonedDiff.Minutes <= 30) return;
             var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
-            if (!removed) continue;
+            if (!removed) return;
             itemToBeRemoved.Remove();
             itemToBeRemoved.DelObject(itemToBeRemoved);
-        }
+        });
     }
 
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
         // Cache traps to reduce Select operation on each iteration
         var traps = ServerSetup.Instance.Traps.Values;
-        var updateList = ServerSetup.Instance.GlobalMonsterCache;
 
-        foreach (var (_, monster) in updateList)
+        Parallel.ForEach(ServerSetup.Instance.GlobalMonsterCache, (monster) =>
         {
-            if (monster?.Scripts == null) continue;
-            if (monster.CurrentHp <= 0)
+            var (serial, npc) = monster;
+            if (npc?.Scripts == null) return;
+            if (npc.CurrentHp <= 0)
             {
-                monster.Skulled = true;
+                npc.Skulled = true;
 
-                if (monster.Target is Aisling aisling)
+                if (npc.Target is Aisling aisling)
                 {
-                    monster.Scripts.Values.First().OnDeath(aisling.Client);
+                    npc.Scripts.Values.First().OnDeath(aisling.Client);
                 }
                 else
                 {
-                    monster.Scripts.Values.First().OnDeath();
+                    npc.Scripts.Values.First().OnDeath();
                 }
             }
 
-            monster.Scripts.Values.First().Update(elapsedTime);
+            npc.Scripts.Values.First().Update(elapsedTime);
 
             foreach (var trap in traps)
             {
-                if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                    monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
-                    monster.Map != trap.TrapItem.Map) continue;
+                if (trap?.Owner == null || trap.Owner.Serial == npc.Serial ||
+                    npc.X != trap.Location.X || npc.Y != trap.Location.Y ||
+                    npc.Map != trap.TrapItem.Map) continue;
 
-                var triggered = Trap.Activate(trap, monster);
+                var triggered = Trap.Activate(trap, npc);
                 if (triggered) break;
             }
 
-            monster.UpdateBuffs(elapsedTime);
-            monster.UpdateDebuffs(elapsedTime);
-            monster.LastUpdated = DateTime.UtcNow;
-        }
+            npc.UpdateBuffs(elapsedTime);
+            npc.UpdateDebuffs(elapsedTime);
+            npc.LastUpdated = DateTime.UtcNow;
+        });
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
     {
-        foreach (var (_, mundane) in ServerSetup.Instance.GlobalMundaneCache)
+        Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache, (mundane) =>
         {
-            if (mundane == null) continue;
-            mundane.Update(elapsedTime);
-            mundane.LastUpdated = DateTime.UtcNow;
-        }
+            var (serial, npc) = mundane;
+            if (npc == null) return;
+            npc.Update(elapsedTime);
+            npc.LastUpdated = DateTime.UtcNow;
+        });
     }
 
     private void CheckTraps(TimeSpan elapsedTime)
     {
-        if (!TrapTimer.Update(elapsedTime)) return;
+        if (!_trapTimer.Update(elapsedTime)) return;
 
         lock (ServerSetup.Instance.Traps)
         {
@@ -756,10 +758,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void UpdateMaps(TimeSpan elapsedTime)
     {
-        foreach (var (_, map) in ServerSetup.Instance.GlobalMapCache)
+        Parallel.ForEach(ServerSetup.Instance.GlobalMapCache, (map) =>
         {
-            map?.Update(elapsedTime);
-        }
+            var (serial, area) = map;
+            area?.Update(elapsedTime);
+        });
     }
 
     #endregion
@@ -3176,7 +3179,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return;
         }
-        
+
         var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
         var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
 
