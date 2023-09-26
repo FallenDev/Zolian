@@ -52,7 +52,7 @@ public class Shadowfade : SkillScript
                     }
 
                     var buff = new buff_hide();
-                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, buff.TimeLeft);
+                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
                     _skillMethod.Train(aisling.Client, _skill);
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
                     break;
@@ -1276,7 +1276,7 @@ public class Icy_Blast : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, _skill);
-            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, TimeSpan.FromSeconds(_debuff.Length));
             _skillMethod.OnSuccess(_target, sprite, _skill, 0, false, action);
         }
     }
@@ -1340,7 +1340,7 @@ public class Icy_Blast : SkillScript
                 if (_target is Aisling affected)
                 {
                     if (!_target.HasDebuff(_debuff.Name))
-                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, TimeSpan.FromSeconds(_debuff.Length));
                 }
                 else
                 {
@@ -1806,7 +1806,7 @@ public class Silent_Siren : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, _skill);
-            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, TimeSpan.FromSeconds(_debuff.Length));
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -1870,7 +1870,7 @@ public class Silent_Siren : SkillScript
                 if (_target is Aisling affected)
                 {
                     if (!_target.HasDebuff(_debuff.Name))
-                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, TimeSpan.FromSeconds(_debuff.Length));
                 }
                 else
                 {
@@ -1998,7 +1998,7 @@ public class Poison_Talon : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, _skill);
-            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, TimeSpan.FromSeconds(_debuff.Length));
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -2062,7 +2062,7 @@ public class Poison_Talon : SkillScript
                 if (_target is Aisling affected)
                 {
                     if (!_target.HasDebuff(_debuff.Name))
-                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, TimeSpan.FromSeconds(_debuff.Length));
                 }
                 else
                 {
@@ -2191,7 +2191,7 @@ public class Toxic_Breath : SkillScript
 
             var dmgCalc = DamageCalc(sprite);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, _skill);
-            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, _debuff.TimeLeft);
+            aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff, TimeSpan.FromSeconds(_debuff.Length));
             _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
         }
     }
@@ -2255,7 +2255,7 @@ public class Toxic_Breath : SkillScript
                 if (_target is Aisling affected)
                 {
                     if (!_target.HasDebuff(_debuff.Name))
-                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, _debuff.TimeLeft);
+                        affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff, TimeSpan.FromSeconds(_debuff.Length));
                 }
                 else
                 {
@@ -2367,7 +2367,7 @@ public class Golden_Lair : SkillScript
 
         if (party == null || party.Count == 0)
         {
-            aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff, _buff.TimeLeft);
+            aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff, TimeSpan.FromSeconds(_buff.Length));
             return;
         }
 
@@ -2375,7 +2375,7 @@ public class Golden_Lair : SkillScript
         {
             if (entity.Map.ID != aisling.Map.ID) continue;
             _target = entity;
-            aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, _buff.TimeLeft);
+            aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, TimeSpan.FromSeconds(_buff.Length));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, entity.Serial, 170));
         }
@@ -2479,7 +2479,7 @@ public class Vicious_Roar : SkillScript
         };
 
         _target = aisling;
-        aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, _buff.TimeLeft);
+        aisling.Client.EnqueueBuffAppliedEvent(_target, _buff, TimeSpan.FromSeconds(_buff.Length));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, _target.Serial, 170));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         _skill.LastUsedSkill = DateTime.UtcNow;

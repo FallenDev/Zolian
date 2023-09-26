@@ -315,7 +315,7 @@ public class DestructiveForce : SpellScript
             var stunned = new DebuffBeagsuain();
             if (_target is Aisling targetAisling)
             {
-                targetAisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                targetAisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
                 targetAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
             }
             else

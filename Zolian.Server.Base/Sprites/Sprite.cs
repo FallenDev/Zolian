@@ -31,8 +31,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int RelicFinder;
     public event PropertyChangedEventHandler PropertyChanged;
     private readonly WorldServerTimer _buffAndDebuffTimer;
-    private readonly object _buffLock = new();
-    private readonly object _debuffLock = new();
     private readonly object _walkLock = new();
 
     public bool Alive => CurrentHp > 1;
@@ -795,7 +793,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         var playerTagged = monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _);
         if (playerTagged) return true;
 
-        return monster.TryAddTagging(attackingPlayer); 
+        return monster.TryAddTagging(attackingPlayer);
     }
 
     #endregion
@@ -1158,7 +1156,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         // Apply consequences
         Thorns(damageDealingSprite, dmg);
-        
+
         // Run OnDamaged scripts
         OnDamaged(damageDealingSprite, dmg);
         return;
@@ -1210,7 +1208,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg = ApplyPvpMod();
             dmg = PainBane();
         }
-        
+
         if (IsAited && dmg > 100)
             dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
 
@@ -1239,7 +1237,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (dmg > 50)
             ApplyEquipmentDurability((int)dmg);
-        
+
         OnDamaged(damageDealingSprite, dmg);
         return;
 
@@ -1403,7 +1401,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when aegisChance >= 99:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, buff.TimeLeft);
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
@@ -1411,7 +1409,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when aegisChance >= 97:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, buff.TimeLeft);
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
@@ -1473,7 +1471,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when bleedingChance >= 99:
                 {
                     var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
@@ -1481,7 +1479,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when bleedingChance >= 97:
                 {
                     var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The weapon has caused your target to bleed.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
@@ -1493,7 +1491,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when rendingChance >= 99:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
@@ -1501,7 +1499,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when rendingChance >= 97:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon has inflicted a minor curse.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
@@ -1525,7 +1523,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }
@@ -1544,7 +1542,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, deBuff.TimeLeft);
+                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }
@@ -1663,16 +1661,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private long LevelDamageMitigation(Sprite damageDealingSprite, long dmg)
     {
         if (Level <= damageDealingSprite.Level) return dmg;
-        
+
         var difference = Level - damageDealingSprite.Level;
         dmg = difference switch
-            {
-                >= 50 => (int)(dmg * 0.75),
-                >= 25 => (int)(dmg * 0.85),
-                >= 10 => (int)(dmg * 0.90),
-                >= 5 => (int)(dmg * 0.95),
-                _ => dmg
-            };
+        {
+            >= 50 => (int)(dmg * 0.75),
+            >= 25 => (int)(dmg * 0.85),
+            >= 10 => (int)(dmg * 0.90),
+            >= 5 => (int)(dmg * 0.95),
+            _ => dmg
+        };
 
         return dmg;
     }
@@ -2013,28 +2011,32 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         var buffs = Buffs.Values;
 
-        lock (_buffLock)
+        Parallel.ForEach(buffs, (b) =>
         {
-            Parallel.ForEach(buffs, (b) =>
+            if (this is Aisling aisling)
             {
+                aisling.Client.EnqueueBuffUpdatedEvent(this, b, elapsedTime);
                 StatusBarDisplayUpdateBuff(b, elapsedTime);
+            }
+            else
                 b.Update(this, elapsedTime);
-            });
-        }
+        });
     }
 
     public void UpdateDebuffs(TimeSpan elapsedTime)
     {
         var debuffs = Debuffs.Values;
 
-        lock (_debuffLock)
+        Parallel.ForEach(debuffs, (d) =>
         {
-            Parallel.ForEach(debuffs, (d) =>
+            if (this is Aisling aisling)
             {
+                aisling.Client.EnqueueDebuffUpdatedEvent(this, d, elapsedTime);
                 StatusBarDisplayUpdateDebuff(d, elapsedTime);
+            }
+            else
                 d.Update(this, elapsedTime);
-            });
-        }
+        });
     }
 
     public void StatusBarDisplayUpdateBuff(Buff buff, TimeSpan elapsedTime)

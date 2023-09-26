@@ -126,7 +126,7 @@ public class BiteAndShake : SkillScript
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
             }
         }
         else
@@ -204,7 +204,7 @@ public class CorrosiveTouch : SkillScript
         {
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
             }
         }

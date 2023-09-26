@@ -273,7 +273,7 @@ public class Poison_Trap : SpellScript
         if (target is Aisling affected)
         {
             if (!target.HasDebuff(debuff.Name))
-                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
             affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
@@ -327,7 +327,7 @@ public class Snare_Trap : SpellScript
         if (target is Aisling affected)
         {
             if (!target.HasDebuff(debuff.Name))
-                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
             affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
@@ -381,7 +381,7 @@ public class Flash_Trap : SpellScript
         if (target is Aisling affected)
         {
             if (!target.HasDebuff(debuff.Name))
-                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, debuff.TimeLeft);
+                affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
             affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
@@ -574,7 +574,7 @@ public class Shunshin : SpellScript
         }
 
         var buff = new buff_hide();
-        client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, buff.TimeLeft);
+        client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
         client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;

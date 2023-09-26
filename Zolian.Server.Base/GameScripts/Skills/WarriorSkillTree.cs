@@ -1003,7 +1003,7 @@ public class Rush : SkillScript
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
@@ -1073,7 +1073,7 @@ public class Rush : SkillScript
             if (wallPos <= 2)
             {
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -1632,7 +1632,7 @@ public class Charge : SkillScript
                 _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
         }
@@ -1702,7 +1702,7 @@ public class Charge : SkillScript
             if (wallPos <= 6)
             {
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, stunned.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -1775,7 +1775,7 @@ public class Titans_Cleave : SkillScript
             var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name)) 
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1828,7 +1828,7 @@ public class Titans_Cleave : SkillScript
             {
                 if (!_target.HasDebuff(debuff.Name))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }
@@ -1921,7 +1921,7 @@ public class Retribution : SkillScript
             var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name)) 
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1974,7 +1974,7 @@ public class Retribution : SkillScript
             {
                 if (!_target.HasDebuff(debuff.Name))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }

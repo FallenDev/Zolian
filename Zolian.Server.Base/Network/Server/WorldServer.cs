@@ -639,9 +639,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private void UpdateClients(TimeSpan elapsedTime)
     {
-        var players = Aislings;
+        var players = Aislings.Where(p => p is { Client: not null });
 
-        foreach (var player in players.Where(player => player is { Client: not null }))
+        Parallel.ForEach(players, (player) =>
         {
             try
             {
@@ -654,7 +654,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         break;
                 }
 
-                if (player.IsInvisible) continue;
+                // If no longer invisible, remove invisible buffs
+                if (player.IsInvisible) return;
                 var buffs = player.Buffs.Values;
 
                 foreach (var buff in buffs)
@@ -670,7 +671,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
                 player.Client.Disconnect();
             }
-        }
+        });
     }
 
     private static void UpdateGroundItems()

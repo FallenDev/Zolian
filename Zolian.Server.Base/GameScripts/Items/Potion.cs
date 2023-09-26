@@ -65,7 +65,7 @@ public class Potion : ItemScript
                         case "Orcish Strength":
                             {
                                 var buff = new buff_OrcishStrength();
-                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, buff.TimeLeft);
+                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your muscles harden (+50 STR)");
                                 client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(34, null, client.Aisling.Serial));
                             }
@@ -73,7 +73,7 @@ public class Potion : ItemScript
                         case "Gryphon's Grace":
                             {
                                 var buff = new buff_GryphonsGrace();
-                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, buff.TimeLeft);
+                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel lighter on your feet (+50 DEX)");
                                 client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(86, null, client.Aisling.Serial));
                             }
@@ -81,7 +81,7 @@ public class Potion : ItemScript
                         case "Feywild Nectar":
                             {
                                 var buff = new buff_FeywildNectar();
-                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, buff.TimeLeft);
+                                client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Feys dance around you in delight (+50 INT & WIS");
                                 client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(35, null, client.Aisling.Serial));
                             }

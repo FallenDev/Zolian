@@ -303,7 +303,7 @@ public class Stab_and_Twist : SkillScript
             var debuff = new DebuffRend();
 
             if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
 
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
@@ -357,7 +357,7 @@ public class Stab_and_Twist : SkillScript
             {
                 if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, debuff.TimeLeft);
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }
@@ -439,7 +439,7 @@ public class Sneak : SkillScript
                     }
 
                     var buff = new buff_hide();
-                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, buff.TimeLeft);
+                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
                     _skillMethod.Train(aisling.Client, _skill);
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
                     break;

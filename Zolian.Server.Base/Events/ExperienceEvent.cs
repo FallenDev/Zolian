@@ -1,6 +1,6 @@
 ﻿using Darkages.Sprites;
 
-namespace Darkages.Types;
+namespace Darkages.Events;
 
 public struct ExperienceEvent
 {

@@ -40,8 +40,8 @@ public class NecroCourtyard : AreaScript
             vectorMap == new Vector2(16, 7) ||
             vectorMap == new Vector2(16, 5))
         {
-            client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
-            client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
+            client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, TimeSpan.FromSeconds(_debuff1.Length));
+            client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, TimeSpan.FromSeconds(_debuff2.Length));
 
             foreach (var buff in client.Aisling.Buffs.Values)
             {
@@ -58,8 +58,8 @@ public class NecroCourtyard : AreaScript
             vectorMap != new Vector2(22, 23) &&
             vectorMap != new Vector2(22, 21)) return;
 
-        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, _debuff1.TimeLeft);
-        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, _debuff2.TimeLeft);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff1, TimeSpan.FromSeconds(_debuff1.Length));
+        client.EnqueueDebuffAppliedEvent(client.Aisling, _debuff2, TimeSpan.FromSeconds(_debuff2.Length));
         foreach (var buff in client.Aisling.Buffs.Values)
         {
             buff?.OnEnded(client.Aisling, buff);
