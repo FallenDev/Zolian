@@ -141,18 +141,19 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target == null) return;
         if (!spell.CanUse())
         {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
         if (target.SpellReflect)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(184, null, target.Serial));
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-            if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
+            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+
+            if (sprite is Aisling caster)
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
+            if (target is Aisling targetPlayer)
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
@@ -160,10 +161,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target.SpellNegate)
         {
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
+
+            if (sprite is Aisling caster)
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            if (target is Aisling targetPlayer)
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}");
 
             return;
         }
@@ -220,13 +222,13 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         }
         else
         {
-            if (sprite is Monster)
+            if (sprite is Aisling caster)
             {
-                SpellOnFailed(sprite, target, spell);
+                caster.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
                 return;
             }
 
-            sprite.PlayerNearby?.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            SpellOnFailed(sprite, target, spell);
         }
     }
 
@@ -339,7 +341,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             case Aisling aisling:
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has failed.");
-                aisling.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
                 break;
             case Monster:
                 sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
@@ -352,18 +354,19 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target == null) return;
         if (!spell.CanUse())
         {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
         if (target.SpellReflect)
         {
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-            if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
+
+            if (sprite is Aisling caster)
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
+            if (target is Aisling targetPlayer)
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
@@ -371,10 +374,11 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         if (target.SpellNegate)
         {
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
-            if (sprite is Aisling)
-                sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
+
+            if (sprite is Aisling caster)
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            if (target is Aisling targetPlayer)
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}");
 
             return;
         }
@@ -446,13 +450,13 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         }
         else
         {
-            if (sprite is Monster)
+            if (sprite is Aisling caster)
             {
-                SpellOnFailed(sprite, target, spell);
+                caster.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
                 return;
             }
 
-            sprite.PlayerNearby?.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            SpellOnFailed(sprite, target, spell);
         }
     }
 
