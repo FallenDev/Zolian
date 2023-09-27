@@ -117,8 +117,8 @@ public interface IWorldClient : ISocketClient
     void SendWorldMap();
     WorldClient AislingToGhostForm();
     WorldClient GhostFormToAisling();
-    WorldClient LearnSkill(Mundane source, SkillTemplate subject, string message);
-    WorldClient LearnSpell(Mundane source, SpellTemplate subject, string message);
+    void LearnSkill(Mundane source, SkillTemplate subject, string message);
+    void LearnSpell(Mundane source, SpellTemplate subject, string message);
     void ClientRefreshed();
     void DaydreamingRoutine(TimeSpan elapsedTime);
     void VariableLagDisconnector(int delay);

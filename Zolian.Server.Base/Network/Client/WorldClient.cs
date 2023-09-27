@@ -3515,38 +3515,52 @@ namespace Darkages.Network.Client
             return this;
         }
 
-        public WorldClient LearnSkill(Mundane source, SkillTemplate subject, string message)
+        public void LearnSkill(Mundane source, SkillTemplate subject, string message)
         {
             var canLearn = false;
 
             if (subject.Prerequisites != null) canLearn = PayPrerequisites(subject.Prerequisites);
-            if (subject.LearningRequirements != null && subject.LearningRequirements.Any()) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
-            if (!canLearn) return this;
+            if (subject.LearningRequirements is { Count: > 0 }) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
+            if (!canLearn)
+            {
+                this.SendOptionsDialog(source, "You do not seem to possess what is necessary to learn this skill");
+                return;
+            }
 
             var skill = Skill.GiveTo(this, subject.Name);
             if (skill) LoadSkillBook();
 
+            // Recall message set in message variable back to the npc
             this.SendOptionsDialog(source, message);
             Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
-            return this;
+            // After learning, ensure player's modifiers are set
+            var item = new Item();
+            item.ReapplyItemModifiers(this);
         }
 
-        public WorldClient LearnSpell(Mundane source, SpellTemplate subject, string message)
+        public void LearnSpell(Mundane source, SpellTemplate subject, string message)
         {
             var canLearn = false;
 
             if (subject.Prerequisites != null) canLearn = PayPrerequisites(subject.Prerequisites);
-            if (subject.LearningRequirements != null && subject.LearningRequirements.Any()) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
-            if (!canLearn) return this;
+            if (subject.LearningRequirements is { Count: > 0 }) canLearn = subject.LearningRequirements.TrueForAll(PayPrerequisites);
+            if (!canLearn)
+            {
+                this.SendOptionsDialog(source, "You do not seem to possess what is necessary to learn this spell");
+                return;
+            }
 
             var spell = Spell.GiveTo(this, subject.Name);
             if (spell) LoadSpellBook();
 
+            // Recall message set in message variable back to the npc
             this.SendOptionsDialog(source, message);
             Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
-            return this;
+            // After learning, ensure player's modifiers are set
+            var item = new Item();
+            item.ReapplyItemModifiers(this);
         }
 
         public void ClientRefreshed()
