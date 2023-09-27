@@ -176,7 +176,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
-            localClient.SendLoginControls(LoginControlsType.Homepage, "https://www.ZolianAoC.com");
+            localClient.SendLoginControls(LoginControlsType.Homepage, "https://classicrpgcharacter.nexon.com/service/ConfirmGameUser.aspx?id=%s&pw=%s&mainCode=2&subCode=0");
             return default;
         }
     }

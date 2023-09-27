@@ -3097,7 +3097,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (handler == null)
         {
-            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}");
+            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
         }
 
         if (trackers != null && IsManualAction(packet.OpCode))

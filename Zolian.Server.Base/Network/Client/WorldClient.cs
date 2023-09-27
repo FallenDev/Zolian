@@ -2207,41 +2207,27 @@ namespace Darkages.Network.Client
                                 Data = metaData.DeflatedData,
                                 CheckSum = metaData.Hash
                             };
+
                             break;
                         }
 
-                        var orgFileName = metaData.Name;
-
-                        switch (Aisling.Path)
+                        var orgFileName = Aisling.Path switch
                         {
-                            case Class.Berserker:
-                                metaData.Name = "SClass1";
-                                break;
-                            case Class.Defender:
-                                metaData.Name = "SClass2";
-                                break;
-                            case Class.Assassin:
-                                metaData.Name = "SClass3";
-                                break;
-                            case Class.Cleric:
-                                metaData.Name = "SClass4";
-                                break;
-                            case Class.Arcanus:
-                                metaData.Name = "SClass5";
-                                break;
-                            case Class.Monk:
-                                metaData.Name = "SClass6";
-                                break;
-                        }
+                            Class.Berserker => "SClass1",
+                            Class.Defender => "SClass2",
+                            Class.Assassin => "SClass3",
+                            Class.Cleric => "SClass4",
+                            Class.Arcanus => "SClass5",
+                            Class.Monk => "SClass6",
+                            _ => metaData.Name
+                        };
 
                         args.MetaDataInfo = new MetaDataInfo
                         {
-                            Name = metaData.Name,
+                            Name = orgFileName,
                             Data = metaData.DeflatedData,
                             CheckSum = metaData.Hash
                         };
-
-                        metaData.Name = orgFileName;
 
                         break;
                     }
@@ -2250,17 +2236,17 @@ namespace Darkages.Network.Client
                         args.MetaDataCollection = new List<MetaDataInfo>();
                         var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
 
-                        foreach (var file in metaFiles)
+                        Parallel.ForEach(metaFiles, (metaFile) =>
                         {
                             var metafileInfo = new MetaDataInfo
                             {
-                                CheckSum = file.Hash,
-                                Data = file.DeflatedData,
-                                Name = file.Name
+                                CheckSum = metaFile.Hash,
+                                Data = metaFile.DeflatedData,
+                                Name = metaFile.Name
                             };
 
                             args.MetaDataCollection.Add(metafileInfo);
-                        }
+                        });
 
                         break;
                     }
