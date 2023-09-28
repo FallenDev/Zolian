@@ -3399,7 +3399,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 switch (abuseConfidenceScore)
                 {
-                    case >= 25:
+                    case >= 5:
                         ServerSetup.Logger("---------World-Server---------");
                         var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
                         ServerSetup.Logger(comment, LogLevel.Warning);

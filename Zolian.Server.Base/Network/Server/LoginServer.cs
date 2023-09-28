@@ -550,7 +550,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 switch (abuseConfidenceScore)
                 {
-                    case >= 25:
+                    case >= 5:
                         ServerSetup.Logger("---------Login-Server---------");
                         var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
                         ServerSetup.Logger(comment, LogLevel.Warning);

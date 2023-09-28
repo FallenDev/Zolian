@@ -245,7 +245,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 switch (abuseConfidenceScore)
                 {
-                    case >= 25:
+                    case >= 5:
                         ServerSetup.Logger("---------Lobby-Server---------");
                         var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
                         ServerSetup.Logger(comment, LogLevel.Warning);
