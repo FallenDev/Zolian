@@ -1987,7 +1987,7 @@ namespace Darkages.Network.Client
         }
 
         /// <summary>
-        /// 0x42 - Request Gold Exchange 
+        /// 0x42 - Request To Exchange (Item | Money)
         /// </summary>
         public void SendExchangeRequestAmount(byte slot)
         {

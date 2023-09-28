@@ -2056,9 +2056,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                                 return default;
                             }
 
-                            // In 7.18 server logic we sent a Bounce packet 0x4B of (ID & 0) then (ID & 0 & ItemSlot)
-                            aisling.Client.SendExchangeAddItem(true, 0, null);
-                            localClient.SendExchangeAddItem(false, 1, item);
+                            localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                            aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                            localClient.SendExchangeStart(aisling);
+                            aisling.Client.SendExchangeStart(localClient.Aisling);
+
+                            if (aisling.CurrentWeight + item.Template.CarryWeight < aisling.MaximumWeight)
+                            {
+                                localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                                localClient.Aisling.Exchange.Items.Add(item);
+                                localClient.Aisling.Exchange.Weight += item.Template.CarryWeight;
+                                localClient.Aisling.Client.SendExchangeAddItem(false, (byte)localClient.Aisling.Exchange.Items.Count, item);
+                                aisling.Client.SendExchangeAddItem(true, (byte)localClient.Aisling.Exchange.Items.Count, item);
+                                break;
+                            }
+
+                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
+
                             break;
                         }
                 }
@@ -2114,8 +2129,33 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
                     case Aisling aisling:
                         {
-                            aisling.Client.SendExchangeSetGold(true, 0);
-                            localClient.SendExchangeSetGold(false, (uint)amount);
+                            localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                            aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                            localClient.SendExchangeStart(aisling);
+                            aisling.Client.SendExchangeStart(localClient.Aisling);
+
+                            if (amount > localClient.Aisling.GoldPoints)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
+                                break;
+                            }
+
+                            if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
+                                break;
+                            }
+
+                            if (amount > 0)
+                            {
+                                localClient.Aisling.GoldPoints -= (long)amount;
+                                localClient.Aisling.Exchange.Gold = (uint)amount;
+                                localClient.SendAttributes(StatUpdateType.ExpGold);
+                                localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
+                                aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
+                            }
+
                             break;
                         }
                 }
@@ -2894,60 +2934,114 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var localPlayer = localClient.Aisling;
             if (localPlayer == null || otherPlayer == null) return default;
             if (!localPlayer.WithinRangeOf(otherPlayer)) return default;
-            localPlayer.Exchange = new ExchangeSession(otherPlayer);
-            otherPlayer.Exchange = new ExchangeSession(localPlayer);
 
-            //switch (localArgs.ExchangeRequestType)
-            //{
-            //    case ExchangeRequestType.StartExchange:
-            //        ServerSetup.Logger($"{client.RemoteIp} - {localPlayer} started a direct exchange, in Chaos this is not possible unless packeting");
-            //        Analytics.TrackEvent($"{client.RemoteIp} - {localPlayer} started a direct exchange, in Chaos this is not possible unless packeting");
-            //        return default;
-            //    case ExchangeRequestType.AddItem:
-            //        if (localPlayer.ThrewHealingPot)
-            //        {
-            //            localPlayer.ThrewHealingPot = false;
-            //            return default;
-            //        }
+            switch (localArgs.ExchangeRequestType)
+            {
+                case ExchangeRequestType.StartExchange:
+                    // Not possible to start an exchange directly
+                    break;
+                case ExchangeRequestType.AddItem:
+                    if (localPlayer.ThrewHealingPot)
+                    {
+                        localPlayer.ThrewHealingPot = false;
+                        break;
+                    }
 
-            //        if (localArgs.SourceSlot == null) return default;
+                    if (localArgs.SourceSlot != null)
+                    {
+                        var item = localPlayer.Inventory.Items[(int)localArgs.SourceSlot];
+                        if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
+                        {
+                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot trade that item");
+                            break;
+                        }
 
-            //        var item = client.Aisling.Inventory.Items[(int)localArgs.SourceSlot];
-            //        if (!item.Template.Flags.FlagIsSet(ItemFlags.Tradeable))
-            //        {
-            //            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "That item is not tradeable");
-            //            return default;
-            //        }
+                        if (localPlayer.Exchange == null) break;
+                        if (otherPlayer.Exchange == null) break;
+                        if (localPlayer.Exchange.Trader != otherPlayer) break;
+                        if (otherPlayer.Exchange.Trader != localPlayer) break;
+                        if (localPlayer.Exchange.Confirmed) break;
+                        if (item?.Template == null) break;
 
-            //        if (localPlayer.Exchange == null) return default;
-            //        if (otherPlayer.Exchange == null) return default;
-            //        if (localPlayer.Exchange.Trader != otherPlayer) return default;
-            //        if (otherPlayer.Exchange.Trader != localPlayer) return default;
-            //        if (localPlayer.Exchange.Confirmed) return default;
-            //        if (item?.Template == null) return default;
+                        if (otherPlayer.CurrentWeight + item.Template.CarryWeight < otherPlayer.MaximumWeight)
+                        {
+                            localPlayer.Inventory.RemoveFromInventory(localPlayer.Client, item);
+                            localPlayer.Exchange.Items.Add(item);
+                            localPlayer.Exchange.Weight += item.Template.CarryWeight;
+                            localPlayer.Client.SendExchangeAddItem(false, (byte)localPlayer.Exchange.Items.Count, item);
+                            otherPlayer.Client.SendExchangeAddItem(true, (byte)localPlayer.Exchange.Items.Count, item);
+                            break;
+                        }
 
-            //        exchange.AddItem(localClient.Aisling, localArgs.SourceSlot!.Value);
+                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
+                        otherPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
+                    }
 
-            //        break;
-            //    case ExchangeRequestType.AddStackableItem:
-            //        exchange.AddStackableItem(localClient.Aisling, localArgs.SourceSlot!.Value, localArgs.ItemCount!.Value);
+                    localPlayer.CancelExchange();
 
-            //        break;
-            //    case ExchangeRequestType.SetGold:
-            //        exchange.SetGold(localClient.Aisling, localArgs.GoldAmount!.Value);
+                    break;
+                case ExchangeRequestType.AddStackableItem:
+                    break;
+                case ExchangeRequestType.SetGold:
+                    if (localPlayer.Exchange == null) break;
+                    if (otherPlayer.Exchange == null) break;
+                    if (localPlayer.Exchange.Trader != otherPlayer) break;
+                    if (otherPlayer.Exchange.Trader != localPlayer) break;
+                    if (localPlayer.Exchange.Confirmed) break;
+                    if (localPlayer.Exchange.Gold != 0) break;
 
-            //        break;
-            //    case ExchangeRequestType.Cancel:
-            //        exchange.Cancel(localClient.Aisling);
+                    var gold = localArgs.GoldAmount;
 
-            //        break;
-            //    case ExchangeRequestType.Accept:
-            //        exchange.Accept(localClient.Aisling);
+                    if (gold > localPlayer.GoldPoints)
+                    {
+                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
+                        break;
+                    }
 
-            //        break;
-            //    default:
-            //        throw new ArgumentOutOfRangeException();
-            //}
+                    if (otherPlayer.GoldPoints + gold > ServerSetup.Instance.Config.MaxCarryGold)
+                    {
+                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
+                        otherPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
+                        break;
+                    }
+
+                    if (gold > 0)
+                    {
+                        localPlayer.GoldPoints -= (long)gold;
+                        localPlayer.Exchange.Gold = (uint)gold;
+                        localClient.SendAttributes(StatUpdateType.ExpGold);
+                        localPlayer.Client.SendExchangeSetGold(false, localPlayer.Exchange.Gold);
+                        otherPlayer.Client.SendExchangeSetGold(true, localPlayer.Exchange.Gold);
+                    }
+
+                    break;
+                case ExchangeRequestType.Cancel:
+                    localPlayer.CancelExchange();
+                    break;
+                case ExchangeRequestType.Accept:
+                    if (localPlayer.Exchange == null) break;
+                    if (otherPlayer.Exchange == null) break;
+                    if (localPlayer.Exchange.Trader != otherPlayer) break;
+                    if (otherPlayer.Exchange.Trader != localPlayer) break;
+
+                    localPlayer.Exchange.Confirmed = true;
+
+                    if (localPlayer.Exchange.Confirmed && otherPlayer.Exchange.Confirmed)
+                    {
+                        localPlayer.Client.SendExchangeAccepted(false);
+                        otherPlayer.Client.SendExchangeAccepted(false);
+                    }
+                    else
+                    {
+                        localPlayer.Client.SendExchangeAccepted(localPlayer.Exchange.Confirmed);
+                        otherPlayer.Client.SendExchangeAccepted(localPlayer.Exchange.Confirmed);
+                    }
+
+                    if (otherPlayer.Exchange.Confirmed)
+                        localPlayer.FinishExchange();
+
+                    break;
+            }
 
             return default;
         }
