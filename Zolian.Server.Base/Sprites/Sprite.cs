@@ -69,12 +69,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         get
         {
-            if (this is Monster monster)
-            {
-                return monster.Scripts.TryGetValue("ShadowSight Monster", out _);
-            }
-
-            return HasBuff("Shadow Sight");
+            if (this is not Monster monster) return HasBuff("Shadow Sight");
+            var canSee = monster.Scripts.TryGetValue("Aosda Remnant", out _);
+            if (canSee) return true;
+            canSee = monster.Scripts.TryGetValue("ShadowSight", out _);
+            if (canSee) return true;
+            canSee = monster.Scripts.TryGetValue("Weak ShadowSight", out _);
+            return canSee || HasBuff("Shadow Sight");
         }
     }
 
