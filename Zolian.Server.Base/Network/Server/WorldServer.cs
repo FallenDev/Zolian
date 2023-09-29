@@ -695,41 +695,41 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         // Cache traps to reduce Select operation on each iteration
         var traps = ServerSetup.Instance.Traps.Values;
+        var updateList = ServerSetup.Instance.GlobalMonsterCache;
 
-        Parallel.ForEach(ServerSetup.Instance.GlobalMonsterCache, (monster) =>
+        foreach (var (_, monster) in updateList)
         {
-            var (serial, npc) = monster;
-            if (npc?.Scripts == null) return;
-            if (npc.CurrentHp <= 0)
+            if (monster?.Scripts == null) continue;
+            if (monster.CurrentHp <= 0)
             {
-                npc.Skulled = true;
+                monster.Skulled = true;
 
-                if (npc.Target is Aisling aisling)
+                if (monster.Target is Aisling aisling)
                 {
-                    npc.Scripts.Values.First().OnDeath(aisling.Client);
+                    monster.Scripts.Values.First().OnDeath(aisling.Client);
                 }
                 else
                 {
-                    npc.Scripts.Values.First().OnDeath();
+                    monster.Scripts.Values.First().OnDeath();
                 }
             }
 
-            npc.Scripts.Values.First().Update(elapsedTime);
+            monster.Scripts.Values.First().Update(elapsedTime);
 
             foreach (var trap in traps)
             {
-                if (trap?.Owner == null || trap.Owner.Serial == npc.Serial ||
-                    npc.X != trap.Location.X || npc.Y != trap.Location.Y ||
-                    npc.Map != trap.TrapItem.Map) continue;
+                if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
+                    monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
+                    monster.Map != trap.TrapItem.Map) continue;
 
-                var triggered = Trap.Activate(trap, npc);
+                var triggered = Trap.Activate(trap, monster);
                 if (triggered) break;
             }
 
-            npc.UpdateBuffs(elapsedTime);
-            npc.UpdateDebuffs(elapsedTime);
-            npc.LastUpdated = DateTime.UtcNow;
-        });
+            monster.UpdateBuffs(elapsedTime);
+            monster.UpdateDebuffs(elapsedTime);
+            monster.LastUpdated = DateTime.UtcNow;
+        }
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)

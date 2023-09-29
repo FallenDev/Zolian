@@ -226,9 +226,6 @@ public class Pramh : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Pramh";
 
-        if (target.HasDebuff("Frozen"))
-            target.RemoveDebuff("Frozen");
-
         if (target.HasDebuff("Sleep"))
         {
             if (sprite is not Aisling aisling) return;

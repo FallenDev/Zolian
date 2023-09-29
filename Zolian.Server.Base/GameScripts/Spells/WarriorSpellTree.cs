@@ -42,7 +42,7 @@ public class Asgall : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
     }
 }
 
@@ -72,7 +72,7 @@ public class Defensive_Stance : SpellScript
             return;
         };
 
-        if (sprite.HasBuff("Defensive Stance") || target.HasBuff("Spectral Shield"))
+        if (sprite.HasBuff("Defensive Stance") || sprite.HasBuff("Spectral Shield"))
         {
             if (sprite is not Aisling aisling) return;
             _spellMethod.Train(aisling.Client, _spell);
@@ -80,7 +80,7 @@ public class Defensive_Stance : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
     }
 }
 
@@ -120,6 +120,6 @@ public class Perfect_Defense : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
     }
 }
