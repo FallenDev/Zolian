@@ -641,54 +641,72 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var players = Aislings.Where(p => p is { Client: not null });
 
-        Parallel.ForEach(players, (player) =>
+        try
         {
-            try
+            Parallel.ForEach(players, (player) =>
             {
-                switch (player.Client.IsWarping)
+                try
                 {
-                    case false when !player.Client.MapOpen:
-                        player.Client.Update(elapsedTime);
-                        break;
-                    case true:
-                        break;
+                    switch (player.Client.IsWarping)
+                    {
+                        case false when !player.Client.MapOpen:
+                            player.Client.Update(elapsedTime);
+                            break;
+                        case true:
+                            break;
+                    }
+
+                    // If no longer invisible, remove invisible buffs
+                    if (player.IsInvisible) return;
+                    var buffs = player.Buffs.Values;
+
+                    foreach (var buff in buffs)
+                    {
+                        if (buff.Name is "Hide" or "Shadowfade")
+                            buff.OnEnded(player, buff);
+                    }
                 }
-
-                // If no longer invisible, remove invisible buffs
-                if (player.IsInvisible) return;
-                var buffs = player.Buffs.Values;
-
-                foreach (var buff in buffs)
+                catch (Exception ex)
                 {
-                    if (buff.Name is "Hide" or "Shadowfade")
-                        buff.OnEnded(player, buff);
+                    ServerSetup.Logger(ex.Message, LogLevel.Error);
+                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    Crashes.TrackError(ex);
+                    player.Client.Disconnect();
                 }
-            }
-            catch (Exception ex)
-            {
-                ServerSetup.Logger(ex.Message, LogLevel.Error);
-                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                Crashes.TrackError(ex);
-                player.Client.Disconnect();
-            }
-        });
+            });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
     }
 
     private static void UpdateGroundItems()
     {
         var items = ServerSetup.Instance.GlobalGroundItemCache;
 
-        Parallel.ForEach(items, (item) =>
+        try
         {
-            var (serial, i) = item;
-            if (i.ItemPane != Item.ItemPanes.Ground) return;
-            var abandonedDiff = DateTime.UtcNow.Subtract(i.AbandonedDate);
-            if (abandonedDiff.Minutes <= 30) return;
-            var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
-            if (!removed) return;
-            itemToBeRemoved.Remove();
-            itemToBeRemoved.DelObject(itemToBeRemoved);
-        });
+            Parallel.ForEach(items, (item) =>
+            {
+                var (serial, i) = item;
+                if (i.ItemPane != Item.ItemPanes.Ground) return;
+                var abandonedDiff = DateTime.UtcNow.Subtract(i.AbandonedDate);
+                if (abandonedDiff.Minutes <= 30) return;
+                var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
+                if (!removed) return;
+                itemToBeRemoved.Remove();
+                itemToBeRemoved.DelObject(itemToBeRemoved);
+            });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
     }
 
     private static void UpdateMonsters(TimeSpan elapsedTime)
@@ -734,13 +752,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
     {
-        Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache, (mundane) =>
+        try
         {
-            var (serial, npc) = mundane;
-            if (npc == null) return;
-            npc.Update(elapsedTime);
-            npc.LastUpdated = DateTime.UtcNow;
-        });
+            Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache, (mundane) =>
+            {
+                var (serial, npc) = mundane;
+                if (npc == null) return;
+                npc.Update(elapsedTime);
+                npc.LastUpdated = DateTime.UtcNow;
+            });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
     }
 
     private void CheckTraps(TimeSpan elapsedTime)
@@ -758,11 +785,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void UpdateMaps(TimeSpan elapsedTime)
     {
-        Parallel.ForEach(ServerSetup.Instance.GlobalMapCache, (map) =>
+        try
         {
-            var (serial, area) = map;
-            area?.Update(elapsedTime);
-        });
+            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache, (map) =>
+            {
+                var (serial, area) = map;
+                area?.Update(elapsedTime);
+            });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
     }
 
     #endregion
