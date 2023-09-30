@@ -1174,7 +1174,7 @@ public class CreateMonster : MonsterCreateScript
 
         var spellList = new[]
         {
-            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh"
+            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh", "Ao Beag Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 20d) + 2;
@@ -1213,7 +1213,7 @@ public class CreateMonster : MonsterCreateScript
 
         var spellList = new[]
         {
-            "Srad", "Sal", "Athar", "Creag", "Dorcha", "Eadrom", "Puinsein", "Cradh"
+            "Srad", "Sal", "Athar", "Creag", "Dorcha", "Eadrom", "Puinsein", "Cradh", "Ao Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 30d) + 2;
@@ -1252,7 +1252,7 @@ public class CreateMonster : MonsterCreateScript
 
         var spellList = new[]
         {
-            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh", "Fas Nadur", "Blind", "Pramh"
+            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh", "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 70d) + 2;
@@ -1291,7 +1291,7 @@ public class CreateMonster : MonsterCreateScript
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Mor Fas Nadur", "Blind", "Pramh", "Silence"
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 100d) + 2;
@@ -1325,7 +1325,7 @@ public class CreateMonster : MonsterCreateScript
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Dark Chain", "Defensive Stance"
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
         };
 
         var spellCount = Math.Round(monster.Level / 150d) + 2;
@@ -1388,9 +1388,9 @@ public class CreateMonster : MonsterCreateScript
     private void CelestialSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Celestial)) return;
-        var skillList = new List<string> { "Thrash", "Smite", "Divine Thrust", "Slash" };
-        var abilityList = new List<string> { "Titan's Cleave", "Shadow Step", "Entice" };
-        var spellList = new List<string> { "Spectral Shield", "Asgall", "Perfect Defense", "Dion", "Silence" };
+        var skillList = new List<string> { "Thrash", "Divine Thrust", "Slash", "Wallop" };
+        var abilityList = new List<string> { "Titan's Cleave", "Shadow Step", "Entice", "Smite" };
+        var spellList = new List<string> { "Deireas Faileas", "Asgall", "Perfect Defense", "Dion", "Silence" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
@@ -1417,7 +1417,7 @@ public class CreateMonster : MonsterCreateScript
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dragon)) return;
         var skillList = new List<string> { "Thrash", "Ambidextrous", "Slash", "Claw", "Tail Slap" };
         var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick" };
-        var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion", };
+        var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion", "Deireas Faileas" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
@@ -1434,7 +1434,7 @@ public class CreateMonster : MonsterCreateScript
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fairy)) return;
         var skillList = new List<string> { "Ambidextrous", "Divine Thrust", "Clobber x2" };
         var abilityList = new List<string> { "Earthly Delights", "Claw Fist", "Lullaby Strike" };
-        var spellList = new List<string> { "Asgall", "Spectral Shield" };
+        var spellList = new List<string> { "Asgall", "Spectral Shield", "Deireas Faileas" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
