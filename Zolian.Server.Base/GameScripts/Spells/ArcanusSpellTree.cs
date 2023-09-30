@@ -2,6 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -183,5 +184,43 @@ public class AoSithGar : SpellScript
         _spellMethod.Train(client, _spell);
         OnSuccess(aisling, target);
         client.SendAttributes(StatUpdateType.Vitality);
+    }
+}
+
+[Script("Deireas Faileas")]
+public class DeireasFaileas : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Buff _buff = new buff_spell_reflect();
+    private readonly GlobalSpellMethods _spellMethod;
+
+    public DeireasFaileas(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite.CantCast)
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
+            return;
+        }
+
+        if (sprite.HasBuff("Deireas Faileas"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
+            return;
+        }
+
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }

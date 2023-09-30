@@ -2,6 +2,7 @@
 
 using Darkages.Object;
 using Darkages.Sprites;
+
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Types;
@@ -54,53 +55,30 @@ public class TileGrid : ObjectManager
         CurrentDist = currentDist;
     }
 
-    public IEnumerable<Sprite> Sprites
+    public IEnumerable<Sprite> Sprites => AttemptFetchSprites();
+
+    private IEnumerable<Sprite> AttemptFetchSprites()
     {
-        get
+        const int maxAttempts = 3;
+        Exception lastException = null;
+        IEnumerable<Sprite> sprites = null;
+
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
-            const int maxAttempts = 3;
-            Exception lastException = null;
-
-            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            try
             {
-                try
-                {
-                    return GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
-                        Get.Monsters | Get.Mundanes | Get.Aislings);
-                }
-                catch (Exception e)
-                {
-                    lastException = e;
-                }
+                sprites = GetObjects(_map, o => o != null && (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
+                    Get.Monsters | Get.Mundanes | Get.Aislings);
+                break;
             }
-
-            Crashes.TrackError(lastException);
-            return null;
-        }
-    }
-
-    public List<Sprite> SpritesList
-    {
-        get
-        {
-            const int maxAttempts = 3;
-            Exception lastException = null;
-
-            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            catch (Exception e)
             {
-                try
-                {
-                    return GetObjects(_map, o => (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
-                        Get.Monsters | Get.Mundanes | Get.Aislings).ToList();
-                }
-                catch (Exception e)
-                {
-                    lastException = e;
-                }
+                lastException = e;
             }
-
-            Crashes.TrackError(lastException);
-            return null;
         }
+
+        if (sprites != null) return sprites;
+        Crashes.TrackError(lastException);
+        return Enumerable.Empty<Sprite>();
     }
 }

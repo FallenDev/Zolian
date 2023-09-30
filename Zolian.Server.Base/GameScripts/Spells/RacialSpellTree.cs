@@ -191,7 +191,7 @@ public class Stone_Skin : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 

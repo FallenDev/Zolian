@@ -34,7 +34,6 @@ public class Spectral_Shield : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-
         if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
         {
             if (sprite is not Aisling aisling) return;
@@ -53,7 +52,7 @@ public class Spectral_Shield : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 
@@ -97,7 +96,7 @@ public class Aite : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 
@@ -141,7 +140,7 @@ public class Mor_Dion : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 
@@ -1132,6 +1131,7 @@ public class Raise_Ally : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
         if (target == null) return;
         if (!_spell.CanUse())
         {
@@ -1140,7 +1140,6 @@ public class Raise_Ally : SpellScript
             return;
         }
 
-        if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         _spellMethod.Train(client, _spell);
 
@@ -1215,6 +1214,7 @@ public class Turn_Undead : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
         if (target == null) return;
         if (!_spell.CanUse())
         {
@@ -1222,8 +1222,6 @@ public class Turn_Undead : SpellScript
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
-
-        if (sprite is not Aisling playerAction) return;
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
@@ -1294,6 +1292,7 @@ public class Turn_Critter : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
         if (target == null) return;
         if (!_spell.CanUse())
         {
@@ -1301,8 +1300,6 @@ public class Turn_Critter : SpellScript
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
-
-        if (sprite is not Aisling playerAction) return;
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
@@ -1373,6 +1370,7 @@ public class Turn_Greater_Undead : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
         if (target == null) return;
         if (!_spell.CanUse())
         {
@@ -1380,8 +1378,6 @@ public class Turn_Greater_Undead : SpellScript
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
-
-        if (sprite is not Aisling playerAction) return;
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
@@ -1452,6 +1448,7 @@ public class Turn_Greater_Critter : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
         if (target == null) return;
         if (!_spell.CanUse())
         {
@@ -1459,8 +1456,6 @@ public class Turn_Greater_Critter : SpellScript
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
-
-        if (sprite is not Aisling playerAction) return;
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
@@ -1502,11 +1497,25 @@ public class AoPuinsein : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
         var cursed = target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein") ||
                      target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein");
+        var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Puinsein"));
 
+        if (sprite is not Aisling aisling)
+        {
+            if (!cursed) return;
+            if (aoDebuff == string.Empty) return;
+
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
+        var client = aisling.Client;
         client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
         if (cursed)
@@ -1517,7 +1526,6 @@ public class AoPuinsein : SpellScript
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
-        var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Puinsein"));
         if (aoDebuff == string.Empty) return;
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
@@ -1599,23 +1607,30 @@ public class AoDall : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
         var blind = target.HasDebuff("Blind");
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (blind)
-            if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
-
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-
         if (!blind) return;
         var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Blind"));
         if (aoDebuff == string.Empty) return;
 
+        if (sprite is not Aisling aisling)
+        {
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
+        var client = aisling.Client;
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
+        if (target is Aisling targetAisling)
+            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1695,22 +1710,29 @@ public class AoBeagCradh : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
         var cursed = target.HasDebuff("Beag Cradh");
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (cursed)
-            if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
-
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-
         if (!cursed) return;
         var aoDebuff = target.GetDebuffName(i => i.Name == "Beag Cradh");
         if (aoDebuff == string.Empty) return;
+
+        if (sprite is not Aisling aisling)
+        {
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
+        var client = aisling.Client;
+        client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
+        if (target is Aisling targetAisling)
+            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1791,23 +1813,31 @@ public class AoCradh : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
+        var cursed = target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh");
+        if (!cursed) return;
+        var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Cradh"));
+        if (aoDebuff == string.Empty) return;
+        if (aoDebuff is not ("Cradh" or "Beag Cradh")) return;
+
+        if (sprite is not Aisling aisling)
+        {
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
         var client = aisling.Client;
-        var cursed = target.HasDebuff("Cradh");
-
         client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (cursed)
-            if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+        if (target is Aisling targetAisling)
+            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-
-        if (!cursed) return;
-        var aoDebuff = target.GetDebuffName(i => i.Name == "Cradh");
-        if (aoDebuff == string.Empty) return;
-
+        
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1887,23 +1917,31 @@ public class AoMorCradh : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
+        var cursed = target.HasDebuff("Mor Cradh") || target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh");
+        if (!cursed) return;
+        var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Cradh"));
+        if (aoDebuff == string.Empty) return;
+        if (aoDebuff is not ("Mor Cradh" or "Cradh" or "Beag Cradh")) return;
+
+        if (sprite is not Aisling aisling)
+        {
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
         var client = aisling.Client;
-        var cursed = target.HasDebuff("Mor Cradh");
-
         client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (cursed)
-            if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+        if (target is Aisling targetAisling)
+            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-
-        if (!cursed) return;
-        var aoDebuff = target.GetDebuffName(i => i.Name == "Mor Cradh");
-        if (aoDebuff == string.Empty) return;
-
+        
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1983,23 +2021,31 @@ public class AoArdCradh : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
-        if (sprite is not Aisling aisling) return;
+        var cursed = target.HasDebuff("Ard Cradh") || target.HasDebuff("Mor Cradh") || target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh");
+        if (!cursed) return;
+        var aoDebuff = target.GetDebuffName(i => i.Name.Contains("Cradh"));
+        if (aoDebuff == string.Empty) return;
+        if (aoDebuff is not ("Ard Cradh" or "Mor Cradh" or "Cradh" or "Beag Cradh")) return;
+
+        if (sprite is not Aisling aisling)
+        {
+            foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
+            {
+                if (debuffs.Name != aoDebuff) continue;
+                debuffs.OnEnded(target, debuffs);
+            }
+
+            return;
+        }
+
         var client = aisling.Client;
-        var cursed = target.HasDebuff("Ard Cradh");
-
         client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
-
-        if (cursed)
-            if (target is Aisling targetAisling)
-                targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
+        if (target is Aisling targetAisling)
+            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-
-        if (!cursed) return;
-        var aoDebuff = target.GetDebuffName(i => i.Name == "Ard Cradh");
-        if (aoDebuff == string.Empty) return;
-
+        
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;

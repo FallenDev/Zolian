@@ -7,7 +7,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
-
+using Microsoft.IdentityModel.Tokens;
 using ServiceStack;
 
 namespace Darkages.Types;
@@ -112,11 +112,10 @@ public class Area : Map, IArea
         
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
-
-        var sprites = grid[x, y].SpritesList;
-        if (sprites.Count == 0) return false;
-
-        return sprite.Target?.Pos != sprites[0].Pos;
+        var spritesAtLocation = grid[x, y].Sprites.ToList();
+        if (spritesAtLocation.IsNullOrEmpty()) return false;
+        var firstSprite = spritesAtLocation.First();
+        return sprite.Target?.Pos != firstSprite.Pos;
     }
 
     /// <summary>
@@ -129,9 +128,7 @@ public class Area : Map, IArea
         
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
-
-        var sprites = grid[x, y].SpritesList;
-        return sprites is { Count: > 0 };
+        return !grid[x, y].Sprites.IsNullOrEmpty();
     }
 
     public bool OnLoaded()

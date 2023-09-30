@@ -42,7 +42,7 @@ public class Asgall : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 
@@ -80,7 +80,7 @@ public class Defensive_Stance : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
 
@@ -120,6 +120,6 @@ public class Perfect_Defense : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
     }
 }
