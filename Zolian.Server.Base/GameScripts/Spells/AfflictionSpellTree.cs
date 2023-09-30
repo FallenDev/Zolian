@@ -1,10 +1,99 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Spells;
+
+#region Mastery
+
+[Script("Dark Seal")]
+public class Dark_Seal : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Debuff _debuff = new DebuffDarkSeal();
+    private readonly GlobalSpellMethods _spellMethod;
+
+    public Dark_Seal(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite is Aisling playerAction)
+            playerAction.ActionUsed = "Dark Seal";
+
+        if (target.HasDebuff("Moon Seal"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
+            return;
+        }
+
+        if (target.HasDebuff("Dark Seal"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
+            return;
+        }
+
+        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+    }
+}
+
+[Script("Moon Seal")]
+public class Moon_Seal : SpellScript
+{
+    private readonly Spell _spell;
+    private readonly Debuff _debuff = new DebuffMoonSeal();
+    private readonly GlobalSpellMethods _spellMethod;
+
+    public Moon_Seal(Spell spell) : base(spell)
+    {
+        _spell = spell;
+        _spellMethod = new GlobalSpellMethods();
+    }
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite is Aisling playerAction)
+            playerAction.ActionUsed = "Ard Cradh";
+
+        if (target.HasDebuff("Moon Seal"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
+            return;
+        }
+
+        if (target.HasDebuff("Dark Seal"))
+        {
+            if (sprite is not Aisling aisling) return;
+            _spellMethod.Train(aisling.Client, _spell);
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
+            return;
+        }
+
+        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+    }
+}
+
+#endregion
 
 #region Ard
 

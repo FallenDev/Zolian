@@ -21,7 +21,7 @@ public class TrainingDummy : MonsterScript
     public override void OnClick(WorldClient client)
     {
         var level = Monster.Template.Level.ToString();
-        var ac = Monster.Ac.ToString();
+        var ac = Monster.SealedAc.ToString();
         var defEle = ElementManager.ElementValue(Monster.DefenseElement);
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, $"Lvl: {level}, AC: {ac}, Def Element: {defEle}");

@@ -567,6 +567,78 @@ public class Petrified : Debuff
 
 #region Armor
 
+public class DebuffMoonSeal : Debuff
+{
+    private static double AcModifer => 0.65;
+    public override byte Icon => 190;
+    public override int Length => 300;
+    public override string Name => "Moon Seal";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.SealedModifier = AcModifer;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.SealedModifier = 1;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffDarkSeal : Debuff
+{
+    private static double AcModifer => 0.50;
+    public override byte Icon => 133;
+    public override int Length => 240;
+    public override string Name => "Dark Seal";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.SealedModifier = AcModifer;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.SealedModifier = 1;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
 public class DebuffArdcradh : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 50);

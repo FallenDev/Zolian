@@ -12,6 +12,7 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.GameScripts.Formulas;
 using Darkages.GameScripts.Spells;
 using Darkages.Interfaces;
 using Darkages.Object;
@@ -54,7 +55,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
-    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Dark Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
+    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name == "Dark Seal" || i.Name == "Moon Seal" || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
     public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
     public bool IsStopped => HasDebuff("Halt");
@@ -91,8 +92,24 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int MaximumMp => Math.Clamp(CheckMp, 0, int.MaxValue);
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
     public int Dmg => _Dmg + BonusDmg;
+    public double SealedModifier { get; set; }
+    public int SealedAc
+    {
+        get
+        {
+            switch (Ac)
+            {
+                case > 0:
+                    return (int)(Ac * SealedModifier);
+                case < 0:
+                    return (int)(Ac / SealedModifier);
+                default:
+                    return (int)(-1 / SealedModifier);
+            }
+        }
+    }
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
-    public int Ac => _ac + BonusAc + AcFromDex;
+    private int Ac => _ac + BonusAc + AcFromDex;
     private double _fortitude => Con * 0.2;
     public double Fortitude => Math.Round(_fortitude + BonusFortitude, 2);
     private double _reflex => Hit * 0.2;
@@ -154,6 +171,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         var readyTime = DateTime.UtcNow;
         _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
         Amplified = 0;
+        SealedModifier = 1;
         Target = null;
         Buffs = new ConcurrentDictionary<string, Buff>();
         Debuffs = new ConcurrentDictionary<string, Debuff>();

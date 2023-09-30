@@ -15,10 +15,10 @@ public class Ac : FormulaScript
 
     public override long Calculate(Sprite obj, long value)
     {
-        var armor = obj.Ac;
+        var armor = obj.SealedAc;
         var dmgMitigation = armor / 100f;
 
-        if (obj.Ac < 0)
+        if (obj.SealedAc < 0)
         {
             var dmgIncreasedByMitigation = Math.Abs(dmgMitigation) * value;
             value += (int)dmgIncreasedByMitigation;

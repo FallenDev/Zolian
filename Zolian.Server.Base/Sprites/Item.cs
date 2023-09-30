@@ -727,7 +727,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             ReapplyReducedArmor(client);
         }
 
-        var ac = client.Aisling.Ac.ToString();
+        var ac = client.Aisling.SealedAc.ToString();
         var regen = client.Aisling.Regen.ToString();
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
     }

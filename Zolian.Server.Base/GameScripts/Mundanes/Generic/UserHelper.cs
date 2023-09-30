@@ -58,7 +58,7 @@ public class UserHelper : MundaneScript
         var pDex = client.Aisling.Dex.ToString("D3");
         var playerDex = Regex.Replace(pDex, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
         var playerDmg = client.Aisling.Dmg.ToString();
-        var playerAc = client.Aisling.Ac.ToString();
+        var playerAc = client.Aisling.SealedAc.ToString();
         var playerFort = client.Aisling.Fortitude.ToString(CultureInfo.CurrentCulture);
         var playerReflex = client.Aisling.Reflex.ToString(CultureInfo.CurrentCulture);
         var playerWill = client.Aisling.Will.ToString(CultureInfo.CurrentCulture);

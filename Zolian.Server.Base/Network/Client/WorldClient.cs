@@ -1461,7 +1461,7 @@ namespace Darkages.Network.Client
             var args = new AttributesArgs
             {
                 Ability = (byte)Aisling.AbpLevel,
-                Ac = (sbyte)Math.Clamp(Aisling.Ac, sbyte.MinValue, sbyte.MaxValue),
+                Ac = (sbyte)Math.Clamp(Aisling.SealedAc, sbyte.MinValue, sbyte.MaxValue),
                 Blind = Aisling.IsBlind,
                 Con = (byte)Math.Clamp(Aisling.Con, byte.MinValue, byte.MaxValue),
                 CurrentHp = (uint)Aisling.CurrentHp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.CurrentHp,
