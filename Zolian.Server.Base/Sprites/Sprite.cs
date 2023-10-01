@@ -100,7 +100,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             switch (Ac)
             {
                 case > 0:
-                    return (int)(Ac * SealedModifier);
+                    return Ac - (int)(Ac * SealedModifier);
                 case < 0:
                     return (int)(Ac / SealedModifier);
                 default:

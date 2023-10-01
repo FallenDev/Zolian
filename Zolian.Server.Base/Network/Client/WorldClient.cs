@@ -218,7 +218,7 @@ namespace Darkages.Network.Client
         }
 
         #region Events
-        
+
         private void ProcessExperienceEvents()
         {
             while (ServerSetup.Instance.Running)
@@ -3908,23 +3908,23 @@ namespace Darkages.Network.Client
             switch (skill.Template.SkillType)
             {
                 case SkillScope.Assail:
-                {
-                    if (skill.Level > 350) skill.Level = 350;
-                    SendServerMessage(ServerMessageType.ActiveMessage,
-                        skill.Level >= 350
-                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
-                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
-                    break;
-                }
+                    {
+                        if (skill.Level > 350) skill.Level = 350;
+                        SendServerMessage(ServerMessageType.ActiveMessage,
+                            skill.Level >= 350
+                                ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                                : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                        break;
+                    }
                 case SkillScope.Ability:
-                {
-                    if (skill.Level > 500) skill.Level = 500;
-                    SendServerMessage(ServerMessageType.ActiveMessage,
-                        skill.Level >= 500
-                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
-                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
-                    break;
-                }
+                    {
+                        if (skill.Level > 500) skill.Level = 500;
+                        SendServerMessage(ServerMessageType.ActiveMessage,
+                            skill.Level >= 500
+                                ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                                : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                        break;
+                    }
             }
         }
 

@@ -28,6 +28,7 @@ public class Dark_Seal : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Dark Seal";
 
@@ -70,6 +71,7 @@ public class Moon_Seal : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Cradh";
 
@@ -116,6 +118,8 @@ public class Ard_Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         switch (sprite)
         {
             case Aisling playerAction:
@@ -165,6 +169,7 @@ public class Ard_Cradh : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Cradh";
 
@@ -207,6 +212,7 @@ public class Ard_Puinsein : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Puinsein";
 
@@ -253,6 +259,8 @@ public class Mor_Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         switch (sprite)
         {
             case Aisling playerAction:
@@ -310,6 +318,7 @@ public class Mor_Cradh : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Cradh";
 
@@ -360,6 +369,7 @@ public class Mor_Puinsein : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Puinsein";
 
@@ -414,6 +424,7 @@ public class Silence : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Silence";
 
@@ -440,6 +451,8 @@ public class Fas_Nadur : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         switch (sprite)
         {
             case Aisling playerAction:
@@ -497,6 +510,7 @@ public class Cradh : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Cradh";
 
@@ -547,6 +561,7 @@ public class Puinsein : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Puinsein";
 
@@ -597,6 +612,7 @@ public class Blind : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Blind";
 
@@ -633,10 +649,10 @@ public class Fas_Spiorad : SpellScript
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        if (target == null) return;
         if (!_spell.CanUse())
         {
             if (sprite is Aisling aisling2)
@@ -671,6 +687,7 @@ public class Fas_Spiorad : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (target.HasDebuff("Fas Spiorad"))
         {
             if (sprite is not Aisling aisling) return;
@@ -715,6 +732,7 @@ public class Beag_Cradh : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Cradh";
 
@@ -757,6 +775,7 @@ public class Beag_Puinsein : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Puinsein";
 

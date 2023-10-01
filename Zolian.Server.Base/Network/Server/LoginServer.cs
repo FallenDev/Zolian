@@ -26,8 +26,11 @@ using Darkages.Types;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json;
+
 using RestSharp;
+
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
@@ -266,27 +269,27 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         return;
                     }
                 case "scythe":
-                {
-                    var gmA = IPAddress.Parse(GameMasterIpA);
-                    var gmB = IPAddress.Parse(GameMasterIpB);
-                    var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
-
-                    if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
                     {
-                        result.LastAttemptIP = localClient.RemoteIp.ToString();
-                        result.LastIP = localClient.RemoteIp.ToString();
-                        if (result.Password == ServerSetup.Instance.Unlock)
-                            result.PasswordAttempts = 0;
-                        await SavePassword(result);
-                        RedirectManager.Add(redirect);
-                        localClient.SendLoginMessage(LoginMessageType.Confirm);
-                        localClient.SendRedirect(redirect);
+                        var gmA = IPAddress.Parse(GameMasterIpA);
+                        var gmB = IPAddress.Parse(GameMasterIpB);
+                        var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
+
+                        if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                        {
+                            result.LastAttemptIP = localClient.RemoteIp.ToString();
+                            result.LastIP = localClient.RemoteIp.ToString();
+                            if (result.Password == ServerSetup.Instance.Unlock)
+                                result.PasswordAttempts = 0;
+                            await SavePassword(result);
+                            RedirectManager.Add(redirect);
+                            localClient.SendLoginMessage(LoginMessageType.Confirm);
+                            localClient.SendRedirect(redirect);
+                            return;
+                        }
+
+                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
                         return;
                     }
-
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
-                    return;
-                }
                 default:
                     result.LastAttemptIP = localClient.RemoteIp.ToString();
                     result.LastIP = localClient.RemoteIp.ToString();

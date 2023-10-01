@@ -689,17 +689,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            Parallel.ForEach(items, (item) =>
+            foreach (var (serial, item) in items)
             {
-                var (serial, i) = item;
-                if (i.ItemPane != Item.ItemPanes.Ground) return;
-                var abandonedDiff = DateTime.UtcNow.Subtract(i.AbandonedDate);
-                if (abandonedDiff.Minutes <= 30) return;
+                if (item == null) continue;
+                if (item.ItemPane != Item.ItemPanes.Ground) continue;
+                var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
+                if (abandonedDiff.Minutes <= 30) continue;
                 var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
-                if (!removed) return;
+                if (!removed) continue;
                 itemToBeRemoved.Remove();
                 itemToBeRemoved.DelObject(itemToBeRemoved);
-            });
+            }
         }
         catch (Exception ex)
         {

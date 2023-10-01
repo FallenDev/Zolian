@@ -323,7 +323,17 @@ public class CreateMonster : MonsterCreateScript
             { 190, (220, 225) },
             { 194, (225, 230) },
             { 200, (230, 240) },
-            { int.MaxValue, (260, 330) } // default case for level > 200
+            { 210, (235, 245) },
+            { 220, (240, 250) },
+            { 230, (245, 255) },
+            { 240, (250, 260) },
+            { 250, (255, 265) },
+            { 260, (260, 270) },
+            { 270, (265, 275) },
+            { 280, (270, 280) },
+            { 290, (275, 285) },
+            { 300, (280, 300) },
+            { int.MaxValue, (290, 350) } // default case for level > 200
         };
 
         // Find the first range where the level is less than or equal to the key
