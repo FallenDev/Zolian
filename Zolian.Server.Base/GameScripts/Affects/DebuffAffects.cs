@@ -569,7 +569,7 @@ public class Petrified : Debuff
 
 public class DebuffMoonSeal : Debuff
 {
-    private static double AcModifer => 0.65;
+    private static double AcModifer => 0.35; // 65% (Armor * Modifier)
     public override byte Icon => 190;
     public override int Length => 300;
     public override string Name => "Moon Seal";
@@ -593,7 +593,7 @@ public class DebuffMoonSeal : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.SealedModifier = 1;
+        affected.SealedModifier = 0;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -605,7 +605,7 @@ public class DebuffMoonSeal : Debuff
 
 public class DebuffDarkSeal : Debuff
 {
-    private static double AcModifer => 0.50;
+    private static double AcModifer => 0.50; // 50% (Armor * Modifier)
     public override byte Icon => 133;
     public override int Length => 240;
     public override string Name => "Dark Seal";
@@ -629,7 +629,7 @@ public class DebuffDarkSeal : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.SealedModifier = 1;
+        affected.SealedModifier = 0;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);

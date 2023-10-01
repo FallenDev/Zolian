@@ -97,15 +97,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         get
         {
-            switch (Ac)
+            return Ac switch
             {
-                case > 0:
-                    return Ac - (int)(Ac * SealedModifier);
-                case < 0:
-                    return (int)(Ac / SealedModifier);
-                default:
-                    return (int)(-1 / SealedModifier);
-            }
+                > 0 => (int)(Ac * SealedModifier),
+                <= 0 => Ac - (int)(Math.Abs(Ac) * SealedModifier)
+            };
         }
     }
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
@@ -171,7 +167,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         var readyTime = DateTime.UtcNow;
         _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
         Amplified = 0;
-        SealedModifier = 1;
+        SealedModifier = 0;
         Target = null;
         Buffs = new ConcurrentDictionary<string, Buff>();
         Debuffs = new ConcurrentDictionary<string, Debuff>();
