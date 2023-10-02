@@ -97,11 +97,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         get
         {
-            return Ac switch
+            switch (Ac)
             {
-                > 0 => (int)(Ac * SealedModifier),
-                <= 0 => Ac - (int)(Math.Abs(Ac) * SealedModifier)
-            };
+                case > 0:
+                    if (SealedModifier == 0) return Ac;
+                    return (int)(Ac * SealedModifier);
+                case <= 0:
+                    if (SealedModifier == 0) return Ac;
+                    return Ac - (int)(Math.Abs(Ac) * SealedModifier);
+            }
         }
     }
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
@@ -1725,7 +1729,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             }
         }
 
-        if (this is Monster)
+        if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
                 if (!CanAttack(aisling, forced))
@@ -1733,6 +1737,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
                     return false;
                 }
+
+            if (monster.Camouflage)
+                dmg = (long)(dmg * .90);
         }
 
         if (Immunity && !forced)
@@ -1784,7 +1791,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             }
         }
 
-        if (this is Monster)
+        if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
                 if (!CanAttack(aisling, forced))
@@ -1792,6 +1799,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
                     return false;
                 }
+
+            if (monster.Camouflage)
+                dmg = (long)(dmg * .90);
         }
 
         if (Immunity && !forced)
