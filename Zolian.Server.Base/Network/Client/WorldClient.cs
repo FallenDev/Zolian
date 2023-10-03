@@ -3664,22 +3664,29 @@ namespace Darkages.Network.Client
         {
             if (prerequisites.ItemsRequired is not { Count: > 0 }) return this;
 
+            // Item Required
             foreach (var retainer in prerequisites.ItemsRequired)
             {
-                var item = Aisling.Inventory.Get(i => i.Template.Name == retainer.Item);
+                // Inventory Fetch
+                var items = Aisling.Inventory.Get(i => i.Template.Name == retainer.Item);
 
-                foreach (var i in item)
+                // Loop for item
+                foreach (var item in items)
                 {
-                    if (!i.Template.Flags.FlagIsSet(ItemFlags.Stackable))
+                    // Loop for non-stacked item
+                    if (!item.Template.CanStack)
                     {
                         for (var j = 0; j < retainer.AmountRequired; j++)
                         {
-                            Aisling.Inventory.RemoveFromInventory(this, i);
+                            var itemLoop = Aisling.Inventory.Get(i => i.Template.Name == retainer.Item);
+                            Aisling.Inventory.RemoveFromInventory(this, itemLoop.First());
                         }
+
                         break;
                     }
 
-                    Aisling.Inventory.RemoveRange(Aisling.Client, i, retainer.AmountRequired);
+                    // Handle stacked item
+                    Aisling.Inventory.RemoveRange(Aisling.Client, item, retainer.AmountRequired);
                     break;
                 }
             }

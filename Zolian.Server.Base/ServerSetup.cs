@@ -236,6 +236,7 @@ public class ServerSetup : IServerContext
 
         foreach (var buff in listOfBuffs)
         {
+            if (buff.Name == "Buff") continue;
             if (GlobalBuffCache == null) continue;
             if (Activator.CreateInstance(buff) is Buff buffInstance)
             {
@@ -253,6 +254,7 @@ public class ServerSetup : IServerContext
 
         foreach (var debuff in listOfDebuffs)
         {
+            if (debuff.Name == "Debuff") continue;
             if (GlobalDeBuffCache == null) continue;
             if (Activator.CreateInstance(debuff) is Debuff debuffInstance)
             {
