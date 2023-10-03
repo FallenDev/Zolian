@@ -567,10 +567,82 @@ public class Petrified : Debuff
 
 #region Armor
 
+public class DebuffSunSeal : Debuff
+{
+    private static double AcModifer => 0.25; // 75% (Armor * Modifier)
+    public override byte Icon => 226;
+    public override int Length => 400;
+    public override string Name => "Sun Seal";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.SealedModifier = AcModifer;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.SealedModifier = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffPentaSeal : Debuff
+{
+    private static double AcModifer => 0.30; // 70% (Armor * Modifier)
+    public override byte Icon => 225;
+    public override int Length => 350;
+    public override string Name => "Penta Seal";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.SealedModifier = AcModifer;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.SealedModifier = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
 public class DebuffMoonSeal : Debuff
 {
     private static double AcModifer => 0.35; // 65% (Armor * Modifier)
-    public override byte Icon => 190;
+    public override byte Icon => 2;
     public override int Length => 300;
     public override string Name => "Moon Seal";
 
@@ -630,6 +702,150 @@ public class DebuffDarkSeal : Debuff
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
         affected.SealedModifier = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffCriochArdCradh : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 80);
+    public override byte Icon => 193;
+    public override int Length => 350;
+    public override string Name => "Croich Ard Cradh";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffCriochMorCradh : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 70);
+    public override byte Icon => 192;
+    public override int Length => 330;
+    public override string Name => "Croich Mor Cradh";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffCriochCradh : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 65);
+    public override byte Icon => 191;
+    public override int Length => 300;
+    public override string Name => "Croich Cradh";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffCriochBeagCradh : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 60);
+    public override byte Icon => 190;
+    public override int Length => 280;
+    public override string Name => "Croich Beag Cradh";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusAc += AcModifer.Value;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -713,7 +929,7 @@ public class DebuffMorcradh : Debuff
 
 public class DebuffDecay : Debuff
 {
-    private static StatusOperator AcModifer => new(Operator.Remove, 40);
+    private static StatusOperator AcModifer => new(Operator.Remove, 55);
     public override byte Icon => 110;
     public override int Length => 20;
     public override string Name => "Decay";

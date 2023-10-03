@@ -36,8 +36,14 @@ public class Debuff : IDebuff
 
         DebuffSpell = debuff.Name switch
         {
+            "Sun Seal" => new DebuffSunSeal(),
+            "Penta Seal" => new DebuffPentaSeal(),
             "Moon Seal" => new DebuffMoonSeal(),
             "Dark Seal" => new DebuffDarkSeal(),
+            "Croich Ard Cradh" => new DebuffCriochArdCradh(),
+            "Croich Mor Cradh" => new DebuffCriochMorCradh(),
+            "Croich Cradh" => new DebuffCriochCradh(),
+            "Croich Beag Cradh" => new DebuffCriochBeagCradh(),
             "Ard Cradh" => new DebuffArdcradh(),
             "Mor Cradh" => new DebuffMorcradh(),
             "Cradh" => new DebuffCradh(),
