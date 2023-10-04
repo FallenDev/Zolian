@@ -131,12 +131,9 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
     {
         if (Template == null) return;
 
-        var nearby = GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this));
-
         if (Template.ChatTimer != null && Template.EnableSpeech)
         {
             Template.ChatTimer.UpdateTime(update);
-
             var speak = Generator.RandNumGen100();
 
             if (Template.ChatTimer.Elapsed && Template.Speech.Count > 0)
@@ -147,10 +144,14 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
                     var msg = Template.Speech[idx];
 
                     if (!msg.IsNullOrEmpty())
+                    {
+                        var nearby = GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this));
+
                         foreach (var aisling in nearby)
                         {
                             aisling.Client.SendPublicMessage(Serial, PublicMessageType.Normal, $"{Template.Name}: {msg}");
                         }
+                    }
                 }
 
                 Template.ChatTimer.Reset();

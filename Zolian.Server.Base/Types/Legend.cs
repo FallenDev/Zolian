@@ -30,7 +30,7 @@ public class Legend
 
     public bool Has(string lpVal)
     {
-        return LegendMarks.Any(i => i.Value.Equals(lpVal));
+        return LegendMarks.Any(i => i.Value != null && i.Value.Equals(lpVal));
     }
 
     public void Remove(LegendItem legend, WorldClient client)
