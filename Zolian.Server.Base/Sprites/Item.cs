@@ -739,6 +739,18 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             if (debuff.Value == null) continue;
             switch (debuff.Value.Name)
             {
+                case "Croich Ard Cradh":
+                    client.Aisling.BonusAc -= 80;
+                    break;
+                case "Croich Mor Cradh":
+                    client.Aisling.BonusAc -= 70;
+                    break;
+                case "Croich Cradh":
+                    client.Aisling.BonusAc -= 65;
+                    break;
+                case "Croich Beag Cradh":
+                    client.Aisling.BonusAc -= 60;
+                    break;
                 case "Ard Cradh":
                     client.Aisling.BonusAc -= 50;
                     break;
@@ -752,7 +764,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                     client.Aisling.BonusAc -= 20;
                     break;
                 case "Decay":
-                    client.Aisling.BonusAc -= 40;
+                    client.Aisling.BonusAc -= 55;
                     break;
                 case "Rending":
                     client.Aisling.BonusAc -= 10;

@@ -55,7 +55,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
-    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name == "Dark Seal" || i.Name == "Moon Seal" || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
+    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
     public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
     public bool IsStopped => HasDebuff("Halt");

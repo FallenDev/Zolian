@@ -55,6 +55,7 @@ public class Dennis : MundaneScript
                 if (skill) client.LoadSkillBook();
                 client.GiveItem("Cleric's Feather");
                 client.SendOptionsDialog(Mundane, "I can see you're worthy, here is something I created personally.");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDennis hands you a feather");
 
                 var legend = new Legend.LegendItem
                 {
@@ -71,6 +72,7 @@ public class Dennis : MundaneScript
                 break;
             case 0x06:
                 client.GiveItem("Cleric's Feather");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDennis hands you a feather");
                 client.SendOptionsDialog(Mundane, "Here you go, try not to lose it again.");
                 break;
         }
