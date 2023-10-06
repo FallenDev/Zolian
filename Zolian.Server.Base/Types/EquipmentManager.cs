@@ -151,7 +151,7 @@ public class EquipmentManager
                 Client.Aisling.CurrentWeight = 0;
         }
 
-        Client.SendAttributes(StatUpdateType.Primary);
+        Client.SendAttributes(StatUpdateType.Full);
     }
 
     private bool HandleUnreturnedItem(Item itemObj)
@@ -164,7 +164,7 @@ public class EquipmentManager
             Client.Aisling.CurrentWeight = 0;
 
         Client.ObjectHandlers.DelObject(itemObj);
-        Client.SendAttributes(StatUpdateType.Primary);
+        Client.SendAttributes(StatUpdateType.Full);
         return true;
     }
 
