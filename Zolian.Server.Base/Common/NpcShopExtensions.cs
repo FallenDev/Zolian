@@ -432,17 +432,25 @@ public static class NpcShopExtensions
 
     public static long GetRepairCosts(WorldClient client)
     {
-        long repairCosts = 0;
+        double repairCosts = 0;
+        
+        foreach (var inventory in client.Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable) && i.Value.Durability < i.Value.MaxDurability))
+        {
+            var item = inventory.Value;
+            if (item.Template == null) continue;
+            var tempValue = Math.Abs(item.Durability / (double)item.MaxDurability - 1);
+            repairCosts += item.Template.Value * tempValue;
+        }
 
-        repairCosts += client.Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable)
-                && i.Value.Durability < i.Value.MaxDurability)
-            .Sum(i => i.Value.Template.Value / 4);
+        foreach (var (key, value) in client.Aisling.EquipmentManager.Equipment.Where(equip => equip.Value != null && equip.Value.Item.Template.Flags.FlagIsSet(ItemFlags.Repairable) && equip.Value.Item.Durability < equip.Value.Item.MaxDurability))
+        {
+            var item = value.Item;
+            if (item.Template == null) continue;
+            var tempValue = Math.Abs(item.Durability / (double)item.MaxDurability - 1);
+            repairCosts += item.Template.Value * tempValue;
+        }
 
-        repairCosts += client.Aisling.EquipmentManager.Equipment.Where(equip => equip.Value != null
-            && equip.Value.Item.Template.Flags.FlagIsSet(ItemFlags.Repairable)
-            && equip.Value.Item.Durability < equip.Value.Item.MaxDurability).Aggregate(repairCosts, (current, equip) => current + equip.Value.Item.Template.Value / 4);
-
-        return repairCosts;
+        return (long)repairCosts;
     }
 
     public static uint GetDetailCosts(WorldClient client, string args)
