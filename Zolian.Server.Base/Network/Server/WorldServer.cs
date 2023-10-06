@@ -52,6 +52,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 {
     private readonly IClientFactory<WorldClient> ClientProvider;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
+    private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private const string GameMasterIpA = "75.226.159.140";
     private const string GameMasterIpB = "24.137.144.53";
@@ -3306,7 +3307,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             client.Disconnect();
             clientSocket.Disconnect(false);
-
             return;
         }
 
@@ -3316,7 +3316,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!lobbyCheck || !loginCheck)
         {
             client.Disconnect();
-            ServerSetup.Logger($"{client.RemoteIp} was blocked due to attempting bypass", LogLevel.Warning);
+            ServerSetup.Logger("---------World-Server---------");
+            var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
+            ServerSetup.Logger(comment, LogLevel.Warning);
+            ReportEndpoint(client, comment);
             return;
         }
 
@@ -3482,7 +3485,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         request.AddParameter("ip", client.RemoteIp.ToString());
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restClient.Execute(request);
+        request.AddParameter("timestamp", DateTime.UtcNow);
+        _restReport.Execute(request);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

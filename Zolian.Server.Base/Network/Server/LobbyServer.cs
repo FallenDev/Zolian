@@ -40,6 +40,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     private readonly IClientFactory<LobbyClient> _clientProvider;
     private readonly MServerTable _serverTable;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
+    private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
 
     public LobbyServer(
@@ -292,7 +293,8 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         request.AddParameter("ip", client.RemoteIp.ToString());
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restClient.Execute(request);
+        request.AddParameter("timestamp", DateTime.UtcNow);
+        _restReport.Execute(request);
     }
 
     private readonly HashSet<string> _bannedIPs = new();
