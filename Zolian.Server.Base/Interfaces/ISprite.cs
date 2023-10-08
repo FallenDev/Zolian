@@ -94,6 +94,7 @@ public interface ISprite
     List<Sprite> DamageableGetAwayInFront(int tileCount = 2, bool intersect = false);
     List<Sprite> DamageableGetBehind(int tileCount = 1, bool intersect = false);
     List<Sprite> MonsterGetInFront(int tileCount = 1, bool intersect = false);
+    List<Sprite> MonsterGetInFrontToSide(int tileCount = 1, bool intersect = false);
     List<Sprite> GetInFrontToSide(int tileCount = 1, bool intersect = false);
     List<Sprite> GetHorizontalInFront(int tileCount = 1, bool intersect = false);
     Position GetFromAllSidesEmpty(Sprite sprite, Sprite target, int tileCount = 1);

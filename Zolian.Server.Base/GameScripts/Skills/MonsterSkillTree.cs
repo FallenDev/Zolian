@@ -480,3 +480,105 @@ public class MuleKick : SkillScript
         return critCheck.Item2;
     }
 }
+
+[Script("Omega Avoid")]
+public class OmegaAvoid : SkillScript
+{
+    private readonly Skill _skill;
+    private readonly Buff _buff1 = new buff_MorDion();
+    private readonly Buff _buff2 = new buff_PerfectDefense();
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public OmegaAvoid(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite) { }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        _skillMethod.ApplyPhysicalBuff(sprite, _buff1);
+        _skillMethod.ApplyPhysicalBuff(sprite, _buff2);
+    }
+}
+
+[Script("Omega Slash")]
+public class OmegaSlash : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public OmegaSlash(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemyList = sprite.MonsterGetInFrontToSide();
+        if (enemyList.Count == 0)
+        {
+            OnFailed(sprite);
+            return;
+        }
+
+        foreach (var enemy in enemyList)
+        {
+            _target = enemy;
+
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(sprite, _skill, action);
+                OnFailed(sprite);
+                continue;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
+        }
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Str * 12 + damageMonster.Dex * 12;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}

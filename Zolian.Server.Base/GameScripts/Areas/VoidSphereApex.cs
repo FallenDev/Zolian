@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+using Chaos.Common.Definitions;
 using Darkages.GameScripts.Affects;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
@@ -8,11 +9,11 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas;
 
-[Script("VoidSphereEnt")]
-public class VoidSphereEnt : AreaScript
+[Script("VoidSphereApex")]
+public class VoidSphereApex : AreaScript
 {
     private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
-    public VoidSphereEnt(Area area) : base(area) => Area = area;
+    public VoidSphereApex(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
     public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
     public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
@@ -21,17 +22,31 @@ public class VoidSphereEnt : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
-        switch (newLocation.X)
+
+        if (vectorMap is { Y: 3, X: 32 or 33 or 34 })
         {
-            case 15 when newLocation.Y == 9:
-            case 15 when newLocation.Y == 8:
-                var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Void Crystal");
-                var script = npc.Scripts.Values.First();
-                script.OnClick(client, npc.Serial);
-                break;
+            if (client.Aisling.HasKilled("Gait Gunner", 5) && client.Aisling.ExpLevel >= 350)
+            {
+                if (client.Aisling.GroupId != 0)
+                {
+                    foreach (var player in client.Aisling.PartyMembers.Where(player => player.Map.ID == 1504))
+                    {
+                        player.Client.TransitionToMap(1505, new Position(11, 21));
+                    }
+
+                    return;
+                }
+
+                client.TransitionToMap(1505, new Position(11, 21));
+                return;
+            }
+
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou are not yet worthy to enter.");
+            return;
         }
 
-        if (!(vectorMap.Y > 15) && !(vectorMap.Y < 3) && !(vectorMap.X > 15) && !(vectorMap.X < 3)) return;
+        // Off-Map Kill
+        if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();
         debuff.OnApplied(client.Aisling, debuff);
         client.TransitionToMap(14757, new Position(13, 34));

@@ -343,6 +343,48 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
+    private IEnumerable<Sprite> MonsterGetInFrontToSide(int tileCount = 1)
+    {
+        var results = new List<Sprite>();
+
+        switch (Direction)
+        {
+            case 0:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y));
+                break;
+
+            case 1:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - tileCount));
+                break;
+
+            case 2:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + tileCount, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y));
+                break;
+
+            case 3:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + tileCount));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - tileCount));
+                break;
+        }
+
+        return results;
+    }
+
     private IEnumerable<Sprite> GetHorizontalInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();
@@ -562,6 +604,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public List<Sprite> DamageableGetAwayInFront(int tileCount = 2, bool intersect = false) => DamageableGetAwayInFront(tileCount).ToList();
     public List<Sprite> DamageableGetBehind(int tileCount = 1, bool intersect = false) => DamageableGetBehind(tileCount).ToList();
     public List<Sprite> MonsterGetInFront(int tileCount = 1, bool intersect = false) => MonsterGetInFront(tileCount).ToList();
+    public List<Sprite> MonsterGetInFrontToSide(int tileCount = 1, bool intersect = false) => MonsterGetInFrontToSide(tileCount).ToList();
     public List<Sprite> GetInFrontToSide(int tileCount = 1, bool intersect = false) => GetInFrontToSide(tileCount).ToList();
     public List<Sprite> GetHorizontalInFront(int tileCount = 1, bool intersect = false) => GetHorizontalInFront(tileCount).ToList();
     public Position GetFromAllSidesEmpty(Sprite sprite, Sprite target, int tileCount = 1) => GetFromAllSidesEmpty(target, tileCount);
@@ -1987,8 +2030,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool RemoveBuff(string buff)
     {
         if (!HasBuff(buff)) return false;
-        var buffObj = Buffs[buff];
-        buffObj?.OnEnded(this, buffObj);
+
+        lock (Buffs)
+        {
+            var buffObj = Buffs[buff];
+            buffObj?.OnEnded(this, buffObj);
+        }
 
         return true;
     }
@@ -2001,15 +2048,17 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool RemoveDebuff(string debuff, bool cancelled = false)
     {
-        if (!cancelled && debuff == "Skulled")
-            return true;
+        if (!cancelled && debuff == "Skulled") return true;
 
-        if (!HasDebuff(debuff)) return false;
-        var buffObj = Debuffs[debuff];
+        lock (Debuffs)
+        {
+            if (!HasDebuff(debuff)) return false;
+            var debuffObj = Debuffs[debuff];
 
-        if (buffObj == null) return false;
-        buffObj.Cancelled = cancelled;
-        buffObj.OnEnded(this, buffObj);
+            if (debuffObj == null) return false;
+            debuffObj.Cancelled = cancelled;
+            debuffObj.OnEnded(this, debuffObj);
+        }
 
         return true;
     }
