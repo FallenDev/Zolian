@@ -139,8 +139,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     DisplayColor IDialogSourceEntity.Color => (DisplayColor)Color;
     public ushort Sprite => Template.Image;
     public void Activate(Aisling source) => Scripts.First().Value.OnUse(source, Slot);
-
-
     public uint Owner { get; set; }
     public ushort Image { get; init; }
     public ushort DisplayImage { get; init; }
@@ -569,8 +567,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         Owner = aisling.Serial;
         ItemPane = ItemPanes.Inventory;
 
-        #region Stackable
-
+        // Stack
         if (Template.Flags.FlagIsSet(ItemFlags.Stackable))
         {
             var numStacks = (byte)Stacks;
@@ -608,27 +605,20 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             return true;
         }
 
-        #endregion
+        // Non-Stack
+        InventorySlot = aisling.Inventory.FindEmpty();
 
-        #region Non-Stackable
-
+        if (InventorySlot == byte.MaxValue)
         {
-            InventorySlot = aisling.Inventory.FindEmpty();
-
-            if (InventorySlot == byte.MaxValue)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
-                return false;
-            }
-
-            aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
-            aisling.Inventory.UpdateSlot(aisling.Client, this);
-            aisling.Client.SendAttributes(StatUpdateType.Primary);
-            aisling.Client.SendAttributes(StatUpdateType.ExpGold);
-            return true;
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantCarryMoreMsg}");
+            return false;
         }
 
-        #endregion
+        aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
+        aisling.Inventory.UpdateSlot(aisling.Client, this);
+        aisling.Client.SendAttributes(StatUpdateType.Primary);
+        aisling.Client.SendAttributes(StatUpdateType.ExpGold);
+        return true;
     }
 
     public void Release(Sprite owner, Position position, bool delete = true)
@@ -967,7 +957,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         client.Aisling.BonusMp += bonus.Mp;
         client.Aisling.BonusRegen += bonus.Regen;
     }
-
 
     public void UpdateSpell(WorldClient client, Spell spell)
     {
