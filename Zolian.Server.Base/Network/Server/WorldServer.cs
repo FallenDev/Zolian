@@ -1322,12 +1322,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             IEnumerable<Aisling> audience;
             bool ParseCommand()
             {
-                if (message.StartsWith("/group ") || message.StartsWith("/party "))
-                {
-                    Commander.ParseChatMessage(localClient.Aisling.Client, message);
-                    return true;
-                }
                 if (!localClient.Aisling.GameMaster) return false;
+
+                //if (message.StartsWith("/group ") || message.StartsWith("/party "))
+                //{
+                //    Commander.ParseChatMessage(localClient.Aisling.Client, message);
+                //    return true;
+                //}
                 if (!message.StartsWith("/")) return false;
                 Commander.ParseChatMessage(localClient.Aisling.Client, message);
                 return true;
