@@ -105,7 +105,6 @@ public static class MundaneStorage
                 var stock29 = reader["DefaultStock29"].ToString();
                 var stock30 = reader["DefaultStock30"].ToString();
 
-
                 temp.Image = (ushort)image;
                 temp.ScriptKey = reader["ScriptKey"].ToString();
                 temp.EnableWalking = (bool)reader["EnableWalking"];

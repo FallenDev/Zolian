@@ -967,7 +967,7 @@ public class Blind : SpellScript
             _spellMethod.Train(aisling.Client, _spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
-        };
+        }
 
         _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
     }

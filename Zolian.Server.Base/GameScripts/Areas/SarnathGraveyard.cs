@@ -18,7 +18,6 @@ public class SarnathGraveyard : AreaScript
     private Debuff _debuff1;
     private Debuff _debuff2;
 
-
     public SarnathGraveyard(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 

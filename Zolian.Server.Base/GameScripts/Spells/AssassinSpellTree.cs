@@ -626,7 +626,6 @@ public class Shunshin : SpellScript
                 return;
             }
 
-
             if (target == null)
             {
                 OnFailed(aisling, null);

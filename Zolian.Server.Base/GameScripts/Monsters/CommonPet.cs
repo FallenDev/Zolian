@@ -66,8 +66,7 @@ public class CommonPet : MonsterScript
             Monster.Target = Monster.Summoner.Target ?? GetObjects(Monster.Map,
                 p => p.Target != null && Monster.Summoner.Serial != p.Serial && p.Target.Serial == Monster.Summoner?.Serial &&
                      p.Target.Serial != Monster.Serial, Get.All).MinBy(i => i.Position.DistanceFrom(Monster.Summoner.Position));
-
-
+            
             if (Monster.Target == null) return;
             if (Monster.Target.CurrentHp == 0 ||
                 !Monster.WithinRangeOf(Monster.Target) ||

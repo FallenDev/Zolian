@@ -14,7 +14,6 @@ public class Dealoote : MundaneScript
 {
     public Dealoote(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

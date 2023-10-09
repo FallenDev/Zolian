@@ -36,7 +36,6 @@ namespace Darkages.Network.Client
             return _server.HandlePacketAsync(this, in packet);
         }
 
-
         public void SendLoginControls(LoginControlsType loginControlsType, string message)
         {
             var args = new LoginControlArgs

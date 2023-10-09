@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+
 using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -120,53 +122,20 @@ public class Neal : MundaneScript
 
         switch (responseID)
         {
-            #region Skills
-
+            // Skills
             case 0x0001:
                 {
-                    var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                    var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
-
-                    newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                    if (newSkills.Count > 0)
-                    {
-                        client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003, newSkills);
-                    }
-                    else
-                    {
-                        client.CloseDialog();
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
-                    }
-
+                    ShowSkillList(client);
                     break;
                 }
             case 0x0002:
                 {
-                    client.SendForgetSkills(Mundane,
-                        "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
+                    client.SendForgetSkills(Mundane, "Muscle memory is a hard thing to unlearn. \nYou may come back to relearn what the mind has lost but the muscle still remembers.", 0x9000);
                     break;
                 }
             case 0x9000:
                 {
-                    int.TryParse(args, out var idx);
-
-                    if (idx is < 0 or > byte.MaxValue)
-                    {
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't quite have that skill.");
-                        client.CloseDialog();
-                    }
-
-                    client.Aisling.SkillBook.Remove(client, (byte)idx);
-                    client.LoadSkillBook();
-
-                    client.SendForgetSkills(Mundane,
-                        "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+                    RemoveSkill(client, args);
                     break;
                 }
             case 0x0003:
@@ -179,75 +148,23 @@ public class Neal : MundaneScript
                 }
             case 0x0004:
                 {
-                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                    if (subject == null) return;
-
-                    var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                    {
-                        if (!result)
-                        {
-                            client.SendOptionsDialog(Mundane, msg, subject.Name);
-                        }
-                    });
-
-                    if (conditions)
-                    {
-                        client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                            subject.Name,
-                            new Dialog.OptionsDataItem(0x0005, "Yes."),
-                            new Dialog.OptionsDataItem(0x0001, "I'll come back later."));
-                    }
-
+                    CheckSkillPrerequisites(client, args);
                     break;
                 }
             case 0x0006:
                 {
-                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                    if (subject == null) return;
-
-                    client.SendOptionsDialog(Mundane,
-                        $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                        subject.Name,
-                        new Dialog.OptionsDataItem(0x0004, "Yes"),
-                        new Dialog.OptionsDataItem(0x0001, "No"));
-
+                    ShowSkillDescription(client, args);
                     break;
                 }
             case 0x0005:
                 {
-                    var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-                    if (subject == null) return;
-                    client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
-
+                    LearnSkill(client, args);
                     break;
                 }
-
-            #endregion
-
-            #region Spells
-
+            // Spells
             case 0x0010:
                 {
-                    var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                    var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                        || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
-                        || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
-
-                    newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                    if (newSpells.Count > 0)
-                    {
-                        client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012, newSpells);
-                    }
-                    else
-                    {
-                        client.CloseDialog();
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
-                    }
-
+                    ShowSpellList(client);
                     break;
                 }
             case 0x0011:
@@ -265,67 +182,25 @@ public class Neal : MundaneScript
                 }
             case 0x0013:
                 {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-
-                    var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                    {
-                        if (!result)
-                        {
-                            client.SendOptionsDialog(Mundane, msg, subject.Name);
-                        }
-                    });
-
-                    if (conditions)
-                    {
-                        client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                            subject.Name,
-                            new Dialog.OptionsDataItem(0x0014, "Yes."),
-                            new Dialog.OptionsDataItem(0x0010, "I'll come back later."));
-                    }
-
+                    CheckSpellPrerequisites(client, args);
                     break;
                 }
             case 0x0014:
                 {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-                    client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
-
+                    LearnSpell(client, args);
                     break;
                 }
             case 0x0015:
                 {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-
-                    client.SendOptionsDialog(Mundane,
-                        $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                        subject.Name,
-                        new Dialog.OptionsDataItem(0x0013, "Yes"),
-                        new Dialog.OptionsDataItem(0x0010, "No"));
-
+                    ShowSpellDescription(client, args);
                     break;
                 }
             case 0x0800:
                 {
-                    int.TryParse(args, out var idx);
-
-                    if (idx is < 0 or > byte.MaxValue)
-                    {
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not sense this spell within you any longer.");
-                        client.CloseDialog();
-                    }
-
-                    client.Aisling.SpellBook.Remove(client, (byte)idx);
-                    client.LoadSpellBook();
-
-                    client.SendForgetSpells(Mundane, "It has been removed.\nRemember, This cannot be undone.", 0x0800);
+                    RemoveSpell(client, args);
                     break;
                 }
-
-            #endregion
-
+            // Quests
             case 0x0008:
                 {
                     client.SendOptionsDialog(Mundane, "When you're ready, I'll be here.");
@@ -958,5 +833,164 @@ public class Neal : MundaneScript
                     break;
                 }
         }
+    }
+
+    private void ShowSkillList(WorldClient client)
+    {
+        var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+        var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                                                                    || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                                                                    || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
+
+        newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
+
+        if (newSkills.Count > 0)
+        {
+            client.SendSkillLearnDialog(Mundane, "What move do you wish to learn? \nThese skills have been taught for generations now and are available to you.", 0x0003, newSkills);
+        }
+        else
+        {
+            client.CloseDialog();
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
+        }
+    }
+
+    private void CheckSkillPrerequisites(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+        if (subject == null) return;
+
+        var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+        {
+            if (!result)
+            {
+                client.SendOptionsDialog(Mundane, msg, subject.Name);
+            }
+        });
+
+        if (conditions)
+        {
+            client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                subject.Name,
+                new Dialog.OptionsDataItem(0x0005, "Yes."),
+                new Dialog.OptionsDataItem(0x0001, "I'll come back later."));
+        }
+    }
+
+    private void ShowSkillDescription(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+        if (subject == null) return;
+
+        client.SendOptionsDialog(Mundane,
+            $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+            subject.Name,
+            new Dialog.OptionsDataItem(0x0004, "Yes"),
+            new Dialog.OptionsDataItem(0x0001, "No"));
+    }
+
+    private void LearnSkill(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSkillTemplateCache[args];
+        if (subject == null) return;
+        client.LearnSkill(Mundane, subject, "Always refine your skills as much as you sharpen your knife.");
+    }
+
+    private void RemoveSkill(WorldClient client, string args)
+    {
+        int.TryParse(args, out var idx);
+
+        if (idx is < 0 or > byte.MaxValue)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You don't quite have that skill.");
+            client.CloseDialog();
+        }
+
+        client.Aisling.SkillBook.Remove(client, (byte)idx);
+        client.LoadSkillBook();
+        client.SendForgetSkills(Mundane, "Your body is still, breathing in, relaxed. \nAny other skills you wish to forget?", 0x9000);
+    }
+
+    private void ShowSpellList(WorldClient client)
+    {
+        var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
+        var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                                                                    || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
+                                                                    || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
+                                                                    || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
+
+        newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
+
+        if (newSpells.Count > 0)
+        {
+            client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012, newSpells);
+        }
+        else
+        {
+            client.CloseDialog();
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
+        }
+    }
+
+    private void CheckSpellPrerequisites(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+        if (subject == null) return;
+
+        var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
+        {
+            if (!result)
+            {
+                client.SendOptionsDialog(Mundane, msg, subject.Name);
+            }
+        });
+
+        if (conditions)
+        {
+            client.SendOptionsDialog(Mundane, "Have you brought what is required?",
+                subject.Name,
+                new Dialog.OptionsDataItem(0x0014, "Yes."),
+                new Dialog.OptionsDataItem(0x0010, "I'll come back later."));
+        }
+    }
+
+    private void ShowSpellDescription(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+        if (subject == null) return;
+
+        client.SendOptionsDialog(Mundane,
+            $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
+            subject.Name,
+            new Dialog.OptionsDataItem(0x0013, "Yes"),
+            new Dialog.OptionsDataItem(0x0010, "No"));
+    }
+
+    private void LearnSpell(WorldClient client, string args)
+    {
+        var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
+        if (subject == null) return;
+        client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
+    }
+
+    private void RemoveSpell(WorldClient client, string args)
+    {
+        int.TryParse(args, out var idx);
+
+        if (idx is < 0 or > byte.MaxValue)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not sense this spell within you any longer.");
+            client.CloseDialog();
+        }
+
+        client.Aisling.SpellBook.Remove(client, (byte)idx);
+        client.LoadSpellBook();
+
+        client.SendForgetSpells(Mundane, "It has been removed.\nRemember, This cannot be undone.", 0x0800);
     }
 }

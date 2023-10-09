@@ -477,6 +477,4 @@ public class CommandParser
 
         return sb.ToString();
     }
-
-
 }

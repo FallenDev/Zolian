@@ -32,7 +32,7 @@ public class Asgall : SpellScript
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
-        };
+        }
 
         if (sprite.HasBuff("Asgall"))
         {
@@ -70,7 +70,7 @@ public class Defensive_Stance : SpellScript
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
-        };
+        }
 
         if (sprite.HasBuff("Defensive Stance") || sprite.HasBuff("Spectral Shield"))
         {
@@ -110,7 +110,7 @@ public class Perfect_Defense : SpellScript
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Incapacitated.");
             return;
-        };
+        }
 
         if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
         {
