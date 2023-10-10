@@ -110,6 +110,7 @@ public interface ISprite
     Aisling[] AislingsNearby();
     Aisling[] AislingsEarShotNearby();
     IEnumerable<Monster> MonstersNearby();
+    IEnumerable<Monster> MonstersOnMap();
     IEnumerable<Mundane> MundanesNearby();
     IEnumerable<Sprite> SpritesNearby();
     bool NextTo(int x, int y);

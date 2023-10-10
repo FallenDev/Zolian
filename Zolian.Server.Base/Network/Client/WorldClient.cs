@@ -546,7 +546,7 @@ namespace Darkages.Network.Client
             }
 
             Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage,
-                Aisling.ThreatMeter == 0 ? "" : $"{{=gAggro: {{={color}{aggro}%");
+                Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
         }
 
         #region Player Load

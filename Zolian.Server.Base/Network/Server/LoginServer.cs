@@ -415,7 +415,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var handler = ClientHandlers[(byte)packet.OpCode];
         if (handler != null) return handler(client, in packet);
         ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
-        Analytics.TrackEvent($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
+        Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
         return default;
     }
 

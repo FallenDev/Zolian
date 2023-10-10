@@ -769,6 +769,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
     public Aisling[] AislingsEarShotNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 16)).ToArray();
     public IEnumerable<Monster> MonstersNearby() => GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    public IEnumerable<Monster> MonstersOnMap() => GetObjects<Monster>(Map, i => i != null);
     public IEnumerable<Mundane> MundanesNearby() => GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
     public IEnumerable<Sprite> SpritesNearby()

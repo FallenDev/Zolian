@@ -3198,6 +3198,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     }
 
                     var skillSet = DecideOnSkillsToPull(client);
+                    if (skillSet.IsNullOrEmpty()) break;
                     localClient.SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
                     break;
                 case MetaDataRequestType.AllCheckSums:
@@ -3230,6 +3231,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (handler == null)
         {
             ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
+            Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
         }
 
         if (trackers != null && IsManualAction(packet.OpCode))
@@ -3273,6 +3275,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
+        // Packet 66 (0x42) Unknown - SendProfile
+        ClientHandlers[(byte)ClientOpCode.Unknown] = OnProfile; // 0x42
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
         ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47

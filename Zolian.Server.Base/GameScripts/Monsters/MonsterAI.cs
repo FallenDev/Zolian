@@ -2,7 +2,8 @@
 using System.Security.Cryptography;
 
 using Chaos.Common.Definitions;
-
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -1274,28 +1275,6 @@ public class SelfDestruct : MonsterScript
             }
         }
 
-        if (Monster.Target is null)
-        {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
-            Monster.Target = recordTuple.player;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
-        }
-        else
-        {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
-
-            if (sum > 0)
-            {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
-        }
-
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -1308,9 +1287,7 @@ public class SelfDestruct : MonsterScript
         if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty && Monster.Template.EngagedWalkingSpeed > 0)
             Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
         var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
         var walk = Monster.WalkTimer.Update(elapsedTime);
 
         if (Monster.Target is Aisling aisling)
@@ -1337,22 +1314,10 @@ public class SelfDestruct : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (assail) Bash();
-            }
-
             if (Monster.AbilityEnabled)
             {
                 if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
-
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
+                    if (ability) Suicide();
             }
         }
 
@@ -1523,8 +1488,8 @@ public class SelfDestruct : MonsterScript
     #endregion
 
     #region Actions
-
-    private void Bash()
+    
+    private void Suicide()
     {
         if (Monster.CantAttack) return;
         if (Monster.Target != null)
@@ -1534,47 +1499,6 @@ public class SelfDestruct : MonsterScript
                 Monster.Turn();
                 return;
             }
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        if (Monster.Target is not { CurrentHp: > 1 })
-        {
-            if (Monster.Target is not Aisling aisling) return;
-            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
-            return;
-        }
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
 
         if (Monster.Target is not { CurrentHp: > 1 })
         {
@@ -1585,35 +1509,16 @@ public class SelfDestruct : MonsterScript
         }
 
         var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
+        if (abilityAttempt <= 15) return;
+        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.SkillScripts.Count);
 
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-    }
-
-    private void CastSpell()
-    {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
-
-        if (Monster.Target is not { CurrentHp: > 1 })
-        {
-            if (Monster.Target is not Aisling aisling) return;
-            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
-            return;
-        }
-
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
-
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        if (Monster.SkillScripts[abilityIdx] is null) return;
+        var skill = Monster.SkillScripts[abilityIdx];
+        skill.OnUse(Monster);
+        if (Monster.Target == null) return;
+        var suicide = Monster.CurrentHp / .5;
+        Monster.Target.ApplyDamage(Monster, (long)suicide, null, true);
+        OnDeath();
     }
 
     private void Walk()
@@ -1927,7 +1832,10 @@ public class AlertSummon : MonsterScript
             if (Monster.CastEnabled)
             {
                 if (!Monster.CantCast)
-                    if (cast) CastSpell();
+                    if (cast)
+                    {
+                        SummonMonsterNearby();
+                    }
             }
         }
 
@@ -2167,15 +2075,11 @@ public class AlertSummon : MonsterScript
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
     }
 
-    private void CastSpell()
+    private void SummonMonsterNearby()
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
-
+        
         if (Monster.Target is not { CurrentHp: > 1 })
         {
             if (Monster.Target is not Aisling aisling) return;
@@ -2185,10 +2089,25 @@ public class AlertSummon : MonsterScript
         }
 
         if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        var monstersNearby = Monster.MonstersOnMap();
+
+        foreach (var monster in monstersNearby)
+        {
+            if (monster.WithinRangeOf(Monster)) continue;
+            
+            var readyTime = DateTime.UtcNow;
+            monster.Pos = new Vector2(Monster.Pos.X, Monster.Pos.Y);
+
+            foreach (var player in Monster.AislingsNearby())
+            {
+                player.Client.SendCreatureWalk(monster.Serial, new Point(Monster.X, Monster.Y), (Direction)Monster.Direction);
+            }
+
+            monster.LastMovementChanged = readyTime;
+            monster.LastPosition = new Position(Monster.X, Monster.Y);
+            break;
+        }
     }
 
     private void Walk()
@@ -2320,9 +2239,6 @@ public class AlertSummon : MonsterScript
 [Script("Turret")]
 public class Turret : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
-    private Vector2 _location = Vector2.Zero;
-
     public Turret(Monster monster, Area map) : base(monster, map)
     {
         Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
@@ -2461,7 +2377,6 @@ public class Turret : MonsterScript
         var assail = Monster.BashTimer.Update(elapsedTime);
         var ability = Monster.AbilityTimer.Update(elapsedTime);
         var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
 
         if (Monster.Target is Aisling aisling)
         {
@@ -2474,15 +2389,9 @@ public class Turret : MonsterScript
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-
-                if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
-                {
-                    Monster.Aggressive = false;
-                    ClearTarget();
-                }
-
-                if (Monster.CantMove || Monster.Blind) return;
-                if (walk) Walk();
+                if (!Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral)) return;
+                Monster.Aggressive = false;
+                ClearTarget();
 
                 return;
             }
@@ -2504,12 +2413,6 @@ public class Turret : MonsterScript
                 if (!Monster.CantCast)
                     if (cast) CastSpell();
             }
-        }
-
-        if (Monster.WalkEnabled)
-        {
-            if (Monster.CantMove || Monster.Blind) return;
-            if (walk) Walk();
         }
 
         if (Monster.Target != null) return;
@@ -2597,7 +2500,6 @@ public class Turret : MonsterScript
         }
 
         Monster.Target = null;
-        _targetPos = Vector2.Zero;
 
         try
         {
@@ -2676,7 +2578,6 @@ public class Turret : MonsterScript
 
     private void Bash()
     {
-        if (Monster.CantAttack) return;
         if (Monster.Target != null)
             if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
@@ -2684,9 +2585,6 @@ public class Turret : MonsterScript
                 Monster.Turn();
                 return;
             }
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
 
         if (Monster.Target is not { CurrentHp: > 1 })
         {
@@ -2714,7 +2612,6 @@ public class Turret : MonsterScript
 
     private void Ability()
     {
-        if (Monster.CantAttack) return;
         if (Monster.Target != null)
             if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
@@ -2722,9 +2619,6 @@ public class Turret : MonsterScript
                 Monster.Turn();
                 return;
             }
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
 
         if (Monster.Target is not { CurrentHp: > 1 })
         {
@@ -2744,12 +2638,8 @@ public class Turret : MonsterScript
 
     private void CastSpell()
     {
-        if (Monster.CantCast) return;
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinRangeOf(Monster)) return;
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
 
         if (Monster.Target is not { CurrentHp: > 1 })
         {
@@ -2764,129 +2654,6 @@ public class Turret : MonsterScript
 
         if (Monster.SpellScripts[spellIdx] is null) return;
         Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
-    }
-
-    private void Walk()
-    {
-        if (Monster.CantMove) return;
-        if (Monster.ThrownBack) return;
-
-        if (Monster.Target != null)
-        {
-            if (Monster.Target is Aisling aisling)
-            {
-                if (Map.ID != aisling.Map.ID)
-                {
-                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
-                    Monster.Wander();
-                    return;
-                }
-
-                if (!aisling.LoggedIn)
-                {
-                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
-                    Monster.Wander();
-                    return;
-                }
-
-                if (aisling.IsInvisible || aisling.Dead || aisling.Skulled)
-                {
-                    Monster.TargetRecord.TaggedAislings.TryRemove(aisling.Serial, out _);
-                    Monster.Wander();
-                    return;
-                }
-            }
-
-            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
-            {
-                if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-                {
-                    Monster.BashEnabled = true;
-                    Monster.AbilityEnabled = true;
-                    Monster.CastEnabled = true;
-                }
-                else
-                {
-                    Monster.BashEnabled = false;
-                    Monster.AbilityEnabled = true;
-                    Monster.CastEnabled = true;
-                    Monster.Direction = (byte)direction;
-                    Monster.Turn();
-                }
-            }
-            else
-            {
-                Monster.BashEnabled = false;
-                Monster.CastEnabled = true;
-
-                // Wander, AStar, and Standard Walk Methods
-                if (Monster.Target == null | !Monster.Aggressive)
-                {
-                    Monster.Wander();
-                }
-                else
-                {
-                    Monster.AStar = true;
-                    _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
-
-                    if (_targetPos == Vector2.Zero)
-                    {
-                        ClearTarget();
-                        Monster.Wander();
-                        return;
-                    }
-
-                    if (Monster.Path.Result.Count > 0)
-                    {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
-                    }
-
-                    if (Monster.Path.Result.Count != 0) return;
-                    Monster.AStar = false;
-
-                    if (Monster.Target == null)
-                    {
-                        Monster.Wander();
-                        return;
-                    }
-
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
-
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-                    Monster.Wander();
-                }
-            }
-        }
-        else
-        {
-            Monster.BashEnabled = false;
-            Monster.CastEnabled = false;
-
-            if (Monster.Template.PathQualifer.PathFlagIsSet(PathQualifer.Patrol))
-            {
-                if (Monster.Template.Waypoints == null)
-                {
-                    Monster.Wander();
-                }
-                else
-                {
-                    if (Monster.Template.Waypoints.Count > 0)
-                        Monster.Patrol();
-                    else
-                        Monster.Wander();
-                }
-            }
-            else
-            {
-                Monster.Wander();
-            }
-        }
     }
 
     #endregion
