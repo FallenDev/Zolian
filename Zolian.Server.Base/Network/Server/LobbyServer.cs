@@ -293,7 +293,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         request.AddParameter("ip", client.RemoteIp.ToString());
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        request.AddParameter("timestamp", DateTime.UtcNow);
         _restReport.Execute(request);
     }
 
