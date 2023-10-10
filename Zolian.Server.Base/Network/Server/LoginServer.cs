@@ -405,6 +405,21 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
     }
 
+    /// <summary>
+    /// 0x2D - Request Player Profile & Load Character Meta Data (Skills/Spells)
+    /// OnProfileRequest is handled in WorldServer and is disabled here, the client
+    /// still requests it from the LoginServer and so it is handled and returned null
+    /// </summary>
+    public ValueTask OnProfileRequest(ILoginClient client, in ClientPacket clientPacket)
+    {
+        static ValueTask InnerOnProfileRequest(ILoginClient localClient)
+        {
+            return default;
+        }
+
+        return ExecuteHandler(client, InnerOnProfileRequest);
+    }
+
     #endregion
 
     #region Connection / Handler
@@ -425,6 +440,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.CreateCharRequest] = OnCreateCharRequest;
         ClientHandlers[(byte)ClientOpCode.CreateCharFinalize] = OnCreateCharFinalize;
         ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
+        ClientHandlers[(byte)ClientOpCode.RequestProfile] = OnProfileRequest;
         ClientHandlers[(byte)ClientOpCode.HomepageRequest] = OnHomepageRequest;
         ClientHandlers[(byte)ClientOpCode.Login] = OnLogin;
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest;
