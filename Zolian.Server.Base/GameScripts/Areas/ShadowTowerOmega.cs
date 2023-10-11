@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-using Darkages.GameScripts.Affects;
+using Chaos.Common.Definitions;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -21,21 +22,14 @@ public class ShadowTowerOmega : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
-        //switch (newLocation.X)
-        //{
-        //    case 15 when newLocation.Y == 9:
-        //    case 15 when newLocation.Y == 8:
-        //        var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Void Crystal");
-        //        var script = npc.Scripts.Values.First();
-        //        script.OnClick(client, npc.Serial);
-        //        break;
-        //}
-
-        //if (!(vectorMap.Y > 15) && !(vectorMap.Y < 3) && !(vectorMap.X > 15) && !(vectorMap.X < 3)) return;
-        //var debuff = new DebuffReaping();
-        //debuff.OnApplied(client.Aisling, debuff);
-        //client.TransitionToMap(14757, new Position(13, 34));
-        //client.SendSound(0x9B, false);
+        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob34", out var boss);
+        var mobsOnMap = client.Aisling.MonstersOnMap();
+        if (mobsOnMap != null) return;
+        var bossCreate = Monster.Create(boss, client.Aisling.Map);
+        if (bossCreate == null) return;
+        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Omega Draconic, now online!"));
+        ServerSetup.Instance.GlobalMonsterCache[bossCreate.Serial] = bossCreate;
+        ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate);
     }
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }

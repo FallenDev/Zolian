@@ -169,15 +169,22 @@ public class CreateMonster : MonsterCreateScript
 
     private void SetSpawn(Monster obj)
     {
-        if (_monsterTemplate.SpawnType == SpawnQualifer.Random)
+        switch (_monsterTemplate.SpawnType)
         {
-            var x = Generator.GenerateMapLocation(_map.Height);
-            var y = Generator.GenerateMapLocation(_map.Width);
-            obj.Pos = new Vector2(x, y);
-        }
-        else
-        {
-            obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
+            case SpawnQualifer.Random:
+            {
+                var x = Generator.GenerateMapLocation(_map.Height);
+                var y = Generator.GenerateMapLocation(_map.Width);
+                obj.Pos = new Vector2(x, y);
+                break;
+            }
+            case SpawnQualifer.Event:
+                if (obj.Aggressive == false) return;
+                obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
+                break;
+            default:
+                obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
+                break;
         }
     }
 

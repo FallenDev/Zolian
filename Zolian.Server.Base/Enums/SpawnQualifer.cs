@@ -5,5 +5,6 @@ namespace Darkages.Enums;
 public enum SpawnQualifer
 {
     Random = 1 << 1,
-    Defined = 1 << 2
+    Defined = 1 << 2,
+    Event = 1 << 3
 }

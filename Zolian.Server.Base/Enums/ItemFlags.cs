@@ -53,6 +53,8 @@ public enum ItemFlags
     NonDropableQuest = Bankable | Consumable | QuestRelated,
     // 2064
     NonDropableQuestNoConsume = Bankable | QuestRelated,
+    // 264216
+    DropableQuestUniqueNoConsume = Bankable | QuestRelated | Unique | Dropable,
     // 264464
     NonDropableQuestUnique = Bankable | Consumable | QuestRelated | Unique,
     // 264208

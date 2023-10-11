@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -12,7 +11,6 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.GameScripts.Formulas;
 using Darkages.GameScripts.Spells;
 using Darkages.Interfaces;
 using Darkages.Object;

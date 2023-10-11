@@ -72,6 +72,64 @@ public class Bite : SkillScript
     }
 }
 
+[Script("Gatling")]
+public class Gatling : SkillScript
+{
+    private readonly Skill _skill;
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod;
+
+    public Gatling(Skill skill) : base(skill)
+    {
+        _skill = skill;
+        _skillMethod = new GlobalSkillMethods();
+    }
+
+    public override void OnFailed(Sprite sprite) { }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!_skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        if (sprite.Target == null) return;
+        _target = sprite.Target;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, _skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, _skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Str * 5 + damageMonster.Dex * 8;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
 [Script("Bite'n Shake")]
 public class BiteAndShake : SkillScript
 {
