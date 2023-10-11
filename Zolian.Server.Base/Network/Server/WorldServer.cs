@@ -1580,7 +1580,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (client.Aisling.Map != null && client.Aisling.IsDead())
                 {
                     client.AislingToGhostForm();
-                    if(!client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+                    if (!client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
                         client.Aisling.WarpToHell();
                 }
 
@@ -2023,65 +2023,77 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (sprite)
                 {
                     case Monster monster:
-                    {
-                        var script = monster.Scripts.Values.First();
-                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                        script?.OnItemDropped(localClient.Aisling.Client, item);
-                        break;
-                    }
-                    case Mundane mundane:
-                    {
-                        var script = mundane.Scripts.Values.First();
-                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                        localClient.EntryCheck = mundane.Serial;
-                        mundane.Bypass = true;
-                        script?.OnItemDropped(localClient.Aisling.Client, item);
-                        break;
-                    }
-                    case Aisling aisling:
-                    {
-                        if (sourceSlot == 0) return default;
-                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-
-                        if (item.DisplayName.StringContains("deum"))
                         {
-                            var script = item.Scripts.Values.First();
-                            localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
-                            localClient.Aisling.ThrewHealingPot = true;
-                            script?.OnUse(aisling, sourceSlot);
-                            localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
-                            return default;
-                        }
-
-                        if (item.DisplayName == "Elixir of Life")
-                        {
-                            localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
-                            localClient.Aisling.ThrewHealingPot = true;
-                            localClient.Aisling.ReviveFromAfar(aisling);
-                            localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
-                            return default;
-                        }
-
-                        localClient.Aisling.Exchange = new ExchangeSession(aisling);
-                        aisling.Exchange = new ExchangeSession(localClient.Aisling);
-                        localClient.SendExchangeStart(aisling);
-                        aisling.Client.SendExchangeStart(localClient.Aisling);
-
-                        if (aisling.CurrentWeight + item.Template.CarryWeight < aisling.MaximumWeight)
-                        {
-                            localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                            localClient.Aisling.Exchange.Items.Add(item);
-                            localClient.Aisling.Exchange.Weight += item.Template.CarryWeight;
-                            localClient.Aisling.Client.SendExchangeAddItem(false, (byte)localClient.Aisling.Exchange.Items.Count, item);
-                            aisling.Client.SendExchangeAddItem(true, (byte)localClient.Aisling.Exchange.Items.Count, item);
+                            var script = monster.Scripts.Values.First();
+                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
+                                script?.OnItemDropped(localClient.Aisling.Client, item);
+                            else
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can't seem to do that");
                             break;
                         }
+                    case Mundane mundane:
+                        {
+                            var script = mundane.Scripts.Values.First();
+                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            localClient.EntryCheck = mundane.Serial;
+                            mundane.Bypass = true;
+                            script?.OnItemDropped(localClient.Aisling.Client, item);
+                            break;
+                        }
+                    case Aisling aisling:
+                        {
+                            if (sourceSlot == 0) return default;
+                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
 
-                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
-                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
+                            if (item.DisplayName.StringContains("deum"))
+                            {
+                                var script = item.Scripts.Values.First();
+                                localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
+                                localClient.Aisling.ThrewHealingPot = true;
+                                script?.OnUse(aisling, sourceSlot);
+                                localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
+                                return default;
+                            }
 
-                        break;
-                    }
+                            if (item.DisplayName == "Elixir of Life")
+                            {
+                                localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
+                                localClient.Aisling.ThrewHealingPot = true;
+                                localClient.Aisling.ReviveFromAfar(aisling);
+                                localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
+                                return default;
+                            }
+
+                            if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
+                            {
+                                localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                                aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                                localClient.SendExchangeStart(aisling);
+                                aisling.Client.SendExchangeStart(localClient.Aisling);
+
+                                if (aisling.CurrentWeight + item.Template.CarryWeight < aisling.MaximumWeight)
+                                {
+                                    localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                                    localClient.Aisling.Exchange.Items.Add(item);
+                                    localClient.Aisling.Exchange.Weight += item.Template.CarryWeight;
+                                    localClient.Aisling.Client.SendExchangeAddItem(false,
+                                        (byte)localClient.Aisling.Exchange.Items.Count, item);
+                                    aisling.Client.SendExchangeAddItem(true, (byte)localClient.Aisling.Exchange.Items.Count,
+                                        item);
+                                    break;
+                                }
+
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
+                            }
+                            else
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can't just give this away");
+                            }
+
+                            break;
+                        }
                 }
             }
 
@@ -2119,50 +2131,50 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (sprite)
                 {
                     case Monster monster:
-                    {
-                        var script = monster.Scripts.Values.First();
-                        if (amount <= 0) return default;
-                        script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-                        break;
-                    }
+                        {
+                            var script = monster.Scripts.Values.First();
+                            if (amount <= 0) return default;
+                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                            break;
+                        }
                     case Mundane mundane:
-                    {
-                        var script = mundane.Scripts.Values.First();
-                        if (amount <= 0) return default;
-                        script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-                        break;
-                    }
+                        {
+                            var script = mundane.Scripts.Values.First();
+                            if (amount <= 0) return default;
+                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                            break;
+                        }
                     case Aisling aisling:
-                    {
-                        localClient.Aisling.Exchange = new ExchangeSession(aisling);
-                        aisling.Exchange = new ExchangeSession(localClient.Aisling);
-                        localClient.SendExchangeStart(aisling);
-                        aisling.Client.SendExchangeStart(localClient.Aisling);
-
-                        if (amount > localClient.Aisling.GoldPoints)
                         {
-                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
+                            localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                            aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                            localClient.SendExchangeStart(aisling);
+                            aisling.Client.SendExchangeStart(localClient.Aisling);
+
+                            if (amount > localClient.Aisling.GoldPoints)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
+                                break;
+                            }
+
+                            if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
+                                break;
+                            }
+
+                            if (amount > 0)
+                            {
+                                localClient.Aisling.GoldPoints -= (long)amount;
+                                localClient.Aisling.Exchange.Gold = (uint)amount;
+                                localClient.SendAttributes(StatUpdateType.ExpGold);
+                                localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
+                                aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
+                            }
+
                             break;
                         }
-
-                        if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
-                        {
-                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
-                            break;
-                        }
-
-                        if (amount > 0)
-                        {
-                            localClient.Aisling.GoldPoints -= (long)amount;
-                            localClient.Aisling.Exchange.Gold = (uint)amount;
-                            localClient.SendAttributes(StatUpdateType.ExpGold);
-                            localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
-                            aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
-                        }
-
-                        break;
-                    }
                 }
             }
 
@@ -2441,181 +2453,181 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             switch (localArgs.BoardRequestType)
             {
                 case BoardRequestType.BoardList:
-                {
-                    localClient.SendBoardList(personalBoards);
-                    break;
-                }
-                case BoardRequestType.ViewBoard:
-                {
-                    var boardId = (int?)localArgs.BoardId;
-
-                    if (boardId <= 2)
                     {
-                        if (personalBoards == null)
+                        localClient.SendBoardList(personalBoards);
+                        break;
+                    }
+                case BoardRequestType.ViewBoard:
+                    {
+                        var boardId = (int?)localArgs.BoardId;
+
+                        if (boardId <= 2)
                         {
-                            localClient.CloseDialog();
+                            if (personalBoards == null)
+                            {
+                                localClient.CloseDialog();
+                                break;
+                            }
+
+                            localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
+
                             break;
                         }
 
-                        localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
-
+                        if (board == null) break;
+                        localClient.SendBoard(board.Subject, localArgs.StartPostId);
                         break;
                     }
-
-                    if (board == null) break;
-                    localClient.SendBoard(board.Subject, localArgs.StartPostId);
-                    break;
-                }
                 case BoardRequestType.ViewPost:
-                {
-                    var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
-
-                    if (post == null)
                     {
-                        var postId = localArgs.PostId - 1;
-                        post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
-                    }
+                        var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
 
-                    if (post == null)
-                    {
-                        localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
+                        if (post == null)
+                        {
+                            var postId = localArgs.PostId - 1;
+                            post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
+                        }
+
+                        if (post == null)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
+                            break;
+                        }
+
+                        var prevEnabled = post.PostId > 0;
+                        localClient.SendPost(post, board.IsMail, prevEnabled);
                         break;
                     }
-
-                    var prevEnabled = post.PostId > 0;
-                    localClient.SendPost(post, board.IsMail, prevEnabled);
-                    break;
-                }
                 case BoardRequestType.NewPost:
-                {
-                    if (board == null) break;
-                    // Mail uses a different boardRequestType for sending mail
-                    if (board.IsMail) break;
-
-                    var np = new PostFormat(localArgs.BoardId ?? 0)
                     {
-                        DatePosted = readyTime,
-                        Message = localArgs.Message,
-                        Subject = localArgs.Subject,
-                        Read = false,
-                        Sender = client.Aisling.Username,
-                        PostId = (short)(board.Posts.Count + 1)
-                    };
+                        if (board == null) break;
+                        // Mail uses a different boardRequestType for sending mail
+                        if (board.IsMail) break;
 
-                    board.Posts ??= new List<PostFormat>();
-                    var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-                    short startPostId = 1;
-                    foreach (var post in postsOrdered)
-                    {
-                        post.PostId = startPostId;
-                        startPostId++;
-                    }
-
-                    np.Associate(client.Aisling.Username);
-                    board.Posts.Add(np);
-                    ServerSetup.SaveCommunityAssets();
-                    localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
-
-                    break;
-                }
-                case BoardRequestType.Delete:
-                {
-                    if (board == null || board.Posts.Count <= 0) break;
-                    //var postId = localArgs.PostId - 1;
-                    //if (postId == null) break;
-
-                    try
-                    {
-                        if ((localArgs.BoardId == 0
-                                ? board.Posts[(short)localArgs.PostId].Recipient
-                                : board.Posts[(short)localArgs.PostId].Sender
-                            ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
+                        var np = new PostFormat(localArgs.BoardId ?? 0)
                         {
-                            board.Posts.RemoveAt((short)localArgs.PostId);
-                            ServerSetup.SaveCommunityAssets();
-                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
-                            localClient.SendBoard(board.Subject, localArgs.StartPostId);
-                        }
-                        else
+                            DatePosted = readyTime,
+                            Message = localArgs.Message,
+                            Subject = localArgs.Subject,
+                            Read = false,
+                            Sender = client.Aisling.Username,
+                            PostId = (short)(board.Posts.Count + 1)
+                        };
+
+                        board.Posts ??= new List<PostFormat>();
+                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                        short startPostId = 1;
+                        foreach (var post in postsOrdered)
                         {
-                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
+                            post.PostId = startPostId;
+                            startPostId++;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        ServerSetup.Logger(ex.Message, LogLevel.Error);
-                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                        Crashes.TrackError(ex);
-                        localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
-                    }
 
-                    break;
-                }
-                case BoardRequestType.SendMail:
-                {
-                    if (board == null) break;
-                    var np = new PostFormat(localArgs.BoardId ?? 0)
-                    {
-                        DatePosted = readyTime,
-                        Message = localArgs.Message,
-                        Subject = localArgs.Subject,
-                        Read = false,
-                        Sender = client.Aisling.Username,
-                        Recipient = localArgs.To,
-                        PostId = (short)(board.Posts.Count + 1)
-                    };
+                        np.Associate(client.Aisling.Username);
+                        board.Posts.Add(np);
+                        ServerSetup.SaveCommunityAssets();
+                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
 
-                    board.Posts ??= new List<PostFormat>();
-                    var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-                    short startPostId = 1;
-                    foreach (var post in postsOrdered)
-                    {
-                        post.PostId = startPostId;
-                        startPostId++;
-                    }
-
-                    np.Associate(client.Aisling.Username);
-                    board.Posts.Add(np);
-                    ServerSetup.SaveCommunityAssets();
-                    localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
-
-                    var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
-                    if (recipient == null) break;
-                    recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
-                    recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
-
-                    break;
-                }
-                case BoardRequestType.Highlight:
-                {
-                    if (board == null) break;
-                    if (!localClient.Aisling.GameMaster)
-                    {
-                        localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
                         break;
                     }
-
-                    ////you cant highlight mail messages
-                    if (board.IsMail) break;
-
-                    foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
+                case BoardRequestType.Delete:
                     {
-                        if (ind.HighLighted)
+                        if (board == null || board.Posts.Count <= 0) break;
+                        //var postId = localArgs.PostId - 1;
+                        //if (postId == null) break;
+
+                        try
                         {
-                            ind.HighLighted = false;
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
+                            if ((localArgs.BoardId == 0
+                                    ? board.Posts[(short)localArgs.PostId].Recipient
+                                    : board.Posts[(short)localArgs.PostId].Sender
+                                ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
+                            {
+                                board.Posts.RemoveAt((short)localArgs.PostId);
+                                ServerSetup.SaveCommunityAssets();
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
+                                localClient.SendBoard(board.Subject, localArgs.StartPostId);
+                            }
+                            else
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            ind.HighLighted = true;
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
+                            ServerSetup.Logger(ex.Message, LogLevel.Error);
+                            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                            Crashes.TrackError(ex);
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
                         }
+
+                        break;
                     }
+                case BoardRequestType.SendMail:
+                    {
+                        if (board == null) break;
+                        var np = new PostFormat(localArgs.BoardId ?? 0)
+                        {
+                            DatePosted = readyTime,
+                            Message = localArgs.Message,
+                            Subject = localArgs.Subject,
+                            Read = false,
+                            Sender = client.Aisling.Username,
+                            Recipient = localArgs.To,
+                            PostId = (short)(board.Posts.Count + 1)
+                        };
 
-                    localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
+                        board.Posts ??= new List<PostFormat>();
+                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                        short startPostId = 1;
+                        foreach (var post in postsOrdered)
+                        {
+                            post.PostId = startPostId;
+                            startPostId++;
+                        }
 
-                    break;
-                }
+                        np.Associate(client.Aisling.Username);
+                        board.Posts.Add(np);
+                        ServerSetup.SaveCommunityAssets();
+                        localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
+
+                        var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
+                        if (recipient == null) break;
+                        recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
+                        recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
+
+                        break;
+                    }
+                case BoardRequestType.Highlight:
+                    {
+                        if (board == null) break;
+                        if (!localClient.Aisling.GameMaster)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
+                            break;
+                        }
+
+                        ////you cant highlight mail messages
+                        if (board.IsMail) break;
+
+                        foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
+                        {
+                            if (ind.HighLighted)
+                            {
+                                ind.HighLighted = false;
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
+                            }
+                            else
+                            {
+                                ind.HighLighted = true;
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
+                            }
+                        }
+
+                        localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
+
+                        break;
+                    }
             }
 
             return default;
