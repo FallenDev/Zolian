@@ -826,6 +826,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (client?.Aisling?.Map == null) return default;
         if (client.MapUpdating && client.Aisling.CurrentMapId != ServerSetup.Instance.Config.TransitionZone) return default;
+        return ExecuteHandler(client, InnerOnMapDataRequest);
 
         static ValueTask InnerOnMapDataRequest(IWorldClient localClient)
         {
@@ -841,8 +842,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnMapDataRequest);
     }
 
     /// <summary>
@@ -878,6 +877,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<ClientWalkArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnClientWalk);
 
         static ValueTask InnerOnClientWalk(IWorldClient localClient, ClientWalkArgs localArgs)
         {
@@ -922,8 +922,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnClientWalk);
     }
 
     /// <summary>
@@ -945,6 +943,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<PickupArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnPickup);
 
         ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
@@ -1041,8 +1040,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnPickup);
     }
 
     /// <summary>
@@ -1065,6 +1062,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<ItemDropArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnItemDropped);
 
         static ValueTask InnerOnItemDropped(IWorldClient localClient, ItemDropArgs localArgs)
         {
@@ -1202,8 +1200,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnItemDropped);
     }
 
     /// <summary>
@@ -1212,6 +1208,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnExitRequest(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<ExitRequestArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnExitRequest);
 
         ValueTask InnerOnExitRequest(IWorldClient localClient, ExitRequestArgs localArgs)
         {
@@ -1226,9 +1223,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
                 var redirect = new Redirect(
-                EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                    EphemeralRandomIdGenerator<uint>.Shared.NextId,
+                    new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
+                    ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
 
                 RedirectManager.Add(redirect);
                 localClient.SendRedirect(redirect);
@@ -1236,8 +1233,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnExitRequest);
     }
 
     /// <summary>
@@ -1246,7 +1241,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnDisplayEntityRequest(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<DisplayEntityRequestArgs>(in clientPacket);
-
         return ExecuteHandler(client, args, InnerOnDisplayEntityRequest);
 
         ValueTask InnerOnDisplayEntityRequest(IWorldClient localClient, DisplayEntityRequestArgs localArgs)
@@ -1269,8 +1263,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnIgnore(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client != null && !client.Aisling.LoggedIn) return default;
-
         var args = PacketSerializer.Deserialize<IgnoreArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnIgnore);
 
         static ValueTask InnerOnIgnore(IWorldClient localClient, IgnoreArgs localArgs)
         {
@@ -1298,8 +1292,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnIgnore);
     }
 
     /// <summary>
@@ -1312,7 +1304,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.IsSilenced) return default;
         var args = PacketSerializer.Deserialize<PublicMessageArgs>(in clientPacket);
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastMessageSent).TotalSeconds < 0.30) return default;
+        return readyTime.Subtract(client.LastMessageSent).TotalSeconds < 0.30 ? default : ExecuteHandler(client, args, InnerOnPublicMessage);
 
         ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
         {
@@ -1320,19 +1312,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.LastMessageSent = readyTime;
             string response;
             IEnumerable<Aisling> audience;
-            bool ParseCommand()
-            {
-                if (!localClient.Aisling.GameMaster) return false;
-
-                //if (message.StartsWith("/group ") || message.StartsWith("/party "))
-                //{
-                //    Commander.ParseChatMessage(localClient.Aisling.Client, message);
-                //    return true;
-                //}
-                if (!message.StartsWith("/")) return false;
-                Commander.ParseChatMessage(localClient.Aisling.Client, message);
-                return true;
-            }
 
             if (ParseCommand()) return default;
 
@@ -1372,9 +1351,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, message);
 
             return default;
-        }
 
-        return ExecuteHandler(client, args, InnerOnPublicMessage);
+            bool ParseCommand()
+            {
+                if (!localClient.Aisling.GameMaster) return false;
+
+                //if (message.StartsWith("/group ") || message.StartsWith("/party "))
+                //{
+                //    Commander.ParseChatMessage(localClient.Aisling.Client, message);
+                //    return true;
+                //}
+                if (!message.StartsWith("/")) return false;
+                Commander.ParseChatMessage(localClient.Aisling.Client, message);
+                return true;
+            }
+        }
     }
 
     /// <summary>
@@ -1387,7 +1378,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.IsDead() || client.Aisling.Skulled) return default;
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastSpellCast).TotalSeconds < 0.25) return default;
+        return readyTime.Subtract(client.LastSpellCast).TotalSeconds < 0.25 ? default : ExecuteHandler(client, args, InnerOnUseSpell);
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
@@ -1470,7 +1461,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                                               | (targetIdSegment[2] << 8)
                                               | targetIdSegment[3]);
                         var targetPoint = new Position((targetPointSegment[0] << 8) | targetPointSegment[1],
-                                            (targetPointSegment[2] << 8) | targetPointSegment[3]);
+                            (targetPointSegment[2] << 8) | targetPointSegment[3]);
                         info.Position = targetPoint;
                         info.Target = targetId;
                     }
@@ -1488,8 +1479,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.Aisling.CastSpell(spell, info);
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnUseSpell);
     }
 
     /// <summary>
@@ -1498,6 +1487,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnClientRedirected(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnClientRedirected);
 
         ValueTask InnerOnClientRedirected(IWorldClient localClient, ClientRedirectedArgs localArgs)
         {
@@ -1527,8 +1517,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             existingAisling?.Client.Disconnect();
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnClientRedirected);
     }
 
     private static async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
@@ -1589,10 +1577,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 client.SendAttributes(StatUpdateType.Full);
                 client.LoggedIn(true);
 
-                if (client.Aisling.IsDead())
+                if (client.Aisling.Map != null && client.Aisling.IsDead())
                 {
                     client.AislingToGhostForm();
-                    client.Aisling.WarpToHell();
+                    if(!client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+                        client.Aisling.WarpToHell();
                 }
 
                 if (client.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
@@ -1625,7 +1614,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static void SetPriorToLoad(IWorldClient client)
     {
         var aisling = client.Aisling;
-
         aisling.SkillBook ??= new SkillBook();
         aisling.SpellBook ??= new SpellBook();
         aisling.Inventory ??= new Inventory();
@@ -1640,6 +1628,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnTurn(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<TurnArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnTurn);
 
         static ValueTask InnerOnTurn(IWorldClient localClient, TurnArgs localArgs)
         {
@@ -1655,8 +1644,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnTurn);
     }
 
     /// <summary>
@@ -1672,29 +1659,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             overburden = 2;
         if (readyTime.Subtract(client.LastAssail).TotalSeconds < 1 + overburden) return default;
         if (ServerSetup.Instance.Config.AssailsCancelSpells)
-        {
             client.SendCancelCasting();
-        }
 
-        if (client.Aisling.Skulled)
-        {
-            client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
-            return default;
-        }
+        if (!client.Aisling.Skulled)
+            return client.Aisling.CantAttack ? default : ExecuteHandler(client, InnerOnSpacebar);
 
-        if (client.Aisling.CantAttack)
-        {
-            return default;
-        }
+        client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
+        return default;
 
         static ValueTask InnerOnSpacebar(IWorldClient localClient)
         {
             AssailRoutine(localClient);
-
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnSpacebar);
     }
 
     private static void AssailRoutine(IWorldClient lpClient)
@@ -1755,7 +1732,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50) return default;
+        return readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50 ? default : ExecuteHandler(client, InnerOnWorldListRequest);
 
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
@@ -1764,8 +1741,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnWorldListRequest);
     }
 
     /// <summary>
@@ -1775,7 +1750,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var args = PacketSerializer.Deserialize<WhisperArgs>(in clientPacket);
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastWhisperMessageSent).TotalSeconds < 0.30) return default;
+        return readyTime.Subtract(client.LastWhisperMessageSent).TotalSeconds < 0.30 ? default : ExecuteHandler(client, args, InnerOnWhisper);
 
         ValueTask InnerOnWhisper(IWorldClient localClient, WhisperArgs localArgs)
         {
@@ -1852,8 +1827,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnWhisper);
     }
 
     /// <summary>
@@ -1862,8 +1835,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnUserOptionToggle(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client.Aisling.GameSettings == null) return default;
-
         var args = PacketSerializer.Deserialize<UserOptionToggleArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnUsrOptionToggle);
 
         static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, UserOptionToggleArgs localArgs)
         {
@@ -1879,8 +1852,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnUsrOptionToggle);
     }
 
     /// <summary>
@@ -1892,8 +1863,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastItemUsed).TotalSeconds < 0.33) return default;
-
         var args = PacketSerializer.Deserialize<ItemUseArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnUseItem);
 
         static ValueTask InnerOnUseItem(IWorldClient localClient, ItemUseArgs localArgs)
         {
@@ -1948,8 +1919,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnUseItem);
     }
 
     /// <summary>
@@ -1969,6 +1938,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<EmoteArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnEmote);
 
         ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
         {
@@ -1977,8 +1947,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnEmote);
     }
 
     /// <summary>
@@ -1998,6 +1966,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<GoldDropArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnGoldDropped);
 
         ValueTask InnerOnGoldDropped(IWorldClient localClient, GoldDropArgs localArgs)
         {
@@ -2023,8 +1992,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnGoldDropped);
     }
 
     /// <summary>
@@ -2038,6 +2005,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.CantAttack) return default;
 
         var args = PacketSerializer.Deserialize<ItemDroppedOnCreatureArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnItemDroppedOnCreature);
 
         ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
         {
@@ -2055,72 +2023,70 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (sprite)
                 {
                     case Monster monster:
-                        {
-                            var script = monster.Scripts.Values.First();
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                            script?.OnItemDropped(localClient.Aisling.Client, item);
-                            break;
-                        }
+                    {
+                        var script = monster.Scripts.Values.First();
+                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                        script?.OnItemDropped(localClient.Aisling.Client, item);
+                        break;
+                    }
                     case Mundane mundane:
-                        {
-                            var script = mundane.Scripts.Values.First();
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                            localClient.EntryCheck = mundane.Serial;
-                            mundane.Bypass = true;
-                            script?.OnItemDropped(localClient.Aisling.Client, item);
-                            break;
-                        }
+                    {
+                        var script = mundane.Scripts.Values.First();
+                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                        localClient.EntryCheck = mundane.Serial;
+                        mundane.Bypass = true;
+                        script?.OnItemDropped(localClient.Aisling.Client, item);
+                        break;
+                    }
                     case Aisling aisling:
+                    {
+                        if (sourceSlot == 0) return default;
+                        var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+
+                        if (item.DisplayName.StringContains("deum"))
                         {
-                            if (sourceSlot == 0) return default;
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            var script = item.Scripts.Values.First();
+                            localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
+                            localClient.Aisling.ThrewHealingPot = true;
+                            script?.OnUse(aisling, sourceSlot);
+                            localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
+                            return default;
+                        }
 
-                            if (item.DisplayName.StringContains("deum"))
-                            {
-                                var script = item.Scripts.Values.First();
-                                localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
-                                localClient.Aisling.ThrewHealingPot = true;
-                                script?.OnUse(aisling, sourceSlot);
-                                localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
-                                return default;
-                            }
+                        if (item.DisplayName == "Elixir of Life")
+                        {
+                            localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
+                            localClient.Aisling.ThrewHealingPot = true;
+                            localClient.Aisling.ReviveFromAfar(aisling);
+                            localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
+                            return default;
+                        }
 
-                            if (item.DisplayName == "Elixir of Life")
-                            {
-                                localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
-                                localClient.Aisling.ThrewHealingPot = true;
-                                localClient.Aisling.ReviveFromAfar(aisling);
-                                localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
-                                return default;
-                            }
+                        localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                        aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                        localClient.SendExchangeStart(aisling);
+                        aisling.Client.SendExchangeStart(localClient.Aisling);
 
-                            localClient.Aisling.Exchange = new ExchangeSession(aisling);
-                            aisling.Exchange = new ExchangeSession(localClient.Aisling);
-                            localClient.SendExchangeStart(aisling);
-                            aisling.Client.SendExchangeStart(localClient.Aisling);
-
-                            if (aisling.CurrentWeight + item.Template.CarryWeight < aisling.MaximumWeight)
-                            {
-                                localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                                localClient.Aisling.Exchange.Items.Add(item);
-                                localClient.Aisling.Exchange.Weight += item.Template.CarryWeight;
-                                localClient.Aisling.Client.SendExchangeAddItem(false, (byte)localClient.Aisling.Exchange.Items.Count, item);
-                                aisling.Client.SendExchangeAddItem(true, (byte)localClient.Aisling.Exchange.Items.Count, item);
-                                break;
-                            }
-
-                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
-                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
-
+                        if (aisling.CurrentWeight + item.Template.CarryWeight < aisling.MaximumWeight)
+                        {
+                            localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                            localClient.Aisling.Exchange.Items.Add(item);
+                            localClient.Aisling.Exchange.Weight += item.Template.CarryWeight;
+                            localClient.Aisling.Client.SendExchangeAddItem(false, (byte)localClient.Aisling.Exchange.Items.Count, item);
+                            aisling.Client.SendExchangeAddItem(true, (byte)localClient.Aisling.Exchange.Items.Count, item);
                             break;
                         }
+
+                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "They can't seem to lift that. The trade has been cancelled.");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "That item seems to be too heavy for you, trade has been cancelled.");
+
+                        break;
+                    }
                 }
             }
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnItemDroppedOnCreature);
     }
 
     /// <summary>
@@ -2134,6 +2100,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.CantAttack) return default;
 
         var args = PacketSerializer.Deserialize<GoldDroppedOnCreatureArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnGoldDroppedOnCreature);
 
         ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
         {
@@ -2152,57 +2119,55 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (sprite)
                 {
                     case Monster monster:
-                        {
-                            var script = monster.Scripts.Values.First();
-                            if (amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-                            break;
-                        }
+                    {
+                        var script = monster.Scripts.Values.First();
+                        if (amount <= 0) return default;
+                        script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                        break;
+                    }
                     case Mundane mundane:
-                        {
-                            var script = mundane.Scripts.Values.First();
-                            if (amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
-                            break;
-                        }
+                    {
+                        var script = mundane.Scripts.Values.First();
+                        if (amount <= 0) return default;
+                        script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                        break;
+                    }
                     case Aisling aisling:
+                    {
+                        localClient.Aisling.Exchange = new ExchangeSession(aisling);
+                        aisling.Exchange = new ExchangeSession(localClient.Aisling);
+                        localClient.SendExchangeStart(aisling);
+                        aisling.Client.SendExchangeStart(localClient.Aisling);
+
+                        if (amount > localClient.Aisling.GoldPoints)
                         {
-                            localClient.Aisling.Exchange = new ExchangeSession(aisling);
-                            aisling.Exchange = new ExchangeSession(localClient.Aisling);
-                            localClient.SendExchangeStart(aisling);
-                            aisling.Client.SendExchangeStart(localClient.Aisling);
-
-                            if (amount > localClient.Aisling.GoldPoints)
-                            {
-                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
-                                break;
-                            }
-
-                            if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
-                            {
-                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
-                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
-                                break;
-                            }
-
-                            if (amount > 0)
-                            {
-                                localClient.Aisling.GoldPoints -= (long)amount;
-                                localClient.Aisling.Exchange.Gold = (uint)amount;
-                                localClient.SendAttributes(StatUpdateType.ExpGold);
-                                localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
-                                aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
-                            }
-
+                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
                             break;
                         }
+
+                        if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
+                        {
+                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
+                            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
+                            break;
+                        }
+
+                        if (amount > 0)
+                        {
+                            localClient.Aisling.GoldPoints -= (long)amount;
+                            localClient.Aisling.Exchange.Gold = (uint)amount;
+                            localClient.SendAttributes(StatUpdateType.ExpGold);
+                            localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
+                            aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
+                        }
+
+                        break;
+                    }
                 }
             }
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnGoldDroppedOnCreature);
     }
 
     /// <summary>
@@ -2215,7 +2180,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.IsDead()) return default;
         if (client.Aisling.CantAttack) return default;
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastSelfProfileRequest).TotalSeconds < 1) return default;
+        return readyTime.Subtract(client.LastSelfProfileRequest).TotalSeconds < 1 ? default : ExecuteHandler(client, InnerOnProfileRequest);
 
         static ValueTask InnerOnProfileRequest(IWorldClient localClient)
         {
@@ -2223,8 +2188,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.SendSelfProfile();
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnProfileRequest);
     }
 
     /// <summary>
@@ -2236,6 +2199,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
 
         var args = PacketSerializer.Deserialize<GroupRequestArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnGroupRequest);
 
         ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupRequestArgs localArgs)
         {
@@ -2269,8 +2233,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnGroupRequest);
     }
 
     /// <summary>
@@ -2279,7 +2241,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnToggleGroup(IWorldClient client, in ClientPacket clientPacket)
     {
         if (client?.Aisling == null) return default;
-        if (!client.Aisling.LoggedIn) return default;
+        return !client.Aisling.LoggedIn ? default : ExecuteHandler(client, InnerOnToggleGroup);
 
         static ValueTask InnerOnToggleGroup(IWorldClient localClient)
         {
@@ -2311,8 +2273,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnToggleGroup);
     }
 
     /// <summary>
@@ -2334,6 +2294,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
 
         var args = PacketSerializer.Deserialize<SwapSlotArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnSwapSlot);
 
         static ValueTask InnerOnSwapSlot(IWorldClient localClient, SwapSlotArgs localArgs)
         {
@@ -2362,8 +2323,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnSwapSlot);
     }
 
     /// <summary>
@@ -2375,15 +2334,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        if (readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.25) return default;
+        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.25 ? default : ExecuteHandler(client, InnerOnRefreshRequest);
 
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {
             localClient.ClientRefreshed();
             return default;
         }
-
-        return ExecuteHandler(client, InnerOnRefreshRequest);
     }
 
     /// <summary>
@@ -2394,6 +2351,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnPursuitRequest);
 
         static ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
         {
@@ -2405,8 +2363,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnPursuitRequest);
     }
 
     /// <summary>
@@ -2417,6 +2373,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnDialogResponse);
 
         static ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
         {
@@ -2463,8 +2420,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnDialogResponse);
     }
 
     /// <summary>
@@ -2473,6 +2428,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<BoardRequestArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnBoardRequest);
 
         ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardRequestArgs localArgs)
         {
@@ -2485,187 +2441,185 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             switch (localArgs.BoardRequestType)
             {
                 case BoardRequestType.BoardList:
-                    {
-                        localClient.SendBoardList(personalBoards);
-                        break;
-                    }
+                {
+                    localClient.SendBoardList(personalBoards);
+                    break;
+                }
                 case BoardRequestType.ViewBoard:
+                {
+                    var boardId = (int?)localArgs.BoardId;
+
+                    if (boardId <= 2)
                     {
-                        var boardId = (int?)localArgs.BoardId;
-
-                        if (boardId <= 2)
+                        if (personalBoards == null)
                         {
-                            if (personalBoards == null)
-                            {
-                                localClient.CloseDialog();
-                                break;
-                            }
-
-                            localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
-
+                            localClient.CloseDialog();
                             break;
                         }
 
-                        if (board == null) break;
-                        localClient.SendBoard(board.Subject, localArgs.StartPostId);
+                        localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
+
                         break;
                     }
+
+                    if (board == null) break;
+                    localClient.SendBoard(board.Subject, localArgs.StartPostId);
+                    break;
+                }
                 case BoardRequestType.ViewPost:
+                {
+                    var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
+
+                    if (post == null)
                     {
-                        var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
+                        var postId = localArgs.PostId - 1;
+                        post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
+                    }
 
-                        if (post == null)
-                        {
-                            var postId = localArgs.PostId - 1;
-                            post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
-                        }
-
-                        if (post == null)
-                        {
-                            localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
-                            break;
-                        }
-
-                        var prevEnabled = post.PostId > 0;
-                        localClient.SendPost(post, board.IsMail, prevEnabled);
+                    if (post == null)
+                    {
+                        localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
                         break;
                     }
+
+                    var prevEnabled = post.PostId > 0;
+                    localClient.SendPost(post, board.IsMail, prevEnabled);
+                    break;
+                }
                 case BoardRequestType.NewPost:
+                {
+                    if (board == null) break;
+                    // Mail uses a different boardRequestType for sending mail
+                    if (board.IsMail) break;
+
+                    var np = new PostFormat(localArgs.BoardId ?? 0)
                     {
-                        if (board == null) break;
-                        // Mail uses a different boardRequestType for sending mail
-                        if (board.IsMail) break;
+                        DatePosted = readyTime,
+                        Message = localArgs.Message,
+                        Subject = localArgs.Subject,
+                        Read = false,
+                        Sender = client.Aisling.Username,
+                        PostId = (short)(board.Posts.Count + 1)
+                    };
 
-                        var np = new PostFormat(localArgs.BoardId ?? 0)
-                        {
-                            DatePosted = readyTime,
-                            Message = localArgs.Message,
-                            Subject = localArgs.Subject,
-                            Read = false,
-                            Sender = client.Aisling.Username,
-                            PostId = (short)(board.Posts.Count + 1)
-                        };
-
-                        board.Posts ??= new List<PostFormat>();
-                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-                        short startPostId = 1;
-                        foreach (var post in postsOrdered)
-                        {
-                            post.PostId = startPostId;
-                            startPostId++;
-                        }
-
-                        np.Associate(client.Aisling.Username);
-                        board.Posts.Add(np);
-                        ServerSetup.SaveCommunityAssets();
-                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
-
-                        break;
+                    board.Posts ??= new List<PostFormat>();
+                    var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                    short startPostId = 1;
+                    foreach (var post in postsOrdered)
+                    {
+                        post.PostId = startPostId;
+                        startPostId++;
                     }
+
+                    np.Associate(client.Aisling.Username);
+                    board.Posts.Add(np);
+                    ServerSetup.SaveCommunityAssets();
+                    localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
+
+                    break;
+                }
                 case BoardRequestType.Delete:
+                {
+                    if (board == null || board.Posts.Count <= 0) break;
+                    //var postId = localArgs.PostId - 1;
+                    //if (postId == null) break;
+
+                    try
                     {
-                        if (board == null || board.Posts.Count <= 0) break;
-                        //var postId = localArgs.PostId - 1;
-                        //if (postId == null) break;
-
-                        try
+                        if ((localArgs.BoardId == 0
+                                ? board.Posts[(short)localArgs.PostId].Recipient
+                                : board.Posts[(short)localArgs.PostId].Sender
+                            ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
                         {
-                            if ((localArgs.BoardId == 0
-                                    ? board.Posts[(short)localArgs.PostId].Recipient
-                                    : board.Posts[(short)localArgs.PostId].Sender
-                                ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
-                            {
-                                board.Posts.RemoveAt((short)localArgs.PostId);
-                                ServerSetup.SaveCommunityAssets();
-                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
-                                localClient.SendBoard(board.Subject, localArgs.StartPostId);
-                            }
-                            else
-                            {
-                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
-                            }
+                            board.Posts.RemoveAt((short)localArgs.PostId);
+                            ServerSetup.SaveCommunityAssets();
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
+                            localClient.SendBoard(board.Subject, localArgs.StartPostId);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            ServerSetup.Logger(ex.Message, LogLevel.Error);
-                            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                            Crashes.TrackError(ex);
-                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
                         }
-
-                        break;
                     }
+                    catch (Exception ex)
+                    {
+                        ServerSetup.Logger(ex.Message, LogLevel.Error);
+                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        Crashes.TrackError(ex);
+                        localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                    }
+
+                    break;
+                }
                 case BoardRequestType.SendMail:
+                {
+                    if (board == null) break;
+                    var np = new PostFormat(localArgs.BoardId ?? 0)
                     {
-                        if (board == null) break;
-                        var np = new PostFormat(localArgs.BoardId ?? 0)
-                        {
-                            DatePosted = readyTime,
-                            Message = localArgs.Message,
-                            Subject = localArgs.Subject,
-                            Read = false,
-                            Sender = client.Aisling.Username,
-                            Recipient = localArgs.To,
-                            PostId = (short)(board.Posts.Count + 1)
-                        };
+                        DatePosted = readyTime,
+                        Message = localArgs.Message,
+                        Subject = localArgs.Subject,
+                        Read = false,
+                        Sender = client.Aisling.Username,
+                        Recipient = localArgs.To,
+                        PostId = (short)(board.Posts.Count + 1)
+                    };
 
-                        board.Posts ??= new List<PostFormat>();
-                        var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-                        short startPostId = 1;
-                        foreach (var post in postsOrdered)
-                        {
-                            post.PostId = startPostId;
-                            startPostId++;
-                        }
-
-                        np.Associate(client.Aisling.Username);
-                        board.Posts.Add(np);
-                        ServerSetup.SaveCommunityAssets();
-                        localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
-
-                        var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
-                        if (recipient == null) break;
-                        recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
-                        recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
-
-                        break;
+                    board.Posts ??= new List<PostFormat>();
+                    var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
+                    short startPostId = 1;
+                    foreach (var post in postsOrdered)
+                    {
+                        post.PostId = startPostId;
+                        startPostId++;
                     }
+
+                    np.Associate(client.Aisling.Username);
+                    board.Posts.Add(np);
+                    ServerSetup.SaveCommunityAssets();
+                    localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
+
+                    var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
+                    if (recipient == null) break;
+                    recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
+                    recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
+
+                    break;
+                }
                 case BoardRequestType.Highlight:
+                {
+                    if (board == null) break;
+                    if (!localClient.Aisling.GameMaster)
                     {
-                        if (board == null) break;
-                        if (!localClient.Aisling.GameMaster)
-                        {
-                            localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
-                            break;
-                        }
-
-                        ////you cant highlight mail messages
-                        if (board.IsMail) break;
-
-                        foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
-                        {
-                            if (ind.HighLighted)
-                            {
-                                ind.HighLighted = false;
-                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
-                            }
-                            else
-                            {
-                                ind.HighLighted = true;
-                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
-                            }
-                        }
-
-                        localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
-
+                        localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
                         break;
                     }
+
+                    ////you cant highlight mail messages
+                    if (board.IsMail) break;
+
+                    foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
+                    {
+                        if (ind.HighLighted)
+                        {
+                            ind.HighLighted = false;
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
+                        }
+                        else
+                        {
+                            ind.HighLighted = true;
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
+                        }
+                    }
+
+                    localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
+
+                    break;
+                }
             }
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnBoardRequest);
     }
 
     /// <summary>
@@ -2681,7 +2635,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.SendLocation();
             return default;
         }
+
         var args = PacketSerializer.Deserialize<SkillUseArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnUseSkill);
 
         static ValueTask InnerOnUseSkill(IWorldClient localClient, SkillUseArgs localArgs)
         {
@@ -2708,8 +2664,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.SendCooldown(true, localArgs.SourceSlot, skill.CurrentCooldown);
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnUseSkill);
     }
 
     /// <summary>
@@ -2718,6 +2672,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnWorldMapClick(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<WorldMapClickArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnWorldMapClick);
 
         static ValueTask InnerOnWorldMapClick(IWorldClient localClient, WorldMapClickArgs localArgs)
         {
@@ -2745,8 +2700,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             localClient.Aisling.Client.PendingNode = null;
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnWorldMapClick);
     }
 
     /// <summary>
@@ -2756,6 +2709,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<ClickArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnClick);
 
         ValueTask InnerOnClick(IWorldClient localClient, ClickArgs localArgs)
         {
@@ -2820,8 +2774,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnClick);
     }
 
     /// <summary>
@@ -2831,6 +2783,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<UnequipArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnUnequip);
 
         static ValueTask InnerOnUnequip(IWorldClient localClient, UnequipArgs localArgs)
         {
@@ -2845,8 +2798,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnUnequip);
     }
 
     /// <summary>
@@ -2855,6 +2806,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public override ValueTask OnHeartBeatAsync(IWorldClient client, in ClientPacket clientPacket)
     {
         var args = PacketSerializer.Deserialize<HeartBeatArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnHeartBeat);
 
         static ValueTask InnerOnHeartBeat(IWorldClient localClient, HeartBeatArgs localArgs)
         {
@@ -2865,8 +2817,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnHeartBeat);
     }
 
     /// <summary>
@@ -2877,6 +2827,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var args = PacketSerializer.Deserialize<RaiseStatArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnRaiseStat);
 
         static ValueTask InnerOnRaiseStat(IWorldClient localClient, RaiseStatArgs localArgs)
         {
@@ -2952,8 +2903,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnRaiseStat);
     }
 
     /// <summary>
@@ -2965,6 +2914,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
         var args = PacketSerializer.Deserialize<ExchangeArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnExchange);
 
         ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
         {
@@ -3083,8 +3033,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnExchange);
     }
 
     /// <summary>
@@ -3096,6 +3044,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
         var args = PacketSerializer.Deserialize<BeginChantArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnBeginChant);
 
         static ValueTask InnerOnBeginChant(IWorldClient localClient, BeginChantArgs localArgs)
         {
@@ -3111,8 +3060,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             };
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnBeginChant);
     }
 
     /// <summary>
@@ -3124,14 +3071,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
         var args = PacketSerializer.Deserialize<DisplayChantArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnChant);
 
         static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
         {
             localClient.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, PublicMessageType.Chant, localArgs.ChantMessage));
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnChant);
     }
 
     /// <summary>
@@ -3142,6 +3088,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<ProfileArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnProfile);
 
         static ValueTask InnerOnProfile(IWorldClient localClient, ProfileArgs localArgs)
         {
@@ -3151,8 +3098,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnProfile);
     }
 
     /// <summary>
@@ -3163,6 +3108,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<SocialStatusArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnSocialStatus);
 
         static ValueTask InnerOnSocialStatus(IWorldClient localClient, SocialStatusArgs localArgs)
         {
@@ -3170,8 +3116,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnSocialStatus);
     }
 
     /// <summary>
@@ -3182,6 +3126,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
 
         ValueTask InnerOnMetaDataRequest(IWorldClient localClient, MetaDataRequestArgs localArgs)
         {
@@ -3208,8 +3153,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-
-        return ExecuteHandler(client, args, InnerOnMetaDataRequest);
     }
 
     private static string DecideOnSkillsToPull(IWorldClient client)
@@ -3514,6 +3457,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientOpCode.GoldDrop => true,
         ClientOpCode.ItemDroppedOnCreature => true,
         ClientOpCode.GoldDroppedOnCreature => true,
+        // Packet 66 (0x42) Unknown - SendProfile
+        ClientOpCode.Unknown => true,
         ClientOpCode.RequestProfile => true,
         ClientOpCode.GroupRequest => true,
         ClientOpCode.ToggleGroup => true,
