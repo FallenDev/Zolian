@@ -6,6 +6,7 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Darkages.GameScripts.Areas;
 
@@ -24,7 +25,7 @@ public class ShadowTowerOmega : AreaScript
         if (client.Aisling.Pos != vectorMap) return;
         ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob34", out var boss);
         var mobsOnMap = client.Aisling.MonstersOnMap();
-        if (mobsOnMap != null) return;
+        if (!mobsOnMap.IsNullOrEmpty()) return;
         var bossCreate = Monster.Create(boss, client.Aisling.Map);
         if (bossCreate == null) return;
         client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Omega Draconic, now online!"));
