@@ -1,6 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Networking.Entities.Server;
 
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
@@ -105,8 +106,16 @@ public class Gatling : SkillScript
             SourceId = sprite.Serial
         };
 
-        if (sprite.Target == null) return;
-        _target = sprite.Target;
+        var nearby = sprite.AislingsNearby();
+
+        foreach (var player in nearby)
+        {
+            if (player == null) continue;
+            var rand = Generator.RandNumGen100();
+            if (rand >= 60) continue;
+            _target = player;
+        }
+
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {

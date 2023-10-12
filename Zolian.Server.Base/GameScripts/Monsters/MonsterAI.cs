@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -896,7 +897,7 @@ public class WeakCommon : MonsterScript
             ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
-        
+
         CheckTarget();
 
         if (Monster.Aggressive)
@@ -1488,7 +1489,7 @@ public class SelfDestruct : MonsterScript
     #endregion
 
     #region Actions
-    
+
     private void Suicide()
     {
         if (Monster.CantAttack) return;
@@ -2079,7 +2080,7 @@ public class AlertSummon : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        
+
         if (Monster.Target is not { CurrentHp: > 1 })
         {
             if (Monster.Target is not Aisling aisling) return;
@@ -2095,7 +2096,7 @@ public class AlertSummon : MonsterScript
         foreach (var monster in monstersNearby)
         {
             if (monster.WithinRangeOf(Monster)) continue;
-            
+
             var readyTime = DateTime.UtcNow;
             monster.Pos = new Vector2(Monster.Pos.X, Monster.Pos.Y);
 
@@ -2375,7 +2376,6 @@ public class Turret : MonsterScript
             Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
 
         var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
         var cast = Monster.CastTimer.Update(elapsedTime);
 
         if (Monster.Target is Aisling aisling)
@@ -2395,18 +2395,8 @@ public class Turret : MonsterScript
 
                 return;
             }
-
-            if (Monster.BashEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (assail) Bash();
-            }
-
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            
+            if (assail) Bash();
 
             if (Monster.CastEnabled)
             {
@@ -2583,7 +2573,6 @@ public class Turret : MonsterScript
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
-                return;
             }
 
         if (Monster.Target is not { CurrentHp: > 1 })
@@ -2594,46 +2583,18 @@ public class Turret : MonsterScript
             return;
         }
 
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
+        var gatling = Monster.SkillScripts.First(i => i.Skill.CanUse() && i.Skill.Template.Name == "Gatling");
+        if (gatling.Skill == null) return;
 
-        Parallel.ForEach(assails, (s) =>
+        gatling.Skill.InUse = true;
+        gatling.OnUse(Monster);
         {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
-        if (Monster.Target is not { CurrentHp: > 1 })
-        {
-            if (Monster.Target is not Aisling aisling) return;
-            Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
-            return;
+            var readyTime = DateTime.UtcNow;
+            readyTime = readyTime.AddSeconds(gatling.Skill.Template.Cooldown);
+            readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
+            gatling.Skill.NextAvailableUse = readyTime;
         }
-
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        gatling.Skill.InUse = false;
     }
 
     private void CastSpell()
