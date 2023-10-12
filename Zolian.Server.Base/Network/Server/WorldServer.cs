@@ -3113,6 +3113,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
+    /// 0x66 - Unknown packet the client sends on login
+    /// </summary>
+    /// <returns></returns>
+    public ValueTask OnSixtySixRequest(IWorldClient client, in ClientPacket clientPacket)
+    {
+        if (client?.Aisling == null) return default;
+        if (!client.Aisling.LoggedIn) return default;
+        var packet = clientPacket;
+        client.SendForcedClientPacket(ref packet);
+        return default;
+    }
+
+    /// <summary>
     /// 0x79 - Player Social Status
     /// </summary>
     public ValueTask OnSocialStatus(IWorldClient client, in ClientPacket clientPacket)
@@ -3230,8 +3243,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
-        // Packet 66 (0x42) Unknown - SendProfile
-        ClientHandlers[(byte)ClientOpCode.Unknown] = OnProfile; // 0x42
+        // Packet 66 (0x42) Unknown
+        ClientHandlers[(byte)ClientOpCode.Unknown] = OnSixtySixRequest; // 0x42
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
         ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47
@@ -3469,7 +3482,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientOpCode.GoldDrop => true,
         ClientOpCode.ItemDroppedOnCreature => true,
         ClientOpCode.GoldDroppedOnCreature => true,
-        // Packet 66 (0x42) Unknown - SendProfile
+        // Packet 66 (0x42) Unknown
         ClientOpCode.Unknown => true,
         ClientOpCode.RequestProfile => true,
         ClientOpCode.GroupRequest => true,
