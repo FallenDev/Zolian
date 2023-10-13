@@ -406,6 +406,21 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     }
 
     /// <summary>
+    /// 0x0B - Exit Request
+    /// </summary>
+    public ValueTask OnExitRequest(ILoginClient client, in ClientPacket clientPacket)
+    {
+        return ExecuteHandler(client, InnerOnExitRequest);
+
+        ValueTask InnerOnExitRequest(ILoginClient localClient)
+        {
+            ClientRegistry.TryRemove(localClient.Id, out _);
+            ServerSetup.Logger($"{localClient.RemoteIp} disconnected from Login Server");
+            return default;
+        }
+    }
+
+    /// <summary>
     /// 0x2D - Request Player Profile & Load Character Meta Data (Skills/Spells)
     /// OnProfileRequest is handled in WorldServer and is disabled here, the client
     /// still requests it from the LoginServer and so it is handled and returned null
@@ -446,6 +461,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest;
         ClientHandlers[(byte)ClientOpCode.NoticeRequest] = OnNoticeRequest;
         ClientHandlers[(byte)ClientOpCode.PasswordChange] = OnPasswordChange;
+        ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
     }
 
     protected override async void OnConnection(IAsyncResult ar)
