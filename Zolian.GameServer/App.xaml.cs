@@ -36,11 +36,13 @@ namespace Zolian.GameServer;
 
 public partial class App
 {
-    public CancellationTokenSource ServerCtx { get; set; }
+    private CancellationTokenSource ServerCtx { get; set; }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += App_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += GlobalUnhandledException;
+
         base.OnStartup(e);
         ServerCtx = new CancellationTokenSource();
 
@@ -62,7 +64,7 @@ public partial class App
 #endif
 
         var providers = new LoggerProviderCollection();
-        const string logTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
+        const string logTemplate = "[{Timestamp:MMM-dd HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.File("_Zolian_General.txt", LogEventLevel.Verbose, logTemplate)
@@ -137,6 +139,18 @@ public partial class App
     {
         Crashes.TrackError(e.Exception);
         e.Handled = true;
+    }
+
+    private static void GlobalUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.IsTerminating)
+        {
+            Crashes.TrackError(e.ExceptionObject as Exception);
+        }
+        else
+        {
+            Analytics.TrackEvent($"{e.ExceptionObject}");
+        }
     }
 
     private static void SetCountryCode()

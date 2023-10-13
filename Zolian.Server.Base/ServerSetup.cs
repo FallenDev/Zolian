@@ -105,7 +105,10 @@ public class ServerSetup : IServerContext
     public void Start(IServerConstants config, ILogger<ServerSetup> logger)
     {
         Config = config;
-        _log = logger;
+        lock (LogLock)
+        {
+            _log = logger;
+        }
 
         Commander.CompileCommands();
 
