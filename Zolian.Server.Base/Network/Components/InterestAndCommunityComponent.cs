@@ -20,13 +20,13 @@ public class InterestAndCommunityComponent : WorldServerComponent
 
     private static void SaveCommunity()
     {
-        if (ServerSetup.Instance.Game == null || Server.Aislings == null) return;
+        if (ServerSetup.Instance.Game == null || !Server.Aislings.Any()) return;
         ServerSetup.SaveCommunityAssets();
     }
 
     private static void AccrueInterest()
     {
-        if (!ServerSetup.Instance.Running || Server.Aislings == null) return;
+        if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
 
         foreach (var aisling in Server.Aislings.Where(player => player is not null))
         {

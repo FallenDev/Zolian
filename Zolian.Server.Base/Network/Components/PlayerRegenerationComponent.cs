@@ -20,7 +20,7 @@ public class PlayerRegenerationComponent : WorldServerComponent
 
     private static void UpdatePlayerRegeneration()
     {
-        if (!ServerSetup.Instance.Running || Server.Aislings == null) return;
+        if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
         foreach (var player in Server.Aislings)
         {
             if (!player.LoggedIn) continue;

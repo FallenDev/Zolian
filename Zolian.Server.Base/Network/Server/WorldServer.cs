@@ -67,8 +67,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private const int SpriteSpeed = 50;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
-                                            .Select(c => c.Aisling)
-                                            .Where(player => player != null!);
+        .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
 
     public WorldServer(
         IClientRegistry<IWorldClient> clientRegistry,
@@ -646,8 +645,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             Parallel.ForEach(players, (player) =>
             {
+                if (player == null) return;
+
                 try
                 {
+                    if (!player.LoggedIn)
+                    {
+                        ClientRegistry.TryRemove(player.Client.Id, out _);
+                        return;
+                    }
+
                     switch (player.Client.IsWarping)
                     {
                         case false when !player.Client.MapOpen:
@@ -672,6 +679,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     ServerSetup.Logger(ex.Message, LogLevel.Error);
                     ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
                     Crashes.TrackError(ex);
+                    ClientRegistry.TryRemove(player.Client.Id, out _);
                     player.Client.Disconnect();
                 }
             });
