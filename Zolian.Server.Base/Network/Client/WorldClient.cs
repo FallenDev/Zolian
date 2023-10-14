@@ -49,7 +49,6 @@ namespace Darkages.Network.Client
     {
         public readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
-        public TimeSpan WorldClientElapsedTime;
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
         public readonly WorldServerTimer LanternCheckTimer = new(TimeSpan.FromSeconds(2));
         public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
@@ -207,7 +206,6 @@ namespace Darkages.Network.Client
         public void Update(TimeSpan elapsedTime)
         {
             if (Aisling is not { LoggedIn: true }) return;
-            WorldClientElapsedTime = elapsedTime;
 
             DoUpdate(elapsedTime);
 

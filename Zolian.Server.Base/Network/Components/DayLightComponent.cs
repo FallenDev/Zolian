@@ -1,13 +1,11 @@
 ﻿using Chaos.Common.Definitions;
 
-using Darkages.Common;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class DayLightComponent : WorldServerComponent
+public class DayLightComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(15.0f));
     private static readonly SortedDictionary<int, (byte start, byte end)> Routine = new()
     {
         {0, (0, 0)},
@@ -24,11 +22,9 @@ public class DayLightComponent : WorldServerComponent
         {11, (0, 0)}
     };
 
-    public DayLightComponent(WorldServer server) : base(server) { }
-
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateDayLight);
+        ZolianUpdateDelegate.Update(UpdateDayLight);
     }
 
     private static void UpdateDayLight()

@@ -1,18 +1,10 @@
-﻿using Darkages.Common;
-using Darkages.Network.Server;
+﻿using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class PingComponent : WorldServerComponent
+public class PingComponent(WorldServer server) : WorldServerComponent(server)
 {
-    public PingComponent(WorldServer server) : base(server)
-    {
-        Timer = new WorldServerTimer(TimeSpan.FromMilliseconds(7000));
-    }
-
-    private WorldServerTimer Timer { get; }
-
-    private void Ping()
+    private static void Ping()
     {
         foreach (var player in Server.Aislings)
         {
@@ -22,7 +14,6 @@ public class PingComponent : WorldServerComponent
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (Timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(Ping);
-        Timer.Delay = elapsedTime + TimeSpan.FromMilliseconds(7000);
+        ZolianUpdateDelegate.Update(Ping);
     }
 }

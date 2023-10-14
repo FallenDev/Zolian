@@ -7,18 +7,14 @@ using Darkages.Types;
 
 namespace Darkages.Network.Components;
 
-public class ObjectComponent : WorldServerComponent
+public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromMilliseconds(20));
-
-    public ObjectComponent(WorldServer server) : base(server) { }
-
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdateObjects);
+        ZolianUpdateDelegate.Update(UpdateObjects);
     }
 
-    private void UpdateObjects()
+    private static void UpdateObjects()
     {
         var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
@@ -88,8 +84,6 @@ public class ObjectComponent : WorldServerComponent
 
         foreach (var obj in objectsToAdd)
         {
-            //if (obj.Serial == self.Serial) continue;
-            //if (self.View.ContainsKey(obj.Serial)) continue;
             // If object is not an item or money, try to add it; If you cannot add it, continue
             if (obj is not Item or Money)
                 if (!self.View.TryAdd(obj.Serial, obj)) continue;

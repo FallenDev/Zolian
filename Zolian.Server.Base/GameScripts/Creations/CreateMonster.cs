@@ -15,36 +15,27 @@ using Microsoft.AppCenter.Crashes;
 namespace Darkages.GameScripts.Creations;
 
 [Script("Create Monster")]
-public class CreateMonster : MonsterCreateScript
+public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateScript
 {
-    private readonly Area _map;
-    private readonly MonsterTemplate _monsterTemplate;
-
-    public CreateMonster(MonsterTemplate template, Area map)
-    {
-        _map = map;
-        _monsterTemplate = template;
-    }
-
     public override Monster Create()
     {
-        if (_monsterTemplate.CastSpeed <= 6000) _monsterTemplate.CastSpeed = 6000;
-        if (_monsterTemplate.AttackSpeed <= 500) _monsterTemplate.AttackSpeed = 500;
-        if (_monsterTemplate.MovementSpeed <= 500) _monsterTemplate.MovementSpeed = 500;
-        if (_monsterTemplate.Level <= 1) _monsterTemplate.Level = 1;
+        if (template.CastSpeed <= 6000) template.CastSpeed = 6000;
+        if (template.AttackSpeed <= 500) template.AttackSpeed = 500;
+        if (template.MovementSpeed <= 500) template.MovementSpeed = 500;
+        if (template.Level <= 1) template.Level = 1;
 
         var obj = new Monster
         {
-            Template = _monsterTemplate,
-            BashTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.AttackSpeed)),
-            AbilityTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
-            CastTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.CastSpeed)),
-            WalkTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(_monsterTemplate.MovementSpeed)),
+            Template = template,
+            BashTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(template.AttackSpeed)),
+            AbilityTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(template.CastSpeed)),
+            CastTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(template.CastSpeed)),
+            WalkTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(template.MovementSpeed)),
             ObjectUpdateTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalBaseSkillDelay)),
             CastEnabled = true,
             Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
             Size = "",
-            CurrentMapId = _map.ID
+            CurrentMapId = map.ID
         };
 
         LoadSkillScript("Assail", obj);
@@ -111,9 +102,9 @@ public class CreateMonster : MonsterCreateScript
 
         obj.AbandonedDate = DateTime.UtcNow;
 
-        obj.Image = _monsterTemplate.ImageVarience > 0
-            ? (ushort)Random.Shared.Next(_monsterTemplate.Image, _monsterTemplate.Image + _monsterTemplate.ImageVarience)
-            : _monsterTemplate.Image;
+        obj.Image = template.ImageVarience > 0
+            ? (ushort)Random.Shared.Next(template.Image, template.Image + template.ImageVarience)
+            : template.Image;
 
         return obj;
     }
@@ -138,7 +129,7 @@ public class CreateMonster : MonsterCreateScript
 
     private void SetWalkEnabled(Monster obj)
     {
-        var pathQualifier = _monsterTemplate.PathQualifer;
+        var pathQualifier = template.PathQualifer;
 
         if ((pathQualifier & PathQualifer.Wander) == PathQualifer.Wander || (pathQualifier & PathQualifer.Patrol) == PathQualifer.Patrol)
         {
@@ -152,11 +143,11 @@ public class CreateMonster : MonsterCreateScript
 
     private void SetMood(Monster obj)
     {
-        if (_monsterTemplate.MoodType.MoodFlagIsSet(MoodQualifer.Aggressive) || _monsterTemplate.MoodType.MoodFlagIsSet(MoodQualifer.VeryAggressive))
+        if (template.MoodType.MoodFlagIsSet(MoodQualifer.Aggressive) || template.MoodType.MoodFlagIsSet(MoodQualifer.VeryAggressive))
         {
             obj.Aggressive = true;
         }
-        else if (_monsterTemplate.MoodType.MoodFlagIsSet(MoodQualifer.Unpredicable))
+        else if (template.MoodType.MoodFlagIsSet(MoodQualifer.Unpredicable))
         {
             var aggro = Generator.RandNumGen100() > 50;
             if (aggro) obj.Aggressive = true;
@@ -169,21 +160,21 @@ public class CreateMonster : MonsterCreateScript
 
     private void SetSpawn(Monster obj)
     {
-        switch (_monsterTemplate.SpawnType)
+        switch (template.SpawnType)
         {
             case SpawnQualifer.Random:
             {
-                var x = Generator.GenerateMapLocation(_map.Height);
-                var y = Generator.GenerateMapLocation(_map.Width);
+                var x = Generator.GenerateMapLocation(map.Height);
+                var y = Generator.GenerateMapLocation(map.Width);
                 obj.Pos = new Vector2(x, y);
                 break;
             }
             case SpawnQualifer.Event:
                 if (obj.Aggressive == false) return;
-                obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
+                obj.Pos = new Vector2(template.DefinedX, template.DefinedY);
                 break;
             default:
-                obj.Pos = new Vector2(_monsterTemplate.DefinedX, _monsterTemplate.DefinedY);
+                obj.Pos = new Vector2(template.DefinedX, template.DefinedY);
                 break;
         }
     }
@@ -224,7 +215,7 @@ public class CreateMonster : MonsterCreateScript
             // Dummy, Inanimate, LowerBeing, HigherBeing have no set action, so they are omitted here
         };
 
-        if (monsterRaceActions.TryGetValue(_monsterTemplate.MonsterRace, out var raceAction))
+        if (monsterRaceActions.TryGetValue(template.MonsterRace, out var raceAction))
         {
             raceAction(obj);
         }
@@ -239,16 +230,16 @@ public class CreateMonster : MonsterCreateScript
         MasterSpells(obj);
 
         // Load Abilities from Template to Monster
-        if (_monsterTemplate.SkillScripts != null)
-            foreach (var skillScriptStr in _monsterTemplate.SkillScripts.Where(skillScriptStr => !string.IsNullOrWhiteSpace(skillScriptStr)))
+        if (template.SkillScripts != null)
+            foreach (var skillScriptStr in template.SkillScripts.Where(skillScriptStr => !string.IsNullOrWhiteSpace(skillScriptStr)))
                 LoadSkillScript(skillScriptStr, obj);
 
-        if (_monsterTemplate.AbilityScripts != null)
-            foreach (var abilityScriptStr in _monsterTemplate.AbilityScripts.Where(abilityScriptStr => !string.IsNullOrWhiteSpace(abilityScriptStr)))
+        if (template.AbilityScripts != null)
+            foreach (var abilityScriptStr in template.AbilityScripts.Where(abilityScriptStr => !string.IsNullOrWhiteSpace(abilityScriptStr)))
                 LoadAbilityScript(abilityScriptStr, obj);
 
-        if (_monsterTemplate.SpellScripts == null) return;
-        foreach (var spellScriptStr in _monsterTemplate.SpellScripts.Where(spellScriptStr => !string.IsNullOrWhiteSpace(spellScriptStr)))
+        if (template.SpellScripts == null) return;
+        foreach (var spellScriptStr in template.SpellScripts.Where(spellScriptStr => !string.IsNullOrWhiteSpace(spellScriptStr)))
             LoadSpellScript(spellScriptStr, obj);
     }
 
@@ -1000,7 +991,7 @@ public class CreateMonster : MonsterCreateScript
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{_monsterTemplate.Name}: is missing a script for {skillScriptStr}\n");
+                Analytics.TrackEvent($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 
@@ -1025,7 +1016,7 @@ public class CreateMonster : MonsterCreateScript
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{_monsterTemplate.Name}: is missing a script for {spellScriptStr}\n");
+                Analytics.TrackEvent($"{template.Name}: is missing a script for {spellScriptStr}\n");
                 return;
             }
 
@@ -1051,7 +1042,7 @@ public class CreateMonster : MonsterCreateScript
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{_monsterTemplate.Name}: is missing a script for {skillScriptStr}\n");
+                Analytics.TrackEvent($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 

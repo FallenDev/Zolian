@@ -5,20 +5,13 @@ using SunCalcNet;
 
 namespace Darkages.Network.Components;
 
-public class MoonPhaseComponent : WorldServerComponent
+public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromHours(2.0f));
-    private double _dayStored;
-
-    public MoonPhaseComponent(WorldServer server) : base(server)
-    {
-        _dayStored = DateTime.Today.Day;
-    }
+    private double _dayStored = DateTime.Today.Day;
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime))
-            ZolianUpdateDelegate.Update(UpdateMoonPhase);
+        ZolianUpdateDelegate.Update(UpdateMoonPhase);
     }
 
     private void UpdateMoonPhase()
@@ -48,7 +41,7 @@ public class MoonPhaseComponent : WorldServerComponent
         }
     }
 
-    private void SetVampireNpc()
+    private static void SetVampireNpc()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
@@ -93,7 +86,7 @@ public class MoonPhaseComponent : WorldServerComponent
         }
     }
 
-    private void SetLycanNpc()
+    private static void SetLycanNpc()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
@@ -138,7 +131,7 @@ public class MoonPhaseComponent : WorldServerComponent
         }
     }
 
-    private void ClearNpcs()
+    private static void ClearNpcs()
     {
         var mundanes = ServerSetup.Instance.GlobalMundaneCache.ToConcurrentDictionary();
         foreach (var npc in mundanes.Values)

@@ -1,19 +1,11 @@
-﻿using Darkages.Common;
-using Darkages.Network.Server;
+﻿using Darkages.Network.Server;
 using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
-public class MundaneComponent : WorldServerComponent
+public class MundaneComponent(WorldServer server) : WorldServerComponent(server)
 {
-    public MundaneComponent(WorldServer server) : base(server)
-    {
-        Timer = new WorldServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MundaneRespawnInterval));
-    }
-
-    private WorldServerTimer Timer { get; }
-
-    private void SpawnMundanes()
+    private static void SpawnMundanes()
     {
         foreach (var mundane in from mundane in ServerSetup.Instance.GlobalMundaneTemplateCache
                                 where mundane.Value != null
@@ -34,6 +26,6 @@ public class MundaneComponent : WorldServerComponent
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (Timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(SpawnMundanes);
+        ZolianUpdateDelegate.Update(SpawnMundanes);
     }
 }

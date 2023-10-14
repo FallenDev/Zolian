@@ -1,21 +1,13 @@
-﻿using Darkages.Common;
-using Darkages.Database;
+﻿using Darkages.Database;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class PlayerSaveComponent : WorldServerComponent
+public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(1));
-
-    public PlayerSaveComponent(WorldServer server) : base(server) { }
-
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime))
-        {
-            ZolianUpdateDelegate.Update(UpdatePlayerSave);
-        }
+        ZolianUpdateDelegate.Update(UpdatePlayerSave);
     }
 
     private static async void UpdatePlayerSave()

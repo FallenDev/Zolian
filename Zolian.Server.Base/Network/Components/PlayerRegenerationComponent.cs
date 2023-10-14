@@ -1,5 +1,4 @@
 ﻿using Chaos.Common.Definitions;
-using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -7,15 +6,11 @@ using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
 
-public class PlayerRegenerationComponent : WorldServerComponent
+public class PlayerRegenerationComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer = new(TimeSpan.FromSeconds(1));
-
-    public PlayerRegenerationComponent(WorldServer server) : base(server) { }
-
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(UpdatePlayerRegeneration);
+        ZolianUpdateDelegate.Update(UpdatePlayerRegeneration);
     }
 
     private static void UpdatePlayerRegeneration()

@@ -1,24 +1,16 @@
 ﻿using Chaos.Common.Definitions;
-using Darkages.Common;
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
-public class MessageClearComponent : WorldServerComponent
+public class MessageClearComponent(WorldServer server) : WorldServerComponent(server)
 {
-    public MessageClearComponent(WorldServer server) : base(server)
-    {
-        Timer = new WorldServerTimer(TimeSpan.FromSeconds(ServerSetup.Instance.Config.MessageClearInterval));
-    }
-
-    private WorldServerTimer Timer { get; set; }
-
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (Timer.Update(elapsedTime)) ZolianUpdateDelegate.Update(Message);
+        ZolianUpdateDelegate.Update(Message);
     }
 
-    private void Message()
+    private static void Message()
     {
         foreach (var player in Server.Aislings)
         {

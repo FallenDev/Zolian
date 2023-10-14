@@ -10,16 +10,9 @@ using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
 
-public class MonolithComponent : WorldServerComponent
+public class MonolithComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private readonly WorldServerTimer _timer;
-
-    public MonolithComponent(WorldServer server) : base(server)
-    {
-        _timer = new WorldServerTimer(TimeSpan.FromMilliseconds(ServerSetup.Instance.Config.GlobalSpawnTimer));
-    }
-
-    private void CreateFromTemplate(MonsterTemplate template, Area map)
+    private static void CreateFromTemplate(MonsterTemplate template, Area map)
     {
         var newObj = Monster.Create(template, map);
 
@@ -30,14 +23,13 @@ public class MonolithComponent : WorldServerComponent
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        if (_timer.Update(elapsedTime))
-            ZolianUpdateDelegate.Update(ManageSpawns);
+        ZolianUpdateDelegate.Update(ManageSpawns);
     }
 
-    private void ManageSpawns()
+    private static void ManageSpawns()
     {
         var templates = ServerSetup.Instance.GlobalMonsterTemplateCache;
-        if (templates.Count == 0) return;
+        if (templates.IsEmpty) return;
 
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
@@ -59,7 +51,7 @@ public class MonolithComponent : WorldServerComponent
         }
     }
 
-    private void PlaceNode(Area map)
+    private static void PlaceNode(Area map)
     {
         if (map.Height < 25 || map.Width < 25) return;
 

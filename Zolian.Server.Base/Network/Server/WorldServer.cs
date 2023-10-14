@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -61,10 +62,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
-    private DateTime _gameSpeed;
-    private DateTime _spriteSpeed;
     private const int GameSpeed = 30;
-    private const int SpriteSpeed = 50;
+    private DateTime _spriteSpeed;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -106,7 +105,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             UpdateComponentsRoutine();
             UpdateObjectsRoutine();
             UpdateMapsRoutine();
-            NightlyServerReset();
+            UpdateClients();
+            //NightlyServerReset();
         }
         catch (Exception ex)
         {
@@ -126,7 +126,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             _serverComponents = new ConcurrentDictionary<Type, WorldServerComponent>
             {
                 [typeof(DayLightComponent)] = new DayLightComponent(this),
-                [typeof(InterestAndCommunityComponent)] = new InterestAndCommunityComponent(this),
+                [typeof(BankInterestComponent)] = new BankInterestComponent(this),
+                [typeof(CommunityComponent)] = new CommunityComponent(this),
                 [typeof(MessageClearComponent)] = new MessageClearComponent(this),
                 [typeof(MonolithComponent)] = new MonolithComponent(this),
                 [typeof(MundaneComponent)] = new MundaneComponent(this),
@@ -553,20 +554,115 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async void UpdateComponentsRoutine()
     {
-        _gameSpeed = DateTime.UtcNow;
+        var dayLightWatch = new Stopwatch();
+        dayLightWatch.Start();
+        var bankInterestWatch = new Stopwatch();
+        bankInterestWatch.Start();
+        var communityWatch = new Stopwatch();
+        communityWatch.Start();
+        var messageClearWatch = new Stopwatch();
+        messageClearWatch.Start();
+        var monolithWatch = new Stopwatch();
+        monolithWatch.Start();
+        var mundaneWatch = new Stopwatch();
+        mundaneWatch.Start();
+        var objectWatch = new Stopwatch();
+        objectWatch.Start();
+        var pingWatch = new Stopwatch();
+        pingWatch.Start();
+        var playerRegenWatch = new Stopwatch();
+        playerRegenWatch.Start();
+        var playerSaveWatch = new Stopwatch();
+        playerSaveWatch.Start();
+        var moonPhaseWatch = new Stopwatch();
+        moonPhaseWatch.Start();
+        var components = _serverComponents.Select(i => i.Value).ToList();
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _gameSpeed;
-            var components = _serverComponents.Select(i => i.Value);
+            var dayLightElapsed = dayLightWatch.Elapsed;
+            var bankInterestElapsed = bankInterestWatch.Elapsed;
+            var communityElapsed = communityWatch.Elapsed;
+            var messageClearElapsed = messageClearWatch.Elapsed;
+            var monolithElapsed = monolithWatch.Elapsed;
+            var mundaneElapsed = mundaneWatch.Elapsed;
+            var objectElapsed = objectWatch.Elapsed;
+            var pingElapsed = pingWatch.Elapsed;
+            var playerRegenElapsed = playerRegenWatch.Elapsed;
+            var playerSaveElapsed = playerSaveWatch.Elapsed;
+            var moonPhaseElapsed = moonPhaseWatch.Elapsed;
 
-            Parallel.ForEach(components, (component) =>
+            try
             {
-                component.Update(gameTime);
-            });
+                Parallel.ForEach(components, (component) =>
+                {
+                    switch (component)
+                    {
+                        case DayLightComponent dayLightComponent:
+                            if (dayLightElapsed.Seconds < 15) break;
+                            dayLightComponent.Update(dayLightElapsed);
+                            dayLightWatch.Restart();
+                            break;
+                        case BankInterestComponent bankInterestComponent:
+                            if (bankInterestElapsed.Minutes < 30) break;
+                            bankInterestComponent.Update(bankInterestElapsed);
+                            bankInterestWatch.Restart();
+                            break;
+                        case CommunityComponent communityComponent:
+                            if (communityElapsed.Seconds < 45) break;
+                            communityComponent.Update(communityElapsed);
+                            communityWatch.Restart();
+                            break;
+                        case MessageClearComponent messageClearComponent:
+                            if (messageClearElapsed.Seconds < 60) break;
+                            messageClearComponent.Update(messageClearElapsed);
+                            messageClearWatch.Restart();
+                            break;
+                        case MonolithComponent monolithComponent:
+                            if (monolithElapsed.Seconds < 3) break;
+                            monolithComponent.Update(monolithElapsed);
+                            monolithWatch.Restart();
+                            break;
+                        case MoonPhaseComponent moonPhaseComponent:
+                            if (moonPhaseElapsed.Hours < 2) break;
+                            moonPhaseComponent.Update(moonPhaseElapsed);
+                            moonPhaseWatch.Restart();
+                            break;
+                        case MundaneComponent mundaneComponent:
+                            if (mundaneElapsed.Seconds < 10) break;
+                            mundaneComponent.Update(mundaneElapsed);
+                            mundaneWatch.Restart();
+                            break;
+                        case ObjectComponent objectComponent:
+                            if (objectElapsed.Milliseconds < 35) break;
+                            objectComponent.Update(objectElapsed);
+                            objectWatch.Restart();
+                            break;
+                        case PingComponent pingComponent:
+                            if (pingElapsed.Seconds < 7) break;
+                            pingComponent.Update(pingElapsed);
+                            pingWatch.Restart();
+                            break;
+                        case PlayerRegenerationComponent playerRegenerationComponent:
+                            if (playerRegenElapsed.Seconds < 1) break;
+                            playerRegenerationComponent.Update(playerRegenElapsed);
+                            playerRegenWatch.Restart();
+                            break;
+                        case PlayerSaveComponent playerSaveComponent:
+                            if (playerSaveElapsed.Seconds < 1) break;
+                            playerSaveComponent.Update(playerSaveElapsed);
+                            playerSaveWatch.Restart();
+                            break;
+                    }
+                });
 
-            _gameSpeed += gameTime;
+            }
+            catch (Exception ex)
+            {
+                ServerSetup.Logger(ex.Message, LogLevel.Error);
+                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                Crashes.TrackError(ex);
+            }
 
             await Task.Delay(GameSpeed);
         }
@@ -574,51 +670,62 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async void UpdateObjectsRoutine()
     {
-        _spriteSpeed = DateTime.UtcNow;
+        var monstersWatch = new Stopwatch();
+        monstersWatch.Start();
+        var mundanesWatch = new Stopwatch();
+        mundanesWatch.Start();
+
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _spriteSpeed;
+            var monstersElapsed = monstersWatch.Elapsed;
+            var mundanesElapsed = mundanesWatch.Elapsed;
 
             try
             {
-                UpdateClients(gameTime);
                 UpdateGroundItems();
-                UpdateMonsters(gameTime);
-                UpdateMundanes(gameTime);
+                if (monstersElapsed.Seconds > 1)
+                {
+                    UpdateMonsters(monstersElapsed);
+                    monstersWatch.Restart();
+                }
+                if (mundanesElapsed.Seconds > 10)
+                {
+                    UpdateMundanes(mundanesElapsed);
+                    mundanesWatch.Restart();
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                ServerSetup.Logger(ex.Message, LogLevel.Error);
+                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                Crashes.TrackError(ex);
             }
 
-            _spriteSpeed += gameTime;
-
-            await Task.Delay(SpriteSpeed);
+            await Task.Delay(GameSpeed);
         }
     }
 
     private async void UpdateMapsRoutine()
     {
-        _gameSpeed = DateTime.UtcNow;
+        var watch = new Stopwatch();
+        watch.Start();
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _gameSpeed;
+            var currentElapsed = watch.Elapsed;
 
             try
             {
-                UpdateMaps(gameTime);
-                CheckTraps(gameTime);
+                UpdateMaps(currentElapsed);
+                CheckTraps(currentElapsed);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                ServerSetup.Logger(ex.Message, LogLevel.Error);
+                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                Crashes.TrackError(ex);
             }
-
-            _gameSpeed += gameTime;
 
             await Task.Delay(GameSpeed);
         }
@@ -637,58 +744,68 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateClients(TimeSpan elapsedTime)
+    private async void UpdateClients()
     {
-        var players = Aislings.Where(p => p is { Client: not null });
+        _spriteSpeed = DateTime.UtcNow;
 
-        try
+        while (ServerSetup.Instance.Running)
         {
-            Parallel.ForEach(players, (player) =>
+            var players = Aislings.Where(p => p is { Client: not null }).ToList();
+            var gTimeConvert = DateTime.UtcNow;
+            var gameTime = gTimeConvert - _spriteSpeed;
+
+            try
             {
-                if (player == null) return;
-
-                try
+                Parallel.ForEach(players, (player) =>
                 {
-                    if (!player.LoggedIn)
+                    if (player == null) return;
+
+                    try
                     {
+                        if (!player.LoggedIn)
+                        {
+                            ClientRegistry.TryRemove(player.Client.Id, out _);
+                            return;
+                        }
+
+                        switch (player.Client.IsWarping)
+                        {
+                            case false when !player.Client.MapOpen:
+                                player.Client.Update(gameTime);
+                                break;
+                            case true:
+                                break;
+                        }
+
+                        // If no longer invisible, remove invisible buffs
+                        if (player.IsInvisible) return;
+                        var buffs = player.Buffs.Values;
+
+                        foreach (var buff in buffs)
+                        {
+                            if (buff.Name is "Hide" or "Shadowfade")
+                                buff.OnEnded(player, buff);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ServerSetup.Logger(ex.Message, LogLevel.Error);
+                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        Crashes.TrackError(ex);
                         ClientRegistry.TryRemove(player.Client.Id, out _);
-                        return;
+                        player.Client.Disconnect();
                     }
+                });
+            }
+            catch (Exception ex)
+            {
+                ServerSetup.Logger(ex.Message, LogLevel.Error);
+                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                Crashes.TrackError(ex);
+            }
 
-                    switch (player.Client.IsWarping)
-                    {
-                        case false when !player.Client.MapOpen:
-                            player.Client.Update(elapsedTime);
-                            break;
-                        case true:
-                            break;
-                    }
-
-                    // If no longer invisible, remove invisible buffs
-                    if (player.IsInvisible) return;
-                    var buffs = player.Buffs.Values;
-
-                    foreach (var buff in buffs)
-                    {
-                        if (buff.Name is "Hide" or "Shadowfade")
-                            buff.OnEnded(player, buff);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ServerSetup.Logger(ex.Message, LogLevel.Error);
-                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                    Crashes.TrackError(ex);
-                    ClientRegistry.TryRemove(player.Client.Id, out _);
-                    player.Client.Disconnect();
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            _spriteSpeed += gameTime;
+            await Task.Delay(GameSpeed);
         }
     }
 
@@ -724,38 +841,47 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var traps = ServerSetup.Instance.Traps.Values;
         var updateList = ServerSetup.Instance.GlobalMonsterCache;
 
-        foreach (var (_, monster) in updateList)
+        try
         {
-            if (monster?.Scripts == null) continue;
-            if (monster.CurrentHp <= 0)
+            foreach (var (_, monster) in updateList)
             {
-                monster.Skulled = true;
-
-                if (monster.Target is Aisling aisling)
+                if (monster?.Scripts == null) continue;
+                if (monster.CurrentHp <= 0)
                 {
-                    monster.Scripts.Values.First().OnDeath(aisling.Client);
+                    monster.Skulled = true;
+
+                    if (monster.Target is Aisling aisling)
+                    {
+                        monster.Scripts.Values.First().OnDeath(aisling.Client);
+                    }
+                    else
+                    {
+                        monster.Scripts.Values.First().OnDeath();
+                    }
                 }
-                else
+
+                monster.Scripts.Values.First().Update(elapsedTime);
+
+                foreach (var trap in traps)
                 {
-                    monster.Scripts.Values.First().OnDeath();
+                    if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
+                        monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
+                        monster.Map != trap.TrapItem.Map) continue;
+
+                    var triggered = Trap.Activate(trap, monster);
+                    if (triggered) break;
                 }
+
+                monster.UpdateBuffs(elapsedTime);
+                monster.UpdateDebuffs(elapsedTime);
+                monster.LastUpdated = DateTime.UtcNow;
             }
-
-            monster.Scripts.Values.First().Update(elapsedTime);
-
-            foreach (var trap in traps)
-            {
-                if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                    monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
-                    monster.Map != trap.TrapItem.Map) continue;
-
-                var triggered = Trap.Activate(trap, monster);
-                if (triggered) break;
-            }
-
-            monster.UpdateBuffs(elapsedTime);
-            monster.UpdateDebuffs(elapsedTime);
-            monster.LastUpdated = DateTime.UtcNow;
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
         }
     }
 
