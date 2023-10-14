@@ -63,7 +63,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public readonly ObjectManager ObjectHandlers = new();
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
-    private DateTime _spriteSpeed;
+    private DateTime _gameSpeed;
+    private DateTime _mapSpeed;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -708,17 +709,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async void UpdateMapsRoutine()
     {
-        var watch = new Stopwatch();
-        watch.Start();
+        _mapSpeed = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
-            var currentElapsed = watch.Elapsed;
+            var gTimeConvert = DateTime.UtcNow;
+            var gameTime = gTimeConvert - _mapSpeed;
 
             try
             {
-                UpdateMaps(currentElapsed);
-                CheckTraps(currentElapsed);
+                UpdateMaps(gameTime);
+                CheckTraps(gameTime);
             }
             catch (Exception ex)
             {
@@ -727,6 +728,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
             }
 
+            _mapSpeed += gameTime;
             await Task.Delay(GameSpeed);
         }
     }
@@ -746,13 +748,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async void UpdateClients()
     {
-        _spriteSpeed = DateTime.UtcNow;
+        _gameSpeed = DateTime.UtcNow;
 
         while (ServerSetup.Instance.Running)
         {
             var players = Aislings.Where(p => p is { Client: not null }).ToList();
             var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _spriteSpeed;
+            var gameTime = gTimeConvert - _gameSpeed;
 
             try
             {
@@ -804,7 +806,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
             }
 
-            _spriteSpeed += gameTime;
+            _gameSpeed += gameTime;
             await Task.Delay(GameSpeed);
         }
     }
