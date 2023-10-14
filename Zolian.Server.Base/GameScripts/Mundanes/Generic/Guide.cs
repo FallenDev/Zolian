@@ -381,7 +381,7 @@ public class Guide : MundaneScript
                 client.SendServerMessage(ServerMessageType.NonScrollWindow,
                     "{=qMap#{=g: {=aThis correlates to your current .map file in your installation folder\n" +
                     "{=qHostiles Nearby{=g: {=aNumber of enemies nearby\n" +
-                    "{=qLatency{=g: {=aConnection speed/quality to the server, values above 250ms might cause unfavorable game play\n" +
+                    "{=qLatency{=g: {=aConnection speed/quality to the server, values above 150ms might cause unfavorable game play\n" +
                     "{=cBase Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your ungeared stats\n" +
                     "{=cGear Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are the stats granted by your equipped items\n" +
                     "{=cFull Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your geared stats (Base + Gear)\n\n" +

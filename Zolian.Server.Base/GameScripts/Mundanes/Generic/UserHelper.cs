@@ -79,8 +79,8 @@ public class UserHelper : MundaneScript
         var playerOffElement = ElementManager.ElementValue(client.Aisling.SecondaryOffensiveElement);
         var playerDefElement = ElementManager.ElementValue(client.Aisling.SecondaryDefensiveElement);
         var amplified = (client.Aisling.Amplified * 100).ToString(CultureInfo.CurrentCulture);
-        var latency = client.LastPingResponse - client.LastPing;
-        var latencyMs = $"{(uint)latency.TotalMilliseconds} ms";
+        var latency = client.Latency.Elapsed;
+        var latencyMs = $"{client.Latency.Elapsed.Milliseconds} ms";
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
         

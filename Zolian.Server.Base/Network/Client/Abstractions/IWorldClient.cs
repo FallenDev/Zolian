@@ -9,6 +9,7 @@ using Darkages.Meta;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
 using Darkages.Templates;
+using System.Diagnostics;
 
 namespace Darkages.Network.Client.Abstractions;
 
@@ -41,8 +42,7 @@ public interface IWorldClient : ISocketClient
     DateTime LastMessageSent { get; set; }
     DateTime LastMovement { get; set; }
     DateTime LastEquip { get; set; }
-    DateTime LastPing { get; set; }
-    DateTime LastPingResponse { get; set; }
+    Stopwatch Latency { get; set; }
     DateTime LastSave { get; set; }
     DateTime LastWhisperMessageSent { get; set; }
     PendingBuy PendingBuySessions { get; set; }
@@ -121,7 +121,6 @@ public interface IWorldClient : ISocketClient
     void LearnSpell(Mundane source, SpellTemplate subject, string message);
     void ClientRefreshed();
     void DaydreamingRoutine(TimeSpan elapsedTime);
-    void VariableLagDisconnector(int delay);
     WorldClient SystemMessage(string message);
     Task<bool> Save();
     void DeathStatusCheck();

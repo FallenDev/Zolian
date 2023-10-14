@@ -37,6 +37,7 @@ using Darkages.Object;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.GameScripts.Formulas;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Chaos.Common.Identity;
 using System.Globalization;
 using ServiceStack;
@@ -156,8 +157,7 @@ namespace Darkages.Network.Client
         public DateTime LastMessageSent { get; set; }
         public DateTime LastMovement { get; set; }
         public DateTime LastEquip { get; set; }
-        public DateTime LastPing { get; set; }
-        public DateTime LastPingResponse { get; set; }
+        public Stopwatch Latency { get; set; } = new();
         public DateTime LastSave { get; set; }
         public DateTime LastWhisperMessageSent { get; set; }
         public PendingBuy PendingBuySessions { get; set; }
@@ -580,8 +580,6 @@ namespace Darkages.Network.Client
             }
 
             SendHeartBeat(0x14, 0x20);
-            LastPing = DateTime.UtcNow;
-
             return null;
         }
 
@@ -2714,7 +2712,7 @@ namespace Darkages.Network.Client
                 Second = second
             };
 
-            LastPing = DateTime.UtcNow;
+            Latency.Restart();
             Send(args);
         }
 
@@ -3599,15 +3597,6 @@ namespace Darkages.Network.Client
             Aisling.Resting = Enums.RestPosition.RestPosition1;
             Aisling.Client.UpdateDisplay();
             Aisling.Client.SendDisplayAisling(Aisling);
-        }
-
-        public void VariableLagDisconnector(int delay)
-        {
-            var readyTime = DateTime.UtcNow;
-
-            if (!((readyTime - LastPingResponse).TotalSeconds > delay)) return;
-            Aisling?.Remove(true);
-            Disconnect();
         }
 
         public WorldClient SystemMessage(string message)

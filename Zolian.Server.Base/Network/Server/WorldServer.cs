@@ -1743,7 +1743,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var time = DateTime.UtcNow;
             ServerSetup.Logger($"{redirect.Name} logged in at: {time}");
-            client.LastPing = time;
         }
     }
 
@@ -2961,7 +2960,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var (first, second) = localArgs;
 
             if (first != 20 || second != 32) return default;
-            localClient.LastPingResponse = DateTime.UtcNow;
+            localClient.Latency.Stop();
 
             return default;
         }
