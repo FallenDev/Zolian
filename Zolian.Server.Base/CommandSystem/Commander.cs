@@ -98,8 +98,8 @@ public static class Commander
 
         foreach (var connected in players)
         {
-            await StorageManager.AislingBucket.QuickSave(connected);
-            await connected.Client.Save();
+            _ = StorageManager.AislingBucket.QuickSave(connected);
+            _ = connected.Client.Save();
             connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Restart-");
             connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
         }

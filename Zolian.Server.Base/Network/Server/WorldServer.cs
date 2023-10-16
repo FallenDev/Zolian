@@ -3435,7 +3435,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         client.BeginReceive();
     }
 
-    private async void OnDisconnect(object sender, EventArgs e)
+    private void OnDisconnect(object sender, EventArgs e)
     {
         var client = (IWorldClient)sender!;
         var aisling = client.Aisling;
@@ -3447,7 +3447,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
-            await StorageManager.AislingBucket.QuickSave(client.Aisling);
+            _ = StorageManager.AislingBucket.QuickSave(client.Aisling);
             ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
             return;
         }
@@ -3467,8 +3467,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.LoggedIn = false;
 
             // Save
-            await StorageManager.AislingBucket.QuickSave(client.Aisling);
-            await client.Save();
+            _ = StorageManager.AislingBucket.QuickSave(client.Aisling);
+            _ = client.Save();
 
             // Cleanup
             client.Aisling.Remove(true);
