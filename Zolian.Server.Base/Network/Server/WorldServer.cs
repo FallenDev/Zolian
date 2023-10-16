@@ -758,16 +758,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             try
             {
-                Parallel.ForEach(players, (player) =>
+                foreach(var player in players)
                 {
-                    if (player == null) return;
+                    if (player == null) continue;
 
                     try
                     {
                         if (!player.LoggedIn)
                         {
                             ClientRegistry.TryRemove(player.Client.Id, out _);
-                            return;
+                            continue;
                         }
 
                         switch (player.Client.IsWarping)
@@ -780,7 +780,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
 
                         // If no longer invisible, remove invisible buffs
-                        if (player.IsInvisible) return;
+                        if (player.IsInvisible) continue;
                         var buffs = player.Buffs.Values;
 
                         foreach (var buff in buffs)
@@ -797,7 +797,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         ClientRegistry.TryRemove(player.Client.Id, out _);
                         player.Client.Disconnect();
                     }
-                });
+                }
             }
             catch (Exception ex)
             {
@@ -841,11 +841,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         // Cache traps to reduce Select operation on each iteration
         var traps = ServerSetup.Instance.Traps.Values;
-        var updateList = ServerSetup.Instance.GlobalMonsterCache;
+        var updateList = ServerSetup.Instance.GlobalMonsterCache.Values;
 
         try
         {
-            foreach (var (_, monster) in updateList)
+            foreach (var monster in updateList)
             {
                 if (monster?.Scripts == null) continue;
                 if (monster.CurrentHp <= 0)
@@ -891,12 +891,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache, (mundane) =>
+            Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache.Values, (mundane) =>
             {
-                var (serial, npc) = mundane;
-                if (npc == null) return;
-                npc.Update(elapsedTime);
-                npc.LastUpdated = DateTime.UtcNow;
+                if (mundane == null) return;
+                mundane.Update(elapsedTime);
+                mundane.LastUpdated = DateTime.UtcNow;
             });
         }
         catch (Exception ex)
@@ -911,12 +910,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (!_trapTimer.Update(elapsedTime)) return;
 
-        lock (ServerSetup.Instance.Traps)
+        try
         {
-            Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) =>
-            {
-                trap?.Update();
-            });
+            Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) => { trap?.Update(); });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
         }
     }
 
@@ -924,11 +926,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache, (map) =>
-            {
-                var (serial, area) = map;
-                area?.Update(elapsedTime);
-            });
+            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, (map) => { map?.Update(elapsedTime); });
         }
         catch (Exception ex)
         {
