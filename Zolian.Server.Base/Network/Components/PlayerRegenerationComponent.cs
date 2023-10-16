@@ -1,7 +1,9 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
+
 using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
@@ -16,15 +18,17 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
     private static void UpdatePlayerRegeneration()
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
-        foreach (var player in Server.Aislings)
+
+        Parallel.ForEach(Server.Aislings, (player) =>
         {
-            if (!player.LoggedIn) continue;
-            if (player.RegenTimerDisabled) continue;
-            if (player.Poisoned) continue;
-            if (player.IsDead()) continue;
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+            if (player.RegenTimerDisabled) return;
+            if (player.Poisoned) return;
+            if (player.IsDead()) return;
 
             if (player.CurrentHp == player.MaximumHp &&
-                player.CurrentMp == player.MaximumMp) continue;
+                player.CurrentMp == player.MaximumMp) return;
 
             lock (player.Client.SyncClient)
             {
@@ -68,7 +72,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
                 if (performedRegen)
                     player.Client.SendAttributes(StatUpdateType.Vitality);
             }
-        }
+        });
     }
 
 
@@ -134,7 +138,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             <= 159 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.50,
             <= 169 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.60,
             <= 179 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.70,
-            <= 189 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.80, 
+            <= 189 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.80,
             <= 199 => Math.Abs(conMod + client.Aisling.ExpLevel) * 2.90,
             _ => Math.Abs(conMod + client.Aisling.ExpLevel) * 3.00
         };

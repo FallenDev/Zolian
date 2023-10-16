@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
+
 using Chaos.Common.Definitions;
+
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
@@ -15,25 +17,28 @@ public class BankInterestComponent(WorldServer server) : WorldServerComponent(se
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
 
-        foreach (var aisling in Server.Aislings.Where(player => player is not null))
+        Parallel.ForEach(Server.Aislings, (player) =>
         {
-            if (!aisling.LoggedIn) continue;
-            if (aisling.BankManager == null) continue;
-            if (aisling.BankedGold <= 0)
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+            if (player.BankManager == null) return;
+            if (player.BankedGold <= 0)
             {
-                aisling.BankedGold = 0;
-                continue;
+                player.BankedGold = 0;
+                return;
             }
 
-            var calc = Math.Round(aisling.BankedGold * 0.00777).ToString(CultureInfo.CurrentCulture);
-            var interest = (uint)Math.Round(aisling.BankedGold * 0.00777);
-            if (aisling.BankedGold + interest >= uint.MaxValue)
+            var calc = Math.Round(player.BankedGold * 0.00777).ToString(CultureInfo.CurrentCulture);
+            var interest = (uint)Math.Round(player.BankedGold * 0.00777);
+            if (player.BankedGold + interest >= uint.MaxValue)
             {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uKing Bruce wishes to see you. - No interest gained -");
-                continue;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    $"{{=uKing Bruce wishes to see you. - No interest gained -");
+                return;
             }
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {calc}");
-            aisling.BankedGold += interest;
-        }
+
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {calc}");
+            player.BankedGold += interest;
+        });
     }
 }

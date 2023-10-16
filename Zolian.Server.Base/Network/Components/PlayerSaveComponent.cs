@@ -10,18 +10,19 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
         ZolianUpdateDelegate.Update(UpdatePlayerSave);
     }
 
-    private static async void UpdatePlayerSave()
+    private static void UpdatePlayerSave()
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
-        foreach (var player in Server.Aislings)
+        var readyTime = DateTime.UtcNow;
+
+        Parallel.ForEach(Server.Aislings, (player) =>
         {
-            if (!player.LoggedIn) continue;
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+            _ = StorageManager.AislingBucket.QuickSave(player);
 
-            await StorageManager.AislingBucket.QuickSave(player);
-
-            var readyTime = DateTime.UtcNow;
             if ((readyTime - player.Client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate)
-                await player.Client.Save();
-        }
+                _ = player.Client.Save();
+        });
     }
 }

@@ -37,10 +37,12 @@ public class DayLightComponent(WorldServer server) : WorldServerComponent(server
         if (ServerSetup.Instance.LightLevel == start)
             ServerSetup.Instance.LightLevel = end;
 
-        foreach (var player in Server.Aislings)
+        Parallel.ForEach(Server.Aislings, (player) =>
         {
-            player?.Client.SendLightLevel((LightLevel)ServerSetup.Instance.LightLevel);
-        }
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+            player.Client.SendLightLevel((LightLevel)ServerSetup.Instance.LightLevel);
+        });
 
         ServerSetup.Instance.LightPhase++;
     }

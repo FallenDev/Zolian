@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
+using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
@@ -19,16 +20,16 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
 
-        foreach (var user in readyLoggedIn)
+        Parallel.ForEach(readyLoggedIn, (user) =>
         {
+            if (user?.Client == null) return;
+            if (!user.LoggedIn) return;
             UpdateClientObjects(user);
-
             var onMap = user.Map.IsLocationOnMap(user);
-
-            if (onMap) continue;
+            if (onMap) return;
             user.Client.TransitionToMap(136, new Position(5, 7));
             user.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Something grabs your hand...");
-        }
+        });
     }
 
     private static void UpdateClientObjects(Aisling user)
