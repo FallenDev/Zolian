@@ -551,8 +551,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    public static Task<bool> CheckIfItemExists(long itemSerial) => StorageManager.AislingBucket.CheckIfItemExists(itemSerial);
-
     private async void UpdateComponentsRoutine()
     {
         var dayLightWatch = new Stopwatch();
@@ -650,7 +648,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             playerRegenWatch.Restart();
                             break;
                         case PlayerSaveComponent playerSaveComponent:
-                            if (playerSaveElapsed.Seconds < 2) break;
+                            if (playerSaveElapsed.Seconds < 1) break;
                             playerSaveComponent.Update(playerSaveElapsed);
                             playerSaveWatch.Restart();
                             break;
@@ -817,6 +815,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
+            // Routine to check items that have been on the ground longer than 30 minutes
             foreach (var (serial, item) in items)
             {
                 if (item == null) continue;

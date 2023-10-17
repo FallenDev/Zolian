@@ -275,6 +275,16 @@ public abstract class DatabaseLoad
         }
 
         ServerSetup.Logger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count}");
+
+        try
+        {
+            ItemStorage.PlayerItemsDbToCache(conn);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
     }
 
     private static void Monsters(string conn)

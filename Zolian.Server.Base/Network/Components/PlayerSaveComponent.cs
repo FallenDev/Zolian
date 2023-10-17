@@ -21,7 +21,7 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
             if (!player.LoggedIn) continue;
             _ = StorageManager.AislingBucket.QuickSave(player);
 
-            if ((readyTime - player.Client.LastSave).TotalSeconds > 6)
+            if ((readyTime - player.Client.LastSave).TotalSeconds > 4)
                 _ = player.Client.Save();
         }
     }

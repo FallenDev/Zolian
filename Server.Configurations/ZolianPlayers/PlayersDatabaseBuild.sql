@@ -53,7 +53,7 @@ DROP PROCEDURE [dbo].[FoundMap]
 DROP PROCEDURE [dbo].[DeBuffSave]
 DROP PROCEDURE [dbo].[CheckIfPlayerHashExists]
 DROP PROCEDURE [dbo].[CheckIfPlayerExists]
-DROP PROCEDURE [dbo].[CheckIfItemExists]
+DROP PROCEDURE [dbo].[LoadItemsToCache]
 DROP PROCEDURE [dbo].[BuffSave]
 DROP PROCEDURE [dbo].[AddLegendMark]
 GO
@@ -344,19 +344,18 @@ BEGIN
 END
 GO
 
--- CheckIfItemExists
+-- LoadItemsToCache
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[CheckIfItemExists]
+CREATE PROCEDURE [dbo].[LoadItemsToCache]
 @ItemId BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
     SELECT *
-    FROM   ZolianPlayers.dbo.PlayersItems
-    WHERE  [ItemId] = @ItemId;
+    FROM   ZolianPlayers.dbo.PlayersItems;
 END
 GO
 

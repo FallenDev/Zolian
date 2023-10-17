@@ -623,31 +623,19 @@ namespace Darkages.Network.Client
         {
             try
             {
-                const string procedure = "[SelectEquipped]";
-                var values = new { Serial = (long)Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
+                var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Equip);
                 var aislingEquipped = Aisling.EquipmentManager.Equipment;
 
-                foreach (var item in itemList.Where(s => s is { Name: not null }))
+                foreach (var item in itemList.Where(s => s.Template is { Name: not null }))
                 {
-                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
-
-                    var equip = new Models.EquipmentSlot(item.Slot, item);
-                    var itemName = item.Name;
-                    var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
-                    {
-                        equip.Item.Template = template;
-                    }
-
+                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
                     var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
 
                     var newGear = new Item
                     {
                         ItemId = item.ItemId,
                         Template = item.Template,
-                        Owner = item.Serial,
+                        Owner = item.Owner,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -671,14 +659,6 @@ namespace Darkages.Network.Client
 
                     aislingEquipped[newGear.Slot] = new Models.EquipmentSlot(newGear.Slot, newGear);
                 }
-
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
             }
             catch (Exception e)
             {
@@ -697,23 +677,13 @@ namespace Darkages.Network.Client
         {
             try
             {
-                const string procedure = "[SelectInventory]";
-                var values = new { Serial = (long)Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.InventorySlot);
+                var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Inventory);
 
                 foreach (var item in itemList)
                 {
-                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
+                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
                     if (item.InventorySlot is <= 0 or >= 60)
                         item.InventorySlot = Aisling.Inventory.FindEmpty();
-
-                    var itemName = item.Name;
-                    var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
-                    {
-                        item.Template = template;
-                    }
 
                     if (Aisling.Inventory.Items[item.InventorySlot] != null)
                     {
@@ -744,7 +714,7 @@ namespace Darkages.Network.Client
                     {
                         ItemId = item.ItemId,
                         Template = item.Template,
-                        Owner = item.Serial,
+                        Owner = item.Owner,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -768,14 +738,6 @@ namespace Darkages.Network.Client
 
                     Aisling.Inventory.Items[newItem.InventorySlot] = newItem;
                 }
-
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
             }
             catch (Exception e)
             {
@@ -809,21 +771,11 @@ namespace Darkages.Network.Client
 
             try
             {
-                const string procedure = "[SelectBanked]";
-                var values = new { Serial = (long)Aisling.Serial };
-                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-                sConn.Open();
-                var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.Name);
+                var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Bank);
 
                 foreach (var item in itemList)
                 {
-                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
-
-                    var itemName = item.Name;
-                    var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
-                    {
-                        item.Template = template;
-                    }
+                    if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
 
                     var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
 
@@ -831,7 +783,7 @@ namespace Darkages.Network.Client
                     {
                         ItemId = item.ItemId,
                         Template = item.Template,
-                        Owner = item.Serial,
+                        Owner = item.Owner,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -855,14 +807,6 @@ namespace Darkages.Network.Client
 
                     Aisling.BankManager.Items[newItem.ItemId] = newItem;
                 }
-
-                sConn.Close();
-            }
-            catch (SqlException e)
-            {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
             }
             catch (Exception e)
             {

@@ -1,7 +1,14 @@
-﻿using Darkages.Enums;
+﻿using Dapper;
+
+using Darkages.Database;
+using Darkages.Enums;
+using Darkages.GameScripts.Formulas;
+using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
+
+using System.Data;
 
 using static Darkages.Enums.ElementManager;
 
@@ -421,6 +428,67 @@ public static class ItemStorage
 
             reader.Close();
             sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
+    }
+
+    public static void PlayerItemsDbToCache(string conn)
+    {
+        try
+        {
+            const string procedure = "[LoadItemsToCache]";
+            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            sConn.Open();
+            var itemList = sConn.Query<Item>(procedure, commandType: CommandType.StoredProcedure);
+
+            foreach (var item in itemList)
+            {
+                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
+
+                var itemName = item.Name;
+                var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
+                {
+                    item.Template = template;
+                }
+
+                var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
+
+                var newItem = new Item
+                {
+                    ItemId = item.ItemId,
+                    Template = item.Template,
+                    Name = itemName,
+                    Owner = item.Serial,
+                    ItemPane = item.ItemPane,
+                    Slot = item.Slot,
+                    InventorySlot = item.InventorySlot,
+                    Color = color,
+                    Durability = item.Durability,
+                    Identified = item.Identified,
+                    ItemVariance = item.ItemVariance,
+                    WeapVariance = item.WeapVariance,
+                    ItemQuality = item.ItemQuality,
+                    OriginalQuality = item.OriginalQuality,
+                    Stacks = item.Stacks,
+                    Enchantable = item.Template.Enchantable,
+                    Tarnished = item.Tarnished,
+                    Image = item.Template.Image,
+                    DisplayImage = item.Template.DisplayImage
+                };
+
+                ItemQualityVariance.SetMaxItemDurability(newItem, newItem.ItemQuality);
+                newItem.GetDisplayName();
+                newItem.NoColorGetDisplayName();
+
+                ServerSetup.Instance.GlobalSqlItemCache.TryAdd(newItem.ItemId, newItem);
+            }
+
+            sConn.Close();
+            ServerSetup.Logger($"Items Cached: {ServerSetup.Instance.GlobalSqlItemCache.Count}");
         }
         catch (SqlException e)
         {

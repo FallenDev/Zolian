@@ -253,10 +253,14 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         TileType = TileContent.Item;
     }
 
+    /// <summary>
+    /// Used to amend an ItemId if it exists during item creation
+    /// </summary>
+    /// <returns>ItemId</returns>
     private static long CheckAndAmendItemIdIfItExists(IItem item)
     {
-        var updateIfExists = WorldServer.CheckIfItemExists(item.ItemId);
-        return updateIfExists.Result ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
+        var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out _);
+        return updateIfExists ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
     }
 
     public Item Create(Sprite owner, string item, Quality quality, Variance variance, WeaponVariance wVariance, bool curse = false) => !ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var value) ? null : Create(owner, value, quality, variance, wVariance, curse);
