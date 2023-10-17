@@ -142,6 +142,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ServerSetup.Logger($"Lobby connection from {ip}");
 
         var client = _clientProvider.CreateClient(clientSocket);
+        client.OnDisconnected += OnDisconnect;
         var badActor = ClientOnBlackList(client);
 
         if (badActor)
@@ -157,8 +158,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        ServerSetup.Instance.GlobalLobbyConnection.TryAdd(client.RemoteIp, client.RemoteIp);
-        client.OnDisconnected += OnDisconnect;
+        //ServerSetup.Instance.GlobalLobbyConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
         // 0x7E - Handshake
         client.SendAcceptConnection();

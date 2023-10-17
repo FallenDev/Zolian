@@ -2232,17 +2232,15 @@ namespace Darkages.Network.Client
                         args.MetaDataCollection = new List<MetaDataInfo>();
                         var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
 
-                        Parallel.ForEach(metaFiles, (metaFile) =>
+                        foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
+                                 {
+                                     CheckSum = metaFile.Hash,
+                                     Data = metaFile.DeflatedData,
+                                     Name = metaFile.Name
+                                 }))
                         {
-                            var metafileInfo = new MetaDataInfo
-                            {
-                                CheckSum = metaFile.Hash,
-                                Data = metaFile.DeflatedData,
-                                Name = metaFile.Name
-                            };
-
                             args.MetaDataCollection.Add(metafileInfo);
-                        });
+                        }
 
                         break;
                     }

@@ -15,14 +15,14 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
         var readyTime = DateTime.UtcNow;
 
-        Parallel.ForEach(Server.Aislings, (player) =>
+        foreach (var player in Server.Aislings)
         {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
             _ = StorageManager.AislingBucket.QuickSave(player);
 
-            if ((readyTime - player.Client.LastSave).TotalSeconds > ServerSetup.Instance.Config.SaveRate)
+            if ((readyTime - player.Client.LastSave).TotalSeconds > 6)
                 _ = player.Client.Save();
-        });
+        }
     }
 }

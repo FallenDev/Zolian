@@ -89,7 +89,7 @@ public static class Commander
         );
     }
     
-    public static async void Restart(Argument[] args, object arg)
+    public static void Restart(Argument[] args, object arg)
     {
         var players = ServerSetup.Instance.Game.Aislings;
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);

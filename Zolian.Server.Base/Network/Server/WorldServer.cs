@@ -650,7 +650,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             playerRegenWatch.Restart();
                             break;
                         case PlayerSaveComponent playerSaveComponent:
-                            if (playerSaveElapsed.Seconds < 1) break;
+                            if (playerSaveElapsed.Seconds < 2) break;
                             playerSaveComponent.Update(playerSaveElapsed);
                             playerSaveWatch.Restart();
                             break;
@@ -3246,19 +3246,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x66 - Unknown packet the client sends on login
-    /// </summary>
-    /// <returns></returns>
-    public ValueTask OnSixtySixRequest(IWorldClient client, in ClientPacket clientPacket)
-    {
-        if (client?.Aisling == null) return default;
-        if (!client.Aisling.LoggedIn) return default;
-        var packet = clientPacket;
-        client.SendForcedClientPacket(ref packet);
-        return default;
-    }
-
-    /// <summary>
     /// 0x79 - Player Social Status
     /// </summary>
     public ValueTask OnSocialStatus(IWorldClient client, in ClientPacket clientPacket)
@@ -3376,8 +3363,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
-        // Packet 66 (0x42) Unknown
-        ClientHandlers[(byte)ClientOpCode.Unknown] = OnSixtySixRequest; // 0x42
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
         ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47
@@ -3416,24 +3401,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return;
         }
 
-        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
-        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
+        //var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+        //var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
 
-        if (!lobbyCheck || !loginCheck)
-        {
-            client.Disconnect();
-            ServerSetup.Logger("---------World-Server---------");
-            var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
-            ServerSetup.Logger(comment, LogLevel.Warning);
-            ReportEndpoint(client, comment);
-            return;
-        }
+        //if (!lobbyCheck || !loginCheck)
+        //{
+        //    client.Disconnect();
+        //    ServerSetup.Logger("---------World-Server---------");
+        //    var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
+        //    ServerSetup.Logger(comment, LogLevel.Warning);
+        //    ReportEndpoint(client, comment);
+        //    return;
+        //}
 
-        ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        //ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
     }
 
-    private void OnDisconnect(object sender, EventArgs e)
+    private async void OnDisconnect(object sender, EventArgs e)
     {
         var client = (IWorldClient)sender!;
         var aisling = client.Aisling;
@@ -3445,7 +3430,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
-            _ = StorageManager.AislingBucket.QuickSave(client.Aisling);
+            await StorageManager.AislingBucket.QuickSave(client.Aisling);
             ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
             return;
         }
@@ -3465,8 +3450,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.LoggedIn = false;
 
             // Save
-            _ = StorageManager.AislingBucket.QuickSave(client.Aisling);
-            _ = client.Save();
+            await StorageManager.AislingBucket.QuickSave(client.Aisling);
+            await client.Save();
 
             // Cleanup
             client.Aisling.Remove(true);
@@ -3615,8 +3600,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientOpCode.GoldDrop => true,
         ClientOpCode.ItemDroppedOnCreature => true,
         ClientOpCode.GoldDroppedOnCreature => true,
-        // Packet 66 (0x42) Unknown
-        ClientOpCode.Unknown => true,
         ClientOpCode.RequestProfile => true,
         ClientOpCode.GroupRequest => true,
         ClientOpCode.ToggleGroup => true,
