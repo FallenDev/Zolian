@@ -22,7 +22,7 @@ public interface IAislingStorage
     void SaveSpells(Aisling obj, SqlConnection connection);
     void SaveBuffs(Aisling aisling, SqlConnection connection);
     void SaveDebuffs(Aisling aisling, SqlConnection connection);
-    Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection);
+    bool SaveItemsForPlayer(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);

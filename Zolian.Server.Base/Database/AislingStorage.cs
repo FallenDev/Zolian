@@ -8,7 +8,6 @@ using Darkages.Sprites;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Darkages.Database;
 
@@ -19,27 +18,6 @@ public record AislingStorage : Sql, IAislingStorage
     private SemaphoreSlim SaveLock { get; } = new(1, 1);
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
     private SemaphoreSlim CreateLock { get; } = new(1, 1);
-    private Item itemA;
-    private Item itemB;
-
-    private sealed class ItemAItemBEqualityComparer : IEqualityComparer<AislingStorage>
-    {
-        public bool Equals(AislingStorage x, AislingStorage y)
-        {
-            if (ReferenceEquals(x, y)) return true;
-            if (ReferenceEquals(x, null)) return false;
-            if (ReferenceEquals(y, null)) return false;
-            if (x.GetType() != y.GetType()) return false;
-            return Equals(x.itemA, y.itemA) && Equals(x.itemB, y.itemB);
-        }
-
-        public int GetHashCode(AislingStorage obj)
-        {
-            return HashCode.Combine(obj.itemA, obj.itemB);
-        }
-    }
-
-    public static IEqualityComparer<AislingStorage> ItemAItemBComparer { get; } = new ItemAItemBEqualityComparer();
 
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
@@ -142,7 +120,7 @@ public record AislingStorage : Sql, IAislingStorage
             SaveSpells(obj, connection);
             SaveBuffs(obj, connection);
             SaveDebuffs(obj, connection);
-            var inventory = await SaveItemsForPlayer(obj, connection);
+            var inventory = SaveItemsForPlayer(obj, connection);
 
             #region Parameters
 
@@ -510,7 +488,7 @@ public record AislingStorage : Sql, IAislingStorage
         }
     }
 
-    public async Task<bool> SaveItemsForPlayer(Aisling obj, SqlConnection connection)
+    public bool SaveItemsForPlayer(Aisling obj, SqlConnection connection)
     {
         if (obj?.Inventory == null) return false;
         var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
@@ -519,13 +497,11 @@ public record AislingStorage : Sql, IAislingStorage
         
         try
         {
+            // ToDo: Create logic to check if an item actually needs to be updated to save on SQL calls
             foreach (var item in itemList.Where(i => i is not null))
             {
                 // Check cache for value
                 var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out var sqlItem);
-                // Check if values changed
-                var equal = ItemAItemBEqualityComparer.Equals(item, sqlItem);
-                if (equal) continue;
                 // Update or Insert
                 var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "ItemUpdate" : "ItemInsert", connection);
                 var pane = ItemEnumConverters.PaneToString(item.ItemPane);
@@ -552,7 +528,7 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
                 cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
                 cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
-                await cmd.ExecuteNonQueryAsync();
+                cmd.ExecuteNonQuery();
 
                 // Update or Add
                 if (updateIfExists)
