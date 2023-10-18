@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
+using System.Collections.Immutable;
 using System.Net;
 using System.Reflection;
 
@@ -31,8 +33,6 @@ public class ServerSetup : IServerContext
     private static ILogger<ServerSetup> _log;
     public static IOptions<ServerOptions> ServerOptions;
 
-    #region Properties
-
     public bool Running { get; set; }
     public IServerConstants Config { get; set; }
     public WorldServer Game { get; set; }
@@ -48,15 +48,23 @@ public class ServerSetup : IServerContext
     public IPAddress IpAddress { get; set; }
     public string InternalAddress { get; set; }
 
-    // Template
-    public ConcurrentDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
-    public ConcurrentDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
-    public ConcurrentDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
-    public ConcurrentDictionary<string, SpellTemplate> GlobalSpellTemplateCache { get; set; }
-    public ConcurrentDictionary<string, ItemTemplate> GlobalItemTemplateCache { get; set; }
-    public ConcurrentDictionary<string, NationTemplate> GlobalNationTemplateCache { get; set; }
-    public ConcurrentDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
-    public ConcurrentDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
+    // Templates
+    public FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
+    public Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; } = new();
+    public FrozenDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
+    public Dictionary<int, WarpTemplate> TempGlobalWarpTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
+    public Dictionary<string, SkillTemplate> TempGlobalSkillTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, SpellTemplate> GlobalSpellTemplateCache { get; set; }
+    public Dictionary<string, SpellTemplate> TempGlobalSpellTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, ItemTemplate> GlobalItemTemplateCache { get; set; }
+    public Dictionary<string, ItemTemplate> TempGlobalItemTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, NationTemplate> GlobalNationTemplateCache { get; set; }
+    public Dictionary<string, NationTemplate> TempGlobalNationTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
+    public Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; } = new();
+    public FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
+    public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = new();
 
     // Live
     public ConcurrentDictionary<int, Area> GlobalMapCache { get; set; } = new();
@@ -73,8 +81,6 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = new();
-
-    #endregion
 
     public ServerSetup(IOptions<ServerOptions> options)
     {
@@ -131,52 +137,24 @@ public class ServerSetup : IServerContext
         }
     }
 
-    public void LoadAndCacheStorage(bool contentOnly = false)
+    public void LoadAndCacheStorage()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-
-        lock (SyncLock)
-        {
-            EmptyCacheCollectors();
-            AreaStorage.Instance.CacheFromDatabase();
-            DatabaseLoad.CacheFromDatabase(new NationTemplate());
-            DatabaseLoad.CacheFromDatabase(new SkillTemplate());
-            DatabaseLoad.CacheFromDatabase(new SpellTemplate());
-            DatabaseLoad.CacheFromDatabase(new ItemTemplate());
-            DatabaseLoad.CacheFromDatabase(new MonsterTemplate());
-            DatabaseLoad.CacheFromDatabase(new MundaneTemplate());
-            DatabaseLoad.CacheFromDatabase(new WarpTemplate());
-            DatabaseLoad.CacheFromDatabase(new WorldMapTemplate());
-
-            CacheCommunityAssets();
-
-            if (contentOnly) return;
-
-            BindTemplates();
-            // ToDo: If decompiling templates, comment out LoadMetaDatabase();
-            //MetafileManager.DecompileTemplates();
-            LoadExtensions();
-        }
+        AreaStorage.Instance.CacheFromDatabase();
+        DatabaseLoad.CacheFromDatabase(new WorldMapTemplate());
+        DatabaseLoad.CacheFromDatabase(new WarpTemplate());
+        DatabaseLoad.CacheFromDatabase(new SkillTemplate());
+        DatabaseLoad.CacheFromDatabase(new SpellTemplate());
+        DatabaseLoad.CacheFromDatabase(new ItemTemplate());
+        DatabaseLoad.CacheFromDatabase(new NationTemplate());
+        DatabaseLoad.CacheFromDatabase(new MonsterTemplate());
+        DatabaseLoad.CacheFromDatabase(new MundaneTemplate());
+        CacheCommunityAssets();
+        BindTemplates();
+        // ToDo: If decompiling templates, comment out LoadMetaDatabase();
+        //MetafileManager.DecompileTemplates();
+        LoadExtensions();
     }
-
-    public void EmptyCacheCollectors()
-    {
-        GlobalMapCache = new ConcurrentDictionary<int, Area>();
-        GlobalItemTemplateCache = new ConcurrentDictionary<string, ItemTemplate>();
-        GlobalNationTemplateCache = new ConcurrentDictionary<string, NationTemplate>();
-        GlobalMonsterTemplateCache = new ConcurrentDictionary<string, MonsterTemplate>();
-        GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
-        GlobalMundaneTemplateCache = new ConcurrentDictionary<string, MundaneTemplate>();
-        GlobalSkillTemplateCache = new ConcurrentDictionary<string, SkillTemplate>();
-        GlobalSpellTemplateCache = new ConcurrentDictionary<string, SpellTemplate>();
-        GlobalWarpTemplateCache = new ConcurrentDictionary<int, WarpTemplate>();
-        GlobalWorldMapTemplateCache = new ConcurrentDictionary<int, WorldMapTemplate>();
-        GlobalBuffCache = new ConcurrentDictionary<string, Buff>();
-        GlobalDeBuffCache = new ConcurrentDictionary<string, Debuff>();
-        GlobalBoardCache = new ConcurrentDictionary<string, List<Board>>();
-    }
-
-    #region Template Building
 
     public void BindTemplates()
     {
@@ -185,8 +163,6 @@ public class ServerSetup : IServerContext
         foreach (var skill in GlobalSkillTemplateCache.Values)
             skill.Prerequisites?.AssociatedWith(skill);
     }
-
-    #endregion
 
     public void CacheCommunityAssets()
     {

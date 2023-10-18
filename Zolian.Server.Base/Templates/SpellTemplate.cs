@@ -185,7 +185,7 @@ public static class SpellStorage
                 temp.DamageMod = reader["DamageMod"].ToString();
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalSpellTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalSpellTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();

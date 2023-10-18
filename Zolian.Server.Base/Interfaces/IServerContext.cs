@@ -5,9 +5,11 @@ using Darkages.Types;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using Darkages.Network.Server;
 using System.Net;
 using Darkages.CommandSystem.CLI;
+using System.Collections.Frozen;
 
 namespace Darkages.Interfaces;
 
@@ -16,22 +18,29 @@ public interface IServerContext
     void InitFromConfig(string storagePath, string serverIp);
     void Start(IServerConstants config, ILogger<ServerSetup> logger);
     void Startup();
-    void LoadAndCacheStorage(bool contentOnly);
-    void EmptyCacheCollectors();
+    void LoadAndCacheStorage();
     void BindTemplates();
     void CacheCommunityAssets();
     void LoadExtensions();
     void CacheBuffs();
     void CacheDebuffs();
     void CommandHandler();
-    ConcurrentDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
-    ConcurrentDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
-    ConcurrentDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
-    ConcurrentDictionary<string, SpellTemplate> GlobalSpellTemplateCache { get; set; }
-    ConcurrentDictionary<string, ItemTemplate> GlobalItemTemplateCache { get; set; }
-    ConcurrentDictionary<string, NationTemplate> GlobalNationTemplateCache { get; set; }
-    ConcurrentDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
-    ConcurrentDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
+    FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
+    Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; }
+    FrozenDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
+    Dictionary<int, WarpTemplate> TempGlobalWarpTemplateCache { get; set; }
+    FrozenDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
+    Dictionary<string, SkillTemplate> TempGlobalSkillTemplateCache { get; set; }
+    FrozenDictionary<string, SpellTemplate> GlobalSpellTemplateCache { get; set; }
+    Dictionary<string, SpellTemplate> TempGlobalSpellTemplateCache { get; set; }
+    FrozenDictionary<string, ItemTemplate> GlobalItemTemplateCache { get; set; }
+    Dictionary<string, ItemTemplate> TempGlobalItemTemplateCache { get; set; }
+    FrozenDictionary<string, NationTemplate> GlobalNationTemplateCache { get; set; }
+    Dictionary<string, NationTemplate> TempGlobalNationTemplateCache { get; set; }
+    FrozenDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
+    Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; }
+    FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
+    Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; }
     ConcurrentDictionary<int, Area> GlobalMapCache { get; set; }
     ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; }
     ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; }

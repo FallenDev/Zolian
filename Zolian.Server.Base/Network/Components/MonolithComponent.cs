@@ -29,7 +29,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
     private static void ManageSpawns()
     {
         var templates = ServerSetup.Instance.GlobalMonsterTemplateCache;
-        if (templates.IsEmpty) return;
+        if (templates.Count == 0) return;
 
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {

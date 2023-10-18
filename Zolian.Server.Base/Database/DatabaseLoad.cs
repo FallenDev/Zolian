@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System.Collections.Frozen;
+using System.Collections.Immutable;
+using System.Numerics;
 
 using Darkages.Enums;
 using Darkages.Models;
@@ -15,30 +17,21 @@ namespace Darkages.Database;
 public abstract class DatabaseLoad
 {
     private const string ZolianConn = "Data Source=.;Initial Catalog=Zolian;Integrated Security=True;Encrypt=False";
-    private const string ZolianAbilitiesConn = "Data Source=.;Initial Catalog=ZolianAbilities;Integrated Security=True;Encrypt=False";
+    private const string ZolianWorldMapsConn = "Data Source=.;Initial Catalog=ZolianWorldMaps;Integrated Security=True;Encrypt=False";
     private const string ZolianMapsConn = "Data Source=.;Initial Catalog=ZolianMaps;Integrated Security=True;Encrypt=False";
+    private const string ZolianAbilitiesConn = "Data Source=.;Initial Catalog=ZolianAbilities;Integrated Security=True;Encrypt=False";
     private const string ZolianMonstersConn = "Data Source=.;Initial Catalog=ZolianMonsters;Integrated Security=True;Encrypt=False";
     private const string ZolianMundanesConn = "Data Source=.;Initial Catalog=ZolianMundanes;Integrated Security=True;Encrypt=False";
-    private const string ZolianWorldMapsConn = "Data Source=.;Initial Catalog=ZolianWorldMaps;Integrated Security=True;Encrypt=False";
 
     public static void CacheFromDatabase(Template temp)
     {
         switch (temp)
         {
-            case NationTemplate _:
-                Nations(ZolianMapsConn);
+            case WorldMapTemplate _:
+                WorldMaps(ZolianWorldMapsConn);
                 break;
             case WarpTemplate _:
                 Warps(ZolianMapsConn);
-                break;
-            case ItemTemplate _:
-                Items(ZolianConn);
-                break;
-            case MonsterTemplate _:
-                Monsters(ZolianMonstersConn);
-                break;
-            case MundaneTemplate _:
-                Mundanes(ZolianMundanesConn);
                 break;
             case SkillTemplate _:
                 Abilities(ZolianAbilitiesConn, 1);
@@ -46,8 +39,17 @@ public abstract class DatabaseLoad
             case SpellTemplate _:
                 Abilities(ZolianAbilitiesConn, 2);
                 break;
-            case WorldMapTemplate _:
-                WorldMaps(ZolianWorldMapsConn);
+            case ItemTemplate _:
+                Items(ZolianConn);
+                break;
+            case NationTemplate _:
+                Nations(ZolianMapsConn);
+                break;
+            case MonsterTemplate _:
+                Monsters(ZolianMonstersConn);
+                break;
+            case MundaneTemplate _:
+                Mundanes(ZolianMundanesConn);
                 break;
         }
     }
@@ -80,7 +82,7 @@ public abstract class DatabaseLoad
                     Name = reader["Name"].ToString()
                 };
 
-                ServerSetup.Instance.GlobalNationTemplateCache[temp.Name!] = temp;
+                ServerSetup.Instance.TempGlobalNationTemplateCache[temp.Name!] = temp;
             }
 
             reader.Close();
@@ -91,6 +93,8 @@ public abstract class DatabaseLoad
             ServerSetup.Logger(e.ToString());
         }
 
+        ServerSetup.Instance.GlobalNationTemplateCache = ServerSetup.Instance.TempGlobalNationTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalNationTemplateCache.Clear();
         ServerSetup.Logger($"Nation Templates: {ServerSetup.Instance.GlobalNationTemplateCache.Count}");
     }
 
@@ -107,7 +111,7 @@ public abstract class DatabaseLoad
             cmd.CommandTimeout = 5;
 
             var reader = cmd.ExecuteReader();
-                
+
             while (reader.Read())
             {
                 var activationsList = new List<Warp>();
@@ -225,7 +229,7 @@ public abstract class DatabaseLoad
 
                 temp.Activations = activationsList;
                 temp.To = to;
-                ServerSetup.Instance.GlobalWarpTemplateCache[id!] = temp;
+                ServerSetup.Instance.TempGlobalWarpTemplateCache[id!] = temp;
             }
 
             reader.Close();
@@ -236,6 +240,8 @@ public abstract class DatabaseLoad
             ServerSetup.Logger(e.ToString());
         }
 
+        ServerSetup.Instance.GlobalWarpTemplateCache = ServerSetup.Instance.TempGlobalWarpTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalWarpTemplateCache.Clear();
         ServerSetup.Logger($"Warp Templates: {ServerSetup.Instance.GlobalWarpTemplateCache.Count}");
     }
 
@@ -274,6 +280,8 @@ public abstract class DatabaseLoad
             Crashes.TrackError(e);
         }
 
+        ServerSetup.Instance.GlobalItemTemplateCache = ServerSetup.Instance.TempGlobalItemTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalItemTemplateCache.Clear();
         ServerSetup.Logger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count}");
 
         try
@@ -305,6 +313,8 @@ public abstract class DatabaseLoad
             Crashes.TrackError(e);
         }
 
+        ServerSetup.Instance.GlobalMonsterTemplateCache = ServerSetup.Instance.TempGlobalMonsterTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalMonsterTemplateCache.Clear();
         ServerSetup.Logger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count}");
     }
 
@@ -326,6 +336,8 @@ public abstract class DatabaseLoad
             Crashes.TrackError(e);
         }
 
+        ServerSetup.Instance.GlobalMundaneTemplateCache = ServerSetup.Instance.TempGlobalMundaneTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalMundaneTemplateCache.Clear();
         ServerSetup.Logger($"Mundane Templates: {ServerSetup.Instance.GlobalMundaneTemplateCache.Count}");
     }
 
@@ -336,11 +348,15 @@ public abstract class DatabaseLoad
             if (num == 1)
             {
                 SkillStorage.CacheFromDatabase(conn);
+                ServerSetup.Instance.GlobalSkillTemplateCache = ServerSetup.Instance.TempGlobalSkillTemplateCache.ToFrozenDictionary();
+                ServerSetup.Instance.TempGlobalSkillTemplateCache.Clear();
                 ServerSetup.Logger($"Skill Templates: {ServerSetup.Instance.GlobalSkillTemplateCache.Count}");
             }
             else
             {
                 SpellStorage.CacheFromDatabase(conn);
+                ServerSetup.Instance.GlobalSpellTemplateCache = ServerSetup.Instance.TempGlobalSpellTemplateCache.ToFrozenDictionary();
+                ServerSetup.Instance.TempGlobalSpellTemplateCache.Clear();
                 ServerSetup.Logger($"Spell Templates: {ServerSetup.Instance.GlobalSpellTemplateCache.Count}");
             }
         }
@@ -368,6 +384,8 @@ public abstract class DatabaseLoad
             Crashes.TrackError(e);
         }
 
+        ServerSetup.Instance.GlobalWorldMapTemplateCache = ServerSetup.Instance.TempGlobalWorldMapTemplateCache.ToFrozenDictionary();
+        ServerSetup.Instance.TempGlobalWorldMapTemplateCache.Clear();
         ServerSetup.Logger($"World Map Templates: {ServerSetup.Instance.GlobalWorldMapTemplateCache.Count}");
     }
 }

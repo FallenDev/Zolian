@@ -266,12 +266,14 @@ public static class Commander
 
         // Wipe
         ServerSetup.Instance.GlobalMapCache = new ConcurrentDictionary<int, Area>();
-        ServerSetup.Instance.GlobalWarpTemplateCache = new ConcurrentDictionary<int, WarpTemplate>();
+        ServerSetup.Instance.TempGlobalWarpTemplateCache = new();
+
         foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
         {
             ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
         }
         ServerSetup.Instance.GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
+        
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);

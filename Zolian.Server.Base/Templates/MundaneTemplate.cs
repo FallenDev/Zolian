@@ -199,7 +199,7 @@ public static class MundaneStorage
                     temp.DefaultMerchantStock.Add(stock30);
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalMundaneTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalMundaneTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();

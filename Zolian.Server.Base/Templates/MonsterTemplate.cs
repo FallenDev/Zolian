@@ -160,7 +160,7 @@ public static class MonsterStorage
                     temp.SpellScripts.Add(spell);
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalMonsterTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalMonsterTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();

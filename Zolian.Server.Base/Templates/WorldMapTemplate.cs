@@ -62,7 +62,7 @@ public static class WorldMapStorage
                 temp.Portals.Add(worldPortal);
             }
             
-            ServerSetup.Instance.GlobalWorldMapTemplateCache[temp.FieldNumber] = temp;
+            ServerSetup.Instance.TempGlobalWorldMapTemplateCache[temp.FieldNumber] = temp;
 
             reader.Close();
             sConn.Close();

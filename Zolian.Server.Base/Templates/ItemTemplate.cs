@@ -159,7 +159,7 @@ public static class ItemStorage
                 };
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalItemTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();
@@ -245,7 +245,7 @@ public static class ItemStorage
                 };
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalItemTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();
@@ -333,7 +333,7 @@ public static class ItemStorage
                 };
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalItemTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();
@@ -423,7 +423,7 @@ public static class ItemStorage
                 };
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalItemTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();

@@ -161,7 +161,7 @@ public static class SkillStorage
                 temp.DamageMod = reader["DamageMod"].ToString();
 
                 if (temp.Name == null) continue;
-                ServerSetup.Instance.GlobalSkillTemplateCache[temp.Name] = temp;
+                ServerSetup.Instance.TempGlobalSkillTemplateCache[temp.Name] = temp;
             }
 
             reader.Close();
