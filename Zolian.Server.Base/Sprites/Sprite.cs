@@ -114,8 +114,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public double Reflex => Math.Round(_reflex, 2);
     private double _will => Mr * 0.2;
     public double Will => Math.Round(_will, 2);
-    public byte Hit => (byte)(_Hit + BonusHit);
-    private byte Mr => (byte)(_Mr + BonusMr);
+    public int Hit => _Hit + BonusHit;
+    private int Mr => _Mr + BonusMr;
     public int Str => (_Str + BonusStr).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Int => (_Int + BonusInt).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Wis => (_Wis + BonusWis).IntClamp(0, ServerSetup.Instance.Config.StatCap);

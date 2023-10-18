@@ -1398,9 +1398,22 @@ namespace Darkages.Network.Client
         /// </summary>
         public void SendAttributes(StatUpdateType statUpdateType)
         {
+            byte levelCap;
+            byte abCap;
+
+            if (Aisling.ExpLevel > 255)
+                levelCap = 255;
+            else
+                levelCap = (byte)Aisling.ExpLevel;
+
+            if (Aisling.AbpLevel > 255)
+                abCap = 255;
+            else
+                abCap = (byte)Aisling.AbpLevel;
+
             var args = new AttributesArgs
             {
-                Ability = (byte)Aisling.AbpLevel,
+                Ability = abCap,
                 Ac = (sbyte)Math.Clamp(Aisling.SealedAc, sbyte.MinValue, sbyte.MaxValue),
                 Blind = Aisling.IsBlind,
                 Con = (byte)Math.Clamp(Aisling.Con, byte.MinValue, byte.MaxValue),
@@ -1409,14 +1422,14 @@ namespace Darkages.Network.Client
                 CurrentWeight = (short)Aisling.CurrentWeight,
                 DefenseElement = (Element)Aisling.DefenseElement,
                 Dex = (byte)Math.Clamp(Aisling.Dex, 0, 255),
-                Dmg = Math.Clamp((byte)Aisling.Dmg, byte.MinValue, byte.MaxValue),
+                Dmg = (byte)Math.Clamp((sbyte)Aisling.Dmg, sbyte.MinValue, sbyte.MaxValue),
                 GamePoints = (uint)Aisling.GamePoints,
                 Gold = (uint)Aisling.GoldPoints,
-                Hit = Math.Clamp(Aisling.Hit, byte.MinValue, byte.MaxValue),
+                Hit = (byte)Math.Clamp((sbyte)Aisling.Hit, sbyte.MinValue, sbyte.MaxValue),
                 Int = (byte)Math.Clamp(Aisling.Int, 0, 255),
                 IsAdmin = Aisling.GameMaster,
                 CanSwim = true,
-                Level = (byte)Aisling.ExpLevel,
+                Level = levelCap,
                 MagicResistance = (byte)(Aisling.Regen / 10),
                 HasUnreadMail = Aisling.MailFlags == (Mail.Letter),
                 MaximumHp = (uint)Aisling.MaximumHp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.MaximumHp,
