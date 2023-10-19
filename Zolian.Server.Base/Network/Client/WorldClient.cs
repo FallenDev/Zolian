@@ -206,13 +206,7 @@ namespace Darkages.Network.Client
         public void Update(TimeSpan elapsedTime)
         {
             if (Aisling is not { LoggedIn: true }) return;
-
             DoUpdate(elapsedTime);
-
-            // ToDo: Enable this once stable
-            // Lag disconnector and routine update for client
-            //if (!Aisling.GameMaster)
-            //VariableLagDisconnector(30);
         }
 
         #region Events
@@ -416,13 +410,11 @@ namespace Darkages.Network.Client
             }
         }
 
-        //ToDo; Fix Trading -- Handle Bad Trades
         public void HandleBadTrades()
         {
-            //if (Aisling.Exchange?.Trader2 == null) return;
-
-            //if (!Aisling.Exchange.Trader2.LoggedIn || !Aisling.WithinRangeOf(Aisling.Exchange.Trader2))
-            //    Aisling.Client.SendExchangeCancel(true);
+            if (Aisling.Exchange?.Trader == null) return;
+            if (Aisling.Exchange.Trader.LoggedIn && Aisling.WithinRangeOf(Aisling.Exchange.Trader)) return;
+            Aisling.CancelExchange();
         }
 
         public void DeathStatusCheck()

@@ -747,63 +747,62 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private async void UpdateClients()
     {
         _gameSpeed = DateTime.UtcNow;
+        var clientsToRemove = new ConcurrentBag<uint>();
 
         while (ServerSetup.Instance.Running)
         {
-            var players = Aislings.Where(p => p is { Client: not null }).ToList();
+            var players = Aislings.ToList();
             var gTimeConvert = DateTime.UtcNow;
             var gameTime = gTimeConvert - _gameSpeed;
 
-            try
+            Parallel.ForEach(players, player =>
             {
-                Parallel.ForEach(players, (player) =>
+                if (player?.Client == null) return;
+
+                try
                 {
-                    if (player == null) return;
-
-                    try
+                    if (!player.LoggedIn)
                     {
-                        if (!player.LoggedIn)
-                        {
-                            ClientRegistry.TryRemove(player.Client.Id, out _);
-                            return;
-                        }
-
-                        switch (player.Client.IsWarping)
-                        {
-                            case false when !player.Client.MapOpen:
-                                player.Client.Update(gameTime);
-                                break;
-                            case true:
-                                break;
-                        }
-
-                        // If no longer invisible, remove invisible buffs
-                        if (player.IsInvisible) return;
-                        var buffs = player.Buffs.Values;
-
-                        foreach (var buff in buffs)
-                        {
-                            if (buff.Name is "Hide" or "Shadowfade")
-                                buff.OnEnded(player, buff);
-                        }
+                        clientsToRemove.Add(player.Client.Id);
+                        return;
                     }
-                    catch (Exception ex)
+
+                    switch (player.Client.IsWarping)
                     {
-                        ServerSetup.Logger(ex.Message, LogLevel.Error);
-                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                        Crashes.TrackError(ex);
-                        ClientRegistry.TryRemove(player.Client.Id, out _);
-                        player.Client.Disconnect();
+                        case false when !player.Client.MapOpen:
+                            player.Client.Update(gameTime);
+                            break;
+                        case true:
+                            break;
                     }
-                });
-            }
-            catch (Exception ex)
+
+                    // If no longer invisible, remove invisible buffs
+                    if (player.IsInvisible) return;
+                    var buffs = player.Buffs.Values;
+
+                    foreach (var buff in buffs)
+                    {
+                        if (buff.Name is "Hide" or "Shadowfade")
+                            buff.OnEnded(player, buff);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ServerSetup.Logger(ex.Message, LogLevel.Error);
+                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    Crashes.TrackError(ex);
+
+                    clientsToRemove.Add(player.Client.Id);
+                    player.Client.Disconnect();
+                }
+            });
+
+            foreach (var clientId in clientsToRemove)
             {
-                ServerSetup.Logger(ex.Message, LogLevel.Error);
-                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                Crashes.TrackError(ex);
+                ClientRegistry.TryRemove(clientId, out _);
             }
 
+            clientsToRemove.Clear();
             _gameSpeed += gameTime;
             await Task.Delay(GameSpeed);
         }
