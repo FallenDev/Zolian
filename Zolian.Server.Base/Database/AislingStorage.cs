@@ -1,10 +1,14 @@
 ﻿using System.Data;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Dapper;
+
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Sprites;
+
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -205,7 +209,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@Flame", SqlDbType.TinyInt).Value = obj.Flame;
             cmd.Parameters.Add("@Dusk", SqlDbType.TinyInt).Value = obj.Dusk;
             cmd.Parameters.Add("@Dawn", SqlDbType.TinyInt).Value = obj.Dawn;
-            
+
             #endregion
 
             ExecuteAndCloseConnection(cmd, connection);
@@ -352,33 +356,35 @@ public record AislingStorage : Sql, IAislingStorage
     public void SaveSkills(Aisling obj, SqlConnection connection)
     {
         if (obj?.SkillBook == null) return;
+        var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
+        var dt = new DataTable();
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Level", typeof(int));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("Skill", typeof(string));
+        dt.Columns.Add("Uses", typeof(int));
+        dt.Columns.Add("Cooldown", typeof(int));
 
         try
         {
-            foreach (var skill in obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }))
+            foreach (var skill in skillList)
             {
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSkills", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
-                cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
-                cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
-                cmd.Parameters.Add("@Skill", SqlDbType.VarChar).Value = skill.SkillName;
-                cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = skill.Uses;
-                cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                cmd.ExecuteNonQuery();
-            }
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skills did not save. Contact GM (Code: Slash)");
-                Crashes.TrackError(e);
-                return;
+                dt.Rows.Add(
+                    (long)obj.Serial,
+                    skill.Level,
+                    skill.Slot,
+                    skill.SkillName,
+                    skill.Uses,
+                    skill.CurrentCooldown
+                    );
             }
 
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            using var cmd = new SqlCommand("PlayerSaveSkills", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Skills", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.SkillType";
+            cmd.ExecuteNonQuery();
         }
         catch (Exception e)
         {
@@ -391,33 +397,35 @@ public record AislingStorage : Sql, IAislingStorage
     public void SaveSpells(Aisling obj, SqlConnection connection)
     {
         if (obj?.SpellBook == null) return;
+        var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
+        var dt = new DataTable();
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Level", typeof(int));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("Spell", typeof(string));
+        dt.Columns.Add("Casts", typeof(int));
+        dt.Columns.Add("Cooldown", typeof(int));
 
         try
         {
-            foreach (var skill in obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }))
+            foreach (var spell in spellList)
             {
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSaveSpells", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
-                cmd.Parameters.Add("@Level", SqlDbType.Int).Value = skill.Level;
-                cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
-                cmd.Parameters.Add("@Spell", SqlDbType.VarChar).Value = skill.SpellName;
-                cmd.Parameters.Add("@Casts", SqlDbType.Int).Value = skill.Casts;
-                cmd.Parameters.Add("@Cooldown", SqlDbType.Int).Value = skill.CurrentCooldown;
-                cmd.ExecuteNonQuery();
-            }
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your spells did not save. Contact GM (Code: Blast)");
-                Crashes.TrackError(e);
-                return;
+                dt.Rows.Add(
+                    (long)obj.Serial,
+                    spell.Level,
+                    spell.Slot,
+                    spell.SpellName,
+                    spell.Casts,
+                    spell.CurrentCooldown
+                );
             }
 
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            using var cmd = new SqlCommand("PlayerSaveSpells", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Spells", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.SpellType";
+            cmd.ExecuteNonQuery();
         }
         catch (Exception e)
         {
@@ -509,7 +517,7 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("Stacks", typeof(int));
         dt.Columns.Add("Enchantable", typeof(bool));
         dt.Columns.Add("Tarnished", typeof(bool));
-        
+
         try
         {
             foreach (var item in itemList)
@@ -678,43 +686,6 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public async Task<bool> CheckIfItemExists(long itemSerial)
-    {
-        try
-        {
-            var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfItemExists", sConn);
-            cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemSerial;
-            var reader = await cmd.ExecuteReaderAsync();
-            var itemFound = false;
-
-            while (reader.Read())
-            {
-                var dbId = (long)reader["ItemId"];
-                if (itemSerial != dbId) continue;
-                itemFound = true;
-            }
-
-            reader.Close();
-            sConn.Close();
-            return itemFound;
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-
-        return false;
-    }
-
     public async Task Create(Aisling obj)
     {
         await CreateLock.WaitAsync().ConfigureAwait(false);
@@ -820,7 +791,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@SwampCount", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Lau", SqlDbType.Int).Value = 0;
-            
+
             #endregion
 
             ExecuteAndCloseConnection(cmd5, sConn);

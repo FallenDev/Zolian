@@ -58,6 +58,8 @@ DROP PROCEDURE [dbo].[ItemUpsert]
 GO
 
 DROP TYPE dbo.ItemType
+DROP TYPE dbo.SkillType
+DROP TYPE dbo.SpellType
 GO
 
 DROP TABLE PlayersItems;
@@ -331,6 +333,26 @@ CREATE TYPE dbo.ItemType AS TABLE
     Stacks INT,
     Enchantable BIT,
     Tarnished BIT
+);
+
+CREATE TYPE dbo.SkillType AS TABLE
+(
+    Serial BIGINT,
+    Level INT,
+    Slot INT,
+    Skill VARCHAR (30),
+    Uses INT,
+    Cooldown INT
+);
+
+CREATE TYPE dbo.SpellType AS TABLE
+(
+    Serial BIGINT,
+    Level INT,
+    Slot INT,
+    Spell VARCHAR (30),
+    Casts INT,
+    Cooldown INT
 );
 
 -- AddLegendMark
@@ -756,19 +778,21 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSaveSkills]
-@Serial BIGINT, @Level INT, @Slot INT, @Skill VARCHAR (30), @Uses INT, @Cooldown INT
+ALTER PROCEDURE [dbo].[PlayerSaveSkills]
+    @Skills dbo.SkillType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersSkillBook]
-    SET    [Level]           = @Level,
-           [Slot]            = @Slot,
-           [SkillName]       = @Skill,
-           [Uses]            = @Uses,
-           [CurrentCooldown] = @Cooldown
-    WHERE  Serial = @Serial
-           AND SkillName = @Skill;
+
+    UPDATE target
+    SET    target.[Level] = source.[Level],
+           target.[Slot] = source.[Slot],
+           target.[SkillName] = source.[Skill],
+           target.[Uses] = source.[Uses],
+           target.[CurrentCooldown] = source.[Cooldown]
+    FROM [ZolianPlayers].[dbo].[PlayersSkillBook] AS target
+    INNER JOIN @Skills AS source
+    ON target.Serial = source.Serial AND target.SkillName = source.Skill;
 END
 GO
 
@@ -777,19 +801,21 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSaveSpells]
-@Serial BIGINT, @Level INT, @Slot INT, @Spell VARCHAR (30), @Casts INT, @Cooldown INT
+ALTER PROCEDURE [dbo].[PlayerSaveSpells]
+    @Spells dbo.SpellType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersSpellBook]
-    SET    [Level]           = @Level,
-           [Slot]            = @Slot,
-           [SpellName]       = @Spell,
-           [Casts]           = @Casts,
-           [CurrentCooldown] = @Cooldown
-    WHERE  Serial = @Serial
-           AND SpellName = @Spell;
+
+    UPDATE target
+    SET    target.[Level] = source.[Level],
+           target.[Slot] = source.[Slot],
+           target.[SpellName] = source.[Spell],
+           target.[Casts] = source.[Casts],
+           target.[CurrentCooldown] = source.[Cooldown]
+    FROM [ZolianPlayers].[dbo].[PlayersSpellBook] AS target
+    INNER JOIN @Spells AS source
+    ON target.Serial = source.Serial AND target.SpellName = source.Spell;
 END
 GO
 
