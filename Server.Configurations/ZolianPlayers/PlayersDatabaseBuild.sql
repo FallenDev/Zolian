@@ -778,7 +778,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[PlayerSaveSkills]
+CREATE PROCEDURE [dbo].[PlayerSaveSkills]
     @Skills dbo.SkillType READONLY
 AS
 BEGIN
@@ -801,7 +801,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[PlayerSaveSpells]
+CREATE PROCEDURE [dbo].[PlayerSaveSpells]
     @Spells dbo.SpellType READONLY
 AS
 BEGIN

@@ -1,6 +1,5 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Common;
-using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;

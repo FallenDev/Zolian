@@ -15,6 +15,9 @@ public static class ItemEnumConverters
             Item.Quality.Epic => "Epic",
             Item.Quality.Legendary => "Legendary",
             Item.Quality.Forsaken => "Forsaken",
+            Item.Quality.Mythic => "Mythic",
+            Item.Quality.Primordial => "Primordial",
+            Item.Quality.Transcendent => "Transcendent",
             _ => "Common"
         };
     }

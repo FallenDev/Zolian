@@ -11,7 +11,6 @@ using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
-using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -42,7 +41,9 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         Epic,
         Legendary,
         Forsaken,
-        Mythic
+        Mythic,
+        Primordial,
+        Transcendent
     }
 
     public enum Variance
@@ -164,6 +165,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             Quality.Legendary => "{=sLegendary ",
             Quality.Forsaken => "{=bForsaken ",
             Quality.Mythic => "{=fMythic ",
+            Quality.Primordial => "{=dPrimordial ",
+            Quality.Transcendent => "{=oTranscendent ",
             _ => ""
         };
 
@@ -212,6 +215,8 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
             Quality.Legendary => "Legendary ",
             Quality.Forsaken => "Forsaken ",
             Quality.Mythic => "Mythic ",
+            Quality.Primordial => "Primordial ",
+            Quality.Transcendent => "Transcendent ",
             _ => ""
         };
 
@@ -510,7 +515,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
                 {
                     return item.ItemQuality = Quality.Forsaken;
                 }
-
                 break;
         }
 
