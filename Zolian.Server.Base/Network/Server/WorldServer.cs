@@ -683,7 +683,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 UpdateGroundItems();
-                if (monstersElapsed.Seconds > 1)
+                if (monstersElapsed.Milliseconds > 500)
                 {
                     UpdateMonsters(monstersElapsed);
                     monstersWatch.Restart();
@@ -756,16 +756,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             try
             {
-                foreach(var player in players)
+                Parallel.ForEach(players, (player) =>
                 {
-                    if (player == null) continue;
+                    if (player == null) return;
 
                     try
                     {
                         if (!player.LoggedIn)
                         {
                             ClientRegistry.TryRemove(player.Client.Id, out _);
-                            continue;
+                            return;
                         }
 
                         switch (player.Client.IsWarping)
@@ -778,7 +778,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
 
                         // If no longer invisible, remove invisible buffs
-                        if (player.IsInvisible) continue;
+                        if (player.IsInvisible) return;
                         var buffs = player.Buffs.Values;
 
                         foreach (var buff in buffs)
@@ -795,7 +795,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         ClientRegistry.TryRemove(player.Client.Id, out _);
                         player.Client.Disconnect();
                     }
-                }
+                });
             }
             catch (Exception ex)
             {
