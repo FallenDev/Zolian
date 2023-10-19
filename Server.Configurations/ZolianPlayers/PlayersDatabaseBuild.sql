@@ -43,8 +43,6 @@ DROP PROCEDURE [dbo].[PlayerQuickSave]
 DROP PROCEDURE [dbo].[PlayerQuestSave]
 DROP PROCEDURE [dbo].[PlayerCreation]
 DROP PROCEDURE [dbo].[PasswordSave]
-DROP PROCEDURE [dbo].[ItemUpdate]
-DROP PROCEDURE [dbo].[ItemInsert]
 DROP PROCEDURE [dbo].[InsertQuests]
 DROP PROCEDURE [dbo].[InsertDeBuff]
 DROP PROCEDURE [dbo].[InsertBuff]
@@ -56,6 +54,10 @@ DROP PROCEDURE [dbo].[CheckIfPlayerExists]
 DROP PROCEDURE [dbo].[LoadItemsToCache]
 DROP PROCEDURE [dbo].[BuffSave]
 DROP PROCEDURE [dbo].[AddLegendMark]
+DROP PROCEDURE [dbo].[ItemUpsert]
+GO
+
+DROP TYPE dbo.ItemType
 GO
 
 DROP TABLE PlayersItems;
@@ -310,6 +312,27 @@ CREATE TABLE PlayersIgnoreList
 	[PlayerIgnored] VARCHAR(12) NOT NULL,
 )
 
+CREATE TYPE dbo.ItemType AS TABLE  
+(  
+    ItemId BIGINT,
+    Name VARCHAR(45),
+    Serial BIGINT,
+    ItemPane VARCHAR(9),
+    Slot INT,
+    InventorySlot INT,
+    Color INT,
+    Cursed BIT,
+    Durability INT,
+    Identified BIT,
+    ItemVariance VARCHAR (15),
+    WeapVariance VARCHAR (15),
+    ItemQuality VARCHAR (10),
+    OriginalQuality VARCHAR (10),
+    Stacks INT,
+    Enchantable BIT,
+    Tarnished BIT
+);
+
 -- AddLegendMark
 SET ANSI_NULLS ON
 GO
@@ -476,56 +499,6 @@ BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau])
     VALUES                                            (@Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau);
-END
-GO
-
--- Item Create
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemInsert]
-@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @ItemPane VARCHAR(9), @Slot INT, @InventorySlot INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersItems] ([ItemId], [Name], [Serial], [ItemPane], [Slot], [InventorySlot], [Color], [Cursed], [Durability], [Identified], [ItemVariance], [WeapVariance], [ItemQuality], [OriginalQuality], [Stacks], [Enchantable], [Tarnished])
-    VALUES                                               (@ItemId, @Name, @Serial, @ItemPane, @Slot, @InventorySlot, @Color, @Cursed, @Durability, @Identified, @ItemVariance, @WeapVariance, @ItemQuality, @OriginalQuality, @Stacks, @Enchantable, @Tarnished);
-END
-GO
-
--- Item Update
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemUpdate]
-@ItemId BIGINT, @Name VARCHAR (45), @Serial BIGINT, @ItemPane VARCHAR(9), @Slot INT, @InventorySlot INT, @Color INT, @Cursed BIT, @Durability INT, @Identified BIT, @ItemVariance VARCHAR (15),
-@WeapVariance VARCHAR (15), @ItemQuality VARCHAR (10), @OriginalQuality VARCHAR (10), @Stacks INT, @Enchantable BIT, @Tarnished BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersItems]
-    SET    [ItemId]          = @ItemId,
-           [Name]            = @Name,
-           [Serial]          = @Serial,
-		   [ItemPane]		 = @ItemPane,
-		   [Slot]			 = @Slot,
-           [InventorySlot]   = @InventorySlot,
-           [Color]           = @Color,
-           [Cursed]          = @Cursed,
-           [Durability]      = @Durability,
-           [Identified]      = @Identified,
-           [ItemVariance]    = @ItemVariance,
-           [WeapVariance]    = @WeapVariance,
-           [ItemQuality]     = @ItemQuality,
-           [OriginalQuality] = @OriginalQuality,
-           [Stacks]          = @Stacks,
-           [Enchantable]     = @Enchantable,
-           [Tarnished]       = @Tarnished
-    WHERE  Serial = @Serial
-           AND ItemId = @ItemId;
 END
 GO
 
@@ -1194,3 +1167,42 @@ BEGIN
     VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
 END
 GO
+
+-- Item Upsert
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ItemUpsert]
+@Items dbo.ItemType READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    MERGE INTO [ZolianPlayers].[dbo].[PlayersItems] AS target
+    USING @Items AS source 
+	ON target.ItemId = source.ItemId
+
+    WHEN MATCHED THEN
+    UPDATE SET 
+        Name = source.Name,
+        Serial = source.Serial,
+        ItemPane = source.ItemPane,
+        Slot = source.Slot,
+        InventorySlot = source.InventorySlot,
+        Color = source.Color,
+        Cursed = source.Cursed,
+        Durability = source.Durability,
+        Identified = source.Identified,
+        ItemVariance = source.ItemVariance,
+        WeapVariance = source.WeapVariance,
+        ItemQuality = source.ItemQuality,
+        OriginalQuality = source.OriginalQuality,
+        Stacks = source.Stacks,
+        Enchantable = source.Enchantable,
+        Tarnished = source.Tarnished
+
+    WHEN NOT MATCHED THEN
+    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished)
+    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished);
+END

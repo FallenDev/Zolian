@@ -120,7 +120,7 @@ public record AislingStorage : Sql, IAislingStorage
             SaveSpells(obj, connection);
             SaveBuffs(obj, connection);
             SaveDebuffs(obj, connection);
-            var inventory = SaveItemsForPlayer(obj, connection);
+            SaveItemsForPlayer(obj, connection);
 
             #region Parameters
 
@@ -209,9 +209,6 @@ public record AislingStorage : Sql, IAislingStorage
             #endregion
 
             ExecuteAndCloseConnection(cmd, connection);
-
-            if (inventory == false)
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with inventory save. (Code: Dying Light)");
         }
         catch (SqlException e)
         {
@@ -488,22 +485,36 @@ public record AislingStorage : Sql, IAislingStorage
         }
     }
 
-    public bool SaveItemsForPlayer(Aisling obj, SqlConnection connection)
+    public void SaveItemsForPlayer(Aisling obj, SqlConnection connection)
     {
-        if (obj?.Inventory == null) return false;
+        if (obj?.Inventory == null) return;
         var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
         itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
         itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
+        var dt = new DataTable();
+        dt.Columns.Add("ItemId", typeof(long));
+        dt.Columns.Add("Name", typeof(string));
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("ItemPane", typeof(string));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("InventorySlot", typeof(int));
+        dt.Columns.Add("Color", typeof(int));
+        dt.Columns.Add("Cursed", typeof(bool));
+        dt.Columns.Add("Durability", typeof(int));
+        dt.Columns.Add("Identified", typeof(bool));
+        dt.Columns.Add("ItemVariance", typeof(string));
+        dt.Columns.Add("WeapVariance", typeof(string));
+        dt.Columns.Add("ItemQuality", typeof(string));
+        dt.Columns.Add("OriginalQuality", typeof(string));
+        dt.Columns.Add("Stacks", typeof(int));
+        dt.Columns.Add("Enchantable", typeof(bool));
+        dt.Columns.Add("Tarnished", typeof(bool));
         
         try
         {
-            // ToDo: Create logic to check if an item actually needs to be updated to save on SQL calls
-            foreach (var item in itemList.Where(i => i is not null))
+            foreach (var item in itemList)
             {
-                // Check cache for value
                 var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out var sqlItem);
-                // Update or Insert
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure(updateIfExists ? "ItemUpdate" : "ItemInsert", connection);
                 var pane = ItemEnumConverters.PaneToString(item.ItemPane);
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
                 var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
@@ -511,26 +522,26 @@ public record AislingStorage : Sql, IAislingStorage
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
 
-                cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = (long)item.ItemId;
-                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = item.Template.Name;
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
-                cmd.Parameters.Add("@ItemPane", SqlDbType.VarChar).Value = pane;
-                cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = item.Slot;
-                cmd.Parameters.Add("@InventorySlot", SqlDbType.Int).Value = item.InventorySlot;
-                cmd.Parameters.Add("@Color", SqlDbType.Int).Value = color;
-                cmd.Parameters.Add("@Cursed", SqlDbType.Bit).Value = item.Cursed;
-                cmd.Parameters.Add("@Durability", SqlDbType.Int).Value = item.Durability;
-                cmd.Parameters.Add("@Identified", SqlDbType.Bit).Value = item.Identified;
-                cmd.Parameters.Add("@ItemVariance", SqlDbType.VarChar).Value = itemVariance;
-                cmd.Parameters.Add("@WeapVariance", SqlDbType.VarChar).Value = weapVariance;
-                cmd.Parameters.Add("@ItemQuality", SqlDbType.VarChar).Value = quality;
-                cmd.Parameters.Add("@OriginalQuality", SqlDbType.VarChar).Value = orgQuality;
-                cmd.Parameters.Add("@Stacks", SqlDbType.Int).Value = item.Stacks;
-                cmd.Parameters.Add("@Enchantable", SqlDbType.Bit).Value = item.Enchantable;
-                cmd.Parameters.Add("@Tarnished", SqlDbType.Bit).Value = item.Tarnished;
-                cmd.ExecuteNonQuery();
+                dt.Rows.Add(
+                    item.ItemId,
+                    item.Template.Name,
+                    (long)obj.Serial,
+                    pane,
+                    item.Slot,
+                    item.InventorySlot,
+                    color,
+                    item.Cursed,
+                    item.Durability,
+                    item.Identified,
+                    itemVariance,
+                    weapVariance,
+                    quality,
+                    orgQuality,
+                    item.Stacks,
+                    item.Enchantable,
+                    item.Tarnished
+                    );
 
-                // Update or Add
                 if (updateIfExists)
                 {
                     ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, sqlItem);
@@ -540,16 +551,20 @@ public record AislingStorage : Sql, IAislingStorage
                     ServerSetup.Instance.GlobalSqlItemCache.TryAdd(item.ItemId, item);
                 }
             }
+
+            using var cmd = new SqlCommand("ItemUpsert", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Items", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.ItemType";
+            cmd.ExecuteNonQuery();
         }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
-            return false;
         }
-
-        return true;
     }
 
     public async Task<bool> CheckIfPlayerExists(string name)
