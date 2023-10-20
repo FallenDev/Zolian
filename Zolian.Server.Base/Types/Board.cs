@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Darkages.Types;
 
-public class Board
+public class Board(string name, ushort index, bool isMail = false)
 {
     private static readonly string StoragePath = $@"{ServerSetup.Instance.StoragePath}\Community\Boards";
 
@@ -14,17 +14,10 @@ public class Board
         if (!Directory.Exists(StoragePath))
             Directory.CreateDirectory(StoragePath);
     }
-    
-    public Board(string name, ushort index, bool isMail = false)
-    {
-        Index = index;
-        Subject = name;
-        IsMail = isMail;
-    }
 
-    public ushort Index { get; set; }
-    public bool IsMail { get; set; }
-    public string Subject { get; set; }
+    public ushort Index { get; set; } = index;
+    public bool IsMail { get; set; } = isMail;
+    public string Subject { get; set; } = name;
 
     public static List<Board> CacheFromStorage(string dir)
     {

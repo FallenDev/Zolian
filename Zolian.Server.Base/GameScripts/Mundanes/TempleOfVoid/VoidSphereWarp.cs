@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Arena;
 
 [Script("VoidSphereWarp")]
-public class VoidSphereWarp : MundaneScript
+public class VoidSphereWarp(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public VoidSphereWarp(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

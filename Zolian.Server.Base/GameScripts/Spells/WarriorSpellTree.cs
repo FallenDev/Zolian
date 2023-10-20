@@ -9,17 +9,10 @@ namespace Darkages.GameScripts.Spells;
 
 // Defender Spells
 [Script("Asgall")]
-public class Asgall : SpellScript
+public class Asgall(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_skill_reflect();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Asgall(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -37,27 +30,20 @@ public class Asgall : SpellScript
         if (sprite.HasBuff("Asgall"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, _spell);
+            _spellMethod.Train(aisling.Client, spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }
 
 [Script("Defensive Stance")]
-public class Defensive_Stance : SpellScript
+public class Defensive_Stance(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_DefenseUp();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Defensive_Stance(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -75,29 +61,22 @@ public class Defensive_Stance : SpellScript
         if (sprite.HasBuff("Defensive Stance") || sprite.HasBuff("Spectral Shield"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, _spell);
+            _spellMethod.Train(aisling.Client, spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }
 
 // Master Spells
 
 [Script("Perfect Defense")]
-public class Perfect_Defense : SpellScript
+public class Perfect_Defense(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_PerfectDefense();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Perfect_Defense(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -115,11 +94,11 @@ public class Perfect_Defense : SpellScript
         if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, _spell);
+            _spellMethod.Train(aisling.Client, spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }

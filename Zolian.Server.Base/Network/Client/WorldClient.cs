@@ -3400,10 +3400,9 @@ namespace Darkages.Network.Client
         /// <param name="worldMap"></param>
         public void SendWorldMap()
         {
-            if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(Aisling.World)) return;
-
+            var mapExists = ServerSetup.Instance.GlobalWorldMapTemplateCache.TryGetValue(Aisling.World, out var portal);
+            if (!mapExists) return;
             MapOpen = true;
-            var portal = ServerSetup.Instance.GlobalWorldMapTemplateCache[Aisling.World];
             var name = $"field{portal.FieldNumber:000}";
             var warpsList = new List<WorldMapNodeInfo>();
 

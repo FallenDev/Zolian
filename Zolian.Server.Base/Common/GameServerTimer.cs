@@ -2,23 +2,16 @@
 
 namespace Darkages.Common;
 
-public class WorldServerTimer
+public class WorldServerTimer(TimeSpan delay)
 {
     private int _randomVariancePct;
 
-    public WorldServerTimer(TimeSpan delay)
-    {
-        Timer = TimeSpan.Zero;
-        BaseDelay = delay;
-        Delay = delay;
-    }
-
-    public TimeSpan BaseDelay { get; set; }
-    public TimeSpan Delay { get; set; }
+    public TimeSpan BaseDelay { get; set; } = delay;
+    public TimeSpan Delay { get; set; } = delay;
     public bool Disabled { get; set; }
     public bool Elapsed => Timer >= Delay;
     public int Tick { get; set; }
-    private TimeSpan Timer { get; set; }
+    private TimeSpan Timer { get; set; } = TimeSpan.Zero;
 
     public int RandomizedVariance
     {

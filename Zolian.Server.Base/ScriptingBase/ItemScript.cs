@@ -5,10 +5,9 @@ using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class ItemScript : ObjectManager, IScriptBase
+public abstract class ItemScript(Item item) : ObjectManager, IScriptBase
 {
-    protected ItemScript(Item item) => Item = item;
-    protected Item Item { get; }
+    protected Item Item { get; } = item;
     public abstract void OnUse(Sprite sprite, byte slot);
     public abstract void Equipped(Sprite sprite, byte displaySlot);
     public abstract void UnEquipped(Sprite sprite, byte displaySlot);

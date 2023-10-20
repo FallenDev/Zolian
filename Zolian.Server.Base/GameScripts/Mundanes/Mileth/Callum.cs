@@ -11,12 +11,10 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Callum")]
-public class Callum : MundaneScript
+public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private Item _itemDetail;
     private uint _cost;
-
-    public Callum(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

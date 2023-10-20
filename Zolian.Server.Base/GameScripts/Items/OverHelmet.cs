@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("OverHelmet")]
-public class OverHelmet : ItemScript
+public class OverHelmet(Item item) : ItemScript(item)
 {
-    public OverHelmet(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

@@ -2,20 +2,12 @@
 
 namespace Darkages.Models;
 
-public class StatusOperator
+public class StatusOperator(Operator option, int value)
 {
-    public StatusOperator(Operator option, int value)
+    public StatusOperator() : this(Operator.Add, 0)
     {
-        Option = option;
-        Value = value;
     }
 
-    public StatusOperator()
-    {
-        Option = Operator.Add;
-        Value = 0;
-    }
-
-    public Operator Option { get; set; }
-    public int Value { get; set; }
+    public Operator Option { get; set; } = option;
+    public int Value { get; set; } = value;
 }

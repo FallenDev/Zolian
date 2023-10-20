@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.TempleOfLight;
 
 [Script("Cloud")]
-public class Cloud : MundaneScript
+public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Cloud(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

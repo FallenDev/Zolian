@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("OverCoat")]
-public class OverCoat : ItemScript
+public class OverCoat(Item item) : ItemScript(item)
 {
-    public OverCoat(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

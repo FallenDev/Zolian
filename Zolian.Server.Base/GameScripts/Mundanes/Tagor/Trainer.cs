@@ -11,34 +11,29 @@ using Darkages.ScriptingBase;
 namespace Darkages.GameScripts.Mundanes.Tagor;
 
 [Script("Training Center")]
-public class Trainer : MundaneScript
+public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private List<Skill> _skillList;
     private List<Spell> _spellList;
-    private readonly List<Vector2> _dojoSpots;
-
-    public Trainer(WorldServer server, Mundane mundane) : base(server, mundane)
+    private readonly List<Vector2> _dojoSpots = new()
     {
-        _dojoSpots = new List<Vector2>
-        {
-            new(12, 22),
-            new(13, 21),
-            new(14, 22),
-            new(13, 23),
-            new(12, 13),
-            new(13, 12),
-            new(14, 13),
-            new(13, 14),
-            new(22, 14),
-            new(21, 13),
-            new(23, 13),
-            new(22, 13),
-            new(22, 21),
-            new(23, 22),
-            new(22, 23),
-            new(21, 22)
-        };
-    }
+        new(12, 22),
+        new(13, 21),
+        new(14, 22),
+        new(13, 23),
+        new(12, 13),
+        new(13, 12),
+        new(14, 13),
+        new(13, 14),
+        new(22, 14),
+        new(21, 13),
+        new(23, 13),
+        new(22, 13),
+        new(22, 21),
+        new(23, 22),
+        new(22, 23),
+        new(21, 22)
+    };
 
     public override void OnClick(WorldClient client, uint serial)
     {

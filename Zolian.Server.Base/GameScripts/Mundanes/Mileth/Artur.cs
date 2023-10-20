@@ -11,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Artur's Gift")]
-public class Artur : MundaneScript
+public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Artur(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

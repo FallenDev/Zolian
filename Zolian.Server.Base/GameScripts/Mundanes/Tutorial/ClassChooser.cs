@@ -12,10 +12,8 @@ using Gender = Darkages.Enums.Gender;
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
 [Script("Class Chooser")]
-public class ClassChooser : MundaneScript
+public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public ClassChooser(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

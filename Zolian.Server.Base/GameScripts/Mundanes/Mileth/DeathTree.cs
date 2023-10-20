@@ -11,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Death Tree")]
-public class DeathTree : MundaneScript
+public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public DeathTree(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

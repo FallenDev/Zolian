@@ -10,16 +10,9 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Spells;
 
 [Script("Mor Stroich Pian Gar")]
-public class Mor_Strioch_Pian_Gar : SpellScript
+public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Strioch_Pian_Gar(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target)
     {
@@ -39,7 +32,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         var healthSap = (int)(aisling.MaximumHp * .33);
         var damage = (int)((healthSap + manaSap) * 0.01) * 200;
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.Animation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.Animation, null, aisling.Serial));
 
         foreach (var targetObj in targets)
         {
@@ -51,7 +44,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
 
                 if (targetObj is Aisling player)
-                    player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {_spell.Template.Name}");
+                    player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}");
 
                 continue;
             }
@@ -60,8 +53,8 @@ public class Mor_Strioch_Pian_Gar : SpellScript
 
             if (mR > targetObj.Will)
             {
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, targetObj.Position, targetObj.Serial));
-                targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, _spell);
+                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, targetObj.Position, targetObj.Serial));
+                targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, spell);
             }
             else
             {
@@ -72,7 +65,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!_spell.CanUse()) return;
+        if (!spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         var manaLoss = (int)(aisling.MaximumMp * .33);
@@ -91,14 +84,14 @@ public class Mor_Strioch_Pian_Gar : SpellScript
             return;
         }
 
-        _spellMethod.Train(client, _spell);
+        _spellMethod.Train(client, spell);
 
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
         if (aisling.CurrentHp < 0)
             aisling.CurrentHp = 1;
 
-        var success = _spellMethod.Execute(client, _spell);
+        var success = _spellMethod.Execute(client, spell);
 
         if (success)
         {
@@ -106,7 +99,7 @@ public class Mor_Strioch_Pian_Gar : SpellScript
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, _spell);
+            _spellMethod.SpellOnFailed(aisling, target, spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);
@@ -114,16 +107,9 @@ public class Mor_Strioch_Pian_Gar : SpellScript
 }
 
 [Script("Ao Sith Gar")]
-public class AoSithGar : SpellScript
+public class AoSithGar(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoSithGar(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target)
     {
@@ -151,7 +137,7 @@ public class AoSithGar : SpellScript
         {
             if (targetObj.GroupParty != aisling.GroupParty) continue;
             if (targetObj.Serial == aisling.Serial) continue;
-            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, targetObj.Serial));
+            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, targetObj.Serial));
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Name == "Skulled") continue;
@@ -178,27 +164,20 @@ public class AoSithGar : SpellScript
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!_spell.CanUse()) return;
+        if (!spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        _spellMethod.Train(client, _spell);
+        _spellMethod.Train(client, spell);
         OnSuccess(aisling, target);
         client.SendAttributes(StatUpdateType.Vitality);
     }
 }
 
 [Script("Deireas Faileas")]
-public class DeireasFaileas : SpellScript
+public class DeireasFaileas(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_spell_reflect();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public DeireasFaileas(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -216,11 +195,11 @@ public class DeireasFaileas : SpellScript
         if (sprite.HasBuff("Deireas Faileas"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, _spell);
+            _spellMethod.Train(aisling.Client, spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }

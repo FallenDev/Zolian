@@ -4,14 +4,9 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("AC Formula")]
-public class Ac : FormulaScript
+public class Ac(Sprite obj) : FormulaScript
 {
-    private readonly Sprite _obj;
-
-    public Ac(Sprite obj)
-    {
-        _obj = obj;
-    }
+    private readonly Sprite _obj = obj;
 
     public override long Calculate(Sprite obj, long value)
     {

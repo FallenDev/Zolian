@@ -16,17 +16,10 @@ namespace Darkages.GameScripts.Spells;
 /// Spectral Shield: Bonus to AC
 /// </summary>
 [Script("Spectral Shield")]
-public class Spectral_Shield : SpellScript
+public class Spectral_Shield(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_SpectralShield();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Spectral_Shield(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -37,10 +30,10 @@ public class Spectral_Shield : SpellScript
         if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
         {
             if (sprite is not Aisling aisling) return;
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(aisling.Client, spell);
             }
             else
             {
@@ -52,7 +45,7 @@ public class Spectral_Shield : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }
 
@@ -60,17 +53,10 @@ public class Spectral_Shield : SpellScript
 /// Aite
 /// </summary>
 [Script("Aite")]
-public class Aite : SpellScript
+public class Aite(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_aite();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Aite(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -81,10 +67,10 @@ public class Aite : SpellScript
         if (target.HasBuff("Aite") || target.HasBuff("Dia Aite"))
         {
             if (sprite is not Aisling aisling) return;
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(aisling.Client, spell);
             }
             else
             {
@@ -96,7 +82,7 @@ public class Aite : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }
 
@@ -104,17 +90,10 @@ public class Aite : SpellScript
 /// Mor Dion
 /// </summary>
 [Script("Mor Dion")]
-public class Mor_Dion : SpellScript
+public class Mor_Dion(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_MorDion();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Dion(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -125,10 +104,10 @@ public class Mor_Dion : SpellScript
         if (target.Immunity)
         {
             if (sprite is not Aisling aisling) return;
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(aisling.Client, spell);
             }
             else
             {
@@ -140,7 +119,7 @@ public class Mor_Dion : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }
 
@@ -148,17 +127,10 @@ public class Mor_Dion : SpellScript
 /// Dark Chain: Stun and Slight Damage
 /// </summary>
 [Script("Dark Chain")]
-public class Dark_Chain : SpellScript
+public class Dark_Chain(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffDarkChain();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Dark_Chain(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -169,8 +141,8 @@ public class Dark_Chain : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Dark Chain";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 60);
-        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 60);
+        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
     }
 }
 
@@ -178,17 +150,10 @@ public class Dark_Chain : SpellScript
 /// Halt: Stop time for a target
 /// </summary>
 [Script("Halt")]
-public class Halt : SpellScript
+public class Halt(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffHalt();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Halt(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -199,22 +164,15 @@ public class Halt : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Halt";
 
-        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
     }
 }
 
 [Script("Pramh")]
-public class Pramh : SpellScript
+public class Pramh(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffSleep();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Pramh(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -228,10 +186,10 @@ public class Pramh : SpellScript
         if (target.HasDebuff("Sleep"))
         {
             if (sprite is not Aisling aisling) return;
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(aisling.Client, spell);
             }
             else
             {
@@ -243,7 +201,7 @@ public class Pramh : SpellScript
             return;
         };
 
-        _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
     }
 }
 
@@ -251,16 +209,9 @@ public class Pramh : SpellScript
 /// Detect: See monsters Advanced Stats
 /// </summary>
 [Script("Detect")]
-public class Detect : SpellScript
+public class Detect(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Detect(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -272,12 +223,12 @@ public class Detect : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             return;
         }
 
@@ -323,7 +274,7 @@ public class Detect : SpellScript
             halfHp = $"{{=b{monster.CurrentHp}{{=s";
         }
 
-        switch (_spell.Level)
+        switch (spell.Level)
         {
             case < 10:
                 aisling.Client.SendServerMessage(ServerMessageType.ScrollWindow, $"{title}\n\n{{=aLv: {colorLvl} {{=aHP: {halfHp}/{monster.MaximumHp} {{=aO: {colorA}{monster.OffenseElement} {{=aD: {colorB}{monster.DefenseElement}");
@@ -340,7 +291,7 @@ public class Detect : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -354,10 +305,10 @@ public class Detect : SpellScript
             if (sprite is not Aisling aisling) return;
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -368,7 +319,7 @@ public class Detect : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -376,7 +327,7 @@ public class Detect : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -389,7 +340,7 @@ public class Detect : SpellScript
                 return;
             }
 
-            _spellMethod.SpellOnFailed(sprite, target, _spell);
+            _spellMethod.SpellOnFailed(sprite, target, spell);
         }
     }
 
@@ -413,16 +364,9 @@ public class Detect : SpellScript
 /// Heal Minor Wounds: Heals 15% of target's health
 /// </summary>
 [Script("Heal Minor Wounds")]
-public class Heal_Minor : SpellScript
+public class Heal_Minor(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Heal_Minor(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -434,8 +378,8 @@ public class Heal_Minor : SpellScript
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.15;
                 aisling.ThreatMeter += (long)healBase;
@@ -444,20 +388,20 @@ public class Heal_Minor : SpellScript
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, _spell.Template.Sound);
+                aisling.Client.SendHealthBar(target, spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
             var healBase = (int)(sprite.BaseHp * 0.10);
 
@@ -472,7 +416,7 @@ public class Heal_Minor : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -483,10 +427,10 @@ public class Heal_Minor : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -497,7 +441,7 @@ public class Heal_Minor : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -505,16 +449,16 @@ public class Heal_Minor : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -529,16 +473,9 @@ public class Heal_Minor : SpellScript
 /// Heal Major Wounds: Heals 30% of target's health
 /// </summary>
 [Script("Heal Major Wounds")]
-public class Heal_Major : SpellScript
+public class Heal_Major(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Heal_Major(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -550,8 +487,8 @@ public class Heal_Major : SpellScript
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.30;
                 aisling.ThreatMeter += (long)healBase;
@@ -560,20 +497,20 @@ public class Heal_Major : SpellScript
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, _spell.Template.Sound);
+                aisling.Client.SendHealthBar(target, spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
             var healBase = (int)(sprite.BaseHp * 0.25);
 
@@ -588,7 +525,7 @@ public class Heal_Major : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -599,10 +536,10 @@ public class Heal_Major : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -613,7 +550,7 @@ public class Heal_Major : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -621,16 +558,16 @@ public class Heal_Major : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -645,16 +582,9 @@ public class Heal_Major : SpellScript
 /// Heal Critical Wounds: Heals 65% of target's health
 /// </summary>
 [Script("Heal Critical Wounds")]
-public class Heal_Critical : SpellScript
+public class Heal_Critical(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Heal_Critical(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -666,8 +596,8 @@ public class Heal_Critical : SpellScript
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.65;
                 aisling.ThreatMeter += (long)healBase;
@@ -676,20 +606,20 @@ public class Heal_Critical : SpellScript
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, _spell.Template.Sound);
+                aisling.Client.SendHealthBar(target, spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
             var healBase = (int)(sprite.BaseHp * 0.45);
 
@@ -704,7 +634,7 @@ public class Heal_Critical : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -715,10 +645,10 @@ public class Heal_Critical : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -729,7 +659,7 @@ public class Heal_Critical : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -737,16 +667,16 @@ public class Heal_Critical : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -761,17 +691,10 @@ public class Heal_Critical : SpellScript
 /// Dire Aid: Heals 70% of target's health, casts spectral shield if not cast
 /// </summary>
 [Script("Dire Aid")]
-public class Dire_Aid : SpellScript
+public class Dire_Aid(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_SpectralShield();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Dire_Aid(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -783,8 +706,8 @@ public class Dire_Aid : SpellScript
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
                 if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
                 {
@@ -793,7 +716,7 @@ public class Dire_Aid : SpellScript
                 }
                 else
                 {
-                    _spellMethod.EnhancementOnUse(sprite, target, _spell, _buff);
+                    _spellMethod.EnhancementOnUse(sprite, target, spell, _buff);
                 }
 
                 var healBase = target.MaximumHp * 0.80;
@@ -803,20 +726,20 @@ public class Dire_Aid : SpellScript
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, _spell.Template.Sound);
+                aisling.Client.SendHealthBar(target, spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
 
             var healBase = (int)(sprite.BaseHp * 0.70);
 
@@ -831,7 +754,7 @@ public class Dire_Aid : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -842,10 +765,10 @@ public class Dire_Aid : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -856,7 +779,7 @@ public class Dire_Aid : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -864,16 +787,16 @@ public class Dire_Aid : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -888,16 +811,9 @@ public class Dire_Aid : SpellScript
 /// Healing Winds: Heal group members based on current health
 /// </summary>
 [Script("Healing Winds")]
-public class Healing_Winds : SpellScript
+public class Healing_Winds(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Healing_Winds(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -907,12 +823,12 @@ public class Healing_Winds : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         var healBase = aisling.MaximumHp * 0.25;
@@ -947,7 +863,7 @@ public class Healing_Winds : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -958,10 +874,10 @@ public class Healing_Winds : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -972,7 +888,7 @@ public class Healing_Winds : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -980,16 +896,16 @@ public class Healing_Winds : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -1004,16 +920,9 @@ public class Healing_Winds : SpellScript
 /// Forestall: Remove debuff "Skulling" and prevent death
 /// </summary>
 [Script("Forestall")]
-public class Forestall : SpellScript
+public class Forestall(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Forestall(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1023,12 +932,12 @@ public class Forestall : SpellScript
         if (target is not Aisling savedAisling) return;
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         if (!savedAisling.Skulled) return;
@@ -1044,17 +953,17 @@ public class Forestall : SpellScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
-        if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= _spell.Template.ManaCost;
-            _spellMethod.Train(client, _spell);
+            aisling.CurrentMp -= spell.Template.ManaCost;
+            _spellMethod.Train(client, spell);
         }
         else
         {
@@ -1074,16 +983,9 @@ public class Forestall : SpellScript
 /// Hell Grasp: Pull ally to the realm of the living
 /// </summary>
 [Script("Hell Grasp")]
-public class Raise_Ally : SpellScript
+public class Raise_Ally(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Raise_Ally(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1092,12 +994,12 @@ public class Raise_Ally : SpellScript
         if (sprite is not Aisling aisling) return;
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         if (aisling.GroupId != 0)
@@ -1133,7 +1035,7 @@ public class Raise_Ally : SpellScript
     {
         if (sprite is not Aisling aisling) return;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1141,9 +1043,9 @@ public class Raise_Ally : SpellScript
         }
 
         var client = aisling.Client;
-        _spellMethod.Train(client, _spell);
+        _spellMethod.Train(client, spell);
 
-        if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp = 0;
         }
@@ -1173,17 +1075,10 @@ public class Raise_Ally : SpellScript
 /// Turn Undead: Rends 10 AC, Slight Holy Damage, Turns Undead non-hostile, level up to 100
 /// </summary>
 [Script("Turn Undead")]
-public class Turn_Undead : SpellScript
+public class Turn_Undead(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffRending();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Turn_Undead(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1193,20 +1088,20 @@ public class Turn_Undead : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 101) continue;
-            _spellMethod.ElementalOnUse(sprite, target, _spell, 30);
-            _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+            _spellMethod.ElementalOnUse(sprite, target, spell, 30);
+            _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
         }
@@ -1216,7 +1111,7 @@ public class Turn_Undead : SpellScript
     {
         if (sprite is not Aisling playerAction) return;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1225,8 +1120,8 @@ public class Turn_Undead : SpellScript
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
-        _spellMethod.Train(client, _spell);
-        var success = _spellMethod.Execute(client, _spell);
+        _spellMethod.Train(client, spell);
+        var success = _spellMethod.Execute(client, spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1237,7 +1132,7 @@ public class Turn_Undead : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, _spell);
+                _spellMethod.SpellOnFailed(playerAction, target, spell);
             }
         }
         else
@@ -1251,17 +1146,10 @@ public class Turn_Undead : SpellScript
 /// Turn Critter: Rends 10 AC, Slight Holy Damage, Turns Critters non-hostile, level up to 100
 /// </summary>
 [Script("Turn Critter")]
-public class Turn_Critter : SpellScript
+public class Turn_Critter(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffRending();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Turn_Critter(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1271,20 +1159,20 @@ public class Turn_Critter : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 101) continue;
-            _spellMethod.ElementalOnUse(sprite, target, _spell, 30);
-            _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+            _spellMethod.ElementalOnUse(sprite, target, spell, 30);
+            _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
         }
@@ -1294,7 +1182,7 @@ public class Turn_Critter : SpellScript
     {
         if (sprite is not Aisling playerAction) return;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1303,8 +1191,8 @@ public class Turn_Critter : SpellScript
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
-        _spellMethod.Train(client, _spell);
-        var success = _spellMethod.Execute(client, _spell);
+        _spellMethod.Train(client, spell);
+        var success = _spellMethod.Execute(client, spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1315,7 +1203,7 @@ public class Turn_Critter : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, _spell);
+                _spellMethod.SpellOnFailed(playerAction, target, spell);
             }
         }
         else
@@ -1329,17 +1217,10 @@ public class Turn_Critter : SpellScript
 /// Turn Greater Undead: Rends 10 AC, Holy Damage, Turns Undead non-hostile, level up to 250
 /// </summary>
 [Script("Turn Greater Undead")]
-public class Turn_Greater_Undead : SpellScript
+public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffRending();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Turn_Greater_Undead(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1349,20 +1230,20 @@ public class Turn_Greater_Undead : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 251) continue;
-            _spellMethod.ElementalOnUse(sprite, target, _spell, 50);
-            _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+            _spellMethod.ElementalOnUse(sprite, target, spell, 50);
+            _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
         }
@@ -1372,7 +1253,7 @@ public class Turn_Greater_Undead : SpellScript
     {
         if (sprite is not Aisling playerAction) return;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1381,8 +1262,8 @@ public class Turn_Greater_Undead : SpellScript
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
-        _spellMethod.Train(client, _spell);
-        var success = _spellMethod.Execute(client, _spell);
+        _spellMethod.Train(client, spell);
+        var success = _spellMethod.Execute(client, spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1393,7 +1274,7 @@ public class Turn_Greater_Undead : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, _spell);
+                _spellMethod.SpellOnFailed(playerAction, target, spell);
             }
         }
         else
@@ -1407,17 +1288,10 @@ public class Turn_Greater_Undead : SpellScript
 /// Turn Greater Critter: Rends 10 AC, Holy Damage, Turns Critters non-hostile, level up to 250
 /// </summary>
 [Script("Turn Greater Critter")]
-public class Turn_Greater_Critter : SpellScript
+public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Debuff _debuff = new DebuffRending();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Turn_Greater_Critter(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1427,20 +1301,20 @@ public class Turn_Greater_Critter : SpellScript
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(_spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 251) continue;
-            _spellMethod.ElementalOnUse(sprite, target, _spell, 50);
-            _spellMethod.AfflictionOnUse(sprite, target, _spell, _debuff);
+            _spellMethod.ElementalOnUse(sprite, target, spell, 50);
+            _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
         }
@@ -1450,7 +1324,7 @@ public class Turn_Greater_Critter : SpellScript
     {
         if (sprite is not Aisling playerAction) return;
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1459,8 +1333,8 @@ public class Turn_Greater_Critter : SpellScript
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
-        _spellMethod.Train(client, _spell);
-        var success = _spellMethod.Execute(client, _spell);
+        _spellMethod.Train(client, spell);
+        var success = _spellMethod.Execute(client, spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1471,7 +1345,7 @@ public class Turn_Greater_Critter : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, _spell);
+                _spellMethod.SpellOnFailed(playerAction, target, spell);
             }
         }
         else
@@ -1482,16 +1356,9 @@ public class Turn_Greater_Critter : SpellScript
 }
 
 [Script("Ao Puinsein")]
-public class AoPuinsein : SpellScript
+public class AoPuinsein(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoPuinsein(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1538,7 +1405,7 @@ public class AoPuinsein : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1549,10 +1416,10 @@ public class AoPuinsein : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -1563,7 +1430,7 @@ public class AoPuinsein : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -1571,16 +1438,16 @@ public class AoPuinsein : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -1592,16 +1459,9 @@ public class AoPuinsein : SpellScript
 }
 
 [Script("Ao Dall")]
-public class AoDall : SpellScript
+public class AoDall(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoDall(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1641,7 +1501,7 @@ public class AoDall : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1652,10 +1512,10 @@ public class AoDall : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -1666,7 +1526,7 @@ public class AoDall : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -1674,16 +1534,16 @@ public class AoDall : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -1695,16 +1555,9 @@ public class AoDall : SpellScript
 }
 
 [Script("Ao Beag Cradh")]
-public class AoBeagCradh : SpellScript
+public class AoBeagCradh(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoBeagCradh(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1744,7 +1597,7 @@ public class AoBeagCradh : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1755,10 +1608,10 @@ public class AoBeagCradh : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -1769,7 +1622,7 @@ public class AoBeagCradh : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -1777,16 +1630,16 @@ public class AoBeagCradh : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -1798,16 +1651,9 @@ public class AoBeagCradh : SpellScript
 }
 
 [Script("Ao Cradh")]
-public class AoCradh : SpellScript
+public class AoCradh(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoCradh(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1848,7 +1694,7 @@ public class AoCradh : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1859,10 +1705,10 @@ public class AoCradh : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -1873,7 +1719,7 @@ public class AoCradh : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -1881,16 +1727,16 @@ public class AoCradh : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -1902,16 +1748,9 @@ public class AoCradh : SpellScript
 }
 
 [Script("Ao Mor Cradh")]
-public class AoMorCradh : SpellScript
+public class AoMorCradh(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoMorCradh(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -1952,7 +1791,7 @@ public class AoMorCradh : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -1963,10 +1802,10 @@ public class AoMorCradh : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -1977,7 +1816,7 @@ public class AoMorCradh : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -1985,16 +1824,16 @@ public class AoMorCradh : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -2006,16 +1845,9 @@ public class AoMorCradh : SpellScript
 }
 
 [Script("Ao Ard Cradh")]
-public class AoArdCradh : SpellScript
+public class AoArdCradh(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoArdCradh(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -2056,7 +1888,7 @@ public class AoArdCradh : SpellScript
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (target == null) return;
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -2067,10 +1899,10 @@ public class AoArdCradh : SpellScript
         {
             var client = aisling.Client;
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
-                _spellMethod.Train(client, _spell);
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                _spellMethod.Train(client, spell);
             }
             else
             {
@@ -2081,7 +1913,7 @@ public class AoArdCradh : SpellScript
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, _spell);
+            var success = _spellMethod.Execute(client, spell);
 
             if (success)
             {
@@ -2089,16 +1921,16 @@ public class AoArdCradh : SpellScript
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, _spell);
+                _spellMethod.SpellOnFailed(aisling, target, spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
         {
-            if (sprite.CurrentMp - _spell.Template.ManaCost > 0)
+            if (sprite.CurrentMp - spell.Template.ManaCost > 0)
             {
-                sprite.CurrentMp -= _spell.Template.ManaCost;
+                sprite.CurrentMp -= spell.Template.ManaCost;
             }
 
             if (sprite.CurrentMp < 0)
@@ -2110,16 +1942,9 @@ public class AoArdCradh : SpellScript
 }
 
 [Script("Ao Suain")]
-public class AoSuain : SpellScript
+public class AoSuain(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public AoSuain(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -2158,17 +1983,17 @@ public class AoSuain : SpellScript
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        if (!_spell.CanUse())
+        if (!spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
-        if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= _spell.Template.ManaCost;
-            _spellMethod.Train(client, _spell);
+            aisling.CurrentMp -= spell.Template.ManaCost;
+            _spellMethod.Train(client, spell);
         }
         else
         {
@@ -2179,7 +2004,7 @@ public class AoSuain : SpellScript
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        var success = _spellMethod.Execute(client, _spell);
+        var success = _spellMethod.Execute(client, spell);
 
         if (success)
         {
@@ -2187,7 +2012,7 @@ public class AoSuain : SpellScript
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, _spell);
+            _spellMethod.SpellOnFailed(aisling, target, spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);

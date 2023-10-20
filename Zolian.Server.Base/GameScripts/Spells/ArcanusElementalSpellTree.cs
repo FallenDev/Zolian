@@ -10,16 +10,9 @@ namespace Darkages.GameScripts.Spells;
 #region Ard
 
 [Script("Ard Athar")]
-public class Tornado : SpellScript
+public class Tornado(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Tornado(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -30,21 +23,14 @@ public class Tornado : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
 [Script("Ard Creag")]
-public class Landslide : SpellScript
+public class Landslide(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Landslide(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -55,21 +41,14 @@ public class Landslide : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
 [Script("Ard Sal")]
-public class Monsoon : SpellScript
+public class Monsoon(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Monsoon(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -80,21 +59,14 @@ public class Monsoon : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
 [Script("Ard Srad")]
-public class Eruption : SpellScript
+public class Eruption(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Eruption(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -105,21 +77,14 @@ public class Eruption : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
 [Script("Ard Dorcha")]
-public class Twilight : SpellScript
+public class Twilight(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Twilight(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -130,21 +95,14 @@ public class Twilight : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
 [Script("Ard Eadrom")]
-public class Sanctified : SpellScript
+public class Sanctified(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Sanctified(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -155,7 +113,7 @@ public class Sanctified : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
     }
 }
 
@@ -164,16 +122,9 @@ public class Sanctified : SpellScript
 #region Mor
 
 [Script("Mor Athar")]
-public class Mor_Athar : SpellScript
+public class Mor_Athar(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Athar(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -184,21 +135,14 @@ public class Mor_Athar : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
 [Script("Mor Creag")]
-public class Mor_Creag : SpellScript
+public class Mor_Creag(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Creag(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -209,21 +153,14 @@ public class Mor_Creag : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
 [Script("Mor Sal")]
-public class Mor_Sal : SpellScript
+public class Mor_Sal(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Sal(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -234,21 +171,14 @@ public class Mor_Sal : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
 [Script("Mor Srad")]
-public class Mor_Srad : SpellScript
+public class Mor_Srad(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Srad(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -259,21 +189,14 @@ public class Mor_Srad : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
 [Script("Mor Dorcha")]
-public class Mor_Dorcha : SpellScript
+public class Mor_Dorcha(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Dorcha(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -284,21 +207,14 @@ public class Mor_Dorcha : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
 [Script("Mor Eadrom")]
-public class Mor_Eadrom : SpellScript
+public class Mor_Eadrom(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Mor_Eadrom(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -309,7 +225,7 @@ public class Mor_Eadrom : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
     }
 }
 
@@ -318,16 +234,9 @@ public class Mor_Eadrom : SpellScript
 #region Normal
 
 [Script("Athar")]
-public class Athar : SpellScript
+public class Athar(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Athar(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -338,21 +247,14 @@ public class Athar : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
 [Script("Creag")]
-public class Creag : SpellScript
+public class Creag(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Creag(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -363,21 +265,14 @@ public class Creag : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
 [Script("Sal")]
-public class Sal : SpellScript
+public class Sal(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Sal(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -388,21 +283,14 @@ public class Sal : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
 [Script("Srad")]
-public class Srad : SpellScript
+public class Srad(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Srad(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -413,21 +301,14 @@ public class Srad : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
 [Script("Dorcha")]
-public class Dorcha : SpellScript
+public class Dorcha(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Dorcha(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -438,21 +319,14 @@ public class Dorcha : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
 [Script("Eadrom")]
-public class Eadrom : SpellScript
+public class Eadrom(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Eadrom(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -463,7 +337,7 @@ public class Eadrom : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
     }
 }
 
@@ -472,16 +346,9 @@ public class Eadrom : SpellScript
 #region Beag
 
 [Script("Beag Athar")]
-public class Beag_Athar : SpellScript
+public class Beag_Athar(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Athar(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -492,21 +359,14 @@ public class Beag_Athar : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 
 [Script("Beag Creag")]
-public class Beag_Creag : SpellScript
+public class Beag_Creag(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Creag(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -517,21 +377,14 @@ public class Beag_Creag : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 
 [Script("Beag Sal")]
-public class Beag_Sal : SpellScript
+public class Beag_Sal(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Sal(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -542,21 +395,14 @@ public class Beag_Sal : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 
 [Script("Beag Srad")]
-public class Beag_Srad : SpellScript
+public class Beag_Srad(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Srad(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -567,21 +413,14 @@ public class Beag_Srad : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 
 [Script("Beag Dorcha")]
-public class Beag_Dorcha : SpellScript
+public class Beag_Dorcha(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Dorcha(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -592,21 +431,14 @@ public class Beag_Dorcha : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 
 [Script("Beag Eadrom")]
-public class Beag_Eadrom : SpellScript
+public class Beag_Eadrom(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Beag_Eadrom(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -617,7 +449,7 @@ public class Beag_Eadrom : SpellScript
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, _spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
     }
 }
 

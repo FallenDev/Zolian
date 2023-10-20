@@ -1,4 +1,6 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+
+using Darkages.Common;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -8,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mehadi;
 
 [Script("Donkan")]
-public class Donkan : MundaneScript
+public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Donkan(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -27,9 +27,13 @@ public class Donkan : MundaneScript
         if (client.Aisling.QuestManager.SwampCount == 0)
         {
             options.Add(new(0x01, "Ok.."));
-
             client.SendOptionsDialog(Mundane, "Oh, he doesn't like you. I know! Let's make waffles!", options.ToArray());
             return;
+        }
+
+        if (client.Aisling.HasItem("Maple Syrup") && client.Aisling.QuestManager.SwampCount == 1)
+        {
+            options.Add(new(0x04, "Here"));
         }
 
         client.SendOptionsDialog(Mundane, "Hmmm, waffles!", options.ToArray());
@@ -39,29 +43,51 @@ public class Donkan : MundaneScript
     {
         if (!AuthenticateUser(client)) return;
 
-        var exp = Random.Shared.Next(1000, 5000);
-
         switch (responseID)
         {
             case 0x01:
-            {
-                var options = new List<Dialog.OptionsDataItem>
                 {
-                    new (0x03, "Go on.."),
-                    new (0x02, "Oh? Take care")
-                };
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x03, "I'm on it"),
+                        new (0x02, "Maybe some other time")
+                    };
 
-                client.SendOptionsDialog(Mundane, "You think waffles will make me like you? For your information, there's a lot more to me than people think. I have layers!", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "In West Woodlands there is a type of maple tree near the Dwarven Village. Grab some {=cMaple Syrup {=aand bring it to me!", options.ToArray());
+                    break;
+                }
             case 0x02:
                 client.CloseDialog();
                 break;
             case 0x03:
-            {
+                {
+                    client.Aisling.QuestManager.SwampCount++;
+                    client.CloseDialog();
+                    break;
+                }
+            case 0x04:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x02, "Thank you")
+                    };
 
-                break;
-            }
+                    if (client.Aisling.HasItem("Maple Syrup"))
+                    {
+                        client.Aisling.QuestManager.SwampCount++;
+                        client.TakeAwayQuantity(client.Aisling, "Maple Syrup", 1);
+                        client.GiveItem("Maple Glazed Waffles");
+                        client.SendAttributes(StatUpdateType.WeightGold);
+                        client.CloseDialog();
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "Remember, the maple syrup is in West Woodlands; Near the Dwarven Village");
+                    }
+
+                    client.SendOptionsDialog(Mundane, "Ohhh, he's going to like you! Here are some waffles as promised!", options.ToArray());
+                    break;
+                }
         }
     }
 }

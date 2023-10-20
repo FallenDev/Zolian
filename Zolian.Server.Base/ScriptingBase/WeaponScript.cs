@@ -3,11 +3,9 @@ using Darkages.Sprites;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class WeaponScript : IScriptBase
+public abstract class WeaponScript(Item item) : IScriptBase
 {
-    protected WeaponScript(Item item) => Item = item;
-
-    private Item Item { get; }
+    private Item Item { get; } = item;
 
     public abstract void OnUse(Sprite sprite, Action<int> cb = null);
 }

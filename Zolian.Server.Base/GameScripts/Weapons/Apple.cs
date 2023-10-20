@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Weapons;
 
 [Script("Apple")]
-public class Apple : WeaponScript
+public class Apple(Item item) : WeaponScript(item)
 {
-    public Apple(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, Action<int> cb = null)
     {
         if (sprite is not Aisling damageDealingSprite) return;

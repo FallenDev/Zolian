@@ -1,4 +1,7 @@
-﻿using Darkages.Common;
+﻿using Chaos.Common.Definitions;
+
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -8,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mehadi;
 
 [Script("Shreek")]
-public class Shreek : MundaneScript
+public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Shreek(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -24,9 +25,20 @@ public class Shreek : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.HasItem("Maple Syrup"))
+        if (client.Aisling.HasItem("Maple Glazed Waffles") && client.Aisling.QuestManager.SwampCount == 2)
         {
-            options.Add(new(0x01, "Here"));
+            options.Add(new(0x01, "Give Waffles"));
+        }
+
+        if (client.Aisling.HasStacks("Red Onion", 10) && client.Aisling.QuestManager.SwampCount == 3)
+        {
+            options.Add(new(0x05, "I'm back"));
+        }
+
+        if (client.Aisling.QuestManager.SwampCount >= 3)
+        {
+            client.SendOptionsDialog(Mundane, "Actually, it's quite good on toast", options.ToArray());
+            return;
         }
 
         client.SendOptionsDialog(Mundane, "*grumbles* Still in my swamp eh?", options.ToArray());
@@ -36,27 +48,67 @@ public class Shreek : MundaneScript
     {
         if (!AuthenticateUser(client)) return;
 
-        var exp = Random.Shared.Next(1000, 5000);
+        var exp = Random.Shared.Next(1000000, 5000000);
 
         switch (responseID)
         {
             case 0x01:
-            {
-                var options = new List<Dialog.OptionsDataItem>
                 {
-                    new (0x03, "Go on.."),
-                    new (0x02, "Oh? Take care")
-                };
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x03, "Go on.."),
+                        new (0x02, "Oh? Take care")
+                    };
 
-                client.SendOptionsDialog(Mundane, "You think waffles will make me like you? For your information, there's a lot more to me than people think. I have layers!", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "You think waffles will make me like you? For your information, there's a lot more to me than people think. I have layers!", options.ToArray());
+                    break;
+                }
             case 0x02:
                 client.CloseDialog();
                 break;
             case 0x03:
-            {
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x04, "Onions, got it"),
+                        new (0x02, "Nevermind")
+                    };
 
+                    client.SendOptionsDialog(Mundane, "I'll tell you what, you want in {=bMY SWAMP{=a, enter, but find me 10 Red Onions. Then I'll allow you full access.", options.ToArray());
+                    break;
+                }
+            case 0x04:
+                {
+                    if (client.Aisling.HasItem("Maple Glazed Waffles"))
+                    {
+                        client.Aisling.QuestManager.SwampAccess = true;
+                        client.Aisling.QuestManager.SwampCount++;
+                        client.TakeAwayQuantity(client.Aisling, "Maple Glazed Waffles", 1);
+                        client.GiveExp(exp);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
+                        client.SendAttributes(StatUpdateType.WeightGold);
+
+                        var legend = new Legend.LegendItem
+                        {
+                            Category = "LShreek1",
+                            Time = null,
+                            Color = LegendColor.White,
+                            Icon = (byte)9,
+                            Value = ""
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                        client.CloseDialog();
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "WHERE ARE THEY!?");
+                    }
+
+                    break;
+                }
+            case 0x05:
+            {
                 break;
             }
         }

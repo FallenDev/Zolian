@@ -12,10 +12,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("User Helper Menu")]
-public class UserHelper : MundaneScript
+public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public UserHelper(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

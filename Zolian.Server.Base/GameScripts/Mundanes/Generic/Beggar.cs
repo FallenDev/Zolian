@@ -8,9 +8,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Beggar")]
-public class Beggar : MundaneScript
+public class Beggar(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Beggar(WorldServer server, Mundane mundane) : base(server, mundane) { }
     public override void OnClick(WorldClient client, uint serial) { }
     public override void OnResponse(WorldClient client, ushort responseID, string args) { }
 

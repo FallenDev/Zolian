@@ -12,11 +12,9 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Banker")]
-public class Banker : MundaneScript
+public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private readonly Bank _bankTeller = new();
-
-    public Banker(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

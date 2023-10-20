@@ -3,16 +3,9 @@ using Darkages.Types;
 
 namespace Darkages.Events;
 
-public struct BuffEvent
+public struct BuffEvent(Sprite affected, Buff buff, TimeSpan timeLeft)
 {
-    public Sprite Affected { get; }
-    public Buff Buff { get; }
-    public TimeSpan TimeLeft { get; }
-
-    public BuffEvent(Sprite affected, Buff buff, TimeSpan timeLeft)
-    {
-        Affected = affected;
-        Buff = buff;
-        TimeLeft = timeLeft;
-    }
+    public Sprite Affected { get; } = affected;
+    public Buff Buff { get; } = buff;
+    public TimeSpan TimeLeft { get; } = timeLeft;
 }

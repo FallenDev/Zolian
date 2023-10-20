@@ -13,17 +13,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Client
 {
-    public class LoginClient : SocketClientBase, ILoginClient
-    {
-        private readonly ILoginServer<LoginClient> _server;
-
-        public LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
+    public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull][ItemNotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
-        {
-            _server = server;
-        }
-
+            [NotNull] [ItemNotNull] ILogger<SocketClientBase> logger)
+        : SocketClientBase(socket, crypto, packetSerializer, logger), ILoginClient
+    {
         protected override ValueTask HandlePacketAsync(Span<byte> span)
         {
             var opCode = span[3];
@@ -33,7 +27,7 @@ namespace Darkages.Network.Client
             if (isEncrypted)
                 Crypto.Decrypt(ref packet);
 
-            return _server.HandlePacketAsync(this, in packet);
+            return server.HandlePacketAsync(this, in packet);
         }
 
         public void SendLoginControls(LoginControlsType loginControlsType, string message)

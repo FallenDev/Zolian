@@ -4,7 +4,7 @@ using Darkages.Sprites;
 
 namespace Darkages.Types;
 
-public class Trackers : WorldServerTimer
+public class Trackers(TimeSpan delay) : WorldServerTimer(delay)
 {
     public Sprite LastDamagedBy { get; set; }
     public string LastMapInstanceId { get; set; }
@@ -15,11 +15,9 @@ public class Trackers : WorldServerTimer
     public DateTime LastTurn { get; set; }
     public Skill LastUsedSkill { get; set; }
     public Spell LastUsedSpell { get; set; }
-
-    public Trackers(TimeSpan delay) : base(delay) { }
 }
 
-public sealed class AislingTrackers : Trackers
+public sealed class AislingTrackers(TimeSpan delay) : Trackers(delay)
 {
     public DateTime LastEquip { get; set; }
     public DateTime LastManualAction { get; set; }
@@ -27,6 +25,4 @@ public sealed class AislingTrackers : Trackers
     public DateTime LastRefresh { get; set; }
     public DateTime LastUnequip { get; set; }
     public DateTime LastEquipOrUnequip => LastEquip > LastUnequip ? LastEquip : LastUnequip;
-
-    public AislingTrackers(TimeSpan delay) : base(delay) { }
 }

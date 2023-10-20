@@ -11,7 +11,7 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Forsaken")]
-public class Forsaken : MundaneScript
+public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private readonly SortedDictionary<Class, (int str, int intel, int wis, int con, int dex, int hp, int mp)> _advancedClassing = new()
     {
@@ -42,8 +42,6 @@ public class Forsaken : MundaneScript
         { Class.Arcanus, (500, 500, 500, 500, 500, "") },
         { Class.Monk, (500, 500, 500, 500, 500, "") }
     };
-
-    public Forsaken(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

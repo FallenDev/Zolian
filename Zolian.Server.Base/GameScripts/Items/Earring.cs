@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("Earring")]
-public class Earring : ItemScript
+public class Earring(Item item) : ItemScript(item)
 {
-    public Earring(Item item) : base(item) { }
-
     public override void Equipped(Sprite sprite, byte displaySlot) { }
 
     public override void OnUse(Sprite sprite, byte slot)

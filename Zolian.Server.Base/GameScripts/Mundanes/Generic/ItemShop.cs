@@ -12,11 +12,9 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Item Shop")]
-public class ItemShop : MundaneScript
+public class ItemShop(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private long _repairSum;
-
-    public ItemShop(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

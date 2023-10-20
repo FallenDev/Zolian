@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Gems;
 
 [Script("Obsidian")]
-public class Obsidian : MundaneScript
+public class Obsidian(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Obsidian(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

@@ -11,20 +11,14 @@ using Darkages.Templates;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class MundaneScript : ObjectManager, IScriptBase
+public abstract class MundaneScript(WorldServer server, Mundane mundane) : ObjectManager, IScriptBase
 {
     private long _onClickCheck;
     private static string[] Messages => ServerSetup.Instance.Config.NpcInteraction.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private static int Count => Messages.Length;
 
-    protected MundaneScript(WorldServer server, Mundane mundane)
-    {
-        Server = server;
-        Mundane = mundane;
-    }
-
-    protected Mundane Mundane { get; init; }
-    protected WorldServer Server { get; }
+    protected Mundane Mundane { get; init; } = mundane;
+    protected WorldServer Server { get; } = server;
 
     public abstract void OnResponse(WorldClient client, ushort responseId, string args);
 

@@ -13,16 +13,9 @@ namespace Darkages.GameScripts.Skills;
 // Cleric Skills
 // Blink = Teleport 
 [Script("Blink")]
-public class Blink : SkillScript
+public class Blink(Skill skill) : SkillScript(skill)
 {
-    private readonly Skill _skill;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Blink(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
+    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
@@ -36,13 +29,13 @@ public class Blink : SkillScript
         var client = damageDealingSprite.Client;
 
         damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
-        _skillMethod.Train(client, _skill);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(_skill.Template.Sound, false));
+        _skillMethod.Train(client, skill);
+        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(skill.Template.Sound, false));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!_skill.CanUse()) return;
+        if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Use the Cleric's Feather (Drag & Drop on map)");
@@ -112,19 +105,12 @@ public class Blink : SkillScript
 }
 
 [Script("Smite")]
-public class Smite : SkillScript
+public class Smite(Skill skill) : SkillScript(skill)
 {
-    private readonly Skill _skill;
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod;
-
-    public Smite(Skill skill) : base(skill)
-    {
-        _skill = skill;
-        _skillMethod = new GlobalSkillMethods();
-    }
+    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
@@ -153,7 +139,7 @@ public class Smite : SkillScript
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, _skill, action);
+            _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
             return;
         }
@@ -170,12 +156,12 @@ public class Smite : SkillScript
                 var debuff = new DebuffFrozen();
                 {
                     if (!_target.HasDebuff(debuff.Name))
-                        _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, _skill);
+                        _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, skill);
                 }
             }
 
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, _skill, dmgCalc, _crit);
+            _skillMethod.OnSuccessWithoutAction(_target, aisling, skill, dmgCalc, _crit);
         }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -183,11 +169,11 @@ public class Smite : SkillScript
 
     public override void OnUse(Sprite sprite)
     {
-        if (!_skill.CanUse()) return;
+        if (!skill.CanUse()) return;
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, _skill);
+            _success = _skillMethod.OnUse(aisling, skill);
 
             if (_success)
             {
@@ -214,11 +200,11 @@ public class Smite : SkillScript
                         var debuff = new DebuffFrozen();
                         {
                             if (!player.HasDebuff(debuff.Name))
-                                _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, player, _skill);
+                                _skillMethod.ApplyPhysicalDebuff(player.Client, debuff, player, skill);
                         }
 
                         var dmgCalc = DamageCalc(sprite);
-                        _skillMethod.OnSuccessWithoutAction(player, sprite, _skill, dmgCalc, _crit);
+                        _skillMethod.OnSuccessWithoutAction(player, sprite, skill, dmgCalc, _crit);
                         break;
                     }
             }
@@ -232,7 +218,7 @@ public class Smite : SkillScript
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 50 + _skill.Level;
+            var imp = 50 + skill.Level;
             dmg = client.Aisling.Str * 3 + client.Aisling.Int * 2;
             dmg += dmg * imp / 100;
         }

@@ -6,10 +6,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Items;
 
 [Script("Generic")]
-public class Generic : ItemScript
+public class Generic(Item item) : ItemScript(item)
 {
-    public Generic(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

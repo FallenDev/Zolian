@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Pete")]
-public class Pete : MundaneScript
+public class Pete(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Pete(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

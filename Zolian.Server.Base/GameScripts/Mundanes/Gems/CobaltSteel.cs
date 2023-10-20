@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Gems;
 
 [Script("CobaltSteel")]
-public class CobaltSteel : MundaneScript
+public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public CobaltSteel(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

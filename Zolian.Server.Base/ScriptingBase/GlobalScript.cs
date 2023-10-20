@@ -5,10 +5,9 @@ using Darkages.Object;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class GlobalScript : ObjectManager, IScriptBase
+public abstract class GlobalScript(WorldClient client) : ObjectManager, IScriptBase
 {
-    private WorldClient _client;
-    protected GlobalScript(WorldClient client) => _client = client;
+    private WorldClient _client = client;
     public WorldServerTimer Timer { get; set; }
     public abstract void Update(TimeSpan elapsedTime);
 }

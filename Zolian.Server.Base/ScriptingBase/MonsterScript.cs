@@ -6,16 +6,10 @@ using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class MonsterScript : ObjectManager, IScriptBase
+public abstract class MonsterScript(Monster monster, Area map) : ObjectManager, IScriptBase
 {
-    protected readonly Area Map;
-    protected readonly Monster Monster;
-
-    protected MonsterScript(Monster monster, Area map)
-    {
-        Monster = monster;
-        Map = map;
-    }
+    protected readonly Area Map = map;
+    protected readonly Monster Monster = monster;
 
     public abstract void Update(TimeSpan elapsedTime);
     public abstract void OnClick(WorldClient client);

@@ -13,10 +13,8 @@ using Gender = Darkages.Enums.Gender;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Eireann")]
-public class Eireann : MundaneScript
+public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Eireann(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

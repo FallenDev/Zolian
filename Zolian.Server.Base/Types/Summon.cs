@@ -13,10 +13,8 @@ public interface IEphermeral
     void Spawn(string creatureName, string script, double lifespan = 120, double updateRate = 650, int count = 1);
 }
 
-public abstract class Summon : ObjectManager, IEphermeral
+public abstract class Summon(WorldClient client) : ObjectManager, IEphermeral
 {
-    private readonly WorldClient _client;
-
     private WorldServerTimer ObjectsUpdateTimer { get; set; }
     private WorldServerTimer ObjectsRemovedTimer { get; set; }
 
@@ -24,11 +22,6 @@ public abstract class Summon : ObjectManager, IEphermeral
 
     private KeyValuePair<string, MonsterTemplate> Template { get; set; }
     private string Script { get; set; }
-
-    protected Summon(WorldClient client)
-    {
-        _client = client;
-    }
 
     public void Spawn(string creatureName, string script, double lifespan = 120, double updateRate = 650, int count = 1)
     {
@@ -76,7 +69,7 @@ public abstract class Summon : ObjectManager, IEphermeral
 
     private void Create(Template template, string script, int count = 1)
     {
-        if (_client == null)
+        if (client == null)
             return;
 
         switch (template)
@@ -86,22 +79,22 @@ public abstract class Summon : ObjectManager, IEphermeral
                 for (var i = 0; i < count; i++)
                 {
                     //Share similar attributes as the summoner.
-                    monsterTemplate.Level = (ushort)(_client.Aisling.ExpLevel + 3);
+                    monsterTemplate.Level = (ushort)(client.Aisling.ExpLevel + 3);
                     monsterTemplate.LootType = LootQualifer.None;
-                    monsterTemplate.DefenseElement = _client.Aisling.DefenseElement;
-                    monsterTemplate.OffenseElement = _client.Aisling.OffenseElement;
-                    monsterTemplate.SkillScripts = new List<string>(_client.Aisling.SkillBook.Skills.Where(n => n.Value != null).Select(n => n.Value.Template.ScriptName).ToList());
+                    monsterTemplate.DefenseElement = client.Aisling.DefenseElement;
+                    monsterTemplate.OffenseElement = client.Aisling.OffenseElement;
+                    monsterTemplate.SkillScripts = new List<string>(client.Aisling.SkillBook.Skills.Where(n => n.Value != null).Select(n => n.Value.Template.ScriptName).ToList());
 
-                    var monster = Monster.Create(monsterTemplate, _client.Aisling.Map);
+                    var monster = Monster.Create(monsterTemplate, client.Aisling.Map);
 
-                    monster.SummonerId = _client.Aisling.Serial;
-                    monster.X = _client.Aisling.LastPosition.X;
-                    monster.Y = _client.Aisling.LastPosition.Y;
-                    monster.CurrentMapId = _client.Aisling.CurrentMapId;
+                    monster.SummonerId = client.Aisling.Serial;
+                    monster.X = client.Aisling.LastPosition.X;
+                    monster.Y = client.Aisling.LastPosition.Y;
+                    monster.CurrentMapId = client.Aisling.CurrentMapId;
 
                     lock (Spawns)
                     {
-                        Spawns.Add((_client.Aisling.Username, monster));
+                        Spawns.Add((client.Aisling.Username, monster));
                     }
 
                     AddObject(monster);

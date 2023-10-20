@@ -5,18 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Darkages.Network.Server
 {
-    public class ClientFactory<T> : IClientFactory<T> where T : SocketClientBase
+    public class ClientFactory<T>(IServiceProvider service) : IClientFactory<T>
+        where T : SocketClientBase
     {
-        private readonly IServiceProvider serviceProvider;
-
-        public ClientFactory(IServiceProvider service)
-        {
-            serviceProvider = service;
-        }
-
         public T CreateClient(Socket socket)
         {
-            return ActivatorUtilities.CreateInstance<T>(serviceProvider, socket);
+            return ActivatorUtilities.CreateInstance<T>(service, socket);
         }
     }
 }

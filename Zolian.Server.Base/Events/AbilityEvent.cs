@@ -2,18 +2,10 @@
 
 namespace Darkages.Events;
 
-public struct AbilityEvent
+public struct AbilityEvent(Aisling player, int exp, bool hunting, bool overflow)
 {
-    public Aisling Player { get; }
-    public int Exp { get; }
-    public bool Hunting { get; }
-    public bool Overflow { get; }
-
-    public AbilityEvent(Aisling player, int exp, bool hunting, bool overflow)
-    {
-        Player = player;
-        Exp = exp;
-        Hunting = hunting;
-        Overflow = overflow;
-    }
+    public Aisling Player { get; } = player;
+    public int Exp { get; } = exp;
+    public bool Hunting { get; } = hunting;
+    public bool Overflow { get; } = overflow;
 }

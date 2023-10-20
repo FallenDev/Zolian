@@ -112,16 +112,10 @@ public class Position
         return list.ToArray();
     }
 
-    public class TileContentPosition
+    public class TileContentPosition(Position pos, TileContent content)
     {
-        public TileContentPosition(Position pos, TileContent content)
-        {
-            Position = pos;
-            Content = content;
-        }
-
-        public TileContent Content { get; set; }
-        public Position Position { get; set; }
+        public TileContent Content { get; set; } = content;
+        public Position Position { get; set; } = pos;
     }
 
     public static bool TryParse(string xValue, string yValue,  out Position position)

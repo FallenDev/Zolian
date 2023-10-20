@@ -973,34 +973,18 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     }
 }
 
-public class QualityBonus
+public class QualityBonus(int _str, int _int, int _wis, int _con, int _dex, int dmg, int hit, int ac, int mr, int hp, int mp, int regen)
 {
-    public int Str { get; }
-    public int Int { get; }
-    public int Wis { get; }
-    public int Con { get; }
-    public int Dex { get; }
-    public int Dmg { get; }
-    public int Hit { get; }
-    public int Ac { get; }
-    public int Mr { get; }
-    public int Hp { get; }
-    public int Mp { get; }
-    public int Regen { get; }
-
-    public QualityBonus(int _str, int _int, int _wis, int _con, int _dex, int dmg, int hit, int ac, int mr, int hp, int mp, int regen)
-    {
-        Str = _str;
-        Int = _int;
-        Wis = _wis;
-        Con = _con;
-        Dex = _dex;
-        Dmg = dmg;
-        Hit = hit;
-        Ac = ac;
-        Mr = mr;
-        Hp = hp;
-        Mp = mp;
-        Regen = regen;
-    }
+    public int Str { get; } = _str;
+    public int Int { get; } = _int;
+    public int Wis { get; } = _wis;
+    public int Con { get; } = _con;
+    public int Dex { get; } = _dex;
+    public int Dmg { get; } = dmg;
+    public int Hit { get; } = hit;
+    public int Ac { get; } = ac;
+    public int Mr { get; } = mr;
+    public int Hp { get; } = hp;
+    public int Mp { get; } = mp;
+    public int Regen { get; } = regen;
 }

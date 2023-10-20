@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Guide")]
-public class Guide : MundaneScript
+public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Guide(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

@@ -2,14 +2,9 @@
 
 namespace Darkages.Types;
 
-public class Pet : Summon
+public class Pet(WorldClient client) : Summon(client)
 {
-    private readonly WorldClient _client;
-
-    public Pet(WorldClient client) : base(client)
-    {
-        _client = client;
-    }
+    private readonly WorldClient _client = client;
 
     // addition pet logic can go here, such as TP back to player.
     public override void UpdateSpawns(TimeSpan elapsedTime)

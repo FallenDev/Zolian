@@ -39,12 +39,7 @@ public static class ScriptManager
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class ScriptAttribute : Attribute
+public class ScriptAttribute(string name) : Attribute
 {
-    public ScriptAttribute(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 }

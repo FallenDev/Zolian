@@ -9,15 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Skills;
 
 [Script("Identify Weapon")]
-public class IdentifyWeapon : SkillScript
+public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 {
-    private readonly Skill _skill;
-
-    public IdentifyWeapon(Skill skill) : base(skill)
-    {
-        _skill = skill;
-    }
-
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
@@ -93,13 +86,13 @@ public class IdentifyWeapon : SkillScript
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!_skill.CanUse()) return;
+        if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);
@@ -107,15 +100,8 @@ public class IdentifyWeapon : SkillScript
 }
 
 [Script("Identify Armor")]
-public class IdentifyArmor : SkillScript
+public class IdentifyArmor(Skill skill) : SkillScript(skill)
 {
-    private readonly Skill _skill;
-
-    public IdentifyArmor(Skill skill) : base(skill)
-    {
-        _skill = skill;
-    }
-
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
@@ -168,13 +154,13 @@ public class IdentifyArmor : SkillScript
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!_skill.CanUse()) return;
+        if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);
@@ -182,15 +168,8 @@ public class IdentifyArmor : SkillScript
 }
 
 [Script("Inspect Item")]
-public class InspectItem : SkillScript
+public class InspectItem(Skill skill) : SkillScript(skill)
 {
-    private readonly Skill _skill;
-
-    public InspectItem(Skill skill) : base(skill)
-    {
-        _skill = skill;
-    }
-
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
@@ -243,13 +222,13 @@ public class InspectItem : SkillScript
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(_skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!_skill.CanUse()) return;
+        if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);

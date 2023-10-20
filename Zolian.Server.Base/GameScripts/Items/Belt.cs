@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("Belt")]
-public class Belt : ItemScript
+public class Belt(Item item) : ItemScript(item)
 {
-    public Belt(Item item) : base(item) { }
-        
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

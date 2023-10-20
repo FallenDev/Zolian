@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
 [Script("Monk Class")]
-public class MonkClass : MundaneScript
+public class MonkClass(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public MonkClass(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
 [Script("First Quest")]
-public class Dealoote : MundaneScript
+public class Dealoote(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Dealoote(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

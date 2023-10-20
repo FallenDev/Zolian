@@ -10,12 +10,10 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Barber")]
-public class Barber : MundaneScript
+public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private int _styleNumber;
     private int _colorNumber;
-
-    public Barber(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

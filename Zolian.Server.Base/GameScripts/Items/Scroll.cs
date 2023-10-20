@@ -7,10 +7,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Items;
 
 [Script("Scroll")]
-public class Scroll : ItemScript
+public class Scroll(Item item) : ItemScript(item)
 {
-    public Scroll(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

@@ -82,11 +82,10 @@ public sealed class ObjectService
     }
 }
 
-public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
+public class SpriteCollection<T>(IEnumerable<T> values) : IEnumerable<T>
+    where T : Sprite
 {
-    private readonly List<T> _values;
-
-    public SpriteCollection(IEnumerable<T> values) => _values = new List<T>(values);
+    private readonly List<T> _values = new List<T>(values);
 
     public void Add(T obj)
     {

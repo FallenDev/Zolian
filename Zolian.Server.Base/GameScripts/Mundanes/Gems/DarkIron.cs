@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Gems;
 
 [Script("DarkIron")]
-public class DarkIron : MundaneScript
+public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public DarkIron(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

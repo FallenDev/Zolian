@@ -11,11 +11,9 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Arena;
 
 [Script("Inner Host")]
-public class InnerHost : MundaneScript
+public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private long _repairSum;
-
-    public InnerHost(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

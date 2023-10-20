@@ -12,10 +12,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Emer")]
-public class Emer : MundaneScript
+public class Emer(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Emer(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

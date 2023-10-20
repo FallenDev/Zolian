@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("FirstAcc")]
-public class FirstAcc : ItemScript
+public class FirstAcc(Item item) : ItemScript(item)
 {
-    public FirstAcc(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

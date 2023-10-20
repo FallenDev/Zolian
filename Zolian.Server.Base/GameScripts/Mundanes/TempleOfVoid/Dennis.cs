@@ -11,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.TempleOfLight;
 
 [Script("Dennis")]
-public class Dennis : MundaneScript
+public class Dennis(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Dennis(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

@@ -4,14 +4,9 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("Will Saving Throw")]
-public class WillSavingThrow : FormulaScript
+public class WillSavingThrow(Sprite obj) : FormulaScript
 {
-    private readonly Sprite _obj;
-
-    public WillSavingThrow(Sprite obj)
-    {
-        _obj = obj;
-    }
+    private readonly Sprite _obj = obj;
 
     public override long Calculate(Sprite obj, long value)
     {

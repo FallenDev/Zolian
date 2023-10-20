@@ -7,10 +7,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Items;
 
 [Script("Consumable")]
-public class Consumable : ItemScript
+public class Consumable(Item item) : ItemScript(item)
 {
-    public Consumable(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

@@ -9,14 +9,9 @@ using MapFlags = Darkages.Enums.MapFlags;
 namespace Darkages.GameScripts.Spells;
 
 [Script("Needle Trap")]
-public class Needle_Trap : SpellScript
+public class Needle_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Needle_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -57,14 +52,9 @@ public class Needle_Trap : SpellScript
 }
 
 [Script("Stiletto Trap")]
-public class Stiletto_Trap : SpellScript
+public class Stiletto_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Stiletto_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -105,14 +95,9 @@ public class Stiletto_Trap : SpellScript
 }
 
 [Script("Coiled Trap")]
-public class Coiled_Trap : SpellScript
+public class Coiled_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Coiled_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -153,14 +138,9 @@ public class Coiled_Trap : SpellScript
 }
 
 [Script("Spring Trap")]
-public class Spring_Trap : SpellScript
+public class Spring_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Spring_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -201,14 +181,9 @@ public class Spring_Trap : SpellScript
 }
 
 [Script("Maiden Trap")]
-public class Maiden_Trap : SpellScript
+public class Maiden_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Maiden_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -249,14 +224,9 @@ public class Maiden_Trap : SpellScript
 }
 
 [Script("Poison Tipped Trap")]
-public class Poison_Trap : SpellScript
+public class Poison_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Poison_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -303,14 +273,9 @@ public class Poison_Trap : SpellScript
 }
 
 [Script("Snare Trap")]
-public class Snare_Trap : SpellScript
+public class Snare_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Snare_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -357,14 +322,9 @@ public class Snare_Trap : SpellScript
 }
 
 [Script("Flash Trap")]
-public class Flash_Trap : SpellScript
+public class Flash_Trap(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Flash_Trap(Spell spell) : base(spell)
-    {
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnActivated(Sprite sprite) { }
 
@@ -411,16 +371,9 @@ public class Flash_Trap : SpellScript
 }
 
 [Script("Hiraishin")]
-public class Hiraishin : SpellScript
+public class Hiraishin(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Hiraishin(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target)
     {
@@ -449,21 +402,21 @@ public class Hiraishin : SpellScript
         damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, spell.Template.Sound);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!_spell.CanUse()) return;
+        if (!spell.CanUse()) return;
 
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            _spellMethod.Train(client, _spell);
+            _spellMethod.Train(client, spell);
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
+                aisling.CurrentMp -= spell.Template.ManaCost;
             }
             else
             {
@@ -535,16 +488,9 @@ public class Hiraishin : SpellScript
 }
 
 [Script("Shunshin")]
-public class Shunshin : SpellScript
+public class Shunshin(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Shunshin(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target)
     {
@@ -586,21 +532,21 @@ public class Shunshin : SpellScript
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
-        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, _spell.Template.Sound);
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, spell.Template.Sound);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!_spell.CanUse()) return;
+        if (!spell.CanUse()) return;
 
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            _spellMethod.Train(client, _spell);
+            _spellMethod.Train(client, spell);
 
-            if (aisling.CurrentMp - _spell.Template.ManaCost > 0)
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
             {
-                aisling.CurrentMp -= _spell.Template.ManaCost;
+                aisling.CurrentMp -= spell.Template.ManaCost;
             }
             else
             {

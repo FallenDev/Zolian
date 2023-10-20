@@ -8,18 +8,13 @@ public class Dialog
 {
     private List<DialogSequence> Sequences = new();
 
-    public Dialog()
-    {
-        Serial = EphemeralRandomIdGenerator<int>.Shared.NextId;
-    }
-
     public bool CanMoveBack => SequenceIndex - 1 >= 0;
     public bool CanMoveNext => SequenceIndex + 1 < Sequences.Count;
     public DialogSequence Current => Sequences[SequenceIndex];
 
     public ushort DisplayImage { get; set; }
     private int SequenceIndex { get; set; }
-    private int Serial { get; set; }
+    private int Serial { get; set; } = EphemeralRandomIdGenerator<int>.Shared.NextId;
 
     public DialogSequence Invoke(WorldClient client)
     {
@@ -39,15 +34,9 @@ public class Dialog
         client.DlgSession.Sequence = (ushort)SequenceIndex;
     }
 
-    public class OptionsDataItem
+    public class OptionsDataItem(short step, string text)
     {
-        public OptionsDataItem(short step, string text)
-        {
-            Step = step;
-            Text = text;
-        }
-
-        public short Step { get; }
-        public string Text { get; }
+        public short Step { get; } = step;
+        public string Text { get; } = text;
     }
 }

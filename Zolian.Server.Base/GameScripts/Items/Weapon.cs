@@ -7,10 +7,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Items;
 
 [Script("Weapon")]
-public class Weapon : ItemScript
+public class Weapon(Item item) : ItemScript(item)
 {
-    public Weapon(Item item) : base(item) { }
-        
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

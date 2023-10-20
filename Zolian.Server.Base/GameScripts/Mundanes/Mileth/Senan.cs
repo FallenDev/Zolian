@@ -11,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Senan")]
-public class Senan : MundaneScript
+public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Senan(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

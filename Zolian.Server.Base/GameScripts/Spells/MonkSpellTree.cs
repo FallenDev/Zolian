@@ -10,17 +10,10 @@ namespace Darkages.GameScripts.Spells;
 /// Dion
 /// </summary>
 [Script("Dion")]
-public class Dion : SpellScript
+public class Dion(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_dion();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Dion(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -31,11 +24,11 @@ public class Dion : SpellScript
         if (target.Immunity)
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, _spell);
+            _spellMethod.Train(aisling.Client, spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }

@@ -8,10 +8,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Temple of Void")]
-public class TempleOfVoid : MundaneScript
+public class TempleOfVoid(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public TempleOfVoid(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

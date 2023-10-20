@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("Boot")]
-public class Boot : ItemScript
+public class Boot(Item item) : ItemScript(item)
 {
-    public Boot(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

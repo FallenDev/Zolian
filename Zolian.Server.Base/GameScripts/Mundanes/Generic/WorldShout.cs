@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("WorldShout")]
-public class WorldShout : MundaneScript
+public class WorldShout(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public WorldShout(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

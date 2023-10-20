@@ -5,13 +5,11 @@ using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class SpellScript : ObjectManager, IScriptBase, IUseableTarget
+public abstract class SpellScript(Spell spell) : ObjectManager, IScriptBase, IUseableTarget
 {
-    protected SpellScript(Spell spell) => Spell = spell;
-
     public string Arguments { get; set; }
     public bool IsScriptDefault { get; set; }
-    public Spell Spell { get; set; }
+    public Spell Spell { get; set; } = spell;
 
     public virtual void OnActivated(Sprite sprite) { }
     public abstract void OnFailed(Sprite sprite, Sprite target);

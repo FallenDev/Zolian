@@ -5,10 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("Necklace")]
-public class Necklace : ItemScript
+public class Necklace(Item item) : ItemScript(item)
 {
-    public Necklace(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

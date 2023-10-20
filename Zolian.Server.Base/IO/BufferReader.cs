@@ -3,11 +3,9 @@ using System.Text;
 
 namespace Darkages.IO;
 
-public class BufferReader : BinaryReader
+public class BufferReader(Stream stream) : BinaryReader(stream, Encoding.GetEncoding(949))
 {
     private readonly Encoding _encoding = Encoding.GetEncoding(949);
-
-    public BufferReader(Stream stream) : base(stream, Encoding.GetEncoding(949)) { }
 
     public IPAddress ReadIpAddress()
     {

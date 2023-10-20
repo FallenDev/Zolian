@@ -7,16 +7,10 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Spells;
 
 [Script("Leap")]
-public class Leap : SpellScript
+public class Leap(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public Leap(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly Spell _spell = spell;
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -32,17 +26,10 @@ public class Leap : SpellScript
 /// Aite
 /// </summary>
 [Script("Dia Aite")]
-public class DiaAite : SpellScript
+public class DiaAite(Spell spell) : SpellScript(spell)
 {
-    private readonly Spell _spell;
     private readonly Buff _buff = new buff_DiaAite();
-    private readonly GlobalSpellMethods _spellMethod;
-
-    public DiaAite(Spell spell) : base(spell)
-    {
-        _spell = spell;
-        _spellMethod = new GlobalSpellMethods();
-    }
+    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -57,6 +44,6 @@ public class DiaAite : SpellScript
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, _spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
     }
 }

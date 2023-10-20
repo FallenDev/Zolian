@@ -6,10 +6,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Items;
 
 [Script("Shield")]
-public class Shield : ItemScript
+public class Shield(Item item) : ItemScript(item)
 {
-    public Shield(Item item) : base(item) { }
-
     public override void OnUse(Sprite sprite, byte slot)
     {
         if (sprite == null) return;

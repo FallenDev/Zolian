@@ -11,10 +11,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Tagor;
 
 [Script("Tagor Access")]
-public class TagorAccess : MundaneScript
+public class TagorAccess(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public TagorAccess(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

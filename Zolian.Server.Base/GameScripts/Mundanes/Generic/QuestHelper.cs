@@ -8,10 +8,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Generic;
 
 [Script("Quest Helper")]
-public class QuestHelper : MundaneScript
+public class QuestHelper(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public QuestHelper(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial) { }
 
     protected override void TopMenu(WorldClient client) => client.CloseDialog();

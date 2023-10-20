@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.TempleOfLight;
 
 [Script("Aerith")]
-public class Aerith : MundaneScript
+public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Aerith(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

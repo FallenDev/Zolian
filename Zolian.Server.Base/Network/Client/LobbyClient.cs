@@ -12,16 +12,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Client
 {
-    public class LobbyClient : SocketClientBase, ILobbyClient
+    public class LobbyClient([NotNull] ILobbyServer<LobbyClient> server, [NotNull] Socket socket,
+            [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
+            [NotNull] [ItemNotNull] ILogger<SocketClientBase> logger)
+        : SocketClientBase(socket, crypto, packetSerializer, logger), ILobbyClient
     {
-        private readonly ILobbyServer<LobbyClient> _server;
-
-        public LobbyClient([NotNull]ILobbyServer<LobbyClient> server, [NotNull] Socket socket, [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer, 
-            [NotNull] [ItemNotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
-        {
-            _server = server;
-        }
-
         protected override ValueTask HandlePacketAsync(Span<byte> span)
         {
             var opCode = span[3];
@@ -31,7 +26,7 @@ namespace Darkages.Network.Client
             if (isEncrypted)
                 Crypto.Decrypt(ref packet);
 
-            return _server.HandlePacketAsync(this, in packet);
+            return server.HandlePacketAsync(this, in packet);
         }
 
         public void SendServerTable(byte[] serverTableData)

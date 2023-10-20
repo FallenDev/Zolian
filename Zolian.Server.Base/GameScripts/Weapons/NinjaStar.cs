@@ -5,15 +5,8 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Weapons;
 
 [Script("Ninja Star")]
-public class NinjaStar : WeaponScript
+public class NinjaStar(Item item) : WeaponScript(item)
 {
-    private Item _item;
-
-    public NinjaStar(Item item) : base(item)
-    {
-        _item = item;
-    }
-
     public override void OnUse(Sprite sprite, Action<int> cb = null)
     {
         if (sprite is not Aisling damageDealingSprite) return;
@@ -30,7 +23,7 @@ public class NinjaStar : WeaponScript
 
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
 
-        switch (_item.ItemQuality)
+        switch (item.ItemQuality)
         {
             // Dull debuff
             case Item.Quality.Damaged:

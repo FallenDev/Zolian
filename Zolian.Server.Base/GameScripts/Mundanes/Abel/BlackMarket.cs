@@ -12,10 +12,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Abel;
 
 [Script("Black Market")]
-public class BlackMarket : MundaneScript
+public class BlackMarket(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public BlackMarket(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

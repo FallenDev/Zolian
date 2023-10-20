@@ -1,6 +1,3 @@
 ﻿namespace Darkages.Meta;
 
-public class MetafileCollection : List<Metafile>
-{
-    public MetafileCollection(int capacity) : base(capacity) { }
-}
+public class MetafileCollection(int capacity) : List<Metafile>(capacity);

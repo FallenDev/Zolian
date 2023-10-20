@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Gems;
 
 [Script("Talos")]
-public class Talos : MundaneScript
+public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Talos(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

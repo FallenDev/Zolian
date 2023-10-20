@@ -11,11 +11,10 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Tutorial;
 
 [Script("Journey Start")]
-public class RaceChooser : MundaneScript
+public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private Race _chosenRace = Race.UnDecided;
     private SubClassDragonkin _dragonkin = SubClassDragonkin.Red;
-    public RaceChooser(WorldServer server, Mundane mundane) : base(server, mundane) { }
 
     public override void OnClick(WorldClient client, uint serial)
     {

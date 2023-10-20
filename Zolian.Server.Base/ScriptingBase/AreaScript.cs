@@ -6,12 +6,11 @@ using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class AreaScript : IScriptBase
+public abstract class AreaScript(Area area) : IScriptBase
 {
-    protected Area Area;
+    protected Area Area = area;
     public WorldServerTimer Timer { get; set; }
 
-    protected AreaScript(Area area) => Area = area;
     public abstract void Update(TimeSpan elapsedTime);
         
     public virtual void OnMapEnter(WorldClient client) { }

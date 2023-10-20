@@ -10,10 +10,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Hell;
 
 [Script("Barren Lord")]
-public class BarrenLord : MundaneScript
+public class BarrenLord(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public BarrenLord(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

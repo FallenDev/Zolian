@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Arena;
 
 [Script("Arena Host")]
-public class ArenaHost : MundaneScript
+public class ArenaHost(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public ArenaHost(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

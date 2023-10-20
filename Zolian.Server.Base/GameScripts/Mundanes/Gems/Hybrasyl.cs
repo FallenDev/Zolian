@@ -9,10 +9,8 @@ using Darkages.Types;
 namespace Darkages.GameScripts.Mundanes.Gems;
 
 [Script("Hybrasyl")]
-public class Hybrasyl : MundaneScript
+public class Hybrasyl(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Hybrasyl(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         client.EntryCheck = serial;

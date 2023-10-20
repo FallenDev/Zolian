@@ -3,14 +3,9 @@ using System.Text;
 
 namespace Darkages.IO;
 
-public class BufferWriter : BinaryWriter
+public class BufferWriter(Stream stream) : BinaryWriter(stream, Encoding.GetEncoding(949))
 {
     private static readonly Encoding Encoding = Encoding.GetEncoding(949);
-
-    public BufferWriter(Stream stream)
-        : base(stream, Encoding.GetEncoding(949))
-    {
-    }
 
     public void Write(IPAddress ipAddress)
     {
