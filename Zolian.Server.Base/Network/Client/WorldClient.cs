@@ -48,11 +48,16 @@ namespace Darkages.Network.Client
 {
     public class WorldClient : SocketClientBase, IWorldClient
     {
-        public readonly IWorldServer<WorldClient> Server;
+        private readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
-        public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromSeconds(1));
-        public readonly WorldServerTimer LanternCheckTimer = new(TimeSpan.FromSeconds(2));
-        public readonly WorldServerTimer AggroTimer = new(TimeSpan.FromSeconds(20));
+        public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
+        private readonly Stopwatch _skillControl = new();
+        private readonly Stopwatch _statusControl = new();
+        private readonly Stopwatch _aggroMessageControl = new();
+        private readonly Stopwatch _lanternControl = new();
+        private readonly Stopwatch _dayDreamingControl = new();
+        private readonly WorldServerTimer _lanternCheckTimer = new(TimeSpan.FromSeconds(2));
+        private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         public readonly object SyncClient = new();
         public bool ExitConfirmed;
@@ -203,10 +208,16 @@ namespace Darkages.Network.Client
             _updateDebuff = Task.Run(ProcessUpdatingDebuffsEvent);
         }
 
-        public void Update(TimeSpan elapsedTime)
+        public void Update()
         {
             if (Aisling is not { LoggedIn: true }) return;
-            DoUpdate(elapsedTime);
+            EquipLantern();
+            CheckDayDreaming();
+            HandleBadTrades();
+            DeathStatusCheck();
+            UpdateStatusBarAndThreat();
+            UpdateSkillSpellCooldown();
+            ShowAggro();
         }
 
         #region Events
@@ -363,20 +374,15 @@ namespace Darkages.Network.Client
 
         #endregion
 
-        private void DoUpdate(TimeSpan elapsedTime)
+        public void EquipLantern()
         {
-            EquipLantern(elapsedTime);
-            CheckDayDreaming(elapsedTime);
-            HandleBadTrades();
-            DeathStatusCheck();
-            UpdateStatusBarAndThreat(elapsedTime);
-            UpdateSkillSpellCooldown(elapsedTime);
-            ShowAggro(elapsedTime);
-        }
+            if (!_lanternControl.IsRunning)
+            {
+                _lanternControl.Start();
+            }
 
-        public void EquipLantern(TimeSpan elapsedTime)
-        {
-            if (!LanternCheckTimer.Update(elapsedTime)) return;
+            if (_lanternControl.Elapsed.TotalMilliseconds < _lanternCheckTimer.Delay.TotalMilliseconds) return;
+            _lanternControl.Restart();
             if (Aisling.Map == null) return;
             if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
             {
@@ -391,7 +397,7 @@ namespace Darkages.Network.Client
             SendDisplayAisling(Aisling);
         }
 
-        public void CheckDayDreaming(TimeSpan elapsedTime)
+        public void CheckDayDreaming()
         {
             // Logic based on player's set ActiveStatus
             switch (Aisling.ActiveStatus)
@@ -403,7 +409,7 @@ namespace Darkages.Network.Client
                 case ActivityStatus.LoneHunter:
                 case ActivityStatus.GroupHunter:
                 case ActivityStatus.NeedHelp:
-                    DaydreamingRoutine(elapsedTime);
+                    DaydreamingRoutine();
                     break;
                 case ActivityStatus.DoNotDisturb:
                     break;
@@ -460,15 +466,28 @@ namespace Darkages.Network.Client
             EnqueueDebuffAppliedEvent(Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
         }
 
-        public void UpdateStatusBarAndThreat(TimeSpan elapsedTime)
+        public void UpdateStatusBarAndThreat()
         {
-            Aisling.UpdateBuffs(elapsedTime);
-            Aisling.UpdateDebuffs(elapsedTime);
-            Aisling.ThreatGeneratedSubsided(Aisling, elapsedTime);
+            if (!_statusControl.IsRunning)
+            {
+                _statusControl.Start();
+            }
+
+            if (_statusControl.Elapsed.TotalMilliseconds < Aisling.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
+
+            Aisling.UpdateBuffs(_statusControl.Elapsed);
+            Aisling.UpdateDebuffs(_statusControl.Elapsed);
+            Aisling.ThreatGeneratedSubsided(Aisling);
+            _statusControl.Restart();
         }
 
-        public void UpdateSkillSpellCooldown(TimeSpan elapsedTime)
+        public void UpdateSkillSpellCooldown()
         {
+            if (!_skillControl.IsRunning)
+            {
+                _skillControl.Start();
+            }
+
             // Checks in real-time if a player is overburdened
             if (Aisling.Overburden)
             {
@@ -486,7 +505,7 @@ namespace Darkages.Network.Client
                 }
             }
 
-            if (!SkillSpellTimer.Update(elapsedTime)) return;
+            if (_skillControl.Elapsed.TotalMilliseconds < SkillSpellTimer.Delay.TotalMilliseconds) return;
 
             foreach (var skill in Aisling.SkillBook.Skills.Values)
             {
@@ -503,14 +522,20 @@ namespace Darkages.Network.Client
                 if (spell.CurrentCooldown < 0)
                     spell.CurrentCooldown = 0;
             }
+
+            _skillControl.Restart();
         }
 
-        private void ShowAggro(TimeSpan elapsedTime)
+        private void ShowAggro()
         {
-            if (!AggroTimer.Update(elapsedTime)) return;
-            Aisling.ThreatTimer = Aisling.Camouflage ? new WorldServerTimer(TimeSpan.FromSeconds(30)) : new WorldServerTimer(TimeSpan.FromSeconds(60));
-            AggroTimer.Delay = elapsedTime + TimeSpan.FromSeconds(7);
+            if (!_aggroMessageControl.IsRunning)
+            {
+                _aggroMessageControl.Start();
+            }
 
+            if (_aggroMessageControl.Elapsed.TotalMilliseconds < _aggroTimer.Delay.TotalMilliseconds) return;
+            _aggroMessageControl.Restart();
+            Aisling.ThreatTimer = Aisling.Camouflage ? new WorldServerTimer(TimeSpan.FromSeconds(30)) : new WorldServerTimer(TimeSpan.FromSeconds(60));
             var color = "a";
             var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
             var group = Aisling.GroupParty?.PartyMembers;
@@ -535,8 +560,7 @@ namespace Darkages.Network.Client
                 break;
             }
 
-            Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage,
-                Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
+            Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
         }
 
         #region Player Load
@@ -2182,11 +2206,11 @@ namespace Darkages.Network.Client
                         var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
 
                         foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
-                                 {
-                                     CheckSum = metaFile.Hash,
-                                     Data = metaFile.DeflatedData,
-                                     Name = metaFile.Name
-                                 }))
+                        {
+                            CheckSum = metaFile.Hash,
+                            Data = metaFile.DeflatedData,
+                            Name = metaFile.Name
+                        }))
                         {
                             args.MetaDataCollection.Add(metafileInfo);
                         }
@@ -3531,9 +3555,16 @@ namespace Darkages.Network.Client
             Aisling.Client.LastClientRefresh = DateTime.UtcNow;
         }
 
-        public void DaydreamingRoutine(TimeSpan elapsedTime)
+        public void DaydreamingRoutine()
         {
-            if (!(_dayDreamingTimer.Update(elapsedTime) & Aisling.Direction is 1 or 2)) return;
+            if (!_dayDreamingControl.IsRunning)
+            {
+                _dayDreamingControl.Start();
+            }
+
+            if (_dayDreamingControl.Elapsed.TotalMilliseconds < _dayDreamingTimer.Delay.TotalMilliseconds) return;
+            _dayDreamingControl.Restart();
+            if (!(Aisling.Direction is 1 or 2)) return;
             if (!((DateTime.UtcNow - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
             if (!Socket.Connected || !IsDayDreaming) return;
 

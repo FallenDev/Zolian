@@ -63,7 +63,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public readonly ObjectManager ObjectHandlers = new();
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
-    private DateTime _gameSpeed;
     private DateTime _mapSpeed;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
@@ -746,14 +745,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async void UpdateClients()
     {
-        _gameSpeed = DateTime.UtcNow;
         var clientsToRemove = new ConcurrentBag<uint>();
 
         while (ServerSetup.Instance.Running)
         {
             var players = Aislings.ToList();
-            var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _gameSpeed;
 
             Parallel.ForEach(players, player =>
             {
@@ -770,7 +766,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     switch (player.Client.IsWarping)
                     {
                         case false when !player.Client.MapOpen:
-                            player.Client.Update(gameTime);
+                            player.Client.Update();
                             break;
                         case true:
                             break;
@@ -803,7 +799,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             clientsToRemove.Clear();
-            _gameSpeed += gameTime;
             await Task.Delay(GameSpeed);
         }
     }
@@ -1821,7 +1816,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             skill.InUse = true;
             // Skill animation and execute
-            ExecuteAbility(lpClient, skill);
+            ExecuteAssail(lpClient, skill);
             skill.InUse = false;
 
             // Skill cleanup
@@ -1838,8 +1833,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             lpClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOverburdened!");
     }
 
-    private static void ExecuteAbility(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
+    private static void ExecuteAssail(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
     {
+        // On skill "Assail" also use weapon script, if there is one
         if (lpSkill.Template.ScriptName == "Assail")
         {
             // Uses a script equipped to the main-hand item if there is one
@@ -2477,7 +2473,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.25 ? default : ExecuteHandler(client, InnerOnRefreshRequest);
+        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.4 ? default : ExecuteHandler(client, InnerOnRefreshRequest);
 
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {

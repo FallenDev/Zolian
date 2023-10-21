@@ -132,7 +132,7 @@ public interface ISprite
     double CalculateElementalDamageMod(ElementManager.Element element);
     long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier);
     void ShowDmg(Aisling aisling, TimeSpan elapsedTime);
-    void ThreatGeneratedSubsided(Aisling aisling, TimeSpan elapsedTime);
+    void ThreatGeneratedSubsided(Aisling aisling);
     long ComputeDmgFromAc(long dmg);
     long ComputeDmgFromWillSavingThrow(long dmg);
     bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced);

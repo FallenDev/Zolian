@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -29,7 +30,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public Position LastPosition;
     public int RelicFinder;
     public event PropertyChangedEventHandler PropertyChanged;
-    private readonly WorldServerTimer _buffAndDebuffTimer;
+    public readonly WorldServerTimer BuffAndDebuffTimer;
+    private readonly Stopwatch _threatControl = new();
     private readonly object _walkLock = new();
 
     public bool Alive => CurrentHp > 1;
@@ -167,7 +169,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is Item)
             TileType = TileContent.Item;
         var readyTime = DateTime.UtcNow;
-        _buffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
+        BuffAndDebuffTimer = new WorldServerTimer(TimeSpan.FromSeconds(1));
         Amplified = 0;
         SealedModifier = 0;
         Target = null;
@@ -1746,16 +1748,21 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.DamageCounter = 0;
     }
 
-    public void ThreatGeneratedSubsided(Aisling aisling, TimeSpan elapsedTime)
+    public void ThreatGeneratedSubsided(Aisling aisling)
     {
         var time = false;
+        if (!_threatControl.IsRunning)
+        {
+            _threatControl.Start();
+        }
 
         if (!aisling.ThreatTimer.Disabled)
         {
-            time = aisling.ThreatTimer.Update(elapsedTime);
+            time = _threatControl.Elapsed.TotalMilliseconds > aisling.ThreatTimer.Delay.TotalMilliseconds;
         }
 
         if (!time) return;
+        _threatControl.Restart();
         aisling.ThreatMeter = 0;
         aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
     }
@@ -2114,7 +2121,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void StatusBarDisplayUpdateBuff(Buff buff, TimeSpan elapsedTime)
     {
-        if (!_buffAndDebuffTimer.Update(elapsedTime)) return;
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
 
@@ -2141,7 +2147,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime)
     {
-        if (!_buffAndDebuffTimer.Update(elapsedTime)) return;
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
 
