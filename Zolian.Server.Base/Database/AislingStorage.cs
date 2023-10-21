@@ -529,26 +529,51 @@ public record AislingStorage : Sql, IAislingStorage
                 var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+                var existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
 
-                dt.Rows.Add(
-                    item.ItemId,
-                    item.Template.Name,
-                    (long)obj.Serial,
-                    pane,
-                    item.Slot,
-                    item.InventorySlot,
-                    color,
-                    item.Cursed,
-                    item.Durability,
-                    item.Identified,
-                    itemVariance,
-                    weapVariance,
-                    quality,
-                    orgQuality,
-                    item.Stacks,
-                    item.Enchantable,
-                    item.Tarnished
+                if (existingRow != null)
+                {
+                    // Update the existing row
+                    existingRow["Name"] = item.Template.Name;
+                    existingRow["Serial"] = (long)obj.Serial;
+                    existingRow["ItemPane"] = pane;
+                    existingRow["Slot"] = item.Slot;
+                    existingRow["InventorySlot"] = item.InventorySlot;
+                    existingRow["Color"] = color;
+                    existingRow["Cursed"] = item.Cursed;
+                    existingRow["Durability"] = item.Durability;
+                    existingRow["Identified"] = item.Identified;
+                    existingRow["ItemVariance"] = itemVariance;
+                    existingRow["WeapVariance"] = weapVariance;
+                    existingRow["ItemQuality"] = quality;
+                    existingRow["OriginalQuality"] = orgQuality;
+                    existingRow["Stacks"] = item.Stacks;
+                    existingRow["Enchantable"] = item.Enchantable;
+                    existingRow["Tarnished"] = item.Tarnished;
+                }
+                else
+                {
+                    // Add a new row
+                    dt.Rows.Add(
+                        item.ItemId,
+                        item.Template.Name,
+                        (long)obj.Serial,
+                        pane,
+                        item.Slot,
+                        item.InventorySlot,
+                        color,
+                        item.Cursed,
+                        item.Durability,
+                        item.Identified,
+                        itemVariance,
+                        weapVariance,
+                        quality,
+                        orgQuality,
+                        item.Stacks,
+                        item.Enchantable,
+                        item.Tarnished
                     );
+                }
 
                 if (updateIfExists)
                 {
