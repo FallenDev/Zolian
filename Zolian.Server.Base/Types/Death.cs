@@ -8,7 +8,6 @@ namespace Darkages.Types;
 
 public class Death
 {
-
     public void Reap(Aisling player)
     {
         if (player == null) return;
@@ -128,11 +127,12 @@ public class Death
 
         item.DeleteFromAislingDb();
         item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        item.ItemPane = Item.ItemPanes.Ground;
+        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
+
         item.AddObject(item);
 
-        foreach (var aisling in item.PlayerNearby.AislingsNearby())
-        {
+        foreach (var aisling in item.AislingsNearby())
             item.ShowTo(aisling);
-        }
     }
 }

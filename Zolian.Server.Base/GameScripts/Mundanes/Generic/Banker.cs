@@ -210,7 +210,6 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                         {
                             client.Aisling.BankManager.Items.TryRemove(itemInBank.ItemId, out var verifiedItem);
                             verifiedItem?.GiveTo(client.Aisling);
-                            verifiedItem?.DeleteFromAislingDb();
                             client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem?.DisplayName ?? ""} x{verifiedItem?.Stacks}");
                             client.PendingItemSessions = null;
                             TopMenu(client);

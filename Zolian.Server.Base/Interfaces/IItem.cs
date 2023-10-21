@@ -47,7 +47,7 @@ public interface IItem : ISprite
     Trap TrapCreate(Sprite owner, ItemTemplate itemTemplate, int duration, int radius = 1, Action<Sprite, Sprite> cb = null);
     bool CanCarry(Sprite sprite);
     bool GiveTo(Sprite sprite, bool checkWeight = true);
-    void Release(Sprite owner, Position position, bool delete = true);
+    void Release(Sprite owner, Position position);
     void DeleteFromAislingDb();
     void ReapplyItemModifiers(WorldClient client);
     void RemoveModifiers(WorldClient client);

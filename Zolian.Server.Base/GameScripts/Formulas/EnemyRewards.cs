@@ -124,7 +124,7 @@ public class EnemyRewards : RewardScript
 
         foreach (var item in randEquipItems)
         {
-            item.Release(_monster, _monster.Position, false);
+            item.Release(_monster, _monster.Position);
             if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
             {
                 Task.Delay(100).ContinueWith(ct =>

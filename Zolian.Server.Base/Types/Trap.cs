@@ -49,7 +49,7 @@ public class Trap
         }
 
         var trap = item.TrapCreate(obj, itemTemplate, duration, radius, cb);
-        trap.TrapItem.Release(obj, pos, false);
+        trap.TrapItem.Release(obj, pos);
         ServerSetup.Instance.Traps.TryAdd(trap.Serial, trap);
     }
 

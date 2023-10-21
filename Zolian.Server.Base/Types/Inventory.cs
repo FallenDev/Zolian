@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Chaos.Extensions.Common;
 
 using Darkages.Enums;

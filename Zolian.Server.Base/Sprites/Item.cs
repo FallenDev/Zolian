@@ -629,7 +629,7 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         return true;
     }
 
-    public void Release(Sprite owner, Position position, bool delete = true)
+    public void Release(Sprite owner, Position position)
     {
         Pos = new Vector2(position.X, position.Y);
         ItemPane = ItemPanes.Ground;
@@ -642,21 +642,27 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
         {
             AuthenticatedAislings = Array.Empty<Sprite>();
             Cursed = false;
-            if (delete) DeleteFromAislingDb();
         }
 
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        ItemPane = ItemPanes.Ground;
+        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(ItemId, this);
+
         AddObject(this);
 
         if (owner is Aisling player)
             ShowTo(player);
     }
 
+    /// <summary>
+    /// Delete from database only happens on death, or item dropped
+    /// Checks if item still exists on SQL List, if so remove
+    /// </summary>
     public void DeleteFromAislingDb()
     {
         if (ItemId == 0) return;
-        var itemId = (long)ItemId;
-        ItemPane = ItemPanes.Ground;
+        var itemId = ItemId;
+        ServerSetup.Instance.GlobalSqlItemCache.TryRemove(itemId, out _);
 
         try
         {
