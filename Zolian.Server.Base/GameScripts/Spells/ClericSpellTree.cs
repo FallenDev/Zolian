@@ -27,6 +27,8 @@ public class Spectral_Shield(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
         {
             if (sprite is not Aisling aisling) return;
@@ -64,6 +66,8 @@ public class Aite(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         if (target.HasBuff("Aite") || target.HasBuff("Dia Aite"))
         {
             if (sprite is not Aisling aisling) return;
@@ -140,6 +144,7 @@ public class Dark_Chain(Spell spell) : SpellScript(spell)
     {
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Dark Chain";
+        if (target == null) return;
 
         _spellMethod.ElementalOnUse(sprite, target, spell, 60);
         _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
@@ -163,6 +168,7 @@ public class Halt(Spell spell) : SpellScript(spell)
     {
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Halt";
+        if (target == null) return;
 
         _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
     }
@@ -182,6 +188,7 @@ public class Pramh(Spell spell) : SpellScript(spell)
     {
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Pramh";
+        if (target == null) return;
 
         if (target.HasDebuff("Sleep"))
         {
@@ -224,7 +231,7 @@ public class Detect(Spell spell) : SpellScript(spell)
         if (target.CurrentHp > 0)
         {
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(spell.Template.Sound, false));
         }
         else
         {
