@@ -682,12 +682,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 UpdateGroundItems();
-                if (monstersElapsed.Milliseconds > 500)
+                if (monstersElapsed.TotalMilliseconds > 300)
                 {
                     UpdateMonsters(monstersElapsed);
                     monstersWatch.Restart();
                 }
-                if (mundanesElapsed.Seconds > 10)
+                if (mundanesElapsed.TotalMilliseconds > 1500)
                 {
                     UpdateMundanes(mundanesElapsed);
                     mundanesWatch.Restart();
@@ -1654,7 +1654,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var exists = await StorageManager.AislingBucket.CheckPassword(redirect.Name);
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
-
+            if (aisling == null)
+            {
+                ServerSetup.Logger($"Unable to retrieve player data: {client.RemoteIp}");
+                client.Disconnect();
+                return;
+            }
             client.Aisling = aisling;
             SetPriorToLoad(client);
             client.Aisling.Serial = aisling.Serial;
