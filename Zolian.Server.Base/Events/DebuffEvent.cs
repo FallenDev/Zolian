@@ -3,7 +3,7 @@ using Darkages.Types;
 
 namespace Darkages.Events;
 
-public struct DebuffEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft)
+public readonly struct DebuffEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft)
 {
     public Sprite Affected { get; } = affected;
     public Debuff Debuff { get; } = debuff;

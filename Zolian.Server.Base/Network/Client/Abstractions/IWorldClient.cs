@@ -169,6 +169,7 @@ public interface IWorldClient : ISocketClient
     void EnqueueBuffAppliedEvent(Sprite affected, Buff buff, TimeSpan timeLeft);
     void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft);
     void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff, TimeSpan timeLeft);
+    void EnqueueItemEvent(Item item);
     void GiveExp(int exp, bool overflow = false);
     void LevelUp(Aisling player, int extraExp);
     void GiveAp(int a, bool overflow = false);

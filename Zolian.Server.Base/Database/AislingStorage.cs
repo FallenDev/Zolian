@@ -495,10 +495,11 @@ public record AislingStorage : Sql, IAislingStorage
 
     public void SaveItemsForPlayer(Aisling obj, SqlConnection connection)
     {
-        if (obj?.Inventory == null) return;
-        var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
-        itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
-        itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
+        //if (obj?.Inventory == null) return;
+        //var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
+        //itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+        //itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
+        var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Serial == obj.Serial);
         var dt = new DataTable();
         dt.Columns.Add("ItemId", typeof(long));
         dt.Columns.Add("Name", typeof(string));
@@ -522,7 +523,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             foreach (var item in itemList)
             {
-                var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out var sqlItem);
                 var pane = ItemEnumConverters.PaneToString(item.ItemPane);
                 var color = ItemColors.ItemColorsToInt(item.Template.Color);
                 var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
@@ -573,15 +573,6 @@ public record AislingStorage : Sql, IAislingStorage
                         item.Enchantable,
                         item.Tarnished
                     );
-                }
-
-                if (updateIfExists)
-                {
-                    ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, sqlItem);
-                }
-                else
-                {
-                    ServerSetup.Instance.GlobalSqlItemCache.TryAdd(item.ItemId, item);
                 }
             }
 

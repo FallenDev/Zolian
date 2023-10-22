@@ -180,18 +180,21 @@ namespace Darkages.Network.Client
         private readonly Queue<BuffEvent> _buffApplyQueue = new();
         private readonly Queue<DebuffEvent> _debuffUpdateQueue = new();
         private readonly Queue<BuffEvent> _buffUpdateQueue = new();
+        private readonly Queue<ItemEvent> _itemQueue = new();
         private readonly object _expQueueLock = new();
         private readonly object _apQueueLock = new();
         private readonly object _buffQueueLockApply = new();
         private readonly object _debuffQueueLockApply = new();
         private readonly object _buffQueueLockUpdate = new();
         private readonly object _debuffQueueLockUpdate = new();
+        private readonly object _itemQueueLock = new();
         private Task _experienceTask;
         private Task _apTask;
-        private Task _applyBuff;
-        private Task _applyDebuff;
-        private Task _updateBuff;
-        private Task _updateDebuff;
+        private Task _applyBuffTask;
+        private Task _applyDebuffTask;
+        private Task _updateBuffTask;
+        private Task _updateDebuffTask;
+        private Task _itemTask;
 
         public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -202,10 +205,11 @@ namespace Darkages.Network.Client
             // Event-Driven Tasks
             _experienceTask = Task.Run(ProcessExperienceEvents);
             _apTask = Task.Run(ProcessAbilityEvents);
-            _applyBuff = Task.Run(ProcessApplyingBuffsEvent);
-            _applyDebuff = Task.Run(ProcessApplyingDebuffsEvent);
-            _updateBuff = Task.Run(ProcessUpdatingBuffsEvent);
-            _updateDebuff = Task.Run(ProcessUpdatingDebuffsEvent);
+            _applyBuffTask = Task.Run(ProcessApplyingBuffsEvents);
+            _applyDebuffTask = Task.Run(ProcessApplyingDebuffsEvents);
+            _updateBuffTask = Task.Run(ProcessUpdatingBuffsEvents);
+            _updateDebuffTask = Task.Run(ProcessUpdatingDebuffsEvents);
+            _itemTask = Task.Run(ProcessItemEvents);
         }
 
         public void Update()
@@ -218,6 +222,7 @@ namespace Darkages.Network.Client
             UpdateStatusBarAndThreat();
             UpdateSkillSpellCooldown();
             ShowAggro();
+            ItemQueueUpdateOrAdd();
         }
 
         #region Events
@@ -272,7 +277,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        private void ProcessApplyingDebuffsEvent()
+        private void ProcessApplyingDebuffsEvents()
         {
             while (ServerSetup.Instance.Running)
             {
@@ -297,7 +302,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        private void ProcessApplyingBuffsEvent()
+        private void ProcessApplyingBuffsEvents()
         {
             while (ServerSetup.Instance.Running)
             {
@@ -322,7 +327,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        private void ProcessUpdatingDebuffsEvent()
+        private void ProcessUpdatingDebuffsEvents()
         {
             while (ServerSetup.Instance.Running)
             {
@@ -347,7 +352,7 @@ namespace Darkages.Network.Client
             }
         }
 
-        private void ProcessUpdatingBuffsEvent()
+        private void ProcessUpdatingBuffsEvents()
         {
             while (ServerSetup.Instance.Running)
             {
@@ -364,6 +369,31 @@ namespace Darkages.Network.Client
                 if (buffEvent.HasValue)
                 {
                     buffEvent.Value.Buff.Update(buffEvent.Value.Affected, buffEvent.Value.TimeLeft);
+                }
+                else
+                {
+                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                }
+            }
+        }
+
+        private void ProcessItemEvents()
+        {
+            while (ServerSetup.Instance.Running)
+            {
+                ItemEvent? itemEvent = null;
+
+                lock (_itemQueueLock)
+                {
+                    if (_itemQueue.Count > 0)
+                    {
+                        itemEvent = _itemQueue.Dequeue();
+                    }
+                }
+
+                if (itemEvent.HasValue)
+                {
+                    WorldCacheUpsert(itemEvent.Value.Item);
                 }
                 else
                 {
@@ -561,6 +591,32 @@ namespace Darkages.Network.Client
             }
 
             Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
+        }
+
+        private void ItemQueueUpdateOrAdd()
+        {
+            var itemList = Aisling.Inventory.Items.Values.Where(i => i is not null).ToList();
+            itemList.AddRange(from item in Aisling.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+            itemList.AddRange(Aisling.BankManager.Items.Values.Where(i => i is not null));
+            
+            foreach (var item in itemList)
+            {
+                EnqueueItemEvent(item);
+            }
+        }
+
+        private static void WorldCacheUpsert(Item item)
+        {
+            var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out var sqlItem);
+
+            if (updateIfExists)
+            {
+                ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, sqlItem);
+            }
+            else
+            {
+                ServerSetup.Instance.GlobalSqlItemCache.TryAdd(item.ItemId, item);
+            }
         }
 
         #region Player Load
@@ -4179,6 +4235,14 @@ namespace Darkages.Network.Client
             lock (_buffQueueLockUpdate)
             {
                 _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff, timeLeft));
+            }
+        }
+
+        public void EnqueueItemEvent(Item item)
+        {
+            lock (_itemQueueLock)
+            {
+                _itemQueue.Enqueue(new ItemEvent(item));
             }
         }
 
