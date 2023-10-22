@@ -7,7 +7,6 @@ using Chaos.Common.Identity;
 using Dapper;
 
 using Darkages.Database;
-using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -21,7 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Darkages.Sprites;
 
-public sealed class Item : Sprite, IItem, IDialogSourceEntity
+public sealed class Item : Sprite, IItem
 {
     public enum ItemPanes
     {
@@ -113,7 +112,6 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public string Name { get; set; }
     public string DisplayName => GetDisplayName();
     public string NoColorDisplayName => NoColorGetDisplayName();
-    public uint Id => Serial;
     public ItemPanes ItemPane { get; set; }
     public byte Slot { get; set; }
     public byte InventorySlot { get; set; }
@@ -129,29 +127,14 @@ public sealed class Item : Sprite, IItem, IDialogSourceEntity
     public ushort Stacks { get; set; }
     public bool Enchantable { get; set; }
     public bool Tarnished { get; set; }
-
     public Sprite[] AuthenticatedAislings { get; set; }
     public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
     public int Dropping { get; set; }
     public bool[] Warnings { get; set; }
-
-    public EntityType EntityType => EntityType.Item;
-    DisplayColor IDialogSourceEntity.Color => (DisplayColor)Color;
-    public ushort Sprite => Template.Image;
-    public void Activate(Aisling source) => Scripts.First().Value.OnUse(source, Slot);
     public uint Owner { get; set; }
     public ushort Image { get; init; }
     public ushort DisplayImage { get; init; }
-    public bool Equipped => ItemPane switch
-    {
-        ItemPanes.Ground => false,
-        ItemPanes.Inventory => false,
-        ItemPanes.Equip => true,
-        ItemPanes.Bank => false,
-        ItemPanes.Archived => false,
-        _ => false
-    };
 
     public string GetDisplayName()
     {
