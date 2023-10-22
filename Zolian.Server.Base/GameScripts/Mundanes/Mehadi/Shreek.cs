@@ -25,17 +25,17 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.HasItem("Maple Glazed Waffles") && client.Aisling.QuestManager.SwampCount == 2)
+        if (client.Aisling.HasItem("Maple Glazed Waffles") && client.Aisling.QuestManager.SwampCount == 4)
         {
             options.Add(new(0x01, "Give Waffles"));
         }
 
-        if (client.Aisling.HasStacks("Red Onion", 10) && client.Aisling.QuestManager.SwampCount == 3)
+        if (client.Aisling.HasStacks("Red Onion", 10) && client.Aisling.QuestManager.SwampCount == 5)
         {
             options.Add(new(0x05, "I'm back"));
         }
 
-        if (client.Aisling.QuestManager.SwampCount >= 3)
+        if (client.Aisling.QuestManager.SwampCount >= 5)
         {
             client.SendOptionsDialog(Mundane, "Actually, it's quite good on toast", options.ToArray());
             return;
@@ -79,11 +79,13 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
             case 0x04:
                 {
-                    if (client.Aisling.HasItem("Maple Glazed Waffles"))
+                    var item = client.Aisling.HasItemReturnItem("Maple Glazed Waffles");
+
+                    if (item != null)
                     {
                         client.Aisling.QuestManager.SwampAccess = true;
                         client.Aisling.QuestManager.SwampCount++;
-                        client.TakeAwayQuantity(client.Aisling, "Maple Glazed Waffles", 1);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
                         client.GiveExp(exp);
                         client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
                         client.SendAttributes(StatUpdateType.WeightGold);

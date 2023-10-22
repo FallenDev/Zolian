@@ -19,7 +19,12 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
     private readonly List<SkillScript> _skillScripts = new();
     private readonly List<SpellScript> _spellScripts = new();
     private int _waypointIndex;
-    private Position CurrentWaypoint => Template.Waypoints[_waypointIndex];
+    private Position CurrentWaypoint
+    {
+        get => Template.Waypoints[_waypointIndex];
+        set => Template.Waypoints[_waypointIndex] = value;
+    }
+
     public ConcurrentDictionary<string, MundaneScript> Scripts { get; private set; }
     public MundaneTemplate Template { get; init; }
     public bool Bypass { get; set; }
@@ -120,7 +125,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
     {
         if (CurrentWaypoint != null) WalkTo(CurrentWaypoint.X, CurrentWaypoint.Y);
 
-        if (Position.DistanceFrom(CurrentWaypoint) > 2 && CurrentWaypoint != null) return;
+        if (Position.DistanceFrom(CurrentWaypoint) > 1 && CurrentWaypoint != null) return;
         if (_waypointIndex + 1 < Template.Waypoints.Count)
             _waypointIndex++;
         else
@@ -138,7 +143,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
 
             if (Template.ChatTimer.Elapsed && Template.Speech.Count > 0)
             {
-                if (speak >= 50)
+                if (speak >= 90)
                 {
                     var idx = Random.Shared.Next(Template.Speech.Count);
                     var msg = Template.Speech[idx];

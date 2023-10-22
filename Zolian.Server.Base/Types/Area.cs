@@ -107,7 +107,8 @@ public class Area : Map, IArea
     /// </summary>
     public bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
     {
-        if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
+        if (sprite is not Mundane)
+            if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
         
         var grid = sprite.Map.ObjectGrid;

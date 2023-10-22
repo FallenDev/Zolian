@@ -31,7 +31,7 @@ public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
-        if (client.Aisling.HasItem("Maple Syrup") && client.Aisling.QuestManager.SwampCount == 1)
+        if (client.Aisling.HasItem("Maple Syrup") && client.Aisling.QuestManager.SwampCount == 3)
         {
             options.Add(new(0x04, "Here"));
         }
@@ -72,10 +72,12 @@ public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server,
                         new (0x02, "Thank you")
                     };
 
-                    if (client.Aisling.HasItem("Maple Syrup"))
+                    var item = client.Aisling.HasItemReturnItem("Maple Syrup");
+
+                    if (item != null)
                     {
                         client.Aisling.QuestManager.SwampCount++;
-                        client.TakeAwayQuantity(client.Aisling, "Maple Syrup", 1);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item);
                         client.GiveItem("Maple Glazed Waffles");
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.CloseDialog();
@@ -83,6 +85,7 @@ public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server,
                     else
                     {
                         client.SendOptionsDialog(Mundane, "Remember, the maple syrup is in West Woodlands; Near the Dwarven Village");
+                        break;
                     }
 
                     client.SendOptionsDialog(Mundane, "Ohhh, he's going to like you! Here are some waffles as promised!", options.ToArray());
