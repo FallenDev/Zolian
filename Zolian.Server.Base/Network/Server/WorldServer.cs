@@ -3400,20 +3400,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return;
         }
 
-        //var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
-        //var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
 
-        //if (!lobbyCheck || !loginCheck)
-        //{
-        //    client.Disconnect();
-        //    ServerSetup.Logger("---------World-Server---------");
-        //    var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
-        //    ServerSetup.Logger(comment, LogLevel.Warning);
-        //    ReportEndpoint(client, comment);
-        //    return;
-        //}
+        if (!lobbyCheck || !loginCheck)
+        {
+            client.Disconnect();
+            ServerSetup.Logger("---------World-Server---------");
+            var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
+            ServerSetup.Logger(comment, LogLevel.Warning);
+            ReportEndpoint(client, comment);
+            return;
+        }
 
-        //ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
     }
 

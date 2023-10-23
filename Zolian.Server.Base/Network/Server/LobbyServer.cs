@@ -158,7 +158,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        //ServerSetup.Instance.GlobalLobbyConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalLobbyConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
         // 0x7E - Handshake
         client.SendAcceptConnection();

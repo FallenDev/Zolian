@@ -502,19 +502,19 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             return;
         }
 
-        //var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
 
-        //if (!lobbyCheck)
-        //{
-        //    client.Disconnect();
-        //    ServerSetup.Logger("---------Login-Server---------");
-        //    var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
-        //    ServerSetup.Logger(comment, LogLevel.Warning);
-        //    ReportEndpoint(client, comment);
-        //    return;
-        //}
+        if (!lobbyCheck)
+        {
+            client.Disconnect();
+            ServerSetup.Logger("---------Login-Server---------");
+            var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
+            ServerSetup.Logger(comment, LogLevel.Warning);
+            ReportEndpoint(client, comment);
+            return;
+        }
 
-        //ServerSetup.Instance.GlobalLoginConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalLoginConnection.TryAdd(client.RemoteIp, client.RemoteIp);
         client.BeginReceive();
         client.SendAcceptConnection();
     }
