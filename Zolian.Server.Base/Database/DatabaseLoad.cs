@@ -285,7 +285,7 @@ public abstract class DatabaseLoad
 
         try
         {
-            ItemStorage.PlayerItemsDbToCache(conn);
+            ItemStorage.PlayerItemsDbToCache();
         }
         catch (Exception e)
         {

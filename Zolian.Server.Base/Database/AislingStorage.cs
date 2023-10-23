@@ -503,7 +503,7 @@ public record AislingStorage : Sql, IAislingStorage
         var dt = new DataTable();
         dt.Columns.Add("ItemId", typeof(long));
         dt.Columns.Add("Name", typeof(string));
-        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Serial", typeof(long)); // Owner's Serial
         dt.Columns.Add("ItemPane", typeof(string));
         dt.Columns.Add("Slot", typeof(int));
         dt.Columns.Add("InventorySlot", typeof(int));

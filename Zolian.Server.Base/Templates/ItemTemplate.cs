@@ -1,4 +1,6 @@
-﻿using Dapper;
+﻿using Chaos.Common.Identity;
+
+using Dapper;
 
 using Darkages.Database;
 using Darkages.Enums;
@@ -436,7 +438,7 @@ public static class ItemStorage
         }
     }
 
-    public static void PlayerItemsDbToCache(string conn)
+    public static void PlayerItemsDbToCache()
     {
         try
         {
@@ -462,6 +464,7 @@ public static class ItemStorage
                     ItemId = item.ItemId,
                     Template = item.Template,
                     Name = itemName,
+                    Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId,
                     Owner = item.Serial,
                     ItemPane = item.ItemPane,
                     Slot = item.Slot,

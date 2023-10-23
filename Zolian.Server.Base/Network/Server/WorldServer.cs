@@ -810,22 +810,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var (serial, item) in items)
+            Parallel.ForEach(items.Values, (item) =>
             {
-                if (item == null) continue;
-                if (item.ItemPane != Item.ItemPanes.Ground) continue;
+                if (item == null) return;
+                if (item.ItemPane != Item.ItemPanes.Ground) return;
                 var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
-                if (abandonedDiff.Minutes <= 30) continue;
-                var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(serial, out var itemToBeRemoved);
-                if (!removed) continue;
+                if (abandonedDiff.Minutes <= 30) return;
+                var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
+                if (!removed) return;
                 itemToBeRemoved.Remove();
                 itemToBeRemoved.DelObject(itemToBeRemoved);
-            }
+            });
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            // Track issues in App Center only
             Crashes.TrackError(ex);
         }
     }
@@ -2158,6 +2157,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         {
                             var script = monster.Scripts.Values.First();
                             var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            item.Owner = 0;
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                                 script?.OnItemDropped(localClient.Aisling.Client, item);
                             else

@@ -56,9 +56,11 @@ namespace Darkages.Network.Client
         private readonly Stopwatch _aggroMessageControl = new();
         private readonly Stopwatch _lanternControl = new();
         private readonly Stopwatch _dayDreamingControl = new();
+        private readonly Stopwatch _itemControl = new();
         private readonly WorldServerTimer _lanternCheckTimer = new(TimeSpan.FromSeconds(2));
         private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
+        private readonly WorldServerTimer _itemCheckTimer = new(TimeSpan.FromMilliseconds(1500));
         public readonly object SyncClient = new();
         public bool ExitConfirmed;
         private static readonly SortedDictionary<long, string> AggroColors = new()
@@ -180,21 +182,18 @@ namespace Darkages.Network.Client
         private readonly Queue<BuffEvent> _buffApplyQueue = new();
         private readonly Queue<DebuffEvent> _debuffUpdateQueue = new();
         private readonly Queue<BuffEvent> _buffUpdateQueue = new();
-        private readonly Queue<ItemEvent> _itemQueue = new();
         private readonly object _expQueueLock = new();
         private readonly object _apQueueLock = new();
         private readonly object _buffQueueLockApply = new();
         private readonly object _debuffQueueLockApply = new();
         private readonly object _buffQueueLockUpdate = new();
         private readonly object _debuffQueueLockUpdate = new();
-        private readonly object _itemQueueLock = new();
         private Task _experienceTask;
         private Task _apTask;
         private Task _applyBuffTask;
         private Task _applyDebuffTask;
         private Task _updateBuffTask;
         private Task _updateDebuffTask;
-        private Task _itemTask;
 
         public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -209,7 +208,6 @@ namespace Darkages.Network.Client
             _applyDebuffTask = Task.Run(ProcessApplyingDebuffsEvents);
             _updateBuffTask = Task.Run(ProcessUpdatingBuffsEvents);
             _updateDebuffTask = Task.Run(ProcessUpdatingDebuffsEvents);
-            _itemTask = Task.Run(ProcessItemEvents);
         }
 
         public void Update()
@@ -247,7 +245,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -272,7 +270,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -297,7 +295,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -322,7 +320,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -347,7 +345,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -372,32 +370,7 @@ namespace Darkages.Network.Client
                 }
                 else
                 {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
-                }
-            }
-        }
-
-        private void ProcessItemEvents()
-        {
-            while (ServerSetup.Instance.Running)
-            {
-                ItemEvent? itemEvent = null;
-
-                lock (_itemQueueLock)
-                {
-                    if (_itemQueue.Count > 0)
-                    {
-                        itemEvent = _itemQueue.Dequeue();
-                    }
-                }
-
-                if (itemEvent.HasValue)
-                {
-                    WorldCacheUpsert(itemEvent.Value.Item);
-                }
-                else
-                {
-                    Task.Delay(10).Wait(); // Delay to avoid busy-waiting
+                    Task.Delay(300).Wait(); // Delay to avoid busy-waiting
                 }
             }
         }
@@ -595,14 +568,24 @@ namespace Darkages.Network.Client
 
         private void ItemQueueUpdateOrAdd()
         {
+            if (!_itemControl.IsRunning)
+            {
+                _itemControl.Start();
+            }
+
+            if (_itemControl.Elapsed.TotalMilliseconds < _itemCheckTimer.Delay.TotalMilliseconds) return;
+
             var itemList = Aisling.Inventory.Items.Values.Where(i => i is not null).ToList();
             itemList.AddRange(from item in Aisling.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
             itemList.AddRange(Aisling.BankManager.Items.Values.Where(i => i is not null));
-            
-            foreach (var item in itemList)
+
+            Parallel.ForEach(itemList, item =>
             {
-                EnqueueItemEvent(item);
-            }
+                item.Owner = Aisling.Serial;
+                WorldCacheUpsert(item);
+            });
+
+            _itemControl.Restart();
         }
 
         private static void WorldCacheUpsert(Item item)
@@ -708,6 +691,7 @@ namespace Darkages.Network.Client
                         ItemId = item.ItemId,
                         Template = item.Template,
                         Owner = item.Owner,
+                        Serial = item.Serial,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -787,6 +771,7 @@ namespace Darkages.Network.Client
                         ItemId = item.ItemId,
                         Template = item.Template,
                         Owner = item.Owner,
+                        Serial = item.Serial,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -856,6 +841,7 @@ namespace Darkages.Network.Client
                         ItemId = item.ItemId,
                         Template = item.Template,
                         Owner = item.Owner,
+                        Serial = item.Serial,
                         ItemPane = item.ItemPane,
                         Slot = item.Slot,
                         InventorySlot = item.InventorySlot,
@@ -4235,14 +4221,6 @@ namespace Darkages.Network.Client
             lock (_buffQueueLockUpdate)
             {
                 _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff, timeLeft));
-            }
-        }
-
-        public void EnqueueItemEvent(Item item)
-        {
-            lock (_itemQueueLock)
-            {
-                _itemQueue.Enqueue(new ItemEvent(item));
             }
         }
 

@@ -428,6 +428,9 @@ public sealed class Item : Sprite, IItem
         return obj;
     }
 
+    /// <summary>
+    /// Owner is not populated - Used for Map populated items
+    /// </summary>
     public Item Create(Area map, ItemTemplate itemTemplate)
     {
         if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(itemTemplate.Name, out var value)) return null;
@@ -530,6 +533,8 @@ public sealed class Item : Sprite, IItem
             Serial = owner.Serial,
             ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId
         };
+
+        obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         return new Trap
         {
@@ -645,7 +650,6 @@ public sealed class Item : Sprite, IItem
     {
         if (ItemId == 0) return;
         var itemId = ItemId;
-        ServerSetup.Instance.GlobalSqlItemCache.TryRemove(itemId, out _);
 
         try
         {

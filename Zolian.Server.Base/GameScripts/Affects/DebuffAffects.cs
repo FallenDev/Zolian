@@ -2407,10 +2407,12 @@ public class DebuffFasspiorad : Debuff
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
 
         var reduce = aisling.MaximumMp * 0.33;
-        aisling.CurrentHp -= (int)reduce;
-
-        if (aisling.CurrentHp <= 0)
+        if (aisling.CurrentHp - reduce <= 0)
+        {
             aisling.CurrentHp = 1;
+        }
+        else
+            aisling.CurrentHp -= (int)reduce;
 
         aisling.CurrentMp = aisling.MaximumMp;
 
