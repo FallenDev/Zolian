@@ -495,11 +495,7 @@ public record AislingStorage : Sql, IAislingStorage
 
     public void SaveItemsForPlayer(Aisling obj, SqlConnection connection)
     {
-        //if (obj?.Inventory == null) return;
-        //var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
-        //itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
-        //itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
-        var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Serial == obj.Serial);
+        var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == obj.Serial);
         var dt = new DataTable();
         dt.Columns.Add("ItemId", typeof(long));
         dt.Columns.Add("Name", typeof(string));

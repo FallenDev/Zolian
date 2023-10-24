@@ -2846,6 +2846,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
+    public ValueTask OnException(IWorldClient client, in ClientPacket clientPacket)
+    {
+        var args = PacketSerializer.Deserialize<ExceptionArgs>(in clientPacket);
+        return ExecuteHandler(client, args, InnerOnException);
+
+        ValueTask InnerOnException(IWorldClient localClient, ExceptionArgs localArgs)
+        {
+            var ex = localArgs.exceptionMsg;
+            client.Disconnect();
+            Crashes.TrackError(new Exception($"{ex}"));
+            return default;
+        }
+    }
+
     /// <summary>
     /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
@@ -3361,6 +3375,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.BoardRequest] = OnBoardRequest; // 0x3B
         ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
+        ClientHandlers[(byte)ClientOpCode.Exception] = OnException;
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
