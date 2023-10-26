@@ -216,6 +216,7 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x20:
                 {
+                    client.PendingBuySessions = null;
                     client.PendingItemSessions = null;
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }

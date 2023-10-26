@@ -188,6 +188,7 @@ public class ItemShop(WorldServer server, Mundane mundane) : MundaneScript(serve
                 break;
             case 0x20:
                 {
+                    client.PendingBuySessions = null;
                     client.PendingItemSessions = null;
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }

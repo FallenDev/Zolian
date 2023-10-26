@@ -205,6 +205,7 @@ public class Emer(WorldServer server, Mundane mundane) : MundaneScript(server, m
                 break;
             case 0x20:
                 {
+                    client.PendingBuySessions = null;
                     client.PendingItemSessions = null;
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }

@@ -186,6 +186,7 @@ public class WeaponArmorShop(WorldServer server, Mundane mundane) : MundaneScrip
                 break;
             case 0x20:
                 {
+                    client.PendingBuySessions = null;
                     client.PendingItemSessions = null;
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }

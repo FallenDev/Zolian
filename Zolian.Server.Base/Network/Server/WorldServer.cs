@@ -61,6 +61,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
+    private readonly Stopwatch _itemGroundCheckControl = new();
+    private readonly WorldServerTimer _itemGroundCheckTimer = new(TimeSpan.FromMilliseconds(5000));
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
     private DateTime _mapSpeed;
@@ -803,14 +805,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static void UpdateGroundItems()
+    private void UpdateGroundItems()
     {
+        if (!_itemGroundCheckControl.IsRunning)
+        {
+            _itemGroundCheckControl.Start();
+        }
+
+        if (_itemGroundCheckControl.Elapsed.TotalMilliseconds < _itemGroundCheckTimer.Delay.TotalMilliseconds) return;
+        _itemGroundCheckControl.Restart();
+
         var items = ServerSetup.Instance.GlobalGroundItemCache;
 
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            Parallel.ForEach(items.Values, (item) =>
+            foreach(var item in items.Values)
             {
                 if (item == null) return;
                 if (item.ItemPane != Item.ItemPanes.Ground)
@@ -819,12 +829,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return;
                 }
                 var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
-                if (abandonedDiff.Minutes <= 30) return;
+                if (abandonedDiff.TotalMinutes <= 30) return;
                 var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
                 if (!removed) return;
                 itemToBeRemoved.Remove();
-                itemToBeRemoved.DelObject(itemToBeRemoved);
-            });
+            }
         }
         catch (Exception ex)
         {
@@ -1851,11 +1860,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (lpSkill.Template.ScriptName == "Assail")
         {
             // Uses a script equipped to the main-hand item if there is one
-            var itemScripts = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScripts;
+            var mainHandScript = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScripts;
+            mainHandScript?.First().Value.OnUse(lpClient.Aisling);
 
-            if (itemScripts != null)
-                foreach (var itemScript in itemScripts.Values.Where(itemScript => itemScript != null))
-                    itemScript.OnUse(lpClient.Aisling);
+            // Uses a script associated with an accessory like Quivers
+            var accessoryScript = lpClient.Aisling.EquipmentManager.Equipment[14]?.Item?.WeaponScripts;
+            accessoryScript?.First().Value.OnUse(lpClient.Aisling);
         }
 
         if (!optExecuteScript) return;

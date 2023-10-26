@@ -2,6 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -38,7 +39,7 @@ public class Gilath : MundaneScript
 
         if (_skillList.Count > 0)
         {
-            options.Add(new(0x01, "Show Available Skills"));
+            options.Add(new(0x0016, "Show Available Skills"));
         }
 
         if (_spellList.Count > 0)
@@ -48,6 +49,9 @@ public class Gilath : MundaneScript
 
         options.Add(new(0x02, "Forget Skill"));
         options.Add(new(0x0011, "Forget Spell"));
+        options.Add(new(0x0017, "Inventory"));
+        options.Add(new(0x0018, "Sell"));
+
 
         client.SendOptionsDialog(Mundane,
             client.Aisling.Stage <= ClassStage.Master
@@ -59,24 +63,43 @@ public class Gilath : MundaneScript
     {
         if (!AuthenticateUser(client)) return;
 
-        var potions = Random.Shared.Next(1, 4);
-        var advExp = Random.Shared.Next(20000, 25000);
-        var advExp2 = Random.Shared.Next(750000, 1000000);
-        var advExp3 = Random.Shared.Next(3000000, 4500000);
-
-        _potion = potions switch
-        {
-            1 => "Beag Ioc Deum",
-            2 => "Beothaich", // Revive
-            3 => "Naomh Sith", // Holy Touch -- Dispel Poison, Entice
-            _ => "Beag Ioc Deum"
-        };
-
         switch (responseID)
         {
+            case 0x00:
+                {
+                    if (string.IsNullOrEmpty(args)) return;
+                    var itemOrSlot = ushort.TryParse(args, out var slot);
+
+                    switch (itemOrSlot)
+                    {
+                        // Buying
+                        case false:
+                            NpcShopExtensions.BuyItemFromInventory(client, Mundane, args);
+                            break;
+                    }
+                }
+                break;
+            case 0x01: // Follows Sequence to buy a stacked item from the vendor
+                var containsInt = ushort.TryParse(args, out var amount);
+                if (containsInt)
+                {
+                    if (client.PendingBuySessions == null && client.PendingItemSessions == null)
+                    {
+                        client.SendOptionsDialog(Mundane, "I no longer have the item");
+                        return;
+                    }
+
+                    if (client.PendingBuySessions != null)
+                    {
+                        client.PendingBuySessions.Quantity = amount;
+                        NpcShopExtensions.BuyStackedItemFromInventory(client, Mundane);
+                    }
+                }
+                break;
+
             #region Skills
 
-            case 0x0001:
+            case 0x0016:
                 {
                     var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
                     var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
@@ -277,7 +300,60 @@ public class Gilath : MundaneScript
                     break;
                 }
 
-                #endregion
+            #endregion
+
+            case 0x0017:
+                client.SendItemShopDialog(Mundane, "Various magical items, take a look", NpcShopExtensions.BuyFromStoreInventory(Mundane));
+                break;
+            case 0x0018:
+                client.SendOptionsDialog(Mundane, "I have no need for worldly trinkets");
+                break;
+            case 0x19:
+                {
+                    if (client.PendingBuySessions != null)
+                    {
+                        var quantity = client.PendingBuySessions.Quantity;
+                        var item = client.PendingBuySessions.Name;
+                        var cost = (uint)(client.PendingBuySessions.Offer * client.PendingBuySessions.Quantity);
+                        if (client.Aisling.GoldPoints >= cost)
+                        {
+                            client.Aisling.GoldPoints -= cost;
+                            if (client.PendingBuySessions.Quantity > 1)
+                                client.GiveQuantity(client.Aisling, item, quantity);
+                            else
+                            {
+                                var itemCreated = new Item();
+                                var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
+                                itemCreated = itemCreated.Create(client.Aisling, template,
+                                    NpcShopExtensions.DungeonMediumQuality(), ItemQualityVariance.DetermineVariance(),
+                                    ItemQualityVariance.DetermineWeaponVariance());
+                                itemCreated.GiveTo(client.Aisling);
+                            }
+                            client.SendAttributes(StatUpdateType.Primary);
+                            client.SendAttributes(StatUpdateType.ExpGold);
+                            client.PendingBuySessions = null;
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you mortal");
+                            TopMenu(client);
+                        }
+                        else
+                        {
+                            client.SendOptionsDialog(Mundane, "Leave, less you wish to be a dog");
+                            client.PendingBuySessions = null;
+                        }
+                    }
+                }
+                break;
+            case 0x20:
+                {
+                    client.PendingBuySessions = null;
+                    client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
+                }
+                break;
         }
+    }
+
+    public override void OnItemDropped(WorldClient client, Item item)
+    {
+        client.SendOptionsDialog(Mundane, "I have no need for worldly trinkets");
     }
 }
