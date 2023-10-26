@@ -73,7 +73,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         var healthBoundsCheck = aisling.CurrentHp - healthLoss;
         var manaBoundsCheck = aisling.CurrentMp - manaLoss;
 
-        if (healthBoundsCheck >= 0 && manaBoundsCheck >= 0)
+        if (healthBoundsCheck >= 1 && manaBoundsCheck >= 1)
         {
             aisling.CurrentHp -= healthLoss;
             aisling.CurrentMp -= manaLoss;

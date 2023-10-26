@@ -57,10 +57,12 @@ namespace Darkages.Network.Client
         private readonly Stopwatch _lanternControl = new();
         private readonly Stopwatch _dayDreamingControl = new();
         private readonly Stopwatch _itemControl = new();
+        private readonly Stopwatch _itemAnimationControl = new();
         private readonly WorldServerTimer _lanternCheckTimer = new(TimeSpan.FromSeconds(2));
         private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
         private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
         private readonly WorldServerTimer _itemCheckTimer = new(TimeSpan.FromMilliseconds(1500));
+        private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
         public readonly object SyncClient = new();
         public bool ExitConfirmed;
         private static readonly SortedDictionary<long, string> AggroColors = new()
@@ -221,6 +223,7 @@ namespace Darkages.Network.Client
             UpdateSkillSpellCooldown();
             ShowAggro();
             ItemQueueUpdateOrAdd();
+            DisplayQualityPillar();
         }
 
         #region Events
@@ -579,13 +582,68 @@ namespace Darkages.Network.Client
             itemList.AddRange(from item in Aisling.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
             itemList.AddRange(Aisling.BankManager.Items.Values.Where(i => i is not null));
 
-            Parallel.ForEach(itemList, item =>
+            try
             {
-                item.Owner = Aisling.Serial;
-                WorldCacheUpsert(item);
-            });
+                Parallel.ForEach(itemList, item =>
+                {
+                    item.Owner = Aisling.Serial;
+                    WorldCacheUpsert(item);
+                });
+            }
+            catch (Exception ex)
+            {
+                Crashes.TrackError(ex);
+            }
 
             _itemControl.Restart();
+        }
+
+        private void DisplayQualityPillar()
+        {
+            if (!_itemAnimationControl.IsRunning)
+            {
+                _itemAnimationControl.Start();
+            }
+
+            if (_itemAnimationControl.Elapsed.TotalMilliseconds < _itemAnimationTimer.Delay.TotalMilliseconds) return;
+
+            var items = ServerSetup.Instance.GlobalGroundItemCache;
+
+            try
+            {
+                Parallel.ForEach(items.Values, (item) =>
+                {
+                    if (item is null) return;
+                    switch (item.ItemQuality)
+                    {
+                        case Item.Quality.Epic:
+                            Aisling.Client.SendAnimation(397, new Position(item.Position.X, item.Position.Y));
+                            break;
+                        case Item.Quality.Legendary:
+                            Aisling.Client.SendAnimation(398, new Position(item.Position.X, item.Position.Y));
+                            break;
+                        case Item.Quality.Forsaken:
+                            Aisling.Client.SendAnimation(399, new Position(item.Position.X, item.Position.Y));
+                            break;
+                        case Item.Quality.Mythic:
+                        case Item.Quality.Primordial:
+                        case Item.Quality.Transcendent:
+                            Aisling.Client.SendAnimation(400, new Position(item.Position.X, item.Position.Y));
+                            break;
+                        case Item.Quality.Damaged:
+                        case Item.Quality.Common:
+                        case Item.Quality.Uncommon:
+                        case Item.Quality.Rare:
+                            break;
+                    }
+                });
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            _itemAnimationControl.Restart();
         }
 
         private static void WorldCacheUpsert(Item item)

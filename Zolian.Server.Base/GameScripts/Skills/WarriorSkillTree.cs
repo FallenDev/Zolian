@@ -696,7 +696,7 @@ public class Crasher(Skill skill) : SkillScript(skill)
         }
 
         var dmg = (int)(criticalHp * 1.5);
-        aisling.CurrentHp = crasherHp;
+        aisling.CurrentHp = crasherHp >= aisling.CurrentHp ? 1 : crasherHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel drained...");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, skill, dmg, false, action);

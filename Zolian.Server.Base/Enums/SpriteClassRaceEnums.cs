@@ -69,7 +69,7 @@ public enum ClassStage
 }
 
 [Flags]
-public enum RacialAfflictions
+public enum Afflictions
 {
     Normal = 1,
     Lycanisim = 1 << 1,
@@ -105,7 +105,7 @@ public static class SpriteClassRaceExtensions
     public static bool ClassFlagIsSet(this Class self, Class flag) => (self & flag) == flag;
     public static bool RaceFlagIsSet(this Race self, Race flag) => (self & flag) == flag;
     public static bool StageFlagIsSet(this ClassStage self, ClassStage flag) => (self & flag) == flag;
-    public static bool AfflictionFlagIsSet(this RacialAfflictions self, RacialAfflictions flag) => (self & flag) == flag;
+    public static bool AfflictionFlagIsSet(this Afflictions self, Afflictions flag) => (self & flag) == flag;
     public static bool SubClassFlagIsSet(this SubClassDragonkin self, SubClassDragonkin flag) => (self & flag) == flag;
 }
     
@@ -189,22 +189,22 @@ public static class ClassStrings
         };
     }
 
-    public static string AfflictionValue(RacialAfflictions a)
+    public static string AfflictionValue(Afflictions a)
     {
         return a switch
         {
-            RacialAfflictions.Normal => "Normal",
-            RacialAfflictions.Lycanisim => "Lycanisim",
-            RacialAfflictions.Vampirisim => "Vampirisim",
-            RacialAfflictions.Plagued => "Plagued",
-            RacialAfflictions.TheShakes => "The Shakes",
-            RacialAfflictions.Stricken => "Stricken",
-            RacialAfflictions.Rabies => "Rabies",
-            RacialAfflictions.LockJoint => "Lock Joint",
-            RacialAfflictions.NumbFall => "Numb Fall",
-            RacialAfflictions.Diseased => "Diseased",
-            RacialAfflictions.Hallowed => "Hallowed",
-            RacialAfflictions.Petrified => "Petrified",
+            Afflictions.Normal => "Normal",
+            Afflictions.Lycanisim => "Lycanisim",
+            Afflictions.Vampirisim => "Vampirisim",
+            Afflictions.Plagued => "Plagued",
+            Afflictions.TheShakes => "The Shakes",
+            Afflictions.Stricken => "Stricken",
+            Afflictions.Rabies => "Rabies",
+            Afflictions.LockJoint => "Lock Joint",
+            Afflictions.NumbFall => "Numb Fall",
+            Afflictions.Diseased => "Diseased",
+            Afflictions.Hallowed => "Hallowed",
+            Afflictions.Petrified => "Petrified",
             _ => "Normal"
         };
     }

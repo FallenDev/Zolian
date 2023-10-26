@@ -835,7 +835,7 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
         }
 
         var dmg = (int)(criticalHp * 2.5);
-        aisling.CurrentHp = kelbHp;
+        aisling.CurrentHp = kelbHp >= aisling.CurrentHp ? 1 : kelbHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahhhhh!");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         _skillMethod.OnSuccess(_target, aisling, skill, dmg, false, action);

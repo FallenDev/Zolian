@@ -24,7 +24,7 @@ public class Player : Sprite
     public Class Path { get; set; }
     public Class PastClass { get; set; }
     public Race Race { get; set; }
-    public RacialAfflictions Afflictions { get; set; }
+    public Afflictions Afflictions { get; set; }
     public Gender Gender { get; set; }
     public byte HairColor { get; set; }
     public byte HairStyle { get; set; }

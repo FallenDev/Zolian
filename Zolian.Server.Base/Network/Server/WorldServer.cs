@@ -813,7 +813,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             Parallel.ForEach(items.Values, (item) =>
             {
                 if (item == null) return;
-                if (item.ItemPane != Item.ItemPanes.Ground) return;
+                if (item.ItemPane != Item.ItemPanes.Ground)
+                {
+                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
+                    return;
+                }
                 var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
                 if (abandonedDiff.Minutes <= 30) return;
                 var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
@@ -1296,6 +1300,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
+                    item.ItemPane = Item.ItemPanes.Ground;
                     item.AbandonedDate = DateTime.UtcNow;
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
@@ -1304,7 +1309,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     {
                         if (itemPosition.X == 31 && itemPosition.Y == 52 ||
                             itemPosition.X == 31 && itemPosition.Y == 53)
+                        {
+                            ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
                             item.Remove();
+                        }
                     }
                 }
             }
@@ -2854,7 +2862,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnException(IWorldClient localClient, ExceptionArgs localArgs)
         {
             var ex = localArgs.exceptionMsg;
-            client.Disconnect();
+            client.Save();
             Crashes.TrackError(new Exception($"{ex}"));
             return default;
         }

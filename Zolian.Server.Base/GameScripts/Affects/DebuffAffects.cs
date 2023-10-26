@@ -30,7 +30,7 @@ public class Lycanisim : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        var vamp = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Vampirisim);
+        var vamp = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
         
         if (vamp)
         {
@@ -40,7 +40,7 @@ public class Lycanisim : Debuff
 
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += DmgModifier;
-        aisling.Afflictions |= RacialAfflictions.Lycanisim;
+        aisling.Afflictions |= Afflictions.Lycanisim;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -53,7 +53,7 @@ public class Lycanisim : Debuff
         if (affected is not Aisling aisling) return;
         aisling.BonusDex -= DexModifier;
         aisling.BonusDmg -= DmgModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Lycanisim;
+        aisling.Afflictions &= ~Afflictions.Lycanisim;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -79,7 +79,7 @@ public class Vampirisim : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        var lycan = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Lycanisim);
+        var lycan = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
 
         if (lycan)
         {
@@ -89,7 +89,7 @@ public class Vampirisim : Debuff
 
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += HitModifier;
-        aisling.Afflictions |= RacialAfflictions.Vampirisim;
+        aisling.Afflictions |= Afflictions.Vampirisim;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -102,7 +102,7 @@ public class Vampirisim : Debuff
         if (affected is not Aisling aisling) return;
         aisling.BonusDex -= DexModifier;
         aisling.BonusDmg -= HitModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Vampirisim;
+        aisling.Afflictions &= ~Afflictions.Vampirisim;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -136,9 +136,9 @@ public class Plagued : Debuff
         aisling.BonusWis -= StatModifier;
         aisling.BonusCon -= StatModifier;
         aisling.BonusDex -= StatModifier;
-        aisling.Afflictions |= RacialAfflictions.Plagued;
+        aisling.Afflictions |= Afflictions.Plagued;
 
-        var diseased = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.TheShakes);
+        var diseased = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes);
         if (diseased)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
@@ -146,7 +146,7 @@ public class Plagued : Debuff
             diseasedDebuff.OnApplied(affected, diseasedDebuff);
         }
 
-        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Stricken);
+        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Stricken);
         if (hallowed)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
@@ -171,7 +171,7 @@ public class Plagued : Debuff
         aisling.BonusWis += StatModifier;
         aisling.BonusCon += StatModifier;
         aisling.BonusDex += StatModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Plagued;
+        aisling.Afflictions &= ~Afflictions.Plagued;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -201,9 +201,9 @@ public class TheShakes : Debuff
         aisling.BonusCon -= ConModifier;
         aisling.BonusDex -= DexModifier;
         aisling.BonusDmg -= DmgModifier;
-        aisling.Afflictions |= RacialAfflictions.TheShakes;
+        aisling.Afflictions |= Afflictions.TheShakes;
 
-        var diseased = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued);
+        var diseased = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
         if (diseased)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
@@ -224,7 +224,7 @@ public class TheShakes : Debuff
         aisling.BonusCon += ConModifier;
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += DmgModifier;
-        aisling.Afflictions &= ~RacialAfflictions.TheShakes;
+        aisling.Afflictions &= ~Afflictions.TheShakes;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -254,9 +254,9 @@ public class Stricken : Debuff
         aisling.BonusMp -= MpModifier;
         aisling.BonusWis -= WisModifier;
         aisling.BonusRegen -= RegenModifier;
-        aisling.Afflictions |= RacialAfflictions.Stricken;
+        aisling.Afflictions |= Afflictions.Stricken;
 
-        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.Plagued);
+        var hallowed = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
         if (hallowed)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
@@ -277,7 +277,7 @@ public class Stricken : Debuff
         aisling.BonusMp += MpModifier;
         aisling.BonusWis += WisModifier;
         aisling.BonusRegen += RegenModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Stricken;
+        aisling.Afflictions &= ~Afflictions.Stricken;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -302,7 +302,7 @@ public class Rabies : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        aisling.Afflictions |= RacialAfflictions.Rabies;
+        aisling.Afflictions |= Afflictions.Rabies;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -351,7 +351,7 @@ public class LockJoint : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        var petrified = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.NumbFall);
+        var petrified = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.NumbFall);
 
         if (petrified)
         {
@@ -360,7 +360,7 @@ public class LockJoint : Debuff
         }
 
         aisling.BonusDmg -= DmgModifier;
-        aisling.Afflictions |= RacialAfflictions.LockJoint;
+        aisling.Afflictions |= Afflictions.LockJoint;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -378,7 +378,7 @@ public class LockJoint : Debuff
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
         aisling.BonusDmg += DmgModifier;
-        aisling.Afflictions &= ~RacialAfflictions.LockJoint;
+        aisling.Afflictions &= ~Afflictions.LockJoint;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -404,7 +404,7 @@ public class NumbFall : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        var petrified = aisling.Afflictions.AfflictionFlagIsSet(RacialAfflictions.LockJoint);
+        var petrified = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.LockJoint);
 
         if (petrified)
         {
@@ -414,7 +414,7 @@ public class NumbFall : Debuff
 
         aisling.BonusHit -= HitModifier;
         aisling.BonusDmg -= DmgModifier;
-        aisling.Afflictions |= RacialAfflictions.NumbFall;
+        aisling.Afflictions |= Afflictions.NumbFall;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -427,7 +427,7 @@ public class NumbFall : Debuff
         if (affected is not Aisling aisling) return;
         aisling.BonusHit += HitModifier;
         aisling.BonusDmg += DmgModifier;
-        aisling.Afflictions &= ~RacialAfflictions.NumbFall;
+        aisling.Afflictions &= ~Afflictions.NumbFall;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -459,7 +459,7 @@ public class Diseased : Debuff
         aisling.BonusWis -= StatModifier;
         aisling.BonusCon -= StatModifier;
         aisling.BonusDex -= StatModifier;
-        aisling.Afflictions |= RacialAfflictions.Diseased;
+        aisling.Afflictions |= Afflictions.Diseased;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -476,7 +476,7 @@ public class Diseased : Debuff
         aisling.BonusWis += StatModifier;
         aisling.BonusCon += StatModifier;
         aisling.BonusDex += StatModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Diseased;
+        aisling.Afflictions &= ~Afflictions.Diseased;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -502,7 +502,7 @@ public class Hallowed : Debuff
 
         InsertDebuff(aisling, debuff);
         aisling.BonusMr -= WillModifier;
-        aisling.Afflictions |= RacialAfflictions.Hallowed;
+        aisling.Afflictions |= Afflictions.Hallowed;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -514,7 +514,7 @@ public class Hallowed : Debuff
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
         aisling.BonusMr += WillModifier;
-        aisling.Afflictions &= ~RacialAfflictions.Hallowed;
+        aisling.Afflictions &= ~Afflictions.Hallowed;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
@@ -538,7 +538,7 @@ public class Petrified : Debuff
         }
 
         InsertDebuff(aisling, debuff);
-        aisling.Afflictions |= RacialAfflictions.Petrified;
+        aisling.Afflictions |= Afflictions.Petrified;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -555,7 +555,7 @@ public class Petrified : Debuff
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
-        aisling.Afflictions &= ~RacialAfflictions.Petrified;
+        aisling.Afflictions &= ~Afflictions.Petrified;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
