@@ -807,7 +807,7 @@ public sealed class Item : Sprite, IItem
     public void StatModifiersCalc(WorldClient client, Item equipment)
     {
         client.Aisling.BonusAc += equipment.Template.AcModifer;
-        client.Aisling.BonusMr += (byte)equipment.Template.MrModifer;
+        client.Aisling.BonusMr += equipment.Template.MrModifer;
         client.Aisling.BonusHp += equipment.Template.HealthModifer;
         client.Aisling.BonusMp += equipment.Template.ManaModifer;
         client.Aisling.BonusRegen += equipment.Template.RegenModifer;
@@ -816,8 +816,8 @@ public sealed class Item : Sprite, IItem
         client.Aisling.BonusWis += equipment.Template.WisModifer;
         client.Aisling.BonusCon += equipment.Template.ConModifer;
         client.Aisling.BonusDex += equipment.Template.DexModifer;
-        client.Aisling.BonusHit += (byte)equipment.Template.HitModifer;
-        client.Aisling.BonusDmg += (byte)equipment.Template.DmgModifer;
+        client.Aisling.BonusHit += equipment.Template.HitModifer;
+        client.Aisling.BonusDmg += equipment.Template.DmgModifer;
     }
 
     public void SpellLines(WorldClient client)
@@ -950,10 +950,10 @@ public sealed class Item : Sprite, IItem
         client.Aisling.BonusWis += bonus.Wis;
         client.Aisling.BonusCon += bonus.Con;
         client.Aisling.BonusDex += bonus.Dex;
-        client.Aisling.BonusDmg += (byte)bonus.Dmg;
-        client.Aisling.BonusHit += (byte)bonus.Hit;
+        client.Aisling.BonusDmg += bonus.Dmg;
+        client.Aisling.BonusHit += bonus.Hit;
         client.Aisling.BonusAc += bonus.Ac;
-        client.Aisling.BonusMr += (byte)bonus.Mr;
+        client.Aisling.BonusMr += bonus.Mr;
         client.Aisling.BonusHp += bonus.Hp;
         client.Aisling.BonusMp += bonus.Mp;
         client.Aisling.BonusRegen += bonus.Regen;

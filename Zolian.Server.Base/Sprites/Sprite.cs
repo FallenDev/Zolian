@@ -110,11 +110,11 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     }
     private int AcFromDex => (Dex / 8).IntClamp(0, 500);
     private int Ac => _ac + BonusAc + AcFromDex;
-    private double _fortitude => Con * 0.2;
+    private double _fortitude => Con * 0.1;
     public double Fortitude => Math.Round(_fortitude + BonusFortitude, 2);
-    private double _reflex => Hit * 0.2;
+    private double _reflex => Hit * 0.1;
     public double Reflex => Math.Round(_reflex, 2);
-    private double _will => Mr * 0.2;
+    private double _will => Mr * 0.1;
     public double Will => Math.Round(_will, 2);
     public int Hit => _Hit + BonusHit;
     private int Mr => _Mr + BonusMr;
@@ -241,8 +241,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public int BonusFortitude { get; set; }
 
-    public byte _Hit { get; set; }
-    public byte BonusHit { get; set; }
+    public int _Hit { get; set; }
+    public int BonusHit { get; set; }
 
     public int _Mr { get; set; }
     public int BonusMr { get; set; }

@@ -24,7 +24,8 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
     {
         base.TopMenu(client);
 
-        var hostiles = client.Aisling.MonstersNearby().Count();
+        var level = client.Aisling.ExpLevel;
+        var ability = client.Aisling.AbpLevel;
         var bStr = client.Aisling._Str.ToString("D3");
         var baseStr = Regex.Replace(bStr, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
         var bInt = client.Aisling._Int.ToString("D3");
@@ -82,7 +83,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
         
-        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gHostiles Nearby: {{=b{hostiles} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
+        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gInsight: {{=b{level} {{=gRank: {{=b{ability} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
                                                                  $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +
                                                                  $"{{=gGear Stats| {{=cS:{{=a{gearStr}{{=c, I:{{=a{gearInt}{{=c, W:{{=a{gearWis}{{=c, C:{{=a{gearCon}{{=c, D:{{=a{gearDex}\n" +
                                                                  $"{{=gFull Stats| {{=cS:{{=a{playerStr}{{=c, I:{{=a{playerInt}{{=c, W:{{=a{playerWis}{{=c, C:{{=a{playerCon}{{=c, D:{{=a{playerDex}\n" +

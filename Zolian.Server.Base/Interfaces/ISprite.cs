@@ -57,8 +57,8 @@ public interface ISprite
 
     int BonusFortitude { get; set; }
 
-    byte _Hit { get; set; }
-    byte BonusHit { get; set; }
+    int _Hit { get; set; }
+    int BonusHit { get; set; }
 
     int _Mr { get; set; }
     int BonusMr { get; set; }

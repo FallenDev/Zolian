@@ -49,6 +49,6 @@ public class FlameQuiver(Item item) : WeaponScript(item)
         });
 
         enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Fire, null);
-        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Fire, null);
+        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Earth, null);
     }
 }

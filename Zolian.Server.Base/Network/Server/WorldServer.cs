@@ -1155,6 +1155,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (item.GiveTo(localClient.Aisling))
                 {
+                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
                     item.Remove();
                     if (item.Scripts is null) return default;
                     foreach (var itemScript in item.Scripts.Values)

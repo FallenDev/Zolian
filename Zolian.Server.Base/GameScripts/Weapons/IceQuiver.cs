@@ -48,7 +48,7 @@ public class IceQuiver(Item item) : WeaponScript(item)
             damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
         });
 
-        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Water, null);
+        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Wind, null);
         enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Water, null);
     }
 }
