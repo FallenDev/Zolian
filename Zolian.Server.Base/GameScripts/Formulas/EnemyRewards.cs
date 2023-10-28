@@ -125,13 +125,13 @@ public class EnemyRewards : RewardScript
         foreach (var item in randEquipItems)
         {
             item.Release(_monster, _monster.Position);
+            ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
+
             if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(361, null, item.Serial));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }
 
@@ -139,8 +139,6 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(359, null, item.Serial));
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
                     player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }

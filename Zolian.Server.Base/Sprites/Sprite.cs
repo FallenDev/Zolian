@@ -114,7 +114,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public double Fortitude => Math.Round(_fortitude + BonusFortitude, 2);
     private double _reflex => Hit * 0.1;
     public double Reflex => Math.Round(_reflex, 2);
-    private double _will => Mr * 0.1;
+    private double _will => Mr * 0.14;
     public double Will => Math.Round(_will, 2);
     public int Hit => _Hit + BonusHit;
     private int Mr => _Mr + BonusMr;

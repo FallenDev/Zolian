@@ -356,7 +356,6 @@ public sealed class Item : Sprite, IItem
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
-        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
@@ -424,7 +423,6 @@ public sealed class Item : Sprite, IItem
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
-        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
