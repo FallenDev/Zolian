@@ -191,7 +191,11 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnLogin(ILoginClient client, in ClientPacket packet)
     {
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
-        return ExecuteHandler(client, args, InnerOnLogin);
+
+        if (ServerSetup.Instance.Running) return ExecuteHandler(client, args, InnerOnLogin);
+
+        client.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is down for maintenance");
+        return default;
 
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
@@ -247,7 +251,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             switch (maintCheck)
             {
                 case "asdf":
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Maintenance Account, denied access");
+                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Maintenance Account, denied access");
                     return;
                 case "death":
                     {
@@ -266,7 +270,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             return;
                         }
 
-                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
+                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Account, denied access");
                         return;
                     }
                 case "scythe":
@@ -288,7 +292,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             return;
                         }
 
-                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
+                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Account, denied access");
                         return;
                     }
                 default:
@@ -304,7 +308,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             if (result.Hacked)
             {
-                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
                 return;
             }
 

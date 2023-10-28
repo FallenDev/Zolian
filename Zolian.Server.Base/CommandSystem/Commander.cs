@@ -84,9 +84,44 @@ public static class Commander
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Chaos", "chaos", "- Force shutdown:")
+            .SetAction(Chaos)
+        );
+
+        ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Reload Maps", "rm", "- Reload all maps:")
             .SetAction(OnMapReload)
         );
+    }
+
+    private static void Chaos(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Shuts down server");
+            return;
+        }
+        var players = ServerSetup.Instance.Game.Aislings;
+        ServerSetup.Logger("--------------------------------------------", LogLevel.Warning);
+        ServerSetup.Logger("", LogLevel.Warning);
+        ServerSetup.Logger("--------------- Server Chaos ---------------", LogLevel.Warning);
+
+        foreach (var connected in players)
+        {
+            _ = StorageManager.AislingBucket.QuickSave(connected);
+            _ = connected.Client.Save();
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
+            connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
+            Task.Delay(500).ContinueWith(ct =>
+            {
+                connected.Client.Disconnect();
+            });
+        }
+
+        ServerSetup.Instance.Running = false;
     }
     
     public static void Restart(Argument[] args, object arg)
@@ -100,8 +135,7 @@ public static class Commander
         {
             _ = StorageManager.AislingBucket.QuickSave(connected);
             _ = connected.Client.Save();
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Restart-");
-            connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Order {=g. -Server Restart-");
         }
 
         ServerSetup.Instance.Running = false;
