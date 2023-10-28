@@ -6,8 +6,6 @@ namespace Darkages.GameScripts.Formulas;
 [Script("Will Saving Throw")]
 public class WillSavingThrow(Sprite obj) : FormulaScript
 {
-    private readonly Sprite _obj = obj;
-
     public override long Calculate(Sprite obj, long value)
     {
         var armor = obj.Will;

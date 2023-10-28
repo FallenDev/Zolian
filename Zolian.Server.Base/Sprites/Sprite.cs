@@ -1026,49 +1026,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #endregion
 
-    #region Damage
-
-    public long ComputeDmgFromAc(long dmg)
-    {
-        var script = ScriptManager.Load<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, this);
-
-        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
-    }
-
-    public long ComputeDmgFromWillSavingThrow(long dmg)
-    {
-        var script = ScriptManager.Load<FormulaScript>("Will Saving Throw", this);
-
-        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
-    }
-
-    private long LuckModifier(long dmg)
-    {
-        if (Luck <= 0) return dmg;
-        long mod;
-
-        switch (Luck)
-        {
-            case >= 1 and <= 5:
-                mod = (long)(dmg * 0.03);
-                dmg -= mod;
-                break;
-            case >= 6 and <= 10:
-                mod = (long)(dmg * 0.05);
-                dmg -= mod;
-                break;
-            case >= 11 and <= 15:
-                mod = (long)(dmg * 0.07);
-                dmg -= mod;
-                break;
-            case >= 16:
-                mod = (long)(dmg * 0.10);
-                dmg -= mod;
-                break;
-        }
-
-        return dmg;
-    }
+    #region Initial Damage Application
+    // Entry methods to all damage to sprite
 
     public void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell)
     {
@@ -1379,6 +1338,163 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
+    #endregion
+
+    #region Physical Damage Application
+
+    public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
+    {
+        if (this is Aisling aislingTarget)
+        {
+            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
+            {
+                aislingTarget.Client.SendHealthBar(this, sound);
+                return false;
+            }
+        }
+
+        if (this is Monster monster)
+        {
+            if (damageDealingSprite is Aisling aisling)
+                if (!CanAttack(aisling, forced))
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
+                    return false;
+                }
+
+            if (monster.Camouflage)
+                dmg = (long)(dmg * .90);
+        }
+
+        if (Immunity && !forced)
+        {
+            PlayerNearby?.Client.SendHealthBar(this, sound);
+            return false;
+        }
+
+        if (IsAited && dmg > 100)
+            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
+
+        double secondary = 0;
+        var weak = false;
+
+        if (damageDealingSprite.SecondaryOffensiveElement != ElementManager.Element.None)
+        {
+            secondary = GetElementalModifier(damageDealingSprite, true);
+            if (secondary < 1.0) weak = true;
+            secondary /= 2;
+        }
+
+        var amplifier = GetElementalModifier(damageDealingSprite);
+        {
+            if (weak)
+                amplifier -= secondary;
+            else
+                amplifier += secondary;
+        }
+
+        dmg = LuckModifier(dmg);
+        dmg = ComputeDmgFromAc(dmg);
+        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
+        var convDmg = (int)dmg;
+
+        if (convDmg > 0)
+            ApplyEquipmentDurability(convDmg);
+
+        return true;
+    }
+
+    public long ComputeDmgFromAc(long dmg)
+    {
+        var script = ScriptManager.Load<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, this);
+
+        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
+    }
+
+    #endregion
+
+    #region Magical Damage Application
+
+    public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
+    {
+        if (this is Aisling aislingTarget)
+        {
+            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
+            {
+                aislingTarget.Client.SendHealthBar(this, sound);
+                return false;
+            }
+        }
+
+        if (this is Monster monster)
+        {
+            if (damageDealingSprite is Aisling aisling)
+                if (!CanAttack(aisling, forced))
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
+                    return false;
+                }
+
+            if (monster.Camouflage)
+                dmg = (long)(dmg * .90);
+        }
+
+        if (Immunity && !forced)
+        {
+            PlayerNearby?.Client.SendHealthBar(this, sound);
+            return false;
+        }
+
+        if (IsAited && dmg > 100)
+            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
+
+        double secondary = 0;
+        var weak = false;
+
+        if (damageDealingSprite.SecondaryOffensiveElement != ElementManager.Element.None)
+        {
+            secondary = GetElementalModifier(damageDealingSprite, true);
+            if (secondary < 1.0) weak = true;
+            secondary /= 2;
+        }
+
+        var amplifier = GetElementalModifier(damageDealingSprite);
+        {
+            if (weak)
+                amplifier -= secondary;
+            else
+                amplifier += secondary;
+        }
+
+        dmg = LuckModifier(dmg);
+        dmg = ComputeDmgFromWillSavingThrow(dmg);
+        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
+        var convDmg = (int)dmg;
+
+        if (convDmg > 0)
+            ApplyEquipmentDurability(convDmg);
+
+        return true;
+    }
+
+    public long ComputeDmgFromWillSavingThrow(long dmg)
+    {
+        var script = ScriptManager.Load<FormulaScript>("Will Saving Throw", this);
+
+        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
+    }
+
+    #endregion
+
+    #region Damage Application Helper Methods
+    // Methods below are in order as per execution
+
+    public double GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type)
+    {
+        var script = ScriptManager.Load<DamageFormulaScript>(ServerSetup.Instance.Config.BaseDamageScript, this, target, type);
+        return script?.Values.Sum(s => s.Calculate(damageDealingSprite, target, type)) ?? 1;
+    }
+
     public long Vulnerable(long dmg)
     {
         if (!IsVulnerable)
@@ -1419,24 +1535,27 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return dmg;
     }
 
-    public void Thorns(Sprite damageDealingSprite, long dmg)
+    public long ApplyWeaponBonuses(Sprite source, long dmg)
     {
-        if (damageDealingSprite is null) return;
-        if (this is not Aisling aisling) return;
-        if (aisling.Spikes == 0) return;
+        if (source is not Aisling aisling) return dmg;
 
-        var thornsDmg = aisling.Spikes * 0.03;
-        Math.Clamp(thornsDmg, 1, int.MaxValue);
-        dmg = (long)(thornsDmg * dmg);
-
-        if (dmg > int.MaxValue)
+        if (aisling.DualWield && aisling.EquipmentManager.Equipment[3] != null && aisling.EquipmentManager.Equipment[3].Item.Template.ScriptName == "Weapon")
         {
-            dmg = int.MaxValue;
+            var weapon2 = aisling.EquipmentManager.Equipment[3].Item;
+            var dmg2 = Random.Shared.Next(
+                (weapon2.Template.DmgMin + aisling.Dmg) * 1,
+                (weapon2.Template.DmgMax + aisling.Dmg) * 5);
+            dmg2 /= 2;
+            dmg += dmg2;
         }
 
-        var convDmg = (int)dmg;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
-        damageDealingSprite.CurrentHp -= convDmg;
+        if (aisling.EquipmentManager.Equipment[1] == null) return dmg;
+        var weapon = aisling.EquipmentManager.Equipment[1].Item;
+        dmg += Random.Shared.Next(
+            (weapon.Template.DmgMin + aisling.Dmg) * 1,
+            (weapon.Template.DmgMax + aisling.Dmg) * 5);
+
+        return dmg;
     }
 
     public void VarianceProc(Sprite sprite, long dmg)
@@ -1684,254 +1803,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    public long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
-    {
-        if (dmg <= 0) dmg = 1;
-
-        if (CurrentHp > MaximumHp)
-            CurrentHp = MaximumHp;
-
-        var dmgApplied = (long)Math.Abs(dmg * amplifier);
-        var finalDmg = LevelDamageMitigation(damageDealingSprite, dmgApplied);
-
-        // ToDo: Create logic for "Over Damage"
-        if (finalDmg > int.MaxValue)
-        {
-            finalDmg = int.MaxValue;
-        }
-
-        var convDmg = (int)finalDmg;
-
-        CurrentHp -= convDmg;
-
-        if (damageDealingSprite is Aisling aisling)
-        {
-            var time = DateTime.UtcNow;
-            var estTime = time.TimeOfDay;
-            aisling.DamageCounter += convDmg;
-            if (aisling.ThreatMeter + dmg >= long.MaxValue)
-                aisling.ThreatMeter = 500000;
-            aisling.ThreatMeter += dmg;
-            aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
-            ShowDmg(aisling, estTime);
-        }
-
-        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
-
-        return convDmg;
-    }
-
-    private long LevelDamageMitigation(Sprite damageDealingSprite, long dmg)
-    {
-        if (Level <= damageDealingSprite.Level) return dmg;
-
-        var difference = Level - damageDealingSprite.Level;
-        dmg = difference switch
-        {
-            >= 50 => (int)(dmg * 0.75),
-            >= 25 => (int)(dmg * 0.85),
-            >= 10 => (int)(dmg * 0.90),
-            >= 5 => (int)(dmg * 0.95),
-            _ => dmg
-        };
-
-        return dmg;
-    }
-
-    public void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
-    {
-        if (!aisling.AttackDmgTrack.Update(elapsedTime)) return;
-        aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
-
-        var dmgShow = aisling.DamageCounter.ToString();
-        aisling.Client.SendPublicMessage(aisling.Serial, PublicMessageType.Chant, $"{dmgShow}");
-        aisling.DamageCounter = 0;
-    }
-
-    public void ThreatGeneratedSubsided(Aisling aisling)
-    {
-        var time = false;
-        if (!_threatControl.IsRunning)
-        {
-            _threatControl.Start();
-        }
-
-        if (!aisling.ThreatTimer.Disabled)
-        {
-            time = _threatControl.Elapsed.TotalMilliseconds > aisling.ThreatTimer.Delay.TotalMilliseconds;
-        }
-
-        if (!time) return;
-        _threatControl.Restart();
-        aisling.ThreatMeter = 0;
-        aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
-    }
-
-    public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
-    {
-        if (this is Aisling aislingTarget)
-        {
-            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
-            {
-                aislingTarget.Client.SendHealthBar(this, sound);
-                return false;
-            }
-        }
-
-        if (this is Monster monster)
-        {
-            if (damageDealingSprite is Aisling aisling)
-                if (!CanAttack(aisling, forced))
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
-                    return false;
-                }
-
-            if (monster.Camouflage)
-                dmg = (long)(dmg * .90);
-        }
-
-        if (Immunity && !forced)
-        {
-            PlayerNearby?.Client.SendHealthBar(this, sound);
-            return false;
-        }
-
-        if (IsAited && dmg > 100)
-            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
-
-        double secondary = 0;
-        var weak = false;
-
-        if (damageDealingSprite.SecondaryOffensiveElement != ElementManager.Element.None)
-        {
-            secondary = GetElementalModifier(damageDealingSprite, true);
-            if (secondary < 1.0) weak = true;
-            secondary /= 2;
-        }
-
-        var amplifier = GetElementalModifier(damageDealingSprite);
-        {
-            if (weak)
-                amplifier -= secondary;
-            else
-                amplifier += secondary;
-        }
-
-        dmg = LuckModifier(dmg);
-        dmg = ComputeDmgFromAc(dmg);
-        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
-        var convDmg = (int)dmg;
-
-        if (convDmg > 0)
-            ApplyEquipmentDurability(convDmg);
-
-        return true;
-    }
-
-    public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
-    {
-        if (this is Aisling aislingTarget)
-        {
-            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
-            {
-                aislingTarget.Client.SendHealthBar(this, sound);
-                return false;
-            }
-        }
-
-        if (this is Monster monster)
-        {
-            if (damageDealingSprite is Aisling aisling)
-                if (!CanAttack(aisling, forced))
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
-                    return false;
-                }
-
-            if (monster.Camouflage)
-                dmg = (long)(dmg * .90);
-        }
-
-        if (Immunity && !forced)
-        {
-            PlayerNearby?.Client.SendHealthBar(this, sound);
-            return false;
-        }
-
-        if (IsAited && dmg > 100)
-            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
-
-        double secondary = 0;
-        var weak = false;
-
-        if (damageDealingSprite.SecondaryOffensiveElement != ElementManager.Element.None)
-        {
-            secondary = GetElementalModifier(damageDealingSprite, true);
-            if (secondary < 1.0) weak = true;
-            secondary /= 2;
-        }
-
-        var amplifier = GetElementalModifier(damageDealingSprite);
-        {
-            if (weak)
-                amplifier -= secondary;
-            else
-                amplifier += secondary;
-        }
-
-        dmg = LuckModifier(dmg);
-        dmg = ComputeDmgFromWillSavingThrow(dmg);
-        dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
-        var convDmg = (int)dmg;
-
-        if (convDmg > 0)
-            ApplyEquipmentDurability(convDmg);
-
-        return true;
-    }
-
-    public void ApplyEquipmentDurability(int dmg)
-    {
-        if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
-            aisling.EquipmentManager.DecreaseDurability();
-    }
-
-    public long ApplyWeaponBonuses(Sprite source, long dmg)
-    {
-        if (source is not Aisling aisling) return dmg;
-
-        if (aisling.DualWield && aisling.EquipmentManager.Equipment[3] != null && aisling.EquipmentManager.Equipment[3].Item.Template.ScriptName == "Weapon")
-        {
-            var weapon2 = aisling.EquipmentManager.Equipment[3].Item;
-            var dmg2 = Random.Shared.Next(
-                (weapon2.Template.DmgMin + aisling.Dmg) * 1,
-                (weapon2.Template.DmgMax + aisling.Dmg) * 5);
-            dmg2 /= 2;
-            dmg += dmg2;
-        }
-
-        if (aisling.EquipmentManager.Equipment[1] == null) return dmg;
-        var weapon = aisling.EquipmentManager.Equipment[1].Item;
-        dmg += Random.Shared.Next(
-            (weapon.Template.DmgMin + aisling.Dmg) * 1,
-            (weapon.Template.DmgMax + aisling.Dmg) * 5);
-
-        return dmg;
-    }
-
-    public double CalculateElementalDamageMod(ElementManager.Element element)
-    {
-        var script = ScriptManager.Load<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, this);
-        return script?.Values.Sum(s => s.Calculate(this, element)) ?? 0.0;
-    }
-
-    public double GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type)
-    {
-        var script = ScriptManager.Load<DamageFormulaScript>(ServerSetup.Instance.Config.BaseDamageScript, this, target, type);
-        return script?.Values.Sum(s => s.Calculate(damageDealingSprite, target, type)) ?? 1;
-    }
-
     public double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false)
     {
         if (damageDealingSprite == null) return 1;
@@ -1970,115 +1841,150 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
+    public double CalculateElementalDamageMod(ElementManager.Element element)
+    {
+        var script = ScriptManager.Load<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, this);
+        return script?.Values.Sum(s => s.Calculate(this, element)) ?? 0.0;
+    }
+
+    private long LuckModifier(long dmg)
+    {
+        if (Luck <= 0) return dmg;
+        long mod;
+
+        switch (Luck)
+        {
+            case >= 1 and <= 5:
+                mod = (long)(dmg * 0.03);
+                dmg -= mod;
+                break;
+            case <= 10:
+                mod = (long)(dmg * 0.05);
+                dmg -= mod;
+                break;
+            case <= 15:
+                mod = (long)(dmg * 0.07);
+                dmg -= mod;
+                break;
+            case <= 16:
+                mod = (long)(dmg * 0.10);
+                dmg -= mod;
+                break;
+        }
+
+        return dmg;
+    }
+
+    private long LevelDamageMitigation(Sprite damageDealingSprite, long dmg)
+    {
+        if (Level <= damageDealingSprite.Level) return dmg;
+        var diff = Level - damageDealingSprite.Level;
+
+        switch (diff)
+        {
+            case >= 10 and < 25:
+                dmg = (long)(dmg * .60);
+                break;
+            case >= 25 and < 50:
+                dmg = (long)(dmg * .45);
+                break;
+            case >= 50 and < 75:
+                dmg = (long)(dmg * .30);
+                break;
+            case >= 75:
+                dmg = (long)(dmg * .15);
+                break;
+            default:
+                return dmg;
+        }
+
+        return dmg;
+    }
+
+    public void Thorns(Sprite damageDealingSprite, long dmg)
+    {
+        if (damageDealingSprite is null) return;
+        if (this is not Aisling aisling) return;
+        if (aisling.Spikes == 0) return;
+
+        var thornsDmg = aisling.Spikes * 0.03;
+        Math.Clamp(thornsDmg, 1, int.MaxValue);
+        dmg = (long)(thornsDmg * dmg);
+
+        if (dmg > int.MaxValue)
+        {
+            dmg = int.MaxValue;
+        }
+
+        var convDmg = (int)dmg;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
+        damageDealingSprite.CurrentHp -= convDmg;
+    }
+
+    #endregion
+
+    #region Complete Damage Application
+
+    public long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
+    {
+        if (dmg <= 0) dmg = 1;
+
+        if (CurrentHp > MaximumHp)
+            CurrentHp = MaximumHp;
+
+        var dmgApplied = (long)Math.Abs(dmg * amplifier);
+        var finalDmg = LevelDamageMitigation(damageDealingSprite, dmgApplied);
+
+        // Over damage converts to max integer
+        if (finalDmg > int.MaxValue)
+        {
+            finalDmg = int.MaxValue;
+        }
+
+        var convDmg = (int)finalDmg;
+        CurrentHp -= convDmg;
+        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+
+        return convDmg;
+    }
+
+    public void ApplyEquipmentDurability(int dmg)
+    {
+        if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
+            aisling.EquipmentManager.DecreaseDurability();
+    }
+
     public void OnDamaged(Sprite source, long dmg)
     {
         (this as Aisling)?.Client.SendAttributes(StatUpdateType.Vitality);
+        if (source is not Aisling aisling) return;
+
+        var time = DateTime.UtcNow;
+        var estTime = time.TimeOfDay;
+        aisling.DamageCounter += dmg;
+        if (aisling.ThreatMeter + dmg >= long.MaxValue)
+            aisling.ThreatMeter = (long)(long.MaxValue * .95);
+        aisling.ThreatMeter += dmg;
+        ShowDmg(aisling, estTime);
 
         if (this is not Monster monster) return;
-        if (source is not Aisling aisling) return;
         if (monster.Template?.ScriptName == null) return;
-        var scriptObj = monster.Scripts?.FirstOrDefault();
-        scriptObj?.Value.OnDamaged(aisling.Client, dmg, source);
+        monster.Scripts?.First().Value.OnDamaged(aisling.Client, dmg, source);
     }
 
-    public string GetDebuffName(Func<Debuff, bool> p)
+    public void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
     {
-        if (Debuffs == null || Debuffs.IsEmpty)
-            return string.Empty;
+        if (!aisling.AttackDmgTrack.Update(elapsedTime)) return;
+        aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
 
-        return Debuffs.Select(i => i.Value)
-            .FirstOrDefault(p)
-            ?.Name;
-    }
-
-    public bool HasBuff(string buff)
-    {
-        if (Buffs == null || Buffs.IsEmpty)
-            return false;
-
-        return Buffs.ContainsKey(buff);
-    }
-
-    public bool HasDebuff(string debuff)
-    {
-        if (Debuffs == null || Debuffs.IsEmpty)
-            return false;
-
-        return Debuffs.ContainsKey(debuff);
-    }
-
-    public bool HasDebuff(Func<Debuff, bool> p)
-    {
-        if (Debuffs == null || Debuffs.IsEmpty)
-            return false;
-
-        return Debuffs.Select(i => i.Value).FirstOrDefault(p) != null;
-    }
-
-    public void RemoveAllBuffs()
-    {
-        if (Buffs == null)
-            return;
-
-        foreach (var buff in Buffs)
-            RemoveBuff(buff.Key);
-    }
-
-    public void RemoveAllDebuffs()
-    {
-        if (Debuffs == null)
-            return;
-
-        foreach (var debuff in Debuffs)
-            RemoveDebuff(debuff.Key);
-    }
-
-    public bool RemoveBuff(string buff)
-    {
-        if (!HasBuff(buff)) return false;
-
-        lock (Buffs)
-        {
-            var buffObj = Buffs[buff];
-            buffObj?.OnEnded(this, buffObj);
-        }
-
-        return true;
-    }
-
-    public void RemoveBuffsAndDebuffs()
-    {
-        RemoveAllBuffs();
-        RemoveAllDebuffs();
-    }
-
-    public bool RemoveDebuff(string debuff, bool cancelled = false)
-    {
-        if (!cancelled && debuff == "Skulled") return true;
-
-        lock (Debuffs)
-        {
-            if (!HasDebuff(debuff)) return false;
-            var debuffObj = Debuffs[debuff];
-
-            if (debuffObj == null) return false;
-            debuffObj.Cancelled = cancelled;
-            debuffObj.OnEnded(this, debuffObj);
-        }
-
-        return true;
+        var dmgShow = aisling.DamageCounter.ToString();
+        aisling.Client.SendPublicMessage(aisling.Serial, PublicMessageType.Chant, $"{dmgShow}");
+        aisling.DamageCounter = 0;
     }
 
     #endregion
 
     #region Status
-
-    public void UpdateAddAndRemove()
-    {
-        PlayerNearby?.Client.SendRemoveObject(Serial);
-        var obj = new List<Sprite> { this };
-        PlayerNearby?.Client.SendVisibleEntities(obj);
-    }
 
     public void UpdateBuffs(TimeSpan elapsedTime)
     {
@@ -2171,6 +2077,25 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.Client.SendEffect((EffectColor)colorInt, debuff.Icon);
     }
 
+    public void ThreatGeneratedSubsided(Aisling aisling)
+    {
+        var time = false;
+        if (!_threatControl.IsRunning)
+        {
+            _threatControl.Start();
+        }
+
+        if (!aisling.ThreatTimer.Disabled)
+        {
+            time = _threatControl.Elapsed.TotalSeconds > aisling.ThreatTimer.Delay.TotalSeconds;
+        }
+
+        if (!time) return;
+        _threatControl.Restart();
+        aisling.ThreatMeter = 0;
+        aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
+    }
+
     private bool CanUpdate()
     {
         if (CantMove || IsBlind) return false;
@@ -2187,9 +2112,104 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return false;
     }
 
+    public bool HasBuff(string buff)
+    {
+        if (Buffs == null || Buffs.IsEmpty)
+            return false;
+
+        return Buffs.ContainsKey(buff);
+    }
+
+    public bool HasDebuff(string debuff)
+    {
+        if (Debuffs == null || Debuffs.IsEmpty)
+            return false;
+
+        return Debuffs.ContainsKey(debuff);
+    }
+
+    public bool HasDebuff(Func<Debuff, bool> p)
+    {
+        if (Debuffs == null || Debuffs.IsEmpty)
+            return false;
+
+        return Debuffs.Select(i => i.Value).FirstOrDefault(p) != null;
+    }
+
+    public string GetDebuffName(Func<Debuff, bool> p)
+    {
+        if (Debuffs == null || Debuffs.IsEmpty)
+            return string.Empty;
+
+        return Debuffs.Select(i => i.Value)
+            .FirstOrDefault(p)
+            ?.Name;
+    }
+
+    public void RemoveAllBuffs()
+    {
+        if (Buffs == null)
+            return;
+
+        foreach (var buff in Buffs)
+            RemoveBuff(buff.Key);
+    }
+
+    public void RemoveAllDebuffs()
+    {
+        if (Debuffs == null)
+            return;
+
+        foreach (var debuff in Debuffs)
+            RemoveDebuff(debuff.Key);
+    }
+
+    public bool RemoveBuff(string buff)
+    {
+        if (!HasBuff(buff)) return false;
+
+        lock (Buffs)
+        {
+            var buffObj = Buffs[buff];
+            buffObj?.OnEnded(this, buffObj);
+        }
+
+        return true;
+    }
+
+    public void RemoveBuffsAndDebuffs()
+    {
+        RemoveAllBuffs();
+        RemoveAllDebuffs();
+    }
+
+    public bool RemoveDebuff(string debuff, bool cancelled = false)
+    {
+        if (!cancelled && debuff == "Skulled") return true;
+
+        lock (Debuffs)
+        {
+            if (!HasDebuff(debuff)) return false;
+            var debuffObj = Debuffs[debuff];
+
+            if (debuffObj == null) return false;
+            debuffObj.Cancelled = cancelled;
+            debuffObj.OnEnded(this, debuffObj);
+        }
+
+        return true;
+    }
+
     #endregion
 
     #region Sprite Methods
+
+    public void UpdateAddAndRemove()
+    {
+        PlayerNearby?.Client.SendRemoveObject(Serial);
+        var obj = new List<Sprite> { this };
+        PlayerNearby?.Client.SendVisibleEntities(obj);
+    }
 
     public void Remove()
     {

@@ -113,7 +113,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
                 target.ApplyElementalSpellDamage(aisling, dmg, spell.Template.ElementalProperty, spell);
             }
             else
@@ -132,7 +131,6 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
         }
     }
 

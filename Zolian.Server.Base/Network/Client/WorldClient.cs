@@ -607,28 +607,27 @@ namespace Darkages.Network.Client
 
             if (_itemAnimationControl.Elapsed.TotalMilliseconds < _itemAnimationTimer.Delay.TotalMilliseconds) return;
 
-            var items = ServerSetup.Instance.GlobalGroundItemCache;
+            var items = ServerSetup.Instance.GlobalGroundItemCache.Where(i => i.Value != null && i.Value.Template.Enchantable);
 
             try
             {
-                Parallel.ForEach(items.Values, (item) =>
+                Parallel.ForEach(items, (entry) =>
                 {
-                    if (item is null) return;
-                    switch (item.ItemQuality)
+                    switch (entry.Value.ItemQuality)
                     {
                         case Item.Quality.Epic:
-                            Aisling.Client.SendAnimation(397, new Position(item.Position.X, item.Position.Y));
+                            Aisling.Client.SendAnimation(397, new Position(entry.Value.Position.X, entry.Value.Position.Y));
                             break;
                         case Item.Quality.Legendary:
-                            Aisling.Client.SendAnimation(398, new Position(item.Position.X, item.Position.Y));
+                            Aisling.Client.SendAnimation(398, new Position(entry.Value.Position.X, entry.Value.Position.Y));
                             break;
                         case Item.Quality.Forsaken:
-                            Aisling.Client.SendAnimation(399, new Position(item.Position.X, item.Position.Y));
+                            Aisling.Client.SendAnimation(399, new Position(entry.Value.Position.X, entry.Value.Position.Y));
                             break;
                         case Item.Quality.Mythic:
                         case Item.Quality.Primordial:
                         case Item.Quality.Transcendent:
-                            Aisling.Client.SendAnimation(400, new Position(item.Position.X, item.Position.Y));
+                            Aisling.Client.SendAnimation(400, new Position(entry.Value.Position.X, entry.Value.Position.Y));
                             break;
                         case Item.Quality.Damaged:
                         case Item.Quality.Common:

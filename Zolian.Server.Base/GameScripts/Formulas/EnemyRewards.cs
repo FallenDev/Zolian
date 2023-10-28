@@ -176,8 +176,8 @@ public class EnemyRewards : RewardScript
             <= -10 => (int)(exp * 0.75),
             // Monster is lower level than player
             >= 30 => 1,
-            >= 15 => (int)(exp * 0.25),
-            >= 10 => (int)(exp * 0.5),
+            >= 15 => (int)(exp * 0.33),
+            >= 10 => (int)(exp * 0.66),
             _ => exp
         };
 

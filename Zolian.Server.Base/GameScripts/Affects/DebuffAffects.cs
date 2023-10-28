@@ -31,7 +31,7 @@ public class Lycanisim : Debuff
 
         InsertDebuff(aisling, debuff);
         var vamp = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
-        
+
         if (vamp)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bThey do not realize who they've bitten");
@@ -1788,8 +1788,7 @@ public class DebuffReaping : Debuff
         }
 
         if (affected is not Monster monster) return;
-        var script = monster.Scripts.Values.First(_ => monster.IsAlive);
-        script?.OnDeath();
+        monster.Scripts?.Values.First(_ => monster.IsAlive).OnDeath();
     }
 }
 #endregion

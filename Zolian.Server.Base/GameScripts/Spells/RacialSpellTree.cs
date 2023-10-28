@@ -51,7 +51,7 @@ public class Caltrops(Spell spell) : SpellScript(spell)
         var seed = Spell.Level / 100d;
         var damageImp = 15000 * seed;
         var dam = (int)(15000 + damageImp);
-        target.MagicApplyDamage(sprite, dam, Spell);
+        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -62,12 +62,12 @@ public class Caltrops(Spell spell) : SpellScript(spell)
     {
         if (Spell.Template.ManaCost > sprite.CurrentMp)
         {
-            sprite.CurrentMp -= Spell.Template.ManaCost;
             if (sprite is Aisling aisling)
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not enough mana to infuse into this trap");
             return;
         }
 
+        sprite.CurrentMp -= Spell.Template.ManaCost;
         Trap.Set(sprite, 2270, 300, 1, OnTriggeredBy);
 
         if (sprite is not Aisling aisling2) return;
@@ -332,6 +332,8 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (target == null) return;
+
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Elemental Bolt";
 

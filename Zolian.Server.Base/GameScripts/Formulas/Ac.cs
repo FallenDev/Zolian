@@ -6,8 +6,6 @@ namespace Darkages.GameScripts.Formulas;
 [Script("AC Formula")]
 public class Ac(Sprite obj) : FormulaScript
 {
-    private readonly Sprite _obj = obj;
-
     public override long Calculate(Sprite obj, long value)
     {
         var armor = obj.SealedAc;
