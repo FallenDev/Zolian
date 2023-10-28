@@ -607,7 +607,7 @@ namespace Darkages.Network.Client
 
             if (_itemAnimationControl.Elapsed.TotalMilliseconds < _itemAnimationTimer.Delay.TotalMilliseconds) return;
 
-            var items = ServerSetup.Instance.GlobalGroundItemCache.Where(i => i.Value != null && i.Value.Template.Enchantable);
+            var items = ServerSetup.Instance.GlobalGroundItemCache.Where(i => i.Value != null && i.Value.Template.Enchantable && i.Value.Map == Aisling.Map);
 
             try
             {
