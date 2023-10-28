@@ -64,6 +64,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             case 3029:
             case 5257:
             case 6228:
+            case 721:
                 return;
             default:
                 try
