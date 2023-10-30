@@ -104,8 +104,23 @@ public class Quests
 {
     public bool TutorialCompleted { get; set; }
     public bool BetaReset { get; set; }
+    public int BlackSmithing { get; set; }
+    public int ArmorSmithing { get; set; }
+    public int JewelCrafting { get; set; }
     public int StoneSmithing { get; set; }
     public int MilethReputation { get; set; }
+    public int AbelReputation { get; set; }
+    public int RucesionReputation { get; set; }
+    public int SuomiReputation { get; set; }
+    public int RionnagReputation { get; set; }
+    public int OrenReputation { get; set; }
+    public int PietReputation { get; set; }
+    public int LouresReputation { get; set; }
+    public int UndineReputation { get; set; }
+    public int TagorReputation { get; set; }
+    public int ThievesGuildReputation { get; set; }
+    public int AssassinsGuildReputation { get; set; }
+    public int AdventuresGuildReputation { get; set; }
     public int ArtursGift { get; set; }
     public bool CamilleGreetingComplete { get; set; }
     public bool ConnPotions { get; set; }
@@ -131,4 +146,5 @@ public class Quests
     public int SwampCount { get; set; }
     public bool TagorDungeonAccess { get; set; }
     public int Lau { get; set; }
+    public string BeltDegree { get; set; }
 }

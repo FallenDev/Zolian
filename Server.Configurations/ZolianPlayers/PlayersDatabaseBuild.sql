@@ -512,15 +512,41 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InsertQuests]
-@Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, @CamilleGreeting BIT,
-@ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT,
-@KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20),
-@AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT
+    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT,
+    @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20),
+    @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT,
+    @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT,
+    @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
+    @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
+    @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
+    @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
+    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6)
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersQuests] ([Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem], [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau])
-    VALUES                                            (@Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem, @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau);
+    
+    INSERT INTO [ZolianPlayers].[dbo].[PlayersQuests] (
+        [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift],
+        [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem],
+        [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting],
+        [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill],
+        [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
+        [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
+        [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
+        [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
+        [BlackSmithing], [ArmorSmithing], [JewelCrafting], [BeltDegree]
+    )
+    VALUES (
+        @Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift,
+        @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem,
+        @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting,
+        @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill,
+        @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau,
+        @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
+        @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
+        @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,
+        @BlackSmithing, @ArmorSmithing, @JewelCrafting, @BeltDegree
+    );
 END
 GO
 
@@ -584,43 +610,64 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[PlayerQuestSave]
-@Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT, 
-@CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20), 
-@EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, 
-@KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, 
-@SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT
+    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT,
+    @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20),
+    @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT,
+    @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT,
+    @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
+    @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
+    @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
+    @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
+    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6)
 AS
 BEGIN
     SET NOCOUNT ON;
+    
     UPDATE [ZolianPlayers].[dbo].[PlayersQuests]
-    SET    [TutorialCompleted]       = @TutComplete,
-           [BetaReset]               = @BetaReset,
-           [StoneSmithing]           = @StoneSmith,
-           [MilethReputation]        = @MilethRep,
-           [ArtursGift]              = @ArtursGift,
+    SET    [TutorialCompleted] = @TutComplete,
+           [BetaReset] = @BetaReset,
+           [StoneSmithing] = @StoneSmith,
+           [MilethReputation] = @MilethRep,
+           [ArtursGift] = @ArtursGift,
            [CamilleGreetingComplete] = @CamilleGreeting,
-           [ConnPotions]             = @ConnPotions,
-           [CryptTerror]             = @CryptTerror,
-           [CryptTerrorSlayed]       = @CryptTerrorSlayed,
-           [Dar]                     = @Dar,
-           [DarItem]                 = @DarItem,
-           [EternalLove]             = @EternalLove,
-           [FionaDance]              = @Fiona,
-           [Keela]                   = @Keela,
-           [KeelaCount]              = @KeelaCount,
-           [KeelaKill]               = @KeelaKill,
-           [KeelaQuesting]           = @KeelaQuesting,
-           [KillerBee]               = @KillerBee,
-           [Neal]                    = @Neal,
-           [NealCount]               = @NealCount,
-           [NealKill]                = @NealKill,
-           [AbelShopAccess]          = @AbelShopAccess,
-           [PeteKill]                = @PeteKill,
-           [PeteComplete]            = @PeteComplete,
-           [SwampAccess]             = @SwampAccess,
-           [SwampCount]              = @SwampCount,
-		   [TagorDungeonAccess]		 = @TagorDungeonAccess,
-           [Lau]					 = @Lau
+           [ConnPotions] = @ConnPotions,
+           [CryptTerror] = @CryptTerror,
+           [CryptTerrorSlayed] = @CryptTerrorSlayed,
+           [Dar] = @Dar,
+           [DarItem] = @DarItem,
+           [EternalLove] = @EternalLove,
+           [FionaDance] = @Fiona,
+           [Keela] = @Keela,
+           [KeelaCount] = @KeelaCount,
+           [KeelaKill] = @KeelaKill,
+           [KeelaQuesting] = @KeelaQuesting,
+           [KillerBee] = @KillerBee,
+           [Neal] = @Neal,
+           [NealCount] = @NealCount,
+           [NealKill] = @NealKill,
+           [AbelShopAccess] = @AbelShopAccess,
+           [PeteKill] = @PeteKill,
+           [PeteComplete] = @PeteComplete,
+           [SwampAccess] = @SwampAccess,
+           [SwampCount] = @SwampCount,
+           [TagorDungeonAccess] = @TagorDungeonAccess,
+           [Lau] = @Lau,
+           [AbelReputation] = @AbelReputation,
+           [RucesionReputation] = @RucesionReputation,
+           [SuomiReputation] = @SuomiReputation,
+           [RionnagReputation] = @RionnagReputation,
+           [OrenReputation] = @OrenReputation,
+           [PietReputation] = @PietReputation,
+           [LouresReputation] = @LouresReputation,
+           [UndineReputation] = @UndineReputation,
+           [TagorReputation] = @TagorReputation,
+           [ThievesGuildReputation] = @ThievesGuildReputation,
+           [AssassinsGuildReputation] = @AssassinsGuildReputation,
+           [AdventuresGuildReputation] = @AdventuresGuildReputation,
+           [BlackSmithing] = @BlackSmithing,
+           [ArmorSmithing] = @ArmorSmithing,
+           [JewelCrafting] = @JewelCrafting,
+           [BeltDegree] = @BeltDegree
     WHERE  Serial = @Serial;
 END
 GO
@@ -1100,35 +1147,16 @@ CREATE PROCEDURE [dbo].[SelectQuests]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT TutorialCompleted,
-           BetaReset,
-           StoneSmithing,
-           MilethReputation,
-           ArtursGift,
-           CamilleGreetingComplete,
-           ConnPotions,
-           CryptTerror,
-           CryptTerrorSlayed,
-           Dar,
-           DarItem,
-           DrunkenHabit,
-           EternalLove,
-           FionaDance,
-           Keela,
-           KeelaCount,
-           KeelaKill,
-           KeelaQuesting,
-           KillerBee,
-           Neal,
-           NealCount,
-           NealKill,
-           AbelShopAccess,
-           PeteKill,
-           PeteComplete,
-           SwampAccess,
-           SwampCount,
-           TagorDungeonAccess,
-           Lau
+
+    SELECT TutorialCompleted, BetaReset, StoneSmithing, MilethReputation, ArtursGift,
+           CamilleGreetingComplete, ConnPotions, CryptTerror, CryptTerrorSlayed, Dar,
+           DarItem, DrunkenHabit, EternalLove, FionaDance, Keela, KeelaCount, KeelaKill,
+           KeelaQuesting, KillerBee, Neal, NealCount, NealKill, AbelShopAccess, PeteKill,
+           PeteComplete, SwampAccess, SwampCount, TagorDungeonAccess, Lau,
+           AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
+           OrenReputation, PietReputation, LouresReputation, UndineReputation,
+           TagorReputation, ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
+           BlackSmithing, ArmorSmithing, JewelCrafting, BeltDegree
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

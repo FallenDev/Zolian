@@ -321,6 +321,22 @@ public record AislingStorage : Sql, IAislingStorage
             cmd2.Parameters.Add("@SwampCount", SqlDbType.Int).Value = obj.QuestManager.SwampCount;
             cmd2.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = obj.QuestManager.TagorDungeonAccess;
             cmd2.Parameters.Add("@Lau", SqlDbType.Int).Value = obj.QuestManager.Lau;
+            cmd2.Parameters.Add("@AbelReputation", SqlDbType.Int).Value = obj.QuestManager.AbelReputation;
+            cmd2.Parameters.Add("@RucesionReputation", SqlDbType.Int).Value = obj.QuestManager.RucesionReputation;
+            cmd2.Parameters.Add("@SuomiReputation", SqlDbType.Int).Value = obj.QuestManager.SuomiReputation;
+            cmd2.Parameters.Add("@RionnagReputation", SqlDbType.Int).Value = obj.QuestManager.RionnagReputation;
+            cmd2.Parameters.Add("@OrenReputation", SqlDbType.Int).Value = obj.QuestManager.OrenReputation;
+            cmd2.Parameters.Add("@PietReputation", SqlDbType.Int).Value = obj.QuestManager.PietReputation;
+            cmd2.Parameters.Add("@LouresReputation", SqlDbType.Int).Value = obj.QuestManager.LouresReputation;
+            cmd2.Parameters.Add("@UndineReputation", SqlDbType.Int).Value = obj.QuestManager.UndineReputation;
+            cmd2.Parameters.Add("@TagorReputation", SqlDbType.Int).Value = obj.QuestManager.TagorReputation;
+            cmd2.Parameters.Add("@ThievesGuildReputation", SqlDbType.Int).Value = obj.QuestManager.ThievesGuildReputation;
+            cmd2.Parameters.Add("@AssassinsGuildReputation", SqlDbType.Int).Value = obj.QuestManager.AssassinsGuildReputation;
+            cmd2.Parameters.Add("@AdventuresGuildReputation", SqlDbType.Int).Value = obj.QuestManager.AdventuresGuildReputation;
+            cmd2.Parameters.Add("@BlackSmithing", SqlDbType.Int).Value = obj.QuestManager.BlackSmithing;
+            cmd2.Parameters.Add("@ArmorSmithing", SqlDbType.Int).Value = obj.QuestManager.ArmorSmithing;
+            cmd2.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = obj.QuestManager.JewelCrafting;
+            cmd2.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = obj.QuestManager.BeltDegree;
 
             #endregion
 
@@ -803,6 +819,22 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@SwampCount", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Lau", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@AbelReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@RucesionReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@SuomiReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@RionnagReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@OrenReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@PietReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@LouresReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@UndineReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@TagorReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@ThievesGuildReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@AssassinsGuildReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@AdventuresGuildReputation", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@BlackSmithing", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@ArmorSmithing", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = "";
 
             #endregion
 
