@@ -12,9 +12,18 @@ public static class Extensions
     private static readonly Encoding Encoding = Encoding.GetEncoding(949);
 
     /// <summary>
-    /// Prevents an integer from going below a set value and above a set value
+    /// Prevents an integer from going below or above a set value
     /// </summary>
     public static int IntClamp(this int value, int min, int max)
+    {
+        if (value < min) return min;
+        return value > max ? max : value;
+    }
+
+    /// <summary>
+    /// Prevents a double from going below or above a set value
+    /// </summary>
+    public static double DoubleClamp(this double value, double min, double max)
     {
         if (value < min) return min;
         return value > max ? max : value;

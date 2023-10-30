@@ -337,7 +337,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd2.Parameters.Add("@BlackSmithing", SqlDbType.Int).Value = obj.QuestManager.BlackSmithing;
             cmd2.Parameters.Add("@ArmorSmithing", SqlDbType.Int).Value = obj.QuestManager.ArmorSmithing;
             cmd2.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = obj.QuestManager.JewelCrafting;
-            cmd2.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = obj.QuestManager.BeltDegree;
+            cmd2.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = obj.QuestManager.BeltDegree ?? "";
 
             #endregion
 
