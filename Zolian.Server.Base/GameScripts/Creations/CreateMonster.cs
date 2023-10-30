@@ -1139,8 +1139,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             },
             _ => new List<string>
             {
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Kelberoth Strike", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Crasher", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
+                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
                 "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
                 "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
             }
@@ -1467,7 +1467,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Gargoyle)) return;
         var skillList = new List<string> { "Slash" };
-        var abilityList = new List<string> { "Kelberoth Strike", "Palm Heel Strike" };
+        var abilityList = new List<string> { "Palm Heel Strike" };
         var spellList = new List<string> { "Mor Dion" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
