@@ -260,6 +260,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@LoggedIn", SqlDbType.Bit).Value = obj.LoggedIn;
             cmd.Parameters.Add("@LastLogged", SqlDbType.DateTime).Value = obj.LastLogged;
             cmd.Parameters.Add("@Stage", SqlDbType.VarChar).Value = obj.Stage;
+            cmd.Parameters.Add("@JobClass", SqlDbType.VarChar).Value = obj.JobClass;
             cmd.Parameters.Add("@Path", SqlDbType.VarChar).Value = obj.Path;
             cmd.Parameters.Add("@PastClass", SqlDbType.VarChar).Value = obj.PastClass;
             cmd.Parameters.Add("@Race", SqlDbType.VarChar).Value = obj.Race;

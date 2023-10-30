@@ -20,6 +20,7 @@ public enum Class
 [Flags]
 public enum Job
 {
+    None = 0,
     Thief = 1,
     DarkKnight = 1 << 1,
     Templar = 1 << 2,

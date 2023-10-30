@@ -21,6 +21,7 @@ public class Player : Sprite
     public int ExpNext { get; set; }
     public uint ExpTotal { get; set; }
     public ClassStage Stage { get; set; }
+    public Job JobClass { get; set; }
     public Class Path { get; set; }
     public Class PastClass { get; set; }
     public Race Race { get; set; }

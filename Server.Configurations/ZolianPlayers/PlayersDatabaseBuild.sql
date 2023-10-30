@@ -584,7 +584,7 @@ BEGIN
     INSERT  INTO [ZolianPlayers].[dbo].[Players] ([Serial], [Created], [Username], [Password], [PasswordAttempts], [Hacked], [LoggedIn], [LastLogged],
     [X], [Y], [CurrentMapId], [OffenseElement], [DefenseElement], [SecondaryOffensiveElement], [SecondaryDefensiveElement], [Direction], [CurrentHp],
     [BaseHp], [CurrentMp], [BaseMp], [_ac], [_Regen], [_Dmg], [_Hit], [_Mr], [_Str], [_Int], [_Wis], [_Con], [_Dex], [_Luck], [AbpLevel], [AbpNext],
-    [AbpTotal], [ExpLevel], [ExpNext], [ExpTotal], [Stage], [Path], [PastClass], [Race], [Afflictions], [Gender], [HairColor], [HairStyle], [OldColor], [OldStyle],
+    [AbpTotal], [ExpLevel], [ExpNext], [ExpTotal], [Stage], [JobClass], [Path], [PastClass], [Race], [Afflictions], [Gender], [HairColor], [HairStyle], [OldColor], [OldStyle],
     [NameColor], [ProfileMessage], [Nation], [Clan], [ClanRank], [ClanTitle], [AnimalForm], [MonsterForm], [ActiveStatus], [Flags], [CurrentWeight],
     [World], [Lantern], [Invisible], [Resting], [FireImmunity], [WaterImmunity], [WindImmunity], [EarthImmunity], [LightImmunity], [DarkImmunity], [PoisonImmunity], [EnticeImmunity],
     [PartyStatus], [RaceSkill], [RaceSpell], [GameMaster], [ArenaHost], [Developer], [Ranger], [Knight], [GoldPoints], [StatPoints], [GamePoints],
@@ -594,7 +594,7 @@ BEGIN
     VALUES (@Serial, @Created, @UserName, @Password, '0', 'False', 'False', @LastLogged,
     '7', '23', '7000', 'None', 'None', 'None', 'None', '0', @CurrentHp,
     @BaseHp, @CurrentMp, @BaseMp, '0', '0', '0', '0', '0', '5', '5', '5', '5', '5', '0', '0', '0',
-    '0', '1', '600', '0', 'Class', 'Peasant', 'Peasant', 'UnDecided', 'Normal', @Gender, @HairColor, @HairStyle, @HairColor, @HairStyle,
+    '0', '1', '600', '0', 'Class', 'None', 'Peasant', 'Peasant', 'UnDecided', 'Normal', @Gender, @HairColor, @HairStyle, @HairColor, @HairStyle,
     '1', '', 'Mileth', '', '', '', 'None', '0', 'Awake', 'Normal', '0',
     '0', '0', 'False', 'Standing', 'False', 'False', 'False', 'False', 'False', 'False', 'False', 'False',
     'AcceptingRequests', '', '', 'False', 'False', 'False', 'False', 'False', '0', '0', '0', '0',
@@ -782,7 +782,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[PlayerSave]
-@Name VARCHAR (12), @LoggedIn BIT, @LastLogged DATETIME, @Stage VARCHAR (10), @Path VARCHAR (10), @PastClass VARCHAR (10), @Race VARCHAR (10), @Gender VARCHAR (6), @NameColor INT, @Profile VARCHAR (100), @Nation VARCHAR (30), @Clan VARCHAR (20), @ClanRank VARCHAR (20), @ClanTitle VARCHAR (20), @FireImm BIT, @WaterImm BIT, @WindImm BIT, @EarthImm BIT, @LightImm BIT, @DarkImm BIT, @PoisonImm BIT, @EnticeImm BIT, @RaceSkill VARCHAR (20), @RaceSpell VARCHAR (20), @GM BIT, @AH BIT, @DEV BIT, @Ranger BIT, @Knight BIT
+@Name VARCHAR (12), @LoggedIn BIT, @LastLogged DATETIME, @Stage VARCHAR (10), @JobClass VARCHAR (12), @Path VARCHAR (10), @PastClass VARCHAR (10), @Race VARCHAR (10), @Gender VARCHAR (6), @NameColor INT, @Profile VARCHAR (100), @Nation VARCHAR (30), @Clan VARCHAR (20), @ClanRank VARCHAR (20), @ClanTitle VARCHAR (20), @FireImm BIT, @WaterImm BIT, @WindImm BIT, @EarthImm BIT, @LightImm BIT, @DarkImm BIT, @PoisonImm BIT, @EnticeImm BIT, @RaceSkill VARCHAR (20), @RaceSpell VARCHAR (20), @GM BIT, @AH BIT, @DEV BIT, @Ranger BIT, @Knight BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -791,6 +791,7 @@ BEGIN
            [LoggedIn]       = @LoggedIn,
            [LastLogged]     = @LastLogged,
            [Stage]          = @Stage,
+           [JobClass]       = @JobClass,
            [Path]           = @Path,
            [PastClass]      = @PastClass,
            [Race]           = @Race,
@@ -1056,6 +1057,7 @@ BEGIN
            [ExpNext],
            [ExpTotal],
            [Stage],
+           [JobClass],
            [Path],
            [PastClass],
            [Race],

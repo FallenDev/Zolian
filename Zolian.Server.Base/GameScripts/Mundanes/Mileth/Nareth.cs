@@ -35,12 +35,12 @@ public class Nareth : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (_skillList.Count > 0)
+        if (_skillList.Count > 0 && client.Aisling.Stage >= ClassStage.Job && client.Aisling.JobClass == Job.ShaolinMonk)
         {
             options.Add(new(0x0016, "Show Available Skills"));
         }
 
-        if (_spellList.Count > 0)
+        if (_spellList.Count > 0 && client.Aisling.Stage >= ClassStage.Job && client.Aisling.JobClass == Job.ShaolinMonk)
         {
             options.Add(new(0x0010, "Show Available Spells"));
         }
