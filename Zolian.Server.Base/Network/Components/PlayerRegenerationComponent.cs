@@ -23,10 +23,16 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         {
             if (player?.Client == null) return;
             if (!player.LoggedIn) return;
-            if (player.RegenTimerDisabled) return;
-            if (player.Poisoned) return;
-            if (player.IsDead()) return;
+            if (player.IsPoisoned || player.Skulled || player.IsDead())
+            {
+                player.RegenTimerDisabled = true;
+            }
+            else
+            {
+                player.RegenTimerDisabled = false;
+            }
 
+            if (player.RegenTimerDisabled) return;
             if (player.CurrentHp == player.MaximumHp &&
                 player.CurrentMp == player.MaximumMp) return;
 

@@ -67,14 +67,27 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 219, (7300, 2400) },
             { 229, (7800, 2800) },
             { 239, (8500, 3500) },
-            { 249, (9150, 4000) },
-            { 255, (40000, 2000) },
-            { int.MaxValue, (100000, 15000) } // default case for level > 450
+            { 249, (9150, 4000) }
         };
+
+        if (obj.Template.Level >= 250)
+        {
+            // Starting values for level > 249
+            var currentHpMultiplier = 9150;
+            var currentMpMultiplier = 4000;
+
+            // Generate multipliers for levels above 249
+            for (var level = 250; level <= 500; level += 5)
+            {
+                currentHpMultiplier = (int)(currentHpMultiplier * 1.05);
+                currentMpMultiplier = (int)(currentMpMultiplier * 1.05);
+                levelMultipliers[level] = (currentHpMultiplier, currentMpMultiplier);
+            }
+        }
 
         // Find the first multiplier where the level is less than or equal to the key
         var (hpMultiplier, mpMultiplier) = levelMultipliers.First(x => obj.Template.Level <= x.Key).Value;
-
+        
         obj.BaseHp = Generator.RandomMonsterStatVariance(obj.Template.Level * hpMultiplier);
         obj.BaseMp = Generator.RandomMonsterStatVariance(obj.Template.Level * mpMultiplier);
         obj._Mr = 50;
@@ -963,16 +976,16 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             },
             [MonsterType.Boss] = monster =>
             {
-                monster.BonusStr += monster._Str * 35;
-                monster.BonusInt += monster._Int * 35;
-                monster.BonusWis += monster._Wis * 25;
-                monster.BonusCon += monster._Con * 25;
-                monster.BonusDex += monster._Dex * 35;
-                monster.BonusMr += monster._Mr * 25;
-                monster.BonusHit += monster._Hit * 25;
-                monster.BonusDmg += monster._Dmg * 30;
-                monster.BonusHp += monster.BaseHp * 40;
-                monster.BonusMp += monster.BaseMp * 40;
+                monster.BonusStr += monster._Str * 30;
+                monster.BonusInt += monster._Int * 30;
+                monster.BonusWis += monster._Wis * 30;
+                monster.BonusCon += monster._Con * 30;
+                monster.BonusDex += monster._Dex * 30;
+                monster.BonusMr += monster._Mr * 20;
+                monster.BonusHit += monster._Hit * 20;
+                monster.BonusDmg += monster._Dmg * 20;
+                monster.BonusHp += monster.BaseHp * 27;
+                monster.BonusMp += monster.BaseMp * 27;
             },
         };
 
