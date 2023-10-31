@@ -24,11 +24,7 @@ public class TrainingDummy : MonsterScript
         var ac = Monster.SealedAc.ToString();
         var defEle = ElementManager.ElementValue(Monster.DefenseElement);
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Template.Name}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"Lv:{level}, Ac:{ac}, Hp:{Monster.CurrentHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Size} - {Monster.Template.MonsterType} - {Monster.MajorAttribute}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"-----------------------------");
-
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"Lv:{level}, Ac:{ac}, Def:{defEle}");
     }
 
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
