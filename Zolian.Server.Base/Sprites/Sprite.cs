@@ -1692,10 +1692,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when reapChance >= 0.999:
                 {
-                    if (target is Aisling)
+                    switch (target)
                     {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                        return;
+                        case Aisling:
+                        case Monster monster when monster.Template.MonsterType == MonsterType.Boss:
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                            return;
                     }
 
                     if (target.Level >= 15 + damageDealingSprite.ExpLevel)
@@ -1711,10 +1713,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 }
             case 2 when reapChance >= 0.995:
                 {
-                    if (target is Aisling)
+                    switch (target)
                     {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                        return;
+                        case Aisling:
+                        case Monster monster when monster.Template.MonsterType == MonsterType.Boss:
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                            return;
                     }
 
                     if (target.Level >= 20 + damageDealingSprite.ExpLevel)

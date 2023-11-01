@@ -241,6 +241,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         MorSpells(obj);
         ArdSpells(obj);
         MasterSpells(obj);
+        JobSpells(obj);
 
         // Load Abilities from Template to Monster
         if (template.SkillScripts != null)
@@ -270,7 +271,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 <= 100 and > 85 => obj.Size = "Large",
                 _ => obj.Size = "Lessor"
             },
-            <= 98 => sizeRand switch
+            <= 135 => sizeRand switch
             {
                 <= 10 => obj.Size = "Lessor",
                 <= 30 and > 10 => obj.Size = "Small",
@@ -343,8 +344,27 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 270, (265, 275) },
             { 280, (270, 280) },
             { 290, (275, 285) },
-            { 300, (280, 300) },
-            { int.MaxValue, (290, 350) } // default case for level > 200
+            { 300, (280, 295) },
+            { 310, (290, 300) },
+            { 320, (295, 305) },
+            { 330, (300, 310) },
+            { 340, (305, 315) },
+            { 350, (310, 320) },
+            { 360, (315, 325) },
+            { 370, (320, 330) },
+            { 380, (325, 335) },
+            { 390, (330, 340) },
+            { 400, (335, 350) },
+            { 410, (345, 355) },
+            { 420, (350, 360) },
+            { 430, (355, 365) },
+            { 440, (360, 370) },
+            { 450, (365, 375) },
+            { 460, (370, 380) },
+            { 470, (375, 385) },
+            { 480, (380, 390) },
+            { 490, (385, 395) },
+            { int.MaxValue, (390, 405) }
         };
 
         // Find the first range where the level is less than or equal to the key
@@ -394,26 +414,34 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 184, (2200000, 2499999) },
             { 190, (2500000, 2899999) },
             { 194, (2900000, 3499999) },
-            { 200, (3500000, 3899999) },
-            { 204, (3500000, 3899999) },
-            { 208, (3675000, 4172999) },
-            { 212, (3861250, 4463519) },
-            { 216, (4054312, 4774565) },
-            { 220, (4255028, 5111586) },
-            { 224, (4463780, 5470397) },
-            { 228, (4680824, 5850126) },
-            { 232, (4906865, 6258125) },
-            { 236, (5142408, 6693074) },
-            { 240, (5396038, 7157987) },
-            { 244, (5666840, 7654052) },
-            { 248, (5955332, 8183075) },
-            { 252, (6262104, 8746983) },
-            { int.MaxValue, (7000000, 10000000) }
+            { 200, (3500000, 3899999) }
         };
 
-        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+        const int startLevel = 200;
+        const int endLevel = 500;
+        // ToDo: Increment this in the future if higher levels need more experience
+        var stepSize = 5;
 
-        obj.Experience = (uint)Generator.GenerateDeterminedNumberRange(start, end);
+        for (var level = startLevel + stepSize; level <= endLevel; level += stepSize)
+        {
+            // Retrieve the last entry's value
+            var lastEntry = levelExperienceRange[level - stepSize];
+            var newEntry = IncrementByFivePercent(lastEntry);
+            levelExperienceRange.Add(level, newEntry);
+        }
+
+        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+        var minXp = (int)(start * 0.9);
+        var maxXp = (int)(end * 1.1);
+
+        obj.Experience = (uint)Generator.GenerateDeterminedNumberRange(minXp, maxXp);
+    }
+
+    private static (int, int) IncrementByFivePercent((int, int) prevValues)
+    {
+        var newValue1 = (int)(prevValues.Item1 * 1.05);
+        var newValue2 = (int)(prevValues.Item2 * 1.05);
+        return (newValue1, newValue2);
     }
 
     private static void MonsterAbility(Monster obj)
@@ -426,7 +454,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var levelExperienceRange = new SortedDictionary<int, (int start, int end)>
         {
-            { 252, (1, 3) },
+            { 250, (1, 3) },
             { 256, (1, 3) },
             { 260, (1, 4) },
             { 264, (1, 4) },
@@ -549,7 +577,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                     _ => obj.DefenseElement
                 };
                 break;
-            default:
+            case <= 250:
                 obj.OffenseElement = offRand switch
                 {
                     <= 10 => ElementManager.Element.Wind,
@@ -568,6 +596,32 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                     <= 40 and > 30 => ElementManager.Element.Fire,
                     <= 75 and > 40 => ElementManager.Element.Void,
                     <= 100 and > 75 => ElementManager.Element.Holy,
+                    _ => obj.DefenseElement
+                };
+                break;
+            default:
+                obj.OffenseElement = offRand switch
+                {
+                    <= 10 => ElementManager.Element.Wind,
+                    <= 20 and > 10 => ElementManager.Element.Earth,
+                    <= 30 and > 20 => ElementManager.Element.Water,
+                    <= 40 and > 30 => ElementManager.Element.Fire,
+                    <= 60 and > 40 => ElementManager.Element.Void,
+                    <= 80 and > 60 => ElementManager.Element.Holy,
+                    <= 90 and > 80 => ElementManager.Element.Rage,
+                    <= 100 and > 90 => ElementManager.Element.Sorrow,
+                    _ => obj.OffenseElement
+                };
+                obj.DefenseElement = defRand switch
+                {
+                    <= 10 => ElementManager.Element.Wind,
+                    <= 20 and > 10 => ElementManager.Element.Earth,
+                    <= 30 and > 20 => ElementManager.Element.Water,
+                    <= 40 and > 30 => ElementManager.Element.Fire,
+                    <= 60 and > 40 => ElementManager.Element.Void,
+                    <= 80 and > 60 => ElementManager.Element.Holy,
+                    <= 90 and > 80 => ElementManager.Element.Rage,
+                    <= 100 and > 90 => ElementManager.Element.Sorrow,
                     _ => obj.DefenseElement
                 };
                 break;
@@ -656,44 +710,65 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private static void MonsterStartingStats(Monster obj)
     {
+        // Level, Min, Max
+        // Min is calculated as the lowest number of the previous level - 35%
+        // Max is calculated as (level * 2) - 15% as to mimic stat generation
         var levelStatsRange = new SortedDictionary<int, (int start, int end)>
         {
-            { 3, (1, 5) },
-            { 7, (5, 10) },
-            { 11, (8, 15) },
-            { 17, (10, 20) },
-            { 24, (10, 25) },
-            { 31, (10, 35) },
-            { 37, (30, 48) },
-            { 44, (30, 57) },
-            { 51, (30, 66) },
-            { 57, (60, 75) },
-            { 64, (60, 80) },
-            { 71, (60, 85) },
-            { 77, (80, 94) },
-            { 84, (80, 102) },
-            { 91, (80, 109) },
-            { 97, (80, 122) },
-            { 104, (90, 130) },
-            { 110, (90, 140) },
-            { 116, (90, 150) },
-            { 123, (90, 160) },
-            { 129, (90, 170) },
-            { 135, (90, 180) },
-            { 140, (90, 190) },
-            { 144, (100, 200) },
-            { 149, (100, 205) },
-            { 155, (100, 210) },
-            { 160, (125, 220) },
-            { 164, (125, 230) },
-            { 169, (125, 240) },
-            { 175, (125, 250) },
-            { 180, (125, 260) },
-            { 184, (125, 270) },
-            { 190, (125, 280) },
-            { 194, (125, 290) },
-            { 200, (150, 300) },
-            { int.MaxValue, (150, 330) } // default case for level > 200
+            { 3, (2, 5) },
+            { 7, (5, 12) },
+            { 11, (7, 19) },
+            { 17, (11, 29) },
+            { 24, (16, 41) },
+            { 31, (20, 53) },
+            { 37, (24, 73) },
+            { 44, (29, 75) },
+            { 51, (33, 87) },
+            { 57, (37, 97) },
+            { 64, (42, 109) },
+            { 71, (46, 121) },
+            { 77, (50, 131) },
+            { 84, (55, 143) },
+            { 91, (59, 155) },
+            { 99, (64, 168) },
+            { 104, (68, 177) },
+            { 110, (72, 187) },
+            { 116, (75, 197) },
+            { 123, (80, 209) },
+            { 129, (84, 219) },
+            { 135, (88, 230) },
+            { 140, (91, 238) },
+            { 144, (94, 245) },
+            { 149, (97, 253) },
+            { 155, (101, 264) },
+            { 160, (104, 272) },
+            { 164, (107, 279) },
+            { 169, (110, 287) },
+            { 175, (114, 298) },
+            { 180, (117, 306) },
+            { 184, (120, 313) },
+            { 190, (124, 323) },
+            { 194, (126, 330) },
+            { 200, (130, 340) },
+            { 215, (140, 366)},
+            { 230, (150, 391)},
+            { 245, (159, 417)},
+            { 260, (169, 442)},
+            { 275, (179, 468)},
+            { 300, (195, 510)},
+            { 315, (205, 536)},
+            { 330, (215, 561)},
+            { 345, (224, 587)},
+            { 360, (234, 612)},
+            { 375, (244, 638)},
+            { 400, (260, 680)},
+            { 415, (270, 706)},
+            { 430, (280, 731)},
+            { 445, (289, 757)},
+            { 460, (299, 782)},
+            { 475, (309, 808)},
+            { 500, (325, 850)},
+            { int.MaxValue, (345, 900) }
         };
 
         var statsToUpdate = new List<Action<int>>
@@ -1342,7 +1417,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     /// </summary>
     private void MasterSpells(Monster monster)
     {
-        if (monster.Template.Level <= 120) return;
+        switch (monster.Template.Level)
+        {
+            case <= 120:
+            case > 250:
+                return;
+        }
 
         var spellList = new[]
         {
@@ -1350,6 +1430,40 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         };
 
         var spellCount = Math.Round(monster.Level / 150d) + 2;
+        spellCount = Math.Min(spellCount, 5); // Max 5 spells regardless of level
+        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+
+        for (var i = 0; i < spellCount; i++)
+        {
+            if (!randomIndices.Any()) // All spells have been assigned
+            {
+                break;
+            }
+
+            var index = Random.Shared.Next(randomIndices.Count);
+            var spell = spellList[randomIndices[index]];
+            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
+
+            if (!check)
+                LoadSpellScript(spell, monster);
+
+            randomIndices.RemoveAt(index); // Remove the index to avoid assigning the same spell again
+        }
+    }
+
+    /// <summary>
+    /// Give job level spells randomly depending on their level
+    /// </summary>
+    private void JobSpells(Monster monster)
+    {
+        if (monster.Template.Level <= 250) return;
+
+        var spellList = new[]
+        {
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
+        };
+
+        var spellCount = Math.Round(monster.Level / 200d) + 2;
         spellCount = Math.Min(spellCount, 5); // Max 5 spells regardless of level
         var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
 
