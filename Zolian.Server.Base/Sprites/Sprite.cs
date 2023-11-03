@@ -2095,6 +2095,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         if (!time) return;
+        if (aisling.MonsterKillCounters.Values.Any(killRecord => DateTime.UtcNow.Subtract(killRecord.TimeKilled) <= TimeSpan.FromSeconds(60))) return;
+
         _threatControl.Restart();
         aisling.ThreatMeter = 0;
         aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");

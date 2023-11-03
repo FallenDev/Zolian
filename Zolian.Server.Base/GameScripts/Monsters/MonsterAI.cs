@@ -107,8 +107,17 @@ public class BaseMonsterIntelligence : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -682,8 +691,17 @@ public class WeakCommon : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -1257,8 +1275,17 @@ public class SelfDestruct : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -1736,8 +1763,17 @@ public class AlertSummon : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -2322,8 +2358,17 @@ public class Turret : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -2716,8 +2761,17 @@ public class GeneralPirate : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -3306,8 +3360,17 @@ public class ShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -3880,8 +3943,17 @@ public class WeakShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -4470,8 +4542,17 @@ public class AosdaRemnant : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -5075,8 +5156,17 @@ public class DraconicOmega : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName} {{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
+            return;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
     }
 
     public override void OnDeath(WorldClient client = null)

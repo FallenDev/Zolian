@@ -64,7 +64,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly Stopwatch _itemGroundCheckControl = new();
     private readonly WorldServerTimer _itemGroundCheckTimer = new(TimeSpan.FromMilliseconds(5000));
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
-    private const int GameSpeed = 30;
+    private const int ComponentSpeed = 5;
+    private const int GameSpeed = 35;
     private DateTime _mapSpeed;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
@@ -594,64 +595,64 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             try
             {
-                Parallel.ForEach(components, (component) =>
+                Parallel.ForEach(components, component =>
                 {
                     switch (component)
                     {
-                        case DayLightComponent dayLightComponent:
-                            if (dayLightElapsed.Seconds < 15) break;
-                            dayLightComponent.Update(dayLightElapsed);
-                            dayLightWatch.Restart();
-                            break;
-                        case BankInterestComponent bankInterestComponent:
-                            if (bankInterestElapsed.Minutes < 30) break;
-                            bankInterestComponent.Update(bankInterestElapsed);
-                            bankInterestWatch.Restart();
-                            break;
-                        case CommunityComponent communityComponent:
-                            if (communityElapsed.Seconds < 45) break;
-                            communityComponent.Update(communityElapsed);
-                            communityWatch.Restart();
-                            break;
-                        case MessageClearComponent messageClearComponent:
-                            if (messageClearElapsed.Seconds < 60) break;
-                            messageClearComponent.Update(messageClearElapsed);
-                            messageClearWatch.Restart();
-                            break;
-                        case MonolithComponent monolithComponent:
-                            if (monolithElapsed.Seconds < 3) break;
-                            monolithComponent.Update(monolithElapsed);
-                            monolithWatch.Restart();
-                            break;
-                        case MoonPhaseComponent moonPhaseComponent:
-                            if (moonPhaseElapsed.Hours < 2) break;
-                            moonPhaseComponent.Update(moonPhaseElapsed);
-                            moonPhaseWatch.Restart();
-                            break;
-                        case MundaneComponent mundaneComponent:
-                            if (mundaneElapsed.Seconds < 10) break;
-                            mundaneComponent.Update(mundaneElapsed);
-                            mundaneWatch.Restart();
-                            break;
                         case ObjectComponent objectComponent:
-                            if (objectElapsed.Milliseconds < 35) break;
+                            if (objectElapsed.TotalMilliseconds < 35) break;
                             objectComponent.Update(objectElapsed);
                             objectWatch.Restart();
                             break;
-                        case PingComponent pingComponent:
-                            if (pingElapsed.Seconds < 7) break;
-                            pingComponent.Update(pingElapsed);
-                            pingWatch.Restart();
-                            break;
                         case PlayerRegenerationComponent playerRegenerationComponent:
-                            if (playerRegenElapsed.Seconds < 1) break;
+                            if (playerRegenElapsed.TotalSeconds < 1) break;
                             playerRegenerationComponent.Update(playerRegenElapsed);
                             playerRegenWatch.Restart();
                             break;
                         case PlayerSaveComponent playerSaveComponent:
-                            if (playerSaveElapsed.Seconds < 1) break;
+                            if (playerSaveElapsed.TotalSeconds < 1) break;
                             playerSaveComponent.Update(playerSaveElapsed);
                             playerSaveWatch.Restart();
+                            break;
+                        case MonolithComponent monolithComponent:
+                            if (monolithElapsed.TotalSeconds < 3) break;
+                            monolithComponent.Update(monolithElapsed);
+                            monolithWatch.Restart();
+                            break;
+                        case PingComponent pingComponent:
+                            if (pingElapsed.TotalSeconds < 7) break;
+                            pingComponent.Update(pingElapsed);
+                            pingWatch.Restart();
+                            break;
+                        case MundaneComponent mundaneComponent:
+                            if (mundaneElapsed.TotalSeconds < 10) break;
+                            mundaneComponent.Update(mundaneElapsed);
+                            mundaneWatch.Restart();
+                            break;
+                        case DayLightComponent dayLightComponent:
+                            if (dayLightElapsed.TotalSeconds < 15) break;
+                            dayLightComponent.Update(dayLightElapsed);
+                            dayLightWatch.Restart();
+                            break;
+                        case CommunityComponent communityComponent:
+                            if (communityElapsed.TotalSeconds < 45) break;
+                            communityComponent.Update(communityElapsed);
+                            communityWatch.Restart();
+                            break;
+                        case MessageClearComponent messageClearComponent:
+                            if (messageClearElapsed.TotalSeconds < 60) break;
+                            messageClearComponent.Update(messageClearElapsed);
+                            messageClearWatch.Restart();
+                            break;
+                        case BankInterestComponent bankInterestComponent:
+                            if (bankInterestElapsed.TotalMinutes < 30) break;
+                            bankInterestComponent.Update(bankInterestElapsed);
+                            bankInterestWatch.Restart();
+                            break;
+                        case MoonPhaseComponent moonPhaseComponent:
+                            if (moonPhaseElapsed.TotalHours < 2) break;
+                            moonPhaseComponent.Update(moonPhaseElapsed);
+                            moonPhaseWatch.Restart();
                             break;
                     }
                 });
@@ -659,12 +660,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             catch (Exception ex)
             {
-                ServerSetup.Logger(ex.Message, LogLevel.Error);
-                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
                 Crashes.TrackError(ex);
             }
 
-            await Task.Delay(GameSpeed);
+            await Task.Delay(ComponentSpeed);
         }
     }
 
@@ -820,7 +819,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach(var item in items.Values)
+            foreach (var item in items.Values)
             {
                 if (item == null) return;
                 if (item.ItemPane != Item.ItemPanes.Ground)

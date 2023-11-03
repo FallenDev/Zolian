@@ -553,11 +553,7 @@ namespace Darkages.Network.Client
                 var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
                 aggro = (long)Math.Clamp(percent, 0, 100);
             }
-            else
-            {
-                Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
-                return;
-            }
+            else return;
 
             foreach (var key in AggroColors.Keys.Reverse())
             {
@@ -566,7 +562,7 @@ namespace Darkages.Network.Client
                 break;
             }
 
-            Aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
+            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
         }
 
         private void ItemQueueUpdateOrAdd()
