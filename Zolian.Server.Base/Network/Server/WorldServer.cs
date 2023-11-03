@@ -64,8 +64,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly Stopwatch _itemGroundCheckControl = new();
     private readonly WorldServerTimer _itemGroundCheckTimer = new(TimeSpan.FromMilliseconds(5000));
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
-    private const int ComponentSpeed = 5;
-    private const int GameSpeed = 35;
+    private const int GameSpeed = 30;
     private DateTime _mapSpeed;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
@@ -663,7 +662,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
             }
 
-            await Task.Delay(ComponentSpeed);
+            await Task.Delay(GameSpeed);
         }
     }
 
