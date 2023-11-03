@@ -561,6 +561,12 @@ public sealed class Item : Sprite, IItem
         Owner = aisling.Serial;
         ItemPane = ItemPanes.Inventory;
 
+        if (aisling.Inventory.IsFull)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
+            return false;
+        }
+
         // Stack
         if (Template.Flags.FlagIsSet(ItemFlags.Stackable))
         {

@@ -175,7 +175,12 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                                 itemCreated = itemCreated.Create(client.Aisling, template,
                                     NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(),
                                     ItemQualityVariance.DetermineWeaponVariance());
-                                itemCreated.GiveTo(client.Aisling);
+                                var given = itemCreated.GiveTo(client.Aisling);
+                                if (!given)
+                                {
+                                    client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
+                                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                                }
                             }
                             client.SendAttributes(StatUpdateType.Primary);
                             client.SendAttributes(StatUpdateType.ExpGold);

@@ -133,7 +133,12 @@ public class Emer(WorldServer server, Mundane mundane) : MundaneScript(server, m
                         client.GiveExp(2500);
                         var item = new Item();
                         item = item.Create(client.Aisling, "Honey Bacon Burger", Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-                        item.GiveTo(client.Aisling);
+                        var given = item.GiveTo(client.Aisling);
+                        if (!given)
+                        {
+                            client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                        }
                         client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 2,500 experience.");
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.SendOptionsDialog(Mundane, "Lovely, I'll take as many as you have. Here's a taste of what I make from it.");
@@ -164,7 +169,12 @@ public class Emer(WorldServer server, Mundane mundane) : MundaneScript(server, m
                                 itemCreated = itemCreated.Create(client.Aisling, template,
                                     NpcShopExtensions.DungeonLowQuality(), ItemQualityVariance.DetermineVariance(),
                                     ItemQualityVariance.DetermineWeaponVariance());
-                                itemCreated.GiveTo(client.Aisling);
+                                var given = itemCreated.GiveTo(client.Aisling);
+                                if (!given)
+                                {
+                                    client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
+                                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                                }
                             }
                             client.SendAttributes(StatUpdateType.Primary);
                             client.SendAttributes(StatUpdateType.ExpGold);

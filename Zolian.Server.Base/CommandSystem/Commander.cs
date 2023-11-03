@@ -357,6 +357,11 @@ public static class Commander
             if (remaining <= 0) return;
             {
                 var item = new Item();
+                if (client.Aisling.Inventory.IsFull)
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
+                    return;
+                }
                 item = item.Create(client.Aisling, template);
                 item.Stacks = (ushort)remaining;
                 if (!item.CanCarry(client.Aisling)) return;
@@ -371,7 +376,11 @@ public static class Commander
                 var variance = ItemQualityVariance.DetermineVariance();
                 var wVariance = ItemQualityVariance.DetermineWeaponVariance();
                 var item = new Item();
-
+                if (client.Aisling.Inventory.IsFull)
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
+                    return;
+                }
                 item = item.Create(client.Aisling, template, quality, variance, wVariance);
                 ItemDura(item, quality, client);
                 if (!item.CanCarry(client.Aisling)) continue;

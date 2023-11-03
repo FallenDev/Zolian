@@ -134,7 +134,11 @@ public class EquipmentManager
         AddEquipment(displaySlot, item);
 
         if (!returnIt) HandleUnreturnedItem(itemObj);
-        itemObj?.GiveTo(Client.Aisling, false);
+        if (itemObj == null) return;
+        var givenBack = itemObj.GiveTo(Client.Aisling, false);
+        if (givenBack) return;
+        Client.Aisling.BankManager.Items.TryAdd(itemObj.ItemId, itemObj);
+        Client.SendServerMessage(ServerMessageType.ActiveMessage, "Inventory full, item deposited to bank");
     }
 
     private void RemoveFromInventoryToEquip(Item item, bool handleWeight = false)

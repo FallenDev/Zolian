@@ -17,7 +17,7 @@ public class Inventory : ObjectManager, IInventory
 {
     private const int Length = 59;
     private readonly int[] _invalidSlots = { 0, 60 };
-    public bool IsFull => TotalItems >= Length;
+    public bool IsFull => TotalItems >= Length - 1;
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
 

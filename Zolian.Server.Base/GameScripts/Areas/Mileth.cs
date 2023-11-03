@@ -178,30 +178,11 @@ public class Mileth : AreaScript
             if (carry <= client.Aisling.MaximumWeight)
             {
                 ItemDura(item, quality);
-                item.GiveTo(client.Aisling);
-
-                if (item is { OriginalQuality: Item.Quality.Forsaken })
+                var given = item.GiveTo(client.Aisling);
+                if (!given)
                 {
-                    var marks = client.Aisling.LegendBook.LegendMarks.ToArray();
-
-                    foreach (var mark in marks)
-                    {
-                        if (mark.Value.StringContains("Relic Finder"))
-                        {
-                            client.Aisling.LegendBook.Remove(mark, client);
-                        }
-                    }
-
-                    var legend = new Legend.LegendItem
-                    {
-                        Category = "Relic Finder",
-                        Time = DateTime.UtcNow,
-                        Color = LegendColor.Red,
-                        Icon = (byte)LegendIcon.Victory,
-                        Value = $"Relic Finder: {client.Aisling.RelicFinder++}"
-                    };
-
-                    client.Aisling.LegendBook.AddLegend(legend, client);
+                    client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
                 }
             }
             else

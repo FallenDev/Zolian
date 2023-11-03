@@ -4055,7 +4055,10 @@ namespace Darkages.Network.Client
             var item = new Item();
             item = item.Create(aisling, itemName);
             item.Stacks = (ushort)range;
-            item.GiveTo(aisling);
+            var given = item.GiveTo(Aisling);
+            if (given) return;
+            Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+            SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
         }
 
 

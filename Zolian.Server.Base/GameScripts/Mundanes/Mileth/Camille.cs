@@ -69,7 +69,12 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                     {
                         var item = new Item();
                         item = item.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Mead"]);
-                        item.GiveTo(client.Aisling);
+                        var given = item.GiveTo(client.Aisling);
+                        if (!given)
+                        {
+                            client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                        }
                         client.CloseDialog();
                     }
                     else
@@ -111,7 +116,12 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                 case 6:
                     var item2 = new Item();
                     item2 = item2.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Zolian Guide"]);
-                    item2.GiveTo(client.Aisling);
+                    var given2 = item2.GiveTo(client.Aisling);
+                    if (!given2)
+                    {
+                        client.Aisling.BankManager.Items.TryAdd(item2.ItemId, item2);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                    }
 
                     var guide = new List<Dialog.OptionsDataItem>
                     {

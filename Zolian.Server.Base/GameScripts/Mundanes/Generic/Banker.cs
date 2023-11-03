@@ -107,8 +107,22 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                                 }
 
                                 client.Aisling.BankManager.Items.TryRemove(bankToInv.ItemId, out var verifiedItem);
-                                verifiedItem?.GiveTo(client.Aisling);
-                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem?.DisplayName ?? ""}");
+                                if (verifiedItem == null)
+                                {
+                                    client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I'm sorry it seems we don't have that.");
+                                    TopMenu(client);
+                                    return;
+                                }
+
+                                var itemGiven = verifiedItem.GiveTo(client.Aisling);
+                                if (!itemGiven)
+                                {
+                                    client.Aisling.BankManager.Items.TryAdd(verifiedItem.ItemId, verifiedItem);
+                                    client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, seems you can't hold it.");
+                                    return;
+                                }
+
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem.DisplayName ?? ""}");
                                 TopMenu(client);
                             }
 
@@ -209,8 +223,22 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                         if (itemInBank.Stacks == client.PendingItemSessions.Quantity)
                         {
                             client.Aisling.BankManager.Items.TryRemove(itemInBank.ItemId, out var verifiedItem);
-                            verifiedItem?.GiveTo(client.Aisling);
-                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem?.DisplayName ?? ""} x{verifiedItem?.Stacks}");
+                            if (verifiedItem == null)
+                            {
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I'm sorry it seems you don't have that.");
+                                TopMenu(client);
+                                return;
+                            }
+
+                            var itemGiven = verifiedItem.GiveTo(client.Aisling);
+                            if (!itemGiven)
+                            {
+                                client.Aisling.BankManager.Items.TryAdd(verifiedItem.ItemId, verifiedItem);
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, looks like you can't hold that. I'll hold onto it.");
+                                return;
+                            }
+
+                            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem.DisplayName ?? ""} x{verifiedItem.Stacks}");
                             client.PendingItemSessions = null;
                             TopMenu(client);
                             return;
@@ -229,7 +257,14 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                             itemCreated.Stacks = client.PendingItemSessions.Quantity;
 
                             // Give
-                            itemCreated.GiveTo(client.Aisling);
+                            var itemGiven = itemCreated.GiveTo(client.Aisling);
+                            if (!itemGiven)
+                            {
+                                client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
+                                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, looks like you can't hold that. I'll hold onto it.");
+                                return;
+                            }
+
                             client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {itemCreated.DisplayName} x{itemCreated.Stacks}");
                             client.Aisling.Inventory.UpdatePlayersWeight(client);
                             client.PendingItemSessions = null;
