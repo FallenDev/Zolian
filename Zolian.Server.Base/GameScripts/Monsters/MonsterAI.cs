@@ -457,7 +457,7 @@ public class BaseMonsterIntelligence : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -1041,7 +1041,7 @@ public class WeakCommon : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -2645,7 +2645,7 @@ public class Turret : MonsterScript
     private void CastSpell()
     {
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         if (Monster.Target is not { CurrentHp: > 1 })
         {
@@ -3106,7 +3106,7 @@ public class GeneralPirate : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
 
@@ -3709,7 +3709,7 @@ public class ShadowSight : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -4292,7 +4292,7 @@ public class WeakShadowSight : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -4886,7 +4886,7 @@ public class AosdaRemnant : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
@@ -5500,7 +5500,7 @@ public class DraconicOmega : MonsterScript
     {
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
-        if (!Monster.Target.WithinRangeOf(Monster)) return;
+        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 

@@ -104,6 +104,7 @@ public interface ISprite
     bool GetPendingThrowIsWall(int warp, Sprite sprite);
     bool WithinRangeOf(Sprite other, bool checkMap = true);
     bool WithinEarShotOf(Sprite other, bool checkMap = true);
+    bool WithinMonsterSpellRangeOf(Sprite other, bool checkMap = true);
     bool WithinRangeOf(int x, int y, int subjectLength);
     bool WithinRangeOf(Sprite other, int distance, bool checkMap = true);
     bool TrapsAreNearby();

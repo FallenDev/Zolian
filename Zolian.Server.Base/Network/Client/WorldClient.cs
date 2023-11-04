@@ -630,7 +630,7 @@ namespace Darkages.Network.Client
             }
 
             SendHeartBeat(0x14, 0x20);
-            return null;
+            return this;
         }
 
         public void SetAislingStartupVariables()
