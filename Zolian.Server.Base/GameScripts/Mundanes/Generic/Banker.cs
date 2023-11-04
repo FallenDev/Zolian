@@ -397,7 +397,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 client.CloseDialog();
                 break;
             case 0x0A:
-                client.SendTextInput(Mundane, $"{{=Banked: {{=q{client.Aisling.BankedGold}\n{{=aInventory: {{=c{client.Aisling.GoldPoints}", 0x0A, "Withdraw:", 10);
+                client.SendTextInput(Mundane, $"{{=cBanked: {{=q{client.Aisling.BankedGold}\n{{=aInventory: {{=c{client.Aisling.GoldPoints}", 0x0A, "Withdraw:", 10);
                 break;
             case 0x0B:
                 var correctWithdraw = long.TryParse(args, out var withdrawAmount);

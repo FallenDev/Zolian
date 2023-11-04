@@ -545,31 +545,34 @@ namespace Darkages.Network.Client
 
             try
             {
-                Parallel.ForEach(items, (entry) =>
+                if (Aisling.GameSettings.GroundQualities)
                 {
-                    switch (entry.Value.ItemQuality)
+                    Parallel.ForEach(items, (entry) =>
                     {
-                        case Item.Quality.Epic:
-                            Aisling.Client.SendAnimation(397, new Position(entry.Value.Position.X, entry.Value.Position.Y));
-                            break;
-                        case Item.Quality.Legendary:
-                            Aisling.Client.SendAnimation(398, new Position(entry.Value.Position.X, entry.Value.Position.Y));
-                            break;
-                        case Item.Quality.Forsaken:
-                            Aisling.Client.SendAnimation(399, new Position(entry.Value.Position.X, entry.Value.Position.Y));
-                            break;
-                        case Item.Quality.Mythic:
-                        case Item.Quality.Primordial:
-                        case Item.Quality.Transcendent:
-                            Aisling.Client.SendAnimation(400, new Position(entry.Value.Position.X, entry.Value.Position.Y));
-                            break;
-                        case Item.Quality.Damaged:
-                        case Item.Quality.Common:
-                        case Item.Quality.Uncommon:
-                        case Item.Quality.Rare:
-                            break;
-                    }
-                });
+                        switch (entry.Value.ItemQuality)
+                        {
+                            case Item.Quality.Epic:
+                                Aisling.Client.SendAnimation(397, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                                break;
+                            case Item.Quality.Legendary:
+                                Aisling.Client.SendAnimation(398, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                                break;
+                            case Item.Quality.Forsaken:
+                                Aisling.Client.SendAnimation(399, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                                break;
+                            case Item.Quality.Mythic:
+                            case Item.Quality.Primordial:
+                            case Item.Quality.Transcendent:
+                                Aisling.Client.SendAnimation(400, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                                break;
+                            case Item.Quality.Damaged:
+                            case Item.Quality.Common:
+                            case Item.Quality.Uncommon:
+                            case Item.Quality.Rare:
+                                break;
+                        }
+                    });
+                }
             }
             catch
             {
@@ -1949,7 +1952,7 @@ namespace Darkages.Network.Client
             var args = new ExchangeArgs
             {
                 ExchangeResponseType = ExchangeResponseType.StartExchange,
-                OtherUserId = (uint?)fromAisling.Serial,
+                OtherUserId = fromAisling.Serial,
                 OtherUserName = fromAisling.Username
             };
 

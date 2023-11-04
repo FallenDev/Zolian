@@ -203,7 +203,14 @@ public static class Commander
         if (string.IsNullOrEmpty(who)) return;
         var players = ServerSetup.Instance.Game.Aislings;
         var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-        player?.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
+        if (player == null) return;
+        if (!player.GameSettings.GMPort)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{player.Username}, has requested not to be summoned.");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"GM {client.Aisling.Username} wished to summon you, but was told you were busy");
+            return;
+        }
+        player.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
     }
 

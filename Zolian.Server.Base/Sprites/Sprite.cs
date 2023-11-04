@@ -1970,7 +1970,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (aisling.ThreatMeter + dmg >= long.MaxValue)
             aisling.ThreatMeter = (long)(long.MaxValue * .95);
         aisling.ThreatMeter += dmg;
-        ShowDmg(aisling, estTime);
+        if (aisling.GameSettings.DmgNumbers)
+            ShowDmg(aisling, estTime);
 
         if (this is not Monster monster) return;
         if (monster.Template?.ScriptName == null) return;

@@ -780,7 +780,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         clientsToRemove.Add(player.Client.Id);
                         return;
                     }
-                    
+
                     player.Client.Update();
 
                     // If no longer invisible, remove invisible buffs
@@ -1731,7 +1731,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 var load = await client.Aisling.Client.Load();
-                
+
                 if (load == null)
                 {
                     ServerSetup.Logger($"Failed to load player to client - exiting");
@@ -1946,6 +1946,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     foreach (var player in Aislings)
                     {
                         if (player.Client is null) continue;
+                        if (!player.GameSettings.GroupChat) continue;
                         if (player.Clan == client.Aisling.Clan)
                         {
                             player.Client.SendServerMessage(ServerMessageType.GuildChat, $"<!{client.Aisling.Username}> {message}");
@@ -1959,6 +1960,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     foreach (var player in Aislings)
                     {
                         if (player.Client is null) continue;
+                        if (!player.GameSettings.GroupChat) continue;
                         if (player.GroupParty == client.Aisling.GroupParty)
                         {
                             player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {message}");
@@ -1981,6 +1983,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (targetAisling.Equals(fromAisling))
             {
                 localClient.SendServerMessage(ServerMessageType.Whisper, "Little voice in yer head eh?");
+                return default;
+            }
+
+            if (!targetAisling.GameSettings.Whisper)
+            {
+                localClient.SendServerMessage(ServerMessageType.Whisper, "Has direct messaging turned off");
                 return default;
             }
 
@@ -2236,6 +2244,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                             {
+                                // Check Game Settings
+                                if (!localClient.Aisling.GameSettings.Exchange)
+                                {
+                                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou have trading turned off");
+                                    return default;
+                                }
+
+                                if (!aisling.GameSettings.Exchange)
+                                {
+                                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{aisling.Username}, is not actively trading");
+                                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qTrade ignored");
+                                    return default;
+                                }
+
                                 localClient.Aisling.Exchange = new ExchangeSession(aisling);
                                 aisling.Exchange = new ExchangeSession(localClient.Aisling);
                                 localClient.SendExchangeStart(aisling);
@@ -2315,6 +2337,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
                     case Aisling aisling:
                         {
+                            // Check Game Settings
+                            if (!localClient.Aisling.GameSettings.Exchange)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou have trading turned off");
+                                return default;
+                            }
+
+                            if (!aisling.GameSettings.Exchange)
+                            {
+                                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{aisling.Username}, is not actively trading");
+                                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{{=qTrade ignored");
+                                return default;
+                            }
+
                             localClient.Aisling.Exchange = new ExchangeSession(aisling);
                             aisling.Exchange = new ExchangeSession(localClient.Aisling);
                             localClient.SendExchangeStart(aisling);
@@ -2436,7 +2472,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             };
 
             localClient.Aisling.PartyStatus = mode;
-            localClient.Aisling.GameSettings.Toggle(UserOption.Group);
 
             if (localClient.Aisling.PartyStatus == GroupStatus.NotAcceptingRequests)
             {

@@ -287,6 +287,11 @@ public sealed class Aisling : Player, IAisling
 
         foreach (var player in selectedPlayers.Where(player => player?.Client != null))
         {
+            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") || method.Method.Name.Contains("OnApplied"))
+            {
+                if (!player.GameSettings.Animations) continue;
+            }
+
             method(player.Client);
         }
     }
