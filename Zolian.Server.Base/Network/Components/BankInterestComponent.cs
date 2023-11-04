@@ -28,8 +28,8 @@ public class BankInterestComponent(WorldServer server) : WorldServerComponent(se
                 return;
             }
 
-            var calc = Math.Round(player.BankedGold * 0.00777).ToString(CultureInfo.CurrentCulture);
-            var interest = (uint)Math.Round(player.BankedGold * 0.00777);
+            var calc = Math.Round(player.BankedGold * 0.00333).ToString(CultureInfo.CurrentCulture);
+            var interest = (uint)Math.Round(player.BankedGold * 0.00333);
             if (player.BankedGold + interest >= uint.MaxValue)
             {
                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage,

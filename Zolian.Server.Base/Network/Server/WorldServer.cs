@@ -51,7 +51,7 @@ namespace Darkages.Network.Server;
 
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
-    private readonly IClientFactory<WorldClient> ClientProvider;
+    private readonly IClientFactory<WorldClient> _clientProvider;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
     private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
@@ -89,7 +89,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             logger)
     {
         ServerSetup.Instance.Game = this;
-        ClientProvider = clientProvider;
+        _clientProvider = clientProvider;
         IndexHandlers();
         SkillMapper();
         RegisterServerComponents();
@@ -137,6 +137,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 [typeof(PingComponent)] = new PingComponent(this),
                 [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
                 [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
+                [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
+                [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
                 [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
             };
 
@@ -574,6 +576,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         playerRegenWatch.Start();
         var playerSaveWatch = new Stopwatch();
         playerSaveWatch.Start();
+        var playerStatusWatch = new Stopwatch();
+        playerStatusWatch.Start();
+        var playerSkillSpellWatch = new Stopwatch();
+        playerSkillSpellWatch.Start();
         var moonPhaseWatch = new Stopwatch();
         moonPhaseWatch.Start();
         var components = _serverComponents.Select(i => i.Value).ToList();
@@ -590,6 +596,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var pingElapsed = pingWatch.Elapsed;
             var playerRegenElapsed = playerRegenWatch.Elapsed;
             var playerSaveElapsed = playerSaveWatch.Elapsed;
+            var playerStatusElapsed = playerStatusWatch.Elapsed;
+            var playerSkillSpellElapsed = playerSkillSpellWatch.Elapsed;
             var moonPhaseElapsed = moonPhaseWatch.Elapsed;
 
             try
@@ -599,9 +607,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     switch (component)
                     {
                         case ObjectComponent objectComponent:
-                            if (objectElapsed.TotalMilliseconds < 35) break;
+                            if (objectElapsed.TotalMilliseconds < GameSpeed) break;
                             objectComponent.Update(objectElapsed);
                             objectWatch.Restart();
+                            break;
+                        case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
+                            if (playerStatusElapsed.TotalMilliseconds < GameSpeed) break;
+                            statusBarAndThreatComponent.Update(playerStatusElapsed);
+                            playerStatusWatch.Restart();
+                            break;
+                        case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
+                            if (playerSkillSpellElapsed.TotalMilliseconds < GameSpeed) break;
+                            skillSpellCooldownComponent.Update(playerSkillSpellElapsed);
+                            playerSkillSpellWatch.Restart();
                             break;
                         case PlayerRegenerationComponent playerRegenerationComponent:
                             if (playerRegenElapsed.TotalSeconds < 1) break;
@@ -662,7 +680,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Crashes.TrackError(ex);
             }
 
-            await Task.Delay(GameSpeed);
+            await Task.Delay(5);
         }
     }
 
@@ -762,15 +780,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         clientsToRemove.Add(player.Client.Id);
                         return;
                     }
-
-                    switch (player.Client.IsWarping)
-                    {
-                        case false when !player.Client.MapOpen:
-                            player.Client.Update();
-                            break;
-                        case true:
-                            break;
-                    }
+                    
+                    player.Client.Update();
 
                     // If no longer invisible, remove invisible buffs
                     if (player.IsInvisible) return;
@@ -3413,7 +3424,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         serverSocket.BeginAccept(OnConnection, serverSocket);
 
-        var client = ClientProvider.CreateClient(clientSocket);
+        var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
         var badActor = ClientOnBlackList(client);

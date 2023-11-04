@@ -125,8 +125,6 @@ public interface IWorldClient : ISocketClient
     Task<bool> Save();
     void DeathStatusCheck();
     WorldClient UpdateDisplay(bool excludeSelf = false);
-    void UpdateStatusBarAndThreat();
-    void UpdateSkillSpellCooldown();
     WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
     bool PayPrerequisites(LearningPredicate prerequisites);
     bool CheckReqs(WorldClient client, Item item);

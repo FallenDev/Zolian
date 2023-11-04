@@ -51,8 +51,8 @@ namespace Darkages.Network.Client
         private readonly IWorldServer<WorldClient> Server;
         public readonly ObjectManager ObjectHandlers = new();
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
-        private readonly Stopwatch _skillControl = new();
-        private readonly Stopwatch _statusControl = new();
+        public readonly Stopwatch SkillControl = new();
+        public readonly Stopwatch StatusControl = new();
         private readonly Stopwatch _aggroMessageControl = new();
         private readonly Stopwatch _lanternControl = new();
         private readonly Stopwatch _dayDreamingControl = new();
@@ -219,8 +219,6 @@ namespace Darkages.Network.Client
             CheckDayDreaming();
             HandleBadTrades();
             DeathStatusCheck();
-            UpdateStatusBarAndThreat();
-            UpdateSkillSpellCooldown();
             ShowAggro();
             ItemQueueUpdateOrAdd();
             DisplayQualityPillar();
@@ -470,66 +468,6 @@ namespace Darkages.Network.Client
 
             var debuff = new DebuffReaping();
             EnqueueDebuffAppliedEvent(Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
-        }
-
-        public void UpdateStatusBarAndThreat()
-        {
-            if (!_statusControl.IsRunning)
-            {
-                _statusControl.Start();
-            }
-
-            if (_statusControl.Elapsed.TotalMilliseconds < Aisling.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
-
-            Aisling.UpdateBuffs(_statusControl.Elapsed);
-            Aisling.UpdateDebuffs(_statusControl.Elapsed);
-            Aisling.ThreatGeneratedSubsided(Aisling);
-            _statusControl.Restart();
-        }
-
-        public void UpdateSkillSpellCooldown()
-        {
-            if (!_skillControl.IsRunning)
-            {
-                _skillControl.Start();
-            }
-
-            // Checks in real-time if a player is overburdened
-            if (Aisling.Overburden)
-            {
-                SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(2000);
-                // If overburdened, set the trigger to remove it when not
-                Aisling.OverburdenDelayed = true;
-            }
-            else
-            {
-                // When not overburdened, check if the player was, and return the delay to normal
-                if (Aisling.OverburdenDelayed)
-                {
-                    SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(1000);
-                    Aisling.OverburdenDelayed = false;
-                }
-            }
-
-            if (_skillControl.Elapsed.TotalMilliseconds < SkillSpellTimer.Delay.TotalMilliseconds) return;
-
-            foreach (var skill in Aisling.SkillBook.Skills.Values)
-            {
-                if (skill == null) continue;
-                skill.CurrentCooldown--;
-                if (skill.CurrentCooldown < 0)
-                    skill.CurrentCooldown = 0;
-            }
-
-            foreach (var spell in Aisling.SpellBook.Spells.Values)
-            {
-                if (spell == null) continue;
-                spell.CurrentCooldown--;
-                if (spell.CurrentCooldown < 0)
-                    spell.CurrentCooldown = 0;
-            }
-
-            _skillControl.Restart();
         }
 
         private void ShowAggro()
