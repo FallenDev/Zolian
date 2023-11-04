@@ -619,6 +619,10 @@ namespace Darkages.Network.Client
                 ServerSetup.Logger(ex.Message, LogLevel.Error);
                 ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
                 Crashes.TrackError(ex);
+
+                LoadLock.Release();
+                Disconnect();
+                return null;
             }
             finally
             {

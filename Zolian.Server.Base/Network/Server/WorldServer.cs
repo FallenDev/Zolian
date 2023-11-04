@@ -1730,7 +1730,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             try
             {
-                await client.Aisling.Client.Load();
+                var load = await client.Aisling.Client.Load();
+                
+                if (load == null)
+                {
+                    ServerSetup.Logger($"Failed to load player to client - exiting");
+                    client.Disconnect();
+                    return;
+                }
+
                 client.SendServerMessage(ServerMessageType.ActiveMessage,
                     $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
                 client.SendAttributes(StatUpdateType.Full);
