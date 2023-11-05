@@ -1,7 +1,8 @@
-﻿using System.Data;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Dapper;
+
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
@@ -13,6 +14,8 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
+using System.Data;
+
 namespace Darkages.Types;
 
 public class Debuff : IDebuff
@@ -22,7 +25,7 @@ public class Debuff : IDebuff
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
     public int TimeLeft { get; set; }
-    public WorldServerTimer Timer { get; set; } = new (TimeSpan.FromSeconds(1));
+    public WorldServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
     public Debuff DebuffSpell { get; set; }
     private readonly object _debuffLock = new();
 

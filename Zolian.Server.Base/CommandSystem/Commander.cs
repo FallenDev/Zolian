@@ -1,5 +1,5 @@
-﻿using System.Collections.Concurrent;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.GameScripts.Formulas;
@@ -7,8 +7,12 @@ using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Analytics;
 using Microsoft.Extensions.Logging;
+
+using System.Collections.Concurrent;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.CommandSystem;
@@ -77,7 +81,7 @@ public static class Commander
             .AddArgument(Argument.Create("name"))
             .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
         );
-        
+
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Restart", "restart", "- Force restart and reload:")
             .SetAction(Restart)
@@ -123,7 +127,7 @@ public static class Commander
 
         ServerSetup.Instance.Running = false;
     }
-    
+
     public static void Restart(Argument[] args, object arg)
     {
         var players = ServerSetup.Instance.Game.Aislings;
@@ -314,7 +318,7 @@ public static class Commander
             ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
         }
         ServerSetup.Instance.GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
-        
+
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);

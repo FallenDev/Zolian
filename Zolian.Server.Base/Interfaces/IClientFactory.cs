@@ -1,5 +1,6 @@
-﻿using System.Net.Sockets;
-using Chaos.Networking.Abstractions;
+﻿using Chaos.Networking.Abstractions;
+
+using System.Net.Sockets;
 
 namespace Darkages.Interfaces
 {

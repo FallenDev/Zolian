@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -28,7 +29,7 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
 
             if (client.Aisling.QuestManager.PeteComplete)
                 options.Add(new Dialog.OptionsDataItem(0x02, "{=qI'll take a pint."));
-                
+
             if (client.Aisling.Level <= 50 && !client.Aisling.QuestManager.CamilleGreetingComplete)
             {
                 options.Add(new Dialog.OptionsDataItem(0x04, "Good Morning, Camille"));
@@ -64,39 +65,39 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
             switch (responseID)
             {
                 case 2:
-                {
-                    if (client.Aisling.QuestManager.PeteComplete)
                     {
-                        var item = new Item();
-                        item = item.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Mead"]);
-                        var given = item.GiveTo(client.Aisling);
-                        if (!given)
+                        if (client.Aisling.QuestManager.PeteComplete)
                         {
-                            client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                            var item = new Item();
+                            item = item.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Mead"]);
+                            var given = item.GiveTo(client.Aisling);
+                            if (!given)
+                            {
+                                client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+                            }
+                            client.CloseDialog();
                         }
-                        client.CloseDialog();
+                        else
+                        {
+                            client.SendOptionsDialog(Mundane, "I'm embarrassed to say this, but it's spoiled?");
+                        }
+                        break;
                     }
-                    else
-                    {
-                        client.SendOptionsDialog(Mundane, "I'm embarrassed to say this, but it's spoiled?");
-                    }
-                    break;
-                }
                 case 3:
                     client.CloseDialog();
                     break;
                 case 4:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x02, "How about some of that mead?"),
                         new (0x05, "Yes, I enjoyed my stay.")
                     };
 
-                    client.SendOptionsDialog(Mundane, "How was the room? Was the bed comfortable?", options.ToArray());
-                    break;
-                }
+                        client.SendOptionsDialog(Mundane, "How was the room? Was the bed comfortable?", options.ToArray());
+                        break;
+                    }
                 case 5:
                     client.Aisling.QuestManager.MilethReputation += 1;
                     client.Aisling.QuestManager.CamilleGreetingComplete = true;
@@ -107,7 +108,7 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                         Category = "LCamille1",
                         Time = null,
                         Color = LegendColor.White,
-                        Icon = (byte)9,
+                        Icon = 9,
                         Value = ""
                     };
 

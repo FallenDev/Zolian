@@ -24,10 +24,10 @@ public class Fiona(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
         if (!client.Aisling.QuestManager.FionaDance)
         {
-            options.Add(new (0x01, "Why not."));
+            options.Add(new(0x01, "Why not."));
         }
 
-        options.Add(new (0x02, "Huh?"));
+        options.Add(new(0x02, "Huh?"));
 
         client.SendOptionsDialog(Mundane, "Wanna Dance?", options.ToArray());
     }
@@ -39,26 +39,26 @@ public class Fiona(WorldServer server, Mundane mundane) : MundaneScript(server, 
         switch (responseID)
         {
             case 0x01:
-            {
-                var options = new List<Dialog.OptionsDataItem>
+                {
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x03, "*smile warmly*"),
                 };
 
-                client.SendOptionsDialog(Mundane, $"You know, you're not too bad.. Thank you.", options.ToArray());
-            }
+                    client.SendOptionsDialog(Mundane, $"You know, you're not too bad.. Thank you.", options.ToArray());
+                }
                 break;
             case 0x02:
-            {
-                client.SendOptionsDialog(Mundane, "Too bad.");
-            }
+                {
+                    client.SendOptionsDialog(Mundane, "Too bad.");
+                }
                 break;
             case 0x03:
-            {
-                client.Aisling.QuestManager.FionaDance = true;
-                client.Aisling.QuestManager.MilethReputation += 1;
-                client.CloseDialog();
-            }
+                {
+                    client.Aisling.QuestManager.FionaDance = true;
+                    client.Aisling.QuestManager.MilethReputation += 1;
+                    client.CloseDialog();
+                }
                 break;
         }
     }

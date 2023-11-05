@@ -1,23 +1,16 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
-using Chaos.Extensions.Common;
+﻿using Chaos.Extensions.Common;
 using Chaos.Extensions.DependencyInjection;
 using Chaos.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
+
 using Darkages;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
+
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
@@ -30,6 +23,17 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
+
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Zolian.GameServer;
@@ -59,8 +63,7 @@ public partial class App
             typeof(Analytics), typeof(Crashes));
 #endif
 #if RELEASE
-            AppCenter.Start(releaseKey,
-                typeof(Analytics), typeof(Crashes));
+            AppCenter.Start(releaseKey, typeof(Analytics), typeof(Crashes));
 #endif
 
         var providers = new LoggerProviderCollection();

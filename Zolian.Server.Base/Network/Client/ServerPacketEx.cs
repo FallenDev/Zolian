@@ -1,7 +1,8 @@
-using System.Text;
 using Chaos.IO.Memory;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions.Definitions;
+
+using System.Text;
 
 namespace Darkages.Network.Client;
 

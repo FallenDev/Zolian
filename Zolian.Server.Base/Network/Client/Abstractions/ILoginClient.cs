@@ -1,5 +1,6 @@
 using Chaos.Common.Definitions;
 using Chaos.Networking.Abstractions;
+
 using Darkages.Meta;
 
 namespace Darkages.Network.Client.Abstractions;

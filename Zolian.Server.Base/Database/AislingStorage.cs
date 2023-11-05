@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 
 using Dapper;
@@ -12,6 +10,8 @@ using Darkages.Sprites;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+
+using System.Data;
 
 namespace Darkages.Database;
 

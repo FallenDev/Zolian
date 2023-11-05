@@ -1,8 +1,8 @@
-﻿using System.Numerics;
-using System.Text;
-
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Sprites;
+
+using System.Numerics;
+using System.Text;
 
 namespace Darkages.Common;
 
@@ -107,14 +107,14 @@ public static class Extensions
         return otherAisling.GameMaster || otherAisling.CanSeeInvisible || self.Path is Class.Assassin || self.PastClass is Class.Assassin
                || self.Race is Race.DarkElf or Race.WoodElf or Race.Dwarf;
     }
-    
+
     /// <summary>
     ///     Finds the next highest number in a sequence from a given value
     /// </summary>
     /// <param name="enumerable">The sequence to search</param>
     /// <param name="seed">The starting value</param>
     /// <typeparam name="T">A numeric type</typeparam>
-    public static T NextHighest<T>(this IEnumerable<T> enumerable, T seed) where T: INumber<T>
+    public static T NextHighest<T>(this IEnumerable<T> enumerable, T seed) where T : INumber<T>
     {
         var current = seed;
 
@@ -143,7 +143,7 @@ public static class Extensions
     /// <param name="enumerable">The sequence to search</param>
     /// <param name="seed">The starting value</param>
     /// <typeparam name="T">A numeric type</typeparam>
-    public static T NextLowest<T>(this IEnumerable<T> enumerable, T seed) where T: INumber<T>
+    public static T NextLowest<T>(this IEnumerable<T> enumerable, T seed) where T : INumber<T>
     {
         var current = seed;
 

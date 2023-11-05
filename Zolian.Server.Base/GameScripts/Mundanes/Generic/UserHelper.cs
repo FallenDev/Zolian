@@ -1,13 +1,14 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
+﻿using Chaos.Common.Definitions;
 
-using Chaos.Common.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -27,35 +28,35 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var level = client.Aisling.ExpLevel;
         var ability = client.Aisling.AbpLevel;
         var bStr = client.Aisling._Str.ToString("D3");
-        var baseStr = Regex.Replace(bStr, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var baseStr = Regex.Replace(bStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var bInt = client.Aisling._Int.ToString("D3");
-        var baseInt = Regex.Replace(bInt, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var baseInt = Regex.Replace(bInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var bWis = client.Aisling._Wis.ToString("D3");
-        var baseWis = Regex.Replace(bWis, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var baseWis = Regex.Replace(bWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var bCon = client.Aisling._Con.ToString("D3");
-        var baseCon = Regex.Replace(bCon, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var baseCon = Regex.Replace(bCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var bDex = client.Aisling._Dex.ToString("D3");
-        var baseDex = Regex.Replace(bDex, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var baseDex = Regex.Replace(bDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var gStr = client.Aisling.BonusStr.ToString("D3");
-        var gearStr = Regex.Replace(gStr, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var gearStr = Regex.Replace(gStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var gInt = client.Aisling.BonusInt.ToString("D3");
-        var gearInt = Regex.Replace(gInt, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var gearInt = Regex.Replace(gInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var gWis = client.Aisling.BonusWis.ToString("D3");
-        var gearWis = Regex.Replace(gWis, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var gearWis = Regex.Replace(gWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var gCon = client.Aisling.BonusCon.ToString("D3");
-        var gearCon = Regex.Replace(gCon, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var gearCon = Regex.Replace(gCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var gDex = client.Aisling.BonusDex.ToString("D3");
-        var gearDex = Regex.Replace(gDex, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var gearDex = Regex.Replace(gDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var pStr = client.Aisling.Str.ToString("D3");
-        var playerStr = Regex.Replace(pStr, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var playerStr = Regex.Replace(pStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var pInt = client.Aisling.Int.ToString("D3");
-        var playerInt = Regex.Replace(pInt, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var playerInt = Regex.Replace(pInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var pWis = client.Aisling.Wis.ToString("D3");
-        var playerWis = Regex.Replace(pWis, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var playerWis = Regex.Replace(pWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var pCon = client.Aisling.Con.ToString("D3");
-        var playerCon = Regex.Replace(pCon, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var playerCon = Regex.Replace(pCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var pDex = client.Aisling.Dex.ToString("D3");
-        var playerDex = Regex.Replace(pDex, @"\b0+", m => "".PadLeft(m.Value.Length,' '));
+        var playerDex = Regex.Replace(pDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
         var playerDmg = client.Aisling.Dmg.ToString();
         var playerAc = client.Aisling.SealedAc.ToString();
         var playerFort = client.Aisling.Fortitude.ToString(CultureInfo.CurrentCulture);
@@ -82,7 +83,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var latencyMs = $"{client.Latency.Elapsed.Milliseconds} ms";
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
-        
+
         client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gInsight: {{=b{level} {{=gRank: {{=b{ability} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
                                                                  $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +
                                                                  $"{{=gGear Stats| {{=cS:{{=a{gearStr}{{=c, I:{{=a{gearInt}{{=c, W:{{=a{gearWis}{{=c, C:{{=a{gearCon}{{=c, D:{{=a{gearDex}\n" +

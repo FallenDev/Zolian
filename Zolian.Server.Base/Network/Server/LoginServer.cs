@@ -1,8 +1,3 @@
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Sockets;
-using System.Text.RegularExpressions;
-
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -30,6 +25,11 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 using RestSharp;
+
+using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;

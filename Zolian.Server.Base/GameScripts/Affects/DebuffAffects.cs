@@ -1,12 +1,12 @@
-﻿using System.Security.Cryptography;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Affects;
 

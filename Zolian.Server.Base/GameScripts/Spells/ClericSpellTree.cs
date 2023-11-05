@@ -1497,7 +1497,7 @@ public class AoDall(Spell spell) : SpellScript(spell)
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-        
+
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1690,7 +1690,7 @@ public class AoCradh(Spell spell) : SpellScript(spell)
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-        
+
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1787,7 +1787,7 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-        
+
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1884,7 +1884,7 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
-        
+
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
             if (debuffs.Name != aoDebuff) continue;
@@ -1959,20 +1959,20 @@ public class AoSuain(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        
+
         switch (target.IsFrozen)
         {
             case false:
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}, but it did nothing");
                 return;
             case true:
-            {
-                client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
+                {
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, $"Cast {Spell.Template.Name}");
 
-                if (target is Aisling targetAisling)
-                    targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
-                break;
-            }
+                    if (target is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} removed your paralysis");
+                    break;
+                }
         }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));

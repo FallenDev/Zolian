@@ -109,7 +109,7 @@ public static class SpriteClassRaceExtensions
     public static bool AfflictionFlagIsSet(this Afflictions self, Afflictions flag) => (self & flag) == flag;
     public static bool SubClassFlagIsSet(this SubClassDragonkin self, SubClassDragonkin flag) => (self & flag) == flag;
 }
-    
+
 public static class ClassStrings
 {
     public static string ClassValue(Class c)

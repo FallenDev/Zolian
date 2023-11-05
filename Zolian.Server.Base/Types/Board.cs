@@ -1,4 +1,5 @@
 ﻿using Microsoft.AppCenter.Crashes;
+
 using Newtonsoft.Json;
 
 namespace Darkages.Types;

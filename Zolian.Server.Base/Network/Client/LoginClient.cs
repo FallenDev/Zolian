@@ -1,21 +1,25 @@
-﻿using System.Net.Sockets;
-using Chaos.Common.Definitions;
-using Chaos.Extensions.Networking;
+﻿using Chaos.Common.Definitions;
 using Chaos.Cryptography.Abstractions;
+using Chaos.Extensions.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
+
 using Darkages.Meta;
 using Darkages.Network.Client.Abstractions;
+
 using JetBrains.Annotations;
+
 using Microsoft.Extensions.Logging;
+
+using System.Net.Sockets;
 
 namespace Darkages.Network.Client
 {
     public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull] [ItemNotNull] ILogger<SocketClientBase> logger)
+            [NotNull][ItemNotNull] ILogger<SocketClientBase> logger)
         : SocketClientBase(socket, crypto, packetSerializer, logger), ILoginClient
     {
         protected override ValueTask HandlePacketAsync(Span<byte> span)

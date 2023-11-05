@@ -1,12 +1,13 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Darkages.Interfaces;
 

@@ -1,8 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
 using Darkages.Object;
 using Darkages.Templates;
+
 using ServiceStack;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.Types;
 
@@ -67,7 +69,7 @@ public class SkillBook : ObjectManager
     }
 
     public void Set(byte slot, Skill newSkill, Skill oldSkill) => Skills.TryUpdate(slot, newSkill, oldSkill);
-    
+
     public bool AttemptSwap(WorldClient client, byte fromSlot, byte toSlot)
     {
         if (!IsValidSlot(fromSlot) || !IsValidSlot(toSlot)) return false;

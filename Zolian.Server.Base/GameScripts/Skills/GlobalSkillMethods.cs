@@ -70,7 +70,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         if (client != null)
             client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
         else if (target is Aisling targetPlayer)
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
         else
             debuff.OnApplied(target, debuff);
 

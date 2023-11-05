@@ -1,12 +1,13 @@
-﻿using Darkages.Network.Client;
+﻿using Chaos.Common.Definitions;
+
+using Darkages.Common;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
-using Chaos.Common.Definitions;
-using Darkages.Common;
-using Darkages.ScriptingBase;
 
 namespace Darkages.GameScripts.Mundanes.Tagor;
 
@@ -122,49 +123,49 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
                     //if (client.Aisling.GoldPoints >= 100000)
                     //{
                     //    client.Aisling.GoldPoints -= 100000;
-                        client.TransitionToMap(5257, new Position(17, 17));
-                        await Task.Delay(100).ContinueWith(ct =>
-                        {
-                            client.CloseDialog();
-                            var spot = _dojoSpots.RandomIEnum();
-                            client.Aisling.Pos = spot;
-                            client.ClientRefreshed();
-                            var monsters = client.Aisling.MonstersNearby()
-                                .Where(i => i.WithinRangeOf(client.Aisling, 2));
+                    client.TransitionToMap(5257, new Position(17, 17));
+                    await Task.Delay(100).ContinueWith(ct =>
+                    {
+                        client.CloseDialog();
+                        var spot = _dojoSpots.RandomIEnum();
+                        client.Aisling.Pos = spot;
+                        client.ClientRefreshed();
+                        var monsters = client.Aisling.MonstersNearby()
+                            .Where(i => i.WithinRangeOf(client.Aisling, 2));
 
-                            foreach (var monster in monsters)
+                        foreach (var monster in monsters)
+                        {
+                            client.Aisling.Facing(monster.X, monster.Y, out var direction);
+                            if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
+                            client.Aisling.Direction = (byte)direction;
+                            client.Aisling.Turn();
+                        }
+                    });
+
+                    var monster = client.Aisling.MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(client.Aisling, 2));
+                    if (monster is null) break;
+                    client.Aisling.Target = monster;
+
+                    while (client.Aisling.NextTo(client.Aisling.Target!.X, client.Aisling.Target!.Y))
+                    {
+                        await Task.Delay(500).ContinueWith(ct =>
+                        {
+                            foreach (var skill in client.Aisling.SkillBook.Skills.Values)
                             {
-                                client.Aisling.Facing(monster.X, monster.Y, out var direction);
-                                if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
-                                client.Aisling.Direction = (byte)direction;
-                                client.Aisling.Turn();
+                                if (skill is null) continue;
+                                if (!skill.CanUse()) continue;
+                                if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                                skill.InUse = true;
+
+                                var script = skill.Scripts.Values.First();
+                                script?.OnUse(client.Aisling);
+
+                                skill.InUse = false;
+                                skill.CurrentCooldown = skill.Template.Cooldown;
                             }
                         });
-
-                        var monster = client.Aisling.MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(client.Aisling, 2));
-                        if (monster is null) break;
-                        client.Aisling.Target = monster;
-
-                        while (client.Aisling.NextTo(client.Aisling.Target!.X, client.Aisling.Target!.Y))
-                        {
-                            await Task.Delay(500).ContinueWith(ct =>
-                            {
-                                foreach (var skill in client.Aisling.SkillBook.Skills.Values)
-                                {
-                                    if (skill is null) continue;
-                                    if (!skill.CanUse()) continue;
-                                    if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
-
-                                    skill.InUse = true;
-
-                                    var script = skill.Scripts.Values.First();
-                                    script?.OnUse(client.Aisling);
-
-                                    skill.InUse = false;
-                                    skill.CurrentCooldown = skill.Template.Cooldown;
-                                }
-                            });
-                        }
+                    }
                     //}
                     //else
                     //{

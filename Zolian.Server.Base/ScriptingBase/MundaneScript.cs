@@ -1,5 +1,5 @@
-﻿using System.Security.Cryptography;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Interfaces;
@@ -8,6 +8,8 @@ using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
+
+using System.Security.Cryptography;
 
 namespace Darkages.ScriptingBase;
 
@@ -32,7 +34,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
         {
             client.CloseDialog();
             return;
-        } 
+        }
 
         // Obtain serial from packet entry ClientFormat43
         client.EntryCheck = serial;

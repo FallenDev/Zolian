@@ -29,6 +29,10 @@ public class FirstAcc(Item item) : ItemScript(item)
 
         client.Aisling.Accessory1Img = Item.Image;
         client.Aisling.Accessory1Color = Item.Color;
+
+        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+        aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
+        aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -41,5 +45,9 @@ public class FirstAcc(Item item) : ItemScript(item)
 
         client.Aisling.Accessory1Img = uint.MinValue;
         client.Aisling.Accessory1Color = uint.MinValue;
+
+        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+        aisling.SecondaryOffensiveElement = ElementManager.Element.None;
+        aisling.SecondaryDefensiveElement = ElementManager.Element.None;
     }
 }

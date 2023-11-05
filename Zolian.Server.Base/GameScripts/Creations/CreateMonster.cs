@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-using Chaos.Common.Identity;
+﻿using Chaos.Common.Identity;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -11,6 +9,8 @@ using Darkages.Types;
 
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+
+using System.Numerics;
 
 namespace Darkages.GameScripts.Creations;
 
@@ -87,7 +87,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         // Find the first multiplier where the level is less than or equal to the key
         var (hpMultiplier, mpMultiplier) = levelMultipliers.First(x => obj.Template.Level <= x.Key).Value;
-        
+
         obj.BaseHp = Generator.RandomMonsterStatVariance(obj.Template.Level * hpMultiplier);
         obj.BaseMp = Generator.RandomMonsterStatVariance(obj.Template.Level * mpMultiplier);
         obj._Mr = 50;
@@ -176,12 +176,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         switch (template.SpawnType)
         {
             case SpawnQualifer.Random:
-            {
-                var x = Generator.GenerateMapLocation(map.Height);
-                var y = Generator.GenerateMapLocation(map.Width);
-                obj.Pos = new Vector2(x, y);
-                break;
-            }
+                {
+                    var x = Generator.GenerateMapLocation(map.Height);
+                    var y = Generator.GenerateMapLocation(map.Width);
+                    obj.Pos = new Vector2(x, y);
+                    break;
+                }
             case SpawnQualifer.Event:
                 if (obj.Aggressive == false) return;
                 obj.Pos = new Vector2(template.DefinedX, template.DefinedY);

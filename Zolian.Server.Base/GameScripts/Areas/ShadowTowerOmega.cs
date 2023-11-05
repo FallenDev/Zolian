@@ -1,12 +1,15 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Microsoft.IdentityModel.Tokens;
+
+using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Darkages.GameScripts.Areas;
 

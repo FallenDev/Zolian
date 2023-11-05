@@ -95,7 +95,7 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                             Category = "LShreek1",
                             Time = null,
                             Color = LegendColor.White,
-                            Icon = (byte)9,
+                            Icon = 9,
                             Value = ""
                         };
 
@@ -110,9 +110,9 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                     break;
                 }
             case 0x05:
-            {
-                break;
-            }
+                {
+                    break;
+                }
         }
     }
 }

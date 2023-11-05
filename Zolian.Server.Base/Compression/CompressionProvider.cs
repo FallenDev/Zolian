@@ -10,7 +10,7 @@ public static class CompressionProvider
     {
         var iStream = new MemoryStream(buffer);
         var oStream = new MemoryStream();
-        var zStream = new ZOutputStream(oStream, (ZlibCompression) 6);
+        var zStream = new ZOutputStream(oStream, (ZlibCompression)6);
 
         try
         {

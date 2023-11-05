@@ -48,7 +48,7 @@ public class Stab(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         var dmgCalc = DamageCalc(sprite);
         if (aisling.IsInvisible)
             dmgCalc *= 2;
@@ -159,7 +159,7 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         var dmgCalc = DamageCalc(sprite);
         if (aisling.IsInvisible)
             dmgCalc *= 2;
@@ -281,7 +281,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 
             var debuff = new DebuffRend();
 
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane")) 
+            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
 
             if (_target is Aisling targetPlayer)

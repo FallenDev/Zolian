@@ -1,7 +1,4 @@
-﻿using System.Collections.Frozen;
-using System.Numerics;
-
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Templates;
 using Darkages.Types;
@@ -10,6 +7,9 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 
 using ServiceStack;
+
+using System.Collections.Frozen;
+using System.Numerics;
 
 namespace Darkages.Database;
 

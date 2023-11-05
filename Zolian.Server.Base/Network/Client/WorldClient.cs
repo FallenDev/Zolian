@@ -1,48 +1,55 @@
-﻿using System.Net.Sockets;
-using System.Numerics;
-using Chaos.Common.Definitions;
-using Chaos.Extensions.Networking;
+﻿using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
 using Chaos.Cryptography.Abstractions;
+using Chaos.Extensions.Networking;
 using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Darkages.Sprites;
-using Darkages.Types;
-using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
-using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Packets.Abstractions.Definitions;
+
+using Dapper;
+
 using Darkages.Common;
+using Darkages.Database;
 using Darkages.Enums;
+using Darkages.Events;
+using Darkages.GameScripts.Affects;
+using Darkages.GameScripts.Formulas;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client.Abstractions;
+using Darkages.Network.Server;
+using Darkages.Object;
+using Darkages.ScriptingBase;
+using Darkages.Sprites;
+using Darkages.Templates;
+using Darkages.Types;
+
+using JetBrains.Annotations;
+
+using Microsoft.AppCenter.Crashes;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+
+using ServiceStack;
+
+using System.Collections.Concurrent;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using System.Net.Sockets;
+using System.Numerics;
+
 using BodyColor = Chaos.Common.Definitions.BodyColor;
+using BodySprite = Chaos.Common.Definitions.BodySprite;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Gender = Chaos.Common.Definitions.Gender;
 using LanternSize = Chaos.Common.Definitions.LanternSize;
-using RestPosition = Chaos.Common.Definitions.RestPosition;
-using BodySprite = Chaos.Common.Definitions.BodySprite;
-using Darkages.Database;
-using Darkages.Templates;
-using Microsoft.AppCenter.Crashes;
-using Microsoft.Data.SqlClient;
-using System.Data;
-using Dapper;
-using Darkages.GameScripts.Affects;
-using Darkages.Network.Server;
-using Darkages.Object;
 using MapFlags = Darkages.Enums.MapFlags;
-using Darkages.GameScripts.Formulas;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using Chaos.Common.Identity;
-using System.Globalization;
-using ServiceStack;
-using Darkages.ScriptingBase;
-using Darkages.Events;
+using RestPosition = Chaos.Common.Definitions.RestPosition;
 
 namespace Darkages.Network.Client
 {
@@ -1523,7 +1530,7 @@ namespace Darkages.Network.Client
                         CreationDate = postFormat.DatePosted,
                         IsHighlighted = postFormat.HighLighted,
                         Message = postFormat.Message,
-                        PostId = (short)postFormat.PostId,
+                        PostId = postFormat.PostId,
                         Subject = postFormat.Subject
                     };
 
@@ -1568,7 +1575,7 @@ namespace Darkages.Network.Client
                         CreationDate = postFormat.DatePosted,
                         IsHighlighted = postFormat.HighLighted,
                         Message = postFormat.Message,
-                        PostId = (short)postFormat.PostId,
+                        PostId = postFormat.PostId,
                         Subject = postFormat.Subject
                     };
 
@@ -1612,7 +1619,7 @@ namespace Darkages.Network.Client
                         CreationDate = postFormat.DatePosted,
                         IsHighlighted = postFormat.HighLighted,
                         Message = postFormat.Message,
-                        PostId = (short)postFormat.PostId,
+                        PostId = postFormat.PostId,
                         Subject = postFormat.Subject
                     };
 
@@ -1666,7 +1673,7 @@ namespace Darkages.Network.Client
                     CreationDate = post.DatePosted,
                     IsHighlighted = post.HighLighted,
                     Message = post.Message,
-                    PostId = (short)post.PostId,
+                    PostId = post.PostId,
                     Subject = post.Subject
                 },
                 EnablePrevBtn = enablePrevBtn
@@ -2072,7 +2079,7 @@ namespace Darkages.Network.Client
         {
             var args = new HealthBarArgs
             {
-                SourceId = (uint)creature.Serial,
+                SourceId = creature.Serial,
                 HealthPercent = (byte)((double)100 * creature.CurrentHp / creature.MaximumHp),
                 Sound = sound
             };
@@ -3349,7 +3356,7 @@ namespace Darkages.Network.Client
                         case Monster creature:
                             var creatureInfo = new CreatureInfo
                             {
-                                Id = (uint)creature.Serial,
+                                Id = creature.Serial,
                                 Sprite = creature.Template.Image,
                                 X = creature.X,
                                 Y = creature.Y,

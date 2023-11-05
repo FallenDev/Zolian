@@ -19,46 +19,46 @@ public class QuestHelper(WorldServer server, Mundane mundane) : MundaneScript(se
         switch (responseID)
         {
             case 1:
-            {
-                // Keela
-                var options = new List<Dialog.OptionsDataItem>
+                {
+                    // Keela
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x02, "{=qReturn me"),
                     new(0x0320, "{=bNo, I'll stay")
                 };
 
-                client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
+                    break;
+                }
             case 2:
-            {
-                client.CloseDialog();
-                client.TransitionToMap(400, new Position(7, 7));
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    client.TransitionToMap(400, new Position(7, 7));
+                    break;
+                }
             case 3:
-            {
-                // Neal
-                var options = new List<Dialog.OptionsDataItem>
+                {
+                    // Neal
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new(0x04, "{=qReturn me"),
                     new(0x0320, "{=bNo, I'll stay")
                 };
 
-                client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
+                    break;
+                }
             case 4:
-            {
-                client.CloseDialog();
-                client.TransitionToMap(301, new Position(7, 7));
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    client.TransitionToMap(301, new Position(7, 7));
+                    break;
+                }
             case 800:
-            {
-                client.CloseDialog();
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    break;
+                }
         }
     }
 }

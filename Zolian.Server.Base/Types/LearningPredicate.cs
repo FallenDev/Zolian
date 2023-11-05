@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
@@ -7,6 +7,8 @@ using Darkages.Sprites;
 using Darkages.Templates;
 
 using Microsoft.AppCenter.Crashes;
+
+using System.Text;
 
 namespace Darkages.Types;
 
@@ -186,7 +188,7 @@ public class LearningPredicate
         result[n++] = new Tuple<bool, object>(player.Dex >= DexRequired, $"You must increase your dexterity. ({DexRequired} Dex Required)");
         result[n++] = new Tuple<bool, object>(player.GoldPoints >= GoldRequired, $"My services aren't free. ({GoldRequired} Gold Required)");
         result[n++] = new Tuple<bool, object>(player.Stage >= StageRequired, "You must transcend further before you can learn this.");
-        result[n++] = new Tuple<bool, object>(ClassRequired.ClassFlagIsSet(player.Path) || ClassRequired.ClassFlagIsSet(player.PastClass) || ClassRequired.ClassFlagIsSet(Class.Peasant) 
+        result[n++] = new Tuple<bool, object>(ClassRequired.ClassFlagIsSet(player.Path) || ClassRequired.ClassFlagIsSet(player.PastClass) || ClassRequired.ClassFlagIsSet(Class.Peasant)
                                               || SecondaryClassRequired.ClassFlagIsSet(player.Path) || SecondaryClassRequired.ClassFlagIsSet(player.PastClass) || SecondaryClassRequired.ClassFlagIsSet(Class.Peasant), "I have nothing left to teach you, " + player.Path);
         return n;
     }

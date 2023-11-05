@@ -1,10 +1,10 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-using ServiceStack.Auth;
 
 namespace Darkages.GameScripts.Areas;
 

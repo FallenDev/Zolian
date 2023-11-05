@@ -1,9 +1,11 @@
-﻿using System.Security.Cryptography;
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Crashes;
+
+using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
 
@@ -66,7 +68,7 @@ public class CommonPet : MonsterScript
             Monster.Target = Monster.Summoner.Target ?? GetObjects(Monster.Map,
                 p => p.Target != null && Monster.Summoner.Serial != p.Serial && p.Target.Serial == Monster.Summoner?.Serial &&
                      p.Target.Serial != Monster.Serial, Get.All).MinBy(i => i.Position.DistanceFrom(Monster.Summoner.Position));
-            
+
             if (Monster.Target == null) return;
             if (Monster.Target.CurrentHp == 0 ||
                 !Monster.WithinRangeOf(Monster.Target) ||

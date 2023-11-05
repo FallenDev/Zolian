@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -50,122 +51,122 @@ public class ArenaHost(WorldServer server, Mundane mundane) : MundaneScript(serv
         switch (responseID)
         {
             case 1:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.TransitionToMap(509, new Position(4, 4));
-                        break;
-                    case >= 25 and <= 49:
-                        client.TransitionToMap(509, new Position(2, 6));
-                        break;
-                    case >= 50 and <= 74:
-                        client.TransitionToMap(509, new Position(6, 2));
-                        break;
-                    case >= 75 and <= 100:
-                        client.TransitionToMap(509, new Position(2, 2));
-                        break;
-                    default:
-                        client.TransitionToMap(509, new Position(4, 4));
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, null, client.Aisling.Serial);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.TransitionToMap(509, new Position(4, 4));
+                            break;
+                        case >= 25 and <= 49:
+                            client.TransitionToMap(509, new Position(2, 6));
+                            break;
+                        case >= 50 and <= 74:
+                            client.TransitionToMap(509, new Position(6, 2));
+                            break;
+                        case >= 75 and <= 100:
+                            client.TransitionToMap(509, new Position(2, 2));
+                            break;
+                        default:
+                            client.TransitionToMap(509, new Position(4, 4));
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Northern Arena");
+                    break;
+                }
             case 2:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.TransitionToMap(509, new Position(51, 4));
-                        break;
-                    case >= 25 and <= 49:
-                        client.TransitionToMap(509, new Position(49, 2));
-                        break;
-                    case >= 50 and <= 74:
-                        client.TransitionToMap(509, new Position(53, 6));
-                        break;
-                    case >= 75 and <= 100:
-                        client.TransitionToMap(509, new Position(53, 2));
-                        break;
-                    default:
-                        client.TransitionToMap(509, new Position(51, 4));
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, null, client.Aisling.Serial);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.TransitionToMap(509, new Position(51, 4));
+                            break;
+                        case >= 25 and <= 49:
+                            client.TransitionToMap(509, new Position(49, 2));
+                            break;
+                        case >= 50 and <= 74:
+                            client.TransitionToMap(509, new Position(53, 6));
+                            break;
+                        case >= 75 and <= 100:
+                            client.TransitionToMap(509, new Position(53, 2));
+                            break;
+                        default:
+                            client.TransitionToMap(509, new Position(51, 4));
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Eastern Arena");
+                    break;
+                }
             case 3:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.TransitionToMap(509, new Position(51, 51));
-                        break;
-                    case >= 25 and <= 49:
-                        client.TransitionToMap(509, new Position(49, 53));
-                        break;
-                    case >= 50 and <= 74:
-                        client.TransitionToMap(509, new Position(53, 49));
-                        break;
-                    case >= 75 and <= 100:
-                        client.TransitionToMap(509, new Position(53, 53));
-                        break;
-                    default:
-                        client.TransitionToMap(509, new Position(51, 51));
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, null, client.Aisling.Serial);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.TransitionToMap(509, new Position(51, 51));
+                            break;
+                        case >= 25 and <= 49:
+                            client.TransitionToMap(509, new Position(49, 53));
+                            break;
+                        case >= 50 and <= 74:
+                            client.TransitionToMap(509, new Position(53, 49));
+                            break;
+                        case >= 75 and <= 100:
+                            client.TransitionToMap(509, new Position(53, 53));
+                            break;
+                        default:
+                            client.TransitionToMap(509, new Position(51, 51));
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Southern Arena");
+                    break;
+                }
             case 4:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 0 and <= 24:
-                        client.TransitionToMap(509, new Position(4, 51));
-                        break;
-                    case >= 25 and <= 49:
-                        client.TransitionToMap(509, new Position(2, 53));
-                        break;
-                    case >= 50 and <= 74:
-                        client.TransitionToMap(509, new Position(2, 49));
-                        break;
-                    case >= 75 and <= 100:
-                        client.TransitionToMap(509, new Position(6, 53));
-                        break;
-                    default:
-                        client.TransitionToMap(509, new Position(4, 51));
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.CloseDialog();
-                client.SendAnimation(262, null, client.Aisling.Serial);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 0 and <= 24:
+                            client.TransitionToMap(509, new Position(4, 51));
+                            break;
+                        case >= 25 and <= 49:
+                            client.TransitionToMap(509, new Position(2, 53));
+                            break;
+                        case >= 50 and <= 74:
+                            client.TransitionToMap(509, new Position(2, 49));
+                            break;
+                        case >= 75 and <= 100:
+                            client.TransitionToMap(509, new Position(6, 53));
+                            break;
+                        default:
+                            client.TransitionToMap(509, new Position(4, 51));
+                            break;
+                    }
+
+                    client.CloseDialog();
+                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Western Arena");
+                    break;
+                }
             case 5:
-            {
-                client.CloseDialog();
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    break;
+                }
         }
     }
 }

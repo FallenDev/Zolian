@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.ScriptingBase;
@@ -8,7 +6,10 @@ using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.IdentityModel.Tokens;
+
 using ServiceStack;
+
+using System.Numerics;
 
 namespace Darkages.Types;
 
@@ -110,7 +111,7 @@ public class Area : Map, IArea
         if (sprite is not Mundane)
             if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
-        
+
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
         var spritesAtLocation = grid[x, y].Sprites.ToList();
@@ -126,7 +127,7 @@ public class Area : Map, IArea
     public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
-        
+
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
         return !grid[x, y].Sprites.IsNullOrEmpty();

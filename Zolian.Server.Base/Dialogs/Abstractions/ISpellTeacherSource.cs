@@ -1,4 +1,5 @@
 ﻿using Darkages.Types;
+
 using System.Diagnostics.CodeAnalysis;
 
 namespace Darkages.Dialogs.Abstractions;

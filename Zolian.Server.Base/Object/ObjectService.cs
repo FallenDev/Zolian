@@ -1,6 +1,7 @@
-﻿using System.Collections;
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Collections;
 
 namespace Darkages.Object;
 

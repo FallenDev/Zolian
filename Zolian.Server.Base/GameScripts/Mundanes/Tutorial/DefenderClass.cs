@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -42,7 +43,7 @@ public class DefenderClass(WorldServer server, Mundane mundane) : MundaneScript(
     public override void OnResponse(WorldClient client, ushort responseID, string args)
     {
         if (!AuthenticateUser(client)) return;
-        
+
         if (responseID is > 0x0001 and < 0x0003)
         {
             client.SendOptionsDialog(Mundane, "Our class protects and defends, when we wish to deal massive damage we rely on our mighty two-handed weapons.");

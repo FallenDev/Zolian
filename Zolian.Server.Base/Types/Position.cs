@@ -1,13 +1,13 @@
-﻿using System.Numerics;
+﻿using Darkages.Enums;
 
-using Darkages.Enums;
+using System.Numerics;
 
 namespace Darkages.Types;
 
 [Serializable]
 public class Position
 {
-    public Position() {}
+    public Position() { }
 
     public Position(Vector2 position)
     {
@@ -17,20 +17,20 @@ public class Position
 
     public Position(int x, ushort y)
     {
-        X = (ushort) x;
+        X = (ushort)x;
         Y = y;
     }
 
     public Position(ushort x, int y)
     {
         X = x;
-        Y = (ushort) y;
+        Y = (ushort)y;
     }
 
     public Position(int x, int y)
     {
-        X = (ushort) x;
-        Y = (ushort) y;
+        X = (ushort)x;
+        Y = (ushort)y;
     }
 
     public Position(float x, float y)
@@ -53,7 +53,7 @@ public class Position
         double xDiff = Math.Abs(xDist - this.X);
         double yDiff = Math.Abs(yDist - this.Y);
 
-        return (int) (xDiff > yDiff ? xDiff : yDiff);
+        return (int)(xDiff > yDiff ? xDiff : yDiff);
     }
 
     public int DistanceFrom(Position pos)
@@ -118,7 +118,7 @@ public class Position
         public Position Position { get; set; } = pos;
     }
 
-    public static bool TryParse(string xValue, string yValue,  out Position position)
+    public static bool TryParse(string xValue, string yValue, out Position position)
     {
         position = null;
 

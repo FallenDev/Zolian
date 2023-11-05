@@ -164,7 +164,7 @@ public class WolfFangFist(Skill skill) : SkillScript(skill)
 
             _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, skill);
         }
-        
+
         _skillMethod.OnSuccess(_target, aisling, skill, 0, false, action);
     }
 
@@ -194,14 +194,14 @@ public class WolfFangFist(Skill skill) : SkillScript(skill)
                 case null:
                     return;
                 case Aisling damageDealingTarget:
-                {
-                    var debuff = new DebuffFrozen();
                     {
-                        if (!damageDealingTarget.HasDebuff(debuff.Name))
-                            _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, skill);
+                        var debuff = new DebuffFrozen();
+                        {
+                            if (!damageDealingTarget.HasDebuff(debuff.Name))
+                                _skillMethod.ApplyPhysicalDebuff(damageDealingTarget.Client, debuff, target, skill);
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
     }
@@ -244,7 +244,7 @@ public class KnifeHandStrike(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
     }
@@ -700,7 +700,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(sprite);
             var debuff = new DebuffHurricane();
 
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
 
             if (_target is Aisling targetPlayer)
@@ -764,7 +764,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
                 if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Rend"))
                     debuff.OnApplied(_target, debuff);
             }
-                
+
             var dmg = (int)(sprite.MaximumHp * 1.2);
             sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
             _skillMethod.OnSuccess(_target, sprite, skill, dmg, false, action);
@@ -1031,12 +1031,12 @@ public class Claw_Fist(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         var buff = new buff_clawfist();
         {
             _skillMethod.ApplyPhysicalBuff(aisling, buff);
         }
-        
+
         _skillMethod.OnSuccess(aisling, aisling, skill, 0, false, action);
     }
 
@@ -1100,7 +1100,7 @@ public class EmberStrike(Skill skill) : SkillScript(skill)
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling,  1);
+            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, skill);
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(17, null, _target.Serial));
             _skillMethod.OnSuccessWithoutAction(_target, aisling, skill, 0, _crit);

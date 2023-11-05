@@ -40,7 +40,7 @@ public class Ac(Sprite obj) : FormulaScript
 
         if (value <= 0)
             value = 1;
-        
+
         return value;
     }
 }

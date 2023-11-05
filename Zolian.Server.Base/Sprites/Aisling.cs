@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
@@ -13,7 +10,11 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Templates;
 using Darkages.Types;
+
 using Microsoft.AppCenter.Crashes;
+
+using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Darkages.Sprites;
 
@@ -342,10 +343,10 @@ public sealed class Aisling : Player, IAisling
         GoldPoints += goldA;
         trader.GoldPoints += goldB;
 
-        if (trader.GoldPoints > (uint)ServerSetup.Instance.Config.MaxCarryGold)
-            trader.GoldPoints = (uint)ServerSetup.Instance.Config.MaxCarryGold;
-        if (GoldPoints > (uint)ServerSetup.Instance.Config.MaxCarryGold)
-            GoldPoints = (uint)ServerSetup.Instance.Config.MaxCarryGold;
+        if (trader.GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
+            trader.GoldPoints = ServerSetup.Instance.Config.MaxCarryGold;
+        if (GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
+            GoldPoints = ServerSetup.Instance.Config.MaxCarryGold;
 
         trader.Client.SendAttributes(StatUpdateType.ExpGold);
         Client.SendAttributes(StatUpdateType.ExpGold);
@@ -455,7 +456,7 @@ public sealed class Aisling : Player, IAisling
         };
 
         SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
-        
+
         return this;
     }
 
@@ -481,10 +482,10 @@ public sealed class Aisling : Player, IAisling
         GoldPoints += goldB;
         trader.GoldPoints += goldA;
 
-        if (trader.GoldPoints > (uint)ServerSetup.Instance.Config.MaxCarryGold)
-            trader.GoldPoints = (uint)ServerSetup.Instance.Config.MaxCarryGold;
-        if (GoldPoints > (uint)ServerSetup.Instance.Config.MaxCarryGold)
-            GoldPoints = (uint)ServerSetup.Instance.Config.MaxCarryGold;
+        if (trader.GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
+            trader.GoldPoints = ServerSetup.Instance.Config.MaxCarryGold;
+        if (GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
+            GoldPoints = ServerSetup.Instance.Config.MaxCarryGold;
 
         exchangeA.Items.Clear();
         exchangeB.Items.Clear();

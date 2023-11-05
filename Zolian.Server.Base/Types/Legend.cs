@@ -1,4 +1,8 @@
-﻿using Dapper;
+﻿using Chaos.Common.Definitions;
+using Chaos.Common.Identity;
+
+using Dapper;
+
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -8,10 +12,9 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
-using System.Data;
-using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
 using ServiceStack;
+
+using System.Data;
 
 namespace Darkages.Types;
 

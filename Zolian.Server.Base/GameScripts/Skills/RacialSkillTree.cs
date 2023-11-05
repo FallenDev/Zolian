@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Networking.Entities.Server;
+
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
@@ -343,7 +344,7 @@ public class Slash(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Slash";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, false, action);
@@ -2259,7 +2260,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, entity.Serial, 170));
         }
-        
+
         skill.LastUsedSkill = DateTime.UtcNow;
         _skillMethod.Train(client, skill);
     }

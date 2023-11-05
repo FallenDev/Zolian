@@ -22,10 +22,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -71,10 +71,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -135,10 +135,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Defender })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -184,10 +184,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Defender })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -248,10 +248,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Assassin })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -297,10 +297,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Assassin })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -361,10 +361,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Cleric })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -410,10 +410,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Cleric })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -474,10 +474,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Arcanus })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -523,10 +523,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Arcanus })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -587,10 +587,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Skill", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Monk })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
@@ -636,10 +636,10 @@ public class HalflingMeta : MetafileManager
         sClass6.Nodes.Add(new MetafileNode("Spell", ""));
 
         foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                 let prerequisites = v.Value.Prerequisites
-                 where prerequisites != null
-                 orderby prerequisites.ExpLevelRequired
-                 select v.Value)
+                                 let prerequisites = v.Value.Prerequisites
+                                 where prerequisites != null
+                                 orderby prerequisites.ExpLevelRequired
+                                 select v.Value)
         {
             if (template.Prerequisites is { RaceRequired: Race.Halfling } or { ClassRequired: Class.Berserker or Class.Peasant } or { SecondaryClassRequired: Class.Berserker or Class.DualBash or Class.Monk })
                 sClass1.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));

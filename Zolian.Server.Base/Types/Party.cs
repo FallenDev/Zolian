@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Darkages.Object;
 using Darkages.Sprites;
 
@@ -34,7 +35,7 @@ public class Party : ObjectManager
     }
 
     public List<Aisling> PartyMembers => GetObjects<Aisling>(null, sprite => sprite.GroupId == Id).Where(i => i != null).Distinct().ToList();
-    
+
     public static bool AddPartyMember(Aisling partyMember, Aisling playerToAdd)
     {
         if (playerToAdd == null) return false;
@@ -121,7 +122,7 @@ public class Party : ObjectManager
         foreach (var player in group.PartyMembers)
         {
             player.GroupId = 0;
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,"The party has now been disbanded.");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The party has now been disbanded.");
         }
     }
 

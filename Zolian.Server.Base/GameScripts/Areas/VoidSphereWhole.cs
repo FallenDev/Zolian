@@ -1,10 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-using Darkages.GameScripts.Affects;
+﻿using Darkages.GameScripts.Affects;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Darkages.GameScripts.Areas;
 

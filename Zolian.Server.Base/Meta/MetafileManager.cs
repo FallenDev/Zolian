@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
-using Darkages.Compression;
-using ServiceStack;
+﻿using Darkages.Compression;
 using Darkages.Models;
+
+using Newtonsoft.Json;
+
+using ServiceStack;
 
 namespace Darkages.Meta;
 
@@ -104,8 +106,8 @@ public class MetafileManager
     {
         var metaCollection = new MetafileCollection(short.MaxValue);
         metaCollection.AddRange(Metafiles.Where(file => !file.Name.Contains("SClass")));
-        metaCollection.AddRange(Metafiles.Where(meta => meta.Name.Equals("SClass1") || meta.Name.Equals("SClass2") || 
-                                                        meta.Name.Equals("SClass3") || meta.Name.Equals("SClass4") || 
+        metaCollection.AddRange(Metafiles.Where(meta => meta.Name.Equals("SClass1") || meta.Name.Equals("SClass2") ||
+                                                        meta.Name.Equals("SClass3") || meta.Name.Equals("SClass4") ||
                                                         meta.Name.Equals("SClass5") || meta.Name.Equals("SClass6")));
 
         return metaCollection;

@@ -77,7 +77,7 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                 client.CloseDialog();
 
                 #region Animation Show
-                
+
                 Task.Delay(350).ContinueWith(ct =>
                 {
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(50, null, Mundane.Serial));
@@ -112,7 +112,7 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                 });
 
                 #endregion
-                
+
                 client.Aisling.QuestManager.TagorDungeonAccess = true;
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"You can now access {{=qTagor Dungeon");
                 var legend = new Legend.LegendItem

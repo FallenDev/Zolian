@@ -1,15 +1,18 @@
 using Chaos.Common.Definitions;
 using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Packets;
-using Darkages.Sprites;
-using Darkages.Types;
-using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Meta;
-using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Darkages.Models;
+using Darkages.Sprites;
 using Darkages.Templates;
+using Darkages.Types;
+
 using System.Diagnostics;
+
+using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 
 namespace Darkages.Network.Client.Abstractions;
 

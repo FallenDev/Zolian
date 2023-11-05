@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
@@ -187,74 +188,74 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x11:
-            {
-                client.Aisling.Race = _chosenRace;
-
-                if (client.Aisling.Race != Race.UnDecided)
                 {
-                    switch (client.Aisling.Race)
-                    {
-                        case Race.Human:
-                            client.Aisling.BodyColor = 0;
-                            if (client.Aisling.RaceSkill is not null)
-                                RacialBonus.HumanSkill(client, client.Aisling.RaceSkill);
-                            if (client.Aisling.RaceSpell is not null)
-                                RacialBonus.HumanSpell(client, client.Aisling.RaceSpell);
-                            break;
-                        case Race.HalfElf:
-                            client.Aisling.BodyColor = 0;
-                            if (client.Aisling.RaceSkill is not null)
-                                RacialBonus.HalfElfSkill(client, client.Aisling.RaceSkill);
-                            if (client.Aisling.RaceSpell is not null)
-                                RacialBonus.HalfElfSpell(client, client.Aisling.RaceSpell);
-                            break;
-                        case Race.HighElf:
-                            client.Aisling.BodyColor = 1;
-                            RacialBonus.HighElf(client);
-                            break;
-                        case Race.DarkElf:
-                            client.Aisling.BodyColor = 6;
-                            RacialBonus.DarkElf(client);
-                            break;
-                        case Race.WoodElf:
-                            client.Aisling.BodyColor = 5;
-                            RacialBonus.WoodElf(client);
-                            break;
-                        case Race.Orc:
-                            client.Aisling.BodyColor = 3;
-                            RacialBonus.Orc(client);
-                            break;
-                        case Race.Dwarf:
-                            client.Aisling.BodyColor = 5;
-                            RacialBonus.Dwarf(client);
-                            break;
-                        case Race.Halfling:
-                            client.Aisling.BodyColor = 0;
-                            RacialBonus.Halfling(client);
-                            break;
-                        case Race.Dragonkin:
-                            RacialBonus.Dragonkin(client, _dragonkin);
-                            break;
-                        case Race.HalfBeast:
-                            client.Aisling.BodyColor = 2;
-                            RacialBonus.HalfBeast(client);
-                            break;
-                        case Race.Merfolk:
-                            client.Aisling.BodyColor = 7;
-                            RacialBonus.Merfolk(client);
-                            break;
-                    }
-                }
+                    client.Aisling.Race = _chosenRace;
 
-                client.SendOptionsDialog(Mundane, "*raises a hand towards you*");
-                Task.Delay(1000).ContinueWith(ct => { client.TransitionToMap(720, new Position(14, 15)); });
-                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
-                Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                client.CloseDialog();
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
-                Task.Delay(2000).ContinueWith(ct => { client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });
-            }
+                    if (client.Aisling.Race != Race.UnDecided)
+                    {
+                        switch (client.Aisling.Race)
+                        {
+                            case Race.Human:
+                                client.Aisling.BodyColor = 0;
+                                if (client.Aisling.RaceSkill is not null)
+                                    RacialBonus.HumanSkill(client, client.Aisling.RaceSkill);
+                                if (client.Aisling.RaceSpell is not null)
+                                    RacialBonus.HumanSpell(client, client.Aisling.RaceSpell);
+                                break;
+                            case Race.HalfElf:
+                                client.Aisling.BodyColor = 0;
+                                if (client.Aisling.RaceSkill is not null)
+                                    RacialBonus.HalfElfSkill(client, client.Aisling.RaceSkill);
+                                if (client.Aisling.RaceSpell is not null)
+                                    RacialBonus.HalfElfSpell(client, client.Aisling.RaceSpell);
+                                break;
+                            case Race.HighElf:
+                                client.Aisling.BodyColor = 1;
+                                RacialBonus.HighElf(client);
+                                break;
+                            case Race.DarkElf:
+                                client.Aisling.BodyColor = 6;
+                                RacialBonus.DarkElf(client);
+                                break;
+                            case Race.WoodElf:
+                                client.Aisling.BodyColor = 5;
+                                RacialBonus.WoodElf(client);
+                                break;
+                            case Race.Orc:
+                                client.Aisling.BodyColor = 3;
+                                RacialBonus.Orc(client);
+                                break;
+                            case Race.Dwarf:
+                                client.Aisling.BodyColor = 5;
+                                RacialBonus.Dwarf(client);
+                                break;
+                            case Race.Halfling:
+                                client.Aisling.BodyColor = 0;
+                                RacialBonus.Halfling(client);
+                                break;
+                            case Race.Dragonkin:
+                                RacialBonus.Dragonkin(client, _dragonkin);
+                                break;
+                            case Race.HalfBeast:
+                                client.Aisling.BodyColor = 2;
+                                RacialBonus.HalfBeast(client);
+                                break;
+                            case Race.Merfolk:
+                                client.Aisling.BodyColor = 7;
+                                RacialBonus.Merfolk(client);
+                                break;
+                        }
+                    }
+
+                    client.SendOptionsDialog(Mundane, "*raises a hand towards you*");
+                    Task.Delay(1000).ContinueWith(ct => { client.TransitionToMap(720, new Position(14, 15)); });
+                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                    Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                    client.CloseDialog();
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Was that a dream?");
+                    Task.Delay(2000).ContinueWith(ct => { client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou start to feel newly found powers surge within you"); });
+                }
                 return;
             case 0x12:
                 client.Aisling.RaceSkill = "Slash";
@@ -303,12 +304,12 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 client.SendServerMessage(ServerMessageType.ScrollWindow,
                     $"{{=aScroll between the various abilities below and chose one that matches the type of dragonkin blood that flows through you.\n" +
-                    $"{{=bRed{{=a: Fire Breath, and immunity to fire dmg.\n" + 
-                    $"{{=fBlue{{=a: Bubble Burst, and immunity to water dmg.\n" + 
-                    $"{{=dGreen{{=a: Earthly Delights, and immunity to earth dmg.\n" + 
-                    $"{{=mBlack{{=a: Poison Talon, and immunity to poison.\n" + 
-                    $"{{=uWhite{{=a: Icy Blast, and immunity to entice.\n" + 
-                    $"{{=sBrass{{=a: Silent Siren, and immunity to fire dmg.\n" + 
+                    $"{{=bRed{{=a: Fire Breath, and immunity to fire dmg.\n" +
+                    $"{{=fBlue{{=a: Bubble Burst, and immunity to water dmg.\n" +
+                    $"{{=dGreen{{=a: Earthly Delights, and immunity to earth dmg.\n" +
+                    $"{{=mBlack{{=a: Poison Talon, and immunity to poison.\n" +
+                    $"{{=uWhite{{=a: Icy Blast, and immunity to entice.\n" +
+                    $"{{=sBrass{{=a: Silent Siren, and immunity to fire dmg.\n" +
                     $"{{=sBronze{{=a: Toxic Breath, and immunity to wind dmg.\n" +
                     $"{{=sCopper{{=a: Vicious Roar, and immunity to earth dmg.\n" +
                     $"{{=cGold{{=a: Golden Lair, and immunity to void dmg.\n" +

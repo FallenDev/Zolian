@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Networking.Entities.Server;
+
 using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -45,7 +46,7 @@ public class Assail(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Assail";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -264,7 +265,7 @@ public class Onslaught(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Onslaught";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -483,7 +484,7 @@ public class ClobberX2(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Clobber x2";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -707,7 +708,7 @@ public class Wallop(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Wallop";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -817,7 +818,7 @@ public class Thrash(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Thrash";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -927,7 +928,7 @@ public class Punch(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Punch";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -1036,7 +1037,7 @@ public class DoublePunch(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Double Punch";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
@@ -1144,7 +1145,7 @@ public class Throw(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         aisling.ActionUsed = "Throw";
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
@@ -1216,8 +1217,8 @@ public class Throw(Skill skill) : SkillScript(skill)
 
             var animation = new AnimationArgs
             {
-                SourceId = (uint)sprite.Serial,
-                TargetId = (uint)_target.Serial,
+                SourceId = sprite.Serial,
+                TargetId = _target.Serial,
                 SourceAnimation = 10011,
                 TargetAnimation = 10011,
                 AnimationSpeed = 100
@@ -1808,7 +1809,7 @@ public class DualWield(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!skill.CanUse()) return;
-        
+
         if (sprite is Aisling aisling)
         {
             if (aisling.EquipmentManager.Equipment[3] != null)

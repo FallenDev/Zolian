@@ -1,8 +1,10 @@
-﻿using System.Numerics;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Darkages.Enums;
 using Darkages.Types;
+
+using System.Numerics;
 
 namespace Darkages.Sprites;
 

@@ -1,12 +1,12 @@
-﻿using System.Numerics;
-
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+
+using System.Numerics;
 
 namespace Darkages.Network.Components;
 

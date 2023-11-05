@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Data;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
@@ -13,6 +11,10 @@ using Darkages.Templates;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+
+using System.Collections.Concurrent;
+using System.ComponentModel;
+using System.Data;
 
 namespace Darkages.Types;
 

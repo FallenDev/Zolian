@@ -203,8 +203,8 @@ public class CroichArdCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Croich Cradh") ||
             target.HasDebuff("Croich Beag Cradh") ||
             target.HasDebuff("Ard Cradh") ||
-            target.HasDebuff("Mor Cradh") || 
-            target.HasDebuff("Cradh") || 
+            target.HasDebuff("Mor Cradh") ||
+            target.HasDebuff("Cradh") ||
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
@@ -252,8 +252,8 @@ public class CroichMorCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Cradh") ||
             target.HasDebuff("Croich Beag Cradh") ||
             target.HasDebuff("Ard Cradh") ||
-            target.HasDebuff("Mor Cradh") || 
-            target.HasDebuff("Cradh") || 
+            target.HasDebuff("Mor Cradh") ||
+            target.HasDebuff("Cradh") ||
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
@@ -301,8 +301,8 @@ public class CroichCradh(Spell spell) : SpellScript(spell)
 
         if (target.HasDebuff("Croich Beag Cradh") ||
             target.HasDebuff("Ard Cradh") ||
-            target.HasDebuff("Mor Cradh") || 
-            target.HasDebuff("Cradh") || 
+            target.HasDebuff("Mor Cradh") ||
+            target.HasDebuff("Cradh") ||
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
@@ -350,8 +350,8 @@ public class CroichBeagCradh(Spell spell) : SpellScript(spell)
         }
 
         if (target.HasDebuff("Ard Cradh") ||
-            target.HasDebuff("Mor Cradh") || 
-            target.HasDebuff("Cradh") || 
+            target.HasDebuff("Mor Cradh") ||
+            target.HasDebuff("Cradh") ||
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
@@ -937,9 +937,9 @@ public class Beag_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Ard Cradh") ||
             target.HasDebuff("Croich Mor Cradh") ||
             target.HasDebuff("Croich Cradh") ||
-            target.HasDebuff("Croich Beag Cradh") || 
-            target.HasDebuff("Ard Cradh") || 
-            target.HasDebuff("Mor Cradh") || 
+            target.HasDebuff("Croich Beag Cradh") ||
+            target.HasDebuff("Ard Cradh") ||
+            target.HasDebuff("Mor Cradh") ||
             target.HasDebuff("Cradh"))
         {
             if (sprite is not Aisling aisling) return;

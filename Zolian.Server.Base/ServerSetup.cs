@@ -1,9 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Frozen;
-using System.Net;
-using System.Reflection;
-
-using Darkages.CommandSystem;
+﻿using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Interfaces;
@@ -16,6 +11,11 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
+using System.Net;
+using System.Reflection;
 
 namespace Darkages;
 

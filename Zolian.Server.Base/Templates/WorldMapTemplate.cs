@@ -43,7 +43,7 @@ public static class WorldMapStorage
                 var areaY = (int)reader["AreaY"];
                 const int portalKey = 0;
                 var fieldNumber = (int)reader["FieldNumber"];
-                
+
                 var destination = new Warp
                 {
                     AreaID = areaId,
@@ -52,16 +52,16 @@ public static class WorldMapStorage
                 };
                 var worldPortal = new WorldPortal
                 {
-                     Destination = destination,
-                     DisplayName = displayName,
-                     PointX = (short)worldX,
-                     PointY = (short)worldY
+                    Destination = destination,
+                    DisplayName = displayName,
+                    PointX = (short)worldX,
+                    PointY = (short)worldY
                 };
 
                 temp.FieldNumber = fieldNumber;
                 temp.Portals.Add(worldPortal);
             }
-            
+
             ServerSetup.Instance.TempGlobalWorldMapTemplateCache[temp.FieldNumber] = temp;
 
             reader.Close();

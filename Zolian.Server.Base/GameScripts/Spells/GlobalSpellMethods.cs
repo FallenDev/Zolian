@@ -151,7 +151,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
-            
+
             if (target is Aisling targetPlayer)
             {
                 targetPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
@@ -371,7 +371,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
-            
+
             if (target is Aisling targetPlayer)
             {
                 targetPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));

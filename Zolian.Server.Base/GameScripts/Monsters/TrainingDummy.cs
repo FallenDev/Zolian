@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
@@ -36,7 +37,7 @@ public class TrainingDummy : MonsterScript
         {
             dmg = int.MaxValue;
         }
-            
+
         var convDmg = (int)dmg;
         _incoming.Damage = convDmg;
         var dmgDisplay = _incoming.Damage.ToString();

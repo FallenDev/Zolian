@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System.Security.Cryptography;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
@@ -16,6 +13,9 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 
 using ServiceStack;
+
+using System.Numerics;
+using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
 
@@ -2440,7 +2440,7 @@ public class Turret : MonsterScript
 
                 return;
             }
-            
+
             if (assail) Bash();
 
             if (Monster.CastEnabled)

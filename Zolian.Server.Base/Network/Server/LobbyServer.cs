@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Sockets;
-
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Networking.Abstractions;
@@ -17,13 +14,15 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 
 using Microsoft.AppCenter.Analytics;
-
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
 using RestSharp;
+
+using System.Net;
+using System.Net.Sockets;
 
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 

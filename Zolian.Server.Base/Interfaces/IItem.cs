@@ -1,10 +1,10 @@
-﻿using System.Collections.Concurrent;
-
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.Interfaces;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Extensions.Common;
 
 using Darkages.Enums;
@@ -10,6 +8,8 @@ using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.Types;
 
@@ -101,9 +101,9 @@ public class Inventory : ObjectManager, IInventory
     public void RemoveFromInventory(WorldClient client, Item item)
     {
         if (item == null) return;
-        
+
         // Remove item from cache prior to delete
-        if(ServerSetup.Instance.GlobalSqlItemCache.TryRemove(item.ItemId, out _))
+        if (ServerSetup.Instance.GlobalSqlItemCache.TryRemove(item.ItemId, out _))
         {
             if (Items.TryUpdate(item.InventorySlot, null, item))
                 client.SendRemoveItemFromPane(item.InventorySlot);
@@ -241,7 +241,7 @@ public class Inventory : ObjectManager, IInventory
             item1.ItemPane = Item.ItemPanes.Bank;
             if (client.Aisling.BankManager.Items.TryAdd(item1.ItemId, item1))
                 client.SendRemoveItemFromPane(item1.InventorySlot);
-            
+
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
             UpdatePlayersWeight(client);
             return (true, 0);

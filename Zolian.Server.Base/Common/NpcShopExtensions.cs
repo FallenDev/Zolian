@@ -433,7 +433,7 @@ public static class NpcShopExtensions
     public static long GetRepairCosts(WorldClient client)
     {
         double repairCosts = 0;
-        
+
         foreach (var inventory in client.Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable) && i.Value.Durability < i.Value.MaxDurability))
         {
             var item = inventory.Value;

@@ -1,11 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
@@ -19,6 +12,13 @@ using Darkages.ScriptingBase;
 using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
+
+using System.Collections.Concurrent;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 using MapFlags = Darkages.Enums.MapFlags;
 

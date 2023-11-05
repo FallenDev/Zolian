@@ -64,7 +64,7 @@ public class BufferWriter(Stream stream) : BinaryWriter(stream, Encoding.GetEnco
 
     public void WriteStringA(string value)
     {
-        var length = (byte) Encoding.GetByteCount(value);
+        var length = (byte)Encoding.GetByteCount(value);
 
         base.Write(length);
         base.Write(Encoding.GetBytes(value));
@@ -72,7 +72,7 @@ public class BufferWriter(Stream stream) : BinaryWriter(stream, Encoding.GetEnco
 
     public void WriteStringB(string value)
     {
-        var length = (ushort) Encoding.GetByteCount(value);
+        var length = (ushort)Encoding.GetByteCount(value);
 
         Write(length);
         base.Write(Encoding.GetBytes(value));

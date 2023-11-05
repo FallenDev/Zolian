@@ -1,13 +1,15 @@
-﻿using System.Numerics;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Numerics;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -199,7 +201,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         {
             damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
-        
+
         var mapCheck = damageDealingSprite.Map.ID;
         if (mapCheck != damageDealingSprite.Map.ID) return;
 
@@ -257,9 +259,9 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
                 if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
                 monster.ThrownBack = true;
             }
-            
+
             var success = _spellMethod.Execute(damageDealingSprite.Client, spell);
-            
+
             if (success)
             {
                 OnSuccess(damageDealingSprite, _target);
@@ -326,7 +328,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
         {
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
         }
-        
+
         target.ApplyElementalSpellDamage(aisling, dmg, randomEle, spell);
     }
 
@@ -429,7 +431,7 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
                 _spellMethod.SpellOnFailed(sprite, null, spell);
                 return;
             }
-            var rand= Random.Shared.Next(0, count);
+            var rand = Random.Shared.Next(0, count);
             var randTarget = targetList[rand];
             _spellMethod.ElementalOnUse(sprite, randTarget, spell, 90);
         }

@@ -13,6 +13,6 @@ public class WarpTemplate : Template
     public int ActivationMapId { get; set; }
     public List<Warp> Activations { get; set; }
     public int LevelRequired { get; set; }
-    public Warp To { get; set; } 
+    public Warp To { get; set; }
     public WarpType WarpType { get; set; }
 }

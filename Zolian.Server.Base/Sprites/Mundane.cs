@@ -1,8 +1,6 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-using System.Security.Cryptography;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Darkages.Common;
 using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
@@ -11,6 +9,10 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using ServiceStack;
+
+using System.Collections.Concurrent;
+using System.Numerics;
+using System.Security.Cryptography;
 
 namespace Darkages.Sprites;
 

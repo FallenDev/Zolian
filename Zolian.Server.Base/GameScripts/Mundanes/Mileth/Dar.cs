@@ -401,7 +401,7 @@ public class Dar : MundaneScript
                                 Category = "LDar1",
                                 Time = null,
                                 Color = LegendColor.White,
-                                Icon = (byte)9,
+                                Icon = 9,
                                 Value = ""
                             };
 
@@ -452,7 +452,7 @@ public class Dar : MundaneScript
                                 Category = "LDar2",
                                 Time = null,
                                 Color = LegendColor.White,
-                                Icon = (byte)9,
+                                Icon = 9,
                                 Value = ""
                             };
 

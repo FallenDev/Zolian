@@ -57,7 +57,7 @@ public class CommandParser
     /// </summary>
     public static CommandParser CreateNew(string prefix = "/")
     {
-        return new CommandParser {Prefix = prefix};
+        return new CommandParser { Prefix = prefix };
     }
 
     /// <summary>
@@ -251,7 +251,7 @@ public class CommandParser
             foreach (var alias in command.Aliases)
             {
                 if ((alias.StartsWith(input)) //If the user did not complete the command.
-                    //If the user missed the last few letters.
+                                              //If the user missed the last few letters.
                     || (input.Length >= 2 && alias.StartsWith(input.Substring(0, 2)))
                     //If user missed last few letters.
                     || (input.Length > 2 && alias.EndsWith(input.Substring(input.Length - 2, 2)))
@@ -329,7 +329,7 @@ public class CommandParser
                     if (comArgs.Arguments[i].Optional && comArgs.Arguments[i].Default == string.Empty)
                     {
                         if (i != comArgs.Arguments.Count - 1)
-                        {    
+                        {
                             continue;
                         }
                     }

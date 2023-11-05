@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -21,99 +22,99 @@ public class Consumable(Item item) : ItemScript(item)
         switch (Item.Template.Name)
         {
             case "Necra Scribblings":
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");
-                return;
-            }
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");
+                    return;
+                }
             case "Zolian Guide":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Captured Golden Floppy":
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
-                return;
-            }
+                {
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
+                    return;
+                }
             case "Raw Dark Iron":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Raw Copper":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Copper", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Copper", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Raw Obsidian":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Raw Cobalt Steel":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Raw Hybrasyl":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
             case "Raw Talos":
-            {
-                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                 {
-                    if (npc.Value.Scripts is null) continue;
-                    if (npc.Value.Scripts.TryGetValue("Talos", out var scriptObj))
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
-                        scriptObj.OnClick(client, npc.Value.Serial);
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Talos", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
                     }
+                    return;
                 }
-                return;
-            }
         }
 
         #endregion

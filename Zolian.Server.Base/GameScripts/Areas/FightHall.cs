@@ -1,9 +1,11 @@
-﻿using System.Collections.Concurrent;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Areas;
 

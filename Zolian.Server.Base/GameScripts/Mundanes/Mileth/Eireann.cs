@@ -8,6 +8,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.Mileth;
@@ -104,22 +105,22 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                 }
                 break;
             case 0x06:
-            {
-                var options = new List<Dialog.OptionsDataItem>();
-
-                switch (client.Aisling.Gender)
                 {
-                    case Gender.Male:
-                        options.Add(new(0x0A, "I have a lady friend whom might be able to help"));
-                        break;
-                    case Gender.Female:
-                        options.Add(new(0x0A, "A good friend of mine can help"));
-                        break;
-                }
+                    var options = new List<Dialog.OptionsDataItem>();
 
-                options.Add(new(0x09, "I'm sorry for their loss"));
-                client.SendOptionsDialog(Mundane, "I have a friend who is grieving the lost of their loved one. They died tragically in the last great goblin war.", options.ToArray());
-            }
+                    switch (client.Aisling.Gender)
+                    {
+                        case Gender.Male:
+                            options.Add(new(0x0A, "I have a lady friend whom might be able to help"));
+                            break;
+                        case Gender.Female:
+                            options.Add(new(0x0A, "A good friend of mine can help"));
+                            break;
+                    }
+
+                    options.Add(new(0x09, "I'm sorry for their loss"));
+                    client.SendOptionsDialog(Mundane, "I have a friend who is grieving the lost of their loved one. They died tragically in the last great goblin war.", options.ToArray());
+                }
                 break;
             case 0x07:
                 {

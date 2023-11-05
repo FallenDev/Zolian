@@ -12,7 +12,7 @@ public abstract class AreaScript(Area area) : IScriptBase
     public WorldServerTimer Timer { get; set; }
 
     public abstract void Update(TimeSpan elapsedTime);
-        
+
     public virtual void OnMapEnter(WorldClient client) { }
     public virtual void OnMapExit(WorldClient client) { }
     public virtual void OnMapClick(WorldClient client, int x, int y) { }

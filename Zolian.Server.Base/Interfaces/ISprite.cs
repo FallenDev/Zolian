@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
-
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace Darkages.Interfaces;
 

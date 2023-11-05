@@ -1294,7 +1294,7 @@ public class Beag_Suain(Skill skill) : SkillScript(skill)
 
             _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, skill);
         }
-        
+
         _skillMethod.OnSuccess(_target, aisling, skill, 0, false, action);
     }
 
@@ -1486,7 +1486,7 @@ public class Charge(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         aisling.ActionUsed = "Charge";
-        
+
         foreach (var i in _enemyList.Where(i => i.Attackable))
         {
             if (i != _target) continue;
@@ -1669,7 +1669,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(aisling);
             var debuff = new DebuffRend();
 
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
@@ -1808,7 +1808,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(sprite);
             var debuff = new DebuffRend();
 
-            if (!_target.HasDebuff(debuff.Name)) 
+            if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);

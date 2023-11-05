@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
+
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
@@ -48,7 +49,7 @@ public class Death
                 {
                     obj.Durability = 0;
                 }
-                
+
                 obj.Tarnished = true;
             }
 

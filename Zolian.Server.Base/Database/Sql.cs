@@ -1,6 +1,8 @@
-﻿using System.Data;
-using Darkages.Interfaces;
+﻿using Darkages.Interfaces;
+
 using Microsoft.Data.SqlClient;
+
+using System.Data;
 
 namespace Darkages.Database;
 

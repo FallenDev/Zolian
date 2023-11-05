@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -15,7 +16,7 @@ public class Shield(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
-            
+
         var i = aisling.EquipmentManager.Equipment[1]?.Slot;
         if (i != null)
         {
@@ -85,7 +86,7 @@ public class Shield(Item item) : ItemScript(item)
         }
 
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
-        {    
+        {
             client.Aisling.WeaponImg = ushort.MinValue;
             client.Aisling.ShieldImg = (byte)Item.Template.Image;
         }

@@ -1,6 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
@@ -9,7 +8,11 @@ using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
+
 using ServiceStack;
+
+using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Darkages.Sprites;
 
@@ -94,12 +97,12 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             Target = target;
             return;
         }
-        
+
         TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true));
-        
+
         if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.IsEmpty()) return;
         if (aisling.GroupParty == null) return;
-        
+
         foreach (var member in aisling.GroupParty.PartyMembers.Where(member => member != null))
         {
             var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);

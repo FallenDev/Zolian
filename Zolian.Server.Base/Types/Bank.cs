@@ -1,8 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
+
 using Darkages.Interfaces;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.Types;
 

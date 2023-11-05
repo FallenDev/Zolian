@@ -1,8 +1,8 @@
-﻿using System.Globalization;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 
 using Darkages.Network.Server;
+
+using System.Globalization;
 
 namespace Darkages.Network.Components;
 

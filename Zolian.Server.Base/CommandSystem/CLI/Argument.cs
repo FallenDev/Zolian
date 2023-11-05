@@ -353,13 +353,13 @@ public class Argument : IArguable
             //Interal rule that will always return true, for default rule
             AlwaysTrue = new ValidationRule(string.Empty, s => true);
 
-            Integer = new ValidationRule("Number", delegate(string s)
+            Integer = new ValidationRule("Number", delegate (string s)
             {
                 int result;
                 return int.TryParse(s, out result);
             });
 
-            Double = new ValidationRule("Number", delegate(string s)
+            Double = new ValidationRule("Number", delegate (string s)
             {
                 double result;
                 return double.TryParse(s, out result);
@@ -369,7 +369,7 @@ public class Argument : IArguable
 
             AlphaNumerical = new ValidationRule("Alphanumeric string", s => AlphaNumericRegex.IsMatch(s));
 
-            IP = new ValidationRule("IP Address", delegate(string s)
+            IP = new ValidationRule("IP Address", delegate (string s)
             {
                 IPAddress ip;
                 var valid = !string.IsNullOrEmpty(s) && IPAddress.TryParse(s, out ip);

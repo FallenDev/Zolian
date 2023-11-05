@@ -50,27 +50,27 @@ public class TempleOfVoid(WorldServer server, Mundane mundane) : MundaneScript(s
         switch (responseID)
         {
             case 1:
-            {
-                var rand = Generator.RandNumGen100();
-
-                switch (rand)
                 {
-                    case >= 50:
-                        client.TransitionToMap(14757, new Position(17, 58));
-                        break;
-                    default:
-                        client.TransitionToMap(14757, new Position(18, 58));
-                        break;
-                }
+                    var rand = Generator.RandNumGen100();
 
-                client.SendAnimation(262, null, client.Aisling.Serial);
-                break;
-            }
+                    switch (rand)
+                    {
+                        case >= 50:
+                            client.TransitionToMap(14757, new Position(17, 58));
+                            break;
+                        default:
+                            client.TransitionToMap(14757, new Position(18, 58));
+                            break;
+                    }
+
+                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    break;
+                }
             case 2:
-            {
-                client.CloseDialog();
-                break;
-            }
+                {
+                    client.CloseDialog();
+                    break;
+                }
         }
     }
 }

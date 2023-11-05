@@ -1,9 +1,9 @@
-﻿using System.Numerics;
-
-using Darkages.Object;
+﻿using Darkages.Object;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
+
+using System.Numerics;
 
 namespace Darkages.Types;
 

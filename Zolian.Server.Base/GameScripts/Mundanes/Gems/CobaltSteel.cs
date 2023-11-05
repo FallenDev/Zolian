@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -56,27 +57,27 @@ public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(se
         switch (responseID)
         {
             case 1:
-            {
-                var options = new List<Dialog.OptionsDataItem>
+                {
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x05, "Proceed"),
                     new (0x04, "{=q<- Back")
                 };
 
-                client.SendOptionsDialog(Mundane, "This process will attempt to refine the raw material.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "This process will attempt to refine the raw material.", options.ToArray());
+                    break;
+                }
             case 2:
-            {
-                var options = new List<Dialog.OptionsDataItem>
+                {
+                    var options = new List<Dialog.OptionsDataItem>
                 {
                     new (0x06, "Proceed"),
                     new (0x04, "{=q<- Back")
                 };
 
-                client.SendOptionsDialog(Mundane, "This process will reduce the raw material to its basic form.", options.ToArray());
-                break;
-            }
+                    client.SendOptionsDialog(Mundane, "This process will reduce the raw material to its basic form.", options.ToArray());
+                    break;
+                }
             case 3:
                 client.CloseDialog();
                 break;
@@ -107,7 +108,7 @@ public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(se
 
     private static bool RefineNode()
     {
-        var tryRefine  = Generator.RandomNumPercentGen();
+        var tryRefine = Generator.RandomNumPercentGen();
 
         return tryRefine switch
         {

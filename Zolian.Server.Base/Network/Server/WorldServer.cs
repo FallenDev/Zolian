@@ -1,9 +1,3 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
-using System.Numerics;
-
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
@@ -40,6 +34,12 @@ using Newtonsoft.Json;
 using RestSharp;
 
 using ServiceStack;
+
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+using System.Numerics;
 
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
@@ -2371,7 +2371,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                             if (amount > 0)
                             {
-                                localClient.Aisling.GoldPoints -= (long)amount;
+                                localClient.Aisling.GoldPoints -= amount;
                                 localClient.Aisling.Exchange.Gold = (uint)amount;
                                 localClient.SendAttributes(StatUpdateType.ExpGold);
                                 localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);

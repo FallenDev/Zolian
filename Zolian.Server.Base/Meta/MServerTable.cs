@@ -1,8 +1,8 @@
-﻿using System.Xml.Serialization;
-
-using Darkages.Compression;
+﻿using Darkages.Compression;
 using Darkages.IO;
 using Darkages.Models;
+
+using System.Xml.Serialization;
 
 namespace Darkages.Meta;
 

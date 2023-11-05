@@ -1,4 +1,5 @@
 ﻿using Chaos.Common.Definitions;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -7,6 +8,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.Tutorial;
@@ -53,8 +55,8 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             switch (responseID)
             {
                 case 33:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        var options = new List<Dialog.OptionsDataItem>
                     {
                         new (0x01, "Berserker"),
                         new (0x02, "Defender"),
@@ -64,9 +66,9 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                         new (0x06, "Monk")
                     };
 
-                    client.SendOptionsDialog(Mundane, "Which will you be?", options.ToArray());
-                    break;
-                }
+                        client.SendOptionsDialog(Mundane, "Which will you be?", options.ToArray());
+                        break;
+                    }
                 case 34:
                     client.SendOptionsDialog(Mundane, "Come back when you're ready to decide.");
                     break;
@@ -80,41 +82,41 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             switch (pathEnum)
             {
                 case BaseClass.Berserker:
-                {
-                    client.Aisling.Path = Class.Berserker;
-                    Berzerker(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Berserker;
+                        Berzerker(client);
+                        break;
+                    }
                 case BaseClass.Defender:
-                {
-                    client.Aisling.Path = Class.Defender;
-                    Defender(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Defender;
+                        Defender(client);
+                        break;
+                    }
                 case BaseClass.Monk:
-                {
-                    client.Aisling.Path = Class.Monk;
-                    Monk(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Monk;
+                        Monk(client);
+                        break;
+                    }
                 case BaseClass.Assassin:
-                {
-                    client.Aisling.Path = Class.Assassin;
-                    Assassin(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Assassin;
+                        Assassin(client);
+                        break;
+                    }
                 case BaseClass.Cleric:
-                {
-                    client.Aisling.Path = Class.Cleric;
-                    Cleric(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Cleric;
+                        Cleric(client);
+                        break;
+                    }
                 case BaseClass.Arcanus:
-                {
-                    client.Aisling.Path = Class.Arcanus;
-                    Arcanus(client);
-                    break;
-                }
+                    {
+                        client.Aisling.Path = Class.Arcanus;
+                        Arcanus(client);
+                        break;
+                    }
             }
 
             var path = ClassStrings.ClassValue(client.Aisling.Path);
@@ -165,7 +167,8 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         client.LoadEquipment();
         client.SendAttributes(StatUpdateType.Primary);
         client.UpdateDisplay();
-        await Task.Delay(500).ContinueWith(ct => {
+        await Task.Delay(500).ContinueWith(ct =>
+        {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "You wake from your slumber.. music begins to fill the air.");
         });
         client.TransitionToMap(137, new Position(1, 4));

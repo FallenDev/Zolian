@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -12,6 +10,8 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using ServiceStack;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Mundanes.Mileth;
 

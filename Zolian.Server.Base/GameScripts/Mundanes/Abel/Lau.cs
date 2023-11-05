@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-using Chaos.Common.Definitions;
+﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -10,6 +8,8 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
+
+using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Mundanes.Abel;
 

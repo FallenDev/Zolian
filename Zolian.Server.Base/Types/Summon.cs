@@ -75,33 +75,33 @@ public abstract class Summon(WorldClient client) : ObjectManager, IEphermeral
         switch (template)
         {
             case MonsterTemplate monsterTemplate:
-            {
-                for (var i = 0; i < count; i++)
                 {
-                    //Share similar attributes as the summoner.
-                    monsterTemplate.Level = (ushort)(client.Aisling.ExpLevel + 3);
-                    monsterTemplate.LootType = LootQualifer.None;
-                    monsterTemplate.DefenseElement = client.Aisling.DefenseElement;
-                    monsterTemplate.OffenseElement = client.Aisling.OffenseElement;
-                    monsterTemplate.SkillScripts = new List<string>(client.Aisling.SkillBook.Skills.Where(n => n.Value != null).Select(n => n.Value.Template.ScriptName).ToList());
-
-                    var monster = Monster.Create(monsterTemplate, client.Aisling.Map);
-
-                    monster.SummonerId = client.Aisling.Serial;
-                    monster.X = client.Aisling.LastPosition.X;
-                    monster.Y = client.Aisling.LastPosition.Y;
-                    monster.CurrentMapId = client.Aisling.CurrentMapId;
-
-                    lock (Spawns)
+                    for (var i = 0; i < count; i++)
                     {
-                        Spawns.Add((client.Aisling.Username, monster));
+                        //Share similar attributes as the summoner.
+                        monsterTemplate.Level = (ushort)(client.Aisling.ExpLevel + 3);
+                        monsterTemplate.LootType = LootQualifer.None;
+                        monsterTemplate.DefenseElement = client.Aisling.DefenseElement;
+                        monsterTemplate.OffenseElement = client.Aisling.OffenseElement;
+                        monsterTemplate.SkillScripts = new List<string>(client.Aisling.SkillBook.Skills.Where(n => n.Value != null).Select(n => n.Value.Template.ScriptName).ToList());
+
+                        var monster = Monster.Create(monsterTemplate, client.Aisling.Map);
+
+                        monster.SummonerId = client.Aisling.Serial;
+                        monster.X = client.Aisling.LastPosition.X;
+                        monster.Y = client.Aisling.LastPosition.Y;
+                        monster.CurrentMapId = client.Aisling.CurrentMapId;
+
+                        lock (Spawns)
+                        {
+                            Spawns.Add((client.Aisling.Username, monster));
+                        }
+
+                        AddObject(monster);
                     }
 
-                    AddObject(monster);
+                    break;
                 }
-
-                break;
-            }
         }
     }
 
