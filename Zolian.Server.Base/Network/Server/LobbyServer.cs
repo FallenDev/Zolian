@@ -23,7 +23,7 @@ using RestSharp;
 
 using System.Net;
 using System.Net.Sockets;
-
+using JetBrains.Annotations;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 
 namespace Darkages.Network.Server;
@@ -34,6 +34,7 @@ namespace Darkages.Network.Server;
 ///     -> OnVersion (Checks version of client)
 ///     -> OnServerTableRequest (Sends server table)
 /// </summary>
+[UsedImplicitly]
 public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
 {
     private readonly IClientFactory<LobbyClient> _clientProvider;

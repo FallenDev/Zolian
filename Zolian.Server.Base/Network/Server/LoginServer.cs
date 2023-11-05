@@ -30,13 +30,14 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-
+using JetBrains.Annotations;
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 
 namespace Darkages.Network.Server;
 
+[UsedImplicitly]
 public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginClient>
 {
     private readonly IClientFactory<LoginClient> _clientProvider;

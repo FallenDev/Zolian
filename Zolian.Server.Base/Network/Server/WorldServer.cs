@@ -40,7 +40,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
-
+using JetBrains.Annotations;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
@@ -49,6 +49,7 @@ using Stat = Chaos.Common.Definitions.Stat;
 
 namespace Darkages.Network.Server;
 
+[UsedImplicitly]
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> _clientProvider;
