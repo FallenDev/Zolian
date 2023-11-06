@@ -56,8 +56,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
     private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
-    private const string GameMasterIpA = "75.226.159.140";
-    private const string GameMasterIpB = "24.137.144.53";
+    private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
+    private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
     public readonly ObjectService ObjectFactory = new();

@@ -53,6 +53,7 @@ using RestPosition = Chaos.Common.Definitions.RestPosition;
 
 namespace Darkages.Network.Client
 {
+    [UsedImplicitly]
     public class WorldClient : SocketClientBase, IWorldClient
     {
         private readonly IWorldServer<WorldClient> Server;

@@ -16,9 +16,10 @@ using System.Net.Sockets;
 
 namespace Darkages.Network.Client
 {
+    [UsedImplicitly]
     public class LobbyClient([NotNull] ILobbyServer<LobbyClient> server, [NotNull] Socket socket,
             [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull][ItemNotNull] ILogger<SocketClientBase> logger)
+            [NotNull] ILogger<SocketClientBase> logger)
         : SocketClientBase(socket, crypto, packetSerializer, logger), ILobbyClient
     {
         protected override ValueTask HandlePacketAsync(Span<byte> span)

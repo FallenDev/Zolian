@@ -45,6 +45,8 @@ public class ServerSetup : IServerContext
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
+    public string GmA { get; set; }
+    public string GmB { get; set; }
     public string InternalAddress { get; set; }
 
     // Templates
@@ -89,6 +91,8 @@ public class ServerSetup : IServerContext
         KeyCode = ServerOptions.Value.KeyCode;
         Unlock = ServerOptions.Value.Unlock;
         InternalAddress = ServerOptions.Value.InternalIp;
+        GmA = ServerOptions.Value.GmA;
+        GmB = ServerOptions.Value.GmB;
     }
 
     public static void Logger(string logMessage, LogLevel logLevel = LogLevel.Information)
