@@ -61,4 +61,6 @@ public class BarrenLord(WorldServer server, Mundane mundane) : MundaneScript(ser
         Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, null, client.Aisling.Serial)); });
         client.CloseDialog();
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

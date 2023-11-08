@@ -202,4 +202,6 @@ public class BlackMarket(WorldServer server, Mundane mundane) : MundaneScript(se
             OnResponse(client, 0x500, item.InventorySlot.ToString());
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

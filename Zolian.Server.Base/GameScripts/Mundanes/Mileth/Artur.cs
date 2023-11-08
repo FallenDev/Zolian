@@ -34,46 +34,49 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
             client.SendOptionsDialog(Mundane, "You look more than capable.. but I wonder", options.ToArray());
         }
-        else switch (client.Aisling.QuestManager.ArtursGift)
+        else
+        {
+            switch (client.Aisling.QuestManager.ArtursGift)
             {
                 case 1:
-                    {
-                        var options = new List<Dialog.OptionsDataItem>
                 {
-                    new(0x06, "I found a strange lexicon."),
-                    new(0x07, "I haven't found one yet..")
-                };
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x06, "I found a strange lexicon."),
+                        new(0x07, "I haven't found one yet..")
+                    };
 
-                        client.SendOptionsDialog(Mundane, "So you've found a replica of Chadul's lexicon? Let me have a look.", options.ToArray());
-                        break;
-                    }
+                    client.SendOptionsDialog(Mundane,
+                        "So you've found a replica of Chadul's lexicon? Let me have a look.", options.ToArray());
+                    break;
+                }
                 case 2:
-                    {
-                        var options = new List<Dialog.OptionsDataItem>
                 {
-                    new(0x08, "So what do you have?")
-                };
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x08, "So what do you have?")
+                    };
 
-                        client.SendOptionsDialog(Mundane, "One moment. ~Ard Naomh Sgiath Spion Meas~!", options.ToArray());
-                        break;
-                    }
+                    client.SendOptionsDialog(Mundane, "One moment. ~Ard Naomh Sgiath Spion Meas~!", options.ToArray());
+                    break;
+                }
                 case 3:
-                    {
-                        client.SendOptionsDialog(Mundane, "Proceed to the {=qHall of Souls {=anear the edge of town.");
-                        break;
-                    }
-                default:
-                    {
-                        var options = new List<Dialog.OptionsDataItem>
                 {
-                    new (0x03, "Alright.")
-                };
+                    client.SendOptionsDialog(Mundane, "Proceed to the {=qHall of Souls {=anear the edge of town.");
+                    break;
+                }
+                default:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x03, "Alright.")
+                    };
 
-                        client.SendOptionsDialog(Mundane, "You lack strength nor have the insight desired.", options.ToArray());
-                        break;
-                    }
+                    client.SendOptionsDialog(Mundane, "You lack strength nor have the insight desired.", options.ToArray());
+                    break;
+                }
             }
-
+        }
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)
@@ -392,4 +395,6 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

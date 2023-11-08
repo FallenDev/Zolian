@@ -268,4 +268,6 @@ public class Gowther : MundaneScript
                 #endregion
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

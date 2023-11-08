@@ -57,7 +57,7 @@ public class ToL : AreaScript
         }
     }
 
-    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
     public override void OnGossip(WorldClient client, string message) { }
 

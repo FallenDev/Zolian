@@ -264,4 +264,6 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

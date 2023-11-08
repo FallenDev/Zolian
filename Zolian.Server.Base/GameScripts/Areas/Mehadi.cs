@@ -39,6 +39,7 @@ public class Mehadi : AreaScript
         if (client == null) return;
         if (client.Aisling.QuestManager.SwampAccess) return;
         if (client.Aisling.Map.ID == 3071) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
         {

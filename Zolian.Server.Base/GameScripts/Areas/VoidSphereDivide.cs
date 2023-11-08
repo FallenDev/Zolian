@@ -22,6 +22,8 @@ public class VoidSphereDivide : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (vectorMap.X is > 15 and < 21)
         {
             var debuff1 = new DebuffReaping();

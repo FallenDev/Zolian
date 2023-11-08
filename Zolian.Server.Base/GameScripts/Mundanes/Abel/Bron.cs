@@ -10,18 +10,16 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Rionnag;
+namespace Darkages.GameScripts.Mundanes.Abel;
 
-[Script("Gilath")]
-public class Gilath : MundaneScript
+[Script("Bron")]
+public class Bron : MundaneScript
 {
     private readonly List<SkillTemplate> _skillList;
-    private readonly List<SpellTemplate> _spellList;
 
-    public Gilath(WorldServer server, Mundane mundane) : base(server, mundane)
+    public Bron(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
-        _spellList = ObtainSpellList();
     }
 
     public override void OnClick(WorldClient client, uint serial)
@@ -34,28 +32,22 @@ public class Gilath : MundaneScript
     {
         base.TopMenu(client);
 
-        var options = new List<Dialog.OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>
+        {
+            new(0x0017, "Gear & Goods")
+        };
 
         if (_skillList.Count > 0)
         {
             options.Add(new(0x0016, "Show Available Skills"));
         }
 
-        if (_spellList.Count > 0)
-        {
-            options.Add(new(0x0010, "Show Available Spells"));
-        }
-
         options.Add(new(0x02, "Forget Skill"));
-        options.Add(new(0x0011, "Forget Spell"));
-        options.Add(new(0x0017, "Inventory"));
-        options.Add(new(0x0018, "Sell"));
-
 
         client.SendOptionsDialog(Mundane,
             client.Aisling.Stage <= ClassStage.Master
-                ? "You dare to even look at me?"
-                : "Listen well, for not many can survive what I have to teach", options.ToArray());
+                ? "Thrust until you hit bone."
+                : "Ahh, what can I do for you?", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)
@@ -199,113 +191,16 @@ public class Gilath : MundaneScript
 
             #endregion
 
-            #region Spells
-
-            case 0x0010:
-                {
-                    var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
-                    var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                                                                                || i.Prerequisites.ClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                                                                                || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.Path)
-                                                                                || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
-                                                                                || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
-                                                                                || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
-
-                    newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
-
-                    if (newSpells.Count > 0)
-                    {
-                        client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x0012, newSpells);
-                    }
-                    else
-                    {
-                        client.CloseDialog();
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I have nothing left to teach you, for now.");
-                    }
-
-                    break;
-                }
-            case 0x0011:
-                {
-                    client.SendForgetSpells(Mundane, "The mind is a complex place, sometimes we need to declutter. \nBe warned, This cannot be undone.", 0x0800);
-                    break;
-                }
-            case 0x0012:
-                {
-                    client.SendOptionsDialog(Mundane, "Are you sure you want to learn the secret of " + args + "? \nLet me test if you're ready.", args,
-                        new Dialog.OptionsDataItem(0x0015, $"What does {args} do?"),
-                        new Dialog.OptionsDataItem(0x0013, "Learn"),
-                        new Dialog.OptionsDataItem(0x0010, "No, thank you."));
-                    break;
-                }
-            case 0x0013:
-                {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-
-                    var conditions = subject.Prerequisites.IsMet(client.Aisling, (msg, result) =>
-                    {
-                        if (!result)
-                        {
-                            client.SendOptionsDialog(Mundane, msg, subject.Name);
-                        }
-                    });
-
-                    if (conditions)
-                    {
-                        client.SendOptionsDialog(Mundane, "Have you brought what is required?",
-                            subject.Name,
-                            new Dialog.OptionsDataItem(0x0014, "Yes."),
-                            new Dialog.OptionsDataItem(0x0010, "I'll come back later."));
-                    }
-
-                    break;
-                }
-            case 0x0014:
-                {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-                    client.LearnSpell(Mundane, subject, "Always expand your knowledge, Aisling.");
-
-                    break;
-                }
-            case 0x0015:
-                {
-                    var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
-                    if (subject == null) return;
-
-                    client.SendOptionsDialog(Mundane,
-                        $"{args} - {(string.IsNullOrEmpty(subject.Description) ? "No more information is available." : subject.Description)}" + "\n" + subject.Prerequisites,
-                        subject.Name,
-                        new Dialog.OptionsDataItem(0x0013, "Yes"),
-                        new Dialog.OptionsDataItem(0x0010, "No"));
-
-                    break;
-                }
-            case 0x0800:
-                {
-                    int.TryParse(args, out var idx);
-
-                    if (idx is < 0 or > byte.MaxValue)
-                    {
-                        client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not sense this spell within you any longer.");
-                        client.CloseDialog();
-                    }
-
-                    client.Aisling.SpellBook.Remove(client, (byte)idx);
-                    client.LoadSpellBook();
-
-                    client.SendForgetSpells(Mundane, "It is gone, Shall we cleanse more?\nRemember, This cannot be undone.", 0x0800);
-                    break;
-                }
-
-            #endregion
-
             case 0x0017:
-                client.SendItemShopDialog(Mundane, "Various magical items, take a look", NpcShopExtensions.BuyFromStoreInventory(Mundane));
+                client.SendItemShopDialog(Mundane, "Artifacts I found down here, take a look", NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 break;
             case 0x0018:
-                client.SendOptionsDialog(Mundane, "I have no need for worldly trinkets");
+                var options = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x21, "Where is it?"),
+                    new (0x22, "What is it?")
+                };
+                client.SendOptionsDialog(Mundane, "Ah, yes, the Evermore. What of it?", options.ToArray());
                 break;
             case 0x19:
                 {
@@ -336,12 +231,12 @@ public class Gilath : MundaneScript
                             client.SendAttributes(StatUpdateType.Primary);
                             client.SendAttributes(StatUpdateType.ExpGold);
                             client.PendingBuySessions = null;
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you mortal");
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cThank you");
                             TopMenu(client);
                         }
                         else
                         {
-                            client.SendOptionsDialog(Mundane, "Leave, less you wish to be a dog");
+                            client.SendOptionsDialog(Mundane, "Don't try to con a con");
                             client.PendingBuySessions = null;
                         }
                     }
@@ -353,13 +248,48 @@ public class Gilath : MundaneScript
                     client.SendOptionsDialog(Mundane, ServerSetup.Instance.Config.MerchantCancelMessage);
                 }
                 break;
+            case 0x21:
+                client.SendOptionsDialog(Mundane, "You're in it, or at least. The entrance.");
+                break;
+            case 0x22:
+                var options2 = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x23, "How exactly was it formed?")
+                };
+                client.SendOptionsDialog(Mundane, "It's an expansive cavern that stretches all the way to Rionnag", options2.ToArray());
+                break;
+            case 0x23:
+                var options3 = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x24, "Yes, I'm interested")
+                };
+                client.SendOptionsDialog(Mundane, "Now yer asking too many questions! But I'll give into the curious mind. The Assassins guild built these caverns as a way to travel unnoticed. Interested in learning more?", options3.ToArray());
+                break;
+            case 0x24:
+                if (client.Aisling.QuestManager.AssassinsGuildReputation <= 0)
+                {
+                    client.Aisling.QuestManager.RionnagReputation++;
+                    client.Aisling.QuestManager.AssassinsGuildReputation++;
+                }
+
+                client.SendOptionsDialog(Mundane, "Great! Seek out an old seer near the ruins of Dubhaim");
+                break;
         }
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
     {
-        client.SendOptionsDialog(Mundane, "I have no need for worldly trinkets");
+        client.SendOptionsDialog(Mundane, "I do not have the coin");
     }
 
-    public override void OnGossip(WorldClient client, string message) { }
+    public override void OnGossip(WorldClient client, string message)
+    {
+        if (!message.Contains("evermore", StringComparison.InvariantCultureIgnoreCase)) return;
+        var options = new List<Dialog.OptionsDataItem>
+        {
+            new(0x0018, "Yes")
+        };
+
+        client.SendOptionsDialog(Mundane, "*Glares* Did you say Evermore?", options.ToArray());
+    }
 }

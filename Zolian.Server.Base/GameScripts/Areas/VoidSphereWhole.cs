@@ -22,6 +22,8 @@ public class VoidSphereWhole : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();
         debuff.OnApplied(client.Aisling, debuff);

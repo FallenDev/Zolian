@@ -89,4 +89,6 @@ public class GurgidLeadbelly(WorldServer server, Mundane mundane) : MundaneScrip
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

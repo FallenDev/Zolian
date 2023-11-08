@@ -24,6 +24,8 @@ public class NecroEntrance : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         switch (newLocation.X)
         {
             case 5 when newLocation.Y == 0:

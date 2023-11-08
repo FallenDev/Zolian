@@ -390,4 +390,6 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                 break;
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

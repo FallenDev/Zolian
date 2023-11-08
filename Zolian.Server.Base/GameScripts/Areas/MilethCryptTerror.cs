@@ -53,6 +53,8 @@ public class MilethCryptTerror : AreaScript
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (newLocation.X == 1 && newLocation.Y == 19 && client.Aisling.QuestManager.CryptTerror && !client.Aisling.QuestManager.CryptTerrorSlayed)
         {
             if (client.Aisling.HasKilled("Crypt Terror", 1))

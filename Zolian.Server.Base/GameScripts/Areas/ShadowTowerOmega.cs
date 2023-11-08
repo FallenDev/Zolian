@@ -26,6 +26,8 @@ public class ShadowTowerOmega : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob34", out var boss);
         var mobsOnMap = client.Aisling.MonstersOnMap();
         if (!mobsOnMap.IsNullOrEmpty()) return;

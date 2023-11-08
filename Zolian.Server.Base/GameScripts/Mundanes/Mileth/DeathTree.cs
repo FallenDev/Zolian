@@ -132,4 +132,6 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                 break;
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

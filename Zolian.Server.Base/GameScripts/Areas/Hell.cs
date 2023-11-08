@@ -48,6 +48,8 @@ public class Hell : AreaScript
             _animate = false;
     }
 
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
     private void HandleMapAnimations(TimeSpan elapsedTime)
     {
         var a = AnimTimer.Update(elapsedTime);

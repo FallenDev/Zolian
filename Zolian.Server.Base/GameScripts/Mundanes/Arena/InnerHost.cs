@@ -236,4 +236,6 @@ public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(serv
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

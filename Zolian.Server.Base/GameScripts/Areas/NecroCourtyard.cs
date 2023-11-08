@@ -29,6 +29,8 @@ public class NecroCourtyard : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (ReflexCheck(client.Aisling)) return;
         _debuff1 = new DebuffArdPoison();
         _debuff2 = new DebuffDecay();

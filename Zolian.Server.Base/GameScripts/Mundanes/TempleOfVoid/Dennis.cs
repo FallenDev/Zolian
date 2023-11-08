@@ -73,4 +73,6 @@ public class Dennis(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

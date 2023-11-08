@@ -115,4 +115,6 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

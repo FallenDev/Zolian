@@ -842,4 +842,6 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
         Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
         client.LoadSpellBook();
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

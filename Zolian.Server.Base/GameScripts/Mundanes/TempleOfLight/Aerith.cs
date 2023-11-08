@@ -126,4 +126,6 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

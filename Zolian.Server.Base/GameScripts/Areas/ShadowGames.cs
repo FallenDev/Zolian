@@ -24,6 +24,8 @@ public class ShadowGames : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob33", out var boss1);
         ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob32", out var boss2);
 

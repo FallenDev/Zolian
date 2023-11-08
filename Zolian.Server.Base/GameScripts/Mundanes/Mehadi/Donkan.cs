@@ -93,4 +93,6 @@ public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

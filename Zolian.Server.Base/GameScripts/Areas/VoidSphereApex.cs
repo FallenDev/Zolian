@@ -24,6 +24,7 @@ public class VoidSphereApex : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         if (vectorMap is { Y: 3, X: 32 or 33 or 34 })
         {

@@ -77,6 +77,8 @@ public class Intro : AreaScript
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         if (_givenClothes) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female

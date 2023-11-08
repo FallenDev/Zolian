@@ -126,4 +126,6 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 }
         }
     }
+
+    public override void OnGossip(WorldClient client, string message) { }
 }

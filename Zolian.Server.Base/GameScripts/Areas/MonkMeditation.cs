@@ -25,6 +25,8 @@ public class MonkMeditation : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+
         if (client.Aisling.Path != Class.Monk && client.Aisling.PastClass != Class.Monk) return;
         switch (client.Aisling.QuestManager.BeltDegree)
         {
