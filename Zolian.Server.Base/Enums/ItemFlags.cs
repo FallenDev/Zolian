@@ -94,9 +94,19 @@ public enum LootQualifer
     Table = 1 << 2,
     Event = 1 << 3,
     Gold = 1 << 5,
+    LootGoblinG = 1 << 6,
+    LootGoblinY = 1 << 7,
+    LootGoblinP = 1 << 8,
+    LootGoblinO = 1 << 9,
+    LootGoblinR = 1 << 10,
     None = 256,
 
-    RandomGold = Random | Gold
+    RandomGold = Random | Gold,
+    LootG = LootGoblinG | Gold,
+    LootY = LootGoblinY | Gold,
+    LootP = LootGoblinP | Gold,
+    LootO = LootGoblinO | Gold,
+    LootR = LootGoblinR | Gold,
 }
 
 public enum MoneySprites : short

@@ -93,7 +93,8 @@ public enum MoodQualifer
     Aggressive = 1 << 1,
     Unpredicable = 1 << 2,
     Neutral = 1 << 3,
-    VeryAggressive = 1 << 4
+    VeryAggressive = 1 << 4,
+    Avoidance = 1 << 5
 }
 
 public static class MonsterExtensions

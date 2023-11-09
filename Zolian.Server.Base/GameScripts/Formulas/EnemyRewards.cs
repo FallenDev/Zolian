@@ -249,6 +249,15 @@ public class EnemyRewards : RewardScript
         if (!_monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold)) return;
 
         var sum = (uint)Random.Shared.Next(_monster.Template.Level * 13, _monster.Template.Level * 200);
+        
+        if (_monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinG) ||
+            _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinY) ||
+            _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinP) ||
+            _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinO) ||
+            _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinR))
+        {
+            sum *= (uint)_monster.Template.LootType;
+        }
 
         if (sum > 0)
             Money.Create(_monster, sum, new Position(_monster.Pos.X, _monster.Pos.Y));

@@ -152,8 +152,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -736,8 +735,7 @@ public class WeakCommon : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -1185,6 +1183,80 @@ public class WeakCommon : MonsterScript
     }
 
     #endregion
+}
+
+[Script("Loot Goblin")]
+public class LootGoblin : MonsterScript
+{
+
+    public LootGoblin(Monster monster, Area map) : base(monster, map)
+    {
+        Monster.MonsterBank = new List<Item>();
+    }
+
+    public override void Update(TimeSpan elapsedTime)
+    {
+        if (Monster is null) return;
+        if (!Monster.IsAlive) return;
+
+        try
+        {
+            if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
+
+            MonsterState(elapsedTime);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            Crashes.TrackError(e);
+        }
+    }
+
+    public override void OnClick(WorldClient client)
+    {
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}!!!!");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}!!!!");
+    }
+
+    public override void OnDeath(WorldClient client = null)
+    {
+        Monster.Remove();
+
+        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        {
+            item.Release(Monster, Monster.Position);
+            item.AddObject(item);
+
+            foreach (var player in item.AislingsNearby())
+            {
+                item.ShowTo(player);
+            }
+        }
+
+        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
+        DelObject(Monster);
+    }
+
+    public override void MonsterState(TimeSpan elapsedTime)
+    {
+        var walk = Monster.WalkTimer.Update(elapsedTime);
+        if (!Monster.WalkEnabled) return;
+        if (walk) Walk();
+    }
+
+    public override void OnItemDropped(WorldClient client, Item item)
+    {
+        if (item == null) return;
+        if (client == null) return;
+        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
+        Monster.MonsterBank.Add(item);
+    }
+
+    private void Walk()
+    {
+        if (Monster.CantMove) return;
+        Monster.Wander();
+    }
 }
 
 [Script("Self Destruct")]
@@ -1808,8 +1880,7 @@ public class AlertSummon : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -2403,8 +2474,7 @@ public class Turret : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -2808,8 +2878,7 @@ public class GeneralPirate : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -3405,8 +3474,7 @@ public class ShadowSight : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -3988,8 +4056,7 @@ public class WeakShadowSight : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -4589,8 +4656,7 @@ public class AosdaRemnant : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
@@ -5203,8 +5269,7 @@ public class DraconicOmega : MonsterScript
 
             if (sum > 0)
             {
-                if (Monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold))
-                    Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
             }
         }
 
