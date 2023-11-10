@@ -2229,3 +2229,111 @@ public class DivineThrust(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 }
+
+[Script("Tiger Palm")]
+public class TigerPalm(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
+            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = aisling.Serial
+        };
+
+        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, skill, action);
+            OnFailed(aisling);
+            return;
+        }
+
+        aisling.ActionUsed = "Tiger Palm";
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var action = new BodyAnimationArgs
+            {
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
+            };
+
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            _target = enemy;
+
+            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(sprite, skill, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        }
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + skill.Level;
+            dmg = client.Aisling.Wis * 4 + client.Aisling.Con * 4;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Wis * 4 + damageMonster.Con * 4;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}

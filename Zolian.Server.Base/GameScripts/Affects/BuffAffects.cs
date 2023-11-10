@@ -297,6 +297,41 @@ public class buff_clawfist : Buff
     }
 }
 
+public class buff_ninthGate : Buff
+{
+    public override byte Icon => 188;
+    public override int Length => 34;
+    public override string Name => "Ninth Gate Release";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYour blood begins to boil, your bones crack!");
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYour body is badly damaged... so drained");
+        aisling.CurrentHp = 100;
+        aisling.CurrentMp = 100;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, aisling.Serial));
+        DeleteBuff(aisling, buff);
+    }
+}
+
 public class buff_wingsOfProtect : Buff
 {
     public override byte Icon => 194;

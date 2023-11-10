@@ -131,7 +131,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var client = aisling.Client;
         aisling.UsedSkill(skill);
 
-        if (client.Aisling.IsInvisible && skill.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+        if (client.Aisling.IsInvisible && (skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.BreakInvisible) || skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both)))
         {
             if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
             {

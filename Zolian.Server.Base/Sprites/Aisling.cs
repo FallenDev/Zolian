@@ -396,14 +396,14 @@ public sealed class Aisling : Player, IAisling
                 {
                     if (info.Target != 0)
                     {
-                        if (Client.Aisling.IsInvisible && spell.Template.PostQualifiers is PostQualifier.BreakInvisible or PostQualifier.Both)
+                        if (IsInvisible && (spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.BreakInvisible) || spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both)))
                         {
-                            if (Client.Aisling.Buffs.TryRemove("Hide", out var hide))
+                            if (Buffs.TryRemove("Hide", out var hide))
                             {
                                 hide.OnEnded(Client.Aisling, hide);
                             }
 
-                            if (Client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
+                            if (Buffs.TryRemove("Shadowfade", out var shadowFade))
                             {
                                 shadowFade.OnEnded(Client.Aisling, shadowFade);
                             }
@@ -438,7 +438,7 @@ public sealed class Aisling : Player, IAisling
             Crashes.TrackError(e);
         }
 
-        Client.Aisling.IsCastingSpell = false;
+        IsCastingSpell = false;
         Client.SpellCastInfo = null;
     }
 

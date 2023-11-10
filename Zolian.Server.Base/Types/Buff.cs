@@ -63,6 +63,7 @@ public class Buff : IBuff
             "Gryphons Grace" => new buff_GryphonsGrace(),
             "Orcish Strength" => new buff_OrcishStrength(),
             "Feywild Nectar" => new buff_FeywildNectar(),
+            "Ninth Gate Released" => new buff_ninthGate(),
             _ => BuffSpell
         };
 

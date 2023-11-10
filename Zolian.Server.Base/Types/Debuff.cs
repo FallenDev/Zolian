@@ -58,6 +58,7 @@ public class Debuff : IDebuff
             "Beag Suain" => new DebuffBeagsuain(),
             "Entice" => new DebuffCharmed(),
             "Frozen" => new DebuffFrozen(),
+            "Adv Frozen" => new DebuffAdvFrozen(),
             "Halt" => new DebuffHalt(),
             "Sleep" => new DebuffSleep(),
             "Bleeding" => new DebuffBleeding(),

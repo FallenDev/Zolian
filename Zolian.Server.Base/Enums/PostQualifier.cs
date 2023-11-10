@@ -8,3 +8,8 @@ public enum PostQualifier
     None = 1 << 2,
     Both = BreakInvisible | IgnoreDefense
 }
+
+public static class PostQualifierExtensions
+{
+    public static bool QualifierFlagIsSet(this PostQualifier self, PostQualifier flag) => (self & flag) == flag;
+}

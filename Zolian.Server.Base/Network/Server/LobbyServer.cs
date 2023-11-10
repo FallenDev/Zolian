@@ -248,7 +248,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 {
                     case >= 5:
                         ServerSetup.Logger("---------Lobby-Server---------");
-                        var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
+                        var comment = $"{client.RemoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.Logger(comment, LogLevel.Warning);
                         ReportEndpoint(client, comment);
                         return true;

@@ -28,7 +28,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 {
     public bool Abyss;
     public Position LastPosition;
-    public int RelicFinder;
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly WorldServerTimer BuffAndDebuffTimer;
     private readonly Stopwatch _threatControl = new();
@@ -65,6 +64,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsSleeping => HasDebuff("Sleep");
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
+    public bool NinthGateReleased => HasBuff("Ninth Gate Release");
+    public bool Berserk => HasBuff("Berserker Rage");
 
     public bool CanSeeInvisible
     {
@@ -1033,101 +1034,99 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell)
     {
         var saved = source.OffenseElement;
-        {
-            source.OffenseElement = element;
-            if (this is Aisling aisling)
-            {
-                if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-            }
+        source.OffenseElement = element;
 
-            MagicApplyDamage(source, dmg, spell);
-            source.OffenseElement = saved;
+        if (this is Aisling aisling)
+        {
+            if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
         }
+
+        MagicApplyDamage(source, dmg, spell);
+        source.OffenseElement = saved;
     }
 
     public void ApplyElementalSkillDamage(Sprite source, long dmg, ElementManager.Element element, Skill skill)
     {
         var saved = source.OffenseElement;
-        {
-            source.OffenseElement = element;
-            if (this is Aisling aisling)
-            {
-                if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-                if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
-                {
-                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
-                    source.OffenseElement = saved;
-                    return;
-                }
-            }
 
-            ApplyDamage(source, dmg, skill);
-            source.OffenseElement = saved;
+        source.OffenseElement = element;
+        if (this is Aisling aisling)
+        {
+            if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
+            if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
+            {
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+                source.OffenseElement = saved;
+                return;
+            }
         }
+
+        ApplyDamage(source, dmg, skill);
+        source.OffenseElement = saved;
     }
 
     public void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false)
@@ -1174,6 +1173,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
         else
         {
+            if (skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.IgnoreDefense) ||
+                skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both))
+                forceTarget = true;
             if (!DamageTarget(damageDealingSprite, ref dmg, skill.Template.Sound, forceTarget)) return;
         }
 
@@ -1315,6 +1317,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
         else
         {
+            if (spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.IgnoreDefense) ||
+                spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both))
+                forceTarget = true;
             if (!MagicDamageTarget(damageDealingSprite, ref dmg, spell.Template.Sound, forceTarget)) return;
         }
 
@@ -1396,6 +1401,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg = LuckModifier(dmg);
         dmg = ComputeDmgFromAc(dmg);
+
+        if (damageDealingSprite.NinthGateReleased)
+            dmg *= 3;
+
         dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
         var convDmg = (int)dmg;
 

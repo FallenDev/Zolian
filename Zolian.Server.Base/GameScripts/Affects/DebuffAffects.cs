@@ -1600,6 +1600,63 @@ public class DebuffFrozen : Debuff
     }
 }
 
+public class DebuffAdvFrozen : Debuff
+{
+    public override byte Icon => 50;
+    public override int Length => 16;
+    public override string Name => "Adv Frozen";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(15, false));
+            InsertDebuff(aisling, debuff);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(15, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body is semi-perm frozen. Brrrrr...");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(123, false));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(40, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(123, false));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can move again");
+        DeleteDebuff(aisling, debuff);
+    }
+}
+
+
 public class DebuffSleep : Debuff
 {
     public override byte Icon => 90;

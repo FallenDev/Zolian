@@ -3495,7 +3495,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             client.Disconnect();
             ServerSetup.Logger("---------World-Server---------");
-            var comment = $"{client.RemoteIp} was blocked due to attempting security bypass";
+            var comment = $"{client.RemoteIp} has been blocked for violating security protocols through improper port access.";
             ServerSetup.Logger(comment, LogLevel.Warning);
             ReportEndpoint(client, comment);
             return;
@@ -3618,7 +3618,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     case >= 5:
                         ServerSetup.Logger("---------World-Server---------");
-                        var comment = $"{client.RemoteIp} was blocked with a score of {abuseConfidenceScore}";
+                        var comment = $"{client.RemoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.Logger(comment, LogLevel.Warning);
                         ReportEndpoint(client, comment);
                         return true;
