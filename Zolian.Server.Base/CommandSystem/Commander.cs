@@ -69,6 +69,12 @@ public static class Commander
         );
 
         ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Kill Player", "kill")
+            .SetAction(OnKillCommand)
+            .AddArgument(Argument.Create("who"))
+        );
+
+        ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Learn Spell", "spell")
             .SetAction(OnLearnSpell)
             .AddArgument(Argument.Create("name"))
@@ -248,6 +254,19 @@ public static class Commander
         if (player != null) player.Gender = (Gender)sResult;
         client.ClientRefreshed();
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
+    }
+
+    /// <summary>
+    /// InGame Usage : /kill "playerName"
+    /// </summary>
+    private static void OnKillCommand(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var who = args.FromName("who").Replace("\"", "");
+        if (string.IsNullOrEmpty(who)) return;
+        client.KillPlayer(who);
+        Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
     }
 
     /// <summary>

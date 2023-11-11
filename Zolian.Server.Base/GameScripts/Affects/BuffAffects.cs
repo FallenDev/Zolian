@@ -325,8 +325,12 @@ public class buff_ninthGate : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYour body is badly damaged... so drained");
-        aisling.CurrentHp = 100;
-        aisling.CurrentMp = 100;
+        if (aisling.CurrentHp > 100)
+            aisling.CurrentHp = 100;
+        if (aisling.CurrentMp > 100)
+            aisling.CurrentMp = 100;
+
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, aisling.Serial));
         DeleteBuff(aisling, buff);
     }

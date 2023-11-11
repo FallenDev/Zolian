@@ -1665,7 +1665,7 @@ public class NinthGate(Skill skill) : SkillScript(skill)
             _skillMethod.ApplyPhysicalBuff(aisling, buff);
         }
 
-        _skillMethod.OnSuccess(_target, aisling, skill, 0, false, action);
+        _skillMethod.OnSuccess(aisling, aisling, skill, 0, false, action);
     }
 
     public override void OnUse(Sprite sprite)

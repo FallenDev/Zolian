@@ -28,35 +28,45 @@ public class MonkMeditation : AreaScript
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         if (client.Aisling.Path != Class.Monk && client.Aisling.PastClass != Class.Monk) return;
-        var mundane = client.Aisling.MundanesNearby().First();
-        var script = mundane?.Scripts.Values.First();
-        if (script == null) return;
+        var monkNpc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value is { Name: "Sabonim Xi" });
+        if (monkNpc.Value == null) return;
+        var monkScript = monkNpc.Value.Scripts.First();
+        if (monkScript.Value == null) return;
+        var script = monkScript.Value;
 
         switch (client.Aisling.QuestManager.BeltDegree)
         {
             case "White":
-                script.OnResponse(client, 0x12, "Yellow");
+                if (vectorMap == new Vector2(5, 4))
+                    script.OnResponse(client, 0x12, "Yellow");
                 return;
             case "Yellow":
-                script.OnResponse(client, 0x13, "Orange");
+                if (vectorMap == new Vector2(13, 9))
+                    script.OnResponse(client, 0x13, "Orange");
                 return;
             case "Orange":
-                script.OnResponse(client, 0x14, "Green");
+                if (vectorMap == new Vector2(4, 11))
+                    script.OnResponse(client, 0x14, "Green");
                 return;
             case "Green":
-                script.OnResponse(client, 0x15, "Purple");
+                if (vectorMap == new Vector2(9, 3))
+                    script.OnResponse(client, 0x15, "Purple");
                 return;
             case "Purple":
-                script.OnResponse(client, 0x16, "Blue");
+                if (vectorMap == new Vector2(11, 12))
+                    script.OnResponse(client, 0x16, "Blue");
                 return;
             case "Blue":
-                script.OnResponse(client, 0x17, "Brown");
+                if (vectorMap == new Vector2(3, 7))
+                    script.OnResponse(client, 0x17, "Brown");
                 return;
             case "Brown":
-                script.OnResponse(client, 0x18, "Red");
+                if (vectorMap == new Vector2(12, 5))
+                    script.OnResponse(client, 0x18, "Red");
                 return;
             case "Red":
-                script.OnResponse(client, 0x19, "Black");
+                if (vectorMap == new Vector2(7, 13))
+                    script.OnResponse(client, 0x19, "Black");
                 return;
             case "":
             case "Black":

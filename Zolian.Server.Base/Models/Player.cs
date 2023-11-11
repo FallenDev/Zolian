@@ -148,4 +148,5 @@ public class Quests
     public bool TagorDungeonAccess { get; set; }
     public int Lau { get; set; }
     public string BeltDegree { get; set; }
+    public string BeltQuest { get; set; }
 }
