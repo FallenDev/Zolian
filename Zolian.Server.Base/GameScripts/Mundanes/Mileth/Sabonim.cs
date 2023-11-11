@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -144,6 +145,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Yellow";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -185,6 +187,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Orange";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -226,6 +229,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Green";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -267,6 +271,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Purple";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -308,6 +313,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Blue";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -349,6 +355,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Brown";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -390,6 +397,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Red";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
@@ -431,6 +439,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 {
                     client.Aisling.QuestManager.BeltDegree = "Black";
                     client.Aisling.QuestManager.BeltQuest = "";
+                    client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
                     client.SendOptionsDialog(Mundane, "Ah, you did well, very well. Talk to the Sabonim meditating in the woods to learn more.");
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);

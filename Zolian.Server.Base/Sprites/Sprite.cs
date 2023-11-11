@@ -55,8 +55,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
     public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
-    public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Dark Chain");
-    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
+    public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain");
+    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsCharmed => HasDebuff("Entice");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
@@ -841,9 +841,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return Direction == direction;
     }
 
-    private bool CanAttack(Sprite attackingPlayer, bool force = false)
+    private bool CanAttack(Sprite attackingPlayer)
     {
-        if (force) return false;
         if (this is not Monster monster) return false;
         if (monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _)) return true;
         if (monster.Template.BaseName == "Training Dummy") return true;
@@ -1362,7 +1361,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
-                if (!CanAttack(aisling, forced))
+                if (!CanAttack(aisling))
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
                     return false;
@@ -1439,7 +1438,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
-                if (!CanAttack(aisling, forced))
+                if (!CanAttack(aisling))
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantAttack}");
                     return false;
