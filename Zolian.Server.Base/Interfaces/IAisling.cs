@@ -42,6 +42,10 @@ public interface IAisling : ISprite
     EquipmentManager EquipmentManager { get; set; }
     Quests QuestManager { get; set; }
     List<int> DiscoveredMaps { get; set; }
+    int Styling { get; set; }
+    int Coloring { get; set; }
+    byte OldColor { get; set; }
+    byte OldStyle { get; set; }
     List<string> IgnoredList { get; set; }
     ConcurrentDictionary<string, string> ExplorePositions { get; set; }
     Vector2 DeathLocation { get; set; }

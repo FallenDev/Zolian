@@ -186,7 +186,7 @@ public class Inventory : ObjectManager, IInventory
             if (item.Stacks > 1)
             {
                 var weight = item.Template.CarryWeight * item.Stacks;
-                client.Aisling.CurrentWeight += weight;
+                client.Aisling.CurrentWeight += (short)weight;
             }
             else
             {

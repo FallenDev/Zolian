@@ -27,7 +27,7 @@ public class ThirdAcc(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.Accessory3Img = Item.Image;
+        client.Aisling.Accessory3Img = (short)Item.Image;
         client.Aisling.Accessory3Color = Item.Color;
     }
 
@@ -39,7 +39,7 @@ public class ThirdAcc(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.Accessory3Img = uint.MinValue;
-        client.Aisling.Accessory3Color = uint.MinValue;
+        client.Aisling.Accessory3Img = 0;
+        client.Aisling.Accessory3Color = 0;
     }
 }

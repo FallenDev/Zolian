@@ -28,7 +28,7 @@ public class Armor(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.Pants = (byte)(Item.Template.HasPants ? 1 : 0);
-        client.Aisling.ArmorImg = Item.Image;
+        client.Aisling.ArmorImg = (short)Item.Image;
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -40,6 +40,6 @@ public class Armor(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.Pants = byte.MinValue;
-        client.Aisling.ArmorImg = ushort.MinValue;
+        client.Aisling.ArmorImg = 0;
     }
 }

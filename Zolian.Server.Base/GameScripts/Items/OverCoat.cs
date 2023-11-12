@@ -27,7 +27,7 @@ public class OverCoat(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.OverCoatImg = Item.Image;
+        client.Aisling.OverCoatImg = (short)Item.Image;
         client.Aisling.OverCoatColor = Item.Color;
     }
 
@@ -39,7 +39,7 @@ public class OverCoat(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.OverCoatImg = uint.MinValue;
+        client.Aisling.OverCoatImg = 0;
         client.Aisling.OverCoatColor = byte.MinValue;
     }
 }

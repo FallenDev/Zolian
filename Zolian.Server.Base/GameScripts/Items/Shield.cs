@@ -87,7 +87,7 @@ public class Shield(Item item) : ItemScript(item)
 
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
         {
-            client.Aisling.WeaponImg = ushort.MinValue;
+            client.Aisling.WeaponImg = 0;
             client.Aisling.ShieldImg = (byte)Item.Template.Image;
         }
         else

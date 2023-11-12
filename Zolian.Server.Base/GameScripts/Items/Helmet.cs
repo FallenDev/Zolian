@@ -27,7 +27,7 @@ public class Helmet(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.HelmetImg = Item.Image;
+        client.Aisling.HelmetImg = (short)Item.Image;
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
@@ -38,6 +38,6 @@ public class Helmet(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.HelmetImg = ushort.MinValue;
+        client.Aisling.HelmetImg = 0;
     }
 }

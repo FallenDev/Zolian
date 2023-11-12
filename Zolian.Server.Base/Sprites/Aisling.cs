@@ -109,6 +109,10 @@ public sealed class Aisling : Player, IAisling
     public EquipmentManager EquipmentManager { get; set; }
     public Quests QuestManager { get; set; }
     public List<int> DiscoveredMaps { get; set; }
+    public int Styling { get; set; }
+    public int Coloring { get; set; }
+    public byte OldColor { get; set; }
+    public byte OldStyle { get; set; }
     public List<string> IgnoredList { get; set; }
     public ConcurrentDictionary<string, string> ExplorePositions { get; set; }
     public Vector2 DeathLocation { get; set; }

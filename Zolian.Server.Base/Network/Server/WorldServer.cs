@@ -1709,6 +1709,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.EquipmentManager.Client = client as WorldClient;
             client.Aisling.CurrentWeight = 0;
             client.Aisling.ActiveStatus = ActivityStatus.Awake;
+            client.Aisling.OldColor = client.Aisling.HairColor;
+            client.Aisling.OldStyle = client.Aisling.HairStyle;
 
             if (aisling.GameMaster)
             {
@@ -3517,7 +3519,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
-            await StorageManager.AislingBucket.QuickSave(client.Aisling);
+            await StorageManager.AislingBucket.AuxiliarySave(client.Aisling);
             ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
             return;
         }
@@ -3537,7 +3539,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.LoggedIn = false;
 
             // Save
-            await StorageManager.AislingBucket.QuickSave(client.Aisling);
+            await StorageManager.AislingBucket.AuxiliarySave(client.Aisling);
             await client.Save();
 
             // Cleanup

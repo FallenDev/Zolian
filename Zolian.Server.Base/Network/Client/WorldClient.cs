@@ -4332,7 +4332,7 @@ namespace Darkages.Network.Client
             if (player.ExpLevel >= 250)
                 player.StatPoints += 1;
             else
-                player.StatPoints += ServerSetup.Instance.Config.StatsPerLevel;
+                player.StatPoints += (short)ServerSetup.Instance.Config.StatsPerLevel;
 
             // Set vitality
             player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
@@ -4590,7 +4590,7 @@ namespace Darkages.Network.Client
 
                         if (value.WarpType != WarpType.World) continue;
                         if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
-                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = value.To.PortalKey;
+                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
 
                         var portal = new PortalSession();
                         portal.TransitionToMap(client);
@@ -4626,7 +4626,7 @@ namespace Darkages.Network.Client
 
                         if (value.WarpType != WarpType.World) continue;
                         if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
-                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = value.To.PortalKey;
+                        if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
 
                         var portal = new PortalSession();
                         portal.TransitionToMap(client);

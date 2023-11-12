@@ -8,7 +8,7 @@ public class Player : Sprite
     public DateTime Created { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
-    public int PasswordAttempts { get; set; }
+    public byte PasswordAttempts { get; set; }
     public bool Hacked { get; set; }
     public bool LoggedIn { get; set; }
     public DateTime LastLogged { get; set; }
@@ -29,10 +29,6 @@ public class Player : Sprite
     public Gender Gender { get; set; }
     public byte HairColor { get; set; }
     public byte HairStyle { get; set; }
-    public byte OldColor { get; set; }
-    public byte OldStyle { get; set; }
-    public int Styling { get; set; }
-    public int Coloring { get; set; }
     public byte NameColor { get; set; }
     public string ProfileMessage { get; set; }
     public string Nation { get; set; }
@@ -43,8 +39,8 @@ public class Player : Sprite
     public ushort MonsterForm { get; set; }
     public ActivityStatus ActiveStatus { get; set; }
     public AislingFlags Flags { get; set; }
-    public int CurrentWeight { get; set; }
-    public int World { get; set; }
+    public short CurrentWeight { get; set; }
+    public byte World { get; set; }
     public byte Lantern { get; set; }
     public RestPosition Resting { get; set; }
     public bool FireImmunity { get; set; }
@@ -64,31 +60,31 @@ public class Player : Sprite
     public bool Ranger { get; set; }
     public bool Knight { get; set; }
     public long GoldPoints { get; set; }
-    public int StatPoints { get; set; }
+    public short StatPoints { get; set; }
     public long GamePoints { get; set; }
     public long BankedGold { get; set; }
-    public uint ArmorImg { get; set; }
-    public uint HelmetImg { get; set; }
-    public uint ShieldImg { get; set; }
-    public uint WeaponImg { get; set; }
-    public uint BootsImg { get; set; }
-    public uint HeadAccessoryImg { get; set; }
-    public uint Accessory1Img { get; set; }
-    public uint Accessory2Img { get; set; }
-    public uint Accessory3Img { get; set; }
-    public uint Accessory1Color { get; set; }
-    public uint Accessory2Color { get; set; }
-    public uint Accessory3Color { get; set; }
+    public short ArmorImg { get; set; }
+    public short HelmetImg { get; set; }
+    public short ShieldImg { get; set; }
+    public short WeaponImg { get; set; }
+    public short BootsImg { get; set; }
+    public short HeadAccessoryImg { get; set; }
+    public short Accessory1Img { get; set; }
+    public short Accessory2Img { get; set; }
+    public short Accessory3Img { get; set; }
+    public byte Accessory1Color { get; set; }
+    public byte Accessory2Color { get; set; }
+    public byte Accessory3Color { get; set; }
     public byte BodyColor { get; set; }
     public byte BodySprite { get; set; }
     public byte FaceSprite { get; set; }
-    public uint OverCoatImg { get; set; }
+    public short OverCoatImg { get; set; }
     public byte BootColor { get; set; }
     public byte OverCoatColor { get; set; }
     public byte Pants { get; set; }
     public byte Aegis { get; set; }
     public byte Bleeding { get; set; }
-    public int Spikes { get; set; }
+    public byte Spikes { get; set; }
     public byte Rending { get; set; }
     public byte Reaping { get; set; }
     public byte Vampirism { get; set; }

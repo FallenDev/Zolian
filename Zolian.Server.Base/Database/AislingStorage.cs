@@ -5,6 +5,7 @@ using Dapper;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
@@ -107,7 +108,7 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
-    public async Task QuickSave(Aisling obj)
+    public async Task AuxiliarySave(Aisling obj)
     {
         if (obj == null) return;
         if (obj.Loading) return;
@@ -119,100 +120,12 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var connection = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuickSave", connection);
             SaveSkills(obj, connection);
             SaveSpells(obj, connection);
             SaveBuffs(obj, connection);
             SaveDebuffs(obj, connection);
             SaveItemsForPlayer(obj, connection);
-
-            #region Parameters
-
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
-            cmd.Parameters.Add("@X", SqlDbType.Int).Value = obj.X;
-            cmd.Parameters.Add("@Y", SqlDbType.Int).Value = obj.Y;
-            cmd.Parameters.Add("@CurrentMap", SqlDbType.Int).Value = obj.CurrentMapId;
-            cmd.Parameters.Add("@OffensePrimary", SqlDbType.VarChar).Value = obj.OffenseElement;
-            cmd.Parameters.Add("@DefensePrimary", SqlDbType.VarChar).Value = obj.DefenseElement;
-            cmd.Parameters.Add("@OffenseSecondary", SqlDbType.VarChar).Value = obj.SecondaryOffensiveElement;
-            cmd.Parameters.Add("@DefenseSecondary", SqlDbType.VarChar).Value = obj.SecondaryDefensiveElement;
-            cmd.Parameters.Add("@Direction", SqlDbType.Int).Value = obj.Direction;
-            cmd.Parameters.Add("@CurrentHp", SqlDbType.Int).Value = obj.CurrentHp;
-            cmd.Parameters.Add("@BaseHp", SqlDbType.Int).Value = obj.BaseHp;
-            cmd.Parameters.Add("@CurrentMp", SqlDbType.Int).Value = obj.CurrentMp;
-            cmd.Parameters.Add("@BaseMp", SqlDbType.Int).Value = obj.BaseMp;
-            cmd.Parameters.Add("@AC", SqlDbType.Int).Value = obj._ac;
-            cmd.Parameters.Add("@Regen", SqlDbType.Int).Value = obj._Regen;
-            cmd.Parameters.Add("@Dmg", SqlDbType.Int).Value = obj._Dmg;
-            cmd.Parameters.Add("@Hit", SqlDbType.Int).Value = obj._Hit;
-            cmd.Parameters.Add("@Mr", SqlDbType.Int).Value = obj._Mr;
-            cmd.Parameters.Add("@Str", SqlDbType.Int).Value = obj._Str;
-            cmd.Parameters.Add("@Int", SqlDbType.Int).Value = obj._Int;
-            cmd.Parameters.Add("@Wis", SqlDbType.Int).Value = obj._Wis;
-            cmd.Parameters.Add("@Con", SqlDbType.Int).Value = obj._Con;
-            cmd.Parameters.Add("@Dex", SqlDbType.Int).Value = obj._Dex;
-            cmd.Parameters.Add("@Luck", SqlDbType.Int).Value = obj._Luck;
-            cmd.Parameters.Add("@ABL", SqlDbType.SmallInt).Value = obj.AbpLevel;
-            cmd.Parameters.Add("@ABN", SqlDbType.Int).Value = obj.AbpNext;
-            cmd.Parameters.Add("@ABT", SqlDbType.Int).Value = obj.AbpTotal;
-            cmd.Parameters.Add("@EXPL", SqlDbType.SmallInt).Value = obj.ExpLevel;
-            cmd.Parameters.Add("@EXPN", SqlDbType.Int).Value = obj.ExpNext;
-            cmd.Parameters.Add("@EXPT", SqlDbType.Int).Value = obj.ExpTotal;
-            cmd.Parameters.Add("@Afflix", SqlDbType.VarChar).Value = obj.Afflictions;
-            cmd.Parameters.Add("@HairColor", SqlDbType.TinyInt).Value = obj.HairColor;
-            cmd.Parameters.Add("@HairStyle", SqlDbType.TinyInt).Value = obj.HairStyle;
-            cmd.Parameters.Add("@OldColor", SqlDbType.TinyInt).Value = obj.OldColor;
-            cmd.Parameters.Add("@OldStyle", SqlDbType.TinyInt).Value = obj.OldStyle;
-            cmd.Parameters.Add("@Animal", SqlDbType.VarChar).Value = obj.AnimalForm;
-            cmd.Parameters.Add("@Monster", SqlDbType.SmallInt).Value = obj.MonsterForm;
-            cmd.Parameters.Add("@Active", SqlDbType.VarChar).Value = obj.ActiveStatus;
-            cmd.Parameters.Add("@Flags", SqlDbType.VarChar).Value = obj.Flags;
-            cmd.Parameters.Add("@CurrentWeight", SqlDbType.Int).Value = obj.CurrentWeight;
-            cmd.Parameters.Add("@World", SqlDbType.Int).Value = obj.World;
-            cmd.Parameters.Add("@Lantern", SqlDbType.TinyInt).Value = obj.Lantern;
-            cmd.Parameters.Add("@Invisible", SqlDbType.Bit).Value = obj.IsInvisible;
-            cmd.Parameters.Add("@Resting", SqlDbType.VarChar).Value = obj.Resting;
-            cmd.Parameters.Add("@PartyStatus", SqlDbType.VarChar).Value = obj.PartyStatus;
-            cmd.Parameters.Add("@GoldPoints", SqlDbType.BigInt).Value = obj.GoldPoints;
-            cmd.Parameters.Add("@StatPoints", SqlDbType.Int).Value = obj.StatPoints;
-            cmd.Parameters.Add("@GamePoints", SqlDbType.BigInt).Value = obj.GamePoints;
-            cmd.Parameters.Add("@BankedGold", SqlDbType.BigInt).Value = obj.BankedGold;
-            cmd.Parameters.Add("@ArmorImg", SqlDbType.Int).Value = obj.ArmorImg;
-            cmd.Parameters.Add("@HelmetImg", SqlDbType.Int).Value = obj.HelmetImg;
-            cmd.Parameters.Add("@ShieldImg", SqlDbType.Int).Value = obj.ShieldImg;
-            cmd.Parameters.Add("@WeaponImg", SqlDbType.Int).Value = obj.WeaponImg;
-            cmd.Parameters.Add("@BootsImg", SqlDbType.Int).Value = obj.BootsImg;
-            cmd.Parameters.Add("@HeadAccessoryImg", SqlDbType.Int).Value = obj.HeadAccessoryImg;
-            cmd.Parameters.Add("@Accessory1Img", SqlDbType.Int).Value = obj.Accessory1Img;
-            cmd.Parameters.Add("@Accessory2Img", SqlDbType.Int).Value = obj.Accessory2Img;
-            cmd.Parameters.Add("@Accessory3Img", SqlDbType.Int).Value = obj.Accessory3Img;
-            cmd.Parameters.Add("@Accessory1Color", SqlDbType.Int).Value = obj.Accessory1Color;
-            cmd.Parameters.Add("@Accessory2Color", SqlDbType.Int).Value = obj.Accessory2Color;
-            cmd.Parameters.Add("@Accessory3Color", SqlDbType.Int).Value = obj.Accessory3Color;
-            cmd.Parameters.Add("@BodyColor", SqlDbType.TinyInt).Value = obj.BodyColor;
-            cmd.Parameters.Add("@BodySprite", SqlDbType.TinyInt).Value = obj.BodySprite;
-            cmd.Parameters.Add("@FaceSprite", SqlDbType.TinyInt).Value = obj.FaceSprite;
-            cmd.Parameters.Add("@OverCoatImg", SqlDbType.Int).Value = obj.OverCoatImg;
-            cmd.Parameters.Add("@BootColor", SqlDbType.TinyInt).Value = obj.BootColor;
-            cmd.Parameters.Add("@OverCoatColor", SqlDbType.TinyInt).Value = obj.OverCoatColor;
-            cmd.Parameters.Add("@Pants", SqlDbType.TinyInt).Value = obj.Pants;
-            cmd.Parameters.Add("@Aegis", SqlDbType.TinyInt).Value = obj.Aegis;
-            cmd.Parameters.Add("@Bleeding", SqlDbType.TinyInt).Value = obj.Bleeding;
-            cmd.Parameters.Add("@Spikes", SqlDbType.Int).Value = obj.Spikes;
-            cmd.Parameters.Add("@Rending", SqlDbType.TinyInt).Value = obj.Rending;
-            cmd.Parameters.Add("@Reaping", SqlDbType.TinyInt).Value = obj.Reaping;
-            cmd.Parameters.Add("@Vampirism", SqlDbType.TinyInt).Value = obj.Vampirism;
-            cmd.Parameters.Add("@Haste", SqlDbType.TinyInt).Value = obj.Haste;
-            cmd.Parameters.Add("@Gust", SqlDbType.TinyInt).Value = obj.Gust;
-            cmd.Parameters.Add("@Quake", SqlDbType.TinyInt).Value = obj.Quake;
-            cmd.Parameters.Add("@Rain", SqlDbType.TinyInt).Value = obj.Rain;
-            cmd.Parameters.Add("@Flame", SqlDbType.TinyInt).Value = obj.Flame;
-            cmd.Parameters.Add("@Dusk", SqlDbType.TinyInt).Value = obj.Dusk;
-            cmd.Parameters.Add("@Dawn", SqlDbType.TinyInt).Value = obj.Dawn;
-
-            #endregion
-
-            ExecuteAndCloseConnection(cmd, connection);
+            connection.Close();
         }
         catch (SqlException e)
         {
@@ -247,51 +160,152 @@ public record AislingStorage : Sql, IAislingStorage
         if (!continueLoad) return false;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
+        var dt = new DataTable();
+        var connection = ConnectToDatabase(ConnectionString);
+
+        #region DataTable
+
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Created", typeof(DateTime));
+        dt.Columns.Add("Username", typeof(string));
+        dt.Columns.Add("LoggedIn", typeof(bool));
+        dt.Columns.Add("LastLogged", typeof(DateTime));
+        dt.Columns.Add("X", typeof(byte));
+        dt.Columns.Add("Y", typeof(byte));
+        dt.Columns.Add("CurrentMapId", typeof(int));
+        dt.Columns.Add("OffenseElement", typeof(string));
+        dt.Columns.Add("DefenseElement", typeof(string));
+        dt.Columns.Add("SecondaryOffensiveElement", typeof(string));
+        dt.Columns.Add("SecondaryDefensiveElement", typeof(string));
+        dt.Columns.Add("Direction", typeof(byte));
+        dt.Columns.Add("CurrentHp", typeof(int));
+        dt.Columns.Add("BaseHp", typeof(int));
+        dt.Columns.Add("CurrentMp", typeof(int));
+        dt.Columns.Add("BaseMp", typeof(int));
+        dt.Columns.Add("_ac", typeof(short));
+        dt.Columns.Add("_Regen", typeof(short));
+        dt.Columns.Add("_Dmg", typeof(short));
+        dt.Columns.Add("_Hit", typeof(short));
+        dt.Columns.Add("_Mr", typeof(short));
+        dt.Columns.Add("_Str", typeof(short));
+        dt.Columns.Add("_Int", typeof(short));
+        dt.Columns.Add("_Wis", typeof(short));
+        dt.Columns.Add("_Con", typeof(short));
+        dt.Columns.Add("_Dex", typeof(short));
+        dt.Columns.Add("_Luck", typeof(short));
+        dt.Columns.Add("AbpLevel", typeof(int));
+        dt.Columns.Add("AbpNext", typeof(int));
+        dt.Columns.Add("AbpTotal", typeof(long));
+        dt.Columns.Add("ExpLevel", typeof(int));
+        dt.Columns.Add("ExpNext", typeof(int));
+        dt.Columns.Add("ExpTotal", typeof(long));
+        dt.Columns.Add("Stage", typeof(string));
+        dt.Columns.Add("JobClass", typeof(string));
+        dt.Columns.Add("Path", typeof(string));
+        dt.Columns.Add("PastClass", typeof(string));
+        dt.Columns.Add("Race", typeof(string));
+        dt.Columns.Add("Afflictions", typeof(string));
+        dt.Columns.Add("Gender", typeof(string));
+        dt.Columns.Add("HairColor", typeof(byte));
+        dt.Columns.Add("HairStyle", typeof(byte));
+        dt.Columns.Add("NameColor", typeof(byte));
+        dt.Columns.Add("ProfileMessage", typeof(string));
+        dt.Columns.Add("Nation", typeof(string));
+        dt.Columns.Add("Clan", typeof(string));
+        dt.Columns.Add("ClanRank", typeof(string));
+        dt.Columns.Add("ClanTitle", typeof(string));
+        dt.Columns.Add("AnimalForm", typeof(string));
+        dt.Columns.Add("MonsterForm", typeof(short));
+        dt.Columns.Add("ActiveStatus", typeof(string));
+        dt.Columns.Add("Flags", typeof(string));
+        dt.Columns.Add("CurrentWeight", typeof(short));
+        dt.Columns.Add("World", typeof(byte));
+        dt.Columns.Add("Lantern", typeof(byte));
+        dt.Columns.Add("Invisible", typeof(bool));
+        dt.Columns.Add("Resting", typeof(string));
+        dt.Columns.Add("FireImmunity", typeof(bool));
+        dt.Columns.Add("WaterImmunity", typeof(bool));
+        dt.Columns.Add("WindImmunity", typeof(bool));
+        dt.Columns.Add("EarthImmunity", typeof(bool));
+        dt.Columns.Add("LightImmunity", typeof(bool));
+        dt.Columns.Add("DarkImmunity", typeof(bool));
+        dt.Columns.Add("PoisonImmunity", typeof(bool));
+        dt.Columns.Add("EnticeImmunity", typeof(bool));
+        dt.Columns.Add("PartyStatus", typeof(string));
+        dt.Columns.Add("RaceSkill", typeof(string));
+        dt.Columns.Add("RaceSpell", typeof(string));
+        dt.Columns.Add("GameMaster", typeof(bool));
+        dt.Columns.Add("ArenaHost", typeof(bool));
+        dt.Columns.Add("Developer", typeof(bool));
+        dt.Columns.Add("Ranger", typeof(bool));
+        dt.Columns.Add("Knight", typeof(bool));
+        dt.Columns.Add("GoldPoints", typeof(long));
+        dt.Columns.Add("StatPoints", typeof(short));
+        dt.Columns.Add("GamePoints", typeof(long));
+        dt.Columns.Add("BankedGold", typeof(long));
+        dt.Columns.Add("ArmorImg", typeof(short));
+        dt.Columns.Add("HelmetImg", typeof(short));
+        dt.Columns.Add("ShieldImg", typeof(short));
+        dt.Columns.Add("WeaponImg", typeof(short));
+        dt.Columns.Add("BootsImg", typeof(short));
+        dt.Columns.Add("HeadAccessoryImg", typeof(short));
+        dt.Columns.Add("Accessory1Img", typeof(short));
+        dt.Columns.Add("Accessory2Img", typeof(short));
+        dt.Columns.Add("Accessory3Img", typeof(short));
+        dt.Columns.Add("Accessory1Color", typeof(byte));
+        dt.Columns.Add("Accessory2Color", typeof(byte));
+        dt.Columns.Add("Accessory3Color", typeof(byte));
+        dt.Columns.Add("BodyColor", typeof(byte));
+        dt.Columns.Add("BodySprite", typeof(byte));
+        dt.Columns.Add("FaceSprite", typeof(byte));
+        dt.Columns.Add("OverCoatImg", typeof(short));
+        dt.Columns.Add("BootColor", typeof(byte));
+        dt.Columns.Add("OverCoatColor", typeof(byte));
+        dt.Columns.Add("Pants", typeof(byte));
+        dt.Columns.Add("Aegis", typeof(byte));
+        dt.Columns.Add("Bleeding", typeof(byte));
+        dt.Columns.Add("Spikes", typeof(byte));
+        dt.Columns.Add("Rending", typeof(byte));
+        dt.Columns.Add("Reaping", typeof(byte));
+        dt.Columns.Add("Vampirism", typeof(byte));
+        dt.Columns.Add("Haste", typeof(byte));
+        dt.Columns.Add("Gust", typeof(byte));
+        dt.Columns.Add("Quake", typeof(byte));
+        dt.Columns.Add("Rain", typeof(byte));
+        dt.Columns.Add("Flame", typeof(byte));
+        dt.Columns.Add("Dusk", typeof(byte));
+        dt.Columns.Add("Dawn", typeof(byte));
+
+        #endregion
 
         try
         {
-            var connection = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerSave", connection);
-            var cmd2 = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuestSave", connection);
+            dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
+                obj.OffenseElement.ToString(), obj.DefenseElement.ToString(), obj.SecondaryOffensiveElement.ToString(),
+                obj.SecondaryDefensiveElement.ToString(), obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
+                obj._Regen, obj._Dmg, obj._Hit, obj._Mr, obj._Str, obj._Int, obj._Wis, obj._Con, obj._Dex, obj._Luck, obj.AbpLevel,
+                obj.AbpNext, obj.AbpTotal, obj.ExpLevel, obj.ExpNext, obj.ExpTotal, obj.Stage.ToString(), obj.JobClass.ToString(),
+                obj.Path.ToString(), obj.PastClass.ToString(), obj.Race.ToString(), obj.Afflictions.ToString(), obj.Gender.ToString(),
+                obj.HairColor, obj.HairStyle, obj.NameColor, obj.ProfileMessage, obj.Nation, obj.Clan, obj.ClanRank, obj.ClanTitle,
+                obj.AnimalForm.ToString(), obj.MonsterForm, obj.ActiveStatus.ToString(), obj.Flags.ToString(), obj.CurrentWeight, obj.World,
+                obj.Lantern, obj.IsInvisible, obj.Resting.ToString(), obj.FireImmunity, obj.WaterImmunity, obj.WindImmunity, obj.EarthImmunity,
+                obj.LightImmunity, obj.DarkImmunity, obj.PoisonImmunity, obj.EnticeImmunity, obj.PartyStatus.ToString(), obj.RaceSkill,
+                obj.RaceSpell, obj.GameMaster, obj.ArenaHost, obj.Developer, obj.Ranger, obj.Knight, obj.GoldPoints, obj.StatPoints, obj.GamePoints,
+                obj.BankedGold, obj.ArmorImg, obj.HelmetImg, obj.ShieldImg, obj.WeaponImg, obj.BootsImg, obj.HeadAccessoryImg, obj.Accessory1Img,
+                obj.Accessory2Img, obj.Accessory3Img, obj.Accessory1Color, obj.Accessory2Color, obj.Accessory3Color, obj.BodyColor, obj.BodySprite,
+                obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants, obj.Aegis, obj.Bleeding, obj.Spikes, obj.Rending,
+                obj.Reaping, obj.Vampirism, obj.Haste, obj.Gust, obj.Quake, obj.Rain, obj.Flame, obj.Dusk, obj.Dawn);
 
-            #region Parameters
-
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
-            cmd.Parameters.Add("@LoggedIn", SqlDbType.Bit).Value = obj.LoggedIn;
-            cmd.Parameters.Add("@LastLogged", SqlDbType.DateTime).Value = obj.LastLogged;
-            cmd.Parameters.Add("@Stage", SqlDbType.VarChar).Value = obj.Stage;
-            cmd.Parameters.Add("@JobClass", SqlDbType.VarChar).Value = obj.JobClass;
-            cmd.Parameters.Add("@Path", SqlDbType.VarChar).Value = obj.Path;
-            cmd.Parameters.Add("@PastClass", SqlDbType.VarChar).Value = obj.PastClass;
-            cmd.Parameters.Add("@Race", SqlDbType.VarChar).Value = obj.Race;
-            cmd.Parameters.Add("@Gender", SqlDbType.VarChar).Value = SpriteMaker.GenderValue(obj.Gender);
-            cmd.Parameters.Add("@NameColor", SqlDbType.TinyInt).Value = obj.NameColor;
-            cmd.Parameters.Add("@Profile", SqlDbType.VarChar).Value = obj.ProfileMessage ?? "";
-            cmd.Parameters.Add("@Nation", SqlDbType.VarChar).Value = obj.Nation;
-            cmd.Parameters.Add("@Clan", SqlDbType.VarChar).Value = obj.Clan ?? "";
-            cmd.Parameters.Add("@ClanRank", SqlDbType.VarChar).Value = obj.ClanRank ?? "";
-            cmd.Parameters.Add("@ClanTitle", SqlDbType.VarChar).Value = obj.ClanTitle ?? "";
-            cmd.Parameters.Add("@FireImm", SqlDbType.Bit).Value = obj.FireImmunity;
-            cmd.Parameters.Add("@WaterImm", SqlDbType.Bit).Value = obj.WaterImmunity;
-            cmd.Parameters.Add("@WindImm", SqlDbType.Bit).Value = obj.WindImmunity;
-            cmd.Parameters.Add("@EarthImm", SqlDbType.Bit).Value = obj.EarthImmunity;
-            cmd.Parameters.Add("@LightImm", SqlDbType.Bit).Value = obj.LightImmunity;
-            cmd.Parameters.Add("@DarkImm", SqlDbType.Bit).Value = obj.DarkImmunity;
-            cmd.Parameters.Add("@PoisonImm", SqlDbType.Bit).Value = obj.PoisonImmunity;
-            cmd.Parameters.Add("@EnticeImm", SqlDbType.Bit).Value = obj.EnticeImmunity;
-            cmd.Parameters.Add("@RaceSkill", SqlDbType.VarChar).Value = obj.RaceSkill ?? "";
-            cmd.Parameters.Add("@RaceSpell", SqlDbType.VarChar).Value = obj.RaceSpell ?? "";
-            cmd.Parameters.Add("@GM", SqlDbType.Bit).Value = obj.GameMaster;
-            cmd.Parameters.Add("@AH", SqlDbType.Bit).Value = obj.ArenaHost;
-            cmd.Parameters.Add("@DEV", SqlDbType.Bit).Value = obj.Developer;
-            cmd.Parameters.Add("@Ranger", SqlDbType.Bit).Value = obj.Ranger;
-            cmd.Parameters.Add("@Knight", SqlDbType.Bit).Value = obj.Knight;
-
-            #endregion
-
+            await using var cmd = new SqlCommand("PlayerSave", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Players", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.PlayerType";
             cmd.ExecuteNonQuery();
 
-            #region Parameters
+            var cmd2 = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuestSave", connection);
+
+            #region Quest Save
 
             cmd2.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)obj.Serial;
             cmd2.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = obj.QuestManager.TutorialCompleted;
@@ -343,19 +357,6 @@ public record AislingStorage : Sql, IAislingStorage
             #endregion
 
             ExecuteAndCloseConnection(cmd2, connection);
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Long)");
-                Crashes.TrackError(e);
-                return false;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {

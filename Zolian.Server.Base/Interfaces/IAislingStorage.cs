@@ -14,7 +14,7 @@ public interface IAislingStorage
     /// <summary>
     /// Save method for properties that change often
     /// </summary>
-    Task QuickSave(Aisling obj);
+    Task AuxiliarySave(Aisling obj);
     /// <summary>
     /// Save method used to store properties that rarely change
     /// </summary>

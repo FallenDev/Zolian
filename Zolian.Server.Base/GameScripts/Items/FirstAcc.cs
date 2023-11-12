@@ -27,7 +27,7 @@ public class FirstAcc(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.Accessory1Img = Item.Image;
+        client.Aisling.Accessory1Img = (short)Item.Image;
         client.Aisling.Accessory1Color = Item.Color;
 
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
@@ -43,8 +43,8 @@ public class FirstAcc(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.Accessory1Img = uint.MinValue;
-        client.Aisling.Accessory1Color = uint.MinValue;
+        client.Aisling.Accessory1Img = 0;
+        client.Aisling.Accessory1Color = 0;
 
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
         aisling.SecondaryOffensiveElement = ElementManager.Element.None;

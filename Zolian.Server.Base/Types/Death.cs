@@ -22,7 +22,6 @@ public class Death
         player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
         player.CurrentWeight = 0;
         player.Client.GiveScar();
-        _ = StorageManager.AislingBucket.QuickSave(player);
     }
 
     private void ReapInventory(Aisling player)

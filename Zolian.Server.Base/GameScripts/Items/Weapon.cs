@@ -133,7 +133,7 @@ public class Weapon(Item item) : ItemScript(item)
         var offHandImage = aisling.EquipmentManager.Equipment[3]?.Item.Template.OffHandImage;
 
         if (templateImage != null)
-            client.Aisling.WeaponImg = (ushort)templateImage;
+            client.Aisling.WeaponImg = (short)templateImage;
         if (offHandImage != 0 && slot == 3)
             client.Aisling.ShieldImg = (byte)Item.Template.OffHandImage;
 
@@ -151,21 +151,21 @@ public class Weapon(Item item) : ItemScript(item)
 
         if (aisling.EquipmentManager.Equipment[1] == null && aisling.EquipmentManager.Equipment[3] == null)
         {
-            client.Aisling.WeaponImg = ushort.MinValue;
-            client.Aisling.ShieldImg = ushort.MinValue;
+            client.Aisling.WeaponImg = 0;
+            client.Aisling.ShieldImg = 0;
         }
 
         switch (slot)
         {
             case 1:
-                client.Aisling.WeaponImg = ushort.MinValue;
+                client.Aisling.WeaponImg = 0;
                 break;
             case 3 when aisling.EquipmentManager.Equipment[1] == null:
-                client.Aisling.WeaponImg = ushort.MinValue;
-                client.Aisling.ShieldImg = ushort.MinValue;
+                client.Aisling.WeaponImg = 0;
+                client.Aisling.ShieldImg = 0;
                 break;
             case 3:
-                client.Aisling.ShieldImg = ushort.MinValue;
+                client.Aisling.ShieldImg = 0;
                 break;
         }
 
