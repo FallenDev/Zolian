@@ -57,6 +57,7 @@ DROP PROCEDURE [dbo].[ItemUpsert]
 GO
 
 DROP TYPE dbo.PlayerType
+DROP TYPE dbo.QuestType
 DROP TYPE dbo.ItemType
 DROP TYPE dbo.SkillType
 DROP TYPE dbo.SpellType
@@ -427,6 +428,57 @@ CREATE TYPE dbo.PlayerType AS TABLE
 	[Dawn] TINYINT
 );
 
+CREATE TYPE dbo.QuestType AS TABLE
+(
+    Serial BIGINT,
+    TutorialCompleted BIT,
+    BetaReset BIT,
+    ArtursGift INT,
+    CamilleGreetingComplete BIT,
+    ConnPotions BIT,
+    CryptTerror BIT,
+    CryptTerrorSlayed BIT,
+    Dar INT,
+    DarItem VARCHAR (20),
+    DrunkenHabit BIT,
+    EternalLove BIT,
+    FionaDance BIT,
+    Keela INT,
+    KeelaCount INT,
+    KeelaKill VARCHAR (20),
+    KeelaQuesting BIT,
+    KillerBee BIT,
+    Neal INT,
+    NealCount INT,
+    NealKill VARCHAR (20),
+    AbelShopAccess BIT,
+    PeteKill INT,
+    PeteComplete BIT,
+    SwampAccess BIT,
+    SwampCount INT,
+    TagorDungeonAccess BIT,
+    Lau INT,
+    BeltDegree VARCHAR (6),
+    MilethReputation INT,
+    AbelReputation INT,
+    RucesionReputation INT,
+    SuomiReputation INT,
+    RionnagReputation INT,
+    OrenReputation INT,
+    PietReputation INT,
+    LouresReputation INT,
+    UndineReputation INT,
+    TagorReputation INT,
+    BlackSmithing INT,
+    ArmorSmithing INT,
+    JewelCrafting INT,
+    StoneSmithing INT,
+    ThievesGuildReputation INT,
+    AssassinsGuildReputation INT,
+    AdventuresGuildReputation INT,
+    BeltQuest VARCHAR (6)
+);
+
 CREATE TYPE dbo.ItemType AS TABLE  
 (  
     ItemId BIGINT,
@@ -723,66 +775,63 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[PlayerQuestSave]
-    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT,
-    @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20),
-    @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT,
-    @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT,
-    @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
-    @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
-    @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
-    @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
-    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6)
+    @Quests dbo.QuestType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE [ZolianPlayers].[dbo].[PlayersQuests]
-    SET    [TutorialCompleted] = @TutComplete,
-           [BetaReset] = @BetaReset,
-           [StoneSmithing] = @StoneSmith,
-           [MilethReputation] = @MilethRep,
-           [ArtursGift] = @ArtursGift,
-           [CamilleGreetingComplete] = @CamilleGreeting,
-           [ConnPotions] = @ConnPotions,
-           [CryptTerror] = @CryptTerror,
-           [CryptTerrorSlayed] = @CryptTerrorSlayed,
-           [Dar] = @Dar,
-           [DarItem] = @DarItem,
-           [EternalLove] = @EternalLove,
-           [FionaDance] = @Fiona,
-           [Keela] = @Keela,
-           [KeelaCount] = @KeelaCount,
-           [KeelaKill] = @KeelaKill,
-           [KeelaQuesting] = @KeelaQuesting,
-           [KillerBee] = @KillerBee,
-           [Neal] = @Neal,
-           [NealCount] = @NealCount,
-           [NealKill] = @NealKill,
-           [AbelShopAccess] = @AbelShopAccess,
-           [PeteKill] = @PeteKill,
-           [PeteComplete] = @PeteComplete,
-           [SwampAccess] = @SwampAccess,
-           [SwampCount] = @SwampCount,
-           [TagorDungeonAccess] = @TagorDungeonAccess,
-           [Lau] = @Lau,
-           [AbelReputation] = @AbelReputation,
-           [RucesionReputation] = @RucesionReputation,
-           [SuomiReputation] = @SuomiReputation,
-           [RionnagReputation] = @RionnagReputation,
-           [OrenReputation] = @OrenReputation,
-           [PietReputation] = @PietReputation,
-           [LouresReputation] = @LouresReputation,
-           [UndineReputation] = @UndineReputation,
-           [TagorReputation] = @TagorReputation,
-           [ThievesGuildReputation] = @ThievesGuildReputation,
-           [AssassinsGuildReputation] = @AssassinsGuildReputation,
-           [AdventuresGuildReputation] = @AdventuresGuildReputation,
-           [BlackSmithing] = @BlackSmithing,
-           [ArmorSmithing] = @ArmorSmithing,
-           [JewelCrafting] = @JewelCrafting,
-           [BeltDegree] = @BeltDegree,
-           [BeltQuest] = @BeltQuest
-    WHERE  Serial = @Serial;
+    MERGE INTO [ZolianPlayers].[dbo].[PlayersQuests] AS target
+    USING @Quests AS source
+    ON target.Serial = source.Serial
+
+    WHEN MATCHED THEN
+    UPDATE SET
+        [TutorialCompleted] = source.TutorialCompleted,
+        [BetaReset] = source.BetaReset,
+        [ArtursGift] = source.ArtursGift,
+        [CamilleGreetingComplete] = source.CamilleGreetingComplete,
+        [ConnPotions] = source.ConnPotions,
+        [CryptTerror] = source.CryptTerror,
+        [CryptTerrorSlayed] = source.CryptTerrorSlayed,
+        [Dar] = source.Dar,
+        [DarItem] = source.DarItem,
+        [DrunkenHabit] = source.DrunkenHabit,
+        [EternalLove] = source.EternalLove,
+        [FionaDance] = source.FionaDance,
+        [Keela] = source.Keela,
+        [KeelaCount] = source.KeelaCount,
+        [KeelaKill] = source.KeelaKill,
+        [KeelaQuesting] = source.KeelaQuesting,
+        [KillerBee] = source.KillerBee,
+        [Neal] = source.Neal,
+        [NealCount] = source.NealCount,
+        [NealKill] = source.NealKill,
+        [AbelShopAccess] = source.AbelShopAccess,
+        [PeteKill] = source.PeteKill,
+        [PeteComplete] = source.PeteComplete,
+        [SwampAccess] = source.SwampAccess,
+        [SwampCount] = source.SwampCount,
+        [TagorDungeonAccess] = source.TagorDungeonAccess,
+        [Lau] = source.Lau,
+        [BeltDegree] = source.BeltDegree,
+        [MilethReputation] = source.MilethReputation,
+        [AbelReputation] = source.AbelReputation,
+        [RucesionReputation] = source.RucesionReputation,
+        [SuomiReputation] = source.SuomiReputation,
+        [RionnagReputation] = source.RionnagReputation,
+        [OrenReputation] = source.OrenReputation,
+        [PietReputation] = source.PietReputation,
+        [LouresReputation] = source.LouresReputation,
+        [UndineReputation] = source.UndineReputation,
+        [TagorReputation] = source.TagorReputation,
+        [BlackSmithing] = source.BlackSmithing,
+        [ArmorSmithing] = source.ArmorSmithing,
+        [JewelCrafting] = source.JewelCrafting,
+        [StoneSmithing] = source.StoneSmithing,
+        [ThievesGuildReputation] = source.ThievesGuildReputation,
+        [AssassinsGuildReputation] = source.AssassinsGuildReputation,
+        [AdventuresGuildReputation] = source.AdventuresGuildReputation,
+        [BeltQuest] = source.BeltQuest;
 END
 GO
 

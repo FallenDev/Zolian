@@ -124,18 +124,18 @@ public class Quests
     public bool CryptTerror { get; set; }
     public bool CryptTerrorSlayed { get; set; }
     public int Dar { get; set; }
-    public string DarItem { get; set; }
+    public string DarItem { get; set; } = string.Empty;
     public bool DrunkenHabit { get; set; }
     public bool EternalLove { get; set; }
     public bool FionaDance { get; set; }
     public int Keela { get; set; }
     public int KeelaCount { get; set; }
-    public string KeelaKill { get; set; }
+    public string KeelaKill { get; set; } = string.Empty;
     public bool KeelaQuesting { get; set; }
     public bool KillerBee { get; set; }
     public int Neal { get; set; }
     public int NealCount { get; set; }
-    public string NealKill { get; set; }
+    public string NealKill { get; set; } = string.Empty;
     public bool AbelShopAccess { get; set; }
     public int PeteKill { get; set; }
     public bool PeteComplete { get; set; }
@@ -143,6 +143,6 @@ public class Quests
     public int SwampCount { get; set; }
     public bool TagorDungeonAccess { get; set; }
     public int Lau { get; set; }
-    public string BeltDegree { get; set; }
-    public string BeltQuest { get; set; }
+    public string BeltDegree { get; set; } = string.Empty;
+    public string BeltQuest { get; set; } = string.Empty;
 }
