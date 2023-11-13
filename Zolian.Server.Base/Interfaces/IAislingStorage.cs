@@ -12,13 +12,17 @@ public interface IAislingStorage
     /// </summary>
     Task<bool> PasswordSave(Aisling obj);
     /// <summary>
-    /// Save method for properties that change often
+    /// Save method for spells, skills, items, buffs, debuffs
     /// </summary>
     Task AuxiliarySave(Aisling obj);
     /// <summary>
-    /// Save method used to store properties that rarely change
+    /// Save method for an individual player
     /// </summary>
     Task<bool> Save(Aisling obj);
+    /// <summary>
+    /// Server Save method used to save all players on the server at once
+    /// </summary>
+    Task<bool> ServerSave(List<Aisling> playerList);
     void SaveSkills(Aisling obj, SqlConnection connection);
     void SaveSpells(Aisling obj, SqlConnection connection);
     void SaveBuffs(Aisling aisling, SqlConnection connection);

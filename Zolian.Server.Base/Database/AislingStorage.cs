@@ -5,7 +5,6 @@ using Dapper;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
-using Darkages.Models;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
@@ -112,8 +111,6 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return;
         if (obj.Loading) return;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
-        if (!continueLoad) return;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
 
@@ -131,7 +128,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             if (e.Message.Contains("PK__Players"))
             {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Quick)");
+                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Aux)");
                 Crashes.TrackError(e);
                 return;
             }
@@ -156,8 +153,6 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
-        if (!continueLoad) return false;
 
         await SaveLock.WaitAsync().ConfigureAwait(false);
         var dt = new DataTable();
@@ -357,6 +352,231 @@ public record AislingStorage : Sql, IAislingStorage
             #endregion
 
             ExecuteAndCloseConnection(cmd2, connection);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+        finally
+        {
+            SaveLock.Release();
+        }
+
+        return true;
+    }
+
+    public async Task<bool> ServerSave(List<Aisling> playerList)
+    {
+        if (playerList.Count == 0) return false;
+
+        await SaveLock.WaitAsync().ConfigureAwait(false);
+        var dt = new DataTable();
+        var connection = ConnectToDatabase(ConnectionString);
+
+        #region DataTable
+
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Created", typeof(DateTime));
+        dt.Columns.Add("Username", typeof(string));
+        dt.Columns.Add("LoggedIn", typeof(bool));
+        dt.Columns.Add("LastLogged", typeof(DateTime));
+        dt.Columns.Add("X", typeof(byte));
+        dt.Columns.Add("Y", typeof(byte));
+        dt.Columns.Add("CurrentMapId", typeof(int));
+        dt.Columns.Add("OffenseElement", typeof(string));
+        dt.Columns.Add("DefenseElement", typeof(string));
+        dt.Columns.Add("SecondaryOffensiveElement", typeof(string));
+        dt.Columns.Add("SecondaryDefensiveElement", typeof(string));
+        dt.Columns.Add("Direction", typeof(byte));
+        dt.Columns.Add("CurrentHp", typeof(int));
+        dt.Columns.Add("BaseHp", typeof(int));
+        dt.Columns.Add("CurrentMp", typeof(int));
+        dt.Columns.Add("BaseMp", typeof(int));
+        dt.Columns.Add("_ac", typeof(short));
+        dt.Columns.Add("_Regen", typeof(short));
+        dt.Columns.Add("_Dmg", typeof(short));
+        dt.Columns.Add("_Hit", typeof(short));
+        dt.Columns.Add("_Mr", typeof(short));
+        dt.Columns.Add("_Str", typeof(short));
+        dt.Columns.Add("_Int", typeof(short));
+        dt.Columns.Add("_Wis", typeof(short));
+        dt.Columns.Add("_Con", typeof(short));
+        dt.Columns.Add("_Dex", typeof(short));
+        dt.Columns.Add("_Luck", typeof(short));
+        dt.Columns.Add("AbpLevel", typeof(int));
+        dt.Columns.Add("AbpNext", typeof(int));
+        dt.Columns.Add("AbpTotal", typeof(long));
+        dt.Columns.Add("ExpLevel", typeof(int));
+        dt.Columns.Add("ExpNext", typeof(int));
+        dt.Columns.Add("ExpTotal", typeof(long));
+        dt.Columns.Add("Stage", typeof(string));
+        dt.Columns.Add("JobClass", typeof(string));
+        dt.Columns.Add("Path", typeof(string));
+        dt.Columns.Add("PastClass", typeof(string));
+        dt.Columns.Add("Race", typeof(string));
+        dt.Columns.Add("Afflictions", typeof(string));
+        dt.Columns.Add("Gender", typeof(string));
+        dt.Columns.Add("HairColor", typeof(byte));
+        dt.Columns.Add("HairStyle", typeof(byte));
+        dt.Columns.Add("NameColor", typeof(byte));
+        dt.Columns.Add("ProfileMessage", typeof(string));
+        dt.Columns.Add("Nation", typeof(string));
+        dt.Columns.Add("Clan", typeof(string));
+        dt.Columns.Add("ClanRank", typeof(string));
+        dt.Columns.Add("ClanTitle", typeof(string));
+        dt.Columns.Add("AnimalForm", typeof(string));
+        dt.Columns.Add("MonsterForm", typeof(short));
+        dt.Columns.Add("ActiveStatus", typeof(string));
+        dt.Columns.Add("Flags", typeof(string));
+        dt.Columns.Add("CurrentWeight", typeof(short));
+        dt.Columns.Add("World", typeof(byte));
+        dt.Columns.Add("Lantern", typeof(byte));
+        dt.Columns.Add("Invisible", typeof(bool));
+        dt.Columns.Add("Resting", typeof(string));
+        dt.Columns.Add("FireImmunity", typeof(bool));
+        dt.Columns.Add("WaterImmunity", typeof(bool));
+        dt.Columns.Add("WindImmunity", typeof(bool));
+        dt.Columns.Add("EarthImmunity", typeof(bool));
+        dt.Columns.Add("LightImmunity", typeof(bool));
+        dt.Columns.Add("DarkImmunity", typeof(bool));
+        dt.Columns.Add("PoisonImmunity", typeof(bool));
+        dt.Columns.Add("EnticeImmunity", typeof(bool));
+        dt.Columns.Add("PartyStatus", typeof(string));
+        dt.Columns.Add("RaceSkill", typeof(string));
+        dt.Columns.Add("RaceSpell", typeof(string));
+        dt.Columns.Add("GameMaster", typeof(bool));
+        dt.Columns.Add("ArenaHost", typeof(bool));
+        dt.Columns.Add("Developer", typeof(bool));
+        dt.Columns.Add("Ranger", typeof(bool));
+        dt.Columns.Add("Knight", typeof(bool));
+        dt.Columns.Add("GoldPoints", typeof(long));
+        dt.Columns.Add("StatPoints", typeof(short));
+        dt.Columns.Add("GamePoints", typeof(long));
+        dt.Columns.Add("BankedGold", typeof(long));
+        dt.Columns.Add("ArmorImg", typeof(short));
+        dt.Columns.Add("HelmetImg", typeof(short));
+        dt.Columns.Add("ShieldImg", typeof(short));
+        dt.Columns.Add("WeaponImg", typeof(short));
+        dt.Columns.Add("BootsImg", typeof(short));
+        dt.Columns.Add("HeadAccessoryImg", typeof(short));
+        dt.Columns.Add("Accessory1Img", typeof(short));
+        dt.Columns.Add("Accessory2Img", typeof(short));
+        dt.Columns.Add("Accessory3Img", typeof(short));
+        dt.Columns.Add("Accessory1Color", typeof(byte));
+        dt.Columns.Add("Accessory2Color", typeof(byte));
+        dt.Columns.Add("Accessory3Color", typeof(byte));
+        dt.Columns.Add("BodyColor", typeof(byte));
+        dt.Columns.Add("BodySprite", typeof(byte));
+        dt.Columns.Add("FaceSprite", typeof(byte));
+        dt.Columns.Add("OverCoatImg", typeof(short));
+        dt.Columns.Add("BootColor", typeof(byte));
+        dt.Columns.Add("OverCoatColor", typeof(byte));
+        dt.Columns.Add("Pants", typeof(byte));
+        dt.Columns.Add("Aegis", typeof(byte));
+        dt.Columns.Add("Bleeding", typeof(byte));
+        dt.Columns.Add("Spikes", typeof(byte));
+        dt.Columns.Add("Rending", typeof(byte));
+        dt.Columns.Add("Reaping", typeof(byte));
+        dt.Columns.Add("Vampirism", typeof(byte));
+        dt.Columns.Add("Haste", typeof(byte));
+        dt.Columns.Add("Gust", typeof(byte));
+        dt.Columns.Add("Quake", typeof(byte));
+        dt.Columns.Add("Rain", typeof(byte));
+        dt.Columns.Add("Flame", typeof(byte));
+        dt.Columns.Add("Dusk", typeof(byte));
+        dt.Columns.Add("Dawn", typeof(byte));
+
+        #endregion
+
+        try
+        {
+            foreach (var player in playerList.Where(player => !player.Loading))
+            {
+                if (player?.Client == null) continue;
+                if (!player.LoggedIn) continue;
+                player.Client.LastSave = DateTime.UtcNow;
+
+                dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
+                    player.OffenseElement.ToString(), player.DefenseElement.ToString(), player.SecondaryOffensiveElement.ToString(),
+                    player.SecondaryDefensiveElement.ToString(), player.Direction, player.CurrentHp, player.BaseHp, player.CurrentMp, player.BaseMp, player._ac,
+                    player._Regen, player._Dmg, player._Hit, player._Mr, player._Str, player._Int, player._Wis, player._Con, player._Dex, player._Luck, player.AbpLevel,
+                    player.AbpNext, player.AbpTotal, player.ExpLevel, player.ExpNext, player.ExpTotal, player.Stage.ToString(), player.JobClass.ToString(),
+                    player.Path.ToString(), player.PastClass.ToString(), player.Race.ToString(), player.Afflictions.ToString(), player.Gender.ToString(),
+                    player.HairColor, player.HairStyle, player.NameColor, player.ProfileMessage, player.Nation, player.Clan, player.ClanRank, player.ClanTitle,
+                    player.AnimalForm.ToString(), player.MonsterForm, player.ActiveStatus.ToString(), player.Flags.ToString(), player.CurrentWeight, player.World,
+                    player.Lantern, player.IsInvisible, player.Resting.ToString(), player.FireImmunity, player.WaterImmunity, player.WindImmunity, player.EarthImmunity,
+                    player.LightImmunity, player.DarkImmunity, player.PoisonImmunity, player.EnticeImmunity, player.PartyStatus.ToString(), player.RaceSkill,
+                    player.RaceSpell, player.GameMaster, player.ArenaHost, player.Developer, player.Ranger, player.Knight, player.GoldPoints, player.StatPoints, player.GamePoints,
+                    player.BankedGold, player.ArmorImg, player.HelmetImg, player.ShieldImg, player.WeaponImg, player.BootsImg, player.HeadAccessoryImg, player.Accessory1Img,
+                    player.Accessory2Img, player.Accessory3Img, player.Accessory1Color, player.Accessory2Color, player.Accessory3Color, player.BodyColor, player.BodySprite,
+                    player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants, player.Aegis, player.Bleeding, player.Spikes, player.Rending,
+                    player.Reaping, player.Vampirism, player.Haste, player.Gust, player.Quake, player.Rain, player.Flame, player.Dusk, player.Dawn);
+
+                var cmd2 = ConnectToDatabaseSqlCommandWithProcedure("PlayerQuestSave", connection);
+
+                #region Quest Save
+
+                cmd2.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)player.Serial;
+                cmd2.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = player.QuestManager.TutorialCompleted;
+                cmd2.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = player.QuestManager.BetaReset;
+                cmd2.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = player.QuestManager.StoneSmithing;
+                cmd2.Parameters.Add("@MilethRep", SqlDbType.Int).Value = player.QuestManager.MilethReputation;
+                cmd2.Parameters.Add("@ArtursGift", SqlDbType.Int).Value = player.QuestManager.ArtursGift;
+                cmd2.Parameters.Add("@CamilleGreeting", SqlDbType.Bit).Value = player.QuestManager.CamilleGreetingComplete;
+                cmd2.Parameters.Add("@ConnPotions", SqlDbType.Bit).Value = player.QuestManager.ConnPotions;
+                cmd2.Parameters.Add("@CryptTerror", SqlDbType.Bit).Value = player.QuestManager.CryptTerror;
+                cmd2.Parameters.Add("@CryptTerrorSlayed", SqlDbType.Bit).Value = player.QuestManager.CryptTerrorSlayed;
+                cmd2.Parameters.Add("@Dar", SqlDbType.Int).Value = player.QuestManager.Dar;
+                cmd2.Parameters.Add("@DarItem", SqlDbType.VarChar).Value = player.QuestManager.DarItem ?? "";
+                cmd2.Parameters.Add("@EternalLove", SqlDbType.Bit).Value = player.QuestManager.EternalLove;
+                cmd2.Parameters.Add("@Fiona", SqlDbType.Bit).Value = player.QuestManager.FionaDance;
+                cmd2.Parameters.Add("@Keela", SqlDbType.Int).Value = player.QuestManager.Keela;
+                cmd2.Parameters.Add("@KeelaCount", SqlDbType.Int).Value = player.QuestManager.KeelaCount;
+                cmd2.Parameters.Add("@KeelaKill", SqlDbType.VarChar).Value = player.QuestManager.KeelaKill ?? "";
+                cmd2.Parameters.Add("@KeelaQuesting", SqlDbType.Bit).Value = player.QuestManager.KeelaQuesting;
+                cmd2.Parameters.Add("@KillerBee", SqlDbType.Bit).Value = player.QuestManager.KillerBee;
+                cmd2.Parameters.Add("@Neal", SqlDbType.Int).Value = player.QuestManager.Neal;
+                cmd2.Parameters.Add("@NealCount", SqlDbType.Int).Value = player.QuestManager.NealCount;
+                cmd2.Parameters.Add("@NealKill", SqlDbType.VarChar).Value = player.QuestManager.NealKill ?? "";
+                cmd2.Parameters.Add("@AbelShopAccess", SqlDbType.Bit).Value = player.QuestManager.AbelShopAccess;
+                cmd2.Parameters.Add("@PeteKill", SqlDbType.Int).Value = player.QuestManager.PeteKill;
+                cmd2.Parameters.Add("@PeteComplete", SqlDbType.Bit).Value = player.QuestManager.PeteComplete;
+                cmd2.Parameters.Add("@SwampAccess", SqlDbType.Bit).Value = player.QuestManager.SwampAccess;
+                cmd2.Parameters.Add("@SwampCount", SqlDbType.Int).Value = player.QuestManager.SwampCount;
+                cmd2.Parameters.Add("@TagorDungeonAccess", SqlDbType.Bit).Value = player.QuestManager.TagorDungeonAccess;
+                cmd2.Parameters.Add("@Lau", SqlDbType.Int).Value = player.QuestManager.Lau;
+                cmd2.Parameters.Add("@AbelReputation", SqlDbType.Int).Value = player.QuestManager.AbelReputation;
+                cmd2.Parameters.Add("@RucesionReputation", SqlDbType.Int).Value = player.QuestManager.RucesionReputation;
+                cmd2.Parameters.Add("@SuomiReputation", SqlDbType.Int).Value = player.QuestManager.SuomiReputation;
+                cmd2.Parameters.Add("@RionnagReputation", SqlDbType.Int).Value = player.QuestManager.RionnagReputation;
+                cmd2.Parameters.Add("@OrenReputation", SqlDbType.Int).Value = player.QuestManager.OrenReputation;
+                cmd2.Parameters.Add("@PietReputation", SqlDbType.Int).Value = player.QuestManager.PietReputation;
+                cmd2.Parameters.Add("@LouresReputation", SqlDbType.Int).Value = player.QuestManager.LouresReputation;
+                cmd2.Parameters.Add("@UndineReputation", SqlDbType.Int).Value = player.QuestManager.UndineReputation;
+                cmd2.Parameters.Add("@TagorReputation", SqlDbType.Int).Value = player.QuestManager.TagorReputation;
+                cmd2.Parameters.Add("@ThievesGuildReputation", SqlDbType.Int).Value = player.QuestManager.ThievesGuildReputation;
+                cmd2.Parameters.Add("@AssassinsGuildReputation", SqlDbType.Int).Value = player.QuestManager.AssassinsGuildReputation;
+                cmd2.Parameters.Add("@AdventuresGuildReputation", SqlDbType.Int).Value = player.QuestManager.AdventuresGuildReputation;
+                cmd2.Parameters.Add("@BlackSmithing", SqlDbType.Int).Value = player.QuestManager.BlackSmithing;
+                cmd2.Parameters.Add("@ArmorSmithing", SqlDbType.Int).Value = player.QuestManager.ArmorSmithing;
+                cmd2.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = player.QuestManager.JewelCrafting;
+                cmd2.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = player.QuestManager.BeltDegree ?? "";
+                cmd2.Parameters.Add("@BeltQuest", SqlDbType.VarChar).Value = player.QuestManager.BeltQuest ?? "";
+
+                #endregion
+
+                cmd2.ExecuteNonQuery();
+            }
+
+            await using var cmd = new SqlCommand("PlayerSave", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Players", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.PlayerType";
+            cmd.ExecuteNonQuery();
+            connection.Close();
         }
         catch (Exception e)
         {

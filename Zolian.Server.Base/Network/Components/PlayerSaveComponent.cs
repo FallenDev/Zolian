@@ -14,12 +14,12 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
 
-        foreach (var player in Server.Aislings)
+        var playersList = Server.Aislings.ToList();
+        _ = StorageManager.AislingBucket.ServerSave(playersList);
+
+        foreach (var player in playersList.Where(player => player?.Client != null).Where(player => player.LoggedIn))
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
             _ = StorageManager.AislingBucket.AuxiliarySave(player);
-            _ = player.Client.Save();
         }
     }
 }

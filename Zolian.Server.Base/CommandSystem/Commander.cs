@@ -115,14 +115,16 @@ public static class Commander
             return;
         }
         var players = ServerSetup.Instance.Game.Aislings;
+        var playersList = players.ToList();
         ServerSetup.Logger("--------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("--------------- Server Chaos ---------------", LogLevel.Warning);
 
-        foreach (var connected in players)
+        _ = StorageManager.AislingBucket.ServerSave(playersList);
+
+        foreach (var connected in playersList)
         {
             _ = StorageManager.AislingBucket.AuxiliarySave(connected);
-            _ = connected.Client.Save();
             connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
             connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
             Task.Delay(500).ContinueWith(ct =>
@@ -137,14 +139,16 @@ public static class Commander
     public static void Restart(Argument[] args, object arg)
     {
         var players = ServerSetup.Instance.Game.Aislings;
+        var playersList = players.ToList();
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
+        
+        _ = StorageManager.AislingBucket.ServerSave(playersList);
 
-        foreach (var connected in players)
+        foreach (var connected in playersList)
         {
             _ = StorageManager.AislingBucket.AuxiliarySave(connected);
-            _ = connected.Client.Save();
             connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Order {=g. -Server Restart-");
         }
 
