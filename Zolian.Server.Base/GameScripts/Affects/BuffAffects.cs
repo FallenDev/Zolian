@@ -1080,3 +1080,90 @@ public class buff_PerfectDefense : Buff
 }
 
 #endregion
+
+#region Aura
+
+public class aura_BriarThorn : Buff
+{
+    public override byte Icon => 213;
+    public override int Length => 32767;
+    public override string Name => "Briarthorn Aura";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.Spikes += 10;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Briarthorn");
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(87, null, affected.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Spikes -= 10;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Briarthorn ended");
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        DeleteBuff(aisling, buff);
+    }
+}
+
+public class aura_LawsOfAosda : Buff
+{
+    public override byte Icon => 206;
+    public override int Length => 32767;
+    public override string Name => "Laws of Aosda";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Laws of Aosda");
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(236, null, affected.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (aisling.PartyMembers == null) return;
+        foreach (var player in aisling.PartyMembers)
+        {
+            if (player == null) continue;
+            if (!player.Skulled) continue;
+            if (!player.WithinRangeOf(aisling)) continue;
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
+            aisling.CurrentHp = aisling.MaximumHp;
+            aisling.Client.SendAttributes(StatUpdateType.Vitality);
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Laws of Aosda ended");
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        DeleteBuff(aisling, buff);
+    }
+}
+
+#endregion

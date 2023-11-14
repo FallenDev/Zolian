@@ -101,4 +101,5 @@ public static class MonsterExtensions
 {
     public static bool MoodFlagIsSet(this MoodQualifer self, MoodQualifer flag) => (self & flag) == flag;
     public static bool MonsterRaceIsSet(this MonsterRace self, MonsterRace flag) => (self & flag) == flag;
+    public static bool MonsterTypeIsSet(this MonsterType self, MonsterType flag) => (self & flag) == flag;
 }

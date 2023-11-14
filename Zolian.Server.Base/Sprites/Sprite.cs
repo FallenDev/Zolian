@@ -1704,7 +1704,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType == MonsterType.Boss:
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss):
                             client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                             return;
                     }
@@ -1725,7 +1725,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType == MonsterType.Boss:
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss):
                             client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                             return;
                     }
