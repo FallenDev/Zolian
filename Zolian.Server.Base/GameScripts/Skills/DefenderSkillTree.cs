@@ -746,7 +746,6 @@ public class Raise_Threat(Skill skill) : SkillScript(skill)
     }
 }
 
-
 [Script("Draconic Leash")]
 public class Draconic_Leash(Skill skill) : SkillScript(skill)
 {
@@ -845,7 +844,8 @@ public class Taunt(Skill skill) : SkillScript(skill)
         foreach (var target in targets)
         {
             if (target is not Monster monster) continue;
-            monster.TargetRecord = new TargetRecord();
+            monster.TargetRecord.TaggedAislings.Clear();
+            monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (450000, aisling, true));
             monster.Target = aisling;
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, monster.Position));
         }

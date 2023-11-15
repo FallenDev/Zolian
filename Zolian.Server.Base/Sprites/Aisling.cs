@@ -14,6 +14,7 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace Darkages.Sprites;
@@ -37,7 +38,7 @@ public sealed class Aisling : Player, IAisling
     public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
     public AislingTrackers AislingTrackers { get; }
-
+    public Stopwatch LawsOfAosda { get; set; }
     public uint MaximumWeight => GameMaster switch
     {
         true => 999,
@@ -791,5 +792,39 @@ public sealed class Aisling : Player, IAisling
         PendingY = oldPosY;
 
         return true;
+    }
+
+    public void AutoRoutine()
+    {
+        var monster = MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(this, 2));
+        if (monster == null) return;
+        Target = monster;
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+
+        while (NextTo(Target!.X, Target!.Y))
+        {
+            if (!(stopWatch.Elapsed.TotalMilliseconds > 1000)) continue;
+            stopWatch.Restart();
+
+            foreach (var skill in SkillBook.Skills.Values)
+            {
+                if (skill is null) continue;
+                if (!skill.CanUse()) continue;
+                if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                skill.InUse = true;
+                var script = skill.Scripts.Values.First();
+                script?.OnUse(this);
+                skill.InUse = false;
+
+                skill.CurrentCooldown = skill.Template.Cooldown;
+                Client.SendCooldown(true, skill.Slot, skill.Template.Cooldown);
+                if (skill.Template.SkillType == SkillScope.Assail)
+                    Client.LastAssail = DateTime.UtcNow;
+            }
+        }
+        
+        stopWatch.Stop();
     }
 }

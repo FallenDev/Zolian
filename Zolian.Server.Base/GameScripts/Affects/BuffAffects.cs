@@ -1125,6 +1125,7 @@ public class aura_LawsOfAosda : Buff
     public override int Length => 32767;
     public override string Name => "Laws of Aosda";
 
+
     public override void OnApplied(Sprite affected, Buff buff)
     {
         if (affected.Buffs.TryAdd(buff.Name, buff))
@@ -1144,6 +1145,7 @@ public class aura_LawsOfAosda : Buff
     {
         if (affected is not Aisling aisling) return;
         if (aisling.PartyMembers == null) return;
+
         foreach (var player in aisling.PartyMembers)
         {
             if (player == null) continue;
@@ -1152,7 +1154,14 @@ public class aura_LawsOfAosda : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
             aisling.CurrentHp = aisling.MaximumHp;
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
+            if (!aisling.LawsOfAosda.IsRunning)
+                aisling.LawsOfAosda.Start();
         }
+
+        if (!aisling.LawsOfAosda.IsRunning) return;
+        if (aisling.LawsOfAosda.Elapsed.TotalSeconds < 10) return;
+        aisling.LawsOfAosda.Stop();
+        OnEnded(aisling, buff);
     }
 
     public override void OnEnded(Sprite affected, Buff buff)

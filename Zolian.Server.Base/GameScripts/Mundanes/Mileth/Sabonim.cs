@@ -33,7 +33,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
             switch (client.Aisling.QuestManager.BeltDegree)
             {
                 case "White":
-                    if (client.Aisling.QuestManager.BeltQuest == "Yellow")
+                    if (client.Aisling.QuestManager.BeltQuest == "Yellow" && client.Aisling.ExpLevel >= 20)
                     {
                         options.Add(new(0x22, "I've slain the Goblin"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -42,7 +42,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x02, "Attainment of the Yellow degree"));
                     break;
                 case "Yellow":
-                    if (client.Aisling.QuestManager.BeltQuest == "Orange")
+                    if (client.Aisling.QuestManager.BeltQuest == "Orange" && client.Aisling.ExpLevel >= 40)
                     {
                         options.Add(new(0x23, "I've slain the Polyps"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -51,7 +51,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x03, "Attainment of the Orange degree"));
                     break;
                 case "Orange":
-                    if (client.Aisling.QuestManager.BeltQuest == "Green")
+                    if (client.Aisling.QuestManager.BeltQuest == "Green" && client.Aisling.ExpLevel >= 60)
                     {
                         options.Add(new(0x24, "I've slain the Grimloks"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -60,7 +60,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x04, "Attainment of the Green degree"));
                     break;
                 case "Green":
-                    if (client.Aisling.QuestManager.BeltQuest == "Purple")
+                    if (client.Aisling.QuestManager.BeltQuest == "Purple" && client.Aisling.ExpLevel >= 80)
                     {
                         options.Add(new(0x25, "I've slain the Marauders"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -69,7 +69,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x05, "Attainment of the Purple degree"));
                     break;
                 case "Purple":
-                    if (client.Aisling.QuestManager.BeltQuest == "Blue")
+                    if (client.Aisling.QuestManager.BeltQuest == "Blue" && client.Aisling.ExpLevel >= 99)
                     {
                         options.Add(new(0x26, "I've slain the Wisps"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -78,7 +78,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x06, "Attainment of the Blue degree"));
                     break;
                 case "Blue":
-                    if (client.Aisling.QuestManager.BeltQuest == "Brown")
+                    if (client.Aisling.QuestManager.BeltQuest == "Brown" && client.Aisling.ExpLevel >= 110)
                     {
                         options.Add(new(0x27, "I've removed a group of flies"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -87,7 +87,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x07, "Attainment of the Brown degree"));
                     break;
                 case "Brown":
-                    if (client.Aisling.QuestManager.BeltQuest == "Red")
+                    if (client.Aisling.QuestManager.BeltQuest == "Red" && client.Aisling.ExpLevel >= 125)
                     {
                         options.Add(new(0x28, "I've slain a Lich Lord"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());
@@ -96,7 +96,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new(0x08, "Attainment of the Red degree"));
                     break;
                 case "Red":
-                    if (client.Aisling.QuestManager.BeltQuest == "Black")
+                    if (client.Aisling.QuestManager.BeltQuest == "Black" && client.Aisling.ExpLevel >= 200)
                     {
                         options.Add(new(0x29, "I've slain the Old One"));
                         client.SendOptionsDialog(Mundane, "You're back, and so soon!", options.ToArray());

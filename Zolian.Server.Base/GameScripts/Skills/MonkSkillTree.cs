@@ -1605,16 +1605,16 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
     {
         if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
-        _success = _skillMethod.OnUse(aisling, skill);
+        var manaReq = aisling.MaximumHp * .10;
 
-        if (_success)
+        if (aisling.CurrentMp >= manaReq)
         {
+            aisling.CurrentMp -= (int)manaReq;
             OnSuccess(aisling);
+            return;
         }
-        else
-        {
-            OnFailed(aisling);
-        }
+        
+        OnFailed(aisling);
     }
 
     private long DamageCalc(Sprite sprite)

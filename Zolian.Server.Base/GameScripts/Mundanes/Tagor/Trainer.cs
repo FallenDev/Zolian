@@ -84,7 +84,7 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
 
                     if (_skillList.Count > 0)
                     {
-                        options.Add(new(0x03, "Let's get started"));
+                        options.Add(new(0x03, "Yes"));
                         options.Add(new Dialog.OptionsDataItem(0x00, "{=bNo, thank you"));
                         client.SendOptionsDialog(Mundane, "Ready? It'll cost you 100,000 gold for unlimited time.", options.ToArray());
                     }
@@ -120,57 +120,34 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
                 }
             case 0x0003:
                 {
-                    //if (client.Aisling.GoldPoints >= 100000)
-                    //{
-                    //    client.Aisling.GoldPoints -= 100000;
-                    client.TransitionToMap(5257, new Position(17, 17));
-                    await Task.Delay(100).ContinueWith(ct =>
+                    if (client.Aisling.GoldPoints >= 100000)
                     {
-                        client.CloseDialog();
-                        var spot = _dojoSpots.RandomIEnum();
-                        client.Aisling.Pos = spot;
-                        client.ClientRefreshed();
-                        var monsters = client.Aisling.MonstersNearby()
-                            .Where(i => i.WithinRangeOf(client.Aisling, 2));
-
-                        foreach (var monster in monsters)
+                        client.Aisling.GoldPoints -= 100000;
+                        client.TransitionToMap(5257, new Position(17, 17));
+                        await Task.Delay(100).ContinueWith(ct =>
                         {
-                            client.Aisling.Facing(monster.X, monster.Y, out var direction);
-                            if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
-                            client.Aisling.Direction = (byte)direction;
-                            client.Aisling.Turn();
-                        }
-                    });
+                            client.CloseDialog();
+                            var spot = _dojoSpots.RandomIEnum();
+                            client.Aisling.Pos = spot;
+                            client.ClientRefreshed();
+                            var monsters = client.Aisling.MonstersNearby()
+                                .Where(i => i.WithinRangeOf(client.Aisling, 2));
 
-                    var monster = client.Aisling.MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(client.Aisling, 2));
-                    if (monster is null) break;
-                    client.Aisling.Target = monster;
-
-                    while (client.Aisling.NextTo(client.Aisling.Target!.X, client.Aisling.Target!.Y))
-                    {
-                        await Task.Delay(500).ContinueWith(ct =>
-                        {
-                            foreach (var skill in client.Aisling.SkillBook.Skills.Values)
+                            foreach (var monster in monsters)
                             {
-                                if (skill is null) continue;
-                                if (!skill.CanUse()) continue;
-                                if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
-
-                                skill.InUse = true;
-
-                                var script = skill.Scripts.Values.First();
-                                script?.OnUse(client.Aisling);
-
-                                skill.InUse = false;
-                                skill.CurrentCooldown = skill.Template.Cooldown;
+                                client.Aisling.Facing(monster.X, monster.Y, out var direction);
+                                if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
+                                client.Aisling.Direction = (byte)direction;
+                                client.Aisling.Turn();
                             }
+
+                            client.Aisling.AutoRoutine();
                         });
                     }
-                    //}
-                    //else
-                    //{
-                    //    client.SendOptionsDialog(Mundane, "Looks like you don't have enough, come back when you do. (100,000 gold)");
-                    //}
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "Looks like you don't have enough, come back when you do. (100,000 gold)");
+                    }
                     break;
                 }
             case 0x0004:

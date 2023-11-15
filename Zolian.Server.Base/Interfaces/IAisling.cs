@@ -81,4 +81,5 @@ public interface IAisling : ISprite
     Aisling UpdateStats(Spell lpSpell);
     void UpdateStats();
     void WarpToHell();
+    void AutoRoutine();
 }
