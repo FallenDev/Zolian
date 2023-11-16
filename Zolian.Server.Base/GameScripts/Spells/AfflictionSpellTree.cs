@@ -892,6 +892,13 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (!spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
+
         if (target == null) return;
         if (target.HasDebuff("Fas Spiorad"))
         {

@@ -60,6 +60,7 @@ namespace Darkages.Network.Client
         public readonly ObjectManager ObjectHandlers = new();
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
         public readonly Stopwatch SkillControl = new();
+        public readonly Stopwatch SpellControl = new();
         public readonly Stopwatch StatusControl = new();
         private readonly Stopwatch _aggroMessageControl = new();
         private readonly Stopwatch _lanternControl = new();

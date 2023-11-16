@@ -1532,8 +1532,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead() || client.Aisling.Skulled) return default;
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
-        var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastSpellCast).TotalSeconds < 0.25 ? default : ExecuteHandler(client, args, InnerOnUseSpell);
+
+        if (!client.Aisling.Client.SpellControl.IsRunning)
+            client.Aisling.Client.SpellControl.Start();
+
+        if (client.Aisling.Client.SpellControl.Elapsed.TotalMilliseconds <
+            client.Aisling.Client.SkillSpellTimer.Delay.TotalMilliseconds - 350) return default;
+
+        client.Aisling.Client.SpellControl.Restart();
+        return ExecuteHandler(client, args, InnerOnUseSpell);
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
@@ -1557,7 +1564,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
             }
 
-            localClient.LastSpellCast = readyTime;
+            localClient.LastSpellCast = DateTime.UtcNow;
             var info = new CastInfo();
 
             if (localClient.SpellCastInfo is null)
