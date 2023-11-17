@@ -1506,8 +1506,8 @@ namespace Darkages.Network.Client
                 Str = (byte)Math.Clamp(Aisling.Str, byte.MinValue, byte.MaxValue),
                 ToNextAbility = (uint)Aisling.AbpNext,
                 ToNextLevel = (uint)Aisling.ExpNext,
-                TotalAbility = Aisling.AbpTotal,
-                TotalExp = Aisling.ExpTotal,
+                TotalAbility = (uint)Aisling.AbpTotal,
+                TotalExp = (uint)Aisling.ExpTotal,
                 UnspentPoints = (byte)Aisling.StatPoints,
                 Wis = (byte)Math.Clamp(Aisling.Wis, byte.MinValue, byte.MaxValue)
             };
@@ -4277,8 +4277,10 @@ namespace Darkages.Network.Client
             else
             {
                 if (!overflow)
+                {
                     player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-                player.ExpTotal += (uint)exp;
+                    player.ExpTotal += (uint)exp;
+                }
             }
 
             try

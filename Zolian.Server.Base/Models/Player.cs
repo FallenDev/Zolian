@@ -16,10 +16,10 @@ public class Player : Sprite
     public string LastAttemptIP { get; set; }
     public ushort AbpLevel { get; set; }
     public int AbpNext { get; set; }
-    public uint AbpTotal { get; set; }
+    public long AbpTotal { get; set; }
     public ushort ExpLevel { get; set; }
     public int ExpNext { get; set; }
-    public uint ExpTotal { get; set; }
+    public long ExpTotal { get; set; }
     public ClassStage Stage { get; set; }
     public Job JobClass { get; set; }
     public Class Path { get; set; }
