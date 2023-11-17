@@ -1524,7 +1524,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x0F - Spell Use (Limited to 4 times a second)
+    /// 0x0F - Spell Use
     /// </summary>
     public ValueTask OnUseSpell(IWorldClient client, in ClientPacket clientPacket)
     {
@@ -1564,7 +1564,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
             }
 
+            if (DateTime.UtcNow.Subtract(localClient.LastSpellCast).TotalMilliseconds < 750)
+            {
+                if (spell == localClient.Aisling.Client.LastSpell) return default;
+            }
+
             localClient.LastSpellCast = DateTime.UtcNow;
+            localClient.Aisling.Client.LastSpell = spell;
             var info = new CastInfo();
 
             if (localClient.SpellCastInfo is null)
