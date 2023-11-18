@@ -20,7 +20,7 @@ public class Pet(WorldClient client) : Summon(client)
                 if (aisling == null)
                     DeSpawn();
 
-                if (aisling == null || aisling.WithinRangeOf(spawn, 9, true))
+                if (aisling == null || aisling.WithinRangeOf(spawn, 9))
                     continue;
 
                 var sprite = GetObject(null, i => i.Serial == spawn.Serial, Get.All);

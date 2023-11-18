@@ -635,10 +635,10 @@ public sealed class Aisling : Player, IAisling
         {
             if (!delete) return;
             var objs = GetObjects(Map,
-                i => i.WithinRangeOf(this, false) && i.Target != null && i.Target.Serial == Serial,
-                Get.Monsters);
+                i => i.WithinRangeOf(this) && i.Target != null && i.Target.Serial == Serial,
+                Get.Monsters).ToArray();
 
-            if (objs == null) return;
+            if (objs.Length == 0) return;
             foreach (var obj in objs)
                 obj.Target = null;
         }

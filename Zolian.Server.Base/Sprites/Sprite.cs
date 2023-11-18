@@ -757,19 +757,19 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private IEnumerable<Sprite> GetSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.All);
     private IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.AislingDamage);
     private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.MonsterDamage);
-    public bool WithinRangeOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity, checkMap);
-    public bool WithinEarShotOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, 14, checkMap);
-    public bool WithinMonsterSpellRangeOf(Sprite other, bool checkMap = true) => other != null && WithinRangeOf(other, 10, checkMap);
-    public bool WithinRangeOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
-    public bool WithinRangeOf(Sprite other, int distance, bool checkMap = true)
+    public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
+    public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
+    public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
+    public bool WithinRangeOf(Sprite other, int distance)
     {
         if (other == null) return false;
-        if (!checkMap) return WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
-        return CurrentMapId == other.CurrentMapId && WithinRangeOf((int)other.Pos.X, (int)other.Pos.Y, distance);
+        return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
-    public bool TrapsAreNearby() => ServerSetup.Instance.Traps.Select(i => i.Value).Any(i => i.CurrentMapId == CurrentMapId);
+    public bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
+
     public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
     public Aisling[] AislingsEarShotNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 16)).ToArray();
+    public Aisling[] AislingsOnMap() => GetObjects<Aisling>(Map, i => i != null && Map == i.Map).ToArray();
     public IEnumerable<Monster> MonstersNearby() => GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
     public IEnumerable<Monster> MonstersOnMap() => GetObjects<Monster>(Map, i => i != null);
     public IEnumerable<Mundane> MundanesNearby() => GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));

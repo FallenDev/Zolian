@@ -1474,15 +1474,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 case PublicMessageType.Normal:
                     response = $"{localClient.Aisling.Username}: {message}";
-                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.WithinRangeOf(n));
+                    audience = localClient.Aisling.AislingsEarShotNearby();
                     break;
                 case PublicMessageType.Shout:
                     response = $"{localClient.Aisling.Username}! {message}";
-                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.CurrentMapId == n.CurrentMapId);
+                    audience = localClient.Aisling.AislingsOnMap();
                     break;
                 case PublicMessageType.Chant:
                     response = message;
-                    audience = ObjectHandlers.GetObjects<Aisling>(localClient.Aisling.Map, n => localClient.Aisling.WithinRangeOf(n, false));
+                    audience = localClient.Aisling.AislingsNearby();
                     break;
                 default:
                     localClient.Disconnect();
@@ -1510,12 +1510,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             bool ParseCommand()
             {
                 if (!localClient.Aisling.GameMaster) return false;
-
-                //if (message.StartsWith("/group ") || message.StartsWith("/party "))
-                //{
-                //    Commander.ParseChatMessage(localClient.Aisling.Client, message);
-                //    return true;
-                //}
                 if (!message.StartsWith("/")) return false;
                 Commander.ParseChatMessage(localClient.Aisling.Client, message);
                 return true;
