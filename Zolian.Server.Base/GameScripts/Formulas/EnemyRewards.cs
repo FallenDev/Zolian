@@ -185,13 +185,13 @@ public class EnemyRewards : RewardScript
         player.Client.EnqueueExperienceEvent(player, exp, true, false);
 
         if (player.PartyMembers == null) return;
-
-        foreach (var party in player.PartyMembers
-                     .Where(party => party.Serial != player.Serial)
-                     .Where(party => party.WithinRangeOf(player)))
+        
+        // Enqueue experience event for party members
+        foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
-            // Enqueue experience event for party members
-            party.Client.EnqueueExperienceEvent(party, exp, true, false);
+            if (party.Map != player.Map) continue;
+            if (party.WithinRangeOf(player, 13))
+                party.Client.EnqueueExperienceEvent(party, exp, true, false);
         }
     }
 
@@ -228,10 +228,9 @@ public class EnemyRewards : RewardScript
         player.Client.EnqueueAbilityEvent(player, ap, true, false);
 
         if (player.PartyMembers == null) return;
-
-        foreach (var party in player.PartyMembers
-                     .Where(party => party.Serial != player.Serial)
-                     .Where(party => party.WithinRangeOf(player)))
+        
+        // Enqueue experience event for party members
+        foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
             if (party.ExpLevel < 250 || party.Stage < ClassStage.Master)
             {
@@ -239,8 +238,9 @@ public class EnemyRewards : RewardScript
                 continue;
             }
 
-            // Enqueue experience event for party members
-            party.Client.EnqueueAbilityEvent(party, ap, true, false);
+            if (party.Map != player.Map) continue;
+            if (party.WithinRangeOf(player, 13))
+                party.Client.EnqueueAbilityEvent(party, ap, true, false);
         }
     }
 
