@@ -567,6 +567,55 @@ public class Petrified : Debuff
 
 #region Armor
 
+public class DebuffWrathConsequences : Debuff
+{
+    private static StatusOperator WillModifer => new(Operator.Remove, 60);
+    public override byte Icon => 27;
+    public override int Length => 100;
+    public override string Name => "Wrath Consequences";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusMr -= WillModifer.Value;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your magical resistance has been tampered");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(200, null, affected.Serial));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(200, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusMr += WillModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Magical resistances return");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
 public class DebuffSunSeal : Debuff
 {
     private static double AcModifer => 0.25; // 75% (Armor * Modifier)

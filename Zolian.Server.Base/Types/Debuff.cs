@@ -86,6 +86,7 @@ public class Debuff : IDebuff
             "Diseased" => new Diseased(),
             "Hallowed" => new Hallowed(),
             "Petrified" => new Petrified(),
+            "Wrath Consequences" => new DebuffWrathConsequences(),
             _ => DebuffSpell
         };
 

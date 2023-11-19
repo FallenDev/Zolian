@@ -937,3 +937,213 @@ public class LawsOfAosda(Skill skill) : SkillScript(skill)
         OnSuccess(aisling);
     }
 }
+
+[Script("Shield Bash")]
+public class ShieldBash(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = aisling.Serial
+        };
+
+        var enemy = aisling.DamageableGetInFront(2);
+
+        if (enemy.Count == 0)
+        {
+            _skillMethod.FailedAttempt(aisling, skill, action);
+            OnFailed(aisling);
+            return;
+        }
+
+        aisling.ActionUsed = "Shield Bash";
+
+        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+        {
+            _target = i;
+            var dmgCalc = DamageCalc(sprite);
+            if (aisling.BlessedShield)
+                dmgCalc *= 2;
+            _skillMethod.OnSuccessWithoutAction(_target, aisling, skill, dmgCalc, _crit);
+        }
+
+        aisling.BlessedShield = false;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
+        if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not ("Shields"))
+        {
+            OnFailed(aisling);
+            return;
+        }
+
+        _success = _skillMethod.OnUse(aisling, skill);
+
+        if (_success)
+        {
+            OnSuccess(aisling);
+        }
+        else
+        {
+            OnFailed(aisling);
+        }
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        long dmg = 0;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 40 + skill.Level;
+            dmg = client.Aisling.Str * 8 + client.Aisling.Dex * 8 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 2);
+            dmg += dmg * imp / 100;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Blessed Shield")]
+public class BlessedShield(Skill skill) : SkillScript(skill)
+{
+    public override void OnFailed(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Must have a shield equipped to Bless");
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(295, null, aisling.Serial));
+        aisling.BlessedShield = true;
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
+        if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not ("Shields"))
+        {
+            OnFailed(aisling);
+            return;
+        }
+        
+        OnSuccess(aisling);
+    }
+}
+
+[Script("Wrath Blow")]
+public class WrathBlow(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingAisling) return;
+        var client = damageDealingAisling.Client;
+
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed");
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Wrath Blow";
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 40,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(aisling, skill, action);
+            OnFailed(aisling);
+            return;
+        }
+
+        var debuff = new DebuffWrathConsequences();
+        {
+            if (_target.HasDebuff(debuff.Name))
+                _target.RemoveDebuff(debuff.Name);
+
+            _skillMethod.ApplyPhysicalDebuff(aisling.Client, debuff, _target, skill);
+        }
+
+        _target.Target = aisling;
+        var dmgCalc = DamageCalc(sprite);
+        _target.ApplyDamage(aisling, dmgCalc, skill);
+        aisling.ThreatMeter += 15000000000;
+        _skillMethod.OnSuccess(_target, aisling, skill, 0, false, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+        _success = _skillMethod.OnUse(aisling, skill);
+
+        if (_success)
+        {
+            OnSuccess(aisling);
+        }
+        else
+        {
+            OnFailed(aisling);
+        }
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        long dmg = 0;
+        if (sprite is not Aisling damageDealingAisling) return dmg;
+        var client = damageDealingAisling.Client;
+        var imp = 50 + skill.Level;
+        dmg = client.Aisling.Str * 12 + client.Aisling.Int * 3;
+        dmg += dmg * imp / 100;
+
+        return dmg;
+    }
+}
