@@ -27,14 +27,14 @@ public static class Generator
     /// <returns>Random element from collection</returns>
     public static T RandomIEnum<T>(this IEnumerable<T> enumerable)
     {
-        return enumerable.RandomElementUsing<T>(new Random());
+        return enumerable.RandomElementUsing<T>();
     }
 
-    private static T RandomElementUsing<T>(this IEnumerable<T> enumerable, Random rand)
+    private static T RandomElementUsing<T>(this IEnumerable<T> enumerable)
     {
-        var enumerable1 = enumerable as T[] ?? enumerable.ToArray();
-        var index = rand.Next(0, enumerable1.Count());
-        return enumerable1.ElementAt(index);
+        var enumeratedArray = enumerable as T[] ?? enumerable.ToArray();
+        var index = Random.Shared.Next(0, enumeratedArray.Count());
+        return enumeratedArray.ElementAt(index);
     }
 
     public static int RandomMonsterStatVariance(int value)
