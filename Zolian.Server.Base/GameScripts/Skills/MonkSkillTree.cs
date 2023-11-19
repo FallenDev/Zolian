@@ -1633,7 +1633,6 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
 public class NinthGate(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -1672,15 +1671,6 @@ public class NinthGate(Skill skill) : SkillScript(skill)
     {
         if (!skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
-        _success = _skillMethod.OnUse(aisling, skill);
-
-        if (_success)
-        {
-            OnSuccess(aisling);
-        }
-        else
-        {
-            OnFailed(aisling);
-        }
+        OnSuccess(aisling);
     }
 }

@@ -1415,3 +1415,49 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
         }
     }
 }
+
+[Script("Berserk")]
+public class Berserk(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingAisling) return;
+        var client = damageDealingAisling.Client;
+
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to focus");
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Berserk";
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var buff = new buff_berserk();
+        {
+            _skillMethod.ApplyPhysicalBuff(aisling, buff);
+        }
+
+        _skillMethod.OnSuccess(aisling, aisling, skill, 0, false, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+        OnSuccess(aisling);
+    }
+}

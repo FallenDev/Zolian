@@ -56,7 +56,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsSilenced => HasDebuff("Silence");
     public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend") || i.Name.Contains("Hurricane") || i.Name.Contains("Decay"));
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain");
-    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep");
+    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep") || HasBuff("Berserker Rage");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsCharmed => HasDebuff("Entice");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
@@ -1404,6 +1404,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (damageDealingSprite.NinthGateReleased)
             dmg *= 3;
 
+        if (damageDealingSprite.Berserk)
+            dmg *= 2;
+
         dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
         var convDmg = (int)dmg;
 
@@ -1477,6 +1480,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg = LuckModifier(dmg);
         dmg = ComputeDmgFromWillSavingThrow(dmg);
+
+        if (damageDealingSprite.Berserk)
+            dmg *= 2;
+
         dmg = CompleteDamageApplication(damageDealingSprite, dmg, sound, amplifier);
         var convDmg = (int)dmg;
 
