@@ -15,6 +15,8 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private readonly Bank _bankTeller = new();
+    private bool _depositGoldCancel;
+    private bool _withdrawGoldCancel;
 
     public override void OnClick(WorldClient client, uint serial)
     {
@@ -25,7 +27,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
     protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
-
+        _depositGoldCancel = false;
+        _withdrawGoldCancel = false;
         var options = new List<Dialog.OptionsDataItem>();
 
         if (client.Aisling.Inventory.TotalItems > 0)
@@ -361,7 +364,13 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
                 break;
             case 0x07:
+                if (_depositGoldCancel)
+                {
+                    client.CloseDialog();
+                    return;
+                }
                 client.SendTextInput(Mundane, $"{{=aInventory: {{=q{client.Aisling.GoldPoints}\n{{=aBanked: {{=c{client.Aisling.BankedGold}", 0x07, "Deposit:", 10);
+                _depositGoldCancel = true;
                 break;
             case 0x08:
                 {
@@ -397,7 +406,13 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 client.CloseDialog();
                 break;
             case 0x0A:
+                if (_withdrawGoldCancel)
+                {
+                    client.CloseDialog();
+                    return;
+                }
                 client.SendTextInput(Mundane, $"{{=cBanked: {{=q{client.Aisling.BankedGold}\n{{=aInventory: {{=c{client.Aisling.GoldPoints}", 0x0A, "Withdraw:", 10);
+                _withdrawGoldCancel = true;
                 break;
             case 0x0B:
                 var correctWithdraw = long.TryParse(args, out var withdrawAmount);
