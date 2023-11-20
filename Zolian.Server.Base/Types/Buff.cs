@@ -63,6 +63,7 @@ public class Buff : IBuff
             "Gryphons Grace" => new buff_GryphonsGrace(),
             "Orcish Strength" => new buff_OrcishStrength(),
             "Feywild Nectar" => new buff_FeywildNectar(),
+            "Drunken Fist" => new buff_drunkenFist(),
             "Ninth Gate Released" => new buff_ninthGate(),
             "Berserker Rage" => new buff_berserk(),
             "Briarthorn Aura" => new aura_BriarThorn(),

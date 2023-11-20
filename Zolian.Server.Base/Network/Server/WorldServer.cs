@@ -1464,6 +1464,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
         {
             var (publicMessageType, message) = localArgs;
+            if (localClient.Aisling.DrunkenFist)
+            {
+                var slurred = Generator.RandomNumPercentGen();
+                if (slurred >= .50)
+                {
+                    const string drunk = "..   .hic!  ";
+                    var drunkSpot = Random.Shared.Next(0, message.Length);
+                    message = message.Remove(drunkSpot).Insert(drunkSpot, drunk);
+                }
+            }
             localClient.LastMessageSent = readyTime;
             string response;
             IEnumerable<Aisling> audience;
@@ -1936,6 +1946,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var fromAisling = localClient.Aisling;
             if (targetName.Length > 12) return default;
             if (message.Length > 100) return default;
+            if (localClient.Aisling.DrunkenFist)
+            {
+                var slurred = Generator.RandomNumPercentGen();
+                if (slurred >= .50)
+                {
+                    const string drunk = "..   .hic!  ";
+                    var drunkSpot = Random.Shared.Next(0, message.Length);
+                    message = message.Remove(drunkSpot).Insert(drunkSpot, drunk);
+                }
+            }
             client.LastWhisperMessageSent = readyTime;
             var maxLength = CONSTANTS.MAX_SERVER_MESSAGE_LENGTH - targetName.Length - 4;
             if (message.Length > maxLength)

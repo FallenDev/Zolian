@@ -297,6 +297,44 @@ public class buff_clawfist : Buff
     }
 }
 
+public class buff_drunkenFist : Buff
+{
+    public override byte Icon => 203;
+    public override int Length => 45;
+    public override string Name => "Drunken Fist";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour body begins to sway, (+25% dmg +25% def)");
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou are no longer drunk!");
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, aisling.Serial));
+        DeleteBuff(aisling, buff);
+    }
+}
+
+
 public class buff_ninthGate : Buff
 {
     public override byte Icon => 208;

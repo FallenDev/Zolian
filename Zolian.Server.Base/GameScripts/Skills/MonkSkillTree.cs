@@ -1632,19 +1632,9 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
 [Script("Ninth Gate")]
 public class NinthGate(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to focus");
-        if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1660,6 +1650,42 @@ public class NinthGate(Skill skill) : SkillScript(skill)
         };
 
         var buff = new buff_ninthGate();
+        {
+            _skillMethod.ApplyPhysicalBuff(aisling, buff);
+        }
+
+        _skillMethod.OnSuccess(aisling, aisling, skill, 0, false, action);
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+        OnSuccess(aisling);
+    }
+}
+
+[Script("Drunken Fist")]
+public class DrunkenFist(Skill skill) : SkillScript(skill)
+{
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite) { }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Drunken Fist";
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.HandsUp2,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var buff = new buff_drunkenFist();
         {
             _skillMethod.ApplyPhysicalBuff(aisling, buff);
         }

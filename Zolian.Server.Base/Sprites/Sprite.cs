@@ -65,6 +65,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
     public bool NinthGateReleased => HasBuff("Ninth Gate Release");
+    public bool DrunkenFist => HasBuff("Drunken Fist");
     public bool Berserk => HasBuff("Berserker Rage");
 
     public bool CanSeeInvisible
@@ -1401,6 +1402,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         dmg = LuckModifier(dmg);
         dmg = ComputeDmgFromAc(dmg);
 
+        if (DrunkenFist)
+            dmg -= (int)(dmg * 0.25);
+
+        if (damageDealingSprite.DrunkenFist)
+            dmg = (int)(dmg * 1.25);
+
         if (damageDealingSprite.NinthGateReleased)
             dmg *= 3;
 
@@ -1480,6 +1487,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg = LuckModifier(dmg);
         dmg = ComputeDmgFromWillSavingThrow(dmg);
+
+        if (DrunkenFist)
+            dmg -= (int)(dmg * 0.25);
 
         if (damageDealingSprite.Berserk)
             dmg *= 2;
