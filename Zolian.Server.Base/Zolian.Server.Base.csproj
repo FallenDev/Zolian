@@ -51,8 +51,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Chaos-Server\Chaos.Networking\Chaos.Networking.csproj" />
-	  <ProjectReference Include="..\..\Chaos-Server\Chaos.Time\Chaos.Time.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Networking\Chaos.Networking.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Time\Chaos.Time.csproj" />
 	</ItemGroup>
 
 	<Import Project="..\Server.Configurations\Server.Configurations.projitems" Label="Shared" />
