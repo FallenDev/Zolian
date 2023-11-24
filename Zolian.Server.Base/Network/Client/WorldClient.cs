@@ -1280,7 +1280,7 @@ namespace Darkages.Network.Client
 
                 if (skill.CurrentCooldown < skill.Template.Cooldown && skill.CurrentCooldown != 0)
                 {
-                    Aisling.UsedSkill(skill);
+                    SendCooldown(true, skill.Slot, skill.CurrentCooldown);
                 }
 
                 Skill.AttachScript(skill);

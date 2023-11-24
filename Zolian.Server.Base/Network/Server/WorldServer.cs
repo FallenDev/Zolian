@@ -1877,8 +1877,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             skill.InUse = true;
             // Skill animation and execute
             ExecuteAssail(lpClient, skill);
-            skill.InUse = false;
-
             // Skill cleanup
             var overburden = 0;
             if (lpClient.Aisling.Overburden)
@@ -1887,6 +1885,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             lpClient.SendCooldown(true, skill.Slot, skill.Template.Cooldown + overburden);
             lastTemplate = skill.Template.Name;
             lpClient.LastAssail = DateTime.UtcNow;
+            skill.InUse = false;
         }
 
         if (lpClient.Aisling.Overburden)
@@ -2899,15 +2898,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (skill.Template == null || skill.Scripts == null) return default;
 
             if (!skill.CanUse()) return default;
+            if (skill.InUse) return default;
 
             skill.InUse = true;
 
             var script = skill.Scripts.Values.First();
             script?.OnUse(localClient.Aisling);
-
-            skill.InUse = false;
             skill.CurrentCooldown = skill.Template.Cooldown;
             localClient.SendCooldown(true, localArgs.SourceSlot, skill.CurrentCooldown);
+
+            skill.InUse = false;
             return default;
         }
     }

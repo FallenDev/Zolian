@@ -817,12 +817,12 @@ public sealed class Aisling : Player, IAisling
                 skill.InUse = true;
                 var script = skill.Scripts.Values.First();
                 script?.OnUse(this);
-                skill.InUse = false;
 
                 skill.CurrentCooldown = skill.Template.Cooldown;
                 Client.SendCooldown(true, skill.Slot, skill.Template.Cooldown);
                 if (skill.Template.SkillType == SkillScope.Assail)
                     Client.LastAssail = DateTime.UtcNow;
+                skill.InUse = false;
             }
         }
         
