@@ -2294,7 +2294,6 @@ namespace Darkages.Network.Client
         {
             var equipment = new Dictionary<EquipmentSlot, ItemInfo>();
             var partyOpen = aisling.PartyStatus == (GroupStatus)1;
-            var legendMarks = new List<LegendMarkInfo>();
 
             #region Gear
 
@@ -2661,36 +2660,33 @@ namespace Darkages.Network.Client
             #endregion
 
             var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
-            var nullLegends = legends.Where(legend => legend.Value == null).ToList();
             var legendCount = aisling.LegendBook.LegendMarks;
-
-            foreach (var removeLegend in nullLegends)
-            {
-                legends.Remove(removeLegend);
-            }
-
-            foreach (var legendItem in legends)
-            {
-                if (legendItem == null) continue;
-                var markCount = legendCount.Count(item => item.Value == legendItem.Value);
-                var legendText = "";
-                if (!legendItem.Value.IsNullOrEmpty())
+            var legendMarks = legends
+                .Where(legend => legend != null && !string.IsNullOrEmpty(legend.Value))
+                .Select(legend =>
                 {
-                    legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
-                }
-
-                var legend = new LegendMarkInfo
+                    var markCount = legendCount.Count(item => item.Value == legend.Value);
+                    var legendText = $"{legend.Value} - {legend.Time?.ToShortDateString()} ({markCount})";
+                    return new LegendMarkInfo
+                    {
+                        Color = (MarkColor)legend.Color,
+                        Icon = (MarkIcon)legend.Icon,
+                        Key = legend.Category,
+                        Text = legendText
+                    };
+                })
+                .ToList();
+            var nullLegends = legends
+                .Where(legend => legend != null && string.IsNullOrEmpty(legend.Value))
+                .Select(legend => new LegendMarkInfo
                 {
-                    Color = (MarkColor)legendItem.Color,
-                    Icon = (MarkIcon)legendItem.Icon,
-                    Key = legendItem.Category,
-                    Text = legendText
-                };
+                    Color = (MarkColor)legend.Color,
+                    Icon = (MarkIcon)legend.Icon,
+                    Key = legend.Category,
+                    Text = ""
+                });
 
-                legendMarks.Add(legend);
-            }
-
-            legendMarks.AddRange(from legendItem in nullLegends where legendItem != null select new LegendMarkInfo { Color = (MarkColor)legendItem.Color, Icon = (MarkIcon)legendItem.Icon, Key = legendItem.Category, Text = "" });
+            legendMarks.AddRange(nullLegends);
 
             var args = new ProfileArgs
             {
@@ -2830,7 +2826,6 @@ namespace Darkages.Network.Client
 
             var equipment = new Dictionary<EquipmentSlot, ItemInfo>();
             var partyOpen = Aisling.PartyStatus == (GroupStatus)1;
-            var legendMarks = new List<LegendMarkInfo>();
 
             #region Gear
 
@@ -3197,36 +3192,33 @@ namespace Darkages.Network.Client
             #endregion
 
             var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
-            var nullLegends = legends.Where(legend => legend.Value == null).ToList();
             var legendCount = Aisling.LegendBook.LegendMarks;
-
-            foreach (var removeLegend in nullLegends)
-            {
-                legends.Remove(removeLegend);
-            }
-
-            foreach (var legendItem in legends)
-            {
-                if (legendItem == null) continue;
-                var markCount = legendCount.Count(item => item.Value == legendItem.Value);
-                var legendText = "";
-                if (!legendItem.Value.IsNullOrEmpty())
+            var legendMarks = legends
+                .Where(legend => legend != null && !string.IsNullOrEmpty(legend.Value))
+                .Select(legend =>
                 {
-                    legendText = $"{legendItem.Value} - {legendItem.Time?.ToShortDateString()} ({markCount})";
-                }
-
-                var legend = new LegendMarkInfo
+                    var markCount = legendCount.Count(item => item.Value == legend.Value);
+                    var legendText = $"{legend.Value} - {legend.Time?.ToShortDateString()} ({markCount})";
+                    return new LegendMarkInfo
+                    {
+                        Color = (MarkColor)legend.Color,
+                        Icon = (MarkIcon)legend.Icon,
+                        Key = legend.Category,
+                        Text = legendText
+                    };
+                })
+                .ToList();
+            var nullLegends = legends
+                .Where(legend => legend != null && string.IsNullOrEmpty(legend.Value))
+                .Select(legend => new LegendMarkInfo
                 {
-                    Color = (MarkColor)legendItem.Color,
-                    Icon = (MarkIcon)legendItem.Icon,
-                    Key = legendItem.Category,
-                    Text = legendText
-                };
+                    Color = (MarkColor)legend.Color,
+                    Icon = (MarkIcon)legend.Icon,
+                    Key = legend.Category,
+                    Text = ""
+                });
 
-                legendMarks.Add(legend);
-            }
-
-            legendMarks.AddRange(from legendItem in nullLegends where legendItem != null select new LegendMarkInfo { Color = (MarkColor)legendItem.Color, Icon = (MarkIcon)legendItem.Icon, Key = legendItem.Category, Text = "" });
+            legendMarks.AddRange(nullLegends);
 
             var args = new SelfProfileArgs
             {
