@@ -24,6 +24,13 @@ public abstract class RewardScript : IScriptBase
         [(120, 149)] = null,
         [(150, 179)] = null,
         [(180, 200)] = null,
+        [(201, 225)] = null,
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> BeltDrops = new()
@@ -40,10 +47,17 @@ public abstract class RewardScript : IScriptBase
         [(88, 95)] = new List<string> { "Fire Braided Mythril Belt", "Wind Braided Mythril Belt", "Earth Braided Mythril Belt", "Water Braided Mythril Belt", "Dark Braided Mythril Belt", "Light Braided Mythril Belt" },
         [(96, 99)] = new List<string> { "Fire Braided Hy-Brasyl Belt", "Wind Braided Hy-Brasyl Belt", "Earth Braided Hy-Brasyl Belt", "Water Braided Hy-Brasyl Belt", "Dark Braided Hy-Brasyl Belt", "Light Braided Hy-Brasyl Belt" },
         [(100, 109)] = null,
-        [(110, 119)] = null,
-        [(120, 149)] = null,
-        [(150, 179)] = null,
-        [(180, 200)] = null,
+        [(110, 119)] = new List<string> { "Void Fringe Belt", "Holy Fringe Belt", "Fire Fringe Belt", "Wind Fringe Belt", "Earth Fringe Belt", "Sea Fringe Belt" },
+        [(120, 149)] = new List<string> { "Void Wade Belt", "Holy Wade Belt", "Fire Wade Belt", "Wind Wade Belt", "Earth Wade Belt", "Water Wade Belt" },
+        [(150, 179)] = new List<string> { "Void Clasp Belt", "Holy Clasp Belt", "Fire Clasp Belt", "Wind Clasp Belt", "Earth Clasp Belt", "Sea Clasp Belt" },
+        [(180, 200)] = new List<string> { "Flame Intricate Girdle", "Wind Intricate Girdle", "Earth Intricate Girdle", "Sea Intricate Girdle" },
+        [(201, 225)] = new List<string> { "Flame Fortified Girdle", "Wind Fortified Girdle", "Earth Fortified Girdle", "Sea Fortified Girdle" },
+        [(226, 249)] = null,
+        [(250, 299)] = new List<string> { "Cursed Belt", "Polished Hybrasyl Girdle" },
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> BootDrops = new()
@@ -60,9 +74,16 @@ public abstract class RewardScript : IScriptBase
         [(88, 99)] = new List<string> { "Enchanted Boots" },
         [(100, 109)] = new List<string> { "Enchanted High Boots" },
         [(110, 119)] = new List<string> { "Enchanted Slippers" },
-        [(120, 149)] = null,
-        [(150, 179)] = null,
-        [(180, 200)] = null,
+        [(120, 149)] = new List<string> { "Arctic Walkers" },
+        [(150, 179)] = new List<string> { "Mulberry Treads", "Swamp Wadders" },
+        [(180, 200)] = new List<string> { "Royal Treads" },
+        [(201, 225)] = new List<string> { "Mythic Slippers", "Hybrasyl Boots" },
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> EarringDrops = new()
@@ -82,6 +103,13 @@ public abstract class RewardScript : IScriptBase
         [(120, 149)] = new List<string> { "Garnet Studded Earrings", "Sapphire Studded Earrings", "Ruby Studded Earrings", "Emerald Studded Earrings" },
         [(150, 179)] = new List<string> { "Ruby Satchel Earrings", "Sapphire Satchel Earrings", "Emerald Satchel Earrings", "Garnet Satchel Earrings" },
         [(180, 200)] = new List<string> { "Emblazoned Sapphire Earrings", "Emblazoned Emerald Earrings", "Emblazoned Diamond Earrings", "Emblazoned Garnet Earrings" },
+        [(201, 225)] = null,
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> GreaveDrops = new()
@@ -99,8 +127,15 @@ public abstract class RewardScript : IScriptBase
         [(100, 109)] = new List<string> { "Light Wing Greaves", "Heavy Wing Greaves" },
         [(110, 119)] = null,
         [(120, 149)] = new List<string> { "Ebony Shinguards", "Mystic Shinguards" },
-        [(150, 179)] = null,
-        [(180, 200)] = null,
+        [(150, 179)] = new List<string> { "Gravel Poleyns", "Gust Poleyns", "Flame Poleyns", "Water Spout Poleyns" },
+        [(180, 200)] = new List<string> { "Enlightened Poleyns" },
+        [(201, 225)] = new List<string> { "Lava Poleyns" },
+        [(226, 249)] = new List<string> { "Forest Poleyns" },
+        [(250, 299)] = new List<string> { "Mana Guards", "Blade Poleyns" },
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> HandDrops = new()
@@ -119,7 +154,14 @@ public abstract class RewardScript : IScriptBase
         [(110, 119)] = null,
         [(120, 149)] = new List<string> { "Scurvy Gauntlet", "Amorphous Gauntlet" },
         [(150, 179)] = new List<string> { "Kandor Glove" },
-        [(180, 200)] = null,
+        [(180, 200)] = new List<string> { "Bran Vambrace" },
+        [(201, 225)] = new List<string> { "Aquatis Vambrace" },
+        [(226, 249)] = new List<string> { "Ruby Hybrasyl Gauntlet" },
+        [(250, 299)] = new List<string> { "Juoinior Gauntlet" },
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> NecklaceDrops = new()
@@ -138,7 +180,14 @@ public abstract class RewardScript : IScriptBase
         [(110, 119)] = null,
         [(120, 149)] = new List<string> { "Fire Encrusted Necklace", "Wind Encrusted Necklace", "Earth Encrusted Necklace", "Water Encrusted Necklace", "Void Encrusted Necklace", "Holy Encrusted Necklace" },
         [(150, 179)] = new List<string> { "Fire Diamat Necklace", "Wind Diamat Necklace", "Earth Diamat Necklace", "Water Diamat Necklace", "Void Diamat Necklace", "Holy Diamat Necklace" },
-        [(180, 200)] = new List<string> { "Children's Crux", "Fervent Mala" }
+        [(180, 200)] = new List<string> { "Children's Crux", "Fervent Mala" },
+        [(201, 225)] = null,
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> OffHandDrops = new()
@@ -158,6 +207,13 @@ public abstract class RewardScript : IScriptBase
         [(120, 149)] = null,
         [(150, 179)] = null,
         [(180, 200)] = null,
+        [(201, 225)] = null,
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> ShieldDrops = new()
@@ -177,6 +233,13 @@ public abstract class RewardScript : IScriptBase
         [(120, 149)] = new List<string> { "Talgonite Shield", "Floga Talgonite Shield", "Thalassa Talgonite Shield", "Zephyr Talgonite Shield", "Laspi Talgonite Shield", "Agios Talgonite Shield", "Skia Talgonite Shield" },
         [(150, 179)] = new List<string> { "Blood Shield", "Floga Blood Shield", "Thalassa Blood Shield", "Zephyr Blood Shield", "Laspi Blood Shield", "Agios Blood Shield", "Skia Blood Shield" },
         [(180, 200)] = null,
+        [(201, 225)] = null,
+        [(226, 249)] = null,
+        [(250, 299)] = null,
+        [(300, 349)] = null,
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> WristDrops = new()
@@ -196,6 +259,13 @@ public abstract class RewardScript : IScriptBase
         [(120, 149)] = null,
         [(150, 179)] = new List<string> { "Scale Bracer" },
         [(180, 200)] = null,
+        [(201, 225)] = null,
+        [(226, 249)] = new List<string> { "Juggernaut Glove" },
+        [(250, 299)] = new List<string> { "Talon Gauntlet" },
+        [(300, 349)] = new List<string> { "Golden Talon Gauntlet" },
+        [(350, 399)] = null,
+        [(400, 449)] = null,
+        [(450, 500)] = null
     };
 
     protected static IEnumerable<string> GenerateDropsBasedOnLevel(Monster monster, Dictionary<(int, int), List<string>> dropsDict)
