@@ -2,6 +2,7 @@
 using Chaos.Networking.Entities.Server;
 
 using Darkages.Enums;
+using Darkages.GameScripts.Spells;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -2622,6 +2623,132 @@ public class Mordhau(Skill skill) : SkillScript(skill)
 
             aisling.ActionUsed = "Mordhau";
             var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
+        }
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!skill.CanUse()) return;
+
+        if (sprite is Aisling aisling)
+        {
+            _success = _skillMethod.OnUse(aisling, skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+        else
+        {
+            var action = new BodyAnimationArgs
+            {
+                AnimationSpeed = 30,
+                BodyAnimation = BodyAnimation.Assail,
+                Sound = null,
+                SourceId = sprite.Serial
+            };
+
+            var enemies = sprite.MonsterGetInFrontToSide();
+
+            foreach (var enemy in enemies)
+            {
+                _target = enemy;
+
+                if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+                {
+                    _skillMethod.FailedAttempt(sprite, skill, action);
+                    OnFailed(sprite);
+                    return;
+                }
+
+                var dmgCalc = DamageCalc(sprite);
+                _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+            }
+        }
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + skill.Level;
+            dmg = client.Aisling.Str * 7 + client.Aisling.Con * 7;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 7 + damageMonster.Con * 4;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+// Aisling Str * 7, Con * 7 | Monster Str * 7, Con * 4
+[Script("Crushing Mace")]
+public class CrushingMace(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
+            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 20,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = aisling.Serial
+        };
+
+        var enemies = aisling.GetInFrontToSide();
+
+        foreach (var enemy in enemies)
+        {
+            _target = enemy;
+
+            if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+            {
+                _skillMethod.FailedAttempt(aisling, skill, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            aisling.ActionUsed = "Crushing Mace";
+            var dmgCalc = DamageCalc(sprite);
+
+            if (aisling.EquipmentManager.Equipment[1] != null)
+            {
+                if (aisling.EquipmentManager.Equipment[1].Item.Template.Group == "Maces")
+                {
+                    dmgCalc *= 2;
+                }
+            }
+            
             _skillMethod.OnSuccess(_target, aisling, skill, dmgCalc, _crit, action);
         }
     }
