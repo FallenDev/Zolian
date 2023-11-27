@@ -2385,13 +2385,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             localClient.SendExchangeStart(aisling);
                             aisling.Client.SendExchangeStart(localClient.Aisling);
 
-                            if (amount > localClient.Aisling.GoldPoints)
+                            if ((uint)amount > localClient.Aisling.GoldPoints)
                             {
                                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
                                 break;
                             }
 
-                            if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
+                            if (aisling.GoldPoints + (uint)amount > ServerSetup.Instance.Config.MaxCarryGold)
                             {
                                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
                                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
@@ -2400,7 +2400,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                             if (amount > 0)
                             {
-                                localClient.Aisling.GoldPoints -= amount;
+                                localClient.Aisling.GoldPoints -= (uint)amount;
                                 localClient.Aisling.Exchange.Gold = (uint)amount;
                                 localClient.SendAttributes(StatUpdateType.ExpGold);
                                 localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
@@ -3239,14 +3239,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     if (localPlayer.Exchange.Gold != 0) break;
 
                     var gold = localArgs.GoldAmount;
+                    if (gold is null or <= 0) gold = 0;
 
-                    if (gold > localPlayer.GoldPoints)
+                    if ((uint)gold > localPlayer.GoldPoints)
                     {
                         localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
                         break;
                     }
 
-                    if (otherPlayer.GoldPoints + gold > ServerSetup.Instance.Config.MaxCarryGold)
+                    if (otherPlayer.GoldPoints + (uint)gold > ServerSetup.Instance.Config.MaxCarryGold)
                     {
                         localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
                         otherPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
@@ -3255,7 +3256,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                     if (gold > 0)
                     {
-                        localPlayer.GoldPoints -= (long)gold;
+                        localPlayer.GoldPoints -= (uint)gold;
                         localPlayer.Exchange.Gold = (uint)gold;
                         localClient.SendAttributes(StatUpdateType.ExpGold);
                         localPlayer.Client.SendExchangeSetGold(false, localPlayer.Exchange.Gold);

@@ -10,23 +10,18 @@ namespace Darkages.Types;
 
 public class Bank : IBank
 {
-    public Bank()
-    {
-        Items = new ConcurrentDictionary<long, Item>();
-    }
+    public ConcurrentDictionary<long, Item> Items { get; } = new();
+    public ulong TempGoldDeposit { get; set; }
+    public ulong TempGoldWithdraw { get; set; }
 
-    public ConcurrentDictionary<long, Item> Items { get; }
-    public long TempGoldDeposit { get; set; }
-    public long TempGoldWithdraw { get; set; }
-
-    public void DepositGold(IWorldClient client, long gold)
+    public void DepositGold(IWorldClient client, ulong gold)
     {
         client.Aisling.GoldPoints -= gold;
         client.Aisling.BankedGold += gold;
         client.SendAttributes(StatUpdateType.ExpGold);
     }
 
-    public void WithdrawGold(IWorldClient client, long gold)
+    public void WithdrawGold(IWorldClient client, ulong gold)
     {
         client.Aisling.GoldPoints += gold;
         client.Aisling.BankedGold -= gold;

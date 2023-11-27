@@ -374,7 +374,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
             case 0x08:
                 {
-                    var correctDeposit = long.TryParse(args, out var depositAmount);
+                    var correctDeposit = ulong.TryParse(args, out var depositAmount);
                     if (correctDeposit)
                     {
                         if (client.Aisling.GoldPoints >= depositAmount)
@@ -415,7 +415,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 _withdrawGoldCancel = true;
                 break;
             case 0x0B:
-                var correctWithdraw = long.TryParse(args, out var withdrawAmount);
+                var correctWithdraw = ulong.TryParse(args, out var withdrawAmount);
                 if (correctWithdraw)
                 {
                     if (client.Aisling.BankedGold >= withdrawAmount)

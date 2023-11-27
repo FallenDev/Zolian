@@ -59,10 +59,10 @@ public class Player : Sprite
     public bool Developer { get; set; }
     public bool Ranger { get; set; }
     public bool Knight { get; set; }
-    public long GoldPoints { get; set; }
+    public ulong GoldPoints { get; set; }
     public short StatPoints { get; set; }
-    public long GamePoints { get; set; }
-    public long BankedGold { get; set; }
+    public ulong GamePoints { get; set; }
+    public ulong BankedGold { get; set; }
     public short ArmorImg { get; set; }
     public short HelmetImg { get; set; }
     public short ShieldImg { get; set; }
