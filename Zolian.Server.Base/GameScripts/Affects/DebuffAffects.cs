@@ -41,6 +41,7 @@ public class Lycanisim : Debuff
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += DmgModifier;
         aisling.Afflictions |= Afflictions.Lycanisim;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -90,6 +91,7 @@ public class Vampirisim : Debuff
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += HitModifier;
         aisling.Afflictions |= Afflictions.Vampirisim;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -115,7 +117,7 @@ public class Plagued : Debuff
     private static int HpModifier => 500;
     private static int MpModifier => 500;
     private static int StatModifier => 5;
-    public override byte Icon => 208;
+    public override byte Icon => 211;
     public override int Length => int.MaxValue;
     public override string Name => "Plagued";
 
@@ -137,6 +139,7 @@ public class Plagued : Debuff
         aisling.BonusCon -= StatModifier;
         aisling.BonusDex -= StatModifier;
         aisling.Afflictions |= Afflictions.Plagued;
+        aisling.Afflictions &= ~Afflictions.Normal;
 
         var diseased = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes);
         if (diseased)
@@ -184,7 +187,7 @@ public class TheShakes : Debuff
     private static int ConModifier => 5;
     private static int DexModifier => 5;
     private static byte DmgModifier => 50;
-    public override byte Icon => 208;
+    public override byte Icon => 177;
     public override int Length => int.MaxValue;
     public override string Name => "The Shakes";
 
@@ -202,6 +205,7 @@ public class TheShakes : Debuff
         aisling.BonusDex -= DexModifier;
         aisling.BonusDmg -= DmgModifier;
         aisling.Afflictions |= Afflictions.TheShakes;
+        aisling.Afflictions &= ~Afflictions.Normal;
 
         var diseased = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
         if (diseased)
@@ -237,7 +241,7 @@ public class Stricken : Debuff
     private static int MpModifier => 1500;
     private static int WisModifier => 10;
     private static byte RegenModifier => 10;
-    public override byte Icon => 208;
+    public override byte Icon => 162;
     public override int Length => int.MaxValue;
     public override string Name => "Stricken";
 
@@ -255,6 +259,7 @@ public class Stricken : Debuff
         aisling.BonusWis -= WisModifier;
         aisling.BonusRegen -= RegenModifier;
         aisling.Afflictions |= Afflictions.Stricken;
+        aisling.Afflictions &= ~Afflictions.Normal;
 
         var hallowed = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
         if (hallowed)
@@ -287,7 +292,7 @@ public class Stricken : Debuff
 
 public class Rabies : Debuff
 {
-    public override byte Icon => 110;
+    public override byte Icon => 122;
     public override int Length => 300;
     public override string Name => "Rabies";
 
@@ -303,6 +308,7 @@ public class Rabies : Debuff
 
         InsertDebuff(aisling, debuff);
         aisling.Afflictions |= Afflictions.Rabies;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(24, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -330,6 +336,7 @@ public class Rabies : Debuff
         if (affected is not Aisling aisling) return;
         var death = new DebuffReaping();
         death.OnApplied(affected, death);
+        aisling.Afflictions &= ~Afflictions.Rabies;
         DeleteDebuff(aisling, debuff);
     }
 }
@@ -337,7 +344,7 @@ public class Rabies : Debuff
 public class LockJoint : Debuff
 {
     private static int DmgModifier => 30;
-    public override byte Icon => 208;
+    public override byte Icon => 176;
     public override int Length => int.MaxValue;
     public override string Name => "Lock Joint";
 
@@ -361,14 +368,15 @@ public class LockJoint : Debuff
 
         aisling.BonusDmg -= DmgModifier;
         aisling.Afflictions |= Afflictions.LockJoint;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
-        var rand = Generator.RandNumGen20();
-        if (rand != 1) return;
+        var rand = Generator.RandomNumPercentGen();
+        if (rand >= 0.02) return;
         var diseasedDebuff = new DebuffBeagsuain();
         diseasedDebuff.OnApplied(affected, diseasedDebuff);
     }
@@ -390,7 +398,7 @@ public class NumbFall : Debuff
 {
     private static int DmgModifier => 30;
     private static byte HitModifier => 50;
-    public override byte Icon => 208;
+    public override byte Icon => 147;
     public override int Length => int.MaxValue;
     public override string Name => "Numb Fall";
 
@@ -415,6 +423,7 @@ public class NumbFall : Debuff
         aisling.BonusHit -= HitModifier;
         aisling.BonusDmg -= DmgModifier;
         aisling.Afflictions |= Afflictions.NumbFall;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -439,7 +448,7 @@ public class Diseased : Debuff
 {
     private static int StatModifier => 10;
     private static byte RegenModifier => 50;
-    public override byte Icon => 208;
+    public override byte Icon => 209;
     public override int Length => int.MaxValue;
     public override string Name => "Diseased";
 
@@ -460,6 +469,7 @@ public class Diseased : Debuff
         aisling.BonusCon -= StatModifier;
         aisling.BonusDex -= StatModifier;
         aisling.Afflictions |= Afflictions.Diseased;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -487,7 +497,7 @@ public class Diseased : Debuff
 public class Hallowed : Debuff
 {
     private static int WillModifier => 80;
-    public override byte Icon => 208;
+    public override byte Icon => 200;
     public override int Length => int.MaxValue;
     public override string Name => "Hallowed";
 
@@ -503,6 +513,7 @@ public class Hallowed : Debuff
         InsertDebuff(aisling, debuff);
         aisling.BonusMr -= WillModifier;
         aisling.Afflictions |= Afflictions.Hallowed;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
@@ -524,7 +535,7 @@ public class Hallowed : Debuff
 
 public class Petrified : Debuff
 {
-    public override byte Icon => 208;
+    public override byte Icon => 201;
     public override int Length => int.MaxValue;
     public override string Name => "Petrified";
 
@@ -539,14 +550,15 @@ public class Petrified : Debuff
 
         InsertDebuff(aisling, debuff);
         aisling.Afflictions |= Afflictions.Petrified;
+        aisling.Afflictions &= ~Afflictions.Normal;
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
-        var rand = Generator.RandNumGen20();
-        if (rand != 1) return;
+        var rand = Generator.RandomNumPercentGen();
+        if (rand >= 0.05) return;
         var diseasedDebuff = new DebuffHalt();
         diseasedDebuff.OnApplied(affected, diseasedDebuff);
     }
@@ -1851,6 +1863,16 @@ public class DebuffReaping : Debuff
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
+        if (affected.Map.ID is 192 or 290 or 14758)
+        {
+            affected.Debuffs.TryRemove(debuff.Name, out _);
+            if (affected is not Aisling playerAffected) return;
+            playerAffected.Client.SendEffect(byte.MinValue, Icon);
+            playerAffected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot die here, saved");
+            DeleteDebuff(playerAffected, debuff);
+            return;
+        }
+
         switch (affected)
         {
             case Aisling aisling when !debuff.Cancelled:

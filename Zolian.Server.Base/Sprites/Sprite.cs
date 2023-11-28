@@ -1144,6 +1144,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
         }
 
+        ApplyAffliction(this, damageDealingSprite);
+
         // Apply modifiers for attacker
         dmg = ApplyPhysicalModifier();
 
@@ -1215,6 +1217,67 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (aisling.PainBane)
                 return (long)(dmg * 0.95);
             return dmg;
+        }
+
+        void ApplyAffliction(Sprite afflicted, Sprite attacker)
+        {
+            if (afflicted is not Aisling) return;
+            if (attacker is not Monster) return;
+            if (attacker.Level <= 249) return;
+            var affliction = Generator.RandomEnumValue<Afflictions>();
+            var rand = Generator.RandomNumPercentGen();
+            switch (affliction)
+            {
+                case Afflictions.Normal:
+                case Afflictions.Lycanisim:
+                case Afflictions.Vampirisim:
+                case Afflictions.Diseased:
+                case Afflictions.Hallowed:
+                case Afflictions.Petrified:
+                    return;
+                case Afflictions.Plagued:
+                    if (rand >= .995)
+                    {
+                        var debuff = new Plagued();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+                case Afflictions.TheShakes:
+                    if (rand >= .995)
+                    {
+                        var debuff = new TheShakes();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+                case Afflictions.Stricken:
+                    if (rand >= .995)
+                    {
+                        var debuff = new Stricken();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+                case Afflictions.Rabies:
+                    if (rand >= .995)
+                    {
+                        var debuff = new Rabies();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+                case Afflictions.LockJoint:
+                    if (rand >= .995)
+                    {
+                        var debuff = new LockJoint();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+                case Afflictions.NumbFall:
+                    if (rand >= .995)
+                    {
+                        var debuff = new NumbFall();
+                        debuff.OnApplied(afflicted, debuff);
+                    }
+                    break;
+            }
         }
     }
 
@@ -2076,7 +2139,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             colorInt = (byte)StatusBarColor.Orange;
         else if (buff.TimeLeft.IntIsWithin(61, 120))
             colorInt = (byte)StatusBarColor.Red;
-        else if (buff.TimeLeft.IntIsWithin(121, short.MaxValue))
+        else if (buff.TimeLeft.IntIsWithin(121, int.MaxValue))
             colorInt = (byte)StatusBarColor.White;
 
         aisling.Client.SendEffect((EffectColor)colorInt, buff.Icon);
@@ -2102,7 +2165,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             colorInt = (byte)StatusBarColor.Orange;
         else if (debuff.TimeLeft.IntIsWithin(61, 120))
             colorInt = (byte)StatusBarColor.Red;
-        else if (debuff.TimeLeft.IntIsWithin(121, short.MaxValue))
+        else if (debuff.TimeLeft.IntIsWithin(121, int.MaxValue))
             colorInt = (byte)StatusBarColor.White;
 
         aisling.Client.SendEffect((EffectColor)colorInt, debuff.Icon);

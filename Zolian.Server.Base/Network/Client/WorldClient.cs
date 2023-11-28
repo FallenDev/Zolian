@@ -61,6 +61,7 @@ namespace Darkages.Network.Client
         public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
         public readonly Stopwatch SkillControl = new();
         public readonly Stopwatch SpellControl = new();
+        private readonly Stopwatch _afflictionControl = new();
         public Spell LastSpell = new();
         public readonly Stopwatch StatusControl = new();
         private readonly Stopwatch _aggroMessageControl = new();
@@ -232,6 +233,7 @@ namespace Darkages.Network.Client
             ShowAggro();
             ItemQueueUpdateOrAdd();
             DisplayQualityPillar();
+            ApplyAffliction();
         }
 
         #region Events
@@ -417,15 +419,15 @@ namespace Darkages.Network.Client
             switch (Aisling.ActiveStatus)
             {
                 case ActivityStatus.Awake:
-                case ActivityStatus.DayDreaming:
                 case ActivityStatus.NeedGroup:
-                case ActivityStatus.Grouped:
                 case ActivityStatus.LoneHunter:
+                case ActivityStatus.Grouped:
                 case ActivityStatus.GroupHunter:
+                case ActivityStatus.DoNotDisturb:
+                    break;
+                case ActivityStatus.DayDreaming:
                 case ActivityStatus.NeedHelp:
                     DaydreamingRoutine();
-                    break;
-                case ActivityStatus.DoNotDisturb:
                     break;
             }
         }
@@ -590,6 +592,144 @@ namespace Darkages.Network.Client
             }
 
             _itemAnimationControl.Restart();
+        }
+
+        private void ApplyAffliction()
+        {
+            if (!_afflictionControl.IsRunning)
+            {
+                _afflictionControl.Start();
+            }
+
+            if (_afflictionControl.Elapsed.TotalSeconds < 5) return;
+            _afflictionControl.Restart();
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal)) return;
+            var hasAnAffliction = false;
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Lycanisim");
+                if (!debuff)
+                {
+                    var applyDebuff = new Lycanisim();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Vampirisim");
+                if (!debuff)
+                {
+                    var applyDebuff = new Vampirisim();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Plagued");
+                if (!debuff)
+                {
+                    var applyDebuff = new Plagued();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("The Shakes");
+                if (!debuff)
+                {
+                    var applyDebuff = new TheShakes();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Stricken))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Stricken");
+                if (!debuff)
+                {
+                    var applyDebuff = new Stricken();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Rabies))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Rabies");
+                if (!debuff)
+                {
+                    var applyDebuff = new Rabies();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.LockJoint))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Lock Joint");
+                if (!debuff)
+                {
+                    var applyDebuff = new LockJoint();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.NumbFall))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Numb Fall");
+                if (!debuff)
+                {
+                    var applyDebuff = new NumbFall();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Diseased))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Diseased");
+                if (!debuff)
+                {
+                    var applyDebuff = new Diseased();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Hallowed))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Hallowed");
+                if (!debuff)
+                {
+                    var applyDebuff = new Hallowed();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Petrified))
+            {
+                hasAnAffliction = true;
+                var debuff = Aisling.HasDebuff("Petrified");
+                if (!debuff)
+                {
+                    var applyDebuff = new Petrified();
+                    applyDebuff.OnApplied(Aisling, applyDebuff);
+                }
+            }
+
+            if (hasAnAffliction) return;
+            Aisling.Afflictions |= Afflictions.Normal;
         }
 
         private static void WorldCacheUpsert(Item item)

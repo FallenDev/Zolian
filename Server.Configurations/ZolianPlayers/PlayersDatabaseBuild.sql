@@ -355,7 +355,7 @@ CREATE TYPE dbo.PlayerType AS TABLE
 	[Path] VARCHAR(10),
 	[PastClass] VARCHAR(10),
 	[Race] VARCHAR(10),
-	[Afflictions] VARCHAR(10),
+	[Afflictions] VARCHAR(120),
 	[Gender] VARCHAR(6),
 	[HairColor] TINYINT,
 	[HairStyle] TINYINT,
