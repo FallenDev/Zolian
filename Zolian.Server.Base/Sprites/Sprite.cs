@@ -1236,42 +1236,42 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 case Afflictions.Petrified:
                     return;
                 case Afflictions.Plagued:
-                    if (rand >= .995)
+                    if (rand >= .9993)
                     {
                         var debuff = new Plagued();
                         debuff.OnApplied(afflicted, debuff);
                     }
                     break;
                 case Afflictions.TheShakes:
-                    if (rand >= .995)
+                    if (rand >= .9985)
                     {
                         var debuff = new TheShakes();
                         debuff.OnApplied(afflicted, debuff);
                     }
                     break;
                 case Afflictions.Stricken:
-                    if (rand >= .995)
+                    if (rand >= .9985)
                     {
                         var debuff = new Stricken();
                         debuff.OnApplied(afflicted, debuff);
                     }
                     break;
                 case Afflictions.Rabies:
-                    if (rand >= .995)
+                    if (rand >= .9997)
                     {
                         var debuff = new Rabies();
                         debuff.OnApplied(afflicted, debuff);
                     }
                     break;
                 case Afflictions.LockJoint:
-                    if (rand >= .995)
+                    if (rand >= .9987)
                     {
                         var debuff = new LockJoint();
                         debuff.OnApplied(afflicted, debuff);
                     }
                     break;
                 case Afflictions.NumbFall:
-                    if (rand >= .995)
+                    if (rand >= .996)
                     {
                         var debuff = new NumbFall();
                         debuff.OnApplied(afflicted, debuff);

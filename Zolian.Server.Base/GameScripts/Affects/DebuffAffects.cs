@@ -336,7 +336,6 @@ public class Rabies : Debuff
         if (affected is not Aisling aisling) return;
         var death = new DebuffReaping();
         death.OnApplied(affected, death);
-        aisling.Afflictions &= ~Afflictions.Rabies;
         DeleteDebuff(aisling, debuff);
     }
 }

@@ -2,7 +2,6 @@
 using Chaos.Networking.Entities.Server;
 
 using Darkages.Enums;
-using Darkages.GameScripts.Spells;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
