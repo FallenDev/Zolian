@@ -1222,7 +1222,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         void ApplyAffliction(Sprite afflicted, Sprite attacker)
         {
             if (afflicted is not Aisling) return;
-            if (attacker is not Monster) return;
+            if (attacker is not Monster monster) return;
             if (attacker.Level <= 249) return;
             var affliction = Generator.RandomEnumValue<Afflictions>();
             var rand = Generator.RandomNumPercentGen();
@@ -1236,45 +1236,112 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 case Afflictions.Petrified:
                     return;
                 case Afflictions.Plagued:
-                    if (rand >= .9993)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fungi) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Ooze) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Insect) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Plant) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead))
                     {
-                        var debuff = new Plagued();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9993)
+                        {
+                            var debuff = new Plagued();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
                 case Afflictions.TheShakes:
-                    if (rand >= .9985)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Celestial) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Demon) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dragon) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Elemental) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Robotic) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Shadow) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Giant))
                     {
-                        var debuff = new TheShakes();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9993)
+                        {
+                            var debuff = new TheShakes();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
                 case Afflictions.Stricken:
-                    if (rand >= .9985)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aquatic) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Contruct) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fairy) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fiend) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Gargoyle) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Goblin) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Grimlok) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Humanoid) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Insect) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Kobold) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Magical) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Mukul) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Plant) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Reptile) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead))
                     {
-                        var debuff = new Stricken();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9995)
+                        {
+                            var debuff = new Stricken();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
                 case Afflictions.Rabies:
-                    if (rand >= .9997)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Animal) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Beast) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fiend) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Kobold) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent))
                     {
-                        var debuff = new Rabies();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9997)
+                        {
+                            var debuff = new Rabies();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
                 case Afflictions.LockJoint:
-                    if (rand >= .9987)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aquatic) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Beast) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Contruct) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dragon) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Gargoyle) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Giant) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Humanoid) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Orc) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Plant) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Robotic) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead))
                     {
-                        var debuff = new LockJoint();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9993)
+                        {
+                            var debuff = new LockJoint();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
                 case Afflictions.NumbFall:
-                    if (rand >= .996)
+                    if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.HigherBeing) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Contruct) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Elemental) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Humanoid) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Magical) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Mukul) ||
+                        monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Reptile))
                     {
-                        var debuff = new NumbFall();
-                        debuff.OnApplied(afflicted, debuff);
+                        if (rand >= .9995)
+                        {
+                            var debuff = new NumbFall();
+                            debuff.OnApplied(afflicted, debuff);
+                        }
                     }
                     break;
             }
