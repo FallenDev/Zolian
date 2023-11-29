@@ -13,7 +13,12 @@ public enum MapFlags : byte
     EvilReaches = CantTeleport | Rain | PlayerKill,
     CanUseAbilities = 1 << 5,
     NoTabMap = 1 << 6, // Actual Map Flag
-    SnowTileSet = 1 << 7 // Actual Map Flag
+    SnowTileSet = 1 << 7, // Actual Map Flag
+    SnowingSnowTileSet = SnowTileSet | Snow,
+    RainingSnowTileSet = SnowTileSet | Rain,
+    DarknessSnowTileSet = SnowTileSet | Darkness,
+    ArenaSnowTileSet = SnowTileSet | PlayerKill,
+    NoTabSnowTileSet = SnowTileSet | NoTabMap
 }
 
 public static class MapExtensions

@@ -846,7 +846,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         if (this is not Monster monster) return false;
         if (monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _)) return true;
-        if (monster.Template.BaseName == "Training Dummy") return true;
+        if (monster.Template.MonsterRace == MonsterRace.Dummy) return true;
 
         // If the dictionary is empty, add the player
         if (monster.TargetRecord.TaggedAislings.IsEmpty)
