@@ -104,6 +104,9 @@ public static class Commander
         );
     }
 
+    /// <summary>
+    /// Freezes server routine for updates and maintenance
+    /// </summary>
     private static void Chaos(Argument[] args, object arg)
     {
         var client = (WorldClient)arg;
@@ -136,23 +139,26 @@ public static class Commander
         ServerSetup.Instance.Running = false;
     }
 
+    /// <summary>
+    /// Restarts server by forcing an Exit Program command
+    /// </summary>
     public static void Restart(Argument[] args, object arg)
     {
-        var players = ServerSetup.Instance.Game.Aislings;
-        var playersList = players.ToList();
+        var players = ServerSetup.Instance.Game.Aislings.ToList();
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
         
-        _ = StorageManager.AislingBucket.ServerSave(playersList);
-
-        foreach (var connected in playersList)
+        // Announce to all players
+        foreach (var connected in players)
         {
-            _ = StorageManager.AislingBucket.AuxiliarySave(connected);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Order {=g. -Server Restart-");
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=g-Server Restart-");
         }
 
+        // Halts all components and routines
         ServerSetup.Instance.Running = false;
+
+        // Exit program so Daemon can reboot it
         Environment.Exit(0);
     }
 
@@ -416,14 +422,14 @@ public static class Commander
                     return;
                 }
                 item = item.Create(client.Aisling, template, quality, variance, wVariance);
-                ItemDura(item, quality, client);
+                ItemDura(item, quality);
                 if (!item.CanCarry(client.Aisling)) continue;
                 item.GiveTo(client.Aisling);
             }
         }
     }
 
-    private static void ItemDura(Item item, Item.Quality quality, WorldClient client)
+    private static void ItemDura(Item item, Item.Quality quality)
     {
         var temp = item.Template.MaxDurability;
         switch (quality)
