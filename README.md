@@ -14,7 +14,7 @@ C# .NET 8 & SQL Server 2022
 
 ## Authors & Contributors   
 
-Chaos: Is a project developed by [Sichi](https://github.com/Sichii) - Zolian runs on the [Chaos Networking Layer](https://github.com/Sichii/Chaos-Server)   
+Chaos: Is a project developed by [Sichi](https://github.com/Sichii) - Zolian runs on the [Chaos-Network](https://github.com/FallenDev/Chaos-Network) solution, which is an extracted networking layer within chaos   
 
 Hades: Formally known as Lorule was the original basis of this server   
 - This project was developed by [wren](https://github.com/wren11) - Project located here: [Hades - Private Darkages Server](https://github.com/wren11/DarkAges-Lorule-Server)   
