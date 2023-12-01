@@ -13,42 +13,42 @@ internal class ExtensionsTest
     public void ShouldClampMinimumValue()
     {
         var result = 20.IntClamp(50, 6000);
-        Assert.AreEqual(result, 50);
+        Assert.Equals(result, 50);
     }
 
     [Test]
     public void ShouldClampMaximumValue()
     {
         var result = 6500.IntClamp(50, 6000);
-        Assert.AreEqual(result, 6000);
+        Assert.Equals(result, 6000);
     }
 
     [Test]
     public void ShouldNotIsWithinMinimumValue()
     {
         var result = 20.IntIsWithin(50, 6000);
-        Assert.IsFalse(result);
+        Assert.Equals(result, false);
     }
 
     [Test]
     public void ShouldIsWithinMinimumValue()
     {
         var result = 150.IntIsWithin(50, 6000);
-        Assert.IsTrue(result);
+        Assert.Equals(result, true);
     }
 
     [Test]
     public void ShouldNotIsWithinMaximumValue()
     {
         var result = 9000.IntIsWithin(50, 6000);
-        Assert.IsFalse(result);
+        Assert.Equals(result, false);
     }
 
     [Test]
     public void ShouldIsWithinMaximumValue()
     {
         var result = 5500.IntIsWithin(50, 6000);
-        Assert.IsTrue(result);
+        Assert.Equals(result, true);
     }
 
     [Test]
@@ -59,6 +59,6 @@ internal class ExtensionsTest
         const string temp = "String to Encode";
         var encoding = Encoding.GetEncoding(949);
         var converted = encoding.GetBytes(temp);
-        Assert.AreEqual(result, converted);
+        Assert.Equals(result, converted);
     }
 }
