@@ -279,9 +279,9 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
             if (aisling.IsInvisible)
                 dmgCalc *= 2;
 
-            var debuff = new DebuffRend();
+            var debuff = new DebuffStabnTwist();
 
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+            if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
 
             if (_target is Aisling targetPlayer)
@@ -330,11 +330,11 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var debuff = new DebuffHurricane();
+            var debuff = new DebuffStabnTwist();
 
             if (_target is Aisling targetPlayer)
             {
-                if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+                if (!_target.HasDebuff(debuff.Name))
                 {
                     targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
@@ -342,7 +342,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
             }
             else
             {
-                if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+                if (!_target.HasDebuff(debuff.Name))
                     debuff.OnApplied(_target, debuff);
             }
 

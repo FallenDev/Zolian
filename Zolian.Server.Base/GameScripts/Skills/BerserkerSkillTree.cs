@@ -1073,7 +1073,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
         {
             _target = i;
             var dmgCalc = DamageCalc(aisling);
-            var debuff = new DebuffRend();
+            var debuff = new DebuffTitansCleave();
 
             if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
@@ -1123,7 +1123,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var debuff = new DebuffRend();
+            var debuff = new DebuffTitansCleave();
 
             if (_target is Aisling targetPlayer)
             {
@@ -1212,7 +1212,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
         {
             _target = i;
             var dmgCalc = DamageCalc(sprite);
-            var debuff = new DebuffRend();
+            var debuff = new DebuffRetribution();
 
             if (!_target.HasDebuff(debuff.Name))
                 aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
@@ -1262,7 +1262,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var debuff = new DebuffRend();
+            var debuff = new DebuffRetribution();
 
             if (_target is Aisling targetPlayer)
             {

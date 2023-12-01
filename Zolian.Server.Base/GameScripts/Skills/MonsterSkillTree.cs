@@ -237,11 +237,11 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var debuff = new DebuffRend();
+        var debuff = new DebuffCorrosiveTouch();
 
         if (_target is Aisling targetPlayer)
         {
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+            if (!_target.HasDebuff(debuff.Name))
             {
                 targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
@@ -249,7 +249,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
         }
         else
         {
-            if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Hurricane"))
+            if (!_target.HasDebuff(debuff.Name))
                 debuff.OnApplied(_target, debuff);
         }
 

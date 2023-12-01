@@ -991,7 +991,7 @@ public class DebuffDecay : Debuff
 {
     private static StatusOperator AcModifer => new(Operator.Remove, 55);
     public override byte Icon => 110;
-    public override int Length => 20;
+    public override int Length => 60;
     public override string Name => "Decay";
 
     public override void OnApplied(Sprite affected, Debuff debuff)
@@ -1005,12 +1005,17 @@ public class DebuffDecay : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body begins to decay");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body begins to decay");
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = true;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYour body is decaying..");
+    }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -1020,7 +1025,7 @@ public class DebuffDecay : Debuff
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Body stops decaying");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Body begins to heal");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -1100,7 +1105,7 @@ public class DebuffBeagcradh : Debuff
 
 public class DebuffRending : Debuff
 {
-    private static StatusOperator AcModifer => new(Operator.Remove, 10);
+    private static StatusOperator AcModifer => new(Operator.Remove, 15);
     public override byte Icon => 189;
     public override int Length => 30;
     public override string Name => "Rending";
@@ -1134,7 +1139,7 @@ public class DebuffRending : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity is weakened");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity has weakened");
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(85, null, affected.Serial));
         }
         else
@@ -1152,18 +1157,138 @@ public class DebuffRending : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor's integrity has been restored");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Integrity restored");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
 
-public class DebuffRend : Debuff
+public class DebuffCorrosiveTouch : Debuff
 {
-    private static StatusOperator AcModifer => new(Operator.Remove, 45);
-    public override byte Icon => 110;
-    public override int Length => 5;
-    public override string Name => "Rend";
+    private static StatusOperator AcModifer => new(Operator.Remove, 30);
+    public override byte Icon => 31;
+    public override int Length => 30;
+    public override string Name => "Corrosive Touch";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor began corroding");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(65, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+            InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(65, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(65, null, affected.Serial));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(65, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryRemove(debuff.Name, out _))
+            affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor stopped corroding");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffShieldBash : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 25);
+    public override byte Icon => 101;
+    public override int Length => 10;
+    public override string Name => "ShieldBash";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(280, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+            InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(280, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Straps to your armor have loosened");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(280, null, affected.Serial));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(280, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryRemove(debuff.Name, out _))
+            affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Integrity restored");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffTitansCleave : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 50);
+    public override byte Icon => 54;
+    public override int Length => 12;
+    public override string Name => "Titan's Cleave";
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -1194,7 +1319,7 @@ public class DebuffRend : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity is weakened");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're suffering from a concussion");
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(383, null, affected.Serial));
         }
         else
@@ -1212,7 +1337,127 @@ public class DebuffRend : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor's integrity has been restored");
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to clear up");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffRetribution : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 60);
+    public override byte Icon => 133;
+    public override int Length => 15;
+    public override string Name => "Retribution";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(277, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+            InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(277, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Retribution is at hand!");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(277, null, affected.Serial));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(277, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryRemove(debuff.Name, out _))
+            affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The target on your back has dissipated");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+}
+
+public class DebuffStabnTwist : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 50);
+    public override byte Icon => 46;
+    public override int Length => 15;
+    public override string Name => "Stab'n Twist";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(160, null, affected.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+            InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(160, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(72, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're now vulnerable");
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(160, null, affected.Serial));
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(160, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryRemove(debuff.Name, out _))
+            affected.BonusAc += AcModifer.Value;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The feeling of vulnerability has passed");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
@@ -1220,9 +1465,9 @@ public class DebuffRend : Debuff
 
 public class DebuffHurricane : Debuff
 {
-    private static StatusOperator AcModifer => new(Operator.Remove, 30);
+    private static StatusOperator AcModifer => new(Operator.Remove, 45);
     public override byte Icon => 116;
-    public override int Length => 5;
+    public override int Length => 12;
     public override string Name => "Hurricane";
 
     public override void OnApplied(Sprite affected, Debuff debuff)
@@ -1236,6 +1481,7 @@ public class DebuffHurricane : Debuff
 
         if (affected is Aisling aisling)
         {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The storm rages!!");
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, null, affected.Serial));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(65, false));
             InsertDebuff(aisling, debuff);
@@ -1254,7 +1500,6 @@ public class DebuffHurricane : Debuff
     {
         if (affected is Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor feels lighter");
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(58, null, affected.Serial));
         }
         else
