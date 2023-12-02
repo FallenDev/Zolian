@@ -36,13 +36,13 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: endorlabs/github-action@b51bd06466b545f01a6ac788e3e1147695d3936c
       with:
-        namespace: "example" # Modify the namespace to your Endor Labs tenant namespace.
+        namespace: "Zolian" # Modify the namespace to your Endor Labs tenant namespace.
         sarif_file: findings.sarif
     - name: Endor Labs scan monitor
       if: github.event_name == 'push'
       uses: endorlabs/github-action@b51bd06466b545f01a6ac788e3e1147695d3936c
       with:
-        namespace: "example" # Modify the namespace to your Endor Labs tenant namespace.
+        namespace: "Zolian" # Modify the namespace to your Endor Labs tenant namespace.
         ci_run: "false"
         sarif_file: findings.sarif
     - name: Upload SARIF to github
