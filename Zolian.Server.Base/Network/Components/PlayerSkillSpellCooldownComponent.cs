@@ -1,4 +1,5 @@
 ﻿using Darkages.Network.Server;
+using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;
 
@@ -27,29 +28,27 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
                     player.Client.SkillControl.Start();
                 }
 
-                // Checks in real-time if a player is overburdened
-                if (player.Overburden)
-                {
-                    player.Client.SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(2000);
-                    // If overburdened, set the trigger to remove it when not
-                    player.OverburdenDelayed = true;
-                }
-                else
-                {
-                    // When not overburdened, check if the player was, and return the delay to normal
-                    if (player.OverburdenDelayed)
-                    {
-                        player.Client.SkillSpellTimer.Delay = TimeSpan.FromMicroseconds(1000);
-                        player.OverburdenDelayed = false;
-                    }
-                }
+                if (player.Client.SkillControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
 
-                if (player.Client.SkillControl.Elapsed.TotalMilliseconds <
-                    player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
+                var haste = Haste(player);
 
                 foreach (var skill in player.SkillBook.Skills.Values)
                 {
                     if (skill == null) continue;
+                    if (skill.CurrentCooldown == 0) continue;
+                    if (skill.CurrentCooldown == skill.Template.Cooldown)
+                    {
+                        if (player.Overburden)
+                        {
+                            var overburdened = skill.CurrentCooldown * 2;
+                            player.Client.SendCooldown(true, skill.Slot, overburdened);
+                        }
+                        else
+                        {
+                            player.Client.SendCooldown(true, skill.Slot, (int)(skill.CurrentCooldown * haste));
+                        }
+                    }
+
                     skill.CurrentCooldown--;
                     if (skill.CurrentCooldown < 0)
                         skill.CurrentCooldown = 0;
@@ -58,6 +57,18 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
                 foreach (var spell in player.SpellBook.Spells.Values)
                 {
                     if (spell == null) continue;
+                    if (spell.CurrentCooldown == 0) continue;
+                    if (spell.CurrentCooldown == spell.Template.Cooldown)
+                    {
+                        if (player.Overburden)
+                        {
+                            var overburdened = spell.CurrentCooldown * 2;
+                            player.Client.SendCooldown(false, spell.Slot, overburdened);
+                        }
+                        else
+                            player.Client.SendCooldown(false, spell.Slot, (int)(spell.CurrentCooldown * haste));
+                    }
+
                     spell.CurrentCooldown--;
                     if (spell.CurrentCooldown < 0)
                         spell.CurrentCooldown = 0;
@@ -70,5 +81,16 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
         {
             Crashes.TrackError(ex);
         }
+    }
+
+    private static double Haste(Aisling player)
+    {
+        if (!player.Hastened) return 1;
+        return player.Client.SkillSpellTimer.Delay.TotalMilliseconds switch
+        {
+            500 => 0.50,
+            750 => 0.75,
+            _ => 1
+        };
     }
 }

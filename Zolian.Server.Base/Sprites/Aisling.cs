@@ -47,7 +47,6 @@ public sealed class Aisling : Player, IAisling
     };
 
     public bool Overburden => CurrentWeight > MaximumWeight;
-    public bool OverburdenDelayed;
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
@@ -80,7 +79,6 @@ public sealed class Aisling : Player, IAisling
         ChantTimer = new ChantTimer(1500);
         TileType = TileContent.Aisling;
         AislingTrackers = new AislingTrackers(TimeSpan.FromSeconds(1));
-        OverburdenDelayed = false;
     }
 
     public bool Loading { get; set; }
@@ -425,7 +423,6 @@ public sealed class Aisling : Player, IAisling
                         spell.InUse = false;
 
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
-                        Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
                     }
                 }
                 else
@@ -819,7 +816,6 @@ public sealed class Aisling : Player, IAisling
                 script?.OnUse(this);
 
                 skill.CurrentCooldown = skill.Template.Cooldown;
-                Client.SendCooldown(true, skill.Slot, skill.Template.Cooldown);
                 if (skill.Template.SkillType == SkillScope.Assail)
                     Client.LastAssail = DateTime.UtcNow;
                 skill.InUse = false;

@@ -1878,11 +1878,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             // Skill animation and execute
             ExecuteAssail(lpClient, skill);
             // Skill cleanup
-            var overburden = 0;
-            if (lpClient.Aisling.Overburden)
-                overburden = 2;
-            skill.CurrentCooldown = skill.Template.Cooldown + overburden;
-            lpClient.SendCooldown(true, skill.Slot, skill.Template.Cooldown + overburden);
+            skill.CurrentCooldown = skill.Template.Cooldown;
             lastTemplate = skill.Template.Name;
             lpClient.LastAssail = DateTime.UtcNow;
             skill.InUse = false;
@@ -2905,7 +2901,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var script = skill.Scripts.Values.First();
             script?.OnUse(localClient.Aisling);
             skill.CurrentCooldown = skill.Template.Cooldown;
-            localClient.SendCooldown(true, localArgs.SourceSlot, skill.CurrentCooldown);
 
             skill.InUse = false;
             return default;

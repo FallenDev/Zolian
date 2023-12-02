@@ -46,7 +46,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
                             HasBuff("Iron Skin") || HasBuff("Wings of Protection");
-
+    public bool Hastened => HasBuff("Hastenga") || HasBuff("Hasten") || HasBuff("Haste");
     public bool SpellReflect => HasBuff("Deireas Faileas");
     public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
     public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
@@ -54,7 +54,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
-    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend")) || HasDebuff("Hurricane") || HasDebuff("Decay") 
+    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend")) || HasDebuff("Hurricane") || HasDebuff("Decay")
                                   || HasDebuff("Corrosive Touch") || HasDebuff("Shield Bash") || HasDebuff("Titan's Cleave") || HasDebuff("Retribution") || HasDebuff("Stab'n Twist");
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain");
     public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep") || HasBuff("Berserker Rage");
@@ -1783,18 +1783,16 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         {
             case 1 when hasteChance >= 99:
                 {
-                    client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
+                    var buff = new buff_Haste();
+                    buff.OnApplied(damageDealingSprite, buff);
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
-                    Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                     break;
                 }
             case 2 when hasteChance >= 97:
                 {
-                    client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to move faster.");
+                    var buff = new buff_Hasten();
+                    buff.OnApplied(damageDealingSprite, buff);
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
-                    Task.Delay(5000).ContinueWith(ct => { client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000); });
                     break;
                 }
         }
