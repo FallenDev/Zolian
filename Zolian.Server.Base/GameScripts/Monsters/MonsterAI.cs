@@ -122,8 +122,6 @@ public class BaseMonsterIntelligence : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -137,7 +135,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -156,6 +154,7 @@ public class BaseMonsterIntelligence : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -347,6 +346,7 @@ public class BaseMonsterIntelligence : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -365,6 +365,7 @@ public class BaseMonsterIntelligence : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -705,8 +706,6 @@ public class WeakCommon : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -720,7 +719,7 @@ public class WeakCommon : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -739,6 +738,7 @@ public class WeakCommon : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -930,6 +930,7 @@ public class WeakCommon : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Lowest dps player targeted, exit
                     break;
@@ -948,6 +949,7 @@ public class WeakCommon : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Lowest dps player targeted, exit
                         break;
@@ -1220,8 +1222,6 @@ public class LootGoblin : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -1233,6 +1233,7 @@ public class LootGoblin : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -1362,8 +1363,6 @@ public class SelfDestruct : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -1375,6 +1374,7 @@ public class SelfDestruct : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -1552,6 +1552,7 @@ public class SelfDestruct : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -1570,6 +1571,7 @@ public class SelfDestruct : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -1850,8 +1852,6 @@ public class AlertSummon : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -1865,7 +1865,7 @@ public class AlertSummon : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -1884,6 +1884,7 @@ public class AlertSummon : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -2078,6 +2079,7 @@ public class AlertSummon : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -2096,6 +2098,7 @@ public class AlertSummon : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -2444,8 +2447,6 @@ public class Turret : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -2459,7 +2460,7 @@ public class Turret : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -2478,6 +2479,7 @@ public class Turret : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -2644,6 +2646,7 @@ public class Turret : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -2662,6 +2665,7 @@ public class Turret : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -2848,7 +2852,6 @@ public class GeneralPirate : MonsterScript
     {
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Task.Delay(300).Wait();
-        Monster.Remove();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
@@ -2863,7 +2866,7 @@ public class GeneralPirate : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -2882,6 +2885,7 @@ public class GeneralPirate : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -3066,6 +3070,7 @@ public class GeneralPirate : MonsterScript
                 {
                     // If a player is invisible, dying, not logged in or nearby; Ignore them
                     if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -3084,6 +3089,7 @@ public class GeneralPirate : MonsterScript
                     {
                         // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -3444,8 +3450,6 @@ public class ShadowSight : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -3459,7 +3463,7 @@ public class ShadowSight : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -3478,6 +3482,7 @@ public class ShadowSight : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -3668,6 +3673,7 @@ public class ShadowSight : MonsterScript
                 {
                     // If a player is dying, not logged in or nearby; Ignore them
                     if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -3686,6 +3692,7 @@ public class ShadowSight : MonsterScript
                     {
                         // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -4026,8 +4033,6 @@ public class WeakShadowSight : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.Remove();
-
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
@@ -4041,7 +4046,7 @@ public class WeakShadowSight : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -4060,6 +4065,7 @@ public class WeakShadowSight : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -4250,6 +4256,7 @@ public class WeakShadowSight : MonsterScript
                 {
                     // If a player is dying, not logged in or nearby; Ignore them
                     if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Lowest dps player targeted, exit
                     break;
@@ -4268,6 +4275,7 @@ public class WeakShadowSight : MonsterScript
                     {
                         // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Lowest dps player targeted, exit
                         break;
@@ -4626,7 +4634,6 @@ public class AosdaRemnant : MonsterScript
     {
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
-        Monster.Remove();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
@@ -4641,7 +4648,7 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -4660,6 +4667,7 @@ public class AosdaRemnant : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -4843,6 +4851,7 @@ public class AosdaRemnant : MonsterScript
                 {
                     // If a player is dying, not logged in or nearby; Ignore them
                     if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -4861,6 +4870,7 @@ public class AosdaRemnant : MonsterScript
                     {
                         // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;
@@ -5239,7 +5249,6 @@ public class DraconicOmega : MonsterScript
     {
         Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
-        Monster.Remove();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
@@ -5254,7 +5263,7 @@ public class DraconicOmega : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault();
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
             Monster.Target = recordTuple.player;
         }
 
@@ -5273,6 +5282,7 @@ public class DraconicOmega : MonsterScript
             }
         }
 
+        Monster.Remove();
         ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
@@ -5456,6 +5466,7 @@ public class DraconicOmega : MonsterScript
                 {
                     // If a player is dying, not logged in or nearby; Ignore them
                     if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
                     break;
@@ -5474,6 +5485,7 @@ public class DraconicOmega : MonsterScript
                     {
                         // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
+                        if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
                         // Highest dps player targeted, exit
                         break;

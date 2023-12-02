@@ -182,15 +182,16 @@ public class EnemyRewards : RewardScript
         };
 
         // Enqueue experience event
-        player.Client.EnqueueExperienceEvent(player, exp, true, false);
+        if (player.WithinRangeOf(_monster, 13))
+            player.Client.EnqueueExperienceEvent(player, exp, true, false);
 
         if (player.PartyMembers == null) return;
         
         // Enqueue experience event for party members
         foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
-            if (party.Map != player.Map) continue;
-            if (party.WithinRangeOf(player, 13))
+            if (party.Map != _monster.Map) continue;
+            if (party.WithinRangeOf(_monster, 13))
                 party.Client.EnqueueExperienceEvent(party, exp, true, false);
         }
     }

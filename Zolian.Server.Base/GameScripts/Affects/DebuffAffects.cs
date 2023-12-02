@@ -737,7 +737,7 @@ public class DebuffMoonSeal : Debuff
 
 public class DebuffDarkSeal : Debuff
 {
-    private static double AcModifer => 0.50; // 50% (Armor * Modifier)
+    private static double AcModifer => 0.45; // 55% (Armor * Modifier)
     public override byte Icon => 133;
     public override int Length => 240;
     public override string Name => "Dark Seal";
