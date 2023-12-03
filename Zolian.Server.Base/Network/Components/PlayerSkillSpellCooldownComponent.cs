@@ -1,7 +1,4 @@
 ﻿using Darkages.Network.Server;
-using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Components;
 
@@ -16,81 +13,40 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
 
-        try
+        Parallel.ForEach(Server.Aislings, (player) =>
         {
-            Parallel.ForEach(Server.Aislings, (player) =>
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+            if (!player.Client.SkillControl.IsRunning)
             {
-                if (player?.Client == null) return;
-                if (!player.LoggedIn) return;
+                player.Client.SkillControl.Start();
+            }
 
-                if (!player.Client.SkillControl.IsRunning)
-                {
-                    player.Client.SkillControl.Start();
-                }
+            if (player.Client.SkillControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
 
-                if (player.Client.SkillControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
+            Parallel.ForEach(player.SkillBook.Skills.Values, (skill) =>
+            {
+                if (skill == null) return;
+                if (skill.CurrentCooldown == 0) return;
 
-                var haste = Haste(player);
+                skill.CurrentCooldown--;
 
-                foreach (var skill in player.SkillBook.Skills.Values)
-                {
-                    if (skill == null) continue;
-                    if (skill.CurrentCooldown == 0) continue;
-                    if (skill.CurrentCooldown == skill.Template.Cooldown)
-                    {
-                        if (player.Overburden)
-                        {
-                            var overburdened = skill.CurrentCooldown * 2;
-                            player.Client.SendCooldown(true, skill.Slot, overburdened);
-                        }
-                        else
-                        {
-                            player.Client.SendCooldown(true, skill.Slot, (int)(skill.CurrentCooldown * haste));
-                        }
-                    }
-
-                    skill.CurrentCooldown--;
-                    if (skill.CurrentCooldown < 0)
-                        skill.CurrentCooldown = 0;
-                }
-
-                foreach (var spell in player.SpellBook.Spells.Values)
-                {
-                    if (spell == null) continue;
-                    if (spell.CurrentCooldown == 0) continue;
-                    if (spell.CurrentCooldown == spell.Template.Cooldown)
-                    {
-                        if (player.Overburden)
-                        {
-                            var overburdened = spell.CurrentCooldown * 2;
-                            player.Client.SendCooldown(false, spell.Slot, overburdened);
-                        }
-                        else
-                            player.Client.SendCooldown(false, spell.Slot, (int)(spell.CurrentCooldown * haste));
-                    }
-
-                    spell.CurrentCooldown--;
-                    if (spell.CurrentCooldown < 0)
-                        spell.CurrentCooldown = 0;
-                }
-
-                player.Client.SkillControl.Restart();
+                if (skill.CurrentCooldown < 0)
+                    skill.CurrentCooldown = 0;
             });
-        }
-        catch (Exception ex)
-        {
-            Crashes.TrackError(ex);
-        }
-    }
 
-    private static double Haste(Aisling player)
-    {
-        if (!player.Hastened) return 1;
-        return player.Client.SkillSpellTimer.Delay.TotalMilliseconds switch
-        {
-            500 => 0.50,
-            750 => 0.75,
-            _ => 1
-        };
+            Parallel.ForEach(player.SpellBook.Spells.Values, (spell) =>
+            {
+                if (spell == null) return;
+                if (spell.CurrentCooldown == 0) return;
+
+                spell.CurrentCooldown--;
+
+                if (spell.CurrentCooldown < 0)
+                    spell.CurrentCooldown = 0;
+            });
+
+            player.Client.SkillControl.Restart();
+        });
     }
 }

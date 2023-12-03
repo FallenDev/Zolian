@@ -1922,6 +1922,16 @@ namespace Darkages.Network.Client
         /// </summary>
         public void SendCooldown(bool skill, byte slot, int cooldownSeconds)
         {
+            if (Aisling.Overburden)
+            {
+                cooldownSeconds *= 2;
+            }
+            else
+            {
+                var haste = Haste(Aisling);
+                cooldownSeconds = (int)(cooldownSeconds * haste);
+            }
+
             var args = new CooldownArgs
             {
                 IsSkill = skill,
@@ -1930,6 +1940,17 @@ namespace Darkages.Network.Client
             };
 
             Send(args);
+        }
+
+        private static double Haste(Aisling player)
+        {
+            if (!player.Hastened) return 1;
+            return player.Client.SkillSpellTimer.Delay.TotalMilliseconds switch
+            {
+                500 => 0.50,
+                750 => 0.75,
+                _ => 1
+            };
         }
 
         /// <summary>

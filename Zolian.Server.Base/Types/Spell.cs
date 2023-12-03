@@ -27,13 +27,23 @@ public class Spell
     [Browsable(false)] public string Name => $"{Template.Name} (Lev:{Level}/{Template.MaxLevel})";
     public string SpellName { get; init; }
     public int CurrentCooldown { get; set; }
-    public bool Ready => CurrentCooldown == 0;
+
+    private bool Ready
+    {
+        get
+        {
+            var readyTime = DateTime.UtcNow;
+            return readyTime.Subtract(LastUsedSpell).TotalSeconds >= Template.Cooldown;
+        }
+    }
 
     public ConcurrentDictionary<string, SpellScript> Scripts { get; set; }
 
     public byte Slot { get; set; }
     public SpellTemplate Template { get; set; }
     public int Casts { get; set; }
+    public DateTime LastUsedSpell { get; set; }
+
 
     public static void AttachScript(Spell spell)
     {

@@ -16,6 +16,7 @@ using Microsoft.AppCenter.Crashes;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
+using Darkages.Network.Server;
 
 namespace Darkages.Sprites;
 
@@ -416,13 +417,16 @@ public sealed class Aisling : Player, IAisling
                         }
 
                         spell.InUse = true;
+
                         var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
                         CastAnimation(spell);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
-                        spell.InUse = false;
-
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
+                        Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+                        spell.LastUsedSpell = DateTime.UtcNow;
+
+                        spell.InUse = false;
                     }
                 }
                 else
@@ -812,16 +816,20 @@ public sealed class Aisling : Player, IAisling
                 if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
 
                 skill.InUse = true;
+
                 var script = skill.Scripts.Values.First();
                 script?.OnUse(this);
-
                 skill.CurrentCooldown = skill.Template.Cooldown;
+                Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+                skill.LastUsedSkill = DateTime.UtcNow;
+
                 if (skill.Template.SkillType == SkillScope.Assail)
                     Client.LastAssail = DateTime.UtcNow;
+
                 skill.InUse = false;
             }
         }
-        
+
         stopWatch.Stop();
     }
 }

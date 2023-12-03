@@ -67,6 +67,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
     private DateTime _mapSpeed;
+    private Task _componentRunTask;
+    private Task _updateObjectsTask;
+    private Task _updateMapsTask;
+    private Task _updateClientsTask;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -105,10 +109,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             ServerSetup.Instance.Running = true;
-            UpdateComponentsRoutine();
-            UpdateObjectsRoutine();
-            UpdateMapsRoutine();
-            UpdateClients();
+            _componentRunTask = Task.Run(UpdateComponentsRoutine, stoppingToken);
+            _updateObjectsTask = Task.Run(UpdateObjectsRoutine, stoppingToken);
+            _updateMapsTask = Task.Run(UpdateMapsRoutine, stoppingToken);
+            _updateClientsTask = Task.Run(UpdateClients, stoppingToken);
             //NightlyServerReset();
         }
         catch (Exception ex)
@@ -555,8 +559,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private async void UpdateComponentsRoutine()
+    private void UpdateComponentsRoutine()
     {
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
         var dayLightWatch = new Stopwatch();
         dayLightWatch.Start();
         var bankInterestWatch = new Stopwatch();
@@ -587,6 +593,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         while (ServerSetup.Instance.Running)
         {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < 5) continue;
             var dayLightElapsed = dayLightWatch.Elapsed;
             var bankInterestElapsed = bankInterestWatch.Elapsed;
             var communityElapsed = communityWatch.Elapsed;
@@ -601,87 +608,79 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var playerSkillSpellElapsed = playerSkillSpellWatch.Elapsed;
             var moonPhaseElapsed = moonPhaseWatch.Elapsed;
 
-            try
+            Parallel.ForEach(components, component =>
             {
-                Parallel.ForEach(components, component =>
+                switch (component)
                 {
-                    switch (component)
-                    {
-                        case ObjectComponent objectComponent:
-                            if (objectElapsed.TotalMilliseconds < GameSpeed) break;
-                            objectComponent.Update(objectElapsed);
-                            objectWatch.Restart();
-                            break;
-                        case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
-                            if (playerStatusElapsed.TotalMilliseconds < GameSpeed) break;
-                            statusBarAndThreatComponent.Update(playerStatusElapsed);
-                            playerStatusWatch.Restart();
-                            break;
-                        case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
-                            if (playerSkillSpellElapsed.TotalMilliseconds < GameSpeed) break;
-                            skillSpellCooldownComponent.Update(playerSkillSpellElapsed);
-                            playerSkillSpellWatch.Restart();
-                            break;
-                        case PlayerRegenerationComponent playerRegenerationComponent:
-                            if (playerRegenElapsed.TotalSeconds < 1) break;
-                            playerRegenerationComponent.Update(playerRegenElapsed);
-                            playerRegenWatch.Restart();
-                            break;
-                        case PlayerSaveComponent playerSaveComponent:
-                            if (playerSaveElapsed.TotalSeconds < 1) break;
-                            playerSaveComponent.Update(playerSaveElapsed);
-                            playerSaveWatch.Restart();
-                            break;
-                        case MonolithComponent monolithComponent:
-                            if (monolithElapsed.TotalSeconds < 3) break;
-                            monolithComponent.Update(monolithElapsed);
-                            monolithWatch.Restart();
-                            break;
-                        case PingComponent pingComponent:
-                            if (pingElapsed.TotalSeconds < 7) break;
-                            pingComponent.Update(pingElapsed);
-                            pingWatch.Restart();
-                            break;
-                        case MundaneComponent mundaneComponent:
-                            if (mundaneElapsed.TotalSeconds < 10) break;
-                            mundaneComponent.Update(mundaneElapsed);
-                            mundaneWatch.Restart();
-                            break;
-                        case DayLightComponent dayLightComponent:
-                            if (dayLightElapsed.TotalSeconds < 15) break;
-                            dayLightComponent.Update(dayLightElapsed);
-                            dayLightWatch.Restart();
-                            break;
-                        case CommunityComponent communityComponent:
-                            if (communityElapsed.TotalSeconds < 45) break;
-                            communityComponent.Update(communityElapsed);
-                            communityWatch.Restart();
-                            break;
-                        case MessageClearComponent messageClearComponent:
-                            if (messageClearElapsed.TotalSeconds < 60) break;
-                            messageClearComponent.Update(messageClearElapsed);
-                            messageClearWatch.Restart();
-                            break;
-                        case BankInterestComponent bankInterestComponent:
-                            if (bankInterestElapsed.TotalMinutes < 30) break;
-                            bankInterestComponent.Update(bankInterestElapsed);
-                            bankInterestWatch.Restart();
-                            break;
-                        case MoonPhaseComponent moonPhaseComponent:
-                            if (moonPhaseElapsed.TotalHours < 2) break;
-                            moonPhaseComponent.Update(moonPhaseElapsed);
-                            moonPhaseWatch.Restart();
-                            break;
-                    }
-                });
+                    case ObjectComponent objectComponent:
+                        if (objectElapsed.TotalMilliseconds < GameSpeed) break;
+                        objectComponent.Update(objectElapsed);
+                        objectWatch.Restart();
+                        break;
+                    case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
+                        if (playerStatusElapsed.TotalMilliseconds < GameSpeed) break;
+                        statusBarAndThreatComponent.Update(playerStatusElapsed);
+                        playerStatusWatch.Restart();
+                        break;
+                    case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
+                        if (playerSkillSpellElapsed.TotalMilliseconds < 50) break;
+                        skillSpellCooldownComponent.Update(playerSkillSpellElapsed);
+                        playerSkillSpellWatch.Restart();
+                        break;
+                    case PlayerRegenerationComponent playerRegenerationComponent:
+                        if (playerRegenElapsed.TotalSeconds < 1) break;
+                        playerRegenerationComponent.Update(playerRegenElapsed);
+                        playerRegenWatch.Restart();
+                        break;
+                    case PlayerSaveComponent playerSaveComponent:
+                        if (playerSaveElapsed.TotalSeconds < 1) break;
+                        playerSaveComponent.Update(playerSaveElapsed);
+                        playerSaveWatch.Restart();
+                        break;
+                    case MonolithComponent monolithComponent:
+                        if (monolithElapsed.TotalSeconds < 3) break;
+                        monolithComponent.Update(monolithElapsed);
+                        monolithWatch.Restart();
+                        break;
+                    case PingComponent pingComponent:
+                        if (pingElapsed.TotalSeconds < 7) break;
+                        pingComponent.Update(pingElapsed);
+                        pingWatch.Restart();
+                        break;
+                    case MundaneComponent mundaneComponent:
+                        if (mundaneElapsed.TotalSeconds < 10) break;
+                        mundaneComponent.Update(mundaneElapsed);
+                        mundaneWatch.Restart();
+                        break;
+                    case DayLightComponent dayLightComponent:
+                        if (dayLightElapsed.TotalSeconds < 15) break;
+                        dayLightComponent.Update(dayLightElapsed);
+                        dayLightWatch.Restart();
+                        break;
+                    case CommunityComponent communityComponent:
+                        if (communityElapsed.TotalSeconds < 45) break;
+                        communityComponent.Update(communityElapsed);
+                        communityWatch.Restart();
+                        break;
+                    case MessageClearComponent messageClearComponent:
+                        if (messageClearElapsed.TotalSeconds < 60) break;
+                        messageClearComponent.Update(messageClearElapsed);
+                        messageClearWatch.Restart();
+                        break;
+                    case BankInterestComponent bankInterestComponent:
+                        if (bankInterestElapsed.TotalMinutes < 30) break;
+                        bankInterestComponent.Update(bankInterestElapsed);
+                        bankInterestWatch.Restart();
+                        break;
+                    case MoonPhaseComponent moonPhaseComponent:
+                        if (moonPhaseElapsed.TotalMinutes < 30) break;
+                        moonPhaseComponent.Update(moonPhaseElapsed);
+                        moonPhaseWatch.Restart();
+                        break;
+                }
+            });
 
-            }
-            catch (Exception ex)
-            {
-                Crashes.TrackError(ex);
-            }
-
-            await Task.Delay(5);
+            componentStopWatch.Restart();
         }
     }
 
@@ -1875,12 +1874,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (!skill.Ready && skill.InUse) continue;
 
             skill.InUse = true;
+
             // Skill animation and execute
             ExecuteAssail(lpClient, skill);
+
             // Skill cleanup
             skill.CurrentCooldown = skill.Template.Cooldown;
+            lpClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
             lastTemplate = skill.Template.Name;
             lpClient.LastAssail = DateTime.UtcNow;
+            skill.LastUsedSkill = DateTime.UtcNow;
+
             skill.InUse = false;
         }
 
@@ -2901,6 +2905,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var script = skill.Scripts.Values.First();
             script?.OnUse(localClient.Aisling);
             skill.CurrentCooldown = skill.Template.Cooldown;
+            localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            skill.LastUsedSkill = DateTime.UtcNow;
 
             skill.InUse = false;
             return default;
