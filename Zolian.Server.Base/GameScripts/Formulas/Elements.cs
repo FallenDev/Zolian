@@ -9,16 +9,16 @@ public class Elements : ElementFormulaScript
 {
     public Elements(Sprite obj) { }
 
-    public override double Calculate(Sprite obj, ElementManager.Element offenseElement)
+    public override double Calculate(Sprite defender, Sprite attacker, ElementManager.Element offenseElement)
     {
-        var defenseElement = obj.DefenseElement;
+        var defenseElement = defender.DefenseElement;
 
         if (defenseElement == ElementManager.Element.None && offenseElement == ElementManager.Element.None)
         {
             return 1;
         }
 
-        return obj.Amplified switch
+        return attacker.Amplified switch
         {
             0 => defenseElement switch
             {
@@ -151,14 +151,14 @@ public class Elements : ElementFormulaScript
                 },
                 _ => 2.00
             },
-            1.5 => FasNadur(obj, offenseElement, defenseElement),
-            2 => MorFasNadur(obj, offenseElement, defenseElement),
-            2.5 => ArdFasNadur(obj, offenseElement, defenseElement),
+            1.5 => FasNadur(offenseElement, defenseElement),
+            2 => MorFasNadur(offenseElement, defenseElement),
+            2.5 => ArdFasNadur(offenseElement, defenseElement),
             _ => 0
         };
     }
 
-    public override double FasNadur(Sprite obj, ElementManager.Element offenseElement, ElementManager.Element defenseElement)
+    public override double FasNadur(ElementManager.Element offenseElement, ElementManager.Element defenseElement)
     {
         return defenseElement switch
         {
@@ -293,7 +293,7 @@ public class Elements : ElementFormulaScript
         };
     }
 
-    public override double MorFasNadur(Sprite obj, ElementManager.Element offenseElement, ElementManager.Element defenseElement)
+    public override double MorFasNadur(ElementManager.Element offenseElement, ElementManager.Element defenseElement)
     {
         return defenseElement switch
         {
@@ -428,7 +428,7 @@ public class Elements : ElementFormulaScript
         };
     }
 
-    public override double ArdFasNadur(Sprite obj, ElementManager.Element offenseElement, ElementManager.Element defenseElement)
+    public override double ArdFasNadur(ElementManager.Element offenseElement, ElementManager.Element defenseElement)
     {
         return defenseElement switch
         {

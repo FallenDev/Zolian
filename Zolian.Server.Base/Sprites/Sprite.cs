@@ -1971,7 +1971,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             var offense = damageDealingSprite.OffenseElement;
             var defense = DefenseElement;
 
-            var amplifier = CalculateElementalDamageMod(offense);
+            // Calc takes the sprite and sends the attackers offense element
+            var amplifier = CalculateElementalDamageMod(damageDealingSprite, offense);
             {
                 DefenseElement = defense;
             }
@@ -1987,7 +1988,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             var offense = damageDealingSprite.SecondaryOffensiveElement;
             var defense = DefenseElement;
 
-            var amplifier = CalculateElementalDamageMod(offense);
+            var amplifier = CalculateElementalDamageMod(damageDealingSprite, offense);
             {
                 DefenseElement = defense;
             }
@@ -2000,10 +2001,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    public double CalculateElementalDamageMod(ElementManager.Element element)
+    public double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element)
     {
         var script = ScriptManager.Load<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, this);
-        return script?.Values.Sum(s => s.Calculate(this, element)) ?? 0.0;
+        return script?.Values.Sum(s => s.Calculate(this, attacker, element)) ?? 0.0;
     }
 
     private long LuckModifier(long dmg)

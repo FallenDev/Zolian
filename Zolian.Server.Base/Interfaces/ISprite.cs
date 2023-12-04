@@ -130,7 +130,7 @@ public interface ISprite
     void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false);
     void ApplyEquipmentDurability(int dmg);
     long ApplyWeaponBonuses(Sprite source, long dmg);
-    double CalculateElementalDamageMod(ElementManager.Element element);
+    double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element);
     long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier);
     void ShowDmg(Aisling aisling, TimeSpan elapsedTime);
     void ThreatGeneratedSubsided(Aisling aisling);
