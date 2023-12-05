@@ -2,7 +2,6 @@ using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
-using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 using Chaos.Packets.Abstractions.Definitions;
@@ -24,6 +23,8 @@ using RestSharp;
 using System.Net;
 using System.Net.Sockets;
 using JetBrains.Annotations;
+using ServiceStack;
+using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 
 namespace Darkages.Network.Server;
@@ -118,10 +119,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     public override ValueTask HandlePacketAsync(ILobbyClient client, in ClientPacket packet)
     {
         var opCode = packet.OpCode;
-        var handler = ClientHandlers[(byte)packet.OpCode];
-        if (handler != null) return handler(client, in packet);
+        var handler = ClientHandlers[(byte)opCode];
+        if (handler is not null) return handler(client, in packet);
         ServerSetup.Logger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
         Crashes.TrackError(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
+        client.Disconnect();
         return default;
     }
 
@@ -136,20 +138,25 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-        serverSocket.BeginAccept(OnConnection, serverSocket);
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
+        {
+            clientSocket.Disconnect(true);
+            return;
+        }
 
-        var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        ServerSetup.Logger($"Lobby connection from {ip}");
-
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-        var badActor = ClientOnBlackList(client);
+        var ipAddress = ip.Address;
+        var badActor = ClientOnBlackList(ipAddress.ToString());
 
         if (badActor)
         {
-            client.Disconnect();
+            clientSocket.Disconnect(true);
             return;
         }
+
+        ServerSetup.Logger($"Lobby connection from {ipAddress}");
+        serverSocket.BeginAccept(OnConnection, serverSocket);
+        var client = _clientProvider.CreateClient(clientSocket);
+        client.OnDisconnected += OnDisconnect;
 
         if (!ClientRegistry.TryAdd(client))
         {
@@ -158,7 +165,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        ServerSetup.Instance.GlobalLobbyConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
         // 0x7E - Handshake
         client.SendAcceptConnection();
@@ -174,24 +181,22 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     /// Client IP Check - Blacklist and BOGON list checks
     /// </summary>
     /// <returns>Boolean, whether or not the IP has been listed as valid</returns>
-    private bool ClientOnBlackList(ISocketClient client)
+    private bool ClientOnBlackList(string remoteIp)
     {
-        if (client == null) return true;
+        if (remoteIp.IsNullOrEmpty()) return true;
 
-        switch (client.RemoteIp.ToString())
+        switch (remoteIp)
         {
-            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
-                return true;
             case "127.0.0.1":
             case InternalIP:
                 return false;
         }
 
-        var bogonCheck = BannedIpCheck(client, client.RemoteIp.ToString());
+        var bogonCheck = BannedIpCheck(remoteIp);
         if (bogonCheck)
         {
             ServerSetup.Logger("-----------------------------------");
-            ServerSetup.Logger($"{client.RemoteIp} is banned and unable to connect");
+            ServerSetup.Logger($"{remoteIp} is banned and unable to connect");
             return true;
         }
 
@@ -208,7 +213,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             var request = new RestRequest("", Method.Get);
             request.AddHeader("Key", keyCode);
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("ipAddress", client.RemoteIp.ToString());
+            request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
             var response = _restClient.Execute<Ipdb>(request);
@@ -219,7 +224,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{client.RemoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -228,19 +233,19 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{client.RemoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
                     ServerSetup.Logger("---------Lobby-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
                     ServerSetup.Logger("---------Lobby-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
@@ -248,22 +253,22 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 {
                     case >= 5:
                         ServerSetup.Logger("---------Lobby-Server---------");
-                        var comment = $"{client.RemoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
+                        var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.Logger(comment, LogLevel.Warning);
-                        ReportEndpoint(client, comment);
+                        ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{client.RemoteIp} - API Issue, confidence score was null");
+                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{client.RemoteIp} - API Issue, response was not successful");
+                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
@@ -278,7 +283,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         return true;
     }
 
-    private void ReportEndpoint(ISocketClient client, string comment)
+    private void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
@@ -290,7 +295,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var request = new RestRequest("", Method.Post);
         request.AddHeader("Key", keyCode);
         request.AddHeader("Accept", "application/json");
-        request.AddParameter("ip", client.RemoteIp.ToString());
+        request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
         _restReport.Execute(request);
@@ -298,9 +303,9 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
     private readonly HashSet<string> _bannedIPs = new();
 
-    private bool BannedIpCheck(ISocketClient client, string ip)
+    private bool BannedIpCheck(string ip)
     {
-        if (client.Socket.RemoteEndPoint == null || ip == null) return true;
+        if (ip.IsNullOrEmpty()) return true;
 
         // Add banned player IPs to the _bannedIPs HashSet
         _bannedIPs.Add("0.0.0.0");

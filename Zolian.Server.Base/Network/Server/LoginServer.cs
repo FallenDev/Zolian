@@ -447,10 +447,11 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public override ValueTask HandlePacketAsync(ILoginClient client, in ClientPacket packet)
     {
         var opCode = packet.OpCode;
-        var handler = ClientHandlers[(byte)packet.OpCode];
-        if (handler != null) return handler(client, in packet);
+        var handler = ClientHandlers[(byte)opCode];
+        if (handler is not null) return handler(client, in packet);
         ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
         Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
+        client.Disconnect();
         return default;
     }
 
@@ -469,58 +470,52 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
     }
 
-    protected override async void OnConnection(IAsyncResult ar)
+    protected override void OnConnection(IAsyncResult ar)
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-        serverSocket.BeginAccept(OnConnection, serverSocket);
-
-        var ip = clientSocket.RemoteEndPoint as IPEndPoint;
-        ServerSetup.Logger($"Login connection from {ip}");
-
-        try
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
-            await FinalizeConnectionAsync(clientSocket);
+            clientSocket.Disconnect(true);
+            return;
         }
-        catch (Exception e)
-        {
-            Analytics.TrackEvent($"Failed to finalize connection {ip}");
-            Crashes.TrackError(e);
-        }
-    }
 
-    private async Task FinalizeConnectionAsync(Socket clientSocket)
-    {
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-        var badActor = ClientOnBlackList(client);
+        var ipAddress = ip.Address;
+        var badActor = ClientOnBlackList(ipAddress.ToString());
 
         if (badActor)
         {
-            client.Disconnect();
+            clientSocket.Disconnect(true);
             return;
         }
+
+        ServerSetup.Logger($"Login connection from {ipAddress}");
+        serverSocket.BeginAccept(OnConnection, serverSocket);
+        var client = _clientProvider.CreateClient(clientSocket);
+        client.OnDisconnected += OnDisconnect;
 
         if (!ClientRegistry.TryAdd(client))
         {
+            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
             client.Disconnect();
             return;
         }
 
-        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
 
         if (!lobbyCheck)
         {
             client.Disconnect();
             ServerSetup.Logger("---------Login-Server---------");
-            var comment = $"{client.RemoteIp} has been blocked for violating security protocols through improper port access.";
+            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.Logger(comment, LogLevel.Warning);
-            ReportEndpoint(client, comment);
+            ReportEndpoint(ipAddress.ToString(), comment);
             return;
         }
 
-        ServerSetup.Instance.GlobalLoginConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
+        // 0x7E - Handshake
         client.SendAcceptConnection();
     }
 
@@ -530,14 +525,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientRegistry.TryRemove(client.Id, out _);
     }
 
-    private bool ClientOnBlackList(ISocketClient client)
+    private bool ClientOnBlackList(string remoteIp)
     {
-        if (client == null) return true;
+        if (remoteIp.IsNullOrEmpty()) return true;
 
-        switch (client.RemoteIp.ToString())
+        switch (remoteIp)
         {
-            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
-                return true;
             case "127.0.0.1":
             case InternalIP:
                 return false;
@@ -556,7 +549,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             var request = new RestRequest("", Method.Get);
             request.AddHeader("Key", keyCode);
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("ipAddress", client.RemoteIp.ToString());
+            request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
             var response = _restClient.Execute<Ipdb>(request);
@@ -567,7 +560,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{client.RemoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -576,19 +569,19 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{client.RemoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
                     ServerSetup.Logger("---------Login-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
                     ServerSetup.Logger("---------Login-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
@@ -596,22 +589,22 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 {
                     case >= 5:
                         ServerSetup.Logger("---------Login-Server---------");
-                        var comment = $"{client.RemoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
+                        var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.Logger(comment, LogLevel.Warning);
-                        ReportEndpoint(client, comment);
+                        ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{client.RemoteIp} - API Issue, confidence score was null");
+                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{client.RemoteIp} - API Issue, response was not successful");
+                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
@@ -626,7 +619,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         return true;
     }
 
-    private void ReportEndpoint(ISocketClient client, string comment)
+    private void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
@@ -638,7 +631,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var request = new RestRequest("", Method.Post);
         request.AddHeader("Key", keyCode);
         request.AddHeader("Accept", "application/json");
-        request.AddParameter("ip", client.RemoteIp.ToString());
+        request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
         _restReport.Execute(request);

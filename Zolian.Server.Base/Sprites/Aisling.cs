@@ -804,7 +804,7 @@ public sealed class Aisling : Player, IAisling
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
-        while (NextTo(Target!.X, Target!.Y))
+        while (NextTo(Target!.X, Target!.Y) && Client.Connected)
         {
             if (!(stopWatch.Elapsed.TotalMilliseconds > 1000)) continue;
             stopWatch.Restart();

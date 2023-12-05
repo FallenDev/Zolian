@@ -3433,16 +3433,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var handler = ClientHandlers[(byte)packet.OpCode];
         var trackers = client.Aisling?.AislingTrackers;
 
-        if (handler == null)
-        {
-            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
-            Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
-        }
-
         if (trackers != null && IsManualAction(packet.OpCode))
             trackers.LastManualAction = DateTime.UtcNow;
 
-        return handler?.Invoke(client, in packet) ?? default;
+        if (handler is not null) return handler(client, in packet);
+        ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
+        Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
+        client.Disconnect();
+        return default;
     }
 
     protected override void IndexHandlers()
@@ -3496,43 +3494,47 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
+        {
+            clientSocket.Disconnect(true);
+            return;
+        }
 
-        serverSocket.BeginAccept(OnConnection, serverSocket);
-
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-
-        var badActor = ClientOnBlackList(client);
+        var ipAddress = ip.Address;
+        var badActor = ClientOnBlackList(ipAddress.ToString());
 
         if (badActor)
         {
-            client.Disconnect();
+            clientSocket.Disconnect(true);
             return;
         }
 
-        ServerSetup.Logger($"World Connection established with {client.RemoteIp}");
+        ServerSetup.Logger($"World connection from {ipAddress}");
+        serverSocket.BeginAccept(OnConnection, serverSocket);
+        var client = _clientProvider.CreateClient(clientSocket);
+        client.OnDisconnected += OnDisconnect;
 
         if (!ClientRegistry.TryAdd(client))
         {
+            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
             client.Disconnect();
-            clientSocket.Disconnect(false);
             return;
         }
 
-        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(client.RemoteIp, out _);
-        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(client.RemoteIp, out _);
+        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
+        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(ipAddress, out _);
 
         if (!lobbyCheck || !loginCheck)
         {
             client.Disconnect();
             ServerSetup.Logger("---------World-Server---------");
-            var comment = $"{client.RemoteIp} has been blocked for violating security protocols through improper port access.";
+            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.Logger(comment, LogLevel.Warning);
-            ReportEndpoint(client, comment);
+            ReportEndpoint(ipAddress.ToString(), comment);
             return;
         }
 
-        ServerSetup.Instance.GlobalWorldConnection.TryAdd(client.RemoteIp, client.RemoteIp);
+        ServerSetup.Instance.GlobalWorldConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
     }
 
@@ -3583,14 +3585,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private bool ClientOnBlackList(ISocketClient client)
+    private bool ClientOnBlackList(string remoteIp)
     {
-        if (client == null) return true;
+        if (remoteIp.IsNullOrEmpty()) return true;
 
-        switch (client.RemoteIp.ToString())
+        switch (remoteIp)
         {
-            case "208.115.199.29": // uptimerrobot address - Do not allow it to go further than just pinging our IP
-                return true;
             case "127.0.0.1":
             case InternalIP:
                 return false;
@@ -3609,7 +3609,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var request = new RestRequest("", Method.Get);
             request.AddHeader("Key", keyCode);
             request.AddHeader("Accept", "application/json");
-            request.AddParameter("ipAddress", client.RemoteIp.ToString());
+            request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
             var response = _restClient.Execute<Ipdb>(request);
@@ -3620,7 +3620,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{client.RemoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -3629,19 +3629,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{client.RemoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
                     ServerSetup.Logger("---------World-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
                     ServerSetup.Logger("---------World-Server---------");
-                    ServerSetup.Logger($"{client.RemoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
@@ -3649,22 +3649,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     case >= 5:
                         ServerSetup.Logger("---------World-Server---------");
-                        var comment = $"{client.RemoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
+                        var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.Logger(comment, LogLevel.Warning);
-                        ReportEndpoint(client, comment);
+                        ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{client.RemoteIp} - API Issue, confidence score was null");
+                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{client.RemoteIp} - API Issue, response was not successful");
+                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
@@ -3679,7 +3679,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         return true;
     }
 
-    private void ReportEndpoint(ISocketClient client, string comment)
+    private void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
@@ -3691,7 +3691,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var request = new RestRequest("", Method.Post);
         request.AddHeader("Key", keyCode);
         request.AddHeader("Accept", "application/json");
-        request.AddParameter("ip", client.RemoteIp.ToString());
+        request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
         _restReport.Execute(request);
