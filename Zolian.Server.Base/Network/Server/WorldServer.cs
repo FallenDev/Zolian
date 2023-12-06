@@ -3494,20 +3494,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
-        {
-            clientSocket.Disconnect(true);
-            return;
-        }
-
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip) return;
         var ipAddress = ip.Address;
         var badActor = ClientOnBlackList(ipAddress.ToString());
-
-        if (badActor)
-        {
-            clientSocket.Disconnect(true);
-            return;
-        }
+        if (badActor) return;
 
         ServerSetup.Logger($"World connection from {ipAddress}");
         serverSocket.BeginAccept(OnConnection, serverSocket);

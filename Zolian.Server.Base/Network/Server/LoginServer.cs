@@ -474,20 +474,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
-        {
-            clientSocket.Disconnect(true);
-            return;
-        }
-
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip) return;
         var ipAddress = ip.Address;
         var badActor = ClientOnBlackList(ipAddress.ToString());
-
-        if (badActor)
-        {
-            clientSocket.Disconnect(true);
-            return;
-        }
+        if (badActor) return;
 
         ServerSetup.Logger($"Login connection from {ipAddress}");
         serverSocket.BeginAccept(OnConnection, serverSocket);
