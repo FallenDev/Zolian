@@ -157,6 +157,7 @@ public record AislingStorage : Sql, IAislingStorage
         await SaveLock.WaitAsync().ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
+        var cDt = ComboScrollDataTable();
         var connection = ConnectToDatabase(ConnectionString);
 
         try
@@ -188,6 +189,10 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.QuestManager.ArmorSmithing, obj.QuestManager.JewelCrafting, obj.QuestManager.StoneSmithing, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
                 obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest);
 
+            cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
+                obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
+                obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
+
             await using var cmd = new SqlCommand("PlayerSave", connection);
             cmd.CommandType = CommandType.StoredProcedure;
             var param = cmd.Parameters.AddWithValue("@Players", dt);
@@ -201,6 +206,13 @@ public record AislingStorage : Sql, IAislingStorage
             param2.SqlDbType = SqlDbType.Structured;
             param2.TypeName = "dbo.QuestType";
             cmd2.ExecuteNonQuery();
+
+            await using var cmd3 = new SqlCommand("PlayerComboSave", connection);
+            cmd3.CommandType = CommandType.StoredProcedure;
+            var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
+            param3.SqlDbType = SqlDbType.Structured;
+            param3.TypeName = "dbo.ComboType";
+            cmd3.ExecuteNonQuery();
             connection.Close();
         }
         catch (Exception e)
@@ -224,6 +236,7 @@ public record AislingStorage : Sql, IAislingStorage
         await SaveLock.WaitAsync().ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
+        var cDt = ComboScrollDataTable();
         var connection = ConnectToDatabase(ConnectionString);
 
         try
@@ -260,6 +273,10 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
                     player.QuestManager.ArmorSmithing, player.QuestManager.JewelCrafting, player.QuestManager.StoneSmithing, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
                     player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest);
+
+                cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
+                    player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
+                    player.ComboManager.Combo12, player.ComboManager.Combo13, player.ComboManager.Combo14, player.ComboManager.Combo15);
             }
 
             await using var cmd = new SqlCommand("PlayerSave", connection);
@@ -275,6 +292,13 @@ public record AislingStorage : Sql, IAislingStorage
             param2.SqlDbType = SqlDbType.Structured;
             param2.TypeName = "dbo.QuestType";
             cmd2.ExecuteNonQuery();
+
+            await using var cmd3 = new SqlCommand("PlayerComboSave", connection);
+            cmd3.CommandType = CommandType.StoredProcedure;
+            var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
+            param3.SqlDbType = SqlDbType.Structured;
+            param3.TypeName = "dbo.ComboType";
+            cmd3.ExecuteNonQuery();
             connection.Close();
         }
         catch (Exception e)
@@ -955,5 +979,27 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("AdventuresGuildReputation", typeof(int));
         qDt.Columns.Add("BeltQuest", typeof(string));
         return qDt;
+    }
+
+    private static DataTable ComboScrollDataTable()
+    {
+        var cDt = new DataTable();
+        cDt.Columns.Add("Serial", typeof(long));
+        cDt.Columns.Add("Combo1", typeof(string));
+        cDt.Columns.Add("Combo2", typeof(string));
+        cDt.Columns.Add("Combo3", typeof(string));
+        cDt.Columns.Add("Combo4", typeof(string));
+        cDt.Columns.Add("Combo5", typeof(string));
+        cDt.Columns.Add("Combo6", typeof(string));
+        cDt.Columns.Add("Combo7", typeof(string));
+        cDt.Columns.Add("Combo8", typeof(string));
+        cDt.Columns.Add("Combo9", typeof(string));
+        cDt.Columns.Add("Combo10", typeof(string));
+        cDt.Columns.Add("Combo11", typeof(string));
+        cDt.Columns.Add("Combo12", typeof(string));
+        cDt.Columns.Add("Combo13", typeof(string));
+        cDt.Columns.Add("Combo14", typeof(string));
+        cDt.Columns.Add("Combo15", typeof(string));
+        return cDt;
     }
 }

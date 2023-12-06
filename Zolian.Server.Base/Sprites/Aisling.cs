@@ -108,6 +108,7 @@ public sealed class Aisling : Player, IAisling
     public Bank BankManager { get; set; }
     public Inventory Inventory { get; set; }
     public EquipmentManager EquipmentManager { get; set; }
+    public ComboScroll ComboManager { get; set; }
     public Quests QuestManager { get; set; }
     public List<int> DiscoveredMaps { get; set; }
     public int Styling { get; set; }
@@ -506,6 +507,11 @@ public sealed class Aisling : Player, IAisling
     public IEnumerable<Skill> GetAssails()
     {
         return SkillBook.GetSkills(i => i?.Template is { SkillType: SkillScope.Assail });
+    }
+
+    public Skill GetSkill(string s)
+    {
+        return SkillBook.GetSkills(i => i?.Template.Name == s).First();
     }
 
     public bool GiveGold(uint offer, bool sendClientUpdate = true)

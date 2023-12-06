@@ -40,6 +40,7 @@ public interface IAisling : ISprite
     Bank BankManager { get; set; }
     Inventory Inventory { get; set; }
     EquipmentManager EquipmentManager { get; set; }
+    ComboScroll ComboManager { get; set; }
     Quests QuestManager { get; set; }
     List<int> DiscoveredMaps { get; set; }
     int Styling { get; set; }
@@ -61,6 +62,7 @@ public interface IAisling : ISprite
     void CastSpell(Spell spell, CastInfo info);
     void FinishExchange();
     IEnumerable<Skill> GetAssails();
+    Skill GetSkill(string s);
     bool GiveGold(uint offer, bool sendClientUpdate = true);
     Aisling GiveHealth(Sprite target, int value);
     void GoHome();

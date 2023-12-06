@@ -97,6 +97,25 @@ public class Player : Sprite
     public byte Dawn { get; set; }
 }
 
+public class ComboScroll
+{
+    public string Combo1 { get; set; } = string.Empty;
+    public string Combo2 { get; set; } = string.Empty;
+    public string Combo3 { get; set; } = string.Empty;
+    public string Combo4 { get; set; } = string.Empty;
+    public string Combo5 { get; set; } = string.Empty;
+    public string Combo6 { get; set; } = string.Empty;
+    public string Combo7 { get; set; } = string.Empty;
+    public string Combo8 { get; set; } = string.Empty;
+    public string Combo9 { get; set; } = string.Empty;
+    public string Combo10 { get; set; } = string.Empty;
+    public string Combo11 { get; set; } = string.Empty;
+    public string Combo12 { get; set; } = string.Empty;
+    public string Combo13 { get; set; } = string.Empty;
+    public string Combo14 { get; set; } = string.Empty;
+    public string Combo15 { get; set; } = string.Empty;
+}
+
 public class Quests
 {
     public bool TutorialCompleted { get; set; }

@@ -759,6 +759,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             SetAislingStartupVariables();
             SendUserId();
             SendProfileRequest();
+            InitCombos();
             InitQuests();
             LoadEquipment().LoadInventory().LoadBank().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
             SendDisplayAisling(Aisling);
@@ -1326,7 +1327,27 @@ public class WorldClient : SocketClientBase, IWorldClient
         return this;
     }
 
-    private WorldClient InitQuests()
+    private void InitCombos()
+    {
+        try
+        {
+            const string procedure = "[SelectCombos]";
+            var values = new { Serial = (long)Aisling.Serial };
+            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            sConn.Open();
+            Aisling.ComboManager = sConn.QueryFirstOrDefault<ComboScroll>(procedure, values, commandType: CommandType.StoredProcedure);
+            Aisling.ComboManager ??= new ComboScroll();
+            sConn.Close();
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+    }
+
+    private void InitQuests()
     {
         try
         {
@@ -1337,20 +1358,12 @@ public class WorldClient : SocketClientBase, IWorldClient
             Aisling.QuestManager = sConn.QueryFirst<Quests>(procedure, values, commandType: CommandType.StoredProcedure);
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
-
-        return this;
     }
 
     private void SkillCleanup()

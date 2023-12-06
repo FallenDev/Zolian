@@ -23,6 +23,7 @@ DROP PROCEDURE [dbo].[SpellToPlayer]
 DROP PROCEDURE [dbo].[SkillToPlayer]
 DROP PROCEDURE [dbo].[SelectSpells]
 DROP PROCEDURE [dbo].[SelectSkills]
+DROP PROCEDURE [dbo].[SelectCombos]
 DROP PROCEDURE [dbo].[SelectQuests]
 DROP PROCEDURE [dbo].[SelectPlayer]
 DROP PROCEDURE [dbo].[SelectLegends]
@@ -39,6 +40,7 @@ DROP PROCEDURE [dbo].[PlayerSecurity]
 DROP PROCEDURE [dbo].[PlayerSaveSpells]
 DROP PROCEDURE [dbo].[PlayerSaveSkills]
 DROP PROCEDURE [dbo].[PlayerSave]
+DROP PROCEDURE [dbo].[PlayerComboSave]
 DROP PROCEDURE [dbo].[PlayerQuestSave]
 DROP PROCEDURE [dbo].[PlayerCreation]
 DROP PROCEDURE [dbo].[PasswordSave]
@@ -57,6 +59,7 @@ DROP PROCEDURE [dbo].[ItemUpsert]
 GO
 
 DROP TYPE dbo.PlayerType
+DROP TYPE dbo.ComboType
 DROP TYPE dbo.QuestType
 DROP TYPE dbo.ItemType
 DROP TYPE dbo.SkillType
@@ -70,6 +73,7 @@ DROP TABLE PlayersSpellBook;
 DROP TABLE PlayersDebuffs;
 DROP TABLE PlayersBuffs;
 DROP TABLE PlayersDiscoveredMaps;
+DROP TABLE PlayersCombos;
 DROP TABLE PlayersQuests;
 DROP TABLE PlayersIgnoreList;
 DROP TABLE Players;
@@ -275,6 +279,26 @@ CREATE TABLE PlayersItems
     [Tarnished] BIT NOT NULL DEFAULT 0
 )
 
+CREATE TABLE PlayerCombos
+(
+    [Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
+    [Combo1] VARCHAR(30) NULL,
+    [Combo2] VARCHAR(30) NULL,
+    [Combo3] VARCHAR(30) NULL,
+    [Combo4] VARCHAR(30) NULL,
+    [Combo5] VARCHAR(30) NULL,
+    [Combo6] VARCHAR(30) NULL,
+    [Combo7] VARCHAR(30) NULL,
+    [Combo8] VARCHAR(30) NULL,
+    [Combo9] VARCHAR(30) NULL,
+    [Combo10] VARCHAR(30) NULL,
+    [Combo11] VARCHAR(30) NULL,
+    [Combo12] VARCHAR(30) NULL,
+    [Combo13] VARCHAR(30) NULL,
+    [Combo14] VARCHAR(30) NULL,
+    [Combo15] VARCHAR(30) NULL,
+)
+
 CREATE TABLE PlayersQuests
 (
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
@@ -444,6 +468,26 @@ CREATE TYPE dbo.PlayerType AS TABLE
 	[Flame] TINYINT,
 	[Dusk] TINYINT,
 	[Dawn] TINYINT
+);
+
+CREATE TYPE dbo.ComboType AS TABLE
+(
+    Serial BIGINT,
+    Combo1 VARCHAR(30),
+    Combo2 VARCHAR(30),
+    Combo3 VARCHAR(30),
+    Combo4 VARCHAR(30),
+    Combo5 VARCHAR(30),
+    Combo6 VARCHAR(30),
+    Combo7 VARCHAR(30),
+    Combo8 VARCHAR(30),
+    Combo9 VARCHAR(30),
+    Combo10 VARCHAR(30),
+    Combo11 VARCHAR(30),
+    Combo12 VARCHAR(30),
+    Combo13 VARCHAR(30),
+    Combo14 VARCHAR(30),
+    Combo15 VARCHAR(30)
 );
 
 CREATE TYPE dbo.QuestType AS TABLE
@@ -784,6 +828,45 @@ BEGIN
     '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
     '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
     '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
+END
+GO
+
+-- PlayerComboSave
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[PlayerComboSave]
+    @Combos dbo.ComboType READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    MERGE INTO [ZolianPlayers].[dbo].[PlayersCombos] AS target
+    USING @Combos AS source
+    ON target.Serial = source.Serial
+
+    WHEN MATCHED THEN
+    UPDATE SET
+        [Combo1] = source.Combo1,
+        [Combo2] = source.Combo2,
+        [Combo3] = source.Combo3,
+        [Combo4] = source.Combo4,
+        [Combo5] = source.Combo5,
+        [Combo6] = source.Combo6,
+        [Combo7] = source.Combo7,
+        [Combo8] = source.Combo8,
+        [Combo9] = source.Combo9,
+        [Combo10] = source.Combo10,
+        [Combo11] = source.Combo11,
+        [Combo12] = source.Combo12,
+        [Combo13] = source.Combo13,
+        [Combo14] = source.Combo14,
+        [Combo15] = source.Combo15
+        
+    WHEN NOT MATCHED THEN
+    INSERT (Serial, Combo1, Combo2, Combo3, Combo4, Combo5, Combo6, Combo7, Combo8, Combo9, Combo10, Combo11, Combo12, Combo13, Combo14, Combo15)
+    VALUES (source.Serial, source.Combo1, source.Combo2, source.Combo3, source.Combo4, source.Combo5, source.Combo6, source.Combo7, source.Combo8, source.Combo9, source.Combo10, source.Combo11, source.Combo12, source.Combo13, source.Combo14, source.Combo15);
 END
 GO
 
@@ -1295,6 +1378,24 @@ BEGIN
            [Dawn]
     FROM   [ZolianPlayers].[dbo].[Players]
     WHERE  Username = @Name;
+END
+GO
+
+-- SelectCombos
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SelectCombos]
+@Serial BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT Combo1, Combo2, Combo3, Combo4, Combo5, Combo6, Combo7, Combo8, Combo9,
+           Combo10, Combo11, Combo12, Combo13, Combo14, Combo15
+    FROM   [ZolianPlayers].[dbo].[PlayersCombos]
+    WHERE  Serial = @Serial;
 END
 GO
 

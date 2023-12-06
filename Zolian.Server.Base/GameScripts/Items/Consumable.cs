@@ -5,6 +5,8 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
+using ServiceStack;
+
 namespace Darkages.GameScripts.Items;
 
 [Script("Consumable")]
@@ -112,6 +114,310 @@ public class Consumable(Item item) : ItemScript(item)
                         {
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
+                    }
+                    return;
+                }
+            case "Basic Combo Scroll":
+                {
+                    var skills = new List<Skill>();
+
+                    if (!aisling.ComboManager.Combo1.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo1))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo1);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo2);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo3);
+                            skills.Add(skill);
+                        }
+                    }
+
+                    foreach (var skill in skills)
+                    {
+                        if (skill is null) continue;
+                        if (!skill.CanUse()) continue;
+                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                        skill.InUse = true;
+
+                        var script = skill.Scripts.Values.First();
+                        script?.OnUse(aisling);
+                        skill.CurrentCooldown = skill.Template.Cooldown;
+                        aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+                        skill.LastUsedSkill = DateTime.UtcNow;
+
+                        if (skill.Template.SkillType == SkillScope.Assail)
+                            aisling.Client.LastAssail = DateTime.UtcNow;
+
+                        skill.InUse = false;
+                    }
+                    return;
+                }
+            case "Advanced Combo Scroll":
+                {
+                    var skills = new List<Skill>();
+
+                    if (!aisling.ComboManager.Combo1.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo1))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo1);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo2);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo3);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo4);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo5);
+                            skills.Add(skill);
+                        }
+                    }
+
+                    foreach (var skill in skills)
+                    {
+                        if (skill is null) continue;
+                        if (!skill.CanUse()) continue;
+                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                        skill.InUse = true;
+
+                        var script = skill.Scripts.Values.First();
+                        script?.OnUse(aisling);
+                        skill.CurrentCooldown = skill.Template.Cooldown;
+                        aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+                        skill.LastUsedSkill = DateTime.UtcNow;
+
+                        if (skill.Template.SkillType == SkillScope.Assail)
+                            aisling.Client.LastAssail = DateTime.UtcNow;
+
+                        skill.InUse = false;
+                    }
+                    return;
+                }
+            case "Enhanced Combo Scroll":
+                {
+                    var skills = new List<Skill>();
+
+                    if (!aisling.ComboManager.Combo1.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo1))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo1);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo2);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo3);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo4);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo5);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo6.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo6))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo6);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo7.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo7))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo7);
+                            skills.Add(skill);
+                        }
+                    }
+
+                    foreach (var skill in skills)
+                    {
+                        if (skill is null) continue;
+                        if (!skill.CanUse()) continue;
+                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                        skill.InUse = true;
+
+                        var script = skill.Scripts.Values.First();
+                        script?.OnUse(aisling);
+                        skill.CurrentCooldown = skill.Template.Cooldown;
+                        aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+                        skill.LastUsedSkill = DateTime.UtcNow;
+
+                        if (skill.Template.SkillType == SkillScope.Assail)
+                            aisling.Client.LastAssail = DateTime.UtcNow;
+
+                        skill.InUse = false;
+                    }
+                    return;
+                }
+            case "Enchanted Combo Scroll":
+                {
+                    var skills = new List<Skill>();
+
+                    if (!aisling.ComboManager.Combo1.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo1))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo1);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo2);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo3);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo4);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo5);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo6.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo6))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo6);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo7.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo7))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo7);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo8.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo8))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo8);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo9.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo9))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo9);
+                            skills.Add(skill);
+                        }
+                    }
+                    if (!aisling.ComboManager.Combo10.IsNullOrEmpty())
+                    {
+                        if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo10))
+                        {
+                            var skill = aisling.GetSkill(aisling.ComboManager.Combo10);
+                            skills.Add(skill);
+                        }
+                    }
+
+                    foreach (var skill in skills)
+                    {
+                        if (skill is null) continue;
+                        if (!skill.CanUse()) continue;
+                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+
+                        skill.InUse = true;
+
+                        var script = skill.Scripts.Values.First();
+                        script?.OnUse(aisling);
+                        skill.CurrentCooldown = skill.Template.Cooldown;
+                        aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+                        skill.LastUsedSkill = DateTime.UtcNow;
+
+                        if (skill.Template.SkillType == SkillScope.Assail)
+                            aisling.Client.LastAssail = DateTime.UtcNow;
+
+                        skill.InUse = false;
                     }
                     return;
                 }
