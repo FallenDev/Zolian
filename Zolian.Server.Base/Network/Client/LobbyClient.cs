@@ -14,57 +14,56 @@ using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
 
-namespace Darkages.Network.Client
+namespace Darkages.Network.Client;
+
+[UsedImplicitly]
+public class LobbyClient([NotNull] ILobbyServer<LobbyClient> server, [NotNull] Socket socket,
+        [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
+        [NotNull] ILogger<SocketClientBase> logger)
+    : SocketClientBase(socket, crypto, packetSerializer, logger), ILobbyClient
 {
-    [UsedImplicitly]
-    public class LobbyClient([NotNull] ILobbyServer<LobbyClient> server, [NotNull] Socket socket,
-            [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull] ILogger<SocketClientBase> logger)
-        : SocketClientBase(socket, crypto, packetSerializer, logger), ILobbyClient
+    protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
-        protected override ValueTask HandlePacketAsync(Span<byte> span)
+        var opCode = span[3];
+        var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
+        var packet = new ClientPacket(ref span, isEncrypted);
+
+        if (isEncrypted)
+            Crypto.Decrypt(ref packet);
+
+        return server.HandlePacketAsync(this, in packet);
+    }
+
+    public void SendServerTable(byte[] serverTableData)
+    {
+        var args = new ServerTableArgs
         {
-            var opCode = span[3];
-            var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
-            var packet = new ClientPacket(ref span, isEncrypted);
+            ServerTable = serverTableData
+        };
 
-            if (isEncrypted)
-                Crypto.Decrypt(ref packet);
+        Send(args);
+    }
 
-            return server.HandlePacketAsync(this, in packet);
-        }
-
-        public void SendServerTable(byte[] serverTableData)
+    public void SendConnectionInfo(uint serverTableCheckSum)
+    {
+        var args = new ConnectionInfoArgs
         {
-            var args = new ServerTableArgs
-            {
-                ServerTable = serverTableData
-            };
+            Key = Crypto.Key,
+            Seed = Crypto.Seed,
+            TableCheckSum = serverTableCheckSum
+        };
 
-            Send(args);
-        }
+        Send(args);
+    }
 
-        public void SendConnectionInfo(uint serverTableCheckSum)
+    public void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null)
+    {
+        var args = new LoginMessageArgs
         {
-            var args = new ConnectionInfoArgs
-            {
-                Key = Crypto.Key,
-                Seed = Crypto.Seed,
-                TableCheckSum = serverTableCheckSum
-            };
+            LoginMessageType = loginMessageType,
+            Message = message
+        };
 
-            Send(args);
-        }
-
-        public void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null)
-        {
-            var args = new LoginMessageArgs
-            {
-                LoginMessageType = loginMessageType,
-                Message = message
-            };
-
-            Send(args);
-        }
+        Send(args);
     }
 }

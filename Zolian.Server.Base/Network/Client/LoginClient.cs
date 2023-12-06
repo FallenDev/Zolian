@@ -15,107 +15,106 @@ using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
 
-namespace Darkages.Network.Client
+namespace Darkages.Network.Client;
+
+[UsedImplicitly]
+public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
+        [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
+        [NotNull] ILogger<SocketClientBase> logger)
+    : SocketClientBase(socket, crypto, packetSerializer, logger), ILoginClient
 {
-    [UsedImplicitly]
-    public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
-            [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-            [NotNull] ILogger<SocketClientBase> logger)
-        : SocketClientBase(socket, crypto, packetSerializer, logger), ILoginClient
+    protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
-        protected override ValueTask HandlePacketAsync(Span<byte> span)
+        var opCode = span[3];
+        var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
+        var packet = new ClientPacket(ref span, isEncrypted);
+
+        if (isEncrypted)
+            Crypto.Decrypt(ref packet);
+
+        return server.HandlePacketAsync(this, in packet);
+    }
+
+    public void SendLoginControls(LoginControlsType loginControlsType, string message)
+    {
+        var args = new LoginControlArgs
         {
-            var opCode = span[3];
-            var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
-            var packet = new ClientPacket(ref span, isEncrypted);
+            LoginControlsType = loginControlsType,
+            Message = message
+        };
 
-            if (isEncrypted)
-                Crypto.Decrypt(ref packet);
+        Send(args);
+    }
 
-            return server.HandlePacketAsync(this, in packet);
-        }
-
-        public void SendLoginControls(LoginControlsType loginControlsType, string message)
+    public void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null)
+    {
+        var args = new LoginMessageArgs
         {
-            var args = new LoginControlArgs
-            {
-                LoginControlsType = loginControlsType,
-                Message = message
-            };
+            LoginMessageType = loginMessageType,
+            Message = message
+        };
 
-            Send(args);
-        }
+        Send(args);
+    }
 
-        public void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null)
+    public void SendLoginNotice(bool full, Notification notice)
+    {
+        var args = new LoginNoticeArgs
         {
-            var args = new LoginMessageArgs
-            {
-                LoginMessageType = loginMessageType,
-                Message = message
-            };
+            IsFullResponse = full
+        };
 
-            Send(args);
-        }
+        if (full)
+            args.Data = notice.Data;
+        else
+            args.CheckSum = notice.Hash;
 
-        public void SendLoginNotice(bool full, Notification notice)
+        Send(args);
+    }
+
+    public void SendMetaData(MetaDataRequestType metaDataRequestType, [NotNull] MetafileManager metaDataStore,
+        [CanBeNull] string name = null)
+    {
+        var args = new MetaDataArgs
         {
-            var args = new LoginNoticeArgs
-            {
-                IsFullResponse = full
-            };
+            MetaDataRequestType = metaDataRequestType
+        };
 
-            if (full)
-                args.Data = notice.Data;
-            else
-                args.CheckSum = notice.Hash;
-
-            Send(args);
-        }
-
-        public void SendMetaData(MetaDataRequestType metaDataRequestType, [NotNull] MetafileManager metaDataStore,
-            [CanBeNull] string name = null)
+        switch (metaDataRequestType)
         {
-            var args = new MetaDataArgs
+            case MetaDataRequestType.DataByName:
             {
-                MetaDataRequestType = metaDataRequestType
-            };
-
-            switch (metaDataRequestType)
-            {
-                case MetaDataRequestType.DataByName:
-                    {
-                        ArgumentNullException.ThrowIfNull(name);
-                        var metaData = metaDataStore.GetMetaFile(name);
-                        args.MetaDataInfo = new MetaDataInfo
-                        {
-                            Name = metaData.Name,
-                            Data = metaData.DeflatedData,
-                            CheckSum = metaData.Hash
-                        };
-                        break;
-                    }
-                case MetaDataRequestType.AllCheckSums:
-                    {
-                        args.MetaDataCollection = new List<MetaDataInfo>();
-                        var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
-
-                        foreach (var file in metaFiles)
-                        {
-                            var metafileInfo = new MetaDataInfo
-                            {
-                                CheckSum = file.Hash,
-                                Data = file.DeflatedData,
-                                Name = file.Name
-                            };
-
-                            args.MetaDataCollection.Add(metafileInfo);
-                        }
-
-                        break;
-                    }
+                ArgumentNullException.ThrowIfNull(name);
+                var metaData = metaDataStore.GetMetaFile(name);
+                args.MetaDataInfo = new MetaDataInfo
+                {
+                    Name = metaData.Name,
+                    Data = metaData.DeflatedData,
+                    CheckSum = metaData.Hash
+                };
+                break;
             }
+            case MetaDataRequestType.AllCheckSums:
+            {
+                args.MetaDataCollection = new List<MetaDataInfo>();
+                var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
 
-            Send(args);
+                foreach (var file in metaFiles)
+                {
+                    var metafileInfo = new MetaDataInfo
+                    {
+                        CheckSum = file.Hash,
+                        Data = file.DeflatedData,
+                        Name = file.Name
+                    };
+
+                    args.MetaDataCollection.Add(metafileInfo);
+                }
+
+                break;
+            }
         }
+
+        Send(args);
     }
 }
