@@ -138,13 +138,24 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         var serverSocket = (Socket)ar.AsyncState!;
         var clientSocket = serverSocket.EndAccept(ar);
-        if (clientSocket.RemoteEndPoint is not IPEndPoint ip) return;
+        ServerSetup.Logger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
+        serverSocket.BeginAccept(OnConnection, serverSocket);
+
+        if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
+        {
+            ServerSetup.Logger("Socket not a valid endpoint");
+            clientSocket.Close();
+            return;
+        }
+
         var ipAddress = ip.Address;
         var badActor = ClientOnBlackList(ipAddress.ToString());
-        if (badActor) return;
+        if (badActor)
+        {
+            clientSocket.Close();
+            return;
+        }
 
-        ServerSetup.Logger($"Lobby connection from {ipAddress}");
-        serverSocket.BeginAccept(OnConnection, serverSocket);
         var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
