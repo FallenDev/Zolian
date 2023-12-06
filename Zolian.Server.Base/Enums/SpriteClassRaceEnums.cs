@@ -152,6 +152,28 @@ public static class ClassStrings
         };
     }
 
+    public static int JobDisplayFlag(string c)
+    {
+        return c switch
+        {
+            "None" => 0,
+            "Thief" => 1,
+            "Dark Knight" => 2,
+            "Templar" => 4,
+            "Knight" => 8,
+            "Ninja" => 16,
+            "SharpShooter" => 32,
+            "Oracle" => 64,
+            "Bard" => 128,
+            "Summoner" => 256,
+            "Samurai" => 512,
+            "ShaolinMonk" => 1024,
+            "Necromancer" => 2048,
+            "Dragoon" => 4096,
+            _ => 0
+        };
+    }
+
     public static string StageValue(ClassStage c)
     {
         return c switch

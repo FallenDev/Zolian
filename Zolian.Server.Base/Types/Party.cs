@@ -15,7 +15,7 @@ public class Party : ObjectManager
         get
         {
             var stringBuilder = new System.Text.StringBuilder();
-            stringBuilder.Append("Group members");
+            stringBuilder.Append($"Group members\n");
 
             foreach (var member in PartyMembers)
             {
@@ -25,10 +25,10 @@ public class Party : ObjectManager
                     leader = "*";
                 }
 
-                stringBuilder.Append($"\n{leader} {member.Username}");
+                stringBuilder.Append($"{leader} {member.Username}\n");
             }
 
-            stringBuilder.Append($"\nTotal {PartyMembers.Count}");
+            stringBuilder.Append($"Total {PartyMembers.Count}number of people");
 
             return stringBuilder.ToString();
         }

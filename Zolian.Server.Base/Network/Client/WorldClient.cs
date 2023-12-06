@@ -2771,6 +2771,34 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         #endregion
 
+        var legendMarks = ObtainProfileLegendMarks(aisling);
+        if (legendMarks.IsNullOrEmpty()) return;
+
+        var args = new ProfileArgs
+        {
+            JobClass = (JobClass)ClassStrings.JobDisplayFlag(aisling.JobClass.ToString()),
+            BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(aisling.Path.ToString()),
+            Equipment = equipment,
+            GroupOpen = partyOpen,
+            GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
+            GuildRank = aisling.GameMaster
+                ? "Game Master"
+                : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}",
+            Id = aisling.Serial,
+            LegendMarks = legendMarks,
+            Name = aisling.Username,
+            Nation = Nation.Mileth,
+            Portrait = aisling.PictureData,
+            ProfileText = aisling.ProfileMessage,
+            SocialStatus = (SocialStatus)aisling.ActiveStatus,
+            Title = $"Level: {aisling.ExpLevel}  DR: {aisling.AbpLevel}"
+        };
+
+        Send(args);
+    }
+
+    private static List<LegendMarkInfo> ObtainProfileLegendMarks(Aisling aisling)
+    {
         var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
         var legendCount = aisling.LegendBook.LegendMarks;
         var legendMarks = legends
@@ -2799,28 +2827,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             });
 
         legendMarks.AddRange(nullLegends);
-
-        var args = new ProfileArgs
-        {
-            AdvClass = AdvClass.None,
-            BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(aisling.Path.ToString()),
-            Equipment = equipment,
-            GroupOpen = partyOpen,
-            GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
-            GuildRank = aisling.GameMaster
-                ? "Game Master"
-                : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}",
-            Id = aisling.Serial,
-            LegendMarks = legendMarks,
-            Name = aisling.Username,
-            Nation = Nation.Mileth,
-            Portrait = aisling.PictureData,
-            ProfileText = aisling.ProfileMessage,
-            SocialStatus = (SocialStatus)aisling.ActiveStatus,
-            Title = $"Level: {aisling.ExpLevel}  DR: {aisling.AbpLevel}"
-        };
-
-        Send(args);
+        return legendMarks;
     }
 
     /// <summary>
@@ -3303,6 +3310,35 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         #endregion
 
+        var legendMarks = ObtainSelfProfileLegendMarks();
+        if (legendMarks.IsNullOrEmpty()) return;
+
+        var args = new SelfProfileArgs
+        {
+            JobClass = (JobClass)ClassStrings.JobDisplayFlag(Aisling.JobClass.ToString()),
+            BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(Aisling.Path.ToString()),
+            Equipment = equipment,
+            GroupOpen = partyOpen,
+            GroupString = Aisling.GroupParty?.PartyMemberString ?? "",
+            GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
+            GuildRank = Aisling.GameMaster
+                ? "Game Master"
+                : $"Vit: {Aisling.BaseHp + Aisling.BaseMp * 2}",
+            IsMaster = Aisling.Stage >= ClassStage.Master,
+            LegendMarks = legendMarks,
+            Name = Aisling.Username,
+            Nation = Nation.Mileth,
+            Portrait = Aisling.PictureData,
+            ProfileText = Aisling.ProfileMessage,
+            SpouseName = null,
+            Title = $"Level: {Aisling.ExpLevel}  DR: {Aisling.AbpLevel}"
+        };
+
+        Send(args);
+    }
+
+    private List<LegendMarkInfo> ObtainSelfProfileLegendMarks()
+    {
         var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
         var legendCount = Aisling.LegendBook.LegendMarks;
         var legendMarks = legends
@@ -3331,29 +3367,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             });
 
         legendMarks.AddRange(nullLegends);
-
-        var args = new SelfProfileArgs
-        {
-            AdvClass = AdvClass.None,
-            BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(Aisling.Path.ToString()),
-            Equipment = equipment,
-            GroupOpen = partyOpen,
-            GroupString = Aisling.GroupParty?.PartyMemberString ?? "",
-            GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
-            GuildRank = Aisling.GameMaster
-                ? "Game Master"
-                : $"Vit: {Aisling.BaseHp + Aisling.BaseMp * 2}",
-            IsMaster = Aisling.Stage >= ClassStage.Master,
-            LegendMarks = legendMarks,
-            Name = Aisling.Username,
-            Nation = Nation.Mileth,
-            Portrait = Aisling.PictureData,
-            ProfileText = Aisling.ProfileMessage,
-            SpouseName = null,
-            Title = $"Level: {Aisling.ExpLevel}  DR: {Aisling.AbpLevel}"
-        };
-
-        Send(args);
+        return legendMarks;
     }
 
     /// <summary>
