@@ -55,7 +55,7 @@ public class Blink(Skill skill) : SkillScript(skill)
         damageDealingSprite.FacingFarAway(pos.X, pos.Y, out var direction);
         damageDealingSprite.Direction = (byte)direction;
         SendPortAnimation(damageDealingSprite, pos);
-        client.WarpTo(pos, false);
+        client.WarpTo(pos);
         OnSuccess(damageDealingSprite);
     }
 

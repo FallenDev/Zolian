@@ -117,8 +117,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var warpPos = new Position(savedXStep, savedYStep);
-        damageDealingSprite.Client.WarpTo(warpPos, true);
-        damageDealingSprite.Client.CheckWarpTransitions(damageDealingSprite.Client);
+        damageDealingSprite.Client.WarpTo(warpPos);
+        damageDealingSprite.Client.CheckWarpTransitions(damageDealingSprite.Client, savedXStep, savedYStep);
         damageDealingSprite.Client.SendRemoveObject(damageDealingSprite.Serial);
         damageDealingSprite.Client.UpdateDisplay();
         damageDealingSprite.Client.LastMovement = DateTime.UtcNow;

@@ -136,6 +136,7 @@ public interface IWorldClient : ISocketClient
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);
     void Interrupt();
+    void WorldMapInterrupt();
     void ForgetSkill(string s);
     void ForgetSkills();
     void ForgetSpell(string s);
@@ -178,7 +179,7 @@ public interface IWorldClient : ISocketClient
     WorldClient TransitionToMap(Area area, Position position);
     WorldClient TransitionToMap(int area, Position position);
     void WarpToAdjacentMap(WarpTemplate warps);
-    void WarpTo(Position position, bool overrideRefresh);
+    void WarpTo(Position position);
     void CheckWarpTransitions(WorldClient client);
     void CheckWarpTransitions(WorldClient client, int x, int y);
     WorldClient Enter();

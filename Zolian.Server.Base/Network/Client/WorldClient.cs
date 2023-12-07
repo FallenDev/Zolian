@@ -3946,6 +3946,11 @@ public class WorldClient : SocketClientBase, IWorldClient
         ClientRefreshed();
     }
 
+    public void WorldMapInterrupt()
+    {
+        WorldServer.CancelIfCasting(this);
+    }
+
     public void ForgetSkill(string s)
     {
         var subject = Aisling.SkillBook.Skills.Values
@@ -4628,7 +4633,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         else
         {
-            WarpTo(position, false);
+            WarpTo(position);
         }
 
         // ToDo: Logic to only play this if a menu is opened.
@@ -4658,7 +4663,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             Aisling.Pos = new Vector2(position.X, position.Y);
             Aisling.CurrentMapId = target.ID;
 
-            WarpTo(new Position(Aisling.Pos), false);
+            WarpTo(new Position(Aisling.Pos));
         }
 
         return this;
@@ -4688,15 +4693,13 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         else
         {
-            WarpTo(warps.To.Location, false);
+            WarpTo(warps.To.Location);
         }
     }
 
-    public void WarpTo(Position position, bool overrideRefresh)
+    public void WarpTo(Position position)
     {
         Aisling.Pos = new Vector2(position.X, position.Y);
-        if (overrideRefresh) return;
-        ClientRefreshed();
     }
 
     public void CheckWarpTransitions(WorldClient client)
@@ -4762,7 +4765,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     var portal = new PortalSession();
                     portal.TransitionToMap(client);
                     breakOuterLoop = true;
-                    client.Interrupt();
+                    client.WorldMapInterrupt();
                     break;
                 }
             }
