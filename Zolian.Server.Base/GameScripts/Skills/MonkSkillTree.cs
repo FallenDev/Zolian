@@ -8,6 +8,8 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
+using static ServiceStack.Diagnostics.Events;
+
 namespace Darkages.GameScripts.Skills;
 
 [Script("Ambush")]
@@ -1597,7 +1599,8 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
         }
-
+        
+        _skillMethod.Train(aisling.Client, skill);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
