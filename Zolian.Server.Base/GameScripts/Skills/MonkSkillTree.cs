@@ -8,8 +8,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using static ServiceStack.Diagnostics.Events;
-
 namespace Darkages.GameScripts.Skills;
 
 [Script("Ambush")]

@@ -887,8 +887,7 @@ public class Briarthorn(Skill skill) : SkillScript(skill)
             laws.OnEnded(aisling, laws);
         
         var buff = new aura_BriarThorn();
-        buff.OnApplied(aisling, buff);
-        
+        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
         _skillMethod.Train(client, skill);
     }
 
@@ -925,8 +924,7 @@ public class LawsOfAosda(Skill skill) : SkillScript(skill)
             briar.OnEnded(aisling, briar);
         
         var buff = new aura_LawsOfAosda();
-        buff.OnApplied(aisling, buff);
-        
+        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
         _skillMethod.Train(client, skill);
     }
 

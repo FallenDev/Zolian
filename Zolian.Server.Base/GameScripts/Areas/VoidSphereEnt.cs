@@ -3,7 +3,6 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-
 using System.Collections.Concurrent;
 using System.Numerics;
 
@@ -36,7 +35,7 @@ public class VoidSphereEnt : AreaScript
 
         if (!(vectorMap.Y > 15) && !(vectorMap.Y < 3) && !(vectorMap.X > 15) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();
-        debuff.OnApplied(client.Aisling, debuff);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
         client.TransitionToMap(14757, new Position(13, 34));
         client.SendSound(0x9B, false);
     }

@@ -23,18 +23,17 @@ public class VoidSphereDivide : AreaScript
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+        var debuff = new DebuffReaping();
 
         if (vectorMap.X is > 15 and < 21)
         {
-            var debuff1 = new DebuffReaping();
-            debuff1.OnApplied(client.Aisling, debuff1);
+            client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
             client.TransitionToMap(14757, new Position(13, 34));
             client.SendSound(0x9B, false);
         }
 
         if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;
-        var debuff = new DebuffReaping();
-        debuff.OnApplied(client.Aisling, debuff);
+        client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
         client.TransitionToMap(14757, new Position(13, 34));
         client.SendSound(0x9B, false);
     }

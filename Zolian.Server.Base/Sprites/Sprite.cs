@@ -1222,7 +1222,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         void ApplyAffliction(Sprite afflicted, Sprite attacker)
         {
-            if (afflicted is not Aisling) return;
+            if (afflicted is not Aisling aisling) return;
             if (attacker is not Monster monster) return;
             if (attacker.Level <= 249) return;
             var affliction = Generator.RandomEnumValue<Afflictions>();
@@ -1247,7 +1247,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9993)
                         {
                             var debuff = new Plagued();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1264,7 +1264,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9993)
                         {
                             var debuff = new TheShakes();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1289,7 +1289,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9995)
                         {
                             var debuff = new Stricken();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1303,7 +1303,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9997)
                         {
                             var debuff = new Rabies();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1325,7 +1325,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9993)
                         {
                             var debuff = new LockJoint();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1341,7 +1341,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         if (rand >= .9995)
                         {
                             var debuff = new NumbFall();
-                            debuff.OnApplied(afflicted, debuff);
+                            aisling.Client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
                         }
                     }
                     break;
@@ -1784,14 +1784,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when hasteChance >= 99:
                 {
                     var buff = new buff_Haste();
-                    buff.OnApplied(damageDealingSprite, buff);
+                    damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when hasteChance >= 97:
                 {
                     var buff = new buff_Hasten();
-                    buff.OnApplied(damageDealingSprite, buff);
+                    damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     break;
                 }
@@ -2166,7 +2166,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 StatusBarDisplayUpdateBuff(b, elapsedTime);
             }
             else
-                b.Update(this, elapsedTime);
+            {
+                if (Alive)
+                    b.Update(this, elapsedTime);
+            }
         });
     }
 
@@ -2182,7 +2185,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 StatusBarDisplayUpdateDebuff(d, elapsedTime);
             }
             else
-                d.Update(this, elapsedTime);
+            {
+                if (Alive)
+                    d.Update(this, elapsedTime);
+            }
         });
     }
 

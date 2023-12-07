@@ -6,6 +6,8 @@ using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
 
+using static ServiceStack.Diagnostics.Events;
+
 namespace Darkages.GameScripts.Affects;
 
 #region Armor
@@ -219,6 +221,18 @@ public class buff_Hastenga : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {
@@ -242,6 +256,18 @@ public class buff_Hastenga : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {
@@ -273,6 +299,18 @@ public class buff_Hasten : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {
@@ -296,6 +334,18 @@ public class buff_Hasten : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {
@@ -327,6 +377,18 @@ public class buff_Haste : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {
@@ -350,6 +412,18 @@ public class buff_Haste : Buff
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
         }
         else
         {

@@ -5,7 +5,6 @@ using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
-
 using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Affects;
@@ -146,7 +145,7 @@ public class Plagued : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
             var diseasedDebuff = new Diseased();
-            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
         }
 
         var hallowed = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Stricken);
@@ -154,7 +153,7 @@ public class Plagued : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
             var hallowedDebuff = new Hallowed();
-            hallowedDebuff.OnApplied(affected, hallowedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff, TimeSpan.FromSeconds(hallowedDebuff.Length));
         }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -212,7 +211,7 @@ public class TheShakes : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
             var diseasedDebuff = new Diseased();
-            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
         }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -266,7 +265,7 @@ public class Stricken : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
             var hallowedDebuff = new Hallowed();
-            hallowedDebuff.OnApplied(affected, hallowedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff, TimeSpan.FromSeconds(hallowedDebuff.Length));
         }
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -335,7 +334,7 @@ public class Rabies : Debuff
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
         var death = new DebuffReaping();
-        death.OnApplied(affected, death);
+        aisling.Client.EnqueueDebuffAppliedEvent(aisling, death, TimeSpan.FromSeconds(death.Length));
         DeleteDebuff(aisling, debuff);
     }
 }
@@ -362,7 +361,7 @@ public class LockJoint : Debuff
         if (petrified)
         {
             var diseasedDebuff = new Petrified();
-            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
         }
 
         aisling.BonusDmg -= DmgModifier;
@@ -374,10 +373,11 @@ public class LockJoint : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        if (affected is not Aisling aisling) return;
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.02) return;
         var diseasedDebuff = new DebuffBeagsuain();
-        diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
@@ -416,7 +416,7 @@ public class NumbFall : Debuff
         if (petrified)
         {
             var diseasedDebuff = new Petrified();
-            diseasedDebuff.OnApplied(affected, diseasedDebuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
         }
 
         aisling.BonusHit -= HitModifier;
@@ -556,10 +556,11 @@ public class Petrified : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        if (affected is not Aisling aisling) return;
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.05) return;
         var diseasedDebuff = new DebuffHalt();
-        diseasedDebuff.OnApplied(affected, diseasedDebuff);
+        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)

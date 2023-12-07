@@ -35,7 +35,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using ServiceStack;
-
 using System.Collections.Concurrent;
 using System.Data;
 using System.Diagnostics;
@@ -612,7 +611,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Lycanisim();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -623,7 +622,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Vampirisim();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -634,7 +633,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Plagued();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -645,7 +644,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new TheShakes();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -656,7 +655,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Stricken();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -667,7 +666,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Rabies();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -678,7 +677,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new LockJoint();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -689,7 +688,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new NumbFall();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -700,7 +699,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Diseased();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -711,7 +710,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Hallowed();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -722,7 +721,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (!debuff)
             {
                 var applyDebuff = new Petrified();
-                applyDebuff.OnApplied(Aisling, applyDebuff);
+                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
