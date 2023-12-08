@@ -55,19 +55,19 @@ public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(serv
                     switch (rand)
                     {
                         case <= 24:
-                            client.WarpTo(new Position(4, 4));
+                            client.WarpToAndRefresh(new Position(4, 4));
                             break;
                         case <= 49:
-                            client.WarpTo(new Position(2, 6));
+                            client.WarpToAndRefresh(new Position(2, 6));
                             break;
                         case <= 74:
-                            client.WarpTo(new Position(6, 2));
+                            client.WarpToAndRefresh(new Position(6, 2));
                             break;
                         case <= 100:
-                            client.WarpTo(new Position(2, 2));
+                            client.WarpToAndRefresh(new Position(2, 2));
                             break;
                         default:
-                            client.WarpTo(new Position(4, 4));
+                            client.WarpToAndRefresh(new Position(4, 4));
                             break;
                     }
 
@@ -83,19 +83,19 @@ public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(serv
                     switch (rand)
                     {
                         case <= 24:
-                            client.WarpTo(new Position(51, 4));
+                            client.WarpToAndRefresh(new Position(51, 4));
                             break;
                         case <= 49:
-                            client.WarpTo(new Position(49, 2));
+                            client.WarpToAndRefresh(new Position(49, 2));
                             break;
                         case <= 74:
-                            client.WarpTo(new Position(53, 6));
+                            client.WarpToAndRefresh(new Position(53, 6));
                             break;
                         case <= 100:
-                            client.WarpTo(new Position(53, 2));
+                            client.WarpToAndRefresh(new Position(53, 2));
                             break;
                         default:
-                            client.WarpTo(new Position(51, 4));
+                            client.WarpToAndRefresh(new Position(51, 4));
                             break;
                     }
 
@@ -111,19 +111,19 @@ public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(serv
                     switch (rand)
                     {
                         case <= 24:
-                            client.WarpTo(new Position(51, 51));
+                            client.WarpToAndRefresh(new Position(51, 51));
                             break;
                         case <= 49:
-                            client.WarpTo(new Position(49, 53));
+                            client.WarpToAndRefresh(new Position(49, 53));
                             break;
                         case <= 74:
-                            client.WarpTo(new Position(53, 49));
+                            client.WarpToAndRefresh(new Position(53, 49));
                             break;
                         case <= 100:
-                            client.WarpTo(new Position(53, 53));
+                            client.WarpToAndRefresh(new Position(53, 53));
                             break;
                         default:
-                            client.WarpTo(new Position(51, 51));
+                            client.WarpToAndRefresh(new Position(51, 51));
                             break;
                     }
 
@@ -139,19 +139,19 @@ public class InnerHost(WorldServer server, Mundane mundane) : MundaneScript(serv
                     switch (rand)
                     {
                         case <= 24:
-                            client.WarpTo(new Position(4, 51));
+                            client.WarpToAndRefresh(new Position(4, 51));
                             break;
                         case <= 49:
-                            client.WarpTo(new Position(2, 53));
+                            client.WarpToAndRefresh(new Position(2, 53));
                             break;
                         case <= 74:
-                            client.WarpTo(new Position(2, 49));
+                            client.WarpToAndRefresh(new Position(2, 49));
                             break;
                         case <= 100:
-                            client.WarpTo(new Position(6, 53));
+                            client.WarpToAndRefresh(new Position(6, 53));
                             break;
                         default:
-                            client.WarpTo(new Position(4, 51));
+                            client.WarpToAndRefresh(new Position(4, 51));
                             break;
                     }
 

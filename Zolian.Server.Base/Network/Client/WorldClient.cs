@@ -3711,6 +3711,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public void ClientRefreshed()
     {
+        if (MapOpen) return;
         if (!CanRefresh) return;
 
         SendMapInfo();
@@ -4632,7 +4633,12 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         else
         {
+            Aisling.LastPosition = new Position(Aisling.Pos);
+            Aisling.Pos = new Vector2(position.X, position.Y);
+            Aisling.CurrentMapId = area.ID;
+
             WarpTo(position);
+            ClientRefreshed();
         }
 
         // ToDo: Logic to only play this if a menu is opened.
@@ -4663,6 +4669,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             Aisling.CurrentMapId = target.ID;
 
             WarpTo(new Position(Aisling.Pos));
+            ClientRefreshed();
         }
 
         return this;
@@ -4701,6 +4708,12 @@ public class WorldClient : SocketClientBase, IWorldClient
         Aisling.Pos = new Vector2(position.X, position.Y);
     }
 
+    public void WarpToAndRefresh(Position position)
+    {
+        Aisling.Pos = new Vector2(position.X, position.Y);
+        ClientRefreshed();
+    }
+
     public void CheckWarpTransitions(WorldClient client)
     {
         foreach (var (_, value) in ServerSetup.Instance.GlobalWarpTemplateCache)
@@ -4710,12 +4723,19 @@ public class WorldClient : SocketClientBase, IWorldClient
 
             lock (_warpCheckLock)
             {
-                foreach (var _ in value.Activations.Where(o =>
+                foreach (var warp in value.Activations.Where(o =>
                              o.Location.X == (int)client.Aisling.Pos.X &&
                              o.Location.Y == (int)client.Aisling.Pos.Y))
                 {
                     if (value.WarpType == WarpType.Map)
                     {
+                        if (client.Aisling.Map.ID == value.To.AreaID)
+                        {
+                            WarpToAndRefresh(value.To.Location);
+                            breakOuterLoop = true;
+                            break;
+                        }
+
                         client.WarpToAdjacentMap(value);
                         breakOuterLoop = true;
                         break;

@@ -180,6 +180,7 @@ public interface IWorldClient : ISocketClient
     WorldClient TransitionToMap(int area, Position position);
     void WarpToAdjacentMap(WarpTemplate warps);
     void WarpTo(Position position);
+    void WarpToAndRefresh(Position position);
     void CheckWarpTransitions(WorldClient client);
     void CheckWarpTransitions(WorldClient client, int x, int y);
     WorldClient Enter();

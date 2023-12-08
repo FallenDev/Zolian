@@ -66,7 +66,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly WorldServerTimer _itemGroundCheckTimer = new(TimeSpan.FromMilliseconds(5000));
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
-    private DateTime _mapSpeed;
     private Task _componentRunTask;
     private Task _updateObjectsTask;
     private Task _updateMapsTask;
@@ -113,14 +112,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             _updateObjectsTask = Task.Run(UpdateObjectsRoutine, stoppingToken);
             _updateMapsTask = Task.Run(UpdateMapsRoutine, stoppingToken);
             _updateClientsTask = Task.Run(UpdateClients, stoppingToken);
-            //NightlyServerReset();
         }
         catch (Exception ex)
         {
             ServerSetup.Logger(ex.Message, LogLevel.Error);
             ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
-            ServerSetup.Instance.Running = false;
         }
 
         return base.ExecuteAsync(stoppingToken);
@@ -589,7 +586,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         playerSkillSpellWatch.Start();
         var moonPhaseWatch = new Stopwatch();
         moonPhaseWatch.Start();
-        var components = _serverComponents.Select(i => i.Value).ToList();
 
         while (ServerSetup.Instance.Running)
         {
@@ -608,7 +604,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var playerSkillSpellElapsed = playerSkillSpellWatch.Elapsed;
             var moonPhaseElapsed = moonPhaseWatch.Elapsed;
 
-            Parallel.ForEach(components, component =>
+            Parallel.ForEach(_serverComponents.Values, component =>
             {
                 switch (component)
                 {
@@ -684,92 +680,61 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private async void UpdateObjectsRoutine()
+    private void UpdateObjectsRoutine()
     {
         var monstersWatch = new Stopwatch();
         monstersWatch.Start();
         var mundanesWatch = new Stopwatch();
         mundanesWatch.Start();
 
-
         while (ServerSetup.Instance.Running)
         {
             var monstersElapsed = monstersWatch.Elapsed;
             var mundanesElapsed = mundanesWatch.Elapsed;
 
-            try
+            UpdateGroundItems();
+
+            if (monstersElapsed.TotalMilliseconds > GameSpeed)
             {
-                UpdateGroundItems();
-                if (monstersElapsed.TotalMilliseconds > 300)
-                {
-                    UpdateMonsters(monstersElapsed);
-                    monstersWatch.Restart();
-                }
-                if (mundanesElapsed.TotalMilliseconds > 1500)
-                {
-                    UpdateMundanes(mundanesElapsed);
-                    mundanesWatch.Restart();
-                }
-            }
-            catch (Exception ex)
-            {
-                ServerSetup.Logger(ex.Message, LogLevel.Error);
-                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                Crashes.TrackError(ex);
+                UpdateMonsters(monstersElapsed);
+                monstersWatch.Restart();
             }
 
-            await Task.Delay(GameSpeed);
+            if (mundanesElapsed.TotalMilliseconds < 1500) continue;
+            UpdateMundanes(mundanesElapsed);
+            mundanesWatch.Restart();
         }
     }
 
-    private async void UpdateMapsRoutine()
+    private void UpdateMapsRoutine()
     {
-        _mapSpeed = DateTime.UtcNow;
+        var gameWatch = new Stopwatch();
+        gameWatch.Start();
 
         while (ServerSetup.Instance.Running)
         {
-            var gTimeConvert = DateTime.UtcNow;
-            var gameTime = gTimeConvert - _mapSpeed;
+            var gameTimeElapsed = gameWatch.Elapsed;
 
-            try
-            {
-                UpdateMaps(gameTime);
-                CheckTraps(gameTime);
-            }
-            catch (Exception ex)
-            {
-                ServerSetup.Logger(ex.Message, LogLevel.Error);
-                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-                Crashes.TrackError(ex);
-            }
-
-            _mapSpeed += gameTime;
-            await Task.Delay(GameSpeed);
+            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
+            UpdateMaps(gameTimeElapsed);
+            CheckTraps(gameTimeElapsed);
+            gameWatch.Restart();
         }
     }
 
-    private static async void NightlyServerReset()
+    private void UpdateClients()
     {
-        var now = DateTime.UtcNow;
-
-        while (ServerSetup.Instance.Running)
-        {
-            await Task.Delay(800);
-
-            if (now is { Hour: 0, Minute: 0, Second: 0 })
-                Commander.Restart(null, null);
-        }
-    }
-
-    private async void UpdateClients()
-    {
+        var gameWatch = new Stopwatch();
+        gameWatch.Start();
         var clientsToRemove = new ConcurrentBag<uint>();
 
         while (ServerSetup.Instance.Running)
         {
-            var players = Aislings.ToList();
+            var gameTimeElapsed = gameWatch.Elapsed;
 
-            Parallel.ForEach(players, player =>
+            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
+
+            Parallel.ForEach(Aislings, player =>
             {
                 if (player?.Client == null) return;
 
@@ -810,7 +775,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             clientsToRemove.Clear();
-            await Task.Delay(GameSpeed);
+            gameWatch.Restart();
         }
     }
 
