@@ -16,6 +16,7 @@ namespace Darkages.GameScripts.Skills;
 public class Blink(Skill skill) : SkillScript(skill)
 {
     private readonly GlobalSkillMethods _skillMethod = new();
+    private Position _oldPosition;
 
     public override void OnFailed(Sprite sprite)
     {
@@ -27,6 +28,7 @@ public class Blink(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
+        SendPortAnimation(damageDealingSprite, _oldPosition);
 
         damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, null, damageDealingSprite.Serial));
         _skillMethod.Train(client, skill);
@@ -52,14 +54,14 @@ public class Blink(Skill skill) : SkillScript(skill)
             return;
         }
 
+        _oldPosition = sprite.Position;
         damageDealingSprite.FacingFarAway(pos.X, pos.Y, out var direction);
         damageDealingSprite.Direction = (byte)direction;
-        SendPortAnimation(damageDealingSprite, pos);
-        client.WarpTo(pos);
+        client.WarpToAndRefresh(pos);
         OnSuccess(damageDealingSprite);
     }
 
-    public void SendPortAnimation(Sprite sprite, Position pos)
+    private static void SendPortAnimation(Sprite sprite, Position pos)
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var orgPos = sprite.Pos;
@@ -70,37 +72,38 @@ public class Blink(Skill skill) : SkillScript(skill)
         var xDiffHold = 0;
         var yDiffHold = 0;
 
-        for (var i = 0; i < yGap; i++)
-        {
-            switch (yDiff)
+        if (yGap > xGap)
+            for (var i = 0; i < yGap; i++)
             {
-                case < 0:
-                    yDiffHold++;
-                    break;
-                case > 0:
-                    yDiffHold--;
-                    break;
+                switch (yDiff)
+                {
+                    case < 0:
+                        yDiffHold++;
+                        break;
+                    case > 0:
+                        yDiffHold--;
+                        break;
+                }
+
+                var newPos = orgPos with { Y = orgPos.Y + yDiffHold };
+                damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
             }
-
-            var newPos = orgPos with { Y = orgPos.Y + yDiffHold };
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
-        }
-
-        for (var i = 0; i < xGap; i++)
-        {
-            switch (xDiff)
+        else
+            for (var i = 0; i < xGap; i++)
             {
-                case < 0:
-                    xDiffHold++;
-                    break;
-                case > 0:
-                    xDiffHold--;
-                    break;
-            }
+                switch (xDiff)
+                {
+                    case < 0:
+                        xDiffHold++;
+                        break;
+                    case > 0:
+                        xDiffHold--;
+                        break;
+                }
 
-            var newPos = orgPos with { X = orgPos.X + xDiffHold };
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
-        }
+                var newPos = orgPos with { X = orgPos.X + xDiffHold };
+                damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, new Position(newPos.X, newPos.Y)));
+            }
     }
 }
 
