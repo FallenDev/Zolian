@@ -39,12 +39,6 @@ public record AislingStorage : Sql, IAislingStorage
             aisling = await sConn.QueryFirstAsync<Aisling>("[SelectPlayer]", values, commandType: CommandType.StoredProcedure);
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -80,19 +74,6 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
             ExecuteAndCloseConnection(cmd, connection);
         }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your password did not save. Try again.");
-                Crashes.TrackError(e);
-                return false;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -123,19 +104,6 @@ public record AislingStorage : Sql, IAislingStorage
             SaveDebuffs(obj, connection);
             SaveItemsForPlayer(obj, connection);
             connection.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your character did not save. Contact GM (Code: Aux)");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {
@@ -412,12 +380,6 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.ExecuteNonQuery();
             }
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -440,12 +402,6 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = deBuff.TimeLeft;
                 cmd.ExecuteNonQuery();
             }
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {
@@ -476,6 +432,8 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("Stacks", typeof(int));
         dt.Columns.Add("Enchantable", typeof(bool));
         dt.Columns.Add("Tarnished", typeof(bool));
+        dt.Columns.Add("GearEnhancement", typeof(string));
+        dt.Columns.Add("ItemMaterial", typeof(string));
 
         try
         {
@@ -487,6 +445,8 @@ public record AislingStorage : Sql, IAislingStorage
                 var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhanced);
+                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.Material);
                 var existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
 
                 // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
@@ -508,6 +468,8 @@ public record AislingStorage : Sql, IAislingStorage
                     existingRow["Stacks"] = item.Stacks;
                     existingRow["Enchantable"] = item.Enchantable;
                     existingRow["Tarnished"] = item.Tarnished;
+                    existingRow["GearEnhancement"] = gearEnhanced;
+                    existingRow["ItemMaterial"] = itemMaterial;
                 }
                 else
                 {
@@ -529,7 +491,9 @@ public record AislingStorage : Sql, IAislingStorage
                         orgQuality,
                         item.Stacks,
                         item.Enchantable,
-                        item.Tarnished
+                        item.Tarnished,
+                        gearEnhanced,
+                        itemMaterial
                     );
                 }
             }
@@ -573,12 +537,6 @@ public record AislingStorage : Sql, IAislingStorage
             sConn.Close();
             return userFound;
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -614,12 +572,6 @@ public record AislingStorage : Sql, IAislingStorage
             sConn.Close();
             return userFound;
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -644,12 +596,6 @@ public record AislingStorage : Sql, IAislingStorage
             aisling = await sConn.QueryFirstAsync<Aisling>("[PlayerSecurity]", values, commandType: CommandType.StoredProcedure);
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
             ServerSetup.Logger(e.Message, LogLevel.Error);
@@ -665,7 +611,6 @@ public record AislingStorage : Sql, IAislingStorage
         await CreateLock.WaitAsync().ConfigureAwait(false);
 
         var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        var item = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
         try
         {
@@ -717,17 +662,6 @@ public record AislingStorage : Sql, IAislingStorage
             cmd3.CommandTimeout = 5;
 
             adapter.InsertCommand = cmd3;
-            adapter.InsertCommand.ExecuteNonQuery();
-
-            // PlayerInventory
-            var playerInventory =
-                "INSERT INTO ZolianPlayers.dbo.PlayersItems (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished) VALUES " +
-                $"('{(long)item}','Zolian Guide','{(long)serial}','Inventory','{0}','{24}','{0}','False','{0}','True','None','None','Common','Common','{1}','False', 'False')";
-
-            var cmd4 = new SqlCommand(playerInventory, sConn);
-            cmd4.CommandTimeout = 5;
-
-            adapter.InsertCommand = cmd4;
             adapter.InsertCommand.ExecuteNonQuery();
 
             #endregion
@@ -786,19 +720,6 @@ public record AislingStorage : Sql, IAislingStorage
             #endregion
 
             ExecuteAndCloseConnection(cmd5, sConn);
-        }
-        catch (SqlException e) when (e.Number == 2627)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                obj.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue creating player. Error: Phoenix");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {

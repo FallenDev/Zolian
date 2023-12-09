@@ -97,6 +97,7 @@ public static class ItemEnumConverters
     {
         return e switch
         {
+            Item.ItemMaterial.None => "None",
             Item.ItemMaterial.Copper => "Copper",
             Item.ItemMaterial.Iron => "Iron",
             Item.ItemMaterial.Steel => "Steel",
@@ -110,7 +111,7 @@ public static class ItemEnumConverters
             Item.ItemMaterial.MoonStone => "MoonStone",
             Item.ItemMaterial.SunStone => "SunStone",
             Item.ItemMaterial.Runic => "Runic",
-            _ => "Copper"
+            _ => "None"
         };
     }
 }

@@ -1699,11 +1699,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var gmB = IPAddress.Parse(GameMasterIpB);
                 var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                if (client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal))
-                {
-                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, null, aisling.Serial));
-                }
-                else
+                if (!(client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal)))
                 {
                     ServerSetup.Logger($"Failed to login GM from {client.RemoteIp}.");
                     Analytics.TrackEvent($"Failed to login GM from {client.RemoteIp}.");

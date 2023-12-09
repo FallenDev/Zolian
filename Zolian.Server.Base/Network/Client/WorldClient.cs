@@ -763,6 +763,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             LoadEquipment().LoadInventory().LoadBank().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
             SendDisplayAisling(Aisling);
             Enter();
+            if (Aisling.Username == "Death")
+                Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, Aisling.Position));
         }
         catch (Exception ex)
         {

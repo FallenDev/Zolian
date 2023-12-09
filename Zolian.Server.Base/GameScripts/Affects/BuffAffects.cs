@@ -6,8 +6,6 @@ using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using static ServiceStack.Diagnostics.Events;
-
 namespace Darkages.GameScripts.Affects;
 
 #region Armor
