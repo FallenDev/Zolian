@@ -39,7 +39,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         };
 
         LoadSkillScript("Assail", obj);
-        MonsterSkillSet(obj);
+        if (template.Level > 10)
+            MonsterSkillSet(obj);
 
         // Initialize the dictionary with the maximum level as the key and the hpMultiplier and mpMultiplier as the value
         var levelMultipliers = new SortedDictionary<int, (int hpMultiplier, int mpMultiplier)>

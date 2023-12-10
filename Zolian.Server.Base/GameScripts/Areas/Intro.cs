@@ -59,7 +59,7 @@ public class Intro : AreaScript
             _givenClothes = true;
         });
 
-        await Task.Delay(750).ContinueWith(ct =>
+        await Task.Delay(350).ContinueWith(ct =>
         {
             client.SendServerMessage(ServerMessageType.ScrollWindow,
                 "{=qWelcome!\n\n{=aThis private server that has been made possible due to countless hours of creation and inspiration.\n\n" +
@@ -68,6 +68,26 @@ public class Intro : AreaScript
                 "of the grind mechanics are from traditional Hack and Slashers that you may know and love. Here you'll be able to build a character, and play either with friends or run solo. " +
                 "The main focus of Zolian is to balance the characters while breathing new life into Nexon's Darkages. That includes new music, new maps, classes, races, and pvp zones " +
                 "much like you would see in open world MMOs.");
+        });
+
+        await Task.Delay(6000).ContinueWith(ct =>
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aYou cannot die in the tutorial, use {{=qSpacebar {{=ato attack.");
+        });
+
+        await Task.Delay(6000).ContinueWith(ct =>
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aYou can see these messages by combo pressing {{=qshift+f{{=a.");
+        });
+
+        await Task.Delay(6000).ContinueWith(ct =>
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qF1{{=a shows advanced stats, while {{=qF4{{=a shows settings.");
+        });
+        
+        await Task.Delay(6000).ContinueWith(ct =>
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aOpen your inventory by pressing {{=qa{{=a; Check out the Guide!");
         }).ConfigureAwait(false);
     }
 

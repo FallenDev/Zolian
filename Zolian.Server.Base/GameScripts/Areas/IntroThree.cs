@@ -20,6 +20,10 @@ public class IntroThree : AreaScript
     {
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
         client.SendServerMessage(ServerMessageType.ScrollWindow, "{=wRebirth{=a... its what's left, when ashes and the decay stops. Then can life begin anew. \n\nSee for your eyes that today is a new light. Today a new beginning, today a new spark. \n\n\n{=qWelcome to Zolian.");
+        var item = new Item();
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qA book suddenly appears in your inventory");
+        item = item.Create(client.Aisling, "Zolian Guide");
+        item.GiveTo(client.Aisling, false);
     }
 
     public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);

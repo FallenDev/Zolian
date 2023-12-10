@@ -28,7 +28,8 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
             new(0x02, "Mechanics"),
             new(0x03, "Lore"),
             new(0x29, "F1 - Advanced Stats"),
-            new(0x04, "Keyboard Controls")
+            new(0x04, "Keyboard Controls"),
+            new(0x1A, "Adv Keyboard Controls")
         };
 
         client.SendOptionsDialog(Mundane, "This documentation is meant to be a guide for terminology and mechanics within Zolian.", options.ToArray());
@@ -114,13 +115,6 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                                                                   $"{{=cShift + f {{=a: System/Important Message Pane\n" +
                                                                                   $"{{=cShift + g {{=a: Extended Basic Stats Pane\n" +
                                                                                   $"{{=cF1 {{=a: Advanced Stats Window\n" +
-                                                                                  $"{{=cF3 {{=a: Macro Sentences\n" +
-                                                                                  $"{{=cF4 {{=a: System Settings\n" +
-                                                                                  $"{{=cF5 {{=a: Client Refresh (Map Fix)\n" +
-                                                                                  $"{{=cF8 {{=a: Client Portrait Taken\n" +
-                                                                                  $"{{=cF9 {{=a: Add player to Ignore List\n" +
-                                                                                  $"{{=cF10 {{=a: Add player to Friends List\n" +
-                                                                                  $"{{=cF12 {{=a: Take ScreenShot (Stored client folder)\n" +
                                                                                   $"{{=cShift + ' {{=a: Direct Message player\n" +
                                                                                   $"{{=cGroup Messaging can be done by typing {{=a!! {{=cfor the players name.");
                     client.SendOptionsDialog(Mundane, "General keyboard commands", options.ToArray());
@@ -259,6 +253,28 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     client.SendOptionsDialog(Mundane, "Health & Mana Regeneration", options.ToArray());
                     break;
                 }
+            case 26:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                {
+                    new (0x28, "{=q<- Back"),
+                    new (0x05, "{=bExit")
+                };
+
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "{=qControls\n" +
+                                                                             "{=cctrl+left click on another player {=a: opens a quick interact window\n" +
+                                                                             "{=cF3 {=a: opens a verbal macro window\n" +
+                                                                             "{=cF4 {=a: opens a settings window\n" +
+                                                                             "{=cF5 {=a: forces a client refresh\n" +
+                                                                             "{=cF8 {=a: takes a quick photo of your character (60min cooldown)\n" +
+                                                                             "{=cF9 {=a: used to control your ignore list\n" +
+                                                                             "{=cF10 {=a: used to add players to your friends list\n" +
+                                                                             "{=cF12 {=a: creates a screen shot - sent to client folder\n" +
+                                                                             "{=calt+j {=a: creates a journal entry - sent to client folder\n" +
+                                                                             "{=calt+j {=a: also ends journal");
+                    client.SendOptionsDialog(Mundane, "Advanced keyboard commands", options.ToArray());
+                    break;
+                }
             case 32:
                 {
                     var options = new List<Dialog.OptionsDataItem>
@@ -379,11 +395,12 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     client.SendServerMessage(ServerMessageType.NonScrollWindow,
                         "{=qMap#{=g: {=aThis correlates to your current .map file in your installation folder\n" +
-                        "{=qHostiles Nearby{=g: {=aNumber of enemies nearby\n" +
-                        "{=qLatency{=g: {=aConnection speed/quality to the server, values above 150ms might cause unfavorable game play\n" +
-                        "{=cBase Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your ungeared stats\n" +
-                        "{=cGear Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are the stats granted by your equipped items\n" +
-                        "{=cFull Stats (Str, Int, Wis, Con, Dex){=g: {=aThese are your geared stats (Base + Gear)\n\n" +
+                        "{=qInsight{=g: {=aYour players level\n" +
+                        "{=qRank{=g: {=aYour players advanced level\n" +
+                        "{=qLatency{=g: {=aConnection speed/quality to the server, round-trip ping is calculated\n" +
+                        "{=qBase Stats ({=cStr, Int, Wis, Con, Dex{=q){=g: {=aThese are your ungeared stats\n" +
+                        "{=qGear Stats ({=cStr, Int, Wis, Con, Dex{=q){=g: {=aThese are the stats granted by your equipped items\n" +
+                        "{=qFull Stats ({=cStr, Int, Wis, Con, Dex{=q){=g: {=aThese are your geared stats (Base + Gear)\n\n" +
                         "{=cOffense{=g:\n" +
                         "   {=qDMG{=g: {=aBoost to dps output after Armor is calculated\n" +
                         "   {=qAmp{=g: {=aYour elemental offenses and defenses are multiplied by this value\n" +
@@ -395,9 +412,9 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         "{=cSaving Throws{=g:\n" +
                         "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (20% of Con)\n" +
                         "   {=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage\n" +
-                        "   {=qWill{=g: {=aIs the percentage of magical attacks you completely repel and receive no damage\n" +
+                        "   {=qWill{=g: {=aIs the percentage of magical attacks you mitigate and reduce their effectiveness\n" +
                         "{=cEnhancements{=g: {=aThese are various equipment enhancements which grant you bonuses or effects.");
-                    client.SendOptionsDialog(Mundane, "Scroll through the window to see details for each attribute.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "Scroll through the window to see the details of each attribute", options.ToArray());
                     break;
                 }
         }
