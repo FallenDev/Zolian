@@ -144,7 +144,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
             ServerSetup.Logger("Socket not a valid endpoint");
-            clientSocket.Close();
+            try
+            {
+                clientSocket.Close();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 
@@ -152,7 +159,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var badActor = ClientOnBlackList(ipAddress.ToString());
         if (badActor)
         {
-            clientSocket.Close();
+            try
+            {
+                clientSocket.Close();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 
@@ -162,7 +176,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         if (!ClientRegistry.TryAdd(client))
         {
             ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
-            client.Disconnect();
+            try
+            {
+                client.Disconnect();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 

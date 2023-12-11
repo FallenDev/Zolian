@@ -3461,7 +3461,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
             ServerSetup.Logger("Socket not a valid endpoint");
-            clientSocket.Close();
+            try
+            {
+                clientSocket.Close();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 
@@ -3469,7 +3476,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var badActor = ClientOnBlackList(ipAddress.ToString());
         if (badActor)
         {
-            clientSocket.Close();
+            try
+            {
+                clientSocket.Close();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 
@@ -3479,7 +3493,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!ClientRegistry.TryAdd(client))
         {
             ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
-            client.Disconnect();
+            try
+            {
+                client.Disconnect();
+            }
+            catch
+            {
+                // ignored
+            }
             return;
         }
 
@@ -3488,7 +3509,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (!lobbyCheck || !loginCheck)
         {
-            client.Disconnect();
+            try
+            {
+                client.Disconnect();
+            }
+            catch
+            {
+                // ignored
+            }
             ServerSetup.Logger("---------World-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.Logger(comment, LogLevel.Warning);

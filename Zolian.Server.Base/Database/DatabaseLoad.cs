@@ -322,7 +322,7 @@ public abstract class DatabaseLoad
         try
         {
             string[] dbTables = { "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor",
-                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands" };
+                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole" };
 
             foreach (var table in dbTables)
             {
