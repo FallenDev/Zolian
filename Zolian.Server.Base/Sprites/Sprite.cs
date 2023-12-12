@@ -2375,9 +2375,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public void UpdateAddAndRemove()
     {
-        PlayerNearby?.Client.SendRemoveObject(Serial);
-        var obj = new List<Sprite> { this };
-        PlayerNearby?.Client.SendVisibleEntities(obj);
+        foreach (var playerNearby in AislingsEarShotNearby())
+        {
+            playerNearby.Client.SendRemoveObject(Serial);
+            var obj = new List<Sprite> { this };
+            playerNearby.Client.SendVisibleEntities(obj);
+        }
     }
 
     public void Remove()

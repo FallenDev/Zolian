@@ -47,41 +47,29 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
-            if (npc.Template.Name != "Nosferatu") continue;
+            if (npc.Name != "Nosferatu") continue;
             var rand = Generator.RandNumGen3();
             switch (rand)
             {
                 case 0:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
+                    npc.CurrentMapId = 100;
                     npc.X = 9;
-                    npc.Template.X = 9;
                     npc.Y = 3;
-                    npc.Template.Y = 3;
-                    npc.Direction = 1;
-                    npc.Template.Direction = 1;
+                    npc.Direction = 2;
                     npc.UpdateAddAndRemove();
                     break;
                 case 1:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
+                    npc.CurrentMapId = 286;
                     npc.X = 16;
-                    npc.Template.X = 16;
                     npc.Y = 1;
-                    npc.Template.Y = 1;
-                    npc.Direction = 2;
-                    npc.Template.Direction = 2;
+                    npc.Direction = 1;
                     npc.UpdateAddAndRemove();
                     break;
                 case 2:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
-                    npc.X = 20;
-                    npc.Template.X = 20;
-                    npc.Y = 1;
-                    npc.Template.Y = 1;
+                    npc.CurrentMapId = 1505;
+                    npc.X = 1;
+                    npc.Y = 23;
                     npc.Direction = 2;
-                    npc.Template.Direction = 2;
                     npc.UpdateAddAndRemove();
                     break;
             }
@@ -92,41 +80,29 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
-            if (npc.Template.Name != "Fenrir") continue;
+            if (npc.Name != "Fenrir") continue;
             var rand = Generator.RandNumGen3();
             switch (rand)
             {
                 case 0:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
+                    npc.CurrentMapId = 100;
                     npc.X = 9;
-                    npc.Template.X = 9;
                     npc.Y = 3;
-                    npc.Template.Y = 3;
-                    npc.Direction = 1;
-                    npc.Template.Direction = 1;
+                    npc.Direction = 2;
                     npc.UpdateAddAndRemove();
                     break;
                 case 1:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
-                    npc.X = 16;
-                    npc.Template.X = 16;
-                    npc.Y = 1;
-                    npc.Template.Y = 1;
-                    npc.Direction = 2;
-                    npc.Template.Direction = 2;
+                    npc.CurrentMapId = 6719;
+                    npc.X = 4;
+                    npc.Y = 3;
+                    npc.Direction = 1;
                     npc.UpdateAddAndRemove();
                     break;
                 case 2:
-                    npc.Map.ID = 100;
-                    npc.Template.AreaID = 100;
-                    npc.X = 20;
-                    npc.Template.X = 20;
-                    npc.Y = 1;
-                    npc.Template.Y = 1;
-                    npc.Direction = 2;
-                    npc.Template.Direction = 2;
+                    npc.CurrentMapId = 3212;
+                    npc.X = 29;
+                    npc.Y = 12;
+                    npc.Direction = 1;
                     npc.UpdateAddAndRemove();
                     break;
             }
@@ -138,26 +114,20 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         var mundanes = ServerSetup.Instance.GlobalMundaneCache.ToConcurrentDictionary();
         foreach (var npc in mundanes.Values)
         {
-            if (npc.Template.Name is not ("Fenrir" or "Nosferatu")) continue;
-            if (npc.Template.Name is "Fenrir")
+            if (npc.Name is not ("Fenrir" or "Nosferatu")) continue;
+            if (npc.Name is "Fenrir")
             {
                 npc.X = 1;
-                npc.Template.X = 1;
                 npc.Y = 2;
-                npc.Template.Y = 2;
             }
             else
             {
                 npc.X = 1;
-                npc.Template.X = 1;
                 npc.Y = 1;
-                npc.Template.Y = 1;
             }
 
-            npc.Map.ID = 14759;
-            npc.Template.AreaID = 14759;
+            npc.CurrentMapId = 14759;
             npc.Direction = 1;
-            npc.Template.Direction = 1;
             npc.UpdateAddAndRemove();
         }
     }
