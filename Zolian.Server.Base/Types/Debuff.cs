@@ -32,6 +32,7 @@ public class Debuff : IDebuff
     public virtual void OnApplied(Sprite affected, Debuff debuff) { }
     public virtual void OnDurationUpdate(Sprite affected, Debuff debuff) { }
     public virtual void OnEnded(Sprite affected, Debuff debuff) { }
+    public virtual void OnItemChange(Aisling affected, Debuff debuff) { }
 
     public Debuff ObtainDebuffName(Sprite affected, Debuff debuff)
     {

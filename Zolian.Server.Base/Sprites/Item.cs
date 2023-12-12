@@ -717,6 +717,9 @@ public sealed class Item : Sprite, IItem
                     ItemVarianceCalc(client, equipment.Value.Item);
                     WeaponVarianceCalc(client, equipment.Value.Item);
                     QualityVarianceCalc(client, equipment.Value.Item);
+
+                    // Reapplies Removed Buffs/Debuffs
+                    BuffDebuffCalc(client);
                 }
             }
             catch (Exception e)
@@ -727,61 +730,10 @@ public sealed class Item : Sprite, IItem
             }
         }
 
-        if (client.Aisling.IsArmorReduced)
-        {
-            ReapplyReducedArmor(client);
-        }
-
+        client.SendAttributes(StatUpdateType.Full);
         var ac = client.Aisling.SealedAc.ToString();
         var regen = client.Aisling.Regen.ToString();
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
-    }
-
-    private static void ReapplyReducedArmor(WorldClient client)
-    {
-        foreach (var debuff in client.Aisling.Debuffs)
-        {
-            if (debuff.Value == null) continue;
-            switch (debuff.Value.Name)
-            {
-                case "Croich Ard Cradh":
-                    client.Aisling.BonusAc -= 80;
-                    break;
-                case "Croich Mor Cradh":
-                    client.Aisling.BonusAc -= 70;
-                    break;
-                case "Croich Cradh":
-                    client.Aisling.BonusAc -= 65;
-                    break;
-                case "Croich Beag Cradh":
-                    client.Aisling.BonusAc -= 60;
-                    break;
-                case "Ard Cradh":
-                    client.Aisling.BonusAc -= 50;
-                    break;
-                case "Mor Cradh":
-                    client.Aisling.BonusAc -= 40;
-                    break;
-                case "Cradh":
-                    client.Aisling.BonusAc -= 30;
-                    break;
-                case "Beag Cradh":
-                    client.Aisling.BonusAc -= 20;
-                    break;
-                case "Decay":
-                    client.Aisling.BonusAc -= 55;
-                    break;
-                case "Rending":
-                    client.Aisling.BonusAc -= 10;
-                    break;
-                case "Rend":
-                    client.Aisling.BonusAc -= 45;
-                    break;
-                case "Hurricane":
-                    client.Aisling.BonusAc -= 30;
-                    break;
-            }
-        }
     }
 
     public void RemoveModifiers(WorldClient client)
@@ -971,6 +923,19 @@ public sealed class Item : Sprite, IItem
         client.Aisling.BonusHp += bonus.Hp;
         client.Aisling.BonusMp += bonus.Mp;
         client.Aisling.BonusRegen += bonus.Regen;
+    }
+
+    public void BuffDebuffCalc(WorldClient client)
+    {
+        Parallel.ForEach(client.Aisling.Buffs.Values, (buff) =>
+        {
+            buff.OnItemChange(client.Aisling, buff);
+        });
+
+        Parallel.ForEach(client.Aisling.Debuffs.Values, (debuff) =>
+        {
+            debuff.OnItemChange(client.Aisling, debuff);
+        });
     }
 
     public void UpdateSpell(WorldClient client, Spell spell)

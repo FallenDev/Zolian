@@ -59,6 +59,12 @@ public class Lycanisim : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusDex += DexModifier;
+        affected.BonusDmg += DmgModifier;
+    }
 }
 
 public class Vampirisim : Debuff
@@ -108,6 +114,12 @@ public class Vampirisim : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusDex += DexModifier;
+        affected.BonusDmg += HitModifier;
     }
 }
 
@@ -179,6 +191,17 @@ public class Plagued : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusHp -= HpModifier;
+        affected.BonusMp -= MpModifier;
+        affected.BonusStr -= StatModifier;
+        affected.BonusInt -= StatModifier;
+        affected.BonusWis -= StatModifier;
+        affected.BonusCon -= StatModifier;
+        affected.BonusDex -= StatModifier;
+    }
 }
 
 public class TheShakes : Debuff
@@ -233,6 +256,13 @@ public class TheShakes : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusCon -= ConModifier;
+        affected.BonusDex -= DexModifier;
+        affected.BonusDmg -= DmgModifier;
+    }
 }
 
 public class Stricken : Debuff
@@ -286,6 +316,13 @@ public class Stricken : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusMp -= MpModifier;
+        affected.BonusWis -= WisModifier;
+        affected.BonusRegen -= RegenModifier;
     }
 }
 
@@ -391,6 +428,11 @@ public class LockJoint : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusDmg -= DmgModifier;
+    }
 }
 
 public class NumbFall : Debuff
@@ -440,6 +482,12 @@ public class NumbFall : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusHit -= HitModifier;
+        affected.BonusDmg -= DmgModifier;
     }
 }
 
@@ -491,6 +539,16 @@ public class Diseased : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusRegen -= RegenModifier;
+        affected.BonusStr -= StatModifier;
+        affected.BonusInt -= StatModifier;
+        affected.BonusWis -= StatModifier;
+        affected.BonusCon -= StatModifier;
+        affected.BonusDex -= StatModifier;
+    }
 }
 
 public class Hallowed : Debuff
@@ -529,6 +587,11 @@ public class Hallowed : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
         aisling.Client.SendAttributes(StatUpdateType.Full);
         DeleteDebuff(aisling, debuff);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusMr -= WillModifier;
     }
 }
 
@@ -626,6 +689,11 @@ public class DebuffWrathConsequences : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusMr -= WillModifer.Value;
+    }
 }
 
 public class DebuffSunSeal : Debuff
@@ -661,6 +729,11 @@ public class DebuffSunSeal : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.SealedModifier = AcModifer;
     }
 }
 
@@ -698,6 +771,11 @@ public class DebuffPentaSeal : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.SealedModifier = AcModifer;
+    }
 }
 
 public class DebuffMoonSeal : Debuff
@@ -733,6 +811,11 @@ public class DebuffMoonSeal : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.SealedModifier = AcModifer;
     }
 }
 
@@ -770,6 +853,11 @@ public class DebuffDarkSeal : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.SealedModifier = AcModifer;
+    }
 }
 
 public class DebuffCriochArdCradh : Debuff
@@ -805,6 +893,11 @@ public class DebuffCriochArdCradh : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -878,6 +971,11 @@ public class DebuffCriochCradh : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffCriochBeagCradh : Debuff
@@ -913,6 +1011,11 @@ public class DebuffCriochBeagCradh : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -950,6 +1053,11 @@ public class DebuffArdcradh : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffMorcradh : Debuff
@@ -985,6 +1093,11 @@ public class DebuffMorcradh : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -1030,6 +1143,11 @@ public class DebuffDecay : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffCradh : Debuff
@@ -1066,6 +1184,11 @@ public class DebuffCradh : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffBeagcradh : Debuff
@@ -1101,6 +1224,11 @@ public class DebuffBeagcradh : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -1162,6 +1290,11 @@ public class DebuffRending : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffCorrosiveTouch : Debuff
@@ -1221,6 +1354,11 @@ public class DebuffCorrosiveTouch : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor stopped corroding");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -1282,6 +1420,11 @@ public class DebuffShieldBash : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffTitansCleave : Debuff
@@ -1341,6 +1484,11 @@ public class DebuffTitansCleave : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to clear up");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 
@@ -1402,6 +1550,11 @@ public class DebuffRetribution : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffStabnTwist : Debuff
@@ -1462,6 +1615,11 @@ public class DebuffStabnTwist : Debuff
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
+    }
 }
 
 public class DebuffHurricane : Debuff
@@ -1521,6 +1679,11 @@ public class DebuffHurricane : Debuff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The storm has passed");
         DeleteDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value;
     }
 }
 

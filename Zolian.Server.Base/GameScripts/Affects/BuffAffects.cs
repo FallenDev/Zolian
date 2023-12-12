@@ -144,6 +144,11 @@ public class buff_SpectralShield : Buff
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusAc += AcModifier.Value;
+    }
 }
 
 public class buff_DefenseUp : Buff
@@ -191,6 +196,11 @@ public class buff_DefenseUp : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've grown complacent.");
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusAc += AcModifier.Value;
     }
 }
 
@@ -599,6 +609,11 @@ public class buff_berserk : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou begin to realize your actions");
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(55, null, aisling.Serial));
         DeleteBuff(aisling, buff);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusDmg += DmgModifier;
     }
 }
 
@@ -1116,6 +1131,11 @@ public class buff_DexUp : Buff
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusDex += 15;
+    }
 }
 
 public class buff_GryphonsGrace : Buff
@@ -1161,6 +1181,11 @@ public class buff_GryphonsGrace : Buff
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusDex += 50;
+    }
 }
 
 public class buff_OrcishStrength : Buff
@@ -1205,6 +1230,11 @@ public class buff_OrcishStrength : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Muscles return to normal");
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Primary);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusStr += 50;
     }
 }
 
@@ -1252,6 +1282,12 @@ public class buff_FeywildNectar : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Feys disappear");
         DeleteBuff(aisling, buff);
         aisling.Client.SendAttributes(StatUpdateType.Primary);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusInt += 50;
+        affected.BonusWis += 50;
     }
 }
 
@@ -1335,6 +1371,11 @@ public class buff_ElementalBane : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are no longer protected.");
         DeleteBuff(aisling, buff);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.BonusFortitude += 100;
     }
 }
 
@@ -1547,6 +1588,11 @@ public class aura_BriarThorn : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Briarthorn ended");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff buff)
+    {
+        affected.Spikes += 10;
     }
 }
 

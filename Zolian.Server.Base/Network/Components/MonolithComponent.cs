@@ -34,16 +34,17 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
             if (map == null || map.Height == 0 || map.Width == 0) return;
+            var monstersOnMap = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Map == map);
+            if (monstersOnMap >= map.Height * map.Width / 75) continue;
 
             var temps = templates.Where(i => i.Value.AreaID == map.ID);
 
             foreach (var (_, monster) in temps)
             {
                 var count = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Template.Name == monster.Name);
-
-                if (!monster.ReadyToSpawn()) continue;
+                
                 if (count >= monster.SpawnMax) continue;
-                if (count >= map.Height * map.Width / 6) continue;
+                if (!monster.ReadyToSpawn()) continue;
 
                 PlaceNode(map);
                 CreateFromTemplate(monster, map);

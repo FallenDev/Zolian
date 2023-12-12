@@ -28,5 +28,6 @@ public interface IItem : ISprite
     void ItemVarianceCalc(WorldClient client, Item equipment);
     void WeaponVarianceCalc(WorldClient client, Item equipment);
     void QualityVarianceCalc(WorldClient client, Item equipment);
+    void BuffDebuffCalc(WorldClient client);
     void UpdateSpell(WorldClient client, Spell spell);
 }

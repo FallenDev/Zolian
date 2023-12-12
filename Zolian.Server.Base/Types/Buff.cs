@@ -32,6 +32,7 @@ public class Buff : IBuff
     public virtual void OnApplied(Sprite affected, Buff buff) { }
     public virtual void OnDurationUpdate(Sprite affected, Buff buff) { }
     public virtual void OnEnded(Sprite affected, Buff buff) { }
+    public virtual void OnItemChange(Aisling affected, Buff buff) { }
 
     public Buff ObtainBuffName(Sprite affected, Buff buff)
     {

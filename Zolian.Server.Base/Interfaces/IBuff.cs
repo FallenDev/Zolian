@@ -18,6 +18,7 @@ public interface IBuff
     void OnApplied(Sprite affected, Buff buff);
     void OnDurationUpdate(Sprite affected, Buff buff);
     void OnEnded(Sprite affected, Buff buff);
+    void OnItemChange(Aisling affected, Buff buff);
     Buff ObtainBuffName(Sprite affected, Buff buff);
     void Update(Sprite affected, TimeSpan elapsedTime);
     void InsertBuff(Aisling aisling, Buff buff);

@@ -164,4 +164,5 @@ public class Quests
     public int Lau { get; set; }
     public string BeltDegree { get; set; } = string.Empty;
     public string BeltQuest { get; set; } = string.Empty;
+    public bool SavedChristmas { get; set; }
 }

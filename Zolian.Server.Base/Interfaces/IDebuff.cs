@@ -18,6 +18,7 @@ public interface IDebuff
     void OnApplied(Sprite affected, Debuff debuff);
     void OnDurationUpdate(Sprite affected, Debuff debuff);
     void OnEnded(Sprite affected, Debuff debuff);
+    void OnItemChange(Aisling affected, Debuff debuff);
     Debuff ObtainDebuffName(Sprite affected, Debuff debuff);
     void Update(Sprite affected, TimeSpan elapsedTime);
     void InsertDebuff(Aisling aisling, Debuff debuff);
