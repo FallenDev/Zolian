@@ -9,8 +9,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using Microsoft.Extensions.Options;
-
 namespace Darkages.GameScripts.Mundanes.NorthPole;
 
 [Script("Santa")]
@@ -39,7 +37,7 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
             options.Add(new(0x03, "How can I save Christmas?"));
         }
 
-        if (client.Aisling.HasInInventory("Christmas Spirit Essence", 7, out _))
+        if (client.Aisling.HasInInventory("Christmas Spirit", 7, out _))
         {
             options.Add(new(0x04, "Christmas Spirit"));
         }
@@ -91,13 +89,13 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         new (0x02, "Thank you, Saint Nickolas")
                     };
 
-                    var item = client.Aisling.HasItemReturnItem("Christmas Spirit Essence");
+                    var item = client.Aisling.HasItemReturnItem("Christmas Spirit");
 
                     if (item != null)
                     {
                         client.Aisling.QuestManager.SavedChristmas = true;
                         client.Aisling.Inventory.RemoveRange(client, item, 7);
-                        client.GiveItem("Santa's Dresden");
+                        client.GiveItem("Santa's Pileus");
                         client.SendAttributes(StatUpdateType.WeightGold);
                         var buffDion = new buff_ArdDion();
                         var buffAite = new buff_DiaAite();
@@ -109,7 +107,7 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             Category = "LSanta1",
                             Time = null,
                             Color = LegendColor.Lavender,
-                            Icon = 3,
+                            Icon = 6,
                             Value = "Restored Santa's Spirit"
                         };
 
@@ -121,7 +119,7 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         break;
                     }
 
-                    client.SendOptionsDialog(Mundane, "Ohhh, he's going to like you! Here are some waffles as promised!", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "It is a Merry Christmas indeed! Thank you Aisling, you have saved Christmas.", options.ToArray());
                     break;
                 }
         }

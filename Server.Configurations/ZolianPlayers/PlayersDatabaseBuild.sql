@@ -349,7 +349,8 @@ CREATE TABLE PlayersQuests
     [ThievesGuildReputation] INT NULL,
     [AssassinsGuildReputation] INT NULL,
     [AdventuresGuildReputation] INT NULL,
-    [BeltQuest] VARCHAR (6) NULL
+    [BeltQuest] VARCHAR (6) NULL,
+    [SavedChristmas] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
@@ -540,7 +541,8 @@ CREATE TYPE dbo.QuestType AS TABLE
     ThievesGuildReputation INT,
     AssassinsGuildReputation INT,
     AdventuresGuildReputation INT,
-    BeltQuest VARCHAR (6)
+    BeltQuest VARCHAR (6),
+    SavedChristmas BIT
 );
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -751,7 +753,8 @@ CREATE PROCEDURE [dbo].[InsertQuests]
     @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
     @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
     @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
-    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6)
+    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
+    @SavedChristmas BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -765,7 +768,7 @@ BEGIN
         [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
         [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
-        [BlackSmithing], [ArmorSmithing], [JewelCrafting], [BeltDegree], [BeltQuest]
+        [BlackSmithing], [ArmorSmithing], [JewelCrafting], [BeltDegree], [BeltQuest], [SavedChristmas]
     )
     VALUES (
         @Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift,
@@ -776,7 +779,7 @@ BEGIN
         @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
         @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,
-        @BlackSmithing, @ArmorSmithing, @JewelCrafting, @BeltDegree, @BeltQuest
+        @BlackSmithing, @ArmorSmithing, @JewelCrafting, @BeltDegree, @BeltQuest, @SavedChristmas
     );
 END
 GO
@@ -936,7 +939,8 @@ BEGIN
         [ThievesGuildReputation] = source.ThievesGuildReputation,
         [AssassinsGuildReputation] = source.AssassinsGuildReputation,
         [AdventuresGuildReputation] = source.AdventuresGuildReputation,
-        [BeltQuest] = source.BeltQuest;
+        [BeltQuest] = source.BeltQuest,
+        [SavedChristmas] = source.SavedChristmas;
 END
 GO
 
@@ -1422,7 +1426,7 @@ BEGIN
            AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
            OrenReputation, PietReputation, LouresReputation, UndineReputation,
            TagorReputation, ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
-           BlackSmithing, ArmorSmithing, JewelCrafting, BeltDegree, BeltQuest
+           BlackSmithing, ArmorSmithing, JewelCrafting, BeltDegree, BeltQuest, SavedChristmas
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

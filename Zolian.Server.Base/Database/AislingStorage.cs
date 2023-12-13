@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
+﻿using Chaos.Common.Identity;
 
 using Dapper;
 
@@ -155,7 +154,7 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
                 obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
                 obj.QuestManager.ArmorSmithing, obj.QuestManager.JewelCrafting, obj.QuestManager.StoneSmithing, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
-                obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest);
+                obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas);
 
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
                 obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
@@ -240,7 +239,7 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.AbelReputation, player.QuestManager.RucesionReputation, player.QuestManager.SuomiReputation, player.QuestManager.RionnagReputation, player.QuestManager.OrenReputation,
                     player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
                     player.QuestManager.ArmorSmithing, player.QuestManager.JewelCrafting, player.QuestManager.StoneSmithing, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
-                    player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest);
+                    player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -716,6 +715,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = "";
             cmd5.Parameters.Add("@BeltQuest", SqlDbType.VarChar).Value = "";
+            cmd5.Parameters.Add("@SavedChristmas", SqlDbType.Bit).Value = false;
 
             #endregion
 
@@ -899,6 +899,7 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("AssassinsGuildReputation", typeof(int));
         qDt.Columns.Add("AdventuresGuildReputation", typeof(int));
         qDt.Columns.Add("BeltQuest", typeof(string));
+        qDt.Columns.Add("SavedChristmas", typeof(bool));
         return qDt;
     }
 
