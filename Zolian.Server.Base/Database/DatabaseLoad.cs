@@ -299,7 +299,9 @@ public abstract class DatabaseLoad
         try
         {
             string[] dbTables = { "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
-                "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos" };
+                "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos",
+                "NorthPole"
+            };
 
             foreach (var table in dbTables)
             {
