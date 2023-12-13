@@ -99,6 +99,7 @@ public class Debuff : IDebuff
         if (TimeLeft > 0)
         {
             TimeLeft--;
+            Console.Write($"{TimeLeft} - {Length}\n");
             OnDurationUpdate(affected, this);
         }
         else

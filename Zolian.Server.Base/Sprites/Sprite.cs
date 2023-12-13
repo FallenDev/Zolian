@@ -30,6 +30,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public Position LastPosition;
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly WorldServerTimer BuffAndDebuffTimer;
+    public Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();
     private readonly object _walkLock = new();
 

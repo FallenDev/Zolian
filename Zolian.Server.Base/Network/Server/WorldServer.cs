@@ -853,9 +853,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     if (triggered) break;
                 }
 
+                if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
+                    monster.MonsterBuffAndDebuffStopWatch.Start();
+                
+                monster.LastUpdated = DateTime.UtcNow;
+
+                if(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
+
                 monster.UpdateBuffs(elapsedTime);
                 monster.UpdateDebuffs(elapsedTime);
-                monster.LastUpdated = DateTime.UtcNow;
+                monster.MonsterBuffAndDebuffStopWatch.Restart();
             }
         }
         catch (Exception ex)
