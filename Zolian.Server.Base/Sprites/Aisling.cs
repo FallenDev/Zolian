@@ -549,18 +549,12 @@ public sealed class Aisling : Player, IAisling
         Client.Enter();
     }
 
-    public bool HasInInventory(string item, int count, out int found)
+    public bool HasInInventory(string item, int count)
     {
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[item];
-        found = 0;
-
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item))
-            return false;
-
-        if (template == null) return false;
-        found = Inventory.Has(template);
-
-        return count == found;
+        var found = ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var template);
+        if (!found) return false;
+        var amount = Inventory.Has(template);
+        return count >= amount;
     }
 
     public bool HasItem(string item)

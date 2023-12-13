@@ -69,7 +69,7 @@ public class GurgidLeadbelly(WorldServer server, Mundane mundane) : MundaneScrip
                 }
             case 0x04:
                 {
-                    if (client.Aisling.HasInInventory("Mead", 7, out _))
+                    if (client.Aisling.HasInInventory("Mead", 7))
                     {
                         client.Aisling.QuestManager.SwampCount++;
                         client.TakeAwayQuantity(client.Aisling, "Mead", 7);

@@ -66,7 +66,7 @@ public interface IAisling : ISprite
     bool GiveGold(uint offer, bool sendClientUpdate = true);
     Aisling GiveHealth(Sprite target, int value);
     void GoHome();
-    bool HasInInventory(string item, int count, out int found);
+    bool HasInInventory(string item, int count);
     bool HasItem(string item);
     bool HasStacks(string item, ushort amount);
     bool HasKilled(string value, int number);

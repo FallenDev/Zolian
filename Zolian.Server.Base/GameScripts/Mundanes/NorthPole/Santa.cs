@@ -37,7 +37,7 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
             options.Add(new(0x03, "How can I save Christmas?"));
         }
 
-        if (client.Aisling.HasInInventory("Christmas Spirit", 7, out _))
+        if (client.Aisling.HasInInventory("Christmas Spirit", 7))
         {
             options.Add(new(0x04, "Christmas Spirit"));
         }
