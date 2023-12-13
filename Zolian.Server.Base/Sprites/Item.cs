@@ -717,10 +717,10 @@ public sealed class Item : Sprite, IItem
                     ItemVarianceCalc(client, equipment.Value.Item);
                     WeaponVarianceCalc(client, equipment.Value.Item);
                     QualityVarianceCalc(client, equipment.Value.Item);
-
-                    // Reapplies Removed Buffs/Debuffs
-                    BuffDebuffCalc(client);
                 }
+
+                // Reapplies Removed Buffs/Debuffs
+                BuffDebuffCalc(client);
             }
             catch (Exception e)
             {
