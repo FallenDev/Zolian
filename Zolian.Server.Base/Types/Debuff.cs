@@ -3,7 +3,6 @@ using Chaos.Common.Identity;
 
 using Dapper;
 
-using Darkages.Common;
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
 using Darkages.Interfaces;
@@ -25,9 +24,7 @@ public class Debuff : IDebuff
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
     public int TimeLeft { get; set; }
-    public WorldServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
     public Debuff DebuffSpell { get; set; }
-    private readonly object _debuffLock = new();
 
     public virtual void OnApplied(Sprite affected, Debuff debuff) { }
     public virtual void OnDurationUpdate(Sprite affected, Debuff debuff) { }
@@ -99,21 +96,13 @@ public class Debuff : IDebuff
 
     public void Update(Sprite affected, TimeSpan elapsedTime)
     {
-        lock (_debuffLock)
+        if (TimeLeft > 0)
         {
-            if (Timer.Disabled) return;
-            if (!Timer.Update(elapsedTime)) return;
-            if (Length - Timer.Tick > 0)
-                OnDurationUpdate(affected, this);
-            else
-            {
-                OnEnded(affected, this);
-                Timer.Tick = 0;
-                return;
-            }
-
-            Timer.Tick++;
+            TimeLeft--;
+            OnDurationUpdate(affected, this);
         }
+        else
+            OnEnded(affected, this);
     }
 
     public async void InsertDebuff(Aisling aisling, Debuff debuff)

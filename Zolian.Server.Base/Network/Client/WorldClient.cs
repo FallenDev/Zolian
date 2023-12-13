@@ -1149,14 +1149,10 @@ public class WorldClient : SocketClientBase, IWorldClient
                 buff.Name = buffDb.Name;
                 buff.Cancelled = buffFromCache.Cancelled;
                 buff.Length = buffFromCache.Length;
-                // Apply Buff on login
-                EnqueueBuffAppliedEvent(Aisling, buff, TimeSpan.FromSeconds(buff.Length));
-                // Set Timer & Time left
+                // Apply Buff on login - Use direct call, so we can set the db TimeLeft
+                buff.OnApplied(Aisling, buff);
+                // Set Time left
                 buff.TimeLeft = buffDb.TimeLeft;
-                buff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
-                {
-                    Tick = buff.Length - buff.TimeLeft
-                };
             }
 
             sConn.Close();
@@ -1200,14 +1196,10 @@ public class WorldClient : SocketClientBase, IWorldClient
                 debuff.Name = deBuffDb.Name;
                 debuff.Cancelled = debuffFromCache.Cancelled;
                 debuff.Length = debuffFromCache.Length;
-                // Apply Debuff on login
-                EnqueueDebuffAppliedEvent(Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
-                // Set Timer & Time left
+                // Apply Debuff on login - Use direct call, so we can set the db TimeLeft
+                debuff.OnApplied(Aisling, debuff);
+                // Set Time left
                 debuff.TimeLeft = deBuffDb.TimeLeft;
-                debuff.Timer = new WorldServerTimer(TimeSpan.FromSeconds(1))
-                {
-                    Tick = debuff.Length - debuff.TimeLeft
-                };
             }
 
             sConn.Close();

@@ -1,5 +1,4 @@
-﻿using Darkages.Common;
-using Darkages.Network.Client.Abstractions;
+﻿using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -12,7 +11,6 @@ public interface IBuff
     int Length { get; set; }
     string Name { get; set; }
     int TimeLeft { get; set; }
-    WorldServerTimer Timer { get; set; }
     Buff BuffSpell { get; set; }
 
     void OnApplied(Sprite affected, Buff buff);

@@ -2163,7 +2163,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (this is Aisling aisling)
             {
                 aisling.Client.EnqueueBuffUpdatedEvent(this, b, elapsedTime);
-                StatusBarDisplayUpdateBuff(b, elapsedTime);
+                StatusBarDisplayUpdateBuff(b);
             }
             else
             {
@@ -2182,7 +2182,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (this is Aisling aisling)
             {
                 aisling.Client.EnqueueDebuffUpdatedEvent(this, d, elapsedTime);
-                StatusBarDisplayUpdateDebuff(d, elapsedTime);
+                StatusBarDisplayUpdateDebuff(d);
             }
             else
             {
@@ -2192,15 +2192,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         });
     }
 
-    public void StatusBarDisplayUpdateBuff(Buff buff, TimeSpan elapsedTime)
+    public void StatusBarDisplayUpdateBuff(Buff buff)
     {
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
-
-        var countDown = buff.Length - buff.Timer.Tick;
-        buff.TimeLeft = countDown;
-
-        if (buff.TimeLeft.IntIsWithin(-10, 1))
+        
+        if (buff.TimeLeft.IntIsWithin(-3, 0))
             colorInt = (byte)StatusBarColor.Off;
         else if (buff.TimeLeft.IntIsWithin(1, 10))
             colorInt = (byte)StatusBarColor.Blue;
@@ -2218,15 +2215,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.Client.SendEffect((EffectColor)colorInt, buff.Icon);
     }
 
-    public void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime)
+    public void StatusBarDisplayUpdateDebuff(Debuff debuff)
     {
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
 
-        var countDown = debuff.Length - debuff.Timer.Tick;
-        debuff.TimeLeft = countDown;
-
-        if (debuff.TimeLeft.IntIsWithin(-10, 1))
+        if (debuff.TimeLeft.IntIsWithin(-3, 0))
             colorInt = (byte)StatusBarColor.Off;
         else if (debuff.TimeLeft.IntIsWithin(1, 10))
             colorInt = (byte)StatusBarColor.Blue;

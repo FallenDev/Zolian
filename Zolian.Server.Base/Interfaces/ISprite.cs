@@ -158,8 +158,8 @@ public interface ISprite
     void UpdateAddAndRemove();
     void UpdateBuffs(TimeSpan elapsedTime);
     void UpdateDebuffs(TimeSpan elapsedTime);
-    void StatusBarDisplayUpdateBuff(Buff buff, TimeSpan elapsedTime);
-    void StatusBarDisplayUpdateDebuff(Debuff debuff, TimeSpan elapsedTime);
+    void StatusBarDisplayUpdateBuff(Buff buff);
+    void StatusBarDisplayUpdateDebuff(Debuff debuff);
     void Remove();
     void HideFrom(Aisling nearbyAisling);
 }

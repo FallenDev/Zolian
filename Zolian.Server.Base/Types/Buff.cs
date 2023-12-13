@@ -2,8 +2,6 @@
 using Chaos.Common.Identity;
 
 using Dapper;
-
-using Darkages.Common;
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
 using Darkages.Interfaces;
@@ -25,9 +23,7 @@ public class Buff : IBuff
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
     public int TimeLeft { get; set; }
-    public WorldServerTimer Timer { get; set; } = new(TimeSpan.FromSeconds(1));
     public Buff BuffSpell { get; set; }
-    private readonly object _buffLock = new();
 
     public virtual void OnApplied(Sprite affected, Buff buff) { }
     public virtual void OnDurationUpdate(Sprite affected, Buff buff) { }
@@ -78,21 +74,13 @@ public class Buff : IBuff
 
     public void Update(Sprite affected, TimeSpan elapsedTime)
     {
-        lock (_buffLock)
+        if (TimeLeft > 0)
         {
-            if (Timer.Disabled) return;
-            if (!Timer.Update(elapsedTime)) return;
-            if (Length - Timer.Tick > 0)
-                OnDurationUpdate(affected, this);
-            else
-            {
-                OnEnded(affected, this);
-                Timer.Tick = 0;
-                return;
-            }
-
-            Timer.Tick++;
+            TimeLeft--;
+            OnDurationUpdate(affected, this);
         }
+        else
+            OnEnded(affected, this);
     }
 
     public async void InsertBuff(Aisling aisling, Buff buff)

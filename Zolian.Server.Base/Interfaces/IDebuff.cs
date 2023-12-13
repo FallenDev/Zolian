@@ -1,5 +1,4 @@
-﻿using Darkages.Common;
-using Darkages.Network.Client.Abstractions;
+﻿using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
 
@@ -12,7 +11,6 @@ public interface IDebuff
     int Length { get; set; }
     string Name { get; set; }
     int TimeLeft { get; set; }
-    WorldServerTimer Timer { get; set; }
     Debuff DebuffSpell { get; set; }
 
     void OnApplied(Sprite affected, Debuff debuff);
