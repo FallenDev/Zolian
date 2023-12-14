@@ -93,9 +93,9 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                         var legend = new Legend.LegendItem
                         {
                             Category = "LShreek1",
-                            Time = null,
-                            Color = LegendColor.White,
-                            Icon = 9,
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Invisible,
+                            Icon = (byte)LegendIcon.Invisible,
                             Value = ""
                         };
 

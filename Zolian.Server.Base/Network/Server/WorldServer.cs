@@ -858,7 +858,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 
                 monster.LastUpdated = DateTime.UtcNow;
 
-                if(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
+                if(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) continue;
 
                 monster.UpdateBuffs(elapsedTime);
                 monster.UpdateDebuffs(elapsedTime);

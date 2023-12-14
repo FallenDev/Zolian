@@ -399,9 +399,9 @@ public class Dar : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "LDar1",
-                                Time = null,
-                                Color = LegendColor.White,
-                                Icon = 9,
+                                Time = DateTime.UtcNow,
+                                Color = LegendColor.Invisible,
+                                Icon = (byte)LegendIcon.Invisible,
                                 Value = ""
                             };
 
@@ -450,9 +450,9 @@ public class Dar : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Category = "LDar2",
-                                Time = null,
-                                Color = LegendColor.White,
-                                Icon = 9,
+                                Time = DateTime.UtcNow,
+                                Color = LegendColor.Invisible,
+                                Icon = (byte)LegendIcon.Invisible,
                                 Value = ""
                             };
 

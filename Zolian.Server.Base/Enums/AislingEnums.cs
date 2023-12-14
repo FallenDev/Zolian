@@ -47,7 +47,8 @@ public enum LegendIcon
     Priest = 4,
     Monk = 5,
     Heart = 6,
-    Victory = 7
+    Victory = 7,
+    Invisible = 8
 }
 
 [Flags]

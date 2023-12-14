@@ -370,9 +370,9 @@ public class Keela : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Category = "LKeela1",
-                                    Time = null,
-                                    Color = LegendColor.White,
-                                    Icon = 9,
+                                    Time = DateTime.UtcNow,
+                                    Color = LegendColor.Invisible,
+                                    Icon = (byte)LegendIcon.Invisible,
                                     Value = ""
                                 };
 

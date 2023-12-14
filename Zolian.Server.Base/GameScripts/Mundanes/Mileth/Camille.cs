@@ -106,9 +106,9 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                     var legend = new Legend.LegendItem
                     {
                         Category = "LCamille1",
-                        Time = null,
-                        Color = LegendColor.White,
-                        Icon = 9,
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.Invisible,
+                        Icon = (byte)LegendIcon.Invisible,
                         Value = ""
                     };
 
