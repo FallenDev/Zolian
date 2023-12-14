@@ -47,7 +47,7 @@ public class EquipmentManager
     public void Add(int displaySlot, Item item)
     {
         if (Client == null) return;
-        if (displaySlot is <= 0 or > 17) return;
+        if (displaySlot is <= 0 or > 18) return;
         if (item?.Template == null) return;
         if (!item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 

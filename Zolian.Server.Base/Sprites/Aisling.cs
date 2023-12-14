@@ -554,7 +554,7 @@ public sealed class Aisling : Player, IAisling
         var found = ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var template);
         if (!found) return false;
         var amount = Inventory.Has(template);
-        return count >= amount;
+        return count <= amount;
     }
 
     public bool HasItem(string item)

@@ -165,4 +165,5 @@ public class Quests
     public string BeltDegree { get; set; } = string.Empty;
     public string BeltQuest { get; set; } = string.Empty;
     public bool SavedChristmas { get; set; }
+    public bool RescuedReindeer { get; set; }
 }
