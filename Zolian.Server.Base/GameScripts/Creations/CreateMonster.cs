@@ -1012,8 +1012,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterType.Above450P] = monster =>
             {
                 monster.BonusStr += monster._Str * 19;
+                monster.BonusCon += monster._Con * 10;
                 monster.BonusDex += monster._Dex * 19;
                 monster.BonusDmg += monster._Dmg * 19;
+                monster.BonusHp += monster.BaseHp * 10;
                 monster.BonusHp += (int)(monster.MaximumHp * 0.17);
             },
             [MonsterType.Above450M] = monster =>
