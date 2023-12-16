@@ -27,6 +27,16 @@ public class Boot(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
+        var i = aisling.EquipmentManager.Equipment[12]?.Slot;
+        if (i != null)
+        {
+            if (aisling.EquipmentManager.Equipment[12].Item.Template.Name == "Anklet")
+            {
+                client.Aisling.BootsImg = 8;
+                return;
+            }
+        }
+
         client.Aisling.BootsImg = (byte)Item.Image;
         client.Aisling.BootColor = (byte)Item.Template.Color;
     }
