@@ -21,4 +21,30 @@ public static class ItemSlots
     public const int OverHelm = 16;
     public const int SecondAcc = 17;
     public const int ThirdAcc = 18;
+
+    public static string ItemSlotMetaValuesStoresBank(int slot)
+    {
+        return slot switch
+        {
+            0 => "None",
+            1 => "Weapons",
+            2 => "Armors",
+            3 => "Shields",
+            4 => "Helmets",
+            5 => "Earrings",
+            6 => "Amulets",
+            7 => "Rings",
+            8 => "Rings",
+            9 => "Arms",
+            10 => "Arms",
+            11 => "Belts",
+            12 => "Leggings",
+            13 => "Boots",
+            14 => "Other",
+            15 => "Overcoats",
+            16 => "Overhelms",
+            17 => "Other",
+            18 => "Other",
+        };
+    }
 }

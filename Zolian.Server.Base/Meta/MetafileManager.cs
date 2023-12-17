@@ -237,7 +237,27 @@ public class MetafileManager
     private static void GenerateItemInfoMeta()
     {
         var i = 0;
-        foreach (var batch in ServerSetup.Instance.GlobalSqlItemCache.OrderBy(v => v.Value.Template.LevelRequired)
+
+        foreach (var batch in ServerSetup.Instance.GlobalItemTemplateCache
+                     .OrderBy(v => v.Value.LevelRequired)
+                     .BatchesOf(1024))
+        {
+            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = new List<MetafileNode>() };
+
+            foreach (var template in from v in batch select v.Value)
+            {
+                var meta = template.GetMetaData();
+                metaFile.Nodes.Add(new MetafileNode(template.Name, meta));
+            }
+
+            CompileTemplate(metaFile);
+            Metafiles.Add(metaFile);
+            i++;
+        }
+
+        foreach (var batch in ServerSetup.Instance.GlobalSqlItemCache
+                     .DistinctBy(v => v.Value.NoColorDisplayName)
+                     .OrderBy(v => v.Value.Template.LevelRequired)
                      .BatchesOf(1024))
         {
             var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = new List<MetafileNode>() };

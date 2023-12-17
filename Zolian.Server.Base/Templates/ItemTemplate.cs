@@ -11,7 +11,7 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 
 using System.Data;
-
+using Darkages.Types;
 using static Darkages.Enums.ElementManager;
 
 namespace Darkages.Templates;
@@ -66,10 +66,14 @@ public class ItemTemplate : Template
     {
         var category = string.IsNullOrEmpty(Group) ? "Other" : Group;
 
+        if (category == "Other" && EquipmentSlot is 0 or 2)
+            category = Class.ToString();
+
+        if (category == "Other" && EquipmentSlot != 0)
+            category = ItemSlots.ItemSlotMetaValuesStoresBank(EquipmentSlot);
+
         if (Gender == 0)
-        {
             Gender = Gender.Unisex;
-        }
 
         return new[]
         {
