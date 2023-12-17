@@ -1,9 +1,12 @@
 ﻿using Darkages.Compression;
 using Darkages.Models;
-
+using Darkages.Sprites;
+using Darkages.Templates;
 using Newtonsoft.Json;
 
 using ServiceStack;
+
+using static Darkages.Sprites.Item;
 
 namespace Darkages.Meta;
 
@@ -234,18 +237,15 @@ public class MetafileManager
     private static void GenerateItemInfoMeta()
     {
         var i = 0;
-        foreach (var batch in ServerSetup.Instance.GlobalItemTemplateCache.OrderBy(v => v.Value.LevelRequired)
-                     .BatchesOf(712))
+        foreach (var batch in ServerSetup.Instance.GlobalSqlItemCache.OrderBy(v => v.Value.Template.LevelRequired)
+                     .BatchesOf(1024))
         {
             var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = new List<MetafileNode>() };
 
-            foreach (var template in from v in batch select v.Value)
+            foreach (var item in from v in batch select v.Value)
             {
-                //if (template.Gender == 0)
-                //    continue;
-
-                var meta = template.GetMetaData();
-                metaFile.Nodes.Add(new MetafileNode(template.Name, meta));
+                var meta = item.Template.GetMetaData();
+                metaFile.Nodes.Add(new MetafileNode(item.NoColorDisplayName, meta));
             }
 
             CompileTemplate(metaFile);

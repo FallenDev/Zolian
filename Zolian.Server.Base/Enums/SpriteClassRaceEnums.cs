@@ -152,6 +152,26 @@ public static class ClassStrings
         };
     }
 
+    public static int ItemClassToIntMetaData(string c)
+    {
+        return c switch
+        {
+            "Peasant" => 0,
+            "Berserker" => 1,
+            "Defender" => 1,
+            "Assassin" => 2,
+            "Cleric" => 4,
+            "Arcanus" => 3,
+            "Monk" => 5,
+            "DualBash" => 0,
+            "DualCast" => 0,
+            "Racial" => 0,
+            "Monster" => 0,
+            "Quest" => 0,
+            _ => 0
+        };
+    }
+
     public static int JobDisplayFlag(string c)
     {
         return c switch

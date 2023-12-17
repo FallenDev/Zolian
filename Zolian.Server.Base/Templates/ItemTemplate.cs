@@ -64,23 +64,7 @@ public class ItemTemplate : Template
 
     public string[] GetMetaData()
     {
-        var category = string.IsNullOrEmpty(Group) ? string.Empty : Group;
-
-        if (string.IsNullOrEmpty(category)) category = Class == Class.Peasant ? "Weapons" : Class.ToString();
-
-        var classConvert = ((int)Class).ToString();
-
-        classConvert = classConvert switch
-        {
-            "0" => "0",
-            "1" => "1",
-            "2" => "1",
-            "3" => "2",
-            "4" => "4",
-            "5" => "3",
-            "6" => "5",
-            _ => classConvert
-        };
+        var category = string.IsNullOrEmpty(Group) ? "Other" : Group;
 
         if (Gender == 0)
         {
@@ -89,24 +73,11 @@ public class ItemTemplate : Template
 
         return new[]
         {
-            LevelRequired.ToString(),
-            classConvert,
-            CarryWeight.ToString(),
-
-            Gender switch
-            {
-                Gender.Unisex => category,
-                Gender.Female => category,
-                Gender.Male => category,
-                _ => category
-            },
-            Gender switch
-            {
-                Gender.Unisex => category,
-                Gender.Female => category,
-                Gender.Male => category,
-                _ => category
-            } + $" {Gender}\n{Description}"
+            $"{LevelRequired}\n",
+            $"{ClassStrings.ItemClassToIntMetaData(Class.ToString())}\n",
+            $"{CarryWeight}\n",
+            category,
+            $"{Gender}\n{Description}"
         };
     }
 }
