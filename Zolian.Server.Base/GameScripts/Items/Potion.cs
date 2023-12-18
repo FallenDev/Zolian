@@ -136,7 +136,7 @@ public class Potion(Item item) : ItemScript(item)
                                 }
                             }
                             break;
-                        case "Major Ao Puinsein Deum":
+                        case "Antidote":
                             {
                                 if (client.Aisling.HasDebuff("Beag Puinsein"))
                                 {
@@ -170,6 +170,17 @@ public class Potion(Item item) : ItemScript(item)
                                 }
                             }
                             break;
+                        case "Eyedrops":
+                        {
+                            if (client.Aisling.HasDebuff("Blind"))
+                            {
+                                client.Aisling.Debuffs.TryRemove("Blind", out var debuff);
+                                debuff?.OnEnded(client.Aisling, debuff);
+                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                            }
+
+                            break;
+                        }
 
                         #endregion
 
