@@ -68,7 +68,17 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 219, (7300, 2400) },
             { 229, (7800, 2800) },
             { 239, (8500, 3500) },
-            { 249, (9150, 4000) }
+            { 250, (9150, 4000) },
+            { 275, (11000, 8000) },
+            { 300, (13000, 12000) },
+            { 325, (15000, 16000) },
+            { 350, (18000, 24000) },
+            { 375, (22000, 30000) },
+            { 400, (25000, 40000) },
+            { 425, (27500, 50000) },
+            { 450, (30000, 60000) },
+            { 475, (40000, 70000) },
+            { 500, (50000, 80000) },
         };
 
         if (obj.Template.Level >= 250)
@@ -101,6 +111,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         MonsterBaseAndSizeStats(obj);
         MonsterStatBoostOnPrimary(obj);
         MonsterStatBoostOnType(obj);
+        AdjustOnArmorType(obj);
 
         obj.CurrentHp = obj.MaximumHp;
         obj.CurrentMp = obj.MaximumMp;
@@ -375,6 +386,24 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         var mrBonus = Generator.GenerateDeterminedNumberRange(start, end);
         mrBonus *= 2;
         obj.BonusMr = mrBonus;
+    }
+
+    private static void AdjustOnArmorType(Monster obj)
+    {
+        switch (obj.Template.MonsterArmorType)
+        {
+            default:
+            case MonsterArmorType.Common:
+                obj.BonusAc = (int)(obj.BonusAc * 0.75d);
+                obj.BonusMr = (int)(obj.BonusMr * 0.75d);
+                break;
+            case MonsterArmorType.Tank:
+                obj.BonusMr = (int)(obj.BonusMr * 0.30d);
+                break;
+            case MonsterArmorType.Caster:
+                obj.BonusAc = (int)(obj.BonusAc * 0.35d);
+                break;
+        }
     }
 
     private static void MonsterExperience(Monster obj)

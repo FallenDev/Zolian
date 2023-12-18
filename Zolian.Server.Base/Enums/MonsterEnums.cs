@@ -47,6 +47,18 @@ public enum MonsterType
     Boss
 }
 
+/// <summary>
+/// Common - 75% AC & Will Save
+/// Tank - 100% AC & 30% Will Save
+/// Caster - 30% AC & 100% Will Save
+/// </summary>
+public enum MonsterArmorType
+{
+    Common,
+    Tank,
+    Caster
+}
+
 [Flags]
 public enum MonsterRace
 {

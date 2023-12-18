@@ -38,6 +38,7 @@ public class MonsterTemplate : Template
     public int SpawnSize { get; set; }
     public SpawnQualifer SpawnType { get; set; }
     public MonsterType MonsterType { get; set; }
+    public MonsterArmorType MonsterArmorType { get; set; }
     public List<string> SpellScripts { get; set; }
     public List<string> AbilityScripts { get; set; }
     public List<Position> Waypoints { get; set; }
@@ -87,6 +88,7 @@ public static class MonsterStorage
                 var y = (int)reader["DefinedY"];
                 var eleType = reader["ElementType"].ConvertTo<ElementQualifer>();
                 var monsterType = reader["Type"].ConvertTo<MonsterType>();
+                var monsterArmor = reader["ArmorType"].ConvertTo<MonsterArmorType>();
                 var monsterRace = reader["MonType"].ConvertTo<MonsterRace>();
                 var pathFind = reader["PathFinder"].ConvertTo<PathQualifer>();
                 var spawnType = reader["SpawnType"].ConvertTo<SpawnQualifer>();
@@ -127,6 +129,7 @@ public static class MonsterStorage
                 temp.SpawnRate = (int)reader["SpawnRate"];
                 temp.MoodType = mood;
                 temp.MonsterType = monsterType;
+                temp.MonsterArmorType = monsterArmor;
                 temp.MonsterRace = monsterRace;
                 temp.IgnoreCollision = (bool)reader["IgnoreCollision"];
                 temp.MovementSpeed = (int)reader["MovementSpeed"];
