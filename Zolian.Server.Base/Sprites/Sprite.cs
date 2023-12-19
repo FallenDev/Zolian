@@ -1741,7 +1741,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 1 when aegisChance >= 99:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, TimeSpan.FromSeconds(buff.Length));
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
@@ -1749,7 +1749,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             case 2 when aegisChance >= 97:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(target, buff, TimeSpan.FromSeconds(buff.Length));
+                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The effects of your weapon surround you.");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
@@ -1763,6 +1763,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     const double absorbPct = 0.07;
                     var absorb = absorbPct * dmg;
                     damageDealingSprite.CurrentHp += (int)absorb;
+                    if (target?.CurrentHp >= (int)absorb)
+                        target.CurrentHp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
@@ -1773,6 +1775,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     const double absorbPct = 0.14;
                     var absorb = absorbPct * dmg;
                     damageDealingSprite.CurrentHp += (int)absorb;
+                    if (target?.CurrentHp >= (int)absorb)
+                        target.CurrentHp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....");
                     damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
