@@ -1,6 +1,8 @@
 ﻿using Chaos.Common.Definitions;
 
+using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Formulas;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -23,6 +25,52 @@ public class Consumable(Item item) : ItemScript(item)
 
         switch (Item.Template.Name)
         {
+            case "Stocking Stuffer":
+                {
+                    var rand = Generator.RandomNumPercentGen();
+                    var stockingItem = new Item();
+                    var quality = ItemQualityVariance.DetermineQuality();
+                    var variance = ItemQualityVariance.DetermineVariance();
+                    var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+
+                    switch (rand)
+                    {
+                        case > 0 and <= 0.10:
+                            stockingItem = stockingItem.Create(aisling, "Santa's Costume", quality, variance, wVariance);
+                            break;
+                        case > 0.10 and <= 0.20:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Helm A", quality, variance, wVariance);
+                            break;
+                        case > 0.20 and <= 0.30:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Helm B", quality, variance, wVariance);
+                            break;
+                        case > 0.30 and <= 0.40:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Helm C", quality, variance, wVariance);
+                            break;
+                        case > 0.40 and <= 0.50:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Costume A", quality, variance, wVariance);
+                            break;
+                        case > 0.50 and <= 0.60:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Costume B", quality, variance, wVariance);
+                            break;
+                        case > 0.60 and <= 0.70:
+                            stockingItem = stockingItem.Create(aisling, "Frosty's Costume C", quality, variance, wVariance);
+                            break;
+                        case > 0.70 and <= 0.83:
+                            stockingItem = stockingItem.Create(aisling, "Rudolph's Helm", quality, variance, wVariance);
+                            break;
+                        case > 0.83 and <= 0.95:
+                            stockingItem = stockingItem.Create(aisling, "Rudolph's Costume", quality, variance, wVariance);
+                            break;
+                        case > 0.95 and <= 1:
+                            stockingItem = stockingItem.Create(aisling, "Lumber Jack", quality, variance, wVariance);
+                            break;
+                    }
+
+                    stockingItem.GiveTo(aisling);
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(294, aisling.Position));
+                    return;
+                }
             case "Necra Scribblings":
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");

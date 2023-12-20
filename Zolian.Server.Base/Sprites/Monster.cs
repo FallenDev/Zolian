@@ -141,35 +141,73 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         if (monster.Target is not Aisling aisling) return;
         var readyTime = DateTime.UtcNow;
 
-        if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
+        if (aisling.GroupParty.PartyMembers is not null)
         {
-            aisling.MonsterKillCounters[monster.Template.BaseName] =
-                new KillRecord
+            foreach (var player in aisling.GroupParty.PartyMembers)
+            {
+                if (!player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
                 {
-                    TotalKills = 1,
-                    TimeKilled = readyTime
-                };
+                    player.MonsterKillCounters[monster.Template.BaseName] =
+                        new KillRecord
+                        {
+                            TotalKills = 1,
+                            TimeKilled = readyTime
+                        };
+                }
+                else
+                {
+                    value.TotalKills++;
+                    value.TimeKilled = readyTime;
+                }
+
+                if (monster.Template.BaseName == player.QuestManager.KeelaKill)
+                {
+                    var returnPlayer = player.QuestManager.KeelaCount <= value?.TotalKills;
+                    QuestTracking(player, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+                }
+
+                if (monster.Template.BaseName == player.QuestManager.NealKill)
+                {
+                    var returnPlayer = player.QuestManager.NealCount <= value?.TotalKills;
+                    QuestTracking(player, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+                }
+
+                if (monster.Template.BaseName != "Mouse" || player.QuestManager.PeteComplete) return;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+            }
         }
         else
         {
-            value.TotalKills++;
-            value.TimeKilled = readyTime;
-        }
+            if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
+            {
+                aisling.MonsterKillCounters[monster.Template.BaseName] =
+                    new KillRecord
+                    {
+                        TotalKills = 1,
+                        TimeKilled = readyTime
+                    };
+            }
+            else
+            {
+                value.TotalKills++;
+                value.TimeKilled = readyTime;
+            }
 
-        if (monster.Template.BaseName == aisling.QuestManager.KeelaKill)
-        {
-            var returnPlayer = aisling.QuestManager.KeelaCount <= value?.TotalKills;
-            QuestTracking(aisling, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
-        }
+            if (monster.Template.BaseName == aisling.QuestManager.KeelaKill)
+            {
+                var returnPlayer = aisling.QuestManager.KeelaCount <= value?.TotalKills;
+                QuestTracking(aisling, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+            }
 
-        if (monster.Template.BaseName == aisling.QuestManager.NealKill)
-        {
-            var returnPlayer = aisling.QuestManager.NealCount <= value?.TotalKills;
-            QuestTracking(aisling, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
-        }
+            if (monster.Template.BaseName == aisling.QuestManager.NealKill)
+            {
+                var returnPlayer = aisling.QuestManager.NealCount <= value?.TotalKills;
+                QuestTracking(aisling, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+            }
 
-        if (monster.Template.BaseName != "Mouse" || aisling.QuestManager.PeteComplete) return;
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+            if (monster.Template.BaseName != "Mouse" || aisling.QuestManager.PeteComplete) return;
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
     }
 
     private static void QuestTracking(IAisling aisling, byte responseId, bool returnPlayer, string text = "")
