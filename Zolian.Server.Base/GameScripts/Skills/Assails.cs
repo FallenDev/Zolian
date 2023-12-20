@@ -2461,7 +2461,7 @@ public class Kenjutsu(Skill skill) : SkillScript(skill)
     }
 }
 
-// Aisling Str * 15 | Monster Str * 12
+// Aisling Str * 15 | Monster Str * 15
 [Script("Short Strike")]
 public class ShortStrike(Skill skill) : SkillScript(skill)
 {
@@ -2569,7 +2569,7 @@ public class ShortStrike(Skill skill) : SkillScript(skill)
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 12;
+            dmg = damageMonster.Str * 15;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);

@@ -141,10 +141,11 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         if (monster.Target is not Aisling aisling) return;
         var readyTime = DateTime.UtcNow;
 
-        if (aisling.GroupParty.PartyMembers is not null)
+        if (aisling.GroupParty is not null)
         {
             foreach (var player in aisling.GroupParty.PartyMembers)
             {
+                if (player.Map.ID != aisling.Map.ID) continue;
                 if (!player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
                 {
                     player.MonsterKillCounters[monster.Template.BaseName] =

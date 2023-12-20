@@ -44,6 +44,7 @@ public enum MonsterType
     DivineWis,
     DivineCon,
     DivineDex,
+    MiniBoss,
     Boss
 }
 

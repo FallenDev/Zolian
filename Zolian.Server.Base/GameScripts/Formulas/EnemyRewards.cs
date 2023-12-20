@@ -7,8 +7,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using System.Security.Cryptography;
-
 namespace Darkages.GameScripts.Formulas;
 
 [Script("Rewards 1x")]
@@ -33,6 +31,9 @@ public class EnemyRewards : RewardScript
 
     private void DetermineRandomSpecialDrop(Monster monster, Aisling player)
     {
+        var kickOut = Generator.RandomNumPercentGen();
+        if (kickOut >= .85) return;
+
         var dropList = JoinList(monster);
         if (dropList.Count <= 0) return;
         var items = new List<Item>();
@@ -43,13 +44,12 @@ public class EnemyRewards : RewardScript
             // Equipment & Enchantable
             if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) && ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
             {
+                chance = Generator.RandomNumPercentGen();
+                if (chance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
+
                 var quality = ItemQualityVariance.DetermineQuality();
                 var variance = ItemQualityVariance.DetermineVariance();
                 var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-                chance = Math.Round(Random.Shared.NextDouble(), 2);
-
-                if (!(chance <= ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate)) continue;
-
                 var equipItem = new Item();
                 equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance, true);
                 ItemQualityVariance.ItemDurability(equipItem, quality);
@@ -65,63 +65,23 @@ public class EnemyRewards : RewardScript
 
         var randEquipItems = new List<Item>();
 
-        switch (items.Count)
+        foreach (var item in items)
         {
-            case >= 3:
-                {
-                    for (var i = 3; i > randEquipItems.Count; i--)
-                    {
-                        var item = RandomNumberGenerator.GetInt32(items.Count);
-                        chance = Generator.RandNumGen100();
-                        var kickOut = Generator.RandNumGen100();
-                        if (kickOut >= 90) return;
+            chance = Generator.RandomNumPercentGen();
 
-                        switch (chance)
-                        {
-                            // If greater than equal 70, restart the list
-                            case >= 70:
-                                randEquipItems = new List<Item>();
-                                continue;
-                            // If greater than 30, continue without adding
-                            case >= 45 and <= 69:
-                                continue;
-                            default:
-                                randEquipItems.Add(items[item]);
-                                continue;
-                        }
-                    }
-
-                    break;
-                }
-            case 2:
-                {
-                    for (var i = 2; i > randEquipItems.Count; i--)
-                    {
-                        var item = RandomNumberGenerator.GetInt32(items.Count);
-                        chance = Generator.RandNumGen100();
-                        var kickOut = Generator.RandNumGen100();
-                        if (kickOut >= 95) return;
-
-                        switch (chance)
-                        {
-                            // If greater than equal 70, restart the list
-                            case >= 70:
-                                randEquipItems = new List<Item>();
-                                continue;
-                            // If greater than 50, continue without adding
-                            case >= 50 and <= 69:
-                                continue;
-                            default:
-                                randEquipItems.Add(items[item]);
-                                continue;
-                        }
-                    }
-
-                    break;
-                }
-            default:
-                randEquipItems = items;
-                break;
+            switch (chance)
+            {
+                // If greater than equal 85%, restart the list
+                case >= .85:
+                    randEquipItems = [];
+                    continue;
+                // If greater than equal 40%, don't add the item
+                case >= .50:
+                    continue;
+                default:
+                    randEquipItems.Add(item);
+                    continue;
+            }
         }
 
         foreach (var item in randEquipItems)
