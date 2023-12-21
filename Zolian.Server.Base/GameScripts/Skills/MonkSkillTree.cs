@@ -1573,6 +1573,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
         };
 
         var enemy = sprite.GetInFrontToSide();
+        var dmgCalc = DamageCalc(sprite);
 
         if (enemy.Count == 0)
         {
@@ -1585,7 +1586,6 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
         {
             _target = i;
             if (_target.CurrentHp <= 1) continue;
-            var dmgCalc = DamageCalc(sprite);
             _target.CurrentHp += (int)dmgCalc;
 
             if (_target.CurrentHp > _target.MaximumHp)
@@ -1597,7 +1597,14 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
         }
-        
+
+        aisling.CurrentHp += (int)dmgCalc;
+
+        if (aisling.CurrentHp > aisling.MaximumHp)
+            aisling.CurrentHp = aisling.MaximumHp;
+
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(aisling, skill.Template.Sound));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
         _skillMethod.Train(aisling.Client, skill);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }

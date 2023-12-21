@@ -18,22 +18,54 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
     private List<Spell> _spellList;
     private readonly List<Vector2> _dojoSpots = new()
     {
+        // Far Left
         new(12, 22),
         new(13, 21),
         new(14, 22),
         new(13, 23),
+
+        // Far Top
         new(12, 13),
         new(13, 12),
         new(14, 13),
         new(13, 14),
+
+        // Far Right
         new(22, 14),
         new(21, 13),
         new(23, 13),
-        new(22, 13),
+        new(22, 12),
+
+        // Far Bottom
         new(22, 21),
         new(23, 22),
         new(22, 23),
-        new(21, 22)
+        new(21, 22),
+
+        // Top
+        new(15, 16),
+        new(16, 15),
+        new(17, 16),
+        new(16, 17),
+
+        // Bottom
+        new(18, 19),
+        new(19, 18),
+        new(20, 19),
+        new(19, 20),
+
+        // Left
+        new(15, 19),
+        new(16, 18),
+        new(17, 19),
+        new(16, 20),
+
+        // Right
+        new(18, 16),
+        new(19, 15),
+        new(20, 16),
+        new(19, 17),
+
     };
 
     public override void OnClick(WorldClient client, uint serial)

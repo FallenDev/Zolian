@@ -410,7 +410,7 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         "   {=qRegen{=g: {=aThe strength of your mana and health regeneration\n" +
                         "   {=qSupport Defense(Secondary){=g: {=aThis is your secondary equipped element for defense\n\n" +
                         "{=cSaving Throws{=g:\n" +
-                        "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (20% of Con)\n" +
+                        "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (10% of Con)\n" +
                         "   {=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage\n" +
                         "   {=qWill{=g: {=aIs the percentage of magical attacks you mitigate and reduce their effectiveness\n" +
                         "{=cEnhancements{=g: {=aThese are various equipment enhancements which grant you bonuses or effects.");
