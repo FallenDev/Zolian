@@ -422,7 +422,7 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("InventorySlot", typeof(int));
         dt.Columns.Add("Color", typeof(int));
         dt.Columns.Add("Cursed", typeof(bool));
-        dt.Columns.Add("Durability", typeof(int));
+        dt.Columns.Add("Durability", typeof(long));
         dt.Columns.Add("Identified", typeof(bool));
         dt.Columns.Add("ItemVariance", typeof(string));
         dt.Columns.Add("WeapVariance", typeof(string));

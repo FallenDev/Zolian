@@ -559,7 +559,7 @@ CREATE TYPE dbo.ItemType AS TABLE
     InventorySlot INT,
     Color INT,
     Cursed BIT,
-    Durability INT,
+    Durability BIGINT,
     Identified BIT,
     ItemVariance VARCHAR (15),
     WeapVariance VARCHAR (15),

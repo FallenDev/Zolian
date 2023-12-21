@@ -112,10 +112,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         MonsterStatBoostOnPrimary(obj);
         MonsterStatBoostOnType(obj);
         AdjustOnArmorType(obj);
-
-        obj.CurrentHp = obj.MaximumHp;
-        obj.CurrentMp = obj.MaximumMp;
-
         SetElementalAlignment(obj);
         SetWalkEnabled(obj);
         SetMood(obj);
@@ -130,6 +126,9 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         obj.Image = template.ImageVarience > 0
             ? (ushort)Random.Shared.Next(template.Image, template.Image + template.ImageVarience)
             : template.Image;
+
+        obj.CurrentHp = obj.MaximumHp;
+        obj.CurrentMp = obj.MaximumMp;
 
         return obj;
     }

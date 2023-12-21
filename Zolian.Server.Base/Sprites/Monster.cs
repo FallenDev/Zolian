@@ -220,6 +220,15 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         scriptObj.Value?.OnResponse(aisling.Client, responseId, $"{npc.Value.Serial}");
     }
 
+    public static void CreateFromTemplate(MonsterTemplate template, Area map)
+    {
+        var newObj = Create(template, map);
+
+        if (newObj == null) return;
+        ServerSetup.Instance.GlobalMonsterCache[newObj.Serial] = newObj;
+        ServerSetup.Instance.Game.ObjectHandlers.AddObject(newObj);
+    }
+
     public void Patrol()
     {
         if (CurrentWaypoint != null) WalkTo(CurrentWaypoint.X, CurrentWaypoint.Y);

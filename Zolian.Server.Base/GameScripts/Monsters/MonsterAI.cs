@@ -6364,13 +6364,16 @@ public class Yeti : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
-    private string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
+    private string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone";
+    private string _aosdaChase = "Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
     private int RunCount => GhostChase.Length;
     private bool _deathCry;
+    private bool _phaseOne;
+    private bool _phaseTwo;
+    private bool _phaseThree;
 
     public Yeti(Monster monster, Area map) : base(monster, map)
     {
@@ -6393,6 +6396,7 @@ public class Yeti : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
+                UpdatePhases();
                 Monster.ObjectUpdateEnabled = false;
             }
             else
@@ -6416,6 +6420,63 @@ public class Yeti : MonsterScript
         {
             ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
+        }
+    }
+
+    private void UpdatePhases()
+    {
+        if (Monster.CurrentHp <= Monster.MaximumHp * 0.75 && !_phaseOne)
+        {
+            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
+            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
+            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
+            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
+
+            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
+            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
+            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
+
+            _phaseOne = true;
+        }
+
+        if (Monster.CurrentHp <= Monster.MaximumHp * 0.50 && !_phaseTwo)
+        {
+            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
+            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
+            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
+            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
+            var foundD = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanD", out var templateD);
+            var foundE = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanE", out var templateE);
+
+            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
+            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
+            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
+            if (foundD) Monster.CreateFromTemplate(templateD, Monster.Map);
+            if (foundE) Monster.CreateFromTemplate(templateE, Monster.Map);
+
+            _phaseTwo = true;
+        }
+
+        if (Monster.CurrentHp <= Monster.MaximumHp * 0.25 && !_phaseThree)
+        {
+            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
+            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
+            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
+            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
+            var foundD = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanD", out var templateD);
+            var foundE = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanE", out var templateE);
+            var foundF = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanF", out var templateF);
+            var foundG = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanG", out var templateG);
+
+            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
+            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
+            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
+            if (foundD) Monster.CreateFromTemplate(templateD, Monster.Map);
+            if (foundE) Monster.CreateFromTemplate(templateE, Monster.Map);
+            if (foundF) Monster.CreateFromTemplate(templateF, Monster.Map);
+            if (foundG) Monster.CreateFromTemplate(templateG, Monster.Map);
+
+            _phaseThree = true;
         }
     }
 
@@ -6535,7 +6596,7 @@ public class Yeti : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -6809,7 +6870,7 @@ public class Yeti : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;

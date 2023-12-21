@@ -70,7 +70,8 @@ public class EquipmentManager
         {
             if (item.Template.Flags.FlagIsSet(ItemFlags.Repairable))
             {
-                item.Durability--;
+                if (item.Durability > 0)
+                    item.Durability--;
 
                 if (item.Durability <= 0)
                     item.Durability = 0;
