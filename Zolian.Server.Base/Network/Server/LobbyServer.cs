@@ -120,10 +120,18 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)opCode];
-        if (handler is not null) return handler(client, in packet);
-        ServerSetup.Logger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
-        Crashes.TrackError(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
-        client.Disconnect();
+
+        try
+        {
+            if (handler is not null) return handler(client, in packet);
+            ServerSetup.Logger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
+            Crashes.TrackError(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
+        }
+        catch
+        {
+            client.Disconnect();
+        }
+
         return default;
     }
 

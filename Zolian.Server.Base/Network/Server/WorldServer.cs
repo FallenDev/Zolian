@@ -3404,10 +3404,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (trackers != null && IsManualAction(packet.OpCode))
             trackers.LastManualAction = DateTime.UtcNow;
 
-        if (handler is not null) return handler(client, in packet);
-        ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
-        Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
-        client.Disconnect();
+        try
+        {
+            if (handler is not null) return handler(client, in packet);
+            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
+            Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
+        }
+        catch
+        {
+            client.Disconnect();
+        }
+
         return default;
     }
 

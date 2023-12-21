@@ -263,7 +263,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();
                             if (result.Password == ServerSetup.Instance.Unlock)
+                            {
                                 result.PasswordAttempts = 0;
+                                result.Hacked = false;
+                            }
                             await SavePassword(result);
                             RedirectManager.Add(redirect);
                             localClient.SendLoginMessage(LoginMessageType.Confirm);
@@ -285,7 +288,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();
                             if (result.Password == ServerSetup.Instance.Unlock)
+                            {
                                 result.PasswordAttempts = 0;
+                                result.Hacked = false;
+                            }
                             await SavePassword(result);
                             RedirectManager.Add(redirect);
                             localClient.SendLoginMessage(LoginMessageType.Confirm);
@@ -301,6 +307,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     result.LastIP = localClient.RemoteIp.ToString();
                     if (result.Password == ServerSetup.Instance.Unlock)
                     {
+                        result.PasswordAttempts = 0;
                         result.Hacked = false;
                     }
                     await SavePassword(result);
@@ -309,10 +316,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             if (result.Hacked)
             {
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
                 return;
             }
 
+            result.PasswordAttempts = 0;
+            await SavePassword(result);
             RedirectManager.Add(redirect);
             localClient.SendLoginMessage(LoginMessageType.Confirm);
             localClient.SendRedirect(redirect);
@@ -448,10 +457,18 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)opCode];
-        if (handler is not null) return handler(client, in packet);
-        ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
-        Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
-        client.Disconnect();
+
+        try
+        {
+            if (handler is not null) return handler(client, in packet);
+            ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
+            Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
+        }
+        catch
+        {
+            client.Disconnect();
+        }
+
         return default;
     }
 
