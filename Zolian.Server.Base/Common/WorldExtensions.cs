@@ -77,6 +77,7 @@ public static class WorldExtensions
                 CurrentDurability = 0,
                 MaxDurability = 0,
                 Name = i.Name,
+                Group = i.Group,
                 Slot = 0,
                 Sprite = i.DisplayImage,
                 Stackable = i.CanStack
@@ -249,6 +250,7 @@ public static class WorldExtensions
                 CurrentDurability = (int)i.Durability,
                 MaxDurability = (int)i.MaxDurability,
                 Name = i.NoColorDisplayName,
+                Group = i.Template.Group,
                 Slot = 0,
                 Sprite = i.DisplayImage,
                 Stackable = i.Template.CanStack

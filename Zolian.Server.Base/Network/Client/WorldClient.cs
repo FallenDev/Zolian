@@ -1483,6 +1483,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)item.Durability,
                 MaxDurability = (int)item.MaxDurability,
                 Name = item.DisplayName,
+                Group = item.Template.Group,
                 Slot = item.InventorySlot,
                 Sprite = item.DisplayImage,
                 Stackable = item.Template.CanStack
@@ -2063,6 +2064,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)item.Durability,
                 MaxDurability = (int)item.MaxDurability,
                 Name = item.NoColorDisplayName,
+                Group = item.Template.Group,
                 Slot = displaySlot,
                 Sprite = item.DisplayImage,
                 Stackable = item.Template.CanStack
@@ -2427,6 +2429,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2447,6 +2450,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2467,6 +2471,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2487,6 +2492,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2507,6 +2513,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2527,6 +2534,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2547,6 +2555,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2567,6 +2576,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2587,6 +2597,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2607,6 +2618,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2627,6 +2639,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2647,6 +2660,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2667,6 +2681,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2687,6 +2702,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2707,6 +2723,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2727,6 +2744,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2747,6 +2765,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2767,6 +2786,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2966,6 +2986,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2986,6 +3007,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3006,6 +3028,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3026,6 +3049,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3046,6 +3070,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3066,6 +3091,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3086,6 +3112,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3106,6 +3133,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3126,6 +3154,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3146,6 +3175,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3166,6 +3196,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3186,6 +3217,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3206,6 +3238,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3226,6 +3259,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3246,6 +3280,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3266,6 +3301,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3286,6 +3322,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3306,6 +3343,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
+                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
