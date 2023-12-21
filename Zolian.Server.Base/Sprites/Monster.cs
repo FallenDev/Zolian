@@ -173,7 +173,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
                     QuestTracking(player, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
                 }
 
-                if (monster.Template.BaseName != "Mouse" || player.QuestManager.PeteComplete) return;
+                if (monster.Template.BaseName != "Mouse" || player.QuestManager.PeteComplete) continue;
                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
             }
         }
