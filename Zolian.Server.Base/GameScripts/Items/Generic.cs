@@ -39,7 +39,7 @@ public class Generic(Item item) : ItemScript(item)
             case 12: // Legs, Guards, Boots
                 if (client.Aisling.EquipmentManager.Equipment[12] == null)
                     Item.Template.EquipmentSlot = ItemSlots.Leg;
-                if (aisling.EquipmentManager.Equipment[12].Item.Template.Name == "Anklet")
+                if (aisling.EquipmentManager.Equipment[12]?.Item?.Template.Name == "Anklet")
                 {
                     client.Aisling.BootsImg = 8;
                 }
