@@ -3,9 +3,12 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
+using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
+using static Darkages.Sprites.Item;
 
 namespace Darkages.GameScripts.Formulas;
 
@@ -31,60 +34,57 @@ public class EnemyRewards : RewardScript
 
     private void DetermineRandomSpecialDrop(Monster monster, Aisling player)
     {
-        var kickOut = Generator.RandomNumPercentGen();
-        if (kickOut >= .85) return;
-
         var dropList = JoinList(monster);
         if (dropList.Count <= 0) return;
         var items = new List<Item>();
-        double chance;
 
+        // Build item list based off of rewards a player can receive from the Monster's level
         foreach (var drop in dropList.Where(drop => ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(drop)))
         {
             // Equipment & Enchantable
-            if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) && ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
+            if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) || ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
             {
-                chance = Generator.RandomNumPercentGen();
+                var chance = Generator.RandomNumPercentGen();
                 if (chance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
 
-                var quality = ItemQualityVariance.DetermineQuality();
-                var variance = ItemQualityVariance.DetermineVariance();
-                var wVariance = ItemQualityVariance.DetermineWeaponVariance();
                 var equipItem = new Item();
-                equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance, true);
-                ItemQualityVariance.ItemDurability(equipItem, quality);
+
+                if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
+                {
+                    var quality = ItemQualityVariance.DetermineQuality();
+                    var variance = ItemQualityVariance.DetermineVariance();
+                    var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+                    equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance);
+                    ItemQualityVariance.ItemDurability(equipItem, quality);
+                    items.Add(equipItem);
+                    continue;
+                }
+                
+                equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
+                ItemQualityVariance.ItemDurability(equipItem, Quality.Common);
                 items.Add(equipItem);
                 continue;
             }
 
-            // Non-Enchantable
-            var equipItem2 = new Item();
-            equipItem2 = equipItem2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
-            items.Add(equipItem2);
+            //var normalChance = Generator.RandomNumPercentGen();
+            //if (normalChance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
+
+            var item2 = new Item();
+            item2 = item2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
+            items.Add(item2);
         }
 
-        var randEquipItems = new List<Item>();
+        // Build a list of items based on chance
+        var buildItemsList = BuildItemList(items);
 
-        foreach (var item in items)
-        {
-            chance = Generator.RandomNumPercentGen();
+        var numberOfItems = Generator.RandNumGen3();
+        if (numberOfItems == 0) return;
 
-            switch (chance)
-            {
-                // If greater than equal 85%, restart the list
-                case >= .85:
-                    randEquipItems = [];
-                    continue;
-                // If greater than equal 40%, don't add the item
-                case >= .50:
-                    continue;
-                default:
-                    randEquipItems.Add(item);
-                    continue;
-            }
-        }
+        // Populate a maximum of items based on chance
+        var maxTwoOrThreeItemsList = RandomPullMaxItems(buildItemsList, numberOfItems);
 
-        foreach (var item in randEquipItems)
+        // Display rewards
+        foreach (var item in maxTwoOrThreeItemsList)
         {
             item.Release(_monster, _monster.Position);
             ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
@@ -105,6 +105,47 @@ public class EnemyRewards : RewardScript
                 });
             }
         }
+    }
+
+    private static List<Item> BuildItemList(List<Item> itemsList)
+    {
+        var buildItemsList = new List<Item>();
+
+        foreach (var item in itemsList)
+        {
+            var chance = Generator.RandomNumPercentGen();
+            switch (chance)
+            {
+                // If greater than equal 85%, don't add the item
+                case >= .85:
+                    continue;
+                default:
+                    buildItemsList.Add(item);
+                    continue;
+            }
+        }
+
+        return buildItemsList;
+    }
+
+    private static List<Item> RandomPullMaxItems(List<Item> itemsList, int count)
+    {
+        var maxTwoOrThreeItemsList = new List<Item>();
+
+        if (itemsList.Count > 1)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var item = itemsList.RandomIEnum();
+                maxTwoOrThreeItemsList.Add(item);
+            }
+        }
+        else
+        {
+            return itemsList;
+        }
+
+        return maxTwoOrThreeItemsList;
     }
 
     private void GenerateDrops(Monster monster, Aisling player)
