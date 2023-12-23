@@ -80,6 +80,12 @@ public sealed class Item : Sprite, IItem
         Dawn
     }
 
+    /// <summary>
+    /// Each tier is 5% boost to min/max dmg
+    /// Tier 3 gives +2 all stats 1k hp/mp
+    /// Tier 5 gives +3 all stats 2k hp/mp
+    /// Tier 6 gives +4 all stats 3k hp/mp
+    /// </summary>
     public enum GearEnhancement
     {
         None,
@@ -91,6 +97,17 @@ public sealed class Item : Sprite, IItem
         Six
     }
 
+    /// <summary>
+    /// Each tier is +1 AC, 5 MR, 5 HIT
+    /// Tier 3 (Steel) +1 all stats 500 hp/mp
+    /// Tier 5 (Elven) +2 all stats 750 hp/mp
+    /// Tier 7 (Mythril) +2 all stats 2500 hp/mp
+    /// Tier 9 (MoonStone) +3 all stats 3000 hp/mp
+    /// Tier 10 (SunStone) +3 all stats 5000 hp/mp
+    /// Tier 11 (Ebony) +4 all stats 6000 hp/mp
+    /// Tier 12 (Runic) +5 all stats 10000 hp/mp
+    /// Tier 13 (Chaos) +5 all stats 20000 hp/mp
+    /// </summary>
     public enum ItemMaterial
     {
         None,
@@ -108,6 +125,7 @@ public sealed class Item : Sprite, IItem
         Runic,
         Chaos
     }
+
     public long ItemId { get; set; }
     public ItemTemplate Template { get; set; }
     public string Name { get; set; }

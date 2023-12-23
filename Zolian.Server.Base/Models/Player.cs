@@ -121,9 +121,13 @@ public class Quests
     public bool TutorialCompleted { get; set; }
     public bool BetaReset { get; set; }
     public int BlackSmithing { get; set; }
+    public string BlackSmithingTier { get; set; } = "Novice";
     public int ArmorSmithing { get; set; }
+    public string ArmorSmithingTier { get; set; } = "Novice";
     public int JewelCrafting { get; set; }
+    public string JewelCraftingTier { get; set; } = "Novice";
     public int StoneSmithing { get; set; }
+    public string StoneSmithingTier { get; set; } = "Novice";
     public int MilethReputation { get; set; }
     public int AbelReputation { get; set; }
     public int RucesionReputation { get; set; }

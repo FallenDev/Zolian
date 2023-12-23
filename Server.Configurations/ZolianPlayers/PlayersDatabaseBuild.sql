@@ -281,7 +281,7 @@ CREATE TABLE PlayersItems
     [ItemMaterial] VARCHAR(9) NOT NULL DEFAULT 'None'
 )
 
-CREATE TABLE PlayerCombos
+CREATE TABLE PlayersCombos
 (
     [Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
     [Combo1] VARCHAR(30) NULL,
@@ -343,9 +343,13 @@ CREATE TABLE PlayersQuests
     [UndineReputation] INT NULL,
     [TagorReputation] INT NULL,
     [BlackSmithing] INT NULL,
+    [BlackSmithingTier] VARCHAR (10) NULL,
     [ArmorSmithing] INT NULL,
+    [ArmorSmithingTier] VARCHAR (10) NULL,
     [JewelCrafting] INT NULL,
+    [JewelCraftingTier] VARCHAR (10) NULL,
     [StoneSmithing] INT NULL,
+    [StoneSmithingTier] VARCHAR (10) NULL,
     [ThievesGuildReputation] INT NULL,
     [AssassinsGuildReputation] INT NULL,
     [AdventuresGuildReputation] INT NULL,
@@ -537,9 +541,13 @@ CREATE TYPE dbo.QuestType AS TABLE
     UndineReputation INT,
     TagorReputation INT,
     BlackSmithing INT,
+	BlackSmithingTier VARCHAR (10),
     ArmorSmithing INT,
+	ArmorSmithingTier VARCHAR (10),
     JewelCrafting INT,
+	JewelCraftingTier VARCHAR (10),
     StoneSmithing INT,
+	StoneSmithingTier VARCHAR (10),
     ThievesGuildReputation INT,
     AssassinsGuildReputation INT,
     AdventuresGuildReputation INT,
@@ -749,34 +757,35 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InsertQuests]
-    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @MilethRep INT, @ArtursGift INT,
-    @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT, @DarItem VARCHAR (20),
-    @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT,
-    @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT,
-    @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
+    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @StoneSmithingTier VARCHAR (10), @MilethRep INT,
+	@ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT,
+	@DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20),
+	@KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT,
+	@PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
     @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
     @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
     @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
-    @BlackSmithing INT, @ArmorSmithing INT, @JewelCrafting INT, @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
+    @BlackSmithing INT, @BlackSmithingTier VARCHAR (10), @ArmorSmithing INT, @ArmorSmithingTier VARCHAR (10),
+	@JewelCrafting INT, @JewelCraftingTier VARCHAR (10), @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
     @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT
 AS
 BEGIN
     SET NOCOUNT ON;
     
     INSERT INTO [ZolianPlayers].[dbo].[PlayersQuests] (
-        [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [MilethReputation], [ArtursGift],
-        [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem],
+        [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
+		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem],
         [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting],
         [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill],
         [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
         [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
         [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
-        [BlackSmithing], [ArmorSmithing], [JewelCrafting], [BeltDegree], [BeltQuest], [SavedChristmas],
-        [RescuedReindeer], [YetiKilled]
+        [BlackSmithing], [BlackSmithingTier], [ArmorSmithing], [ArmorSmithingTier], [JewelCrafting], [JewelCraftingTier],
+		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled]
     )
     VALUES (
-        @Serial, @TutComplete, @BetaReset, @StoneSmith, @MilethRep, @ArtursGift,
+        @Serial, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep, @ArtursGift,
         @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem,
         @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting,
         @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill,
@@ -784,8 +793,8 @@ BEGIN
         @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
         @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,
-        @BlackSmithing, @ArmorSmithing, @JewelCrafting, @BeltDegree, @BeltQuest, @SavedChristmas,
-        @RescuedReindeer, @YetiKilled
+        @BlackSmithing, @BlackSmithingTier, @ArmorSmithing, @ArmorSmithingTier, @JewelCrafting, @JewelCraftingTier,
+		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled
     );
 END
 GO
@@ -939,9 +948,13 @@ BEGIN
         [UndineReputation] = source.UndineReputation,
         [TagorReputation] = source.TagorReputation,
         [BlackSmithing] = source.BlackSmithing,
+		[BlackSmithingTier] = source.BlackSmithingTier,
         [ArmorSmithing] = source.ArmorSmithing,
+		[ArmorSmithingTier] = source.ArmorSmithingTier,
         [JewelCrafting] = source.JewelCrafting,
+		[JewelCraftingTier] = source.JewelCraftingTier,
         [StoneSmithing] = source.StoneSmithing,
+		[StoneSmithingTier] = source.StoneSmithingTier,
         [ThievesGuildReputation] = source.ThievesGuildReputation,
         [AssassinsGuildReputation] = source.AssassinsGuildReputation,
         [AdventuresGuildReputation] = source.AdventuresGuildReputation,
@@ -1426,7 +1439,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT TutorialCompleted, BetaReset, StoneSmithing, MilethReputation, ArtursGift,
+    SELECT TutorialCompleted, BetaReset, StoneSmithing, StoneSmithingTier, MilethReputation, ArtursGift,
            CamilleGreetingComplete, ConnPotions, CryptTerror, CryptTerrorSlayed, Dar,
            DarItem, DrunkenHabit, EternalLove, FionaDance, Keela, KeelaCount, KeelaKill,
            KeelaQuesting, KillerBee, Neal, NealCount, NealKill, AbelShopAccess, PeteKill,
@@ -1434,8 +1447,8 @@ BEGIN
            AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
            OrenReputation, PietReputation, LouresReputation, UndineReputation,
            TagorReputation, ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
-           BlackSmithing, ArmorSmithing, JewelCrafting, BeltDegree, BeltQuest, SavedChristmas,
-           RescuedReindeer, YetiKilled
+           BlackSmithing, BlackSmithingTier, ArmorSmithing, ArmorSmithingTier, JewelCrafting, JewelCraftingTier,
+		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

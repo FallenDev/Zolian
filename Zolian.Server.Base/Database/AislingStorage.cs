@@ -153,7 +153,8 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
                 obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
                 obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
-                obj.QuestManager.ArmorSmithing, obj.QuestManager.JewelCrafting, obj.QuestManager.StoneSmithing, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
+                obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
+                obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
                 obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled);
 
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -238,7 +239,8 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.SwampCount, player.QuestManager.TagorDungeonAccess, player.QuestManager.Lau, player.QuestManager.BeltDegree, player.QuestManager.MilethReputation,
                     player.QuestManager.AbelReputation, player.QuestManager.RucesionReputation, player.QuestManager.SuomiReputation, player.QuestManager.RionnagReputation, player.QuestManager.OrenReputation,
                     player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
-                    player.QuestManager.ArmorSmithing, player.QuestManager.JewelCrafting, player.QuestManager.StoneSmithing, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
+                    player.QuestManager.BlackSmithingTier, player.QuestManager.ArmorSmithing, player.QuestManager.ArmorSmithingTier, player.QuestManager.JewelCrafting, player.QuestManager.JewelCraftingTier,
+                    player.QuestManager.StoneSmithing, player.QuestManager.StoneSmithingTier, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
                     player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
@@ -673,6 +675,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@StoneSmithingTier", SqlDbType.VarChar).Value = "Novice";
             cmd5.Parameters.Add("@MilethRep", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@ArtursGift", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@CamilleGreeting", SqlDbType.Bit).Value = false;
@@ -711,8 +714,11 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@AssassinsGuildReputation", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@AdventuresGuildReputation", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@BlackSmithing", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@BlackSmithingTier", SqlDbType.VarChar).Value = "Novice";
             cmd5.Parameters.Add("@ArmorSmithing", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@ArmorSmithingTier", SqlDbType.VarChar).Value = "Novice";
             cmd5.Parameters.Add("@JewelCrafting", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@JewelCraftingTier", SqlDbType.VarChar).Value = "Novice";
             cmd5.Parameters.Add("@BeltDegree", SqlDbType.VarChar).Value = "";
             cmd5.Parameters.Add("@BeltQuest", SqlDbType.VarChar).Value = "";
             cmd5.Parameters.Add("@SavedChristmas", SqlDbType.Bit).Value = false;
@@ -894,9 +900,13 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("UndineReputation", typeof(int));
         qDt.Columns.Add("TagorReputation", typeof(int));
         qDt.Columns.Add("BlackSmithing", typeof(int));
+        qDt.Columns.Add("BlackSmithingTier", typeof(string));
         qDt.Columns.Add("ArmorSmithing", typeof(int));
+        qDt.Columns.Add("ArmorSmithingTier", typeof(string));
         qDt.Columns.Add("JewelCrafting", typeof(int));
+        qDt.Columns.Add("JewelCraftingTier", typeof(string));
         qDt.Columns.Add("StoneSmithing", typeof(int));
+        qDt.Columns.Add("StoneSmithingTier", typeof(string));
         qDt.Columns.Add("ThievesGuildReputation", typeof(int));
         qDt.Columns.Add("AssassinsGuildReputation", typeof(int));
         qDt.Columns.Add("AdventuresGuildReputation", typeof(int));
