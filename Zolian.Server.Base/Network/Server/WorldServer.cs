@@ -3362,23 +3362,30 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var (metadataRequestType, name) = localArgs;
 
-            switch (metadataRequestType)
+            try
             {
-                case MetaDataRequestType.DataByName:
-                    if (name is null) return default;
-                    if (!name.Contains("Class"))
-                    {
-                        localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
-                        break;
-                    }
+                switch (metadataRequestType)
+                {
+                    case MetaDataRequestType.DataByName:
+                        if (name is null) return default;
+                        if (!name.Contains("Class"))
+                        {
+                            localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
+                            break;
+                        }
 
-                    var skillSet = DecideOnSkillsToPull(client);
-                    if (skillSet.IsNullOrEmpty()) break;
-                    localClient.SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
-                    break;
-                case MetaDataRequestType.AllCheckSums:
-                    localClient.SendMetaData(MetaDataRequestType.AllCheckSums, new MetafileManager());
-                    break;
+                        var skillSet = DecideOnSkillsToPull(client);
+                        if (skillSet.IsNullOrEmpty()) break;
+                        localClient.SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
+                        break;
+                    case MetaDataRequestType.AllCheckSums:
+                        localClient.SendMetaData(MetaDataRequestType.AllCheckSums, new MetafileManager());
+                        break;
+                }
+            }
+            catch
+            {
+                // Ignore
             }
 
             return default;

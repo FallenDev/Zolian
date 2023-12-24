@@ -1102,7 +1102,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     client.Aisling.LegendBook.AddLegend(legend, client);
                 }
                 break;
-            case <= 75:
+            case <= 74:
                 if (!client.Aisling.LegendBook.Has("Blacksmithing: Apprentice"))
                 {
                     client.Aisling.QuestManager.BlackSmithingTier = "Apprentice";
