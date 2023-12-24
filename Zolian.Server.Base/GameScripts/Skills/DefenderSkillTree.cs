@@ -780,6 +780,7 @@ public class Draconic_Leash(Skill skill) : SkillScript(skill)
         if (monsters.Count == 0)
         {
             OnFailed(aisling);
+            _skillMethod.Train(client, skill);
             return;
         }
 
@@ -790,9 +791,9 @@ public class Draconic_Leash(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, monster.Position));
             monster.Pos = aisling.Pos;
             monster.UpdateAddAndRemove();
-            _skillMethod.Train(client, skill);
         }
-
+        
+        _skillMethod.Train(client, skill);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(139, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }

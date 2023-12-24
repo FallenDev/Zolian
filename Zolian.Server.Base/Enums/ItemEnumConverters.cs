@@ -78,39 +78,39 @@ public static class ItemEnumConverters
         };
     }
 
-    public static string GearEnhancementToString(Item.GearEnhancement e)
+    public static string GearEnhancementToString(Item.GearEnhancements e)
     {
         return e switch
         {
-            Item.GearEnhancement.None => "None",
-            Item.GearEnhancement.One => "One",
-            Item.GearEnhancement.Two => "Two",
-            Item.GearEnhancement.Three => "Three",
-            Item.GearEnhancement.Four => "Four",
-            Item.GearEnhancement.Five => "Five",
-            Item.GearEnhancement.Six => "Six",
+            Item.GearEnhancements.None => "None",
+            Item.GearEnhancements.One => "One",
+            Item.GearEnhancements.Two => "Two",
+            Item.GearEnhancements.Three => "Three",
+            Item.GearEnhancements.Four => "Four",
+            Item.GearEnhancements.Five => "Five",
+            Item.GearEnhancements.Six => "Six",
             _ => "None"
         };
     }
 
-    public static string ItemMaterialToString(Item.ItemMaterial e)
+    public static string ItemMaterialToString(Item.ItemMaterials e)
     {
         return e switch
         {
-            Item.ItemMaterial.None => "None",
-            Item.ItemMaterial.Copper => "Copper",
-            Item.ItemMaterial.Iron => "Iron",
-            Item.ItemMaterial.Steel => "Steel",
-            Item.ItemMaterial.Forged => "Forged",
-            Item.ItemMaterial.Elven => "Elven",
-            Item.ItemMaterial.Dwarven => "Dwarven",
-            Item.ItemMaterial.Mythril => "Mythril",
-            Item.ItemMaterial.Hybrasyl => "Hybrasyl",
-            Item.ItemMaterial.Ebony => "Ebony",
-            Item.ItemMaterial.Chaos => "Chaos",
-            Item.ItemMaterial.MoonStone => "MoonStone",
-            Item.ItemMaterial.SunStone => "SunStone",
-            Item.ItemMaterial.Runic => "Runic",
+            Item.ItemMaterials.None => "None",
+            Item.ItemMaterials.Copper => "Copper",
+            Item.ItemMaterials.Iron => "Iron",
+            Item.ItemMaterials.Steel => "Steel",
+            Item.ItemMaterials.Forged => "Forged",
+            Item.ItemMaterials.Elven => "Elven",
+            Item.ItemMaterials.Dwarven => "Dwarven",
+            Item.ItemMaterials.Mythril => "Mythril",
+            Item.ItemMaterials.Hybrasyl => "Hybrasyl",
+            Item.ItemMaterials.Ebony => "Ebony",
+            Item.ItemMaterials.Chaos => "Chaos",
+            Item.ItemMaterials.MoonStone => "MoonStone",
+            Item.ItemMaterials.SunStone => "SunStone",
+            Item.ItemMaterials.Runic => "Runic",
             _ => "None"
         };
     }

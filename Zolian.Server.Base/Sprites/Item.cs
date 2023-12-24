@@ -86,7 +86,7 @@ public sealed class Item : Sprite, IItem
     /// Tier 5 gives +3 all stats 2k hp/mp
     /// Tier 6 gives +4 all stats 3k hp/mp
     /// </summary>
-    public enum GearEnhancement
+    public enum GearEnhancements
     {
         None,
         One,
@@ -108,7 +108,7 @@ public sealed class Item : Sprite, IItem
     /// Tier 12 (Runic) +5 all stats 10000 hp/mp
     /// Tier 13 (Chaos) +5 all stats 20000 hp/mp
     /// </summary>
-    public enum ItemMaterial
+    public enum ItemMaterials
     {
         None,
         Copper,
@@ -146,8 +146,8 @@ public sealed class Item : Sprite, IItem
     public ushort Stacks { get; set; }
     public bool Enchantable { get; set; }
     public bool Tarnished { get; set; }
-    public GearEnhancement GearEnhanced { get; set; }
-    public ItemMaterial Material { get; set; }
+    public GearEnhancements GearEnhancement { get; set; }
+    public ItemMaterials ItemMaterial { get; set; }
     public Sprite[] AuthenticatedAislings { get; set; }
     public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
@@ -174,6 +174,18 @@ public sealed class Item : Sprite, IItem
             _ => ""
         };
 
+        var enhanceCode = GearEnhancement switch
+        {
+            GearEnhancements.None => "",
+            GearEnhancements.One => " +1",
+            GearEnhancements.Two => " +2",
+            GearEnhancements.Three => " +3",
+            GearEnhancements.Four => " +4",
+            GearEnhancements.Five => " +5",
+            GearEnhancements.Six => " +6",
+            _ => ""
+        };
+
         if (Tarnished)
             colorCode = "{=jTarnished ";
 
@@ -193,16 +205,27 @@ public sealed class Item : Sprite, IItem
         if (WeapVariance != WeaponVariance.None && ItemQuality != Quality.Common)
         {
             var displayName = colorCode + Template.Name + " of " + WeapVariance;
+
+            if (GearEnhancement != GearEnhancements.None)
+                displayName += enhanceCode;
+
             return displayName;
         }
 
         if (WeapVariance != WeaponVariance.None && ItemQuality == Quality.Common)
         {
             var displayName = Template.Name + " of " + WeapVariance;
+
+            if (GearEnhancement != GearEnhancements.None)
+                displayName += enhanceCode;
+
             return displayName;
         }
 
         var standard = colorCode + Template.Name;
+
+        if (GearEnhancement != GearEnhancements.None)
+            standard += enhanceCode;
 
         return standard;
     }
@@ -221,6 +244,18 @@ public sealed class Item : Sprite, IItem
             Quality.Mythic => "Mythic ",
             Quality.Primordial => "Primordial ",
             Quality.Transcendent => "Transcendent ",
+            _ => ""
+        };
+
+        var enhanceCode = GearEnhancement switch
+        {
+            GearEnhancements.None => "",
+            GearEnhancements.One => " +1",
+            GearEnhancements.Two => " +2",
+            GearEnhancements.Three => " +3",
+            GearEnhancements.Four => " +4",
+            GearEnhancements.Five => " +5",
+            GearEnhancements.Six => " +6",
             _ => ""
         };
 
@@ -243,16 +278,27 @@ public sealed class Item : Sprite, IItem
         if (WeapVariance != WeaponVariance.None && ItemQuality != Quality.Common)
         {
             var displayName = colorCode + Template.Name + " of " + WeapVariance;
+
+            if (GearEnhancement != GearEnhancements.None)
+                displayName += enhanceCode;
+
             return displayName;
         }
 
         if (WeapVariance != WeaponVariance.None && ItemQuality == Quality.Common)
         {
             var displayName = Template.Name + " of " + WeapVariance;
+
+            if (GearEnhancement != GearEnhancements.None)
+                displayName += enhanceCode;
+
             return displayName;
         }
 
         var standard = colorCode + Template.Name;
+
+        if (GearEnhancement != GearEnhancements.None)
+            standard += enhanceCode;
 
         return standard;
     }
@@ -299,8 +345,8 @@ public sealed class Item : Sprite, IItem
             DefenseElement = template.DefenseElement,
             SecondaryDefensiveElement = template.SecondaryDefensiveElement,
             Enchantable = template.Enchantable,
-            GearEnhanced = GearEnhancement.None,
-            Material = ItemMaterial.None,
+            GearEnhancement = GearEnhancements.None,
+            ItemMaterial = ItemMaterials.None,
             Warnings = new bool[3],
             AuthenticatedAislings = null
         };
@@ -411,8 +457,8 @@ public sealed class Item : Sprite, IItem
             OriginalQuality = Quality.Common,
             ItemVariance = Variance.None,
             WeapVariance = WeaponVariance.None,
-            GearEnhanced = GearEnhancement.None,
-            Material = ItemMaterial.None
+            GearEnhancement = GearEnhancements.None,
+            ItemMaterial = ItemMaterials.None
     };
 
         if (obj.Color == 0)
@@ -482,8 +528,8 @@ public sealed class Item : Sprite, IItem
             OriginalQuality = Quality.Common,
             ItemVariance = Variance.None,
             WeapVariance = WeaponVariance.None,
-            GearEnhanced = GearEnhancement.None,
-            Material = ItemMaterial.None
+            GearEnhancement = GearEnhancements.None,
+            ItemMaterial = ItemMaterials.None
         };
 
         if (obj.Template.Flags.FlagIsSet(ItemFlags.QuestRelated))
@@ -554,8 +600,8 @@ public sealed class Item : Sprite, IItem
             OriginalQuality = Quality.Common,
             ItemVariance = Variance.None,
             WeapVariance = WeaponVariance.None,
-            GearEnhanced = GearEnhancement.None,
-            Material = ItemMaterial.None,
+            GearEnhancement = GearEnhancements.None,
+            ItemMaterial = ItemMaterials.None,
             Serial = owner.Serial,
             ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId
         };

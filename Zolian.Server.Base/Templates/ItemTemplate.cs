@@ -454,6 +454,8 @@ public static class ItemStorage
                     Stacks = item.Stacks,
                     Enchantable = item.Template.Enchantable,
                     Tarnished = item.Tarnished,
+                    GearEnhancement = item.GearEnhancement,
+                    ItemMaterial = item.ItemMaterial,
                     Image = item.Template.Image,
                     DisplayImage = item.Template.DisplayImage
                 };

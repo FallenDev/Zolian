@@ -446,8 +446,8 @@ public record AislingStorage : Sql, IAislingStorage
                 var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
                 var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
                 var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhanced);
-                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.Material);
+                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
+                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
                 var existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
 
                 // Check for duplicated ItemIds -- If an ID exists, this will overwrite it

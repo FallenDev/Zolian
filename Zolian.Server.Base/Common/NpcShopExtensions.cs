@@ -406,12 +406,53 @@ public static class NpcShopExtensions
 
     #region Blacksmithing
 
+    // Increase weapons to +1
     public static List<byte> GetCharacterNoviceWeaponImprove(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
 
-        return inventory.Where(w => w.GearEnhanced == Item.GearEnhancement.None).Select(i => i.InventorySlot).ToList();
+        return inventory.Where(w => w.GearEnhancement == Item.GearEnhancements.None).Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase weapons to +2
+    public static List<byte> GetCharacterApprenticeWeaponImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
+
+        return inventory.Where(w => w.GearEnhancement is Item.GearEnhancements.None or Item.GearEnhancements.One)
+            .Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase weapons to +3
+    public static List<byte> GetCharacterJourneymanWeaponImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
+
+        return inventory.Where(w => w.GearEnhancement is Item.GearEnhancements.None or Item.GearEnhancements.One or Item.GearEnhancements.Two)
+            .Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase weapons to +4
+    public static List<byte> GetCharacterExpertWeaponImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
+
+        return inventory.Where(w => w.GearEnhancement is Item.GearEnhancements.None or Item.GearEnhancements.One or Item.GearEnhancements.Two or Item.GearEnhancements.Three)
+            .Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase weapons to +6
+    public static List<byte> GetCharacterArtisanWeaponImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
+
+        return inventory.Where(w => w.GearEnhancement is Item.GearEnhancements.None or Item.GearEnhancements.One or Item.GearEnhancements.Two or Item.GearEnhancements.Three or Item.GearEnhancements.Four or Item.GearEnhancements.Five)
+            .Select(i => i.InventorySlot).ToList();
     }
 
     public static uint GetSmithingCosts(WorldClient client, string args)
@@ -423,13 +464,13 @@ public static class NpcShopExtensions
         return ItemDetail.OriginalQuality switch
         {
             Item.Quality.Damaged => 1000,
-            Item.Quality.Common => 7000,
-            Item.Quality.Uncommon => 15000,
-            Item.Quality.Rare => 40000,
-            Item.Quality.Epic => 250000,
-            Item.Quality.Legendary => 1000000,
-            Item.Quality.Forsaken => 5000000,
-            Item.Quality.Mythic => 7500000,
+            Item.Quality.Common => 5000,
+            Item.Quality.Uncommon => 7500,
+            Item.Quality.Rare => 15000,
+            Item.Quality.Epic => 30000,
+            Item.Quality.Legendary => 50000,
+            Item.Quality.Forsaken => 100000,
+            Item.Quality.Mythic => 300000,
             _ => 0
         };
     }
