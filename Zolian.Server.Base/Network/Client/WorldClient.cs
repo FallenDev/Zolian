@@ -4289,10 +4289,10 @@ public class WorldClient : SocketClientBase, IWorldClient
         return Aisling.Position.IsNextTo(sprite.Position) && delta == 0;
     }
 
-    public void KillPlayer(string u)
+    public void KillPlayer(Area map, string u)
     {
         if (u is null) return;
-        var user = ObjectHandlers.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
+        var user = ObjectHandlers.GetObject<Aisling>(map, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
 
         if (user != null)
             user.CurrentHp = 0;

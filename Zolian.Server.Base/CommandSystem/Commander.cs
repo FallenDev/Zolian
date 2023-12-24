@@ -26,19 +26,35 @@ public static class Commander
 
     public static void CompileCommands()
     {
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Group", "group")
-            .AddAlias("party")
-            .SetAction(OnRemoteGroup)
-            .AddArgument(Argument.Create("name"))
-        );
+        #region Server Maintenance
 
         ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Create Item", "give")
-            .SetAction(OnItemCreate)
-            .AddArgument(Argument.Create("item"))
-            .AddArgument(Argument.Create("amount").MakeOptional().SetDefault(1))
-        );
+            .Create("Restart", "restart", "- Force restart and reload:")
+            .SetAction(Restart));
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Chaos", "chaos", "- Force shutdown:")
+            .SetAction(Chaos));
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Reload Maps", "rm", "- Reload all maps:")
+            .SetAction(OnMapReload));
+
+        #endregion
+
+        #region GM Control
+        
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Learn Spell", "spell")
+            .SetAction(OnLearnSpell)
+            .AddArgument(Argument.Create("name"))
+            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100)));
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Learn Skill", "skill")
+            .SetAction(OnLearnSkill)
+            .AddArgument(Argument.Create("name"))
+            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100)));
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Teleport", "map")
@@ -46,62 +62,46 @@ public static class Commander
             .SetAction(OnTeleport)
             .AddArgument(Argument.Create("t"))
             .AddArgument(Argument.Create("x"))
-            .AddArgument(Argument.Create("y"))
-        );
+            .AddArgument(Argument.Create("y")));
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Create Item", "give")
+            .SetAction(OnItemCreate)
+            .AddArgument(Argument.Create("item"))
+            .AddArgument(Argument.Create("amount").MakeOptional().SetDefault(1)));
+
+        #endregion
+
+        #region Interaction with Players
+
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Group", "group")
+            .AddAlias("party")
+            .SetAction(OnRemoteGroup)
+            .AddArgument(Argument.Create("name")));
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Summon Player", "s")
             .SetAction(OnSummonPlayer)
-            .AddArgument(Argument.Create("who"))
-        );
+            .AddArgument(Argument.Create("who")));
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Teleport to Player", "p")
             .SetAction(OnPortToPlayer)
-            .AddArgument(Argument.Create("who"))
-        );
+            .AddArgument(Argument.Create("who")));
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Sex Change", "sex")
             .SetAction(OnSexChange)
             .AddArgument(Argument.Create("who"))
-            .AddArgument(Argument.Create("s"))
-        );
+            .AddArgument(Argument.Create("s")));
 
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Kill Player", "kill")
             .SetAction(OnKillCommand)
-            .AddArgument(Argument.Create("who"))
-        );
+            .AddArgument(Argument.Create("who")));
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Spell", "spell")
-            .SetAction(OnLearnSpell)
-            .AddArgument(Argument.Create("name"))
-            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
-        );
-
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Skill", "skill")
-            .SetAction(OnLearnSkill)
-            .AddArgument(Argument.Create("name"))
-            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100))
-        );
-
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Restart", "restart", "- Force restart and reload:")
-            .SetAction(Restart)
-        );
-
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Chaos", "chaos", "- Force shutdown:")
-            .SetAction(Chaos)
-        );
-
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Reload Maps", "rm", "- Reload all maps:")
-            .SetAction(OnMapReload)
-        );
+        #endregion
     }
 
     /// <summary>
@@ -148,7 +148,7 @@ public static class Commander
         ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
-        
+
         // Announce to all players
         foreach (var connected in players)
         {
@@ -275,7 +275,9 @@ public static class Commander
         if (client == null) return;
         var who = args.FromName("who").Replace("\"", "");
         if (string.IsNullOrEmpty(who)) return;
-        client.KillPlayer(who);
+        var players = ServerSetup.Instance.Game.Aislings;
+        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        client.KillPlayer(client.Aisling.Map, player?.Username);
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
     }
 

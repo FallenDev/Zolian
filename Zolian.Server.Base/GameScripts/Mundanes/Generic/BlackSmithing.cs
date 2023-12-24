@@ -16,6 +16,8 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private string _tempSkillName;
+    private Item _itemDetail;
+    private uint _cost;
 
     public override void OnClick(WorldClient client, uint serial)
     {
@@ -26,17 +28,17 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
     protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
-        var options = new List<Dialog.OptionsDataItem>();
+        var options = new List<Dialog.OptionsDataItem>
+        {
+            new(0x03, "Introduction")
+        };
 
         switch (client.Aisling.QuestManager.BlackSmithingTier)
         {
             case "Novice": // 25
-                //options.Add(new(0x03, "Introduction"));
                 options.Add(new(0x00, "Improve Weapons"));
                 break;
             case "Apprentice": // 75
-                //options.Add(new(0x03, "Introduction"));
-
                 if (client.Aisling.HasItem("Basic Combo Scroll"))
                     options.Add(new(0x10, "Basic Combo Scroll"));
                 else
@@ -45,9 +47,8 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 options.Add(new(0x00, "Improve Weapons"));
                 break;
             case "Journeyman": // 150
-                //options.Add(new(0x03, "Introduction"));
                 if (client.Aisling.HasItem("Basic Combo Scroll"))
-                    options.Add(new(0x00, "Upgrade Combo Scroll"));
+                    options.Add(new(0x50, "Upgrade Combo Scroll"));
                 else if (client.Aisling.HasItem("Advanced Combo Scroll"))
                     options.Add(new(0x20, "Advanced Combo Scroll"));
                 else
@@ -57,10 +58,8 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 //options.Add(new(0x00, "{=bDismantle Weapons"));
                 break;
             case "Expert": // 225
-                //options.Add(new(0x03, "Introduction"));
-
                 if (client.Aisling.HasItem("Basic Combo Scroll") || client.Aisling.HasItem("Advanced Combo Scroll"))
-                    options.Add(new(0x00, "Upgrade Combo Scroll"));
+                    options.Add(new(0x50, "Upgrade Combo Scroll"));
                 else if (client.Aisling.HasItem("Enhanced Combo Scroll"))
                     options.Add(new(0x30, "Enhanced Combo Scroll"));
                 else
@@ -70,10 +69,8 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 //options.Add(new(0x00, "{=bDismantle Weapons"));
                 break;
             case "Artisan":
-                //options.Add(new(0x03, "Introduction"));
-
                 if (client.Aisling.HasItem("Basic Combo Scroll") || client.Aisling.HasItem("Advanced Combo Scroll"))
-                    options.Add(new(0x00, "Upgrade Combo Scroll"));
+                    options.Add(new(0x50, "Upgrade Combo Scroll"));
                 else if (client.Aisling.HasItem("Enchanted Combo Scroll"))
                     options.Add(new(0x40, "Enchanted Combo Scroll"));
                 else
@@ -94,6 +91,86 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
         switch (responseID)
         {
             case 0x00:
+                {
+                    _cost = NpcShopExtensions.GetDetailCosts(client, args);
+                    _itemDetail = NpcShopExtensions.ItemDetail;
+
+                    if (_cost == 0)
+                    {
+                        client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
+                        return;
+                    }
+
+                    // check current bonus
+                    // let them know the costs and items required
+                    // send them to completion stage
+                    // create npcextensions logic to attempt level
+                    // create logic to level player's bs up and if they hit threshhold, rank them up
+                    // give new item back 
+                    var opts2 = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x80, ServerSetup.Instance.Config.MerchantConfirmMessage),
+                        new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage)
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"It's going to cost about {_cost} to attempt this", opts2.ToArray());
+                    break;
+                }
+            case 0x01:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x02, "I have the parchment")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "We'll first need some parchment, I believe you can buy some in Rionnag", options.ToArray());
+                    break;
+                }
+            case 0x02:
+                {
+                    if (client.Aisling.HasItem("Plain Parchment"))
+                    {
+                        var parchment = client.Aisling.HasItemReturnItem("Plain Parchment");
+                        client.Aisling.Inventory.RemoveFromInventory(client, parchment);
+                        var item = new Item();
+                        item = item.Create(client.Aisling, "Basic Combo Scroll");
+                        item.GiveTo(client.Aisling);
+                        client.Aisling.QuestManager.BlackSmithing++;
+                        client.SendOptionsDialog(Mundane, "Very good, now let's write something on your scroll");
+                    }
+                    else
+                        client.SendOptionsDialog(Mundane, "Are you sure, I don't quite see any on you?");
+
+                    break;
+                }
+            case 0x03:
+                {
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "");
+                    client.SendOptionsDialog(Mundane, "Here, this will help; *hands you a piece of parchment*");
+
+                    break;
+                }
+            case 0x04:
+                {
+                    // for novice I want them to be able to grab weapons + 1
+                    // for Journeyman I want +2
+                    // for expert I want + 3, + 4
+                    // for artisan I want + 5, + 6
+                    var blacksmithingSort = NpcShopExtensions.GetCharacterNoviceWeaponImprove(client);
+
+                    if (blacksmithingSort.Count == 0)
+                    {
+                        client.SendOptionsDialog(Mundane, "Hmm, it seems you're out of things to reforge");
+
+                    }
+                    else
+                    {
+                        client.SendItemSellDialog(Mundane, "Alright Novice, what do we want to work on?", blacksmithingSort);
+                    }
+                    break;
+                }
+            // Upgrading Combo Scroll
+            case 0x50:
                 {
                     if (client.Aisling.HasItem("Basic Combo Scroll"))
                     {
@@ -135,40 +212,6 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     }
                     else
                         client.SendOptionsDialog(Mundane, "Are you sure, I don't quite see any on you?");
-
-                    break;
-                }
-            case 0x01:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new(0x02, "I have the parchment")
-                    };
-
-                    client.SendOptionsDialog(Mundane, "We'll first need some parchment, I believe you can buy some in Rionnag", options.ToArray());
-                    break;
-                }
-            case 0x02:
-                {
-                    if (client.Aisling.HasItem("Plain Parchment"))
-                    {
-                        var parchment = client.Aisling.HasItemReturnItem("Plain Parchment");
-                        client.Aisling.Inventory.RemoveFromInventory(client, parchment);
-                        var item = new Item();
-                        item = item.Create(client.Aisling, "Basic Combo Scroll");
-                        item.GiveTo(client.Aisling);
-                        client.Aisling.QuestManager.BlackSmithing++;
-                        client.SendOptionsDialog(Mundane, "Very good, now let's write something on your scroll");
-                    }
-                    else
-                        client.SendOptionsDialog(Mundane, "Are you sure, I don't quite see any on you?");
-
-                    break;
-                }
-            case 0x03:
-                {
-                    client.SendServerMessage(ServerMessageType.ScrollWindow, "");
-                    client.SendOptionsDialog(Mundane, "Here, this will help; *hands you a piece of parchment*");
 
                     break;
                 }

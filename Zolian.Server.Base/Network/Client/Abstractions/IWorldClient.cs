@@ -157,7 +157,7 @@ public interface IWorldClient : ISocketClient
     void RepairEquipment();
     bool Revive();
     bool IsBehind(Sprite sprite);
-    void KillPlayer(string u);
+    void KillPlayer(Area map, string u);
     void GiveHp(int v = 1);
     void GiveMp(int v = 1);
     void GiveStr(byte v = 1);

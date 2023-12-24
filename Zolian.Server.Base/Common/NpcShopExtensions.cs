@@ -404,6 +404,38 @@ public static class NpcShopExtensions
 
     #endregion
 
+    #region Blacksmithing
+
+    public static List<byte> GetCharacterNoviceWeaponImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable && i.Template.EquipmentSlot == 1));
+
+        return inventory.Where(w => w.GearEnhanced == Item.GearEnhancement.None).Select(i => i.InventorySlot).ToList();
+    }
+
+    public static uint GetSmithingCosts(WorldClient client, string args)
+    {
+        ItemDetail = client.Aisling.Inventory.Get(i => i != null && i.InventorySlot == Convert.ToInt32(args)).FirstOrDefault();
+
+        if (ItemDetail == null) return 0;
+
+        return ItemDetail.OriginalQuality switch
+        {
+            Item.Quality.Damaged => 1000,
+            Item.Quality.Common => 7000,
+            Item.Quality.Uncommon => 15000,
+            Item.Quality.Rare => 40000,
+            Item.Quality.Epic => 250000,
+            Item.Quality.Legendary => 1000000,
+            Item.Quality.Forsaken => 5000000,
+            Item.Quality.Mythic => 7500000,
+            _ => 0
+        };
+    }
+
+    #endregion
+
     #region Repair
 
     public static List<byte> GetCharacterDetailingByteListForLowGradePolish(WorldClient client)

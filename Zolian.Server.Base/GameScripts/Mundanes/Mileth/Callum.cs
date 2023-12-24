@@ -72,7 +72,6 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                         client.SendOptionsDialog(Mundane, $"It'll cost you {_cost} gold for this service.", opts2.ToArray());
                     }
-
                 }
                 break;
             case 0x01:
