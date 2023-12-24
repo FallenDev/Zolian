@@ -1700,18 +1700,118 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (aisling.DualWield && aisling.EquipmentManager.Equipment[3] != null && aisling.EquipmentManager.Equipment[3].Item.Template.ScriptName == "Weapon")
         {
             var weapon2 = aisling.EquipmentManager.Equipment[3].Item;
-            var dmg2 = Random.Shared.Next(
-                (weapon2.Template.DmgMin + aisling.Dmg) * 1,
-                (weapon2.Template.DmgMax + aisling.Dmg) * 5);
+            long dmg2 = 0;
+
+            switch (weapon2.GearEnhancement)
+            {
+                default:
+                case Item.GearEnhancements.None:
+                    dmg2 += Random.Shared.Next(
+                        (weapon2.Template.DmgMin + aisling.Dmg) * 1,
+                        (weapon2.Template.DmgMax + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.One:
+                    var min1 = weapon2.Template.DmgMin * 0.04;
+                    var max1 = weapon2.Template.DmgMax * 0.04;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min1) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max1) + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.Two:
+                    var min2 = weapon2.Template.DmgMin * 0.08;
+                    var max2 = weapon2.Template.DmgMax * 0.08;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min2) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max2) + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.Three:
+                    var min3 = weapon2.Template.DmgMin * 0.12;
+                    var max3 = weapon2.Template.DmgMax * 0.12;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min3) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max3) + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.Four:
+                    var min4 = weapon2.Template.DmgMin * 0.16;
+                    var max4 = weapon2.Template.DmgMax * 0.16;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min4) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max4) + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.Five:
+                    var min5 = weapon2.Template.DmgMin * 0.20;
+                    var max5 = weapon2.Template.DmgMax * 0.20;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min5) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max5) + aisling.Dmg) * 5);
+                    break;
+                case Item.GearEnhancements.Six:
+                    var min6 = weapon2.Template.DmgMin * 0.25;
+                    var max6 = weapon2.Template.DmgMax * 0.25;
+                    dmg2 += Random.Shared.Next(
+                        ((int)(weapon2.Template.DmgMin + min6) + aisling.Dmg) * 1,
+                        ((int)(weapon2.Template.DmgMax + max6) + aisling.Dmg) * 5);
+                    break;
+            }
+
             dmg2 /= 2;
             dmg += dmg2;
         }
 
         if (aisling.EquipmentManager.Equipment[1] == null) return dmg;
         var weapon = aisling.EquipmentManager.Equipment[1].Item;
-        dmg += Random.Shared.Next(
-            (weapon.Template.DmgMin + aisling.Dmg) * 1,
-            (weapon.Template.DmgMax + aisling.Dmg) * 5);
+
+        switch (weapon.GearEnhancement)
+        {
+            default:
+            case Item.GearEnhancements.None:
+                dmg += Random.Shared.Next(
+                    (weapon.Template.DmgMin + aisling.Dmg) * 1,
+                    (weapon.Template.DmgMax + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.One:
+                var min1 = weapon.Template.DmgMin * 0.04;
+                var max1 = weapon.Template.DmgMax * 0.04;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min1) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max1) + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.Two:
+                var min2 = weapon.Template.DmgMin * 0.08;
+                var max2 = weapon.Template.DmgMax * 0.08;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min2) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max2) + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.Three:
+                var min3 = weapon.Template.DmgMin * 0.12;
+                var max3 = weapon.Template.DmgMax * 0.12;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min3) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max3) + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.Four:
+                var min4 = weapon.Template.DmgMin * 0.16;
+                var max4 = weapon.Template.DmgMax * 0.16;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min4) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max4) + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.Five:
+                var min5 = weapon.Template.DmgMin * 0.20;
+                var max5 = weapon.Template.DmgMax * 0.20;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min5) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max5) + aisling.Dmg) * 5);
+                break;
+            case Item.GearEnhancements.Six:
+                var min6 = weapon.Template.DmgMin * 0.25;
+                var max6 = weapon.Template.DmgMax * 0.25;
+                dmg += Random.Shared.Next(
+                    ((int)(weapon.Template.DmgMin + min6) + aisling.Dmg) * 1,
+                    ((int)(weapon.Template.DmgMax + max6) + aisling.Dmg) * 5);
+                break;
+        }
 
         return dmg;
     }
@@ -2201,7 +2301,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
-        
+
         if (buff.TimeLeft.IntIsWithin(-3, 0))
             colorInt = (byte)StatusBarColor.Off;
         else if (buff.TimeLeft.IntIsWithin(1, 10))
