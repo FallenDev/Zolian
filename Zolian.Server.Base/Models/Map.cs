@@ -11,7 +11,8 @@ public class Map : ObjectManager
     public string Name { get; init; }
     public ushort Height { get; init; }
     public string ScriptKey { get; init; }
-    public int ID { get; set; }
+    public MiningNodes MiningNodes { get; set; }
+    public int ID { get; init; }
 }
 
 public class DiscoveredMap

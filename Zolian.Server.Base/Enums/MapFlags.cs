@@ -21,7 +21,33 @@ public enum MapFlags : byte
     NoTabSnowTileSet = SnowTileSet | NoTabMap
 }
 
+/// <summary>
+/// Set Default as 1 due to Flags 0 = 0, always true
+/// </summary>
+[Flags]
+public enum MiningNodes : byte
+{
+    Default = 1,
+    Talos = 1 << 1,
+    Copper = 1 << 2,
+    DarkIron = 1 << 3,
+    Hybrasyl = 1 << 4,
+    CobaltSteel = 1 << 5,
+    Obsidian = 1 << 6,
+
+    CopperMine = Talos | Copper,
+    DarkIronMine = Copper | DarkIron,
+    DarkIronWoods = Talos | DarkIron,
+    HybrasylWoods = Copper | Hybrasyl,
+    HybrasylMine = DarkIron | Hybrasyl,
+    CobaltWoods = DarkIron | CobaltSteel,
+    CobaltCaverns = Talos | CobaltSteel,
+    ObsidianRuins = Hybrasyl | Obsidian,
+    ObsidianDepths = CobaltSteel | Obsidian
+}
+
 public static class MapExtensions
 {
     public static bool MapFlagIsSet(this MapFlags self, MapFlags flag) => (self & flag) == flag;
+    public static bool MapNodeFlagIsSet(this MiningNodes self, MiningNodes flag) => (self & flag) == flag;
 }

@@ -23,7 +23,7 @@ public class Area : Map, IArea
     private List<List<TileGrid>> _masterGrid = new();
     private readonly object _mapLoadLock = new();
 
-    public int MiningNodes { get; set; }
+    public int MiningNodesCount { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }
     public TileContent[,] TileContent { get; set; }
     public Tuple<string, AreaScript> Script { get; set; }

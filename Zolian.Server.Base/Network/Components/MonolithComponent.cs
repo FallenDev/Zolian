@@ -7,6 +7,7 @@ using Darkages.Types;
 using Microsoft.AppCenter.Crashes;
 
 using System.Numerics;
+using Darkages.Enums;
 
 namespace Darkages.Network.Components;
 
@@ -34,106 +35,113 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
             if (map == null || map.Height == 0 || map.Width == 0) return;
-            var monstersOnMap = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Map == map);
-            if (monstersOnMap >= map.Height * map.Width / 75) continue;
+            PlaceNode(map);
 
+            var monstersOnMap = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Map == map);
+            if (monstersOnMap >= map.Height * map.Width / 100) continue;
             var temps = templates.Where(i => i.Value.AreaID == map.ID);
 
             foreach (var (_, monster) in temps)
             {
                 var count = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Template.Name == monster.Name);
-                
+
                 if (count >= monster.SpawnMax) continue;
                 if (!monster.ReadyToSpawn()) continue;
 
-                PlaceNode(map);
                 CreateFromTemplate(monster, map);
             }
         }
     }
 
+    /// <summary>
+    /// Logic to check map for number of nodes on it, then place the node
+    /// </summary>
     private static void PlaceNode(Area map)
     {
-        if (map.Height < 25 || map.Width < 25) return;
-
-        map.MiningNodes = Server.ObjectHandlers.GetObjects<Item>(map, i => i.Template is { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Default)) return;
+        if (map.Height < 15 || map.Width < 15) return;
+        
+        map.MiningNodesCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i.Template is { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
             or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }).Count();
 
-        if (map.MiningNodes >= 6) return;
-        switch (map.ID)
+        if (map.MiningNodesCount >= map.Height * map.Width / 100) return;
+
+        try
         {
-            case 3029:
-            case 5257:
-            case 6228:
-            case 721:
-                return;
-            default:
-                try
-                {
-                    var node = MiningNode(map);
-                    var x = Generator.GenerateMapLocation(map.Height);
-                    var y = Generator.GenerateMapLocation(map.Width);
+            var node = MiningNode(map);
+            if (node == null) return;
+            var x = Generator.GenerateMapLocation(map.Height);
+            var y = Generator.GenerateMapLocation(map.Width);
 
-                    for (var i = 0; i < 10; i++)
-                    {
-                        if (map.IsWall(x, y)) continue;
-                        node.Pos = new Vector2(x, y);
+            for (var i = 0; i < 10; i++)
+            {
+                if (map.IsWall(x, y)) continue;
+                node.Pos = new Vector2(x, y);
 
-                        Server.ObjectHandlers.AddObject(node);
-                        break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Crashes.TrackError(ex);
-                }
-
+                Server.ObjectHandlers.AddObject(node);
                 break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Crashes.TrackError(ex);
         }
     }
 
+    /// <summary>
+    /// Logic to check what nodes can populate on a map, create them, then return them randomly
+    /// </summary>
     private static Item MiningNode(Area map)
     {
-        var qualityNode = Generator.RandomNumPercentGen();
-        var item = new Item();
 
-        if (map.Name.Contains("Crypt"))
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Talos))
         {
-            return qualityNode switch
-            {
-                >= 0 and <= .50 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Copper"]),
-                > .50 and <= 1 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]),
-                _ => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"])
-            };
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]);
         }
 
-        if (map.Name.Contains("Wood"))
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Copper))
         {
-            return qualityNode switch
-            {
-                >= 0 and <= .32 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Copper"]),
-                > .32 and <= .66 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Hybrasyl"]),
-                > .66 and <= 1 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]),
-                _ => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"])
-            };
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Copper"]);
         }
 
-        if (map.ID == 623 || map.Name.Contains("Garden"))
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.DarkIron))
         {
-            return item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]);
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Dark Iron"]);
         }
 
-        // ToDo: Make it so nodes have a chance to drop a gem like ruby that enhances weapon stats.
-
-        return qualityNode switch
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Hybrasyl))
         {
-            >= 0 and <= .16 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Dark Iron"]),
-            > .16 and <= .32 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Copper"]),
-            > .32 and <= .48 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Obsidian"]),
-            > .48 and <= .66 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Cobalt Steel"]),
-            > .66 and <= .84 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Hybrasyl"]),
-            > .84 and <= 1 => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]),
-            _ => item.Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"])
-        };
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Hybrasyl"]);
+        }
+
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.CobaltSteel))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Cobalt Steel"]);
+        }
+
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Obsidian))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Obsidian"]);
+        }
+
+        return null;
     }
 }

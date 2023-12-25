@@ -36,6 +36,7 @@ public record AreaStorage : IAreaStorage
             while (reader.Read())
             {
                 var flags = ServiceStack.AutoMappingUtils.ConvertTo<MapFlags>(reader["Flags"]);
+                var miningNodes = ServiceStack.AutoMappingUtils.ConvertTo<MiningNodes>(reader["MiningNodes"]);
                 var rows = (int)reader["mRows"];
                 var cols = (int)reader["mCols"];
                 var temp = new Area
@@ -46,6 +47,7 @@ public record AreaStorage : IAreaStorage
                     Height = (ushort)rows,
                     Width = (ushort)cols,
                     ScriptKey = reader["ScriptKey"].ToString(),
+                    MiningNodes = miningNodes,
                     Name = reader["Name"].ToString()
                 };
 
