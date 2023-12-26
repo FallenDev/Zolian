@@ -210,7 +210,7 @@ public class ItemShop(WorldServer server, Mundane mundane) : MundaneScript(serve
                 break;
             case 0x500:
                 {
-                    NpcShopExtensions.SellItemDroppedFromInventory(client, Mundane, args);
+                    NpcShopExtensions.AutoSellItemDroppedFromInventory(client, Mundane, args);
                 }
                 break;
         }

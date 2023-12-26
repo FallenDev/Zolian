@@ -272,6 +272,52 @@ public static class NpcShopExtensions
         }
     }
 
+    public static void AutoSellItemDroppedFromInventory(WorldClient client, Mundane mundane, string args)
+    {
+        client.Aisling.Inventory.Items.TryGetValue(Convert.ToInt32(args), out var itemFromSlot);
+
+        if (itemFromSlot == null)
+        {
+            client.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{mundane.Name}: Well? Where is it?");
+            return;
+        }
+
+        var offer = itemFromSlot.Template.Value / 2;
+
+        if (offer <= 0)
+        {
+            client.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{mundane.Name}: I can't accept that.");
+            return;
+        }
+
+        if (itemFromSlot.Stacks > 1 && itemFromSlot.Template.CanStack)
+        {
+            client.PendingItemSessions = new PendingSell
+            {
+                ID = itemFromSlot.ItemId,
+                Name = itemFromSlot.Template.Name,
+                Quantity = 0
+            };
+
+            client.SendTextInput(mundane, $"How many {{=q{itemFromSlot.Template.Name} {{=awould you like to sell?\nStack Size: {itemFromSlot.Stacks}", "Amount:", 3);
+        }
+        else
+        {
+            if (offer > itemFromSlot.Template.Value) return;
+
+            if (client.Aisling.GoldPoints + offer > ServerSetup.Instance.Config.MaxCarryGold)
+            {
+                client.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{mundane.Name}: Your gold satchel is full!");
+                return;
+            }
+
+            client.Aisling.GoldPoints += offer;
+            client.Aisling.Inventory.RemoveFromInventory(client, itemFromSlot);
+            client.SendAttributes(StatUpdateType.WeightGold);
+            client.SendPublicMessage(mundane.Serial, PublicMessageType.Normal, $"{mundane.Name}: Thank you!");
+        }
+    }
+
     #endregion
 
     #region Bank

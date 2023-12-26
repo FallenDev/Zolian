@@ -239,7 +239,7 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x500:
                 {
-                    NpcShopExtensions.SellItemDroppedFromInventory(client, Mundane, args);
+                    NpcShopExtensions.AutoSellItemDroppedFromInventory(client, Mundane, args);
                 }
                 break;
         }

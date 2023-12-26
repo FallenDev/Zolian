@@ -447,33 +447,24 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
             case 0x500: // OnItemDrop
                 {
-                    var containsUshort = ushort.TryParse(args, out var slot);
-                    if (containsUshort)
+                    client.Aisling.Inventory.Items.TryGetValue(Convert.ToInt32(args), out var item);
+
+                    if (item == null)
                     {
-                        var item = client.Aisling.Inventory.FindInSlot(slot);
-                        if (item == null)
-                        {
-                            client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                            return;
-                        }
-
-                        if (!client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, null, item))
-                        {
-                            client.SendOptionsDialog(Mundane, "Well? Where is it?");
-                            return;
-                        }
-
-                        item.ItemPane = Item.ItemPanes.Bank;
-                        if (client.Aisling.BankManager.Items.TryAdd(item.ItemId, item))
-                            client.SendRemoveItemFromPane(item.InventorySlot);
-
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item.DisplayName}");
-                        client.Aisling.Inventory.UpdatePlayersWeight(client);
+                        client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: Well? Where is it?");
+                        return;
                     }
-                    else
-                    {
-                        client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, hmm, you sure?");
-                    }
+
+                    if (client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, null, item))
+                        client.SendRemoveItemFromPane(item.InventorySlot);
+
+                    item.ItemPane = Item.ItemPanes.Bank;
+                    client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+                    ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, item);
+
+                    client.Aisling.Inventory.UpdatePlayersWeight(client);
+                    client.SendAttributes(StatUpdateType.WeightGold);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item.DisplayName}");
                 }
                 break;
         }
