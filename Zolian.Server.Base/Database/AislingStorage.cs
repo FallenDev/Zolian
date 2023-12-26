@@ -4,13 +4,16 @@ using Dapper;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
+using Darkages.Models;
 using Darkages.Sprites;
+using Darkages.Types;
 
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Data;
+using System.Numerics;
 
 namespace Darkages.Database;
 
@@ -97,11 +100,8 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var connection = ConnectToDatabase(ConnectionString);
-            SaveSkills(obj, connection);
-            SaveSpells(obj, connection);
             SaveBuffs(obj, connection);
             SaveDebuffs(obj, connection);
-            SaveItemsForPlayer(obj, connection);
             connection.Close();
         }
         catch (Exception e)
@@ -125,10 +125,17 @@ public record AislingStorage : Sql, IAislingStorage
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
+        var iDt = ItemsDataTable();
+        var skillDt = SkillDataTable();
+        var spellDt = SpellDataTable();
         var connection = ConnectToDatabase(ConnectionString);
 
         try
         {
+            var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == obj.Serial);
+            var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
+            var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
+
             dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
                 obj.OffenseElement.ToString(), obj.DefenseElement.ToString(), obj.SecondaryOffensiveElement.ToString(),
                 obj.SecondaryDefensiveElement.ToString(), obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
@@ -161,6 +168,91 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
                 obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
 
+            foreach (var item in itemList)
+            {
+                var pane = ItemEnumConverters.PaneToString(item.ItemPane);
+                var color = ItemColors.ItemColorsToInt(item.Template.Color);
+                var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
+                var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
+                var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
+                var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
+                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
+                var existingRow = iDt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
+
+                // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
+                if (existingRow != null)
+                {
+                    existingRow["Name"] = item.Template.Name;
+                    existingRow["Serial"] = (long)obj.Serial;
+                    existingRow["ItemPane"] = pane;
+                    existingRow["Slot"] = item.Slot;
+                    existingRow["InventorySlot"] = item.InventorySlot;
+                    existingRow["Color"] = color;
+                    existingRow["Cursed"] = item.Cursed;
+                    existingRow["Durability"] = item.Durability;
+                    existingRow["Identified"] = item.Identified;
+                    existingRow["ItemVariance"] = itemVariance;
+                    existingRow["WeapVariance"] = weapVariance;
+                    existingRow["ItemQuality"] = quality;
+                    existingRow["OriginalQuality"] = orgQuality;
+                    existingRow["Stacks"] = item.Stacks;
+                    existingRow["Enchantable"] = item.Enchantable;
+                    existingRow["Tarnished"] = item.Tarnished;
+                    existingRow["GearEnhancement"] = gearEnhanced;
+                    existingRow["ItemMaterial"] = itemMaterial;
+                }
+                else
+                {
+                    // If the item hasn't already been added to the data table, add it
+                    iDt.Rows.Add(
+                        item.ItemId,
+                    item.Template.Name,
+                        (long)obj.Serial,
+                        pane,
+                        item.Slot,
+                        item.InventorySlot,
+                        color,
+                        item.Cursed,
+                        item.Durability,
+                        item.Identified,
+                        itemVariance,
+                        weapVariance,
+                        quality,
+                        orgQuality,
+                        item.Stacks,
+                        item.Enchantable,
+                        item.Tarnished,
+                        gearEnhanced,
+                        itemMaterial
+                    );
+                }
+
+                foreach (var skill in skillList)
+                {
+                    skillDt.Rows.Add(
+                        (long)obj.Serial,
+                        skill.Level,
+                        skill.Slot,
+                        skill.SkillName,
+                        skill.Uses,
+                        skill.CurrentCooldown
+                    );
+                }
+
+                foreach (var spell in spellList)
+                {
+                    spellDt.Rows.Add(
+                        (long)obj.Serial,
+                        spell.Level,
+                        spell.Slot,
+                        spell.SpellName,
+                        spell.Casts,
+                        spell.CurrentCooldown
+                    );
+                }
+            }
+
             await using var cmd = new SqlCommand("PlayerSave", connection);
             cmd.CommandType = CommandType.StoredProcedure;
             var param = cmd.Parameters.AddWithValue("@Players", dt);
@@ -181,6 +273,28 @@ public record AislingStorage : Sql, IAislingStorage
             param3.SqlDbType = SqlDbType.Structured;
             param3.TypeName = "dbo.ComboType";
             cmd3.ExecuteNonQuery();
+
+            await using var cmd4 = new SqlCommand("ItemUpsert", connection);
+            cmd4.CommandType = CommandType.StoredProcedure;
+            var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
+            param4.SqlDbType = SqlDbType.Structured;
+            param4.TypeName = "dbo.ItemType";
+            cmd4.ExecuteNonQuery();
+
+            await using var cmd5 = new SqlCommand("PlayerSaveSkills", connection);
+            cmd5.CommandType = CommandType.StoredProcedure;
+            var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
+            param5.SqlDbType = SqlDbType.Structured;
+            param5.TypeName = "dbo.SkillType";
+            cmd5.ExecuteNonQuery();
+
+            await using var cmd6 = new SqlCommand("PlayerSaveSpells", connection);
+            cmd6.CommandType = CommandType.StoredProcedure;
+            var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
+            param6.SqlDbType = SqlDbType.Structured;
+            param6.TypeName = "dbo.SpellType";
+            cmd6.ExecuteNonQuery();
+
             connection.Close();
         }
         catch (Exception e)
@@ -205,6 +319,9 @@ public record AislingStorage : Sql, IAislingStorage
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
+        var iDt = ItemsDataTable();
+        var skillDt = SkillDataTable();
+        var spellDt = SpellDataTable();
         var connection = ConnectToDatabase(ConnectionString);
 
         try
@@ -214,6 +331,9 @@ public record AislingStorage : Sql, IAislingStorage
                 if (player?.Client == null) continue;
                 if (!player.LoggedIn) continue;
                 player.Client.LastSave = DateTime.UtcNow;
+                var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == player.Serial);
+                var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
+                var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
 
                 dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
                     player.OffenseElement.ToString(), player.DefenseElement.ToString(), player.SecondaryOffensiveElement.ToString(),
@@ -246,6 +366,91 @@ public record AislingStorage : Sql, IAislingStorage
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
                     player.ComboManager.Combo12, player.ComboManager.Combo13, player.ComboManager.Combo14, player.ComboManager.Combo15);
+
+                foreach (var item in itemList)
+                {
+                    var pane = ItemEnumConverters.PaneToString(item.ItemPane);
+                    var color = ItemColors.ItemColorsToInt(item.Template.Color);
+                    var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
+                    var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
+                    var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
+                    var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+                    var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
+                    var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
+                    var existingRow = iDt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
+
+                    // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
+                    if (existingRow != null)
+                    {
+                        existingRow["Name"] = item.Template.Name;
+                        existingRow["Serial"] = (long)player.Serial;
+                        existingRow["ItemPane"] = pane;
+                        existingRow["Slot"] = item.Slot;
+                        existingRow["InventorySlot"] = item.InventorySlot;
+                        existingRow["Color"] = color;
+                        existingRow["Cursed"] = item.Cursed;
+                        existingRow["Durability"] = item.Durability;
+                        existingRow["Identified"] = item.Identified;
+                        existingRow["ItemVariance"] = itemVariance;
+                        existingRow["WeapVariance"] = weapVariance;
+                        existingRow["ItemQuality"] = quality;
+                        existingRow["OriginalQuality"] = orgQuality;
+                        existingRow["Stacks"] = item.Stacks;
+                        existingRow["Enchantable"] = item.Enchantable;
+                        existingRow["Tarnished"] = item.Tarnished;
+                        existingRow["GearEnhancement"] = gearEnhanced;
+                        existingRow["ItemMaterial"] = itemMaterial;
+                    }
+                    else
+                    {
+                        // If the item hasn't already been added to the data table, add it
+                        iDt.Rows.Add(
+                            item.ItemId,
+                            item.Template.Name,
+                            (long)player.Serial,
+                            pane,
+                            item.Slot,
+                            item.InventorySlot,
+                            color,
+                            item.Cursed,
+                            item.Durability,
+                            item.Identified,
+                            itemVariance,
+                            weapVariance,
+                            quality,
+                            orgQuality,
+                            item.Stacks,
+                            item.Enchantable,
+                            item.Tarnished,
+                            gearEnhanced,
+                            itemMaterial
+                        );
+                    }
+                }
+
+                foreach (var skill in skillList)
+                {
+                    skillDt.Rows.Add(
+                        (long)player.Serial,
+                        skill.Level,
+                        skill.Slot,
+                        skill.SkillName,
+                        skill.Uses,
+                        skill.CurrentCooldown
+                    );
+                }
+
+                foreach (var spell in spellList)
+                {
+                    spellDt.Rows.Add(
+                        (long)player.Serial,
+                        spell.Level,
+                        spell.Slot,
+                        spell.SpellName,
+                        spell.Casts,
+                        spell.CurrentCooldown
+                    );
+                }
             }
 
             await using var cmd = new SqlCommand("PlayerSave", connection);
@@ -268,6 +473,28 @@ public record AislingStorage : Sql, IAislingStorage
             param3.SqlDbType = SqlDbType.Structured;
             param3.TypeName = "dbo.ComboType";
             cmd3.ExecuteNonQuery();
+
+            await using var cmd4 = new SqlCommand("ItemUpsert", connection);
+            cmd4.CommandType = CommandType.StoredProcedure;
+            var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
+            param4.SqlDbType = SqlDbType.Structured;
+            param4.TypeName = "dbo.ItemType";
+            cmd4.ExecuteNonQuery();
+
+            await using var cmd5 = new SqlCommand("PlayerSaveSkills", connection);
+            cmd5.CommandType = CommandType.StoredProcedure;
+            var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
+            param5.SqlDbType = SqlDbType.Structured;
+            param5.TypeName = "dbo.SkillType";
+            cmd5.ExecuteNonQuery();
+
+            await using var cmd6 = new SqlCommand("PlayerSaveSpells", connection);
+            cmd6.CommandType = CommandType.StoredProcedure;
+            var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
+            param6.SqlDbType = SqlDbType.Structured;
+            param6.TypeName = "dbo.SpellType";
+            cmd6.ExecuteNonQuery();
+
             connection.Close();
         }
         catch (Exception e)
@@ -282,88 +509,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
 
         return true;
-    }
-
-    public void SaveSkills(Aisling obj, SqlConnection connection)
-    {
-        if (obj?.SkillBook == null) return;
-        var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
-        var dt = new DataTable();
-        dt.Columns.Add("Serial", typeof(long));
-        dt.Columns.Add("Level", typeof(int));
-        dt.Columns.Add("Slot", typeof(int));
-        dt.Columns.Add("Skill", typeof(string));
-        dt.Columns.Add("Uses", typeof(int));
-        dt.Columns.Add("Cooldown", typeof(int));
-
-        try
-        {
-            foreach (var skill in skillList)
-            {
-                dt.Rows.Add(
-                    (long)obj.Serial,
-                    skill.Level,
-                    skill.Slot,
-                    skill.SkillName,
-                    skill.Uses,
-                    skill.CurrentCooldown
-                    );
-            }
-
-            using var cmd = new SqlCommand("PlayerSaveSkills", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            var param = cmd.Parameters.AddWithValue("@Skills", dt);
-            param.SqlDbType = SqlDbType.Structured;
-            param.TypeName = "dbo.SkillType";
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-    }
-
-    public void SaveSpells(Aisling obj, SqlConnection connection)
-    {
-        if (obj?.SpellBook == null) return;
-        var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
-        var dt = new DataTable();
-        dt.Columns.Add("Serial", typeof(long));
-        dt.Columns.Add("Level", typeof(int));
-        dt.Columns.Add("Slot", typeof(int));
-        dt.Columns.Add("Spell", typeof(string));
-        dt.Columns.Add("Casts", typeof(int));
-        dt.Columns.Add("Cooldown", typeof(int));
-
-        try
-        {
-            foreach (var spell in spellList)
-            {
-                dt.Rows.Add(
-                    (long)obj.Serial,
-                    spell.Level,
-                    spell.Slot,
-                    spell.SpellName,
-                    spell.Casts,
-                    spell.CurrentCooldown
-                );
-            }
-
-            using var cmd = new SqlCommand("PlayerSaveSpells", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            var param = cmd.Parameters.AddWithValue("@Spells", dt);
-            param.SqlDbType = SqlDbType.Structured;
-            param.TypeName = "dbo.SpellType";
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
     }
 
     public void SaveBuffs(Aisling aisling, SqlConnection connection)
@@ -403,108 +548,6 @@ public record AislingStorage : Sql, IAislingStorage
                 cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = deBuff.TimeLeft;
                 cmd.ExecuteNonQuery();
             }
-        }
-        catch (Exception e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
-    }
-
-    public void SaveItemsForPlayer(Aisling obj, SqlConnection connection)
-    {
-        var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == obj.Serial);
-        var dt = new DataTable();
-        dt.Columns.Add("ItemId", typeof(long));
-        dt.Columns.Add("Name", typeof(string));
-        dt.Columns.Add("Serial", typeof(long)); // Owner's Serial
-        dt.Columns.Add("ItemPane", typeof(string));
-        dt.Columns.Add("Slot", typeof(int));
-        dt.Columns.Add("InventorySlot", typeof(int));
-        dt.Columns.Add("Color", typeof(int));
-        dt.Columns.Add("Cursed", typeof(bool));
-        dt.Columns.Add("Durability", typeof(long));
-        dt.Columns.Add("Identified", typeof(bool));
-        dt.Columns.Add("ItemVariance", typeof(string));
-        dt.Columns.Add("WeapVariance", typeof(string));
-        dt.Columns.Add("ItemQuality", typeof(string));
-        dt.Columns.Add("OriginalQuality", typeof(string));
-        dt.Columns.Add("Stacks", typeof(int));
-        dt.Columns.Add("Enchantable", typeof(bool));
-        dt.Columns.Add("Tarnished", typeof(bool));
-        dt.Columns.Add("GearEnhancement", typeof(string));
-        dt.Columns.Add("ItemMaterial", typeof(string));
-
-        try
-        {
-            foreach (var item in itemList)
-            {
-                var pane = ItemEnumConverters.PaneToString(item.ItemPane);
-                var color = ItemColors.ItemColorsToInt(item.Template.Color);
-                var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
-                var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
-                var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
-                var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
-                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
-                var existingRow = dt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
-
-                // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
-                if (existingRow != null)
-                {
-                    existingRow["Name"] = item.Template.Name;
-                    existingRow["Serial"] = (long)obj.Serial;
-                    existingRow["ItemPane"] = pane;
-                    existingRow["Slot"] = item.Slot;
-                    existingRow["InventorySlot"] = item.InventorySlot;
-                    existingRow["Color"] = color;
-                    existingRow["Cursed"] = item.Cursed;
-                    existingRow["Durability"] = item.Durability;
-                    existingRow["Identified"] = item.Identified;
-                    existingRow["ItemVariance"] = itemVariance;
-                    existingRow["WeapVariance"] = weapVariance;
-                    existingRow["ItemQuality"] = quality;
-                    existingRow["OriginalQuality"] = orgQuality;
-                    existingRow["Stacks"] = item.Stacks;
-                    existingRow["Enchantable"] = item.Enchantable;
-                    existingRow["Tarnished"] = item.Tarnished;
-                    existingRow["GearEnhancement"] = gearEnhanced;
-                    existingRow["ItemMaterial"] = itemMaterial;
-                }
-                else
-                {
-                    // If the item hasn't already been added to the data table, add it
-                    dt.Rows.Add(
-                        item.ItemId,
-                        item.Template.Name,
-                        (long)obj.Serial,
-                        pane,
-                        item.Slot,
-                        item.InventorySlot,
-                        color,
-                        item.Cursed,
-                        item.Durability,
-                        item.Identified,
-                        itemVariance,
-                        weapVariance,
-                        quality,
-                        orgQuality,
-                        item.Stacks,
-                        item.Enchantable,
-                        item.Tarnished,
-                        gearEnhanced,
-                        itemMaterial
-                    );
-                }
-            }
-
-            using var cmd = new SqlCommand("ItemUpsert", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            var param = cmd.Parameters.AddWithValue("@Items", dt);
-            param.SqlDbType = SqlDbType.Structured;
-            param.TypeName = "dbo.ItemType";
-            cmd.ExecuteNonQuery();
         }
         catch (Exception e)
         {
@@ -854,6 +897,55 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("Flame", typeof(byte));
         dt.Columns.Add("Dusk", typeof(byte));
         dt.Columns.Add("Dawn", typeof(byte));
+        return dt;
+    }
+
+    private static DataTable ItemsDataTable()
+    {
+        var dt = new DataTable();
+        dt.Columns.Add("ItemId", typeof(long));
+        dt.Columns.Add("Name", typeof(string));
+        dt.Columns.Add("Serial", typeof(long)); // Owner's Serial
+        dt.Columns.Add("ItemPane", typeof(string));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("InventorySlot", typeof(int));
+        dt.Columns.Add("Color", typeof(int));
+        dt.Columns.Add("Cursed", typeof(bool));
+        dt.Columns.Add("Durability", typeof(long));
+        dt.Columns.Add("Identified", typeof(bool));
+        dt.Columns.Add("ItemVariance", typeof(string));
+        dt.Columns.Add("WeapVariance", typeof(string));
+        dt.Columns.Add("ItemQuality", typeof(string));
+        dt.Columns.Add("OriginalQuality", typeof(string));
+        dt.Columns.Add("Stacks", typeof(int));
+        dt.Columns.Add("Enchantable", typeof(bool));
+        dt.Columns.Add("Tarnished", typeof(bool));
+        dt.Columns.Add("GearEnhancement", typeof(string));
+        dt.Columns.Add("ItemMaterial", typeof(string));
+        return dt;
+    }
+
+    private static DataTable SkillDataTable()
+    {
+        var dt = new DataTable();
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Level", typeof(int));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("Skill", typeof(string));
+        dt.Columns.Add("Uses", typeof(int));
+        dt.Columns.Add("Cooldown", typeof(int));
+        return dt;
+    }
+
+    private static DataTable SpellDataTable()
+    {
+        var dt = new DataTable();
+        dt.Columns.Add("Serial", typeof(long));
+        dt.Columns.Add("Level", typeof(int));
+        dt.Columns.Add("Slot", typeof(int));
+        dt.Columns.Add("Spell", typeof(string));
+        dt.Columns.Add("Casts", typeof(int));
+        dt.Columns.Add("Cooldown", typeof(int));
         return dt;
     }
 

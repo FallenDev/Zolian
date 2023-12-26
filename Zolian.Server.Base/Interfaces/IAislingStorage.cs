@@ -23,11 +23,8 @@ public interface IAislingStorage
     /// Server Save method used to save all players on the server at once
     /// </summary>
     Task<bool> ServerSave(List<Aisling> playerList);
-    void SaveSkills(Aisling obj, SqlConnection connection);
-    void SaveSpells(Aisling obj, SqlConnection connection);
     void SaveBuffs(Aisling aisling, SqlConnection connection);
     void SaveDebuffs(Aisling aisling, SqlConnection connection);
-    void SaveItemsForPlayer(Aisling obj, SqlConnection connection);
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);

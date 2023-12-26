@@ -64,7 +64,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         map.MiningNodesCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i.Template is { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
             or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }).Count();
 
-        if (map.MiningNodesCount >= map.Height * map.Width / 100) return;
+        if (map.MiningNodesCount >= map.Height * map.Width / 200) return;
 
         try
         {
