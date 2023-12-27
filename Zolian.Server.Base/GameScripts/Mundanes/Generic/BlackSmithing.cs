@@ -778,9 +778,9 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         var options = new List<Dialog.OptionsDataItem>
                         {
-                            new(0x101, "Skill 1"),
-                            new(0x102, "Skill 2"),
-                            new(0x103, "Skill 3")
+                            new(0x101, $"{client.Aisling.ComboManager.Combo1 ?? "Skill 1"}"),
+                            new(0x102, $"{client.Aisling.ComboManager.Combo2 ?? "Skill 2"}"),
+                            new(0x103, $"{client.Aisling.ComboManager.Combo3 ?? "Skill 3"}")
                         };
                         _tempSkillName = skillTemplate.Name;
 
@@ -831,11 +831,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         var options = new List<Dialog.OptionsDataItem>
                         {
-                            new(0x201, "Skill 1"),
-                            new(0x202, "Skill 2"),
-                            new(0x203, "Skill 3"),
-                            new(0x204, "Skill 4"),
-                            new(0x205, "Skill 5"),
+                            new(0x201, $"{client.Aisling.ComboManager.Combo1 ?? "Skill 1"}"),
+                            new(0x202, $"{client.Aisling.ComboManager.Combo2 ?? "Skill 2"}"),
+                            new(0x203, $"{client.Aisling.ComboManager.Combo3 ?? "Skill 3"}"),
+                            new(0x204, $"{client.Aisling.ComboManager.Combo4 ?? "Skill 4"}"),
+                            new(0x205, $"{client.Aisling.ComboManager.Combo5 ?? "Skill 5"}"),
 
                         };
                         _tempSkillName = skillTemplate.Name;
@@ -901,13 +901,13 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         var options = new List<Dialog.OptionsDataItem>
                         {
-                            new(0x301, "Skill 1"),
-                            new(0x302, "Skill 2"),
-                            new(0x303, "Skill 3"),
-                            new(0x304, "Skill 4"),
-                            new(0x305, "Skill 5"),
-                            new(0x306, "Skill 6"),
-                            new(0x307, "Skill 7")
+                            new(0x301, $"{client.Aisling.ComboManager.Combo1 ?? "Skill 1"}"),
+                            new(0x302, $"{client.Aisling.ComboManager.Combo2 ?? "Skill 2"}"),
+                            new(0x303, $"{client.Aisling.ComboManager.Combo3 ?? "Skill 3"}"),
+                            new(0x304, $"{client.Aisling.ComboManager.Combo4 ?? "Skill 4"}"),
+                            new(0x305, $"{client.Aisling.ComboManager.Combo5 ?? "Skill 5"}"),
+                            new(0x306, $"{client.Aisling.ComboManager.Combo6 ?? "Skill 6"}"),
+                            new(0x307, $"{client.Aisling.ComboManager.Combo7 ?? "Skill 7"}")
                         };
                         _tempSkillName = skillTemplate.Name;
 
@@ -986,16 +986,16 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         var options = new List<Dialog.OptionsDataItem>
                         {
-                            new(0x401, "Skill 1"),
-                            new(0x402, "Skill 2"),
-                            new(0x403, "Skill 3"),
-                            new(0x404, "Skill 4"),
-                            new(0x405, "Skill 5"),
-                            new(0x406, "Skill 6"),
-                            new(0x407, "Skill 7"),
-                            new(0x408, "Skill 8"),
-                            new(0x409, "Skill 9"),
-                            new(0x40A, "Skill 10")
+                            new(0x401, $"{client.Aisling.ComboManager.Combo1 ?? "Skill 1"}"),
+                            new(0x402, $"{client.Aisling.ComboManager.Combo2 ?? "Skill 2"}"),
+                            new(0x403, $"{client.Aisling.ComboManager.Combo3 ?? "Skill 3"}"),
+                            new(0x404, $"{client.Aisling.ComboManager.Combo4 ?? "Skill 4"}"),
+                            new(0x405, $"{client.Aisling.ComboManager.Combo5 ?? "Skill 5"}"),
+                            new(0x406, $"{client.Aisling.ComboManager.Combo6 ?? "Skill 6"}"),
+                            new(0x407, $"{client.Aisling.ComboManager.Combo7 ?? "Skill 7"}"),
+                            new(0x408, $"{client.Aisling.ComboManager.Combo8 ?? "Skill 8"}"),
+                            new(0x409, $"{client.Aisling.ComboManager.Combo9 ?? "Skill 9"}"),
+                            new(0x40A, $"{client.Aisling.ComboManager.Combo10 ?? "Skill 10"}")
                         };
                         _tempSkillName = skillTemplate.Name;
 
