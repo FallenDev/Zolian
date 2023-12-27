@@ -112,6 +112,10 @@ public record AislingStorage : Sql, IAislingStorage
         }
     }
 
+    /// <summary>
+    /// Saves a player's state on disconnect or error
+    /// Creates a new DB connection on event
+    /// </summary>
     public async Task<bool> Save(Aisling obj)
     {
         if (obj == null) return false;
@@ -307,6 +311,10 @@ public record AislingStorage : Sql, IAislingStorage
         return true;
     }
 
+    /// <summary>
+    /// Saves all players states
+    /// Utilizes an active connection that self-heals if closed
+    /// </summary>
     public async Task<bool> ServerSave(List<Aisling> playerList)
     {
         if (playerList.Count == 0) return false;

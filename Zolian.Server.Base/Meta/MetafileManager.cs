@@ -1,12 +1,8 @@
 ﻿using Darkages.Compression;
 using Darkages.Models;
-using Darkages.Sprites;
-using Darkages.Templates;
 using Newtonsoft.Json;
 
 using ServiceStack;
-
-using static Darkages.Sprites.Item;
 
 namespace Darkages.Meta;
 
