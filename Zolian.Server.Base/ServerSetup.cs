@@ -14,8 +14,11 @@ using Microsoft.Extensions.Options;
 
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using System.Data;
 using System.Net;
 using System.Reflection;
+using Microsoft.Data.SqlClient;
+using Darkages.GameScripts.Mundanes.Mileth;
 
 namespace Darkages;
 
@@ -33,6 +36,7 @@ public class ServerSetup : IServerContext
     public static IOptions<ServerOptions> ServerOptions;
 
     public bool Running { get; set; }
+    public SqlConnection ServerSaveConnection { get; set; }
     public IServerConstants Config { get; set; }
     public WorldServer Game { get; set; }
     public LoginServer LoginServer { get; set; }
@@ -124,6 +128,7 @@ public class ServerSetup : IServerContext
 
         Startup();
         CommandHandler();
+        DatabaseSaveConnection();
     }
 
     public void Startup()
@@ -256,6 +261,23 @@ public class ServerSetup : IServerContext
         foreach (var command in Parser.Commands)
         {
             Console.WriteLine(command.ShowHelp(), LogLevel.Debug);
+        }
+    }
+
+    public void DatabaseSaveConnection()
+    {
+        ServerSaveConnection = new SqlConnection(AislingStorage.ConnectionString);
+        ServerSaveConnection.Open();
+
+        if (ServerSaveConnection.State == ConnectionState.Open)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Player Save-State Connected");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Issue connecting to database");
         }
     }
 

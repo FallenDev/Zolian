@@ -4,16 +4,12 @@ using Dapper;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
-using Darkages.Models;
 using Darkages.Sprites;
-using Darkages.Types;
-
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Data;
-using System.Numerics;
 
 namespace Darkages.Database;
 
@@ -133,8 +129,8 @@ public record AislingStorage : Sql, IAislingStorage
         try
         {
             var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == obj.Serial);
-            var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
-            var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
+            var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
+            var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
             dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
                 obj.OffenseElement.ToString(), obj.DefenseElement.ToString(), obj.SecondaryOffensiveElement.ToString(),
@@ -322,7 +318,7 @@ public record AislingStorage : Sql, IAislingStorage
         var iDt = ItemsDataTable();
         var skillDt = SkillDataTable();
         var spellDt = SpellDataTable();
-        var connection = ConnectToDatabase(ConnectionString);
+        var connection = ServerSetup.Instance.ServerSaveConnection;
 
         try
         {
@@ -332,8 +328,8 @@ public record AislingStorage : Sql, IAislingStorage
                 if (!player.LoggedIn) continue;
                 player.Client.LastSave = DateTime.UtcNow;
                 var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == player.Serial);
-                var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null });
-                var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null });
+                var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
+                var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
                 dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
                     player.OffenseElement.ToString(), player.DefenseElement.ToString(), player.SecondaryOffensiveElement.ToString(),
@@ -494,17 +490,25 @@ public record AislingStorage : Sql, IAislingStorage
             param6.SqlDbType = SqlDbType.Structured;
             param6.TypeName = "dbo.SpellType";
             cmd6.ExecuteNonQuery();
-
-            connection.Close();
         }
         catch (Exception e)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Issue with database connection");
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
         {
+            if (connection.State != ConnectionState.Open)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("Reconnecting Player Save-State");
+                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
+                ServerSetup.Instance.ServerSaveConnection.Open();
+            }
+
             SaveLock.Release();
         }
 

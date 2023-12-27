@@ -4,6 +4,7 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
@@ -24,6 +25,7 @@ public interface IServerContext
     void CacheBuffs();
     void CacheDebuffs();
     void CommandHandler();
+    void DatabaseSaveConnection();
     FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
     Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; }
     FrozenDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
@@ -55,6 +57,7 @@ public interface IServerContext
     ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; }
     bool Running { get; set; }
+    SqlConnection ServerSaveConnection { get; set; }
     IServerConstants Config { get; set; }
     WorldServer Game { get; set; }
     LoginServer LoginServer { get; set; }
