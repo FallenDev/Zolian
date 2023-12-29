@@ -56,7 +56,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
         // If user is not on the same map, disconnect them
         if (client.Aisling.Map.ID != Mundane.Map.ID)
         {
-            client.Dispose();
+            client.Disconnect();
             return false;
         }
 
@@ -64,7 +64,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
         if (_onClickCheck != 0) return Mundane.WithinEarShotOf(client.Aisling);
 
         // Otherwise disconnect the client
-        client.Dispose();
+        client.Disconnect();
         return false;
     }
 

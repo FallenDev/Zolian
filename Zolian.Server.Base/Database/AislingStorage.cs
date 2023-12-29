@@ -152,6 +152,7 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants, obj.Aegis, obj.Bleeding, obj.Spikes, obj.Rending,
                 obj.Reaping, obj.Vampirism, obj.Haste, obj.Gust, obj.Quake, obj.Rain, obj.Flame, obj.Dusk, obj.Dawn);
 
+            if (obj.QuestManager == null) return false;
             qDt.Rows.Add(obj.Serial, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
                 obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem,
                 obj.QuestManager.DrunkenHabit, obj.QuestManager.EternalLove, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount,
@@ -164,6 +165,7 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
                 obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled);
 
+            if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
                 obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
                 obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);

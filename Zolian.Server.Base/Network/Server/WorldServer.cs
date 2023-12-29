@@ -3419,7 +3419,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch
         {
-            client.Disconnect();
+            // ignored
         }
 
         return default;
@@ -3482,24 +3482,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
             ServerSetup.Logger("Socket not a valid endpoint");
-            try
-            {
-                clientSocket.Close();
-            }
-            catch
-            {
-                // ignored
-            }
             return;
         }
 
         var ipAddress = ip.Address;
+        var client = _clientProvider.CreateClient(clientSocket);
+        client.OnDisconnected += OnDisconnect;
+
         var badActor = ClientOnBlackList(ipAddress.ToString());
         if (badActor)
         {
             try
             {
-                clientSocket.Close();
+                client.Disconnect();
             }
             catch
             {
@@ -3507,9 +3502,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             return;
         }
-
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
 
         if (!ClientRegistry.TryAdd(client))
         {

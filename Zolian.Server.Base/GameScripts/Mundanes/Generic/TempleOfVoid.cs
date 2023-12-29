@@ -43,7 +43,7 @@ public class TempleOfVoid(WorldServer server, Mundane mundane) : MundaneScript(s
 
         if (client.Aisling.Map.ID != 500)
         {
-            client.Dispose();
+            client.Disconnect();
             return;
         }
 

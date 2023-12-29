@@ -43,7 +43,7 @@ public class TempleOfLight(WorldServer server, Mundane mundane) : MundaneScript(
 
         if (client.Aisling.Map.ID != 500)
         {
-            client.Dispose();
+            client.Disconnect();
             return;
         }
 

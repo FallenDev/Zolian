@@ -44,7 +44,7 @@ public class ArenaHost(WorldServer server, Mundane mundane) : MundaneScript(serv
 
         if (client.Aisling.Map.ID != 5232)
         {
-            client.Dispose();
+            client.Disconnect();
             return;
         }
 
