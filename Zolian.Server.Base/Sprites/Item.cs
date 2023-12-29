@@ -314,7 +314,7 @@ public sealed class Item : Sprite, IItem
     /// <returns>ItemId</returns>
     private static long CheckAndAmendItemIdIfItExists(IItem item)
     {
-        var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out _);
+        var updateIfExists = ServerSetup.Instance.GlobalGroundItemCache.TryGetValue(item.ItemId, out _);
         return updateIfExists ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
     }
 

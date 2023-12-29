@@ -35,6 +35,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using ServiceStack;
+
 using System.Collections.Concurrent;
 using System.Data;
 using System.Diagnostics;
@@ -230,7 +231,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         HandleBadTrades();
         DeathStatusCheck();
         ShowAggro();
-        ItemQueueUpdateOrAdd();
         DisplayQualityPillar();
         ApplyAffliction();
     }
@@ -512,35 +512,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
     }
 
-    private void ItemQueueUpdateOrAdd()
-    {
-        if (!_itemControl.IsRunning)
-        {
-            _itemControl.Start();
-        }
-
-        if (_itemControl.Elapsed.TotalMilliseconds < _itemCheckTimer.Delay.TotalMilliseconds) return;
-
-        var itemList = Aisling.Inventory.Items.Values.Where(i => i is not null).ToList();
-        itemList.AddRange(from item in Aisling.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
-        itemList.AddRange(Aisling.BankManager.Items.Values.Where(i => i is not null));
-
-        try
-        {
-            Parallel.ForEach(itemList, item =>
-            {
-                item.Owner = Aisling.Serial;
-                WorldCacheUpsert(item);
-            });
-        }
-        catch (Exception ex)
-        {
-            Crashes.TrackError(ex);
-        }
-
-        _itemControl.Restart();
-    }
-
     private void DisplayQualityPillar()
     {
         if (!_itemAnimationControl.IsRunning)
@@ -729,20 +700,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         Aisling.Afflictions |= Afflictions.Normal;
     }
 
-    private static void WorldCacheUpsert(Item item)
-    {
-        var updateIfExists = ServerSetup.Instance.GlobalSqlItemCache.TryGetValue(item.ItemId, out var sqlItem);
-
-        if (updateIfExists)
-        {
-            ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, sqlItem);
-        }
-        else
-        {
-            ServerSetup.Instance.GlobalSqlItemCache.TryAdd(item.ItemId, item);
-        }
-    }
-
     #region Player Load
 
     public async Task<WorldClient> Load()
@@ -750,17 +707,18 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (Aisling == null || Aisling.AreaId == 0) return null;
         if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(Aisling.AreaId)) return null;
         Aisling.Client = this;
-
+        await using var loadConnection = new SqlConnection(AislingStorage.ConnectionString);
         await LoadLock.WaitAsync().ConfigureAwait(false);
 
         try
         {
+            loadConnection.Open();
             SetAislingStartupVariables();
             SendUserId();
             SendProfileRequest();
             InitCombos();
             InitQuests();
-            LoadEquipment().LoadInventory().LoadBank().InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
+            LoadEquipment(loadConnection).LoadInventory(loadConnection).LoadBank(loadConnection).InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
             SendDisplayAisling(Aisling);
             Enter();
             if (Aisling.Username == "Death")
@@ -780,6 +738,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         finally
         {
             LoadLock.Release();
+            loadConnection.Close();
         }
 
         SendHeartBeat(0x14, 0x20);
@@ -819,16 +778,25 @@ public class WorldClient : SocketClientBase, IWorldClient
         Aisling.Loading = true;
     }
 
-    public WorldClient LoadEquipment()
+    public WorldClient LoadEquipment(SqlConnection sConn)
     {
         try
         {
-            var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Equip);
+            const string procedure = "[SelectEquipped]";
+            var values = new { Serial = (long)Aisling.Serial };
+            var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
             var aislingEquipped = Aisling.EquipmentManager.Equipment;
 
-            foreach (var item in itemList.Where(s => s.Template is { Name: not null }))
+            foreach (var item in itemList.Where(s => s is { Name: not null }))
             {
-                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
+                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
+
+                var itemName = item.Name;
+                var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
+                {
+                    item.Template = template;
+                }
+
                 var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
 
                 var newGear = new Item
@@ -876,17 +844,25 @@ public class WorldClient : SocketClientBase, IWorldClient
         return this;
     }
 
-    public WorldClient LoadInventory()
+    public WorldClient LoadInventory(SqlConnection sConn)
     {
         try
         {
-            var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Inventory);
+            const string procedure = "[SelectInventory]";
+            var values = new { Serial = (long)Aisling.Serial };
+            var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).OrderBy(s => s.InventorySlot);
 
             foreach (var item in itemList)
             {
-                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
+                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
                 if (item.InventorySlot is <= 0 or >= 60)
                     item.InventorySlot = Aisling.Inventory.FindEmpty();
+
+                var itemName = item.Name;
+                var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
+                {
+                    item.Template = template;
+                }
 
                 if (Aisling.Inventory.Items[item.InventorySlot] != null)
                 {
@@ -905,7 +881,8 @@ public class WorldClient : SocketClientBase, IWorldClient
                         }
 
                         if (routineCheck != 4) continue;
-                        ServerSetup.Logger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
+                        ServerSetup.Logger(
+                            $"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
                         Disconnect();
                         break;
                     }
@@ -971,17 +948,25 @@ public class WorldClient : SocketClientBase, IWorldClient
         return this;
     }
 
-    public WorldClient LoadBank()
+    public WorldClient LoadBank(SqlConnection sConn)
     {
         Aisling.BankManager = new Bank();
 
         try
         {
-            var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == Aisling.Serial && i.ItemPane == Item.ItemPanes.Bank);
+            const string procedure = "[SelectBanked]";
+            var values = new { Serial = (long)Aisling.Serial };
+            var itemList = sConn.Query<Item>(procedure, values, commandType: CommandType.StoredProcedure).ToList();
 
             foreach (var item in itemList)
             {
-                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Template.Name)) continue;
+                if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(item.Name)) continue;
+
+                var itemName = item.Name;
+                var template = ServerSetup.Instance.GlobalItemTemplateCache[itemName];
+                {
+                    item.Template = template;
+                }
 
                 var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
 
@@ -2340,59 +2325,59 @@ public class WorldClient : SocketClientBase, IWorldClient
         switch (metaDataRequestType)
         {
             case MetaDataRequestType.DataByName:
-            {
-                ArgumentNullException.ThrowIfNull(name);
-                var metaData = metaDataStore.GetMetaFile(name);
-
-                if (!name.Contains("Class"))
                 {
+                    ArgumentNullException.ThrowIfNull(name);
+                    var metaData = metaDataStore.GetMetaFile(name);
+
+                    if (!name.Contains("Class"))
+                    {
+                        args.MetaDataInfo = new MetaDataInfo
+                        {
+                            Name = metaData.Name,
+                            Data = metaData.DeflatedData,
+                            CheckSum = metaData.Hash
+                        };
+
+                        break;
+                    }
+
+                    var orgFileName = Aisling.Path switch
+                    {
+                        Class.Berserker => "SClass1",
+                        Class.Defender => "SClass2",
+                        Class.Assassin => "SClass3",
+                        Class.Cleric => "SClass4",
+                        Class.Arcanus => "SClass5",
+                        Class.Monk => "SClass6",
+                        _ => metaData.Name
+                    };
+
                     args.MetaDataInfo = new MetaDataInfo
                     {
-                        Name = metaData.Name,
+                        Name = orgFileName,
                         Data = metaData.DeflatedData,
                         CheckSum = metaData.Hash
                     };
 
                     break;
                 }
-
-                var orgFileName = Aisling.Path switch
-                {
-                    Class.Berserker => "SClass1",
-                    Class.Defender => "SClass2",
-                    Class.Assassin => "SClass3",
-                    Class.Cleric => "SClass4",
-                    Class.Arcanus => "SClass5",
-                    Class.Monk => "SClass6",
-                    _ => metaData.Name
-                };
-
-                args.MetaDataInfo = new MetaDataInfo
-                {
-                    Name = orgFileName,
-                    Data = metaData.DeflatedData,
-                    CheckSum = metaData.Hash
-                };
-
-                break;
-            }
             case MetaDataRequestType.AllCheckSums:
-            {
-                args.MetaDataCollection = new List<MetaDataInfo>();
-                var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
-
-                foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
-                         {
-                             CheckSum = metaFile.Hash,
-                             Data = metaFile.DeflatedData,
-                             Name = metaFile.Name
-                         }))
                 {
-                    args.MetaDataCollection.Add(metafileInfo);
-                }
+                    args.MetaDataCollection = new List<MetaDataInfo>();
+                    var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
 
-                break;
-            }
+                    foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
+                    {
+                        CheckSum = metaFile.Hash,
+                        Data = metaFile.DeflatedData,
+                        Name = metaFile.Name
+                    }))
+                    {
+                        args.MetaDataCollection.Add(metafileInfo);
+                    }
+
+                    break;
+                }
         }
 
         Send(args);
@@ -4103,23 +4088,23 @@ public class WorldClient : SocketClientBase, IWorldClient
         switch (skill.Template.SkillType)
         {
             case SkillScope.Assail:
-            {
-                if (skill.Level > 350) skill.Level = 350;
-                SendServerMessage(ServerMessageType.ActiveMessage,
-                    skill.Level >= 350
-                        ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
-                        : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
-                break;
-            }
+                {
+                    if (skill.Level > 350) skill.Level = 350;
+                    SendServerMessage(ServerMessageType.ActiveMessage,
+                        skill.Level >= 350
+                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                    break;
+                }
             case SkillScope.Ability:
-            {
-                if (skill.Level > 500) skill.Level = 500;
-                SendServerMessage(ServerMessageType.ActiveMessage,
-                    skill.Level >= 500
-                        ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
-                        : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
-                break;
-            }
+                {
+                    if (skill.Level > 500) skill.Level = 500;
+                    SendServerMessage(ServerMessageType.ActiveMessage,
+                        skill.Level >= 500
+                            ? string.Format(CultureInfo.CurrentUICulture, "{0} mastered!", skill.Template.Name)
+                            : string.Format(CultureInfo.CurrentUICulture, "{0}, Lv:{1}", skill.Template.Name, skill.Level));
+                    break;
+                }
         }
     }
 

@@ -417,6 +417,9 @@ public static class ItemStorage
     {
         try
         {
+            // Clear cache prior to load
+            ServerSetup.Instance.GlobalSqlItemCache.Clear();
+
             const string procedure = "[LoadItemsToCache]";
             using var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
@@ -468,7 +471,6 @@ public static class ItemStorage
             }
 
             sConn.Close();
-            ServerSetup.Logger($"Items Cached: {ServerSetup.Instance.GlobalSqlItemCache.Count}");
         }
         catch (SqlException e)
         {

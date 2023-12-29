@@ -164,7 +164,6 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         client.Aisling.PastClass = client.Aisling.Path;
         client.LoadSkillBook();
         client.LoadSpellBook();
-        client.LoadEquipment();
         client.SendAttributes(StatUpdateType.Primary);
         client.UpdateDisplay();
         await Task.Delay(500).ContinueWith(ct =>

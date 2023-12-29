@@ -102,16 +102,12 @@ public class Inventory : ObjectManager, IInventory
     {
         if (item == null) return;
 
-        // Remove item from cache prior to delete
-        if (ServerSetup.Instance.GlobalSqlItemCache.TryRemove(item.ItemId, out _))
+        if (Items.TryUpdate(item.InventorySlot, null, item))
         {
-            if (Items.TryUpdate(item.InventorySlot, null, item))
-                client.SendRemoveItemFromPane(item.InventorySlot);
+            client.SendRemoveItemFromPane(item.InventorySlot);
             client.LastItemDropped = item;
             UpdatePlayersWeight(client);
             item.DeleteFromAislingDb();
-            // Ensure item was removed from cache, routine can sometimes add it back
-            ServerSetup.Instance.GlobalSqlItemCache.TryRemove(item.ItemId, out _);
         }
         else
         {

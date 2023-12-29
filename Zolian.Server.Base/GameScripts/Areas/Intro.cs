@@ -53,7 +53,6 @@ public class Intro : AreaScript
             _item.NoColorGetDisplayName();
             if (client.Aisling.EquipmentManager.Equipment[2] == null)
                 client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
-            client.LoadEquipment();
             client.SendAttributes(StatUpdateType.Primary);
             client.UpdateDisplay();
             _givenClothes = true;
@@ -124,7 +123,6 @@ public class Intro : AreaScript
         _item.NoColorGetDisplayName();
         if (client.Aisling.EquipmentManager.Equipment[2] == null)
             client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
-        client.LoadEquipment();
         client.SendAttributes(StatUpdateType.Primary);
         client.UpdateDisplay();
     }

@@ -1283,7 +1283,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     item.Stacks = (ushort)remaining;
                     localClient.SendRemoveItemFromPane(item.InventorySlot);
                     localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, value);
-                    ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, value);
                     localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
                 }
             }

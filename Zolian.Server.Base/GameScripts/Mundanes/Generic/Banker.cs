@@ -460,8 +460,6 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                     item.ItemPane = Item.ItemPanes.Bank;
                     client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
-                    ServerSetup.Instance.GlobalSqlItemCache.TryUpdate(item.ItemId, item, item);
-
                     client.Aisling.Inventory.UpdatePlayersWeight(client);
                     client.SendAttributes(StatUpdateType.WeightGold);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item.DisplayName}");

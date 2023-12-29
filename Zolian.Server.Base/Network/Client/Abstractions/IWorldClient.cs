@@ -11,7 +11,7 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using System.Diagnostics;
-
+using Microsoft.Data.SqlClient;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 
 namespace Darkages.Network.Client.Abstractions;
@@ -56,9 +56,9 @@ public interface IWorldClient : ISocketClient
     Position LastKnownPosition { get; set; }
     int MapClicks { get; set; }
     uint EntryCheck { get; set; }
-    WorldClient LoadEquipment();
-    WorldClient LoadInventory();
-    WorldClient LoadBank();
+    WorldClient LoadEquipment(SqlConnection sConn);
+    WorldClient LoadInventory(SqlConnection sConn);
+    WorldClient LoadBank(SqlConnection sConn);
     void LoadSkillBook();
     void LoadSpellBook();
     void SendLoginMessage(LoginMessageType loginMessageType, string message = null);

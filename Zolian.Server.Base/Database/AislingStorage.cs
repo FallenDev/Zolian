@@ -132,7 +132,9 @@ public record AislingStorage : Sql, IAislingStorage
 
         try
         {
-            var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == obj.Serial);
+            var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
+            itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+            itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
             var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
             var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
@@ -337,7 +339,9 @@ public record AislingStorage : Sql, IAislingStorage
                 if (player?.Client == null) continue;
                 if (!player.LoggedIn) continue;
                 player.Client.LastSave = DateTime.UtcNow;
-                var itemList = ServerSetup.Instance.GlobalSqlItemCache.Values.Where(i => i.Owner == player.Serial);
+                var itemList = player.Inventory.Items.Values.Where(i => i is not null).ToList();
+                itemList.AddRange(from item in player.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+                itemList.AddRange(player.BankManager.Items.Values.Where(i => i is not null));
                 var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
                 var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
