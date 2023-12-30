@@ -1,6 +1,5 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Extensions.Common;
-
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -8,12 +7,11 @@ using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
-
 using System.Collections.Concurrent;
 
-namespace Darkages.Types;
+namespace Darkages.Managers;
 
-public class Inventory : ObjectManager, IInventory
+public class InventoryManager : ObjectManager, IInventory
 {
     private const int Length = 59;
     private readonly int[] _invalidSlots = { 0, 60 };
@@ -21,7 +19,7 @@ public class Inventory : ObjectManager, IInventory
 
     public readonly ConcurrentDictionary<int, Item> Items = new();
 
-    public Inventory()
+    public InventoryManager()
     {
         for (var i = 0; i < Length; i++) Items[i + 1] = null;
     }
@@ -202,7 +200,7 @@ public class Inventory : ObjectManager, IInventory
 
     public override bool Equals(object obj)
     {
-        if (obj is not Inventory inv) return false;
+        if (obj is not InventoryManager inv) return false;
         return Equals(Items.Values, inv.Items.Values) && Equals(Items.Keys, inv.Items.Keys);
     }
 
@@ -243,12 +241,12 @@ public class Inventory : ObjectManager, IInventory
             return (true, 0);
         }
 
-        if ((item1 == null)
-            || (item2 == null)
+        if (item1 == null
+            || item2 == null
             || !item1.Template.CanStack
             || !item2.Template.CanStack
-            || (item1.Stacks == item1.Template.MaxStack)
-            || (item2.Stacks == item2.Template.MaxStack)
+            || item1.Stacks == item1.Template.MaxStack
+            || item2.Stacks == item2.Template.MaxStack
             || !item1.DisplayName.EqualsI(item2.DisplayName))
             return AttemptSwap(client, item1, item2, slot1, slot2);
 
@@ -308,16 +306,16 @@ public class Inventory : ObjectManager, IInventory
     }
 }
 
-public class InventoryComparer : IEqualityComparer<Inventory>
+public class InventoryComparer : IEqualityComparer<InventoryManager>
 {
-    public bool Equals(Inventory x, Inventory y)
+    public bool Equals(InventoryManager x, InventoryManager y)
     {
         if (x == null || y == null) return false;
         if (ReferenceEquals(x, y)) return true;
         return Equals(x.Items.Values, y.Items.Values) && Equals(x.Items.Keys, y.Items.Keys);
     }
 
-    public int GetHashCode(Inventory obj)
+    public int GetHashCode(InventoryManager obj)
     {
         unchecked
         {

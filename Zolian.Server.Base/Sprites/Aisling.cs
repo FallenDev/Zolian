@@ -5,6 +5,7 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Interfaces;
+using Darkages.Managers;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
@@ -104,8 +105,8 @@ public sealed class Aisling : Player, IAisling
     public Death Remains { get; set; }
     public Legend LegendBook { get; set; }
     public byte[] PictureData { get; set; }
-    public Bank BankManager { get; set; }
-    public Inventory Inventory { get; set; }
+    public BankManager BankManager { get; set; }
+    public InventoryManager Inventory { get; set; }
     public EquipmentManager EquipmentManager { get; set; }
     public ComboScroll ComboManager { get; set; }
     public Quests QuestManager { get; set; }

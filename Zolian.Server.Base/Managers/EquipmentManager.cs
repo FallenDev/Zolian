@@ -1,14 +1,13 @@
 ﻿using Chaos.Common.Definitions;
-
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Sprites;
-
+using Darkages.Types;
 using System.Collections.Concurrent;
 
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
-namespace Darkages.Types;
+namespace Darkages.Managers;
 
 public class EquipmentManager
 {

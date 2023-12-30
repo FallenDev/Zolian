@@ -2,6 +2,7 @@
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Managers;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -14,7 +15,7 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Banker")]
 public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private readonly Bank _bankTeller = new();
+    private readonly BankManager _bankTeller = new();
     private bool _depositGoldCancel;
     private bool _withdrawGoldCancel;
 

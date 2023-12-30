@@ -30,6 +30,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using Darkages.Managers;
 using JetBrains.Annotations;
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
@@ -137,8 +138,8 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     BodyColor = 0,
                     SkillBook = new SkillBook(),
                     SpellBook = new SpellBook(),
-                    Inventory = new Inventory(),
-                    BankManager = new Bank(),
+                    Inventory = new InventoryManager(),
+                    BankManager = new BankManager(),
                     EquipmentManager = new EquipmentManager(null)
                 };
 

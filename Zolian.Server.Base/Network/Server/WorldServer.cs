@@ -40,6 +40,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using Darkages.Managers;
 using JetBrains.Annotations;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using MapFlags = Darkages.Enums.MapFlags;
@@ -1768,8 +1769,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var aisling = client.Aisling;
         aisling.SkillBook ??= new SkillBook();
         aisling.SpellBook ??= new SpellBook();
-        aisling.Inventory ??= new Inventory();
-        aisling.BankManager ??= new Bank();
+        aisling.Inventory ??= new InventoryManager();
+        aisling.BankManager ??= new BankManager();
         aisling.EquipmentManager ??= new EquipmentManager(aisling.Client);
         aisling.QuestManager ??= new Quests();
     }

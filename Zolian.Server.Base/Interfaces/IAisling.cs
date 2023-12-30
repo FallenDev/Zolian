@@ -1,5 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Managers;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
@@ -37,8 +38,8 @@ public interface IAisling : ISprite
     Death Remains { get; set; }
     Legend LegendBook { get; set; }
     byte[] PictureData { get; set; }
-    Bank BankManager { get; set; }
-    Inventory Inventory { get; set; }
+    BankManager BankManager { get; set; }
+    InventoryManager Inventory { get; set; }
     EquipmentManager EquipmentManager { get; set; }
     ComboScroll ComboManager { get; set; }
     Quests QuestManager { get; set; }

@@ -42,7 +42,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.Sockets;
 using System.Numerics;
-
+using Darkages.Managers;
 using BodyColor = Chaos.Common.Definitions.BodyColor;
 using BodySprite = Chaos.Common.Definitions.BodySprite;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
@@ -950,7 +950,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public WorldClient LoadBank(SqlConnection sConn)
     {
-        Aisling.BankManager = new Bank();
+        Aisling.BankManager = new BankManager();
 
         try
         {
