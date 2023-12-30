@@ -17,6 +17,7 @@ using System.Collections.Frozen;
 using System.Data;
 using System.Net;
 using System.Reflection;
+using Chaos.Common.Identity;
 using Microsoft.Data.SqlClient;
 
 namespace Darkages;
@@ -69,7 +70,9 @@ public class ServerSetup : IServerContext
     public Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; } = new();
     public FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
     public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = new();
-
+    public FrozenDictionary<uint, string> GlobalKnownGoodActorsCache { get; set; }
+    public Dictionary<uint, string> TempGlobalKnownGoodActorsCache { get; set; } = new();
+    
     // Live
     public ConcurrentDictionary<int, Area> GlobalMapCache { get; set; } = new();
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
@@ -278,6 +281,25 @@ public class ServerSetup : IServerContext
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Issue connecting to database");
         }
+
+        SetGoodActors();
+    }
+
+    public void SetGoodActors()
+    {
+        const string sql = "SELECT LastIP FROM ZolianPlayers.dbo.Players";
+        var cmd = new SqlCommand(sql, ServerSaveConnection);
+        cmd.CommandTimeout = 5;
+        var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var iP = reader["LastIP"].ToString();
+            TempGlobalKnownGoodActorsCache.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, iP);
+        }
+
+        GlobalKnownGoodActorsCache = TempGlobalKnownGoodActorsCache.ToFrozenDictionary();
+        TempGlobalKnownGoodActorsCache.Clear();
     }
 
     public static void SaveCommunityAssets()

@@ -26,6 +26,7 @@ public interface IServerContext
     void CacheDebuffs();
     void CommandHandler();
     void DatabaseSaveConnection();
+    void SetGoodActors();
     FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
     Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; }
     FrozenDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
@@ -42,6 +43,8 @@ public interface IServerContext
     Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; }
     FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
     Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; }
+    FrozenDictionary<uint, string> GlobalKnownGoodActorsCache { get; set; }
+    Dictionary<uint, string> TempGlobalKnownGoodActorsCache { get; set; }
     ConcurrentDictionary<int, Area> GlobalMapCache { get; set; }
     ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; }
     ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; }

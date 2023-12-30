@@ -503,19 +503,26 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var ipAddress = ip.Address;
         var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
+        var safe = false;
 
-        var badActor = ClientOnBlackList(ipAddress.ToString());
-        if (badActor)
+        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
+            safe = true;
+
+        if (!safe)
         {
-            try
+            var badActor = ClientOnBlackList(ipAddress.ToString());
+            if (badActor)
             {
-                client.Disconnect();
+                try
+                {
+                    client.Disconnect();
+                }
+                catch
+                {
+                    // ignored
+                }
+                return;
             }
-            catch
-            {
-                // ignored
-            }
-            return;
         }
 
         if (!ClientRegistry.TryAdd(client))
