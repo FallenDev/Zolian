@@ -1,5 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Extensions.Common;
+
 using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
@@ -7,10 +8,15 @@ using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
+
 using System.Collections.Concurrent;
 
 namespace Darkages.Managers;
 
+/// <summary>
+/// Controls Slot movement within the inventory, checks for items in slots, permanently removes items,
+/// controls stacks adding and removing. 
+/// </summary>
 public class InventoryManager : ObjectManager, IInventory
 {
     private const int Length = 59;
@@ -24,7 +30,7 @@ public class InventoryManager : ObjectManager, IInventory
         for (var i = 0; i < Length; i++) Items[i + 1] = null;
     }
 
-    public bool IsValidSlot(byte slot) => slot is > 0 and <= Length && !_invalidSlots.Contains(slot);
+    private bool IsValidSlot(byte slot) => slot is > 0 and <= Length && !_invalidSlots.Contains(slot);
 
     public int TotalItems
     {
@@ -100,44 +106,50 @@ public class InventoryManager : ObjectManager, IInventory
     {
         if (item == null) return;
 
-        if (Items.TryUpdate(item.InventorySlot, null, item))
+        try
         {
+            var succeeded = Items.TryUpdate(item.InventorySlot, null, item);
+            if (!succeeded) return;
             client.SendRemoveItemFromPane(item.InventorySlot);
             client.LastItemDropped = item;
             UpdatePlayersWeight(client);
-            item.DeleteFromAislingDb();
         }
-        else
+        catch
         {
             ServerSetup.Logger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+        }
+        finally
+        {
+            item.DeleteFromAislingDb();
         }
     }
 
     /// <summary>
     /// Removes a specific amount from a stacked item - Deletes from database if no longer existing
     /// </summary>
-    /// <param name="client"></param>
-    /// <param name="item"></param>
-    /// <param name="range"></param>
     public void RemoveRange(WorldClient client, Item item, int range)
     {
         var remaining = Math.Abs(item.Stacks - range);
         var original = item;
 
-        if (remaining <= 0)
+        try
         {
-            RemoveFromInventory(client, item);
-            item.Remove();
+            if (remaining <= 0)
+            {
+                RemoveFromInventory(client, item);
+            }
+            else
+            {
+                item.Stacks = (ushort)remaining;
+                client.SendRemoveItemFromPane(item.InventorySlot);
+                client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
+                UpdateSlot(client, item);
+            }
         }
-        else
+        catch
         {
-            item.Stacks = (ushort)remaining;
-            client.SendRemoveItemFromPane(item.InventorySlot);
-            client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
-            UpdateSlot(client, item);
+            ServerSetup.Logger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
-
-        UpdatePlayersWeight(client);
     }
 
     public void AddRange(WorldClient client, Item item, int range)
@@ -145,29 +157,33 @@ public class InventoryManager : ObjectManager, IInventory
         var given = Math.Abs(item.Stacks + range);
         var original = item;
 
-        if (given <= 0)
-        {
-            RemoveFromInventory(client, item);
-            item.Remove();
-        }
-        else
+        try
         {
             item.Stacks = (ushort)given;
             client.SendRemoveItemFromPane(item.InventorySlot);
             client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
             UpdateSlot(client, item);
         }
-
-        UpdatePlayersWeight(client);
+        catch
+        {
+            ServerSetup.Logger($"Issue adding item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+        }
     }
 
     public void UpdateSlot(WorldClient client, Item item)
     {
-        item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
-        if (!string.IsNullOrEmpty(item.Template.WeaponScript))
-            item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
-        client.SendAddItemToPane(item);
-        UpdatePlayersWeight(client);
+        try
+        {
+            item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
+            if (!string.IsNullOrEmpty(item.Template.WeaponScript))
+                item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
+            client.SendAddItemToPane(item);
+            UpdatePlayersWeight(client);
+        }
+        catch
+        {
+            ServerSetup.Logger($"Issue updating slot on item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+        }
     }
 
     public void UpdatePlayersWeight(WorldClient client)
@@ -198,130 +214,109 @@ public class InventoryManager : ObjectManager, IInventory
         client.SendAttributes(StatUpdateType.Primary);
     }
 
-    public override bool Equals(object obj)
-    {
-        if (obj is not InventoryManager inv) return false;
-        return Equals(Items.Values, inv.Items.Values) && Equals(Items.Keys, inv.Items.Keys);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            var hash = 17;
-            hash = hash * 23 + Items.Values.GetHashCode();
-            return hash * 23 + Items.Keys.GetHashCode();
-        }
-    }
-
     public (bool, int) TrySwap(WorldClient client, byte slot1, byte slot2)
     {
         if (!IsValidSlot(slot1) || !IsValidSlot(slot2)) return (false, 0);
         if (slot1 == slot2) return (true, 0);
 
-        var item1 = FindInSlot(slot1);
-        var item2 = FindInSlot(slot2);
-
-        if (slot2 == 59)
+        try
         {
-            if (item1 == null) return (false, 0);
-            if (!item1.Template.Flags.FlagIsSet(ItemFlags.Bankable))
+            var item1 = FindInSlot(slot1);
+            var item2 = FindInSlot(slot2);
+
+            if (slot2 == 59)
             {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bBound!");
-                return (false, 1);
+                if (item1 == null) return (false, 0);
+                if (!item1.Template.Flags.FlagIsSet(ItemFlags.Bankable))
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bBound!");
+                    return (false, 1);
+                }
+
+                if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return (true, 0);
+                item1.ItemPane = Item.ItemPanes.Bank;
+                if (client.Aisling.BankManager.Items.TryAdd(item1.ItemId, item1))
+                    client.SendRemoveItemFromPane(item1.InventorySlot);
+
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
+                UpdatePlayersWeight(client);
+                return (true, 0);
             }
 
-            if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return (true, 0);
-            item1.ItemPane = Item.ItemPanes.Bank;
-            if (client.Aisling.BankManager.Items.TryAdd(item1.ItemId, item1))
-                client.SendRemoveItemFromPane(item1.InventorySlot);
+            if (item1 == null
+                || item2 == null
+                || !item1.Template.CanStack
+                || !item2.Template.CanStack
+                || item1.Stacks == item1.Template.MaxStack
+                || item2.Stacks == item2.Template.MaxStack
+                || !item1.DisplayName.EqualsI(item2.DisplayName))
+                return AttemptSwap(client, item1, item2, slot1, slot2);
 
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
-            UpdatePlayersWeight(client);
-            return (true, 0);
+            // Stacks remaining on an item
+            var stacksCanSupport = item2.Template.MaxStack - item2.Stacks;
+
+            // Max number capable of stacking
+            var stacksToGive = Math.Min(stacksCanSupport, item1.Stacks);
+
+            if (item1.Stacks > stacksToGive)
+            {
+                return AttemptSwap(client, item1, item2, slot1, slot2);
+            }
+
+            AddRange(client, item2, item1.Stacks);
+            RemoveFromInventory(client, item1);
         }
-
-        if (item1 == null
-            || item2 == null
-            || !item1.Template.CanStack
-            || !item2.Template.CanStack
-            || item1.Stacks == item1.Template.MaxStack
-            || item2.Stacks == item2.Template.MaxStack
-            || !item1.DisplayName.EqualsI(item2.DisplayName))
-            return AttemptSwap(client, item1, item2, slot1, slot2);
-
-        // Stacks remaining on an item
-        var stacksCanSupport = item2.Template.MaxStack - item2.Stacks;
-
-        // Max number capable of stacking
-        var stacksToGive = Math.Min(stacksCanSupport, item1.Stacks);
-
-        if (item1.Stacks > stacksToGive)
+        catch
         {
-            return AttemptSwap(client, item1, item2, slot1, slot2);
+            ServerSetup.Logger($"Issue outer swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
         }
-
-        AddRange(client, item2, item1.Stacks);
-        RemoveFromInventory(client, item1);
 
         return (true, 0);
     }
 
     private (bool, int) AttemptSwap(WorldClient client, Item item1, Item item2, byte slot1, byte slot2)
     {
-        if (item1 != null && slot2 != 0)
-            client.SendRemoveItemFromPane(item1.InventorySlot);
-        if (item2 != null)
-            client.SendRemoveItemFromPane(item2.InventorySlot);
-
-        if (item1 != null && item2 != null)
+        try
         {
-            item1.InventorySlot = slot2;
-            item2.InventorySlot = slot1;
-            Items.TryUpdate(slot1, item2, item1);
-            Items.TryUpdate(slot2, item1, item2);
-            UpdateSlot(client, item1);
-            UpdateSlot(client, item2);
-            return (true, 0);
-        }
+            if (item1 != null && slot2 != 0)
+                client.SendRemoveItemFromPane(item1.InventorySlot);
+            if (item2 != null)
+                client.SendRemoveItemFromPane(item2.InventorySlot);
 
-        switch (item1)
-        {
-            // Handle spaces with nulls
-            case null when item2 != null:
+            if (item1 != null && item2 != null)
+            {
+                item1.InventorySlot = slot2;
                 item2.InventorySlot = slot1;
-                Items.TryUpdate(slot1, item2, null);
-                Items.TryUpdate(slot2, null, item2);
+                Items.TryUpdate(slot1, item2, item1);
+                Items.TryUpdate(slot2, item1, item2);
+                UpdateSlot(client, item1);
                 UpdateSlot(client, item2);
                 return (true, 0);
-            case null:
-                return (true, 0);
+            }
+
+            switch (item1)
+            {
+                // Handle spaces with nulls
+                case null when item2 != null:
+                    item2.InventorySlot = slot1;
+                    Items.TryUpdate(slot1, item2, null);
+                    Items.TryUpdate(slot2, null, item2);
+                    UpdateSlot(client, item2);
+                    return (true, 0);
+                case null:
+                    return (true, 0);
+            }
+
+            item1.InventorySlot = slot2;
+            Items.TryUpdate(slot1, null, item1);
+            Items.TryUpdate(slot2, item1, null);
+            UpdateSlot(client, item1);
         }
-
-        item1.InventorySlot = slot2;
-        Items.TryUpdate(slot1, null, item1);
-        Items.TryUpdate(slot2, item1, null);
-        UpdateSlot(client, item1);
-        return (true, 0);
-    }
-}
-
-public class InventoryComparer : IEqualityComparer<InventoryManager>
-{
-    public bool Equals(InventoryManager x, InventoryManager y)
-    {
-        if (x == null || y == null) return false;
-        if (ReferenceEquals(x, y)) return true;
-        return Equals(x.Items.Values, y.Items.Values) && Equals(x.Items.Keys, y.Items.Keys);
-    }
-
-    public int GetHashCode(InventoryManager obj)
-    {
-        unchecked
+        catch
         {
-            var hash = 17;
-            hash = hash * 23 + obj.Items.Values.GetHashCode();
-            return hash * 23 + obj.Items.Keys.GetHashCode();
+            ServerSetup.Logger($"Issue inner swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
         }
+
+        return (true, 0);
     }
 }

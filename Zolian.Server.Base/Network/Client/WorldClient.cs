@@ -803,7 +803,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 {
                     ItemId = item.ItemId,
                     Template = item.Template,
-                    Owner = item.Owner,
                     Serial = item.Serial,
                     ItemPane = item.ItemPane,
                     Slot = item.Slot,
@@ -894,7 +893,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 {
                     ItemId = item.ItemId,
                     Template = item.Template,
-                    Owner = item.Owner,
                     Serial = item.Serial,
                     ItemPane = item.ItemPane,
                     Slot = item.Slot,
@@ -974,7 +972,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 {
                     ItemId = item.ItemId,
                     Template = item.Template,
-                    Owner = item.Owner,
                     Serial = item.Serial,
                     ItemPane = item.ItemPane,
                     Slot = item.Slot,

@@ -148,12 +148,10 @@ public sealed class Item : Sprite, IItem
     public bool Tarnished { get; set; }
     public GearEnhancements GearEnhancement { get; set; }
     public ItemMaterials ItemMaterial { get; set; }
-    public Sprite[] AuthenticatedAislings { get; set; }
     public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
     public int Dropping { get; set; }
     public bool[] Warnings { get; set; }
-    public uint Owner { get; set; }
     public ushort Image { get; init; }
     public ushort DisplayImage { get; init; }
 
@@ -337,7 +335,6 @@ public sealed class Item : Sprite, IItem
             DisplayImage = template.DisplayImage,
             CurrentMapId = owner.CurrentMapId,
             Cursed = curse,
-            Owner = owner.Serial,
             MaxDurability = template.MaxDurability,
             Durability = template.MaxDurability,
             OffenseElement = template.OffenseElement,
@@ -348,7 +345,6 @@ public sealed class Item : Sprite, IItem
             GearEnhancement = GearEnhancements.None,
             ItemMaterial = ItemMaterials.None,
             Warnings = new bool[3],
-            AuthenticatedAislings = null
         };
 
         if (obj.Color == 0)
@@ -443,7 +439,6 @@ public sealed class Item : Sprite, IItem
             DisplayImage = template.DisplayImage,
             CurrentMapId = owner.CurrentMapId,
             Cursed = curse,
-            Owner = owner.Serial,
             MaxDurability = template.MaxDurability,
             Durability = template.MaxDurability,
             OffenseElement = template.OffenseElement,
@@ -451,7 +446,6 @@ public sealed class Item : Sprite, IItem
             DefenseElement = template.DefenseElement,
             SecondaryDefensiveElement = template.SecondaryDefensiveElement,
             Warnings = new bool[3],
-            AuthenticatedAislings = null,
             Enchantable = false,
             ItemQuality = Quality.Common,
             OriginalQuality = Quality.Common,
@@ -514,7 +508,6 @@ public sealed class Item : Sprite, IItem
             DisplayImage = template.DisplayImage,
             CurrentMapId = map.ID,
             Cursed = false,
-            Owner = 0,
             MaxDurability = template.MaxDurability,
             Durability = template.MaxDurability,
             OffenseElement = template.OffenseElement,
@@ -522,7 +515,6 @@ public sealed class Item : Sprite, IItem
             DefenseElement = template.DefenseElement,
             SecondaryDefensiveElement = template.SecondaryDefensiveElement,
             Warnings = new bool[3],
-            AuthenticatedAislings = null,
             Enchantable = false,
             ItemQuality = Quality.Common,
             OriginalQuality = Quality.Common,
@@ -590,7 +582,6 @@ public sealed class Item : Sprite, IItem
             Image = itemTemplate.Image,
             DisplayImage = itemTemplate.DisplayImage,
             CurrentMapId = owner.CurrentMapId,
-            Owner = owner.Serial,
             OffenseElement = itemTemplate.OffenseElement,
             SecondaryOffensiveElement = itemTemplate.SecondaryOffensiveElement,
             DefenseElement = itemTemplate.DefenseElement,
@@ -632,7 +623,6 @@ public sealed class Item : Sprite, IItem
     public bool GiveTo(Sprite sprite, bool checkWeight = true)
     {
         if (sprite is not Aisling aisling) return false;
-        Owner = aisling.Serial;
         ItemPane = ItemPanes.Inventory;
 
         if (aisling.Inventory.IsFull)
@@ -699,21 +689,11 @@ public sealed class Item : Sprite, IItem
     {
         Pos = new Vector2(position.X, position.Y);
         ItemPane = ItemPanes.Ground;
-
-        var readyTime = DateTime.UtcNow;
         CurrentMapId = owner.CurrentMapId;
-        AbandonedDate = readyTime;
-
-        if (owner is Aisling)
-        {
-            AuthenticatedAislings = Array.Empty<Sprite>();
-            Cursed = false;
-        }
-
+        AbandonedDate = DateTime.UtcNow;
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         ItemPane = ItemPanes.Ground;
         ServerSetup.Instance.GlobalGroundItemCache.TryAdd(ItemId, this);
-
         AddObject(this);
 
         if (owner is Aisling player)
@@ -726,7 +706,6 @@ public sealed class Item : Sprite, IItem
     /// </summary>
     public void DeleteFromAislingDb()
     {
-        if (ItemId == 0) return;
         var itemId = ItemId;
 
         try
@@ -736,12 +715,6 @@ public sealed class Item : Sprite, IItem
             const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
             sConn.Execute(cmd, new { itemId });
             sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {

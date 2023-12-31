@@ -1111,25 +1111,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (item.Cursed)
                 {
-                    Sprite first = null;
-
-                    if (item.AuthenticatedAislings != null)
-                    {
-                        foreach (var i in item.AuthenticatedAislings)
-                        {
-                            if (i.Serial != localClient.Aisling.Serial) continue;
-
-                            first = i;
-                            break;
-                        }
-
-                        if (item.AuthenticatedAislings != null && first == null)
-                        {
-                            localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.CursedItemMessage}");
-                            return default;
-                        }
-                    }
-
                     item.Pos = localClient.Aisling.Pos;
                     var objToList = new List<Sprite> { obj };
                     localClient.SendVisibleEntities(objToList);
@@ -1245,7 +1226,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (remaining == 0)
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                    item.AbandonedDate = DateTime.UtcNow;
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
                     // Mileth Altar 
@@ -1292,8 +1272,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                    item.ItemPane = Item.ItemPanes.Ground;
-                    item.AbandonedDate = DateTime.UtcNow;
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
 
                     // Mileth Altar 
@@ -1310,8 +1288,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             localClient.Aisling.Inventory.UpdatePlayersWeight(localClient.Aisling.Client);
-            localClient.SendAttributes(StatUpdateType.Primary);
-            localClient.SendAttributes(StatUpdateType.ExpGold);
 
             if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
             {
@@ -2199,7 +2175,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         {
                             var script = monster.Scripts.Values.First();
                             var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
-                            item.Owner = 0;
+                            item.Serial = monster.Serial;
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                                 script?.OnItemDropped(localClient.Aisling.Client, item);
                             else
@@ -2210,6 +2186,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         {
                             var script = mundane.Scripts.Values.First();
                             var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            item.Serial = mundane.Serial;
                             localClient.EntryCheck = mundane.Serial;
                             mundane.Bypass = true;
                             script?.OnItemDropped(localClient.Aisling.Client, item);

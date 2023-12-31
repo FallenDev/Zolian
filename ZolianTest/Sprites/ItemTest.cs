@@ -40,7 +40,6 @@ public class ItemTest
             Scripts = null,
             WeaponScripts = null,
             Dropping = 0,
-            Owner = 0,
             Image = 0,
             DisplayImage = 0
         };
