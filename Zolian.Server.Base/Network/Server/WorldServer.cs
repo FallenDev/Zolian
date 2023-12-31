@@ -47,6 +47,7 @@ using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using Stat = Chaos.Common.Definitions.Stat;
+using Chaos.Networking.Entities;
 
 namespace Darkages.Network.Server;
 
@@ -56,6 +57,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly IClientFactory<WorldClient> _clientProvider;
     private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
     private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
+    private readonly MServerTable _serverTable;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
@@ -94,6 +96,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             logger)
     {
         ServerSetup.Instance.Game = this;
+        _serverTable = MServerTable.FromFile("MServerTable.xml");
         _clientProvider = clientProvider;
         IndexHandlers();
         SkillMapper();
@@ -1323,11 +1326,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             else
             {
-                var connectInfo = new IPEndPoint(IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp), ServerSetup.Instance.Config.SERVER_PORT);
-                var redirect = new Redirect(
-                    EphemeralRandomIdGenerator<uint>.Shared.NextId,
+                var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
+                var redirect = new Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
                     new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                    ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                    ServerType.Login,
+                    localClient.Crypto.Key,
+                    localClient.Crypto.Seed);
 
                 RedirectManager.Add(redirect);
                 localClient.SendRedirect(redirect);

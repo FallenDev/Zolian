@@ -26,6 +26,8 @@ using JetBrains.Annotations;
 using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
+using Chaos.Extensions.Common;
+using Chaos.Networking.Options;
 
 namespace Darkages.Network.Server;
 
@@ -94,9 +96,14 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             {
                 case ServerTableRequestType.ServerId:
                     var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
-                    var redirect = new Chaos.Networking.Entities.Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                        ServerType.Lobby, localClient.Crypto.Key, localClient.Crypto.Seed, $"socket[{localClient.Id}]");
+                    var redirect = new Chaos.Networking.Entities.Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
+                        new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
+                        ServerType.Login, 
+                        localClient.Crypto.Key, 
+                        localClient.Crypto.Seed);
+                    
                     RedirectManager.Add(redirect);
+                    ServerSetup.Logger($"Redirecting {client.RemoteIp} to Login Server");
                     localClient.SendRedirect(redirect);
                     break;
                 case ServerTableRequestType.RequestTable:

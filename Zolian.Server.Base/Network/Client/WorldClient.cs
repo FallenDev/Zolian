@@ -2786,7 +2786,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         #endregion
 
         var legendMarks = ObtainProfileLegendMarks(aisling);
-        if (legendMarks.IsNullOrEmpty()) return;
 
         var args = new ProfileArgs
         {
@@ -3343,7 +3342,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         #endregion
 
         var legendMarks = ObtainSelfProfileLegendMarks();
-        if (legendMarks.IsNullOrEmpty()) return;
 
         var args = new SelfProfileArgs
         {
