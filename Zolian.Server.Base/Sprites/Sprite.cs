@@ -69,7 +69,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool NinthGateReleased => HasBuff("Ninth Gate Release");
     public bool DrunkenFist => HasBuff("Drunken Fist");
     public bool Berserk => HasBuff("Berserker Rage");
-
+    public bool ClawFistEmpowerment { get; set; }
     public bool CanSeeInvisible
     {
         get
@@ -194,7 +194,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public ElementManager.Element SecondaryOffensiveElement { get; set; }
     public ElementManager.Element DefenseElement { get; set; }
     public ElementManager.Element SecondaryDefensiveElement { get; set; }
-    public bool ClawFistEmpowerment { get; set; }
     public DateTime AbandonedDate { get; set; }
     public Sprite Target { get; set; }
     public int X { get; set; }

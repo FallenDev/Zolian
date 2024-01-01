@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Networking.Entities.Server;
-
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -23,6 +23,7 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        client.CloseDialog();
 
         var action = new BodyAnimationArgs
         {
@@ -114,6 +115,7 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        client.CloseDialog();
 
         var action = new BodyAnimationArgs
         {
@@ -182,6 +184,7 @@ public class InspectItem(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        client.CloseDialog();
 
         var action = new BodyAnimationArgs
         {

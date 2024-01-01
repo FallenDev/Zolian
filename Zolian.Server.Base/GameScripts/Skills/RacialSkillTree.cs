@@ -1,6 +1,6 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Networking.Entities.Server;
-
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
@@ -638,6 +638,7 @@ public class Appraise(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        client.CloseDialog();
 
         var action = new BodyAnimationArgs
         {
