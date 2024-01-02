@@ -8,16 +8,9 @@ namespace Darkages.Meta;
 
 public class MServerTable : CompressableObject
 {
-    public MServerTable()
-    {
-        Servers = new List<MServer>();
-    }
-
     [XmlIgnore] public byte[] Data => DeflatedData;
     [XmlIgnore] public uint Hash { get; set; }
-    public List<MServer> Servers { get; set; }
-
-    [XmlIgnore] public ushort Size => (ushort)DeflatedData.Length;
+    public List<MServer> Servers { get; set; } = new();
 
     public static MServerTable FromFile(string filename)
     {
@@ -59,7 +52,7 @@ public class MServerTable : CompressableObject
         {
             var server = new MServer
             {
-                Guid = reader.ReadByte(),
+                ID = reader.ReadByte(),
                 Address = reader.ReadIpAddress(),
                 Port = reader.ReadUInt16()
             };
@@ -69,7 +62,7 @@ public class MServerTable : CompressableObject
             server.Name = text[0];
             server.Description = text[1];
 
-            var id = reader.ReadByte();
+            _ = reader.ReadByte();
 
             Servers.Add(server);
         }
@@ -82,13 +75,13 @@ public class MServerTable : CompressableObject
 
         foreach (var server in Servers)
         {
-            writer.Write(server.Guid);
+            writer.Write(server.ID);
             writer.Write(server.Address);
             writer.Write(server.Port);
             writer.Write(server.Name + ";" + server.Description);
-            writer.Write(server.ID);
         }
 
+        writer.Write((byte)0x00);
         return writer.BaseStream;
     }
 }

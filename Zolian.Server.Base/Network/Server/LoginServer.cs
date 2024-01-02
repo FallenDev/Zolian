@@ -43,8 +43,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
-    private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
-    private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
@@ -598,7 +596,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
-            var response = _restClient.Execute<Ipdb>(request);
+            var response = ServerSetup.Instance.RestClient.Execute<Ipdb>(request);
 
             if (response.IsSuccessful)
             {
@@ -680,7 +678,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restReport.Execute(request);
+        ServerSetup.Instance.RestReport.Execute(request);
     }
 
     private static async Task<bool> SavePassword(Aisling aisling)

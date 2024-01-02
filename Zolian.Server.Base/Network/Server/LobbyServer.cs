@@ -26,8 +26,6 @@ using JetBrains.Annotations;
 using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
-using Chaos.Extensions.Common;
-using Chaos.Networking.Options;
 
 namespace Darkages.Network.Server;
 
@@ -42,8 +40,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 {
     private readonly IClientFactory<LobbyClient> _clientProvider;
     private readonly MServerTable _serverTable;
-    private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
-    private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
 
     public LobbyServer(
@@ -98,10 +94,10 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                     var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
                     var redirect = new Chaos.Networking.Entities.Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
                         new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                        ServerType.Login, 
-                        localClient.Crypto.Key, 
+                        ServerType.Login,
+                        localClient.Crypto.Key,
                         localClient.Crypto.Seed);
-                    
+
                     RedirectManager.Add(redirect);
                     ServerSetup.Logger($"Redirecting {client.RemoteIp} to Login Server");
                     localClient.SendRedirect(redirect);
@@ -252,7 +248,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
-            var response = _restClient.Execute<Ipdb>(request);
+            var response = ServerSetup.Instance.RestClient.Execute<Ipdb>(request);
 
             if (response.IsSuccessful)
             {
@@ -334,7 +330,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restReport.Execute(request);
+        ServerSetup.Instance.RestReport.Execute(request);
     }
 
     private readonly HashSet<string> _bannedIPs = new();

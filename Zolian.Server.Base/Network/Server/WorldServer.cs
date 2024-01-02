@@ -55,8 +55,6 @@ namespace Darkages.Network.Server;
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> _clientProvider;
-    private readonly RestClient _restClient = new("https://api.abuseipdb.com/api/v2/check");
-    private readonly RestClient _restReport = new("https://api.abuseipdb.com/api/v2/report");
     private readonly MServerTable _serverTable;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
@@ -3603,7 +3601,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
-            var response = _restClient.Execute<Ipdb>(request);
+            var response = ServerSetup.Instance.RestClient.Execute<Ipdb>(request);
 
             if (response.IsSuccessful)
             {
@@ -3685,7 +3683,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         request.AddParameter("ip", remoteIp);
         request.AddParameter("categories", "14, 15, 16, 21");
         request.AddParameter("comment", comment);
-        _restReport.Execute(request);
+        ServerSetup.Instance.RestReport.Execute(request);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

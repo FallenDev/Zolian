@@ -5,31 +5,26 @@ namespace Darkages.Models;
 
 public class MServer
 {
-    public MServer()
-    {
-    }
+    public MServer() { }
 
-    public MServer(byte guid, string name, string description, IPAddress address, ushort port)
+    public MServer(byte id, IPAddress address, ushort port, string name, string description)
     {
-        Guid = guid;
-        Name = name;
-        Description = description;
+        ID = id;
         Address = address;
         Port = port;
+        Name = name;
+        Description = description;
     }
 
+    [XmlElement("ID")] public byte ID { get; set; }
     [XmlIgnore] public IPAddress Address { get; set; }
-
     [XmlElement("Addr")]
     public string AddressString
     {
         get => Address.ToString();
         set => Address = IPAddress.Parse(value);
     }
-
-    [XmlElement("Desc")] public string Description { get; set; }
-    [XmlElement("Guid")] public byte Guid { get; set; }
-    [XmlElement("ID")] public byte ID { get; set; }
-    [XmlElement("Name")] public string Name { get; set; }
     [XmlElement("Port")] public ushort Port { get; set; }
+    [XmlElement("Name")] public string Name { get; set; }
+    [XmlElement("Desc")] public string Description { get; set; }
 }

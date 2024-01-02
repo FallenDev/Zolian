@@ -1,12 +1,18 @@
 ﻿<MServerTable>
 	<Servers>
 		<MServer>
+			<ID>1</ID>
 			<Addr>127.0.0.1</Addr>
 			<Port>4201</Port>
-			<Guid>0</Guid>
 			<Name>Zolian</Name>
-			<Desc>Zolian Server</Desc>
-			<ID>1</ID>
+			<Desc>Zolian Beta - Stable</Desc>
+		</MServer>
+		<MServer>
+			<ID>2</ID>
+			<Addr>127.0.0.1</Addr>
+			<Port>4201</Port>
+			<Name>Zolian</Name>
+			<Desc>Zolian Alpha - Used for testing</Desc>
 		</MServer>
 	</Servers>
 </MServerTable>

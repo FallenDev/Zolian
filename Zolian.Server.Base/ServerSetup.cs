@@ -19,6 +19,7 @@ using System.Net;
 using System.Reflection;
 using Chaos.Common.Identity;
 using Microsoft.Data.SqlClient;
+using RestSharp;
 
 namespace Darkages;
 
@@ -34,6 +35,8 @@ public class ServerSetup : IServerContext
     private static Board[] _serverUpdates = new Board[1];
     private static ILogger<ServerSetup> _log;
     public static IOptions<ServerOptions> ServerOptions;
+    public readonly RestClient RestClient;
+    public readonly RestClient RestReport;
 
     public bool Running { get; set; }
     public SqlConnection ServerSaveConnection { get; set; }
@@ -99,14 +102,30 @@ public class ServerSetup : IServerContext
         InternalAddress = ServerOptions.Value.InternalIp;
         GmA = ServerOptions.Value.GmA;
         GmB = ServerOptions.Value.GmB;
+        var restSettings = SetupRestClients();
+        RestClient = new RestClient(restSettings.Item1);
+        RestReport = new RestClient(restSettings.Item2);
     }
 
     public static void Logger(string logMessage, LogLevel logLevel = LogLevel.Information)
     {
-        lock (LogLock)
+        _log?.Log(logLevel, "{logMessage}", logMessage);
+    }
+
+    private static (RestClientOptions, RestClientOptions) SetupRestClients()
+    {
+        var optionsCheck = new RestClientOptions("https://api.abuseipdb.com/api/v2/check")
         {
-            _log?.Log(logLevel, "{logMessage}", logMessage);
-        }
+            ThrowOnAnyError = true,
+            MaxTimeout = 5000
+        };
+        var optionsReport = new RestClientOptions("https://api.abuseipdb.com/api/v2/report")
+        {
+            ThrowOnAnyError = true,
+            MaxTimeout = 5000
+        };
+
+        return (optionsCheck, optionsReport);
     }
 
     public void InitFromConfig(string storagePath, string ipAddress)
@@ -121,13 +140,8 @@ public class ServerSetup : IServerContext
     public void Start(IServerConstants config, ILogger<ServerSetup> logger)
     {
         Config = config;
-        lock (LogLock)
-        {
-            _log = logger;
-        }
-
+        _log = logger;
         Commander.CompileCommands();
-
         Startup();
         CommandHandler();
         DatabaseSaveConnection();
