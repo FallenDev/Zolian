@@ -453,7 +453,7 @@ public sealed class Item : Sprite, IItem
             WeapVariance = WeaponVariance.None,
             GearEnhancement = GearEnhancements.None,
             ItemMaterial = ItemMaterials.None
-    };
+        };
 
         if (obj.Color == 0)
             obj.Color = 13;
@@ -704,9 +704,10 @@ public sealed class Item : Sprite, IItem
     /// Delete from database only happens on death, or item dropped
     /// Checks if item still exists on SQL List, if so remove
     /// </summary>
-    public void DeleteFromAislingDb()
+    public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
+        await StorageManager.AislingBucket.SaveLock.WaitAsync().ConfigureAwait(false);
 
         try
         {
@@ -721,6 +722,10 @@ public sealed class Item : Sprite, IItem
             ServerSetup.Logger(e.Message, LogLevel.Error);
             ServerSetup.Logger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
+        }
+        finally
+        {
+            StorageManager.AislingBucket.SaveLock.Release();
         }
     }
 

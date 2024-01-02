@@ -631,7 +631,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         playerRegenWatch.Restart();
                         break;
                     case PlayerSaveComponent playerSaveComponent:
-                        if (playerSaveElapsed.TotalSeconds < 1) break;
+                        if (playerSaveElapsed.TotalSeconds < 10) break;
                         playerSaveComponent.Update(playerSaveElapsed);
                         playerSaveWatch.Restart();
                         break;
