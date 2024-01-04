@@ -66,6 +66,10 @@ public class Buff : IBuff
             "Berserker Rage" => new buff_berserk(),
             "Briarthorn Aura" => new aura_BriarThorn(),
             "Laws of Aosda" => new aura_LawsOfAosda(),
+            "Ard Fas Nadur" => new BuffArdFasNadur(),
+            "Mor Fas Nadur" => new BuffMorFasNadur(),
+            "Fas Nadur" => new BuffFasNadur(),
+            "Fas Spiorad" => new BuffFasSpiorad(),
             _ => BuffSpell
         };
 

@@ -433,7 +433,7 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
             }
             var rand = Random.Shared.Next(0, count);
             var randTarget = targetList[rand];
-            _spellMethod.ElementalOnUse(sprite, randTarget, spell, 90);
+            _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, spell, 90 + playerAction.ExpLevel);
         }
     }
 }

@@ -230,9 +230,109 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (sprite is Aisling caster)
             {
                 caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+                SpellOnFailed(sprite, target, spell);
                 return;
             }
 
+            SpellOnFailed(sprite, target, spell);
+        }
+    }
+
+    public void ElementalNecklaceOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp)
+    {
+        if (sprite is not Aisling aisling) return;
+
+        if (target == null) return;
+        var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
+        var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
+
+        if (target.CurrentHp > 0)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
+            target.ApplyElementalSpellDamage(aisling, dmg, aisling.OffenseElement, spell);
+        }
+        else
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
+        }
+    }
+
+    public void ElementalNecklaceOnUse(Sprite sprite, Sprite target, Spell spell, double exp = 1)
+    {
+        if (target == null) return;
+        if (!spell.CanUse())
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
+
+        if (target.SpellReflect)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
+            }
+
+            if (target is Aisling targetPlayer)
+            {
+                targetPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}");
+            }
+
+            sprite = Spell.SpellReflect(target, sprite);
+        }
+
+        if (target.SpellNegate)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            }
+
+            if (target is not Aisling targetPlayer) return;
+            targetPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}");
+            return;
+        }
+
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (sprite is not Aisling aisling) return;
+            var client = aisling.Client;
+
+            if (aisling.CurrentMp - spell.Template.ManaCost > 0)
+            {
+                aisling.CurrentMp -= spell.Template.ManaCost;
+                Train(client, spell);
+            }
+            else
+            {
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                return;
+            }
+
+            var success = Execute(client, spell);
+
+            if (success)
+            {
+                ElementalNecklaceOnSuccess(aisling, target, spell, exp);
+            }
+            else
+            {
+                SpellOnFailed(aisling, target, spell);
+            }
+
+            client.SendAttributes(StatUpdateType.Vitality);
+        }
+        else
+        {
+            if (sprite is not Aisling caster) return;
+            caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
             SpellOnFailed(sprite, target, spell);
         }
     }
@@ -465,6 +565,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (sprite is Aisling caster)
             {
                 caster.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+                SpellOnFailed(sprite, target, spell);
                 return;
             }
 

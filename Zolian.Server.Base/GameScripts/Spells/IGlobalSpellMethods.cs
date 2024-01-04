@@ -13,6 +13,8 @@ public interface IGlobalSpellMethods
     long MonsterElementalDamageProc(Sprite sprite, long baseDmg, Spell spell, double exp);
     void ElementalOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp);
     void ElementalOnUse(Sprite sprite, Sprite target, Spell spell, double exp = 1);
+    void ElementalNecklaceOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp);
+    void ElementalNecklaceOnUse(Sprite sprite, Sprite target, Spell spell, double exp = 1);
     void AfflictionOnSuccess(Sprite sprite, Sprite target, Spell spell, Debuff debuff);
     void PoisonOnSuccess(Sprite sprite, Sprite target, Spell spell, Debuff debuff);
     void SpellOnSuccess(Sprite sprite, Sprite target, Spell spell);

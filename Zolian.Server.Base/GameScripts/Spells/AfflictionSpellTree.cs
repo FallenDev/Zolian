@@ -368,50 +368,6 @@ public class CroichBeagCradh(Spell spell) : SpellScript(spell)
 
 #region Ard
 
-[Script("Ard Fas Nadur")]
-public class Ard_Fas_Nadur(Spell spell) : SpellScript(spell)
-{
-    private readonly Debuff _debuff = new DebuffArdfasnadur();
-    private readonly GlobalSpellMethods _spellMethod = new();
-
-    public override void OnFailed(Sprite sprite, Sprite target) { }
-
-    public override void OnSuccess(Sprite sprite, Sprite target) { }
-
-    public override void OnUse(Sprite sprite, Sprite target)
-    {
-        if (target == null) return;
-
-        switch (sprite)
-        {
-            case Aisling playerAction:
-                playerAction.ActionUsed = "Ard Fas Nadur";
-                break;
-            case Monster monsterAction:
-                target = monsterAction;
-                break;
-        }
-
-        if (target.HasDebuff("Ard Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
-            return;
-        }
-
-        if (target.HasDebuff("Mor Fas Nadur") || target.HasDebuff("Fas Nadur") || target.HasDebuff("Beag Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
-            return;
-        }
-
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
-    }
-}
-
 [Script("Ard Cradh")]
 public class Ard_Cradh(Spell spell) : SpellScript(spell)
 {
@@ -498,58 +454,6 @@ public class Ard_Puinsein(Spell spell) : SpellScript(spell)
 #endregion
 
 #region Mor
-
-[Script("Mor Fas Nadur")]
-public class Mor_Fas_Nadur(Spell spell) : SpellScript(spell)
-{
-    private readonly Debuff _debuff = new DebuffMorfasnadur();
-    private readonly GlobalSpellMethods _spellMethod = new();
-
-    public override void OnFailed(Sprite sprite, Sprite target) { }
-
-    public override void OnSuccess(Sprite sprite, Sprite target) { }
-
-    public override void OnUse(Sprite sprite, Sprite target)
-    {
-        if (target == null) return;
-
-        switch (sprite)
-        {
-            case Aisling playerAction:
-                playerAction.ActionUsed = "Mor Fas Nadur";
-                break;
-            case Monster monsterAction:
-                target = monsterAction;
-                break;
-        }
-
-        if (target.HasDebuff("Ard Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
-            return;
-        }
-
-        if (target.HasDebuff("Mor Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
-            return;
-        }
-
-        if (target.HasDebuff("Fas Nadur") || target.HasDebuff("Beag Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
-            return;
-        }
-
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
-    }
-}
 
 [Script("Mor Cradh")]
 public class Mor_Cradh(Spell spell) : SpellScript(spell)
@@ -662,58 +566,6 @@ public class Silence(Spell spell) : SpellScript(spell)
         if (target == null) return;
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Silence";
-
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
-    }
-}
-
-[Script("Fas Nadur")]
-public class Fas_Nadur(Spell spell) : SpellScript(spell)
-{
-    private readonly Debuff _debuff = new DebuffFasnadur();
-    private readonly GlobalSpellMethods _spellMethod = new();
-
-    public override void OnFailed(Sprite sprite, Sprite target) { }
-
-    public override void OnSuccess(Sprite sprite, Sprite target) { }
-
-    public override void OnUse(Sprite sprite, Sprite target)
-    {
-        if (target == null) return;
-
-        switch (sprite)
-        {
-            case Aisling playerAction:
-                playerAction.ActionUsed = "Fas Nadur";
-                break;
-            case Monster monsterAction:
-                target = monsterAction;
-                break;
-        }
-
-        if (target.HasDebuff("Ard Fas Nadur") || target.HasDebuff("Mor Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
-            return;
-        }
-
-        if (target.HasDebuff("Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
-            return;
-        }
-
-        if (target.HasDebuff("Beag Fas Nadur"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
-            return;
-        }
 
         _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
     }
@@ -837,87 +689,6 @@ public class Blind(Spell spell) : SpellScript(spell)
         }
 
         _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
-    }
-}
-
-[Script("Fas Spiorad")]
-public class Fas_Spiorad(Spell spell) : SpellScript(spell)
-{
-    private readonly Debuff _debuff = new DebuffFasspiorad();
-    private readonly GlobalSpellMethods _spellMethod = new();
-
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-        if (sprite is Aisling aisling)
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Your body is too weak.");
-    }
-
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-        if (target == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        if (!spell.CanUse())
-        {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
-            return;
-        }
-
-        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
-        {
-            aisling.CurrentMp -= spell.Template.ManaCost;
-            _spellMethod.Train(client, spell);
-        }
-        else
-        {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            return;
-        }
-
-        var success = _spellMethod.Execute(client, spell);
-
-        if (success)
-        {
-            _spellMethod.AfflictionOnSuccess(aisling, target, spell, _debuff);
-        }
-        else
-        {
-            _spellMethod.SpellOnFailed(aisling, target, spell);
-        }
-
-        client.SendAttributes(StatUpdateType.Vitality);
-    }
-
-    public override void OnUse(Sprite sprite, Sprite target)
-    {
-        if (!spell.CanUse())
-        {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
-            return;
-        }
-
-        if (target == null) return;
-        if (target.HasDebuff("Fas Spiorad"))
-        {
-            if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body is too weak.");
-            return;
-        }
-
-        var healthCheck = (int)(target.MaximumHp * 0.33);
-
-        if (healthCheck > 0)
-        {
-            _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
-        }
-        else
-        {
-            OnFailed(sprite, target);
-        }
     }
 }
 

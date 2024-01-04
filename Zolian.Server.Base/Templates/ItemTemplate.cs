@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Identity;
-
-using Dapper;
+﻿using Dapper;
 
 using Darkages.Database;
 using Darkages.Enums;
@@ -53,6 +51,7 @@ public class ItemTemplate : Template
     public string NpcKey { get; init; }
     public Class Class { get; init; }
     public ushort LevelRequired { get; init; }
+    public ushort JobLevelRequired { get; init; }
     public ClassStage StageRequired { get; init; }
     public int DmgMin { get; init; }
     public int DmgMax { get; init; }
@@ -75,9 +74,13 @@ public class ItemTemplate : Template
         if (Gender == 0)
             Gender = Gender.Unisex;
 
+        var stage = 0;
+        if (StageRequired >= ClassStage.Master)
+            stage = 1;
+
         return new[]
         {
-            $"{LevelRequired}\n",
+            $"{LevelRequired}/{stage}/{JobLevelRequired}\n",
             $"{ClassStrings.ItemClassToIntMetaData(Class.ToString())}\n",
             $"{CarryWeight}\n",
             category,
@@ -112,6 +115,7 @@ public static class ItemStorage
                 var worth = (int)reader["Worth"];
                 var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
                 var level = (int)reader["LevelRequired"];
+                var jobLevel = (int)reader["JobLevelRequired"];
                 var drop = (decimal)reader["DropRate"];
                 var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
                 var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
@@ -128,6 +132,7 @@ public static class ItemStorage
                     NpcKey = reader["NpcKey"].ToString(),
                     Class = itemClass,
                     LevelRequired = (ushort)level,
+                    JobLevelRequired = (ushort)jobLevel,
                     DropRate = (double)drop,
                     StageRequired = classStage,
                     Color = color,
@@ -174,6 +179,7 @@ public static class ItemStorage
                 var worth = (int)reader["Worth"];
                 var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
                 var level = (int)reader["LevelRequired"];
+                var jobLevel = (int)reader["JobLevelRequired"];
                 var drop = (decimal)reader["DropRate"];
                 var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
                 var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
@@ -194,6 +200,7 @@ public static class ItemStorage
                     NpcKey = "",
                     Class = itemClass,
                     LevelRequired = (ushort)level,
+                    JobLevelRequired = (ushort)jobLevel,
                     DmgMin = 0,
                     DmgMax = 0,
                     DropRate = (double)drop,
@@ -262,6 +269,7 @@ public static class ItemStorage
                 var worth = (int)reader["Worth"];
                 var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
                 var level = (int)reader["LevelRequired"];
+                var jobLevel = (int)reader["JobLevelRequired"];
                 var drop = (decimal)reader["DropRate"];
                 var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
                 var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
@@ -282,6 +290,7 @@ public static class ItemStorage
                     NpcKey = "",
                     Class = itemClass,
                     LevelRequired = (ushort)level,
+                    JobLevelRequired = (ushort)jobLevel,
                     DmgMin = 0,
                     DmgMax = 0,
                     DropRate = (double)drop,
@@ -351,6 +360,7 @@ public static class ItemStorage
                 var worth = (int)reader["Worth"];
                 var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
                 var level = (int)reader["LevelRequired"];
+                var jobLevel = (int)reader["JobLevelRequired"];
                 var drop = (decimal)reader["DropRate"];
                 var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
                 var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
@@ -372,6 +382,7 @@ public static class ItemStorage
                     NpcKey = reader["NpcKey"].ToString(),
                     Class = itemClass,
                     LevelRequired = (ushort)level,
+                    JobLevelRequired = (ushort)jobLevel,
                     DmgMin = (int)reader["DmgMin"],
                     DmgMax = (int)reader["DmgMax"],
                     DropRate = (double)drop,

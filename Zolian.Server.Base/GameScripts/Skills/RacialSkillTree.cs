@@ -307,7 +307,7 @@ public class Splash(Skill skill) : SkillScript(skill)
 }
 
 // Human
-// Has a chance to hit twice, Aisling Str * 3, Con * 2, Dex * 3
+// Has a chance to hit twice, Aisling Str * 8, Con * 8, Dex * 8
 [Script("Slash")]
 public class Slash(Skill skill) : SkillScript(skill)
 {
@@ -404,14 +404,14 @@ public class Slash(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + skill.Level;
-            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 2 + client.Aisling.Dex * 3;
+            dmg = client.Aisling.Str * 8 + client.Aisling.Con * 8 + client.Aisling.Dex * 8;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 4;
-            dmg += damageMonster.Con * 3;
+            dmg = damageMonster.Str * 8;
+            dmg += damageMonster.Con * 8;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);

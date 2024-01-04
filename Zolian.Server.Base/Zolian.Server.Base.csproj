@@ -16,6 +16,7 @@
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<TieredPGO>true</TieredPGO>
 		<ErrorReport>send</ErrorReport>
+		<RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,8 +37,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="1.1.0" />
-		<PackageReference Include="Dapper.StrongName" Version="2.1.24" />
+		<PackageReference Include="Chaos-Networking" Version="1.1.2" />
+		<PackageReference Include="Dapper.StrongName" Version="2.1.28" />
 		<PackageReference Include="Microsoft.AppCenter" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.3" />

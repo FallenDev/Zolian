@@ -1653,3 +1653,165 @@ public class aura_LawsOfAosda : Buff
 }
 
 #endregion
+
+#region Fas
+
+public class BuffArdFasNadur : Buff
+{
+    public override byte Icon => 219;
+    public override int Length => 640;
+    public override string Name => "Ard Fas Nadur";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.Amplified = 2.5;
+        }
+
+        if (affected is not Aisling player) return;
+        InsertBuff(player, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        aisling.Amplified = 2.5;
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.Amplified = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+}
+
+public class BuffMorFasNadur : Buff
+{
+    public override byte Icon => 218;
+    public override int Length => 320;
+    public override string Name => "Mor Fas Nadur";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.Amplified = 2;
+        }
+
+        if (affected is not Aisling player) return;
+        InsertBuff(player, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        aisling.Amplified = 2;
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.Amplified = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+}
+
+public class BuffFasNadur : Buff
+{
+    public override byte Icon => 119;
+    public override int Length => 120;
+    public override string Name => "Fas Nadur";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+            affected.Amplified = 1.5;
+        }
+
+        if (affected is not Aisling player) return;
+        InsertBuff(player, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        aisling.Amplified = 1.5;
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.Amplified = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+}
+
+public class BuffFasSpiorad : Buff
+{
+    public override byte Icon => 26;
+    public override int Length => 2;
+    public override string Name => "Fas Spiorad";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+
+        var reduce = aisling.MaximumMp * 0.50;
+        if (aisling.CurrentHp - reduce <= 0)
+        {
+            aisling.CurrentHp = 1;
+        }
+        else
+            aisling.CurrentHp -= (int)reduce;
+
+        aisling.CurrentMp = aisling.MaximumMp;
+
+        InsertBuff(aisling, buff);
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(26, false));
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The impact to your body dissipates.");
+        DeleteBuff(aisling, buff);
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+}
+#endregion

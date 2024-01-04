@@ -3354,7 +3354,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildRank = Aisling.GameMaster
                 ? "Game Master"
                 : $"Vit: {Aisling.BaseHp + Aisling.BaseMp * 2}",
-            IsMaster = Aisling.Stage >= ClassStage.Master,
+            IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
             LegendMarks = legendMarks,
             Name = Aisling.Username,
             Nation = Nation.Mileth,
@@ -3904,6 +3904,13 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (client.Aisling.Stage < item.Template.StageRequired)
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not have the current expertise for this.");
+            return false;
+        }
+
+        // Job Level Check
+        if (client.Aisling.AbpLevel < item.Template.JobLevelRequired)
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not have the expertise level for this.");
             return false;
         }
 

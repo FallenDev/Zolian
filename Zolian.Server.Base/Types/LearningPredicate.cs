@@ -32,6 +32,7 @@ public class LearningPredicate
     public int ConRequired { get; set; }
     public int DexRequired { get; set; }
     public int ExpLevelRequired { get; set; }
+    public int AbpLevelRequired { get; set; }
     public uint ExperienceRequired { get; set; }
     public uint GoldRequired { get; set; }
     public int SkillLevelRequired { get; set; }
@@ -39,28 +40,13 @@ public class LearningPredicate
     public int SpellLevelRequired { get; set; }
     public string SpellRequired { get; set; }
     public ClassStage StageRequired { get; set; }
-    private string LevelDisplay
-    {
-        get
-        {
-            return StageRequired switch
-            {
-                ClassStage.Master => $"{ExpLevelRequired}/1/0",
-                ClassStage.Job => $"{ExpLevelRequired}/1/{ExpLevelRequired}",
-                _ => ExpLevelRequired switch
-                {
-                    > 0 and < 500 => $"{ExpLevelRequired}/0/0",
-                    _ => "0/0/0"
-                }
-            };
-        }
-    }
+    private bool MasterRequired => StageRequired.StageFlagIsSet(ClassStage.Master);
 
     internal string[] MetaData => new[]
     {
-        $"{LevelDisplay}",
-        $"{(_template is SkillTemplate template ? template.Icon : ((SpellTemplate) _template).Icon)}",
-        $"{(StrRequired == 0 ? 3 : StrRequired)}/{(IntRequired == 0 ? 3 : IntRequired)}/{(WisRequired == 0 ? 3 : WisRequired)}/{(DexRequired == 0 ? 3 : DexRequired)}/{(ConRequired == 0 ? 3 : ConRequired)}",
+        $"{ExpLevelRequired}/{Convert.ToByte(MasterRequired)}/{AbpLevelRequired}",
+        $"{(_template is SkillTemplate template ? template.Icon : ((SpellTemplate) _template).Icon)}/0/0",
+        $"{(StrRequired == 0 ? 5 : StrRequired)}/{(IntRequired == 0 ? 5 : IntRequired)}/{(WisRequired == 0 ? 5 : WisRequired)}/{(DexRequired == 0 ? 5 : DexRequired)}/{(ConRequired == 0 ? 5 : ConRequired)}",
         $"{(!string.IsNullOrEmpty(SkillRequired) ? SkillRequired : "0")}/{(SkillLevelRequired > 0 ? SkillLevelRequired : 0)}",
         $"{(!string.IsNullOrEmpty(SpellRequired) ? SpellRequired : "0")}/{(SpellLevelRequired > 0 ? SpellLevelRequired : 0)}",
         $"{_template.Description}\n\nItems Required: {(ItemsRequired.Count > 0 ? string.Join(",", ItemsRequired.Select(i => i.AmountRequired + " " + i.Item)) : "None")} \nGold: {(GoldRequired > 0 ? GoldRequired : 0)}\n{Script()}",

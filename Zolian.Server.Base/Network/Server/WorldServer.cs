@@ -47,7 +47,6 @@ using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using Stat = Chaos.Common.Definitions.Stat;
-using Chaos.Networking.Entities;
 
 namespace Darkages.Network.Server;
 
