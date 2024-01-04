@@ -1,10 +1,7 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
-using Darkages.Types;
 
 namespace Darkages.Network.Components;
 
@@ -25,10 +22,6 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             if (user?.Client == null) return;
             if (!user.LoggedIn) return;
             UpdateClientObjects(user);
-            var onMap = user.Map.IsLocationOnMap(user);
-            if (onMap) return;
-            user.Client.TransitionToMap(136, new Position(5, 7));
-            user.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Something grabs your hand...");
         });
     }
 

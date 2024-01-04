@@ -21,19 +21,18 @@ public enum Class
 public enum Job
 {
     None = 0,
-    Thief = 1,
-    DarkKnight = 1 << 1,
-    Templar = 1 << 2,
-    Knight = 1 << 3,
-    Ninja = 1 << 4,
-    SharpShooter = 1 << 5,
-    Oracle = 1 << 6,
-    Bard = 1 << 7,
-    Summoner = 1 << 8,
-    Samurai = 1 << 9,
-    ShaolinMonk = 1 << 10,
-    Necromancer = 1 << 11,
-    Dragoon = 1 << 12
+    Thief = 1, // ♈︎
+    DarkKnight = 1 << 1, // ♒︎
+    Templar = 1 << 2, // ♉︎
+    Ninja = 1 << 3, // ♍︎
+    SharpShooter = 1 << 4, // ♌︎
+    Oracle = 1 << 5, // ♎︎
+    Bard = 1 << 6, // ♏︎
+    Summoner = 1 << 7, // ♊︎
+    Samurai = 1 << 8, // ♓︎
+    ShaolinMonk = 1 << 9, // ♋︎
+    Necromancer = 1 << 10, // ♑︎
+    Dragoon = 1 << 11 // ♐︎
 }
 
 [Flags]

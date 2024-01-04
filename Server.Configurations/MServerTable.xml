@@ -7,12 +7,5 @@
 			<Name>Zolian</Name>
 			<Desc>Zolian Beta - Stable</Desc>
 		</MServer>
-		<MServer>
-			<ID>2</ID>
-			<Addr>127.0.0.1</Addr>
-			<Port>4201</Port>
-			<Name>Zolian</Name>
-			<Desc>Zolian Alpha - Used for testing</Desc>
-		</MServer>
 	</Servers>
 </MServerTable>

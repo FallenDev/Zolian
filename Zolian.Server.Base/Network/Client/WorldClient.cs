@@ -3579,6 +3579,29 @@ public class WorldClient : SocketClientBase, IWorldClient
                 _ => 0
             };
 
+            var jobClass = aisling.JobClass switch
+            {
+                Job.None => "",
+                Job.Thief => "Thief",
+                Job.DarkKnight => "Dark Knight",
+                Job.Templar => "Templar",
+                Job.Ninja => "Ninja",
+                Job.SharpShooter => "Sharp Shooter",
+                Job.Oracle => "Oracle",
+                Job.Bard => "Bard",
+                Job.Summoner => "Summoner",
+                Job.Samurai => "Samurai",
+                Job.ShaolinMonk => "Shaolin Monk",
+                Job.Necromancer => "Necromancer",
+                Job.Dragoon => "Dragoon",
+                _ => ""
+            };
+
+            var vitality = $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}";
+
+            if (!jobClass.IsNullOrEmpty())
+                vitality = jobClass;
+
             var arg = new WorldListMemberInfo
             {
                 BaseClass = (BaseClass)classList,
@@ -3588,7 +3611,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 SocialStatus = (SocialStatus)aisling.ActiveStatus,
                 Title = aisling.GameMaster
                     ? "Game Master"
-                    : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}"
+                    : $"{vitality}"
             };
 
             worldList.Add(arg);
@@ -4773,6 +4796,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     var portal = new PortalSession();
                     portal.TransitionToMap(client);
                     breakOuterLoop = true;
+                    client.WorldMapInterrupt();
                     break;
                 }
             }
@@ -4798,7 +4822,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                     {
                         client.WarpToAdjacentMap(value);
                         breakOuterLoop = true;
-                        client.Interrupt();
                         break;
                     }
 
