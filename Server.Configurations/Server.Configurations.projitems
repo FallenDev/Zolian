@@ -21,6 +21,9 @@
     <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianAbilities.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianBoardsMail.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)ZolianDB\ZolianMaps.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

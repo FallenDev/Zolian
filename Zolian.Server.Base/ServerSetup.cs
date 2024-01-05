@@ -319,38 +319,38 @@ public class ServerSetup : IServerContext
 
     public static void SaveCommunityAssets()
     {
-        lock (SyncLock)
-        {
-            var tmp = new List<Board>(_arenaUpdates);
-            var tmp1 = new List<Board>(_huntingToL);
-            var tmp2 = new List<Board>(PersonalBoards);
-            var tmp3 = new List<Board>(_serverUpdates);
-            var tmp4 = new List<Board>(_trashTalk);
+        //lock (SyncLock)
+        //{
+        //    var tmp = new List<Board>(_arenaUpdates);
+        //    var tmp1 = new List<Board>(_huntingToL);
+        //    var tmp2 = new List<Board>(PersonalBoards);
+        //    var tmp3 = new List<Board>(_serverUpdates);
+        //    var tmp4 = new List<Board>(_trashTalk);
 
-            foreach (var asset in tmp)
-            {
-                asset.Save("Arena Updates");
-            }
+        //    foreach (var asset in tmp)
+        //    {
+        //        asset.Save("Arena Updates");
+        //    }
 
-            foreach (var asset in tmp1)
-            {
-                asset.Save("Hunting");
-            }
+        //    foreach (var asset in tmp1)
+        //    {
+        //        asset.Save("Hunting");
+        //    }
 
-            foreach (var asset in tmp2)
-            {
-                asset.Save("Personal");
-            }
+        //    foreach (var asset in tmp2)
+        //    {
+        //        asset.Save("Personal");
+        //    }
 
-            foreach (var asset in tmp3)
-            {
-                asset.Save("Server Updates");
-            }
+        //    foreach (var asset in tmp3)
+        //    {
+        //        asset.Save("Server Updates");
+        //    }
 
-            foreach (var asset in tmp4)
-            {
-                asset.Save("Trash Talk");
-            }
-        }
+        //    foreach (var asset in tmp4)
+        //    {
+        //        asset.Save("Trash Talk");
+        //    }
+        //}
     }
 }
