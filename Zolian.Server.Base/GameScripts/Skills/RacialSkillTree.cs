@@ -824,6 +824,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -997,6 +998,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -1171,6 +1173,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -1355,6 +1358,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -1501,6 +1505,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -1679,6 +1684,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -1864,6 +1870,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -2050,6 +2057,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         {
             _skillMethod.FailedAttempt(aisling, skill, action);
             OnFailed(aisling);
+            _skillMethod.Train(aisling.Client, skill);
             return;
         }
 
@@ -2247,6 +2255,8 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
+        _skillMethod.Train(aisling.Client, skill);
+
         if (party == null || party.Count == 0)
         {
             aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff, TimeSpan.FromSeconds(_buff.Length));
@@ -2263,7 +2273,6 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
         }
 
         skill.LastUsedSkill = DateTime.UtcNow;
-        _skillMethod.Train(client, skill);
     }
 
     public override void OnUse(Sprite sprite)
