@@ -80,7 +80,7 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<int, Area> GlobalMapCache { get; set; } = new();
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
     public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = new();
-    public ConcurrentDictionary<string, List<Board>> GlobalBoardCache { get; set; } = new();
+    public ConcurrentDictionary<long, BoardTemplate> GlobalBoardPostCache { get; set; } = new();
     public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
     public ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; } = new();
     public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = new();
@@ -173,7 +173,8 @@ public class ServerSetup : IServerContext
         DatabaseLoad.CacheFromDatabase(new NationTemplate());
         DatabaseLoad.CacheFromDatabase(new MonsterTemplate());
         DatabaseLoad.CacheFromDatabase(new MundaneTemplate());
-        CacheCommunityAssets();
+        DatabaseLoad.CacheFromDatabase(new BoardTemplate());
+        //CacheCommunityAssets();
         BindTemplates();
         // ToDo: If decompiling templates, comment out LoadMetaDatabase();
         //MetafileManager.DecompileTemplates();
@@ -190,37 +191,37 @@ public class ServerSetup : IServerContext
 
     public void CacheCommunityAssets()
     {
-        if (PersonalBoards == null) return;
-        var dirs = Directory.GetDirectories(Path.Combine(StoragePath, "Community\\Boards"));
-        var tmpBoards = new Dictionary<string, List<Board>>();
+        //if (PersonalBoards == null) return;
+        //var dirs = Directory.GetDirectories(Path.Combine(StoragePath, "Community\\Boards"));
+        //var tmpBoards = new Dictionary<string, List<Board>>();
 
-        foreach (var dir in dirs.Select(i => new DirectoryInfo(i)))
-        {
-            var boards = Board.CacheFromStorage(dir.FullName);
+        //foreach (var dir in dirs.Select(i => new DirectoryInfo(i)))
+        //{
+        //    var boards = Board.CacheFromStorage(dir.FullName);
 
-            if (boards == null) continue;
+        //    if (boards == null) continue;
 
-            if (dir.Name == "Personal")
-                if (boards.Find(i => i.Index == 0) == null)
-                    boards.Add(new Board("Mail", 0, true));
+        //    if (dir.Name == "Personal")
+        //        if (boards.Find(i => i.Index == 0) == null)
+        //            boards.Add(new Board("Mail", 0, true));
 
-            if (!tmpBoards.ContainsKey(dir.Name)) tmpBoards[dir.Name] = new List<Board>();
+        //    if (!tmpBoards.ContainsKey(dir.Name)) tmpBoards[dir.Name] = new List<Board>();
 
-            tmpBoards[dir.Name].AddRange(boards);
-        }
+        //    tmpBoards[dir.Name].AddRange(boards);
+        //}
 
-        PersonalBoards = tmpBoards["Personal"].OrderBy(i => i.Index).ToArray();
-        _huntingToL = tmpBoards["Hunting"].OrderBy(i => i.Index).ToArray();
-        _arenaUpdates = tmpBoards["Arena Updates"].OrderBy(i => i.Index).ToArray();
-        _trashTalk = tmpBoards["Trash Talk"].OrderBy(i => i.Index).ToArray();
-        _serverUpdates = tmpBoards["Server Updates"].OrderBy(i => i.Index).ToArray();
+        //PersonalBoards = tmpBoards["Personal"].OrderBy(i => i.Index).ToArray();
+        //_huntingToL = tmpBoards["Hunting"].OrderBy(i => i.Index).ToArray();
+        //_arenaUpdates = tmpBoards["Arena Updates"].OrderBy(i => i.Index).ToArray();
+        //_trashTalk = tmpBoards["Trash Talk"].OrderBy(i => i.Index).ToArray();
+        //_serverUpdates = tmpBoards["Server Updates"].OrderBy(i => i.Index).ToArray();
 
-        foreach (var (key, value) in tmpBoards)
-        {
-            if (!GlobalBoardCache.ContainsKey(key)) GlobalBoardCache[key] = new List<Board>();
+        //foreach (var (key, value) in tmpBoards)
+        //{
+        //    if (!GlobalBoardCache.ContainsKey(key)) GlobalBoardCache[key] = new List<Board>();
 
-            GlobalBoardCache[key].AddRange(value);
-        }
+        //    GlobalBoardCache[key].AddRange(value);
+        //}
     }
 
     public void LoadExtensions()

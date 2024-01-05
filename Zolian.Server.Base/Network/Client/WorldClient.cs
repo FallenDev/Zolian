@@ -1608,40 +1608,40 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendBoard(string boardName, short? startPost, int index = 0)
     {
-        if (!ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardIndex)) return;
-        ICollection<PostInfo> postsCollection = new List<PostInfo>();
-        var board = boardIndex[index];
+        //if (!ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardIndex)) return;
+        //ICollection<PostInfo> postsCollection = new List<PostInfo>();
+        //var board = boardIndex[index];
 
-        foreach (var postFormat in board.Posts)
-        {
-            var post = new PostInfo
-            {
-                Author = postFormat.Sender,
-                CreationDate = postFormat.DatePosted,
-                IsHighlighted = postFormat.HighLighted,
-                Message = postFormat.Message,
-                PostId = postFormat.PostId,
-                Subject = postFormat.Subject
-            };
+        //foreach (var postFormat in board.Posts)
+        //{
+        //    var post = new PostInfo
+        //    {
+        //        Author = postFormat.Sender,
+        //        CreationDate = postFormat.DatePosted,
+        //        IsHighlighted = postFormat.HighLighted,
+        //        Message = postFormat.Message,
+        //        PostId = postFormat.PostId,
+        //        Subject = postFormat.Subject
+        //    };
 
-            postsCollection.Add(post);
-        }
+        //    postsCollection.Add(post);
+        //}
 
-        var boardInfo = new BoardInfo
-        {
-            BoardId = board.Index,
-            Name = boardName,
-            Posts = postsCollection
-        };
+        //var boardInfo = new BoardInfo
+        //{
+        //    BoardId = board.Index,
+        //    Name = boardName,
+        //    Posts = postsCollection
+        //};
 
-        var args = new BoardArgs
-        {
-            Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
-            Board = boardInfo,
-            StartPostId = startPost
-        };
+        //var args = new BoardArgs
+        //{
+        //    Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
+        //    Board = boardInfo,
+        //    StartPostId = startPost
+        //};
 
-        Send(args);
+        //Send(args);
     }
 
     /// <summary>

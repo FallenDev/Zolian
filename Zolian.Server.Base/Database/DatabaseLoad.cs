@@ -16,6 +16,7 @@ namespace Darkages.Database;
 public abstract class DatabaseLoad
 {
     private const string ZolianConn = "Data Source=.;Initial Catalog=Zolian;Integrated Security=True;Encrypt=False";
+    private const string ZolianBoardConn = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False";
     private const string ZolianWorldMapsConn = "Data Source=.;Initial Catalog=ZolianWorldMaps;Integrated Security=True;Encrypt=False";
     private const string ZolianMapsConn = "Data Source=.;Initial Catalog=ZolianMaps;Integrated Security=True;Encrypt=False";
     private const string ZolianAbilitiesConn = "Data Source=.;Initial Catalog=ZolianAbilities;Integrated Security=True;Encrypt=False";
@@ -49,6 +50,9 @@ public abstract class DatabaseLoad
                 break;
             case MundaneTemplate _:
                 Mundanes(ZolianMundanesConn);
+                break;
+            case BoardTemplate _:
+                BoardsPosts(ZolianBoardConn);
                 break;
         }
     }
@@ -388,5 +392,20 @@ public abstract class DatabaseLoad
         ServerSetup.Instance.GlobalWorldMapTemplateCache = ServerSetup.Instance.TempGlobalWorldMapTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalWorldMapTemplateCache.Clear();
         ServerSetup.Logger($"World Map Templates: {ServerSetup.Instance.GlobalWorldMapTemplateCache.Count}");
+    }
+
+    private static void BoardsPosts(string conn)
+    {
+        try
+        {
+            BoardPostStorage.CacheFromDatabase(conn);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
+
+        ServerSetup.Logger($"Boards Loaded: {ServerSetup.Instance.GlobalBoardPostCache.Count}");
     }
 }
