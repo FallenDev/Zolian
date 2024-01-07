@@ -29,7 +29,7 @@ public interface IAislingStorage
     Task<bool> CheckIfPlayerExists(string name);
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);
-    BoardTemplate ObtainBoardId(long serial);
+    BoardTemplate ObtainMailboxId(long serial);
     List<PostTemplate> ObtainPosts(ushort boardId);
     void SendPost(PostTemplate postInfo, ushort boardId);
     Task Create(Aisling obj);

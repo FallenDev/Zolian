@@ -2651,11 +2651,33 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case BoardRequestType.ViewPost:
                     {
                         if (localArgs.BoardId == null) return default;
+                        if (localArgs.BoardId == localClient.Aisling.QuestManager.MailBoxNumber)
+                        {
+                            var post = localClient.Aisling.PersonalLetters.Values.FirstOrDefault(p => p.PostId == localArgs.PostId);
+
+                            // If null, check to see if there is a previous post first
+                            if (post == null)
+                            {
+                                var postId = localArgs.PostId - 1;
+                                post = localClient.Aisling.PersonalLetters.Values.FirstOrDefault(p => p.PostId == postId);
+                            }
+
+                            // If still null, display an error and exit
+                            if (post == null)
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "There is nothing more to read", false);
+                                break;
+                            }
+
+                            var prevEnabled = post.PostId > 0;
+                            localClient.SendPost(post, true, prevEnabled);
+                            break;
+                        }
+
                         var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
                         if (boardFound)
                         {
-                            var post = board.IsMail ? localClient.Aisling.PersonalLetters.Values.FirstOrDefault(p => p.PostId == localArgs.PostId)
-                                : board.Posts.Values.FirstOrDefault(p => p.PostId == localArgs.PostId);
+                            var post = board.Posts.Values.FirstOrDefault(p => p.PostId == localArgs.PostId);
 
                             // If null, check to see if there is a previous post first
                             if (post == null)
@@ -2667,14 +2689,42 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             // If still null, display an error and exit
                             if (post == null)
                             {
-                                localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "There is nothing more to read.", false);
+                                localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "There is nothing more to read", false);
                                 break;
                             }
 
                             var prevEnabled = post.PostId > 0;
-                            localClient.SendPost(post, board.IsMail, prevEnabled);
+                            localClient.SendPost(post, false, prevEnabled);
                         }
 
+                        break;
+                    }
+                case BoardRequestType.SendMail:
+                    {
+                        var receiver = StorageManager.AislingBucket.CheckPassword(localArgs.To);
+                        if (receiver.Result == null)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "User does not exist.", false);
+                            break;
+                        }
+                        var board = StorageManager.AislingBucket.ObtainMailboxId(receiver.Result.Serial);
+                        var posts = StorageManager.AislingBucket.ObtainPosts(board.BoardId);
+                        var postIdList = posts.Select(post => (int)post.PostId).ToList();
+                        var postId = Enumerable.Range(1, 128).Except(postIdList).First();
+                        var np = new PostTemplate
+                        {
+                            PostId = (short)postId,
+                            Highlighted = false,
+                            DatePosted = DateTime.UtcNow,
+                            Owner = localArgs.To,
+                            Sender = client.Aisling.Username,
+                            ReadPost = false,
+                            SubjectLine = localArgs.Subject,
+                            Message = localArgs.Message
+                        };
+
+                        StorageManager.AislingBucket.SendPost(np, board.BoardId);
+                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
                         break;
                     }
                 case BoardRequestType.NewPost:
@@ -2706,6 +2756,29 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case BoardRequestType.Delete:
                     {
                         if (localArgs.BoardId == null) return default;
+                        if (localArgs.BoardId == localClient.Aisling.QuestManager.MailBoxNumber)
+                        {
+                            try
+                            {
+                                var postFound = localClient.Aisling.PersonalLetters.TryGetValue((short)localArgs.PostId!, out var post);
+                                if (!postFound)
+                                {
+                                    localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Letter not found!", false);
+                                    break;
+                                }
+
+                                BoardPostStorage.DeletePost(post, (ushort)client.Aisling.QuestManager.MailBoxNumber);
+                                localClient.Aisling.PersonalLetters.TryRemove((short)localArgs.PostId!, out _);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Letter set on fire", true);
+                            }
+                            catch
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                            }
+
+                            break;
+                        }
+
                         var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
                         if (!boardFound)
                         {
@@ -2718,52 +2791,41 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             var postFound = board.Posts.TryGetValue((short)localArgs.PostId!, out var post);
                             if (!postFound)
                             {
-                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Post not found!", false);
                                 break;
                             }
 
-                            if (board.BoardId == client.Aisling.QuestManager.MailBoxNumber || string.Equals(post.Owner, client.Aisling.Username, StringComparison.InvariantCultureIgnoreCase))
+                            if (board.BoardId == client.Aisling.QuestManager.MailBoxNumber)
+                            {
+                                BoardPostStorage.DeletePost(post, (ushort)client.Aisling.QuestManager.MailBoxNumber);
+                                board.Posts.TryRemove((short)localArgs.PostId!, out _);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Letter set on fire", true);
+                                break;
+                            }
+
+                            if (string.Equals(post.Owner, client.Aisling.Username, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 BoardPostStorage.DeletePost(post, board.BoardId);
-                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted.", true);
+                                board.Posts.TryRemove((short)localArgs.PostId!, out _);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Post removed", true);
                                 break;
                             }
 
-                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "You do not have permission.", false);
+                            if (localClient.Aisling.GameMaster)
+                            {
+                                BoardPostStorage.DeletePost(post, board.BoardId);
+                                board.Posts.TryRemove((short)localArgs.PostId!, out _);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "GM Delete Used", true);
+                                break;
+                            }
+
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "You do not have permission", false);
                         }
                         catch
                         {
                             localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
                         }
 
-                        break;
-                    }
-                case BoardRequestType.SendMail:
-                    {
-                        var receiver = StorageManager.AislingBucket.CheckPassword(localArgs.To);
-                        if (receiver.Result == null)
-                        {
-                            localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "User does not exist.", false);
-                            break;
-                        }
-                        var board = StorageManager.AislingBucket.ObtainBoardId(receiver.Result.Serial);
-                        var posts = StorageManager.AislingBucket.ObtainPosts(board.BoardId);
-                        var postIdList = posts.Select(post => (int)post.PostId).ToList();
-                        var postId = Enumerable.Range(1, 128).Except(postIdList).First();
-                        var np = new PostTemplate
-                        {
-                            PostId = (short)postId,
-                            Highlighted = false,
-                            DatePosted = DateTime.UtcNow,
-                            Owner = localArgs.To,
-                            Sender = client.Aisling.Username,
-                            ReadPost = false,
-                            SubjectLine = localArgs.Subject,
-                            Message = localArgs.Message
-                        };
-
-                        StorageManager.AislingBucket.SendPost(np, board.BoardId);
-                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
                         break;
                     }
                 case BoardRequestType.Highlight:

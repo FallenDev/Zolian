@@ -73,7 +73,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
     private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
     private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
-    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(5000));
+    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(30000));
     public readonly object SyncClient = new();
     public bool ExitConfirmed;
     private static readonly SortedDictionary<long, string> AggroColors = new()

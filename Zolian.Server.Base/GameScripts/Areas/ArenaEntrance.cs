@@ -19,8 +19,8 @@ public class ArenaEntrance : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
-        var arenaBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(2, out var arenaBoard);
-        var trashBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(3, out var trashBoard);
+        var arenaBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(3, out var arenaBoard);
+        var trashBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(4, out var trashBoard);
 
         switch (x)
         {

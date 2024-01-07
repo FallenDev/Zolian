@@ -11,6 +11,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Data;
+using Darkages.Models;
 using Darkages.Templates;
 
 namespace Darkages.Database;
@@ -697,15 +698,18 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
-    public BoardTemplate ObtainBoardId(long serial)
+    public BoardTemplate ObtainMailboxId(long serial)
     {
         var board = new BoardTemplate();
-
         try
         {
-            var sConn = ConnectToDatabase(PersonalMailString);
+            var sConn = ConnectToDatabase(ConnectionString);
             var values = new { Serial = serial };
-            board = sConn.QueryFirst<BoardTemplate>("[ObtainMailBoxNumber]", values, commandType: CommandType.StoredProcedure);
+            var quests = sConn.QueryFirst<Quests>("[ObtainMailBoxNumber]", values, commandType: CommandType.StoredProcedure);
+            board.BoardId = (ushort)quests.MailBoxNumber;
+            board.IsMail = true;
+            board.Private = true;
+            board.Serial = serial;
             sConn.Close();
         }
         catch (Exception e)
@@ -799,7 +803,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             // Player
             var connection = ConnectToDatabase(EncryptedConnectionString);
-            var boardConn = ConnectToDatabase(PersonalMailString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerCreation", connection);
             var mailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
 
@@ -847,17 +850,6 @@ public record AislingStorage : Sql, IAislingStorage
             cmd3.CommandTimeout = 5;
 
             adapter.InsertCommand = cmd3;
-            adapter.InsertCommand.ExecuteNonQuery();
-
-            // Player Mail
-            var playerMailBox =
-                "INSERT INTO ZolianBoardsMail.dbo.Boards (BoardId, Serial, Private, IsMail, Name) VALUES " +
-                $"('{mailBoxNumber}','{(long)serial}','{1}','{1}','Mail')";
-
-            var cmd4 = new SqlCommand(playerMailBox, boardConn);
-            cmd4.CommandTimeout = 5;
-
-            adapter.InsertCommand = cmd4;
             adapter.InsertCommand.ExecuteNonQuery();
 
             #endregion

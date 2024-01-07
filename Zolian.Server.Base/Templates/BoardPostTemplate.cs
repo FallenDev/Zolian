@@ -104,7 +104,6 @@ public static class BoardPostStorage
         if (client.Aisling.QuestManager.MailBoxNumber == 0)
         {
             client.Aisling.QuestManager.MailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
-            CreateMailBox(client);
         }
 
         try
@@ -151,42 +150,18 @@ public static class BoardPostStorage
         }
     }
 
-    public static void DeletePost(PostTemplate post, ushort boardId)
+    public static void DeletePost(PostTemplate post, ushort id)
     {
         var postId = post.PostId;
+        var boardId = (int)id;
         var owner = post.Owner;
 
         try
         {
             var sConn = new SqlConnection(AislingStorage.PersonalMailString);
             sConn.Open();
-            const string cmd = "DELETE FROM ZolianBoardsMail.dbo.Posts WHERE BoardId = @boardId AND PostId = @postId AND Owner = @owner";
+            const string cmd = "DELETE FROM ZolianBoardsMail.dbo.Posts WHERE BoardId = @BoardId AND PostId = @PostId AND Owner = @Owner";
             sConn.Execute(cmd, new { boardId, postId, owner });
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.ToString());
-            Crashes.TrackError(e);
-        }
-    }
-
-    private static void CreateMailBox(WorldClient client)
-    {
-        try
-        {
-            var sConn = new SqlConnection(AislingStorage.PersonalMailString);
-            sConn.Open();
-            // Player Mail
-            var playerMailBox =
-                "INSERT INTO ZolianBoardsMail.dbo.Boards (BoardId, Serial, Private, IsMail, Name) VALUES " +
-                $"('{client.Aisling.QuestManager.MailBoxNumber}','{(long)client.Aisling.Serial}','{1}','{1}','Mail')";
-
-            var cmd4 = new SqlCommand(playerMailBox, sConn);
-            var adapter = new SqlDataAdapter();
-            cmd4.CommandTimeout = 5;
-            adapter.InsertCommand = cmd4;
-            adapter.InsertCommand.ExecuteNonQuery();
             sConn.Close();
         }
         catch (SqlException e)
