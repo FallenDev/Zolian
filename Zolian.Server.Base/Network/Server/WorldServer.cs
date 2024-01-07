@@ -2747,6 +2747,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                                 Message = localArgs.Message
                             };
 
+                            board.Posts.TryAdd((short)postId, np);
                             StorageManager.AislingBucket.SendPost(np, board.BoardId);
                             localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
                         }
