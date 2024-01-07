@@ -1,8 +1,6 @@
 ﻿using Darkages.Sprites;
 using Darkages.Types;
 
-using Newtonsoft.Json;
-
 namespace Darkages.Object;
 
 public interface IObjectManager
@@ -15,8 +13,6 @@ public interface IObjectManager
     T GetObjectByName<T>(string name, Area map = null) where T : Sprite, new();
     IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite;
     IEnumerable<Sprite> GetObjects(Area map, Predicate<Sprite> p, ObjectManager.Get selections);
-    T PersonalBoardJsonConvert<T>(object source);
-    Aisling GetAislingForMailDeliveryMessage(string name);
 }
 
 public class ObjectManager : IObjectManager
@@ -128,35 +124,5 @@ public class ObjectManager : IObjectManager
         }
 
         return bucket;
-    }
-
-    public T PersonalBoardJsonConvert<T>(object source)
-    {
-        var serialized = JsonConvert.SerializeObject(source, Formatting.Indented, Settings);
-        return JsonConvert.DeserializeObject<T>(serialized, Settings);
-    }
-
-    private static readonly JsonSerializerSettings Settings = new()
-    {
-        TypeNameHandling = TypeNameHandling.None,
-        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-        Formatting = Formatting.Indented,
-        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-    };
-
-    public Aisling GetAislingForMailDeliveryMessage(string name)
-    {
-        try
-        {
-            var sprite = GetObjects(null, i => i is Aisling aisling && string.Equals(aisling.Username, name, StringComparison.CurrentCultureIgnoreCase), Get.Aislings).FirstOrDefault();
-
-            if (sprite is Aisling player) return player;
-        }
-        catch
-        {
-            // Ignored
-        }
-
-        return null;
     }
 }

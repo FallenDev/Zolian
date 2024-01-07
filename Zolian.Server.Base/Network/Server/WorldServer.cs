@@ -43,10 +43,15 @@ using System.Numerics;
 using Darkages.Managers;
 using JetBrains.Annotations;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
+using ExchangeArgs = Chaos.Networking.Entities.Client.ExchangeArgs;
+using GroupRequestArgs = Chaos.Networking.Entities.Client.GroupRequestArgs;
 using MapFlags = Darkages.Enums.MapFlags;
+using ProfileArgs = Chaos.Networking.Entities.Client.ProfileArgs;
+using PublicMessageArgs = Chaos.Networking.Entities.Client.PublicMessageArgs;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using Stat = Chaos.Common.Definitions.Stat;
+using UnequipArgs = Chaos.Networking.Entities.Client.UnequipArgs;
 
 namespace Darkages.Network.Server;
 
@@ -126,28 +131,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private void RegisterServerComponents()
     {
-        lock (ServerSetup.SyncLock)
+        _serverComponents = new ConcurrentDictionary<Type, WorldServerComponent>
         {
-            _serverComponents = new ConcurrentDictionary<Type, WorldServerComponent>
-            {
-                [typeof(DayLightComponent)] = new DayLightComponent(this),
-                [typeof(BankInterestComponent)] = new BankInterestComponent(this),
-                [typeof(CommunityComponent)] = new CommunityComponent(this),
-                [typeof(MessageClearComponent)] = new MessageClearComponent(this),
-                [typeof(MonolithComponent)] = new MonolithComponent(this),
-                [typeof(MundaneComponent)] = new MundaneComponent(this),
-                [typeof(ObjectComponent)] = new ObjectComponent(this),
-                [typeof(PingComponent)] = new PingComponent(this),
-                [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
-                [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
-                [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
-                [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
-                [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
-            };
+            [typeof(DayLightComponent)] = new DayLightComponent(this),
+            [typeof(BankInterestComponent)] = new BankInterestComponent(this),
+            [typeof(MessageClearComponent)] = new MessageClearComponent(this),
+            [typeof(MonolithComponent)] = new MonolithComponent(this),
+            [typeof(MundaneComponent)] = new MundaneComponent(this),
+            [typeof(ObjectComponent)] = new ObjectComponent(this),
+            [typeof(PingComponent)] = new PingComponent(this),
+            [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
+            [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
+            [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
+            [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
+            [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
+        };
 
-            Console.WriteLine();
-            ServerSetup.Logger($"Server Components Loaded: {_serverComponents.Count}");
-        }
+        Console.WriteLine();
+        ServerSetup.Logger($"Server Components Loaded: {_serverComponents.Count}");
     }
 
     private static void SkillMapper()
@@ -565,8 +566,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         dayLightWatch.Start();
         var bankInterestWatch = new Stopwatch();
         bankInterestWatch.Start();
-        var communityWatch = new Stopwatch();
-        communityWatch.Start();
         var messageClearWatch = new Stopwatch();
         messageClearWatch.Start();
         var monolithWatch = new Stopwatch();
@@ -590,10 +589,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < 5) continue;
+            if (componentStopWatch.Elapsed.TotalMilliseconds < 10) continue;
             var dayLightElapsed = dayLightWatch.Elapsed;
             var bankInterestElapsed = bankInterestWatch.Elapsed;
-            var communityElapsed = communityWatch.Elapsed;
             var messageClearElapsed = messageClearWatch.Elapsed;
             var monolithElapsed = monolithWatch.Elapsed;
             var mundaneElapsed = mundaneWatch.Elapsed;
@@ -610,12 +608,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (component)
                 {
                     case ObjectComponent objectComponent:
-                        if (objectElapsed.TotalMilliseconds < GameSpeed) break;
+                        if (objectElapsed.TotalMilliseconds < 30) break;
                         objectComponent.Update(objectElapsed);
                         objectWatch.Restart();
                         break;
                     case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
-                        if (playerStatusElapsed.TotalMilliseconds < GameSpeed) break;
+                        if (playerStatusElapsed.TotalMilliseconds < 30) break;
                         statusBarAndThreatComponent.Update(playerStatusElapsed);
                         playerStatusWatch.Restart();
                         break;
@@ -629,11 +627,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         playerRegenerationComponent.Update(playerRegenElapsed);
                         playerRegenWatch.Restart();
                         break;
-                    case PlayerSaveComponent playerSaveComponent:
-                        if (playerSaveElapsed.TotalSeconds < 10) break;
-                        playerSaveComponent.Update(playerSaveElapsed);
-                        playerSaveWatch.Restart();
-                        break;
                     case MonolithComponent monolithComponent:
                         if (monolithElapsed.TotalSeconds < 3) break;
                         monolithComponent.Update(monolithElapsed);
@@ -643,6 +636,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         if (pingElapsed.TotalSeconds < 7) break;
                         pingComponent.Update(pingElapsed);
                         pingWatch.Restart();
+                        break;
+                    case PlayerSaveComponent playerSaveComponent:
+                        if (playerSaveElapsed.TotalSeconds < 10) break;
+                        playerSaveComponent.Update(playerSaveElapsed);
+                        playerSaveWatch.Restart();
                         break;
                     case MundaneComponent mundaneComponent:
                         if (mundaneElapsed.TotalSeconds < 10) break;
@@ -654,14 +652,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         dayLightComponent.Update(dayLightElapsed);
                         dayLightWatch.Restart();
                         break;
-                    case CommunityComponent communityComponent:
-                        if (communityElapsed.TotalSeconds < 45) break;
-                        communityComponent.Update(communityElapsed);
-                        communityWatch.Restart();
-                        break;
                     case MessageClearComponent messageClearComponent:
                         if (messageClearElapsed.TotalSeconds < 60) break;
                         messageClearComponent.Update(messageClearElapsed);
+                        UpdateBoards();
                         messageClearWatch.Restart();
                         break;
                     case BankInterestComponent bankInterestComponent:
@@ -856,10 +850,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
                     monster.MonsterBuffAndDebuffStopWatch.Start();
-                
+
                 monster.LastUpdated = DateTime.UtcNow;
 
-                if(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) continue;
+                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) continue;
 
                 monster.UpdateBuffs(elapsedTime);
                 monster.UpdateDebuffs(elapsedTime);
@@ -914,6 +908,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, (map) => { map?.Update(elapsedTime); });
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.Logger(ex.Message, LogLevel.Error);
+            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            Crashes.TrackError(ex);
+        }
+    }
+
+    private static void UpdateBoards()
+    {
+        try
+        {
+            ServerSetup.Instance.GlobalBoardPostCache.Clear();
+            BoardPostStorage.CacheFromDatabase(AislingStorage.PersonalMailString);
         }
         catch (Exception ex)
         {
@@ -2614,7 +2623,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
-    /// 0x3B - Request Bulletin Board
+    /// 0x3B - Request Boards & Mailboxes
     /// </summary>
     public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
     {
@@ -2623,191 +2632,171 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardRequestArgs localArgs)
         {
-            //ServerSetup.Instance.GlobalBoardCache.TryGetValue("Personal", out var personalBoards);
-            //var board = ServerSetup.Instance.GlobalBoardCache.Select(i => i.Value)
-            //    .SelectMany(i => i.Where(n => n.Index == localArgs.BoardId))
-            //    .FirstOrDefault();
-            //var readyTime = DateTime.UtcNow;
+            switch (localArgs.BoardRequestType)
+            {
+                case BoardRequestType.BoardList:
+                    {
+                        // Sends Personal Mailbox - Delayed Populated 15 seconds
+                        localClient.SendMailBox();
+                        break;
+                    }
+                case BoardRequestType.ViewBoard:
+                    {
+                        if (localArgs.BoardId == null) return default;
+                        var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
+                        if (boardFound)
+                            localClient.SendBoard(board);
+                        break;
+                    }
+                case BoardRequestType.ViewPost:
+                    {
+                        if (localArgs.BoardId == null) return default;
+                        var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
+                        if (boardFound)
+                        {
+                            var post = board.IsMail ? localClient.Aisling.PersonalLetters.Values.FirstOrDefault(p => p.PostId == localArgs.PostId)
+                                : board.Posts.Values.FirstOrDefault(p => p.PostId == localArgs.PostId);
 
-            //switch (localArgs.BoardRequestType)
-            //{
-            //    case BoardRequestType.BoardList:
-            //        {
-            //            localClient.SendBoardList(personalBoards);
-            //            break;
-            //        }
-            //    case BoardRequestType.ViewBoard:
-            //        {
-            //            var boardId = (int?)localArgs.BoardId;
+                            // If null, check to see if there is a previous post first
+                            if (post == null)
+                            {
+                                var postId = localArgs.PostId - 1;
+                                post = board?.Posts.Values.FirstOrDefault(p => p.PostId == postId);
+                            }
 
-            //            if (boardId <= 2)
-            //            {
-            //                if (personalBoards == null)
-            //                {
-            //                    localClient.CloseDialog();
-            //                    break;
-            //                }
+                            // If still null, display an error and exit
+                            if (post == null)
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "There is nothing more to read.", false);
+                                break;
+                            }
 
-            //                localClient.SendEmbeddedBoard(personalBoards[(int)boardId].Index, localArgs.StartPostId);
+                            var prevEnabled = post.PostId > 0;
+                            localClient.SendPost(post, board.IsMail, prevEnabled);
+                        }
 
-            //                break;
-            //            }
+                        break;
+                    }
+                case BoardRequestType.NewPost:
+                    {
+                        if (localArgs.BoardId == null) return default;
+                        var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
+                        if (boardFound)
+                        {
+                            var postIdList = board.Posts.Values.Select(post => (int)post.PostId).ToList();
+                            var postId = Enumerable.Range(1, 128).Except(postIdList).First();
+                            var np = new PostTemplate
+                            {
+                                PostId = (short)postId,
+                                Highlighted = false,
+                                DatePosted = DateTime.UtcNow,
+                                Owner = client.Aisling.Username,
+                                Sender = client.Aisling.Username,
+                                ReadPost = false,
+                                SubjectLine = localArgs.Subject,
+                                Message = localArgs.Message
+                            };
 
-            //            if (board == null) break;
-            //            localClient.SendBoard(board.Subject, localArgs.StartPostId);
-            //            break;
-            //        }
-            //    case BoardRequestType.ViewPost:
-            //        {
-            //            var post = board?.Posts.FirstOrDefault(p => p.PostId == localArgs.PostId);
+                            StorageManager.AislingBucket.SendPost(np, board.BoardId);
+                            localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
+                        }
 
-            //            if (post == null)
-            //            {
-            //                var postId = localArgs.PostId - 1;
-            //                post = board?.Posts.FirstOrDefault(p => p.PostId == postId);
-            //            }
+                        break;
+                    }
+                case BoardRequestType.Delete:
+                    {
+                        if (localArgs.BoardId == null) return default;
+                        var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)localArgs.BoardId, out var board);
+                        if (!boardFound)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                            break;
+                        }
 
-            //            if (post == null)
-            //            {
-            //                localClient.SendBoardResponse(BoardOrResponseType.PublicPost, "Failed!", false);
-            //                break;
-            //            }
+                        try
+                        {
+                            var postFound = board.Posts.TryGetValue((short)localArgs.PostId!, out var post);
+                            if (!postFound)
+                            {
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                                break;
+                            }
 
-            //            var prevEnabled = post.PostId > 0;
-            //            localClient.SendPost(post, board.IsMail, prevEnabled);
-            //            break;
-            //        }
-            //    case BoardRequestType.NewPost:
-            //        {
-            //            if (board == null) break;
-            //            // Mail uses a different boardRequestType for sending mail
-            //            if (board.IsMail) break;
+                            if (board.BoardId == client.Aisling.QuestManager.MailBoxNumber || string.Equals(post.Owner, client.Aisling.Username, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                BoardPostStorage.DeletePost(post, board.BoardId);
+                                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted.", true);
+                                break;
+                            }
 
-            //            var np = new PostFormat(localArgs.BoardId ?? 0)
-            //            {
-            //                DatePosted = readyTime,
-            //                Message = localArgs.Message,
-            //                Subject = localArgs.Subject,
-            //                Read = false,
-            //                Sender = client.Aisling.Username,
-            //                PostId = (short)(board.Posts.Count + 1)
-            //            };
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "You do not have permission.", false);
+                        }
+                        catch
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
+                        }
 
-            //            board.Posts ??= new List<PostFormat>();
-            //            var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-            //            short startPostId = 1;
-            //            foreach (var post in postsOrdered)
-            //            {
-            //                post.PostId = startPostId;
-            //                startPostId++;
-            //            }
+                        break;
+                    }
+                case BoardRequestType.SendMail:
+                    {
+                        var receiver = StorageManager.AislingBucket.CheckPassword(localArgs.To);
+                        if (receiver.Result == null)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "User does not exist.", false);
+                            break;
+                        }
+                        var board = StorageManager.AislingBucket.ObtainBoardId(receiver.Result.Serial);
+                        var posts = StorageManager.AislingBucket.ObtainPosts(board.BoardId);
+                        var postIdList = posts.Select(post => (int)post.PostId).ToList();
+                        var postId = Enumerable.Range(1, 128).Except(postIdList).First();
+                        var np = new PostTemplate
+                        {
+                            PostId = (short)postId,
+                            Highlighted = false,
+                            DatePosted = DateTime.UtcNow,
+                            Owner = localArgs.To,
+                            Sender = client.Aisling.Username,
+                            ReadPost = false,
+                            SubjectLine = localArgs.Subject,
+                            Message = localArgs.Message
+                        };
 
-            //            np.Associate(client.Aisling.Username);
-            //            board.Posts.Add(np);
-            //            ServerSetup.SaveCommunityAssets();
-            //            localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Posted!", true);
+                        StorageManager.AislingBucket.SendPost(np, board.BoardId);
+                        localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
+                        break;
+                    }
+                case BoardRequestType.Highlight:
+                    {
+                        //if (board == null) break;
+                        if (!localClient.Aisling.GameMaster)
+                        {
+                            localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
+                            //break;
+                        }
 
-            //            break;
-            //        }
-            //    case BoardRequestType.Delete:
-            //        {
-            //            if (board == null || board.Posts.Count <= 0) break;
-            //            //var postId = localArgs.PostId - 1;
-            //            //if (postId == null) break;
+                        //////you cant highlight mail messages
+                        //if (board.IsMail) break;
 
-            //            try
-            //            {
-            //                if ((localArgs.BoardId == 0
-            //                        ? board.Posts[(short)localArgs.PostId].Recipient
-            //                        : board.Posts[(short)localArgs.PostId].Sender
-            //                    ).Equals(client.Aisling.Username, StringComparison.OrdinalIgnoreCase) || client.Aisling.GameMaster)
-            //                {
-            //                    board.Posts.RemoveAt((short)localArgs.PostId);
-            //                    ServerSetup.SaveCommunityAssets();
-            //                    localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Deleted!", true);
-            //                    localClient.SendBoard(board.Subject, localArgs.StartPostId);
-            //                }
-            //                else
-            //                {
-            //                    localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Can't do that!", false);
-            //                }
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                ServerSetup.Logger(ex.Message, LogLevel.Error);
-            //                ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
-            //                Crashes.TrackError(ex);
-            //                localClient.SendBoardResponse(BoardOrResponseType.DeletePostResponse, "Failed!", false);
-            //            }
+                        //foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
+                        //{
+                        //    if (ind.HighLighted)
+                        //    {
+                        //        ind.HighLighted = false;
+                        //        client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
+                        //    }
+                        //    else
+                        //    {
+                        //        ind.HighLighted = true;
+                        //        client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
+                        //    }
+                        //}
 
-            //            break;
-            //        }
-            //    case BoardRequestType.SendMail:
-            //        {
-            //            if (board == null) break;
-            //            var np = new PostFormat(localArgs.BoardId ?? 0)
-            //            {
-            //                DatePosted = readyTime,
-            //                Message = localArgs.Message,
-            //                Subject = localArgs.Subject,
-            //                Read = false,
-            //                Sender = client.Aisling.Username,
-            //                Recipient = localArgs.To,
-            //                PostId = (short)(board.Posts.Count + 1)
-            //            };
+                        //localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
 
-            //            board.Posts ??= new List<PostFormat>();
-            //            var postsOrdered = board.Posts.OrderBy(p => p.DatePosted).ToList();
-            //            short startPostId = 1;
-            //            foreach (var post in postsOrdered)
-            //            {
-            //                post.PostId = startPostId;
-            //                startPostId++;
-            //            }
-
-            //            np.Associate(client.Aisling.Username);
-            //            board.Posts.Add(np);
-            //            ServerSetup.SaveCommunityAssets();
-            //            localClient.SendBoardResponse(BoardOrResponseType.MailPost, "Message Sent!", true);
-
-            //            var recipient = ObjectHandlers.GetAislingForMailDeliveryMessage(Convert.ToString(localArgs.To));
-            //            if (recipient == null) break;
-            //            recipient.Client.SendAttributes(StatUpdateType.UnreadMail);
-            //            recipient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou got mail!");
-
-            //            break;
-            //        }
-            //    case BoardRequestType.Highlight:
-            //        {
-            //            if (board == null) break;
-            //            if (!localClient.Aisling.GameMaster)
-            //            {
-            //                localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "You do not have permission", false);
-            //                break;
-            //            }
-
-            //            ////you cant highlight mail messages
-            //            if (board.IsMail) break;
-
-            //            foreach (var ind in board.Posts.Where(ind => ind.PostId == localArgs.PostId))
-            //            {
-            //                if (ind.HighLighted)
-            //                {
-            //                    ind.HighLighted = false;
-            //                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"Removed Highlight: {ind.Subject}");
-            //                }
-            //                else
-            //                {
-            //                    ind.HighLighted = true;
-            //                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"Highlighted: {ind.Subject}");
-            //                }
-            //            }
-
-            //            localClient.SendBoardResponse(BoardOrResponseType.HighlightPostResponse, "Highlight Succeeded", true);
-
-            //            break;
-            //        }
-            //}
+                        break;
+                    }
+            }
 
             return default;
         }

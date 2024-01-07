@@ -19,15 +19,20 @@ public class ArenaEntrance : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        var arenaBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(2, out var arenaBoard);
+        var trashBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(3, out var trashBoard);
+
         switch (x)
         {
             case 8 when y == 3:
             case 9 when y == 4:
-                client.SendBoard("Arena Updates", null);
+                if (arenaBoardFound)
+                    client.SendBoard(arenaBoard);
                 break;
             case 2 when y == 3:
             case 3 when y == 4:
-                client.SendBoard("Trash Talk", null);
+                if (trashBoardFound)
+                    client.SendBoard(trashBoard);
                 break;
         }
     }

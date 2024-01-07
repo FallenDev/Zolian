@@ -67,11 +67,10 @@ public interface IWorldClient : ISocketClient
     void SendAddSpellToPane(Spell spell);
     void SendAnimation(ushort targetEffect, Position position = null, uint targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint casterSerial = 0);
     void SendAttributes(StatUpdateType statUpdateType);
-    void SendBoard(string boardName, short? startPost, int index = 0);
-    void SendBoardList(IEnumerable<Board> boards);
-    void SendEmbeddedBoard(int index, short? startPost);
+    void SendBoard(BoardTemplate board);
+    void SendMailBox();
     void SendBoardResponse(BoardOrResponseType responseType, string message, bool success);
-    void SendPost(PostFormat post, bool isMail, bool enablePrevBtn = true);
+    void SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true);
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
     bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target);
     void SendCancelCasting();
@@ -133,6 +132,7 @@ public interface IWorldClient : ISocketClient
     bool CheckReqs(WorldClient client, Item item);
     void EquipLantern();
     void CheckDayDreaming();
+    void CheckForMail();
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);
     void Interrupt();

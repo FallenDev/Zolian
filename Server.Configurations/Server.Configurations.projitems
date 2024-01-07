@@ -45,5 +45,8 @@
     <None Include="$(MSBuildThisFileDirectory)sotp.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ZolianPlayers\BoardsMailInsertProcedure.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

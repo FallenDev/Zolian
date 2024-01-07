@@ -67,13 +67,13 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly Stopwatch _aggroMessageControl = new();
     private readonly Stopwatch _lanternControl = new();
     private readonly Stopwatch _dayDreamingControl = new();
-    private readonly Stopwatch _itemControl = new();
+    private readonly Stopwatch _mailManControl = new();
     private readonly Stopwatch _itemAnimationControl = new();
     private readonly WorldServerTimer _lanternCheckTimer = new(TimeSpan.FromSeconds(2));
     private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
     private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
-    private readonly WorldServerTimer _itemCheckTimer = new(TimeSpan.FromMilliseconds(1500));
     private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
+    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(15000));
     public readonly object SyncClient = new();
     public bool ExitConfirmed;
     private static readonly SortedDictionary<long, string> AggroColors = new()
@@ -228,6 +228,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (Aisling is not { LoggedIn: true }) return;
         EquipLantern();
         CheckDayDreaming();
+        CheckForMail();
         HandleBadTrades();
         DeathStatusCheck();
         ShowAggro();
@@ -392,9 +393,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     public void EquipLantern()
     {
         if (!_lanternControl.IsRunning)
-        {
             _lanternControl.Start();
-        }
 
         if (_lanternControl.Elapsed.TotalMilliseconds < _lanternCheckTimer.Delay.TotalMilliseconds) return;
         _lanternControl.Restart();
@@ -429,6 +428,18 @@ public class WorldClient : SocketClientBase, IWorldClient
                 DaydreamingRoutine();
                 break;
         }
+    }
+
+    public void CheckForMail()
+    {
+        if (!_mailManControl.IsRunning)
+            _mailManControl.Start();
+
+        if (_mailManControl.Elapsed.TotalMilliseconds < _mailManTimer.Delay.TotalMilliseconds) return;
+        _mailManControl.Restart();
+
+        BoardPostStorage.MailFromDatabase(this);
+        SendAttributes(StatUpdateType.Secondary);
     }
 
     public void HandleBadTrades()
@@ -1565,6 +1576,16 @@ public class WorldClient : SocketClientBase, IWorldClient
         else
             abCap = (byte)Aisling.AbpLevel;
 
+        var hasUnreadMail = false;
+
+        // ToDo: Disabling until logic is worked to turn off read letters
+        //foreach (var letter in Aisling.PersonalLetters.Values)
+        //{
+        //    if (letter.ReadPost) continue;
+        //    hasUnreadMail = true;
+        //    break;
+        //}
+
         var args = new AttributesArgs
         {
             Ability = abCap,
@@ -1585,7 +1606,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             CanSwim = true,
             Level = levelCap,
             MagicResistance = (byte)(Aisling.Regen / 10),
-            HasUnreadMail = Aisling.MailFlags == (Mail.Letter),
+            HasUnreadMail = hasUnreadMail,
             MaximumHp = (uint)Aisling.MaximumHp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.MaximumHp,
             MaximumMp = (uint)Aisling.MaximumMp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.MaximumMp,
             MaxWeight = (short)Aisling.MaximumWeight,
@@ -1606,135 +1627,73 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <summary>
     /// 0x31 - Show Board
     /// </summary>
-    public void SendBoard(string boardName, short? startPost, int index = 0)
+    public void SendBoard(BoardTemplate board)
     {
-        //if (!ServerSetup.Instance.GlobalBoardCache.TryGetValue(boardName, out var boardIndex)) return;
-        //ICollection<PostInfo> postsCollection = new List<PostInfo>();
-        //var board = boardIndex[index];
-
-        //foreach (var postFormat in board.Posts)
-        //{
-        //    var post = new PostInfo
-        //    {
-        //        Author = postFormat.Sender,
-        //        CreationDate = postFormat.DatePosted,
-        //        IsHighlighted = postFormat.HighLighted,
-        //        Message = postFormat.Message,
-        //        PostId = postFormat.PostId,
-        //        Subject = postFormat.Subject
-        //    };
-
-        //    postsCollection.Add(post);
-        //}
-
-        //var boardInfo = new BoardInfo
-        //{
-        //    BoardId = board.Index,
-        //    Name = boardName,
-        //    Posts = postsCollection
-        //};
-
-        //var args = new BoardArgs
-        //{
-        //    Type = board.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
-        //    Board = boardInfo,
-        //    StartPostId = startPost
-        //};
-
-        //Send(args);
-    }
-
-    /// <summary>
-    /// Sends a list of boards
-    /// </summary>
-    /// <param name="boards"></param>
-    public void SendBoardList(IEnumerable<Board> boards)
-    {
-        var boardInfoList = new List<BoardInfo>();
-
-        foreach (var board in boards)
+        var postsCollection = board.Posts.Values.Select(postFormat => new PostInfo
         {
-            List<PostInfo> postsCollection = new();
+            Author = postFormat.Sender,
+            CreationDate = postFormat.DatePosted,
+            IsHighlighted = postFormat.Highlighted,
+            Message = postFormat.Message,
+            PostId = postFormat.PostId,
+            Subject = postFormat.SubjectLine
+        }).ToList();
 
-            foreach (var postFormat in board.Posts)
-            {
-                var post = new PostInfo
-                {
-                    Author = postFormat.Sender,
-                    CreationDate = postFormat.DatePosted,
-                    IsHighlighted = postFormat.HighLighted,
-                    Message = postFormat.Message,
-                    PostId = postFormat.PostId,
-                    Subject = postFormat.Subject
-                };
-
-                postsCollection.Add(post);
-            }
-
-            var boardInfo = new BoardInfo
-            {
-                BoardId = board.Index,
-                Name = board.Subject,
-                Posts = postsCollection
-            };
-
-            boardInfoList.Add(boardInfo);
-        }
+        var boardInfo = new BoardInfo
+        {
+            BoardId = board.BoardId,
+            Name = board.Name,
+            Posts = postsCollection
+        };
 
         var args = new BoardArgs
         {
-            Boards = boardInfoList,
-            Type = BoardOrResponseType.BoardList
+            Type = BoardOrResponseType.PublicBoard,
+            Board = boardInfo,
+            StartPostId = short.MaxValue
         };
 
         Send(args);
     }
 
     /// <summary>
-    /// Used to display an embedded board - Example: "Personal" Board array (Mail, News, etc)
+    /// 0x31 - Show Mailbox
     /// </summary>
-    public void SendEmbeddedBoard(int index, short? startPost)
+    public void SendMailBox()
     {
         try
         {
-            List<PostInfo> postsCollection = new();
-            var personalBoard = ObjectHandlers.PersonalBoardJsonConvert<Board>(ServerSetup.PersonalBoards[index]);
-
-            foreach (var postFormat in personalBoard.Posts)
+            var postsCollection = Aisling.PersonalLetters.Values.Select(postFormat => new PostInfo
             {
-                var post = new PostInfo
-                {
-                    Author = postFormat.Sender,
-                    CreationDate = postFormat.DatePosted,
-                    IsHighlighted = postFormat.HighLighted,
-                    Message = postFormat.Message,
-                    PostId = postFormat.PostId,
-                    Subject = postFormat.Subject
-                };
+                Author = postFormat.Sender,
+                CreationDate = postFormat.DatePosted,
+                IsHighlighted = postFormat.Highlighted,
+                Message = postFormat.Message,
+                PostId = postFormat.PostId,
+                Subject = postFormat.SubjectLine
+            }).ToList();
 
-                postsCollection.Add(post);
-            }
+            var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)Aisling.QuestManager.MailBoxNumber, out var mailBoard);
+            if (!boardFound) return;
 
             var boardInfo = new BoardInfo
             {
-                BoardId = personalBoard.Index,
-                Name = personalBoard.Subject,
-                Posts = postsCollection
+                BoardId = (ushort)Aisling.QuestManager.MailBoxNumber,
+                Name = mailBoard.Name,
+                Posts = postsCollection!
             };
 
             var args = new BoardArgs
             {
-                Type = personalBoard.IsMail ? BoardOrResponseType.MailBoard : BoardOrResponseType.PublicBoard,
+                Type = BoardOrResponseType.MailBoard,
                 Board = boardInfo,
-                StartPostId = startPost
+                StartPostId = short.MaxValue
             };
 
             Send(args);
         }
-        catch (Exception e)
+        catch
         {
-            ServerSetup.Logger($"{Aisling.Username}: Issue with opening board {index}");
-            Crashes.TrackError(e);
             Aisling.Client.CloseDialog();
         }
     }
@@ -1751,19 +1710,22 @@ public class WorldClient : SocketClientBase, IWorldClient
         Send(args);
     }
 
-    public void SendPost(PostFormat post, bool isMail, bool enablePrevBtn = true)
+    /// <summary>
+    /// Show Posts and Letters
+    /// </summary>
+    public void SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true)
     {
         var args = new BoardArgs
         {
             Type = isMail ? BoardOrResponseType.MailPost : BoardOrResponseType.PublicPost,
             Post = new PostInfo
             {
-                Author = post.Owner,
+                Author = post.Sender,
                 CreationDate = post.DatePosted,
-                IsHighlighted = post.HighLighted,
+                IsHighlighted = post.Highlighted,
                 Message = post.Message,
                 PostId = post.PostId,
-                Subject = post.Subject
+                Subject = post.SubjectLine
             },
             EnablePrevBtn = enablePrevBtn
         };

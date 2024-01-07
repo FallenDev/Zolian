@@ -20,7 +20,6 @@ public interface IServerContext
     void Startup();
     void LoadAndCacheStorage();
     void BindTemplates();
-    void CacheCommunityAssets();
     void LoadExtensions();
     void CacheBuffs();
     void CacheDebuffs();
@@ -48,7 +47,7 @@ public interface IServerContext
     ConcurrentDictionary<int, Area> GlobalMapCache { get; set; }
     ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; }
     ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; }
-    ConcurrentDictionary<long, BoardTemplate> GlobalBoardPostCache { get; set; }
+    ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; }
     ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; }
     ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; }
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }

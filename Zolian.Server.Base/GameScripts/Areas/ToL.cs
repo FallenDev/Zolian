@@ -51,9 +51,12 @@ public class ToL : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        var huntingBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(2, out var huntingBoard);
+
         if (x == 15 && y == 52 || x == 14 && y == 51 || x == 14 && y == 50)
         {
-            client.SendBoard("Hunting", null);
+            if (huntingBoardFound)
+                client.SendBoard(huntingBoard);
         }
     }
 

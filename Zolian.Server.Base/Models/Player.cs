@@ -118,6 +118,7 @@ public class ComboScroll
 
 public class Quests
 {
+    public int MailBoxNumber { get; set; }
     public bool TutorialCompleted { get; set; }
     public bool BetaReset { get; set; }
     public int BlackSmithing { get; set; }

@@ -10,7 +10,6 @@ public class WorldServerTimer(TimeSpan delay)
     public TimeSpan Delay { get; set; } = delay;
     public bool Disabled { get; set; }
     public bool Elapsed => Timer >= Delay;
-    public int Tick { get; set; }
     private TimeSpan Timer { get; set; } = TimeSpan.Zero;
 
     public int RandomizedVariance

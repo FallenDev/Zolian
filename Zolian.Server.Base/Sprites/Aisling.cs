@@ -32,25 +32,13 @@ public record IgnoredRecord
     public string PlayerIgnored { get; init; }
 }
 
-public record PersonalMail
-{
-    public uint PostId { get; set; }
-    public bool Highlighted { get; set; }
-    public DateTime DatePosted { get; set; }
-    public string Owner { get; set; }
-    public string Sender { get; set; }
-    public bool ReadPost { get; set; }
-    public string SubjectLine { get; set; }
-    public string Message { get; set; }
-}
-
 public sealed class Aisling : Player, IAisling
 {
     public WorldClient Client { get; set; }
     public int EquipmentDamageTaken = 0;
     public readonly ConcurrentDictionary<uint, Sprite> View = new();
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
-    public ConcurrentDictionary<uint, PersonalMail> PersonalLetters = new();
+    public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = new();
     public AislingTrackers AislingTrackers { get; }
     public Stopwatch LawsOfAosda { get; set; }
     public bool BlessedShield;
@@ -64,9 +52,7 @@ public sealed class Aisling : Player, IAisling
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
-    public Party GroupParty => ServerSetup.Instance.GlobalGroupCache.TryGetValue(GroupId, out var idParty)
-        ? idParty
-        : null;
+    public Party GroupParty => ServerSetup.Instance.GlobalGroupCache.GetValueOrDefault(GroupId);
     public List<Aisling> PartyMembers => GroupParty?.PartyMembers;
     public int AreaId => CurrentMapId;
 

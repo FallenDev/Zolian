@@ -11,12 +11,14 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Data;
+using Darkages.Templates;
 
 namespace Darkages.Database;
 
 public record AislingStorage : Sql, IAislingStorage
 {
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False";
+    public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True";
     public SemaphoreSlim SaveLock { get; } = new(1, 1);
     private SemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
@@ -158,7 +160,7 @@ public record AislingStorage : Sql, IAislingStorage
                 obj.Reaping, obj.Vampirism, obj.Haste, obj.Gust, obj.Quake, obj.Rain, obj.Flame, obj.Dusk, obj.Dawn);
 
             if (obj.QuestManager == null) return false;
-            qDt.Rows.Add(obj.Serial, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
+            qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
                 obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem,
                 obj.QuestManager.DrunkenHabit, obj.QuestManager.EternalLove, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount,
                 obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting, obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount,
@@ -376,7 +378,7 @@ public record AislingStorage : Sql, IAislingStorage
                     player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants, player.Aegis, player.Bleeding, player.Spikes, player.Rending,
                     player.Reaping, player.Vampirism, player.Haste, player.Gust, player.Quake, player.Rain, player.Flame, player.Dusk, player.Dawn);
 
-                qDt.Rows.Add(player.Serial, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
+                qDt.Rows.Add(player.Serial, player.QuestManager.MailBoxNumber, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
                     player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.Dar, player.QuestManager.DarItem,
                     player.QuestManager.DrunkenHabit, player.QuestManager.EternalLove, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount,
                     player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting, player.QuestManager.KillerBee, player.QuestManager.Neal, player.QuestManager.NealCount,
@@ -695,6 +697,98 @@ public record AislingStorage : Sql, IAislingStorage
         return aisling;
     }
 
+    public BoardTemplate ObtainBoardId(long serial)
+    {
+        var board = new BoardTemplate();
+
+        try
+        {
+            var sConn = ConnectToDatabase(PersonalMailString);
+            var values = new { Serial = serial };
+            board = sConn.QueryFirst<BoardTemplate>("[ObtainMailBoxNumber]", values, commandType: CommandType.StoredProcedure);
+            sConn.Close();
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+
+        return board;
+    }
+
+    public List<PostTemplate> ObtainPosts(ushort boardId)
+    {
+        var posts = new List<PostTemplate>();
+
+        try
+        {
+            var sConn = new SqlConnection(PersonalMailString);
+            sConn.Open();
+            const string sql = "SELECT * FROM ZolianBoardsMail.dbo.Posts";
+            var cmd = new SqlCommand(sql, sConn);
+            cmd.CommandTimeout = 5;
+            var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var readBoardId = (int)reader["BoardId"];
+                if (boardId != readBoardId) continue;
+                var postId = (int)reader["PostId"];
+
+                var post = new PostTemplate()
+                {
+                    PostId = (short)postId,
+                    Highlighted = (bool)reader["Highlighted"],
+                    DatePosted = (DateTime)reader["DatePosted"],
+                    Owner = reader["Owner"].ToString(),
+                    Sender = reader["Sender"].ToString(),
+                    ReadPost = (bool)reader["ReadPost"],
+                    SubjectLine = reader["SubjectLine"].ToString(),
+                    Message = reader["Message"].ToString()
+                };
+
+                posts.Add(post);
+            }
+
+            reader.Close();
+            sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.Logger(e.ToString());
+            Crashes.TrackError(e);
+        }
+
+        return posts;
+    }
+
+    public void SendPost(PostTemplate postInfo, ushort boardId)
+    {
+        try
+        {
+            var connection = ConnectToDatabase(PersonalMailString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("InsertPost", connection);
+            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = boardId;
+            cmd.Parameters.Add("@PostId", SqlDbType.Int).Value = postInfo.PostId;
+            cmd.Parameters.Add("@Highlighted", SqlDbType.Bit).Value = postInfo.Highlighted;
+            cmd.Parameters.Add("@DatePosted", SqlDbType.DateTime).Value = postInfo.DatePosted;
+            cmd.Parameters.Add("@Owner", SqlDbType.VarChar).Value = postInfo.Owner;
+            cmd.Parameters.Add("@Sender", SqlDbType.VarChar).Value = postInfo.Sender;
+            cmd.Parameters.Add("@ReadPost", SqlDbType.Bit).Value = postInfo.ReadPost;
+            cmd.Parameters.Add("@SubjectLine", SqlDbType.VarChar).Value = postInfo.SubjectLine;
+            cmd.Parameters.Add("@Message", SqlDbType.VarChar).Value = postInfo.Message;
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            ServerSetup.Logger(e.Message, LogLevel.Error);
+            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            Crashes.TrackError(e);
+        }
+    }
+
     public async Task Create(Aisling obj)
     {
         await CreateLock.WaitAsync().ConfigureAwait(false);
@@ -705,7 +799,9 @@ public record AislingStorage : Sql, IAislingStorage
         {
             // Player
             var connection = ConnectToDatabase(EncryptedConnectionString);
+            var boardConn = ConnectToDatabase(PersonalMailString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerCreation", connection);
+            var mailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
 
             #region Parameters
 
@@ -753,6 +849,17 @@ public record AislingStorage : Sql, IAislingStorage
             adapter.InsertCommand = cmd3;
             adapter.InsertCommand.ExecuteNonQuery();
 
+            // Player Mail
+            var playerMailBox =
+                "INSERT INTO ZolianBoardsMail.dbo.Boards (BoardId, Serial, Private, IsMail, Name) VALUES " +
+                $"('{mailBoxNumber}','{(long)serial}','{1}','{1}','Mail')";
+
+            var cmd4 = new SqlCommand(playerMailBox, boardConn);
+            cmd4.CommandTimeout = 5;
+
+            adapter.InsertCommand = cmd4;
+            adapter.InsertCommand.ExecuteNonQuery();
+
             #endregion
 
             var cmd5 = ConnectToDatabaseSqlCommandWithProcedure("InsertQuests", sConn);
@@ -760,6 +867,7 @@ public record AislingStorage : Sql, IAislingStorage
             #region Parameters
 
             cmd5.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)serial;
+            cmd5.Parameters.Add("@MailBoxNumber", SqlDbType.Int).Value = mailBoxNumber;
             cmd5.Parameters.Add("@TutComplete", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@BetaReset", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@StoneSmith", SqlDbType.Int).Value = 0;
@@ -998,6 +1106,7 @@ public record AislingStorage : Sql, IAislingStorage
     {
         var qDt = new DataTable();
         qDt.Columns.Add("Serial", typeof(long));
+        qDt.Columns.Add("MailBoxNumber", typeof(int));
         qDt.Columns.Add("TutorialCompleted", typeof(bool));
         qDt.Columns.Add("BetaReset", typeof(bool));
         qDt.Columns.Add("ArtursGift", typeof(int));
