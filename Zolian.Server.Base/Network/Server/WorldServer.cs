@@ -2636,7 +2636,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 case BoardRequestType.BoardList:
                     {
-                        // Sends Personal Mailbox - Delayed Populated 15 seconds
+                        // Sends Personal Mailbox - Delayed Population
                         localClient.SendMailBox();
                         break;
                     }

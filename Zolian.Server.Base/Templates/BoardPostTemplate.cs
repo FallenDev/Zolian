@@ -100,6 +100,7 @@ public static class BoardPostStorage
 
     public static void MailFromDatabase(WorldClient client)
     {
+        // ToDo: Do not need this logic once everyone has a defined mailbox
         if (client.Aisling.QuestManager.MailBoxNumber == 0)
         {
             client.Aisling.QuestManager.MailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
@@ -110,7 +111,7 @@ public static class BoardPostStorage
         {
             var sConn = new SqlConnection(AislingStorage.PersonalMailString);
             sConn.Open();
-            const string sql = "SELECT * FROM ZolianBoardsMail.dbo.Posts";
+            var sql = $"SELECT * FROM ZolianBoardsMail.dbo.Posts WHERE BoardId = {client.Aisling.QuestManager.MailBoxNumber}";
             var cmd = new SqlCommand(sql, sConn);
             cmd.CommandTimeout = 5;
             var reader = cmd.ExecuteReader();
@@ -120,16 +121,17 @@ public static class BoardPostStorage
 
             while (reader.Read())
             {
-                var boardId = (int)reader["BoardId"];
-                if ((ushort)boardId != client.Aisling.QuestManager.MailBoxNumber) continue;
-                var postId = (int)reader["PostId"];
+                // Check ownership, just in-case two players end up with the same mailbox number
+                var ownerCheck = reader["Owner"].ToString();
+                if (!string.Equals(ownerCheck, client.Aisling.Username, StringComparison.InvariantCultureIgnoreCase)) continue;
 
+                var postId = (int)reader["PostId"];
                 var post = new PostTemplate()
                 {
                     PostId = (short)postId,
                     Highlighted = (bool)reader["Highlighted"],
                     DatePosted = (DateTime)reader["DatePosted"],
-                    Owner = reader["Owner"].ToString(),
+                    Owner = ownerCheck,
                     Sender = reader["Sender"].ToString(),
                     ReadPost = (bool)reader["ReadPost"],
                     SubjectLine = reader["SubjectLine"].ToString(),

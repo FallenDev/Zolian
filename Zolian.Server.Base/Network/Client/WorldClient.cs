@@ -73,7 +73,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
     private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
     private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
-    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(15000));
+    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(5000));
     public readonly object SyncClient = new();
     public bool ExitConfirmed;
     private static readonly SortedDictionary<long, string> AggroColors = new()
@@ -1627,39 +1627,49 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <summary>
     /// 0x31 - Show Board
     /// </summary>
-    public void SendBoard(BoardTemplate board)
+    public bool SendBoard(BoardTemplate board)
     {
-        var postsCollection = board.Posts.Values.Select(postFormat => new PostInfo
+        try
         {
-            Author = postFormat.Sender,
-            CreationDate = postFormat.DatePosted,
-            IsHighlighted = postFormat.Highlighted,
-            Message = postFormat.Message,
-            PostId = postFormat.PostId,
-            Subject = postFormat.SubjectLine
-        }).ToList();
+            var postsCollection = board.Posts.Values.Select(postFormat => new PostInfo
+            {
+                Author = postFormat.Sender,
+                CreationDate = postFormat.DatePosted,
+                IsHighlighted = postFormat.Highlighted,
+                Message = postFormat.Message,
+                PostId = postFormat.PostId,
+                Subject = postFormat.SubjectLine
+            }).ToList();
 
-        var boardInfo = new BoardInfo
+            var boardInfo = new BoardInfo
+            {
+                BoardId = board.BoardId,
+                Name = board.Name,
+                Posts = postsCollection
+            };
+
+            var args = new BoardArgs
+            {
+                Type = BoardOrResponseType.PublicBoard,
+                Board = boardInfo,
+                StartPostId = short.MaxValue
+            };
+
+            Send(args);
+            return true;
+        }
+        catch
         {
-            BoardId = board.BoardId,
-            Name = board.Name,
-            Posts = postsCollection
-        };
+            SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Issue with board", false);
+        }
 
-        var args = new BoardArgs
-        {
-            Type = BoardOrResponseType.PublicBoard,
-            Board = boardInfo,
-            StartPostId = short.MaxValue
-        };
-
-        Send(args);
+        return false;
     }
 
     /// <summary>
     /// 0x31 - Show Mailbox
     /// </summary>
-    public void SendMailBox()
+    public bool SendMailBox()
     {
         try
         {
@@ -1672,14 +1682,11 @@ public class WorldClient : SocketClientBase, IWorldClient
                 PostId = postFormat.PostId,
                 Subject = postFormat.SubjectLine
             }).ToList();
-
-            var boardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue((ushort)Aisling.QuestManager.MailBoxNumber, out var mailBoard);
-            if (!boardFound) return;
-
+            
             var boardInfo = new BoardInfo
             {
                 BoardId = (ushort)Aisling.QuestManager.MailBoxNumber,
-                Name = mailBoard.Name,
+                Name = "Mail",
                 Posts = postsCollection!
             };
 
@@ -1691,11 +1698,47 @@ public class WorldClient : SocketClientBase, IWorldClient
             };
 
             Send(args);
+            return true;
         }
         catch
         {
-            Aisling.Client.CloseDialog();
+            SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Issue with mailbox, try again", false);
         }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Show Posts and Letters
+    /// </summary>
+    public bool SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true)
+    {
+        try
+        {
+            var args = new BoardArgs
+            {
+                Type = isMail ? BoardOrResponseType.MailPost : BoardOrResponseType.PublicPost,
+                Post = new PostInfo
+                {
+                    Author = post.Sender,
+                    CreationDate = post.DatePosted,
+                    IsHighlighted = post.Highlighted,
+                    Message = post.Message,
+                    PostId = post.PostId,
+                    Subject = post.SubjectLine
+                },
+                EnablePrevBtn = enablePrevBtn
+            };
+
+            Send(args);
+            return true;
+        }
+        catch
+        {
+            SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Issue opening", false);
+        }
+
+        return false;
     }
 
     public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
@@ -1705,29 +1748,6 @@ public class WorldClient : SocketClientBase, IWorldClient
             Type = responseType,
             ResponseMessage = message,
             Success = success
-        };
-
-        Send(args);
-    }
-
-    /// <summary>
-    /// Show Posts and Letters
-    /// </summary>
-    public void SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true)
-    {
-        var args = new BoardArgs
-        {
-            Type = isMail ? BoardOrResponseType.MailPost : BoardOrResponseType.PublicPost,
-            Post = new PostInfo
-            {
-                Author = post.Sender,
-                CreationDate = post.DatePosted,
-                IsHighlighted = post.Highlighted,
-                Message = post.Message,
-                PostId = post.PostId,
-                Subject = post.SubjectLine
-            },
-            EnablePrevBtn = enablePrevBtn
         };
 
         Send(args);

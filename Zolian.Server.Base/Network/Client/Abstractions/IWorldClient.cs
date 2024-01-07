@@ -67,10 +67,10 @@ public interface IWorldClient : ISocketClient
     void SendAddSpellToPane(Spell spell);
     void SendAnimation(ushort targetEffect, Position position = null, uint targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint casterSerial = 0);
     void SendAttributes(StatUpdateType statUpdateType);
-    void SendBoard(BoardTemplate board);
-    void SendMailBox();
+    bool SendBoard(BoardTemplate board);
+    bool SendMailBox();
+    bool SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true);
     void SendBoardResponse(BoardOrResponseType responseType, string message, bool success);
-    void SendPost(PostTemplate post, bool isMail, bool enablePrevBtn = true);
     void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null);
     bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target);
     void SendCancelCasting();
