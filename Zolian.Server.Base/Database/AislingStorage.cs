@@ -770,7 +770,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             var connection = ConnectToDatabase(PersonalMailString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("InsertPost", connection);
-            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = boardId;
+            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = (int)boardId;
             cmd.Parameters.Add("@PostId", SqlDbType.Int).Value = postInfo.PostId;
             cmd.Parameters.Add("@Highlighted", SqlDbType.Bit).Value = postInfo.Highlighted;
             cmd.Parameters.Add("@DatePosted", SqlDbType.DateTime).Value = postInfo.DatePosted;
