@@ -17,42 +17,56 @@ public class AbilityMetaBuilder : MetafileManager
 
             sClass.Nodes.Add(new MetafileNode("Skill", ""));
 
-            foreach (var template in from v in ServerSetup.Instance.GlobalSkillTemplateCache
-                                     let prerequisites = v.Value.Prerequisites
-                                     where prerequisites != null
-                                     orderby prerequisites.ExpLevelRequired
-                                     select v.Value)
+            foreach (var template in ServerSetup.Instance.GlobalSkillTemplateCache
+                         .Where(p => p.Value.Prerequisites != null)
+                         .OrderBy(p => p.Value.Prerequisites.ExpLevelRequired)
+                         .Select(p => p.Value)
+                         .Distinct())
             {
-                if (template.Prerequisites.RaceRequired == race || ((template.Prerequisites.ClassRequired == class1 || template.Prerequisites.ClassRequired == Class.Peasant)
-                                                                    || template.Prerequisites.SecondaryClassRequired == class2))
+                if (template.Prerequisites.RaceRequired == race || ((template.Prerequisites.ClassRequired == class1 || template.Prerequisites.ClassRequired == Class.Peasant) || template.Prerequisites.SecondaryClassRequired == class2))
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                    continue;
+                }
 
                 if (class1 is Class.Berserker or Class.Defender && template.Prerequisites.SecondaryClassRequired == Class.DualBash)
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                    continue;
+                }
 
                 if (class1 is Class.Cleric or Class.Arcanus && template.Prerequisites.SecondaryClassRequired == Class.DualCast)
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                }
             }
 
             sClass.Nodes.Add(new MetafileNode("Skill_End", ""));
             sClass.Nodes.Add(new MetafileNode("", ""));
             sClass.Nodes.Add(new MetafileNode("Spell", ""));
 
-            foreach (var template in from v in ServerSetup.Instance.GlobalSpellTemplateCache
-                                     let prerequisites = v.Value.Prerequisites
-                                     where prerequisites != null
-                                     orderby prerequisites.ExpLevelRequired
-                                     select v.Value)
+            foreach (var template in ServerSetup.Instance.GlobalSpellTemplateCache
+                         .Where(p => p.Value.Prerequisites != null)
+                         .OrderBy(p => p.Value.Prerequisites.ExpLevelRequired)
+                         .Select(p => p.Value)
+                         .Distinct())
             {
-                if (template.Prerequisites.RaceRequired == race || ((template.Prerequisites.ClassRequired == class1 || template.Prerequisites.ClassRequired == Class.Peasant)
-                                                                    || template.Prerequisites.SecondaryClassRequired == class2))
+                if (template.Prerequisites.RaceRequired == race || ((template.Prerequisites.ClassRequired == class1 || template.Prerequisites.ClassRequired == Class.Peasant) || template.Prerequisites.SecondaryClassRequired == class2))
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                    continue;
+                }
 
                 if (class1 is Class.Berserker or Class.Defender && template.Prerequisites.SecondaryClassRequired == Class.DualBash)
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                    continue;
+                }
 
                 if (class1 is Class.Cleric or Class.Arcanus && template.Prerequisites.SecondaryClassRequired == Class.DualCast)
+                {
                     sClass.Nodes.Add(new MetafileNode(template.Prerequisites.DisplayName, template.GetMetaData()));
+                }
             }
 
             sClass.Nodes.Add(new MetafileNode("Spell_End", ""));
