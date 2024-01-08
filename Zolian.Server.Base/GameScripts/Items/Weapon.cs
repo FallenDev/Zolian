@@ -85,6 +85,8 @@ public class Weapon(Item item) : ItemScript(item)
                     }
                 }
 
+            if (!client.CheckReqs(client, Item)) return;
+
             int equipSlot;
 
             if (weaponSlot == null)
@@ -105,9 +107,7 @@ public class Weapon(Item item) : ItemScript(item)
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Item.NoColorDisplayName} equipped to your off-hand.");
             }
 
-            if (client.CheckReqs(client, Item))
-                client.Aisling.EquipmentManager.Add(equipSlot, Item);
-
+            client.Aisling.EquipmentManager.Add(equipSlot, Item);
             return;
         }
 
