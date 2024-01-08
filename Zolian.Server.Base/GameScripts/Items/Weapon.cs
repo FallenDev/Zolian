@@ -135,7 +135,7 @@ public class Weapon(Item item) : ItemScript(item)
         if (templateImage != null)
             client.Aisling.WeaponImg = (short)templateImage;
         if (offHandImage != 0 && slot == 3)
-            client.Aisling.ShieldImg = (byte)Item.Template.OffHandImage;
+            client.Aisling.ShieldImg = (short)Item.Template.OffHandImage;
 
         client.Aisling.UsingTwoHanded = Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff);
     }

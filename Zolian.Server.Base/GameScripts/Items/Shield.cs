@@ -88,14 +88,14 @@ public class Shield(Item item) : ItemScript(item)
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
         {
             client.Aisling.WeaponImg = 0;
-            client.Aisling.ShieldImg = (byte)Item.Template.Image;
+            client.Aisling.ShieldImg = (short)Item.Template.Image;
         }
         else
         {
             if (Item.Template.OffHandImage != 0)
-                client.Aisling.ShieldImg = (byte)Item.Template.OffHandImage;
+                client.Aisling.ShieldImg = (short)Item.Template.OffHandImage;
             else
-                client.Aisling.ShieldImg = (byte)Item.Template.Image;
+                client.Aisling.ShieldImg = (short)Item.Template.Image;
         }
 
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
@@ -111,11 +111,20 @@ public class Shield(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.ShieldImg = byte.MinValue;
+        client.Aisling.ShieldImg = short.MinValue;
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
         {
             aisling.SecondaryOffensiveElement = ElementManager.Element.None;
             aisling.SecondaryDefensiveElement = ElementManager.Element.None;
+
+            // If First Accessory is elemental, set it
+            if (aisling.EquipmentManager.Equipment[14]?.Item != null)
+                if (aisling.EquipmentManager.Equipment[14].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+                {
+                    aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryOffensiveElement;
+                    aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryDefensiveElement;
+                    return;
+                }
         }
 
         foreach (var (_, spell) in aisling.SpellBook.Spells)

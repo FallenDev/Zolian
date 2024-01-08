@@ -31,8 +31,34 @@ public class FirstAcc(Item item) : ItemScript(item)
         client.Aisling.Accessory1Color = Item.Color;
 
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
-        aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
-        aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
+
+        // Off-Hand elements override First Accessory
+        if (aisling.EquipmentManager.Equipment[3]?.Item != null)
+            if (aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+            {
+                if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement;
+                else
+                {
+                    if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                        aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
+                }
+
+                if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
+                else
+                {
+                    if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                        aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
+                }
+
+                return;
+            }
+
+        if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+            aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
+        if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+            aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -47,6 +73,30 @@ public class FirstAcc(Item item) : ItemScript(item)
         client.Aisling.Accessory1Color = 0;
 
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+
+        // Off-Hand elements override First Accessory
+        if (aisling.EquipmentManager.Equipment[3]?.Item != null)
+            if (aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+            {
+                if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement;
+                else
+                {
+                    if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                        aisling.SecondaryOffensiveElement = ElementManager.Element.None;
+                }
+
+                if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
+                else
+                {
+                    if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                        aisling.SecondaryDefensiveElement = ElementManager.Element.None;
+                }
+
+                return;
+            }
+
         aisling.SecondaryOffensiveElement = ElementManager.Element.None;
         aisling.SecondaryDefensiveElement = ElementManager.Element.None;
     }

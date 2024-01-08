@@ -40,6 +40,6 @@ public class OverCoat(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.OverCoatImg = 0;
-        client.Aisling.OverCoatColor = byte.MinValue;
+        client.Aisling.OverCoatColor = 0;
     }
 }

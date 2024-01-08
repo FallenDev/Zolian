@@ -39,7 +39,7 @@ public class Armor(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.Pants = byte.MinValue;
+        client.Aisling.Pants = 0;
         client.Aisling.ArmorImg = 0;
     }
 }

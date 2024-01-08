@@ -37,7 +37,7 @@ public class Boot(Item item) : ItemScript(item)
             }
         }
 
-        client.Aisling.BootsImg = (byte)Item.Image;
+        client.Aisling.BootsImg = (short)Item.Image;
         client.Aisling.BootColor = (byte)Item.Template.Color;
     }
 
@@ -49,6 +49,7 @@ public class Boot(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        client.Aisling.BootsImg = byte.MinValue;
+        client.Aisling.BootsImg = 0;
+        client.Aisling.BodyColor = 0;
     }
 }

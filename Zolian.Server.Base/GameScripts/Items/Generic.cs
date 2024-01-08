@@ -36,13 +36,9 @@ public class Generic(Item item) : ItemScript(item)
                 else if (client.Aisling.EquipmentManager.Equipment[10] == null)
                     Item.Template.EquipmentSlot = ItemSlots.RArm;
                 break;
-            case 12: // Legs, Guards, Boots
+            case 12: // Legs, ShinGuards
                 if (client.Aisling.EquipmentManager.Equipment[12] == null)
                     Item.Template.EquipmentSlot = ItemSlots.Leg;
-                if (aisling.EquipmentManager.Equipment[12]?.Item?.Template.Name == "Anklet")
-                {
-                    client.Aisling.BootsImg = 8;
-                }
                 break;
             case 14: // First Accessory
                 if (client.Aisling.EquipmentManager.Equipment[14] == null)
@@ -59,7 +55,102 @@ public class Generic(Item item) : ItemScript(item)
         }
     }
 
-    public override void Equipped(Sprite sprite, byte displaySlot) { }
+    public override void Equipped(Sprite sprite, byte displaySlot)
+    {
+        if (sprite == null) return;
+        if (Item?.Template == null) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-    public override void UnEquipped(Sprite sprite, byte displaySlot) { }
+        switch (item.Template.EquipmentSlot)
+        {
+            case 12: // Legs, ShinGuards
+                if (aisling.EquipmentManager.Equipment[12]?.Item?.Template.Name == "Anklet")
+                {
+                    client.Aisling.BootsImg = 8;
+                }
+                break;
+            case 14: // First Accessory
+                if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+
+                // Off-Hand elements override First Accessory
+                if (aisling.EquipmentManager.Equipment[3]?.Item != null)
+                    if (aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+                    {
+                        if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                            aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement;
+                        else
+                        {
+                            if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                                aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
+                        }
+
+                        if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                            aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
+                        else
+                        {
+                            if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                                aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
+                        }
+
+                        return;
+                    }
+
+                if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
+                if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                    aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
+                break;
+        }
+    }
+
+    public override void UnEquipped(Sprite sprite, byte displaySlot)
+    {
+        if (sprite == null) return;
+        if (Item?.Template == null) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+
+        switch (item.Template.EquipmentSlot)
+        {
+            case 12: // Legs, ShinGuards
+                if (aisling.EquipmentManager.Equipment[13]?.Item != null)
+                {
+                    client.Aisling.BootsImg = (short)aisling.EquipmentManager.Equipment[13].Item.Image;
+                    client.Aisling.BodyColor = (byte)aisling.EquipmentManager.Equipment[13].Item.Template.Color;
+                }
+                break;
+            case 14: // First Accessory
+                if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+
+                // Off-Hand elements override First Accessory
+                if (aisling.EquipmentManager.Equipment[3]?.Item != null)
+                    if (aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+                    {
+                        if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                            aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement;
+                        else
+                        {
+                            if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                                aisling.SecondaryOffensiveElement = ElementManager.Element.None;
+                        }
+
+                        if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                            aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
+                        else
+                        {
+                            if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                                aisling.SecondaryDefensiveElement = ElementManager.Element.None;
+                        }
+
+                        return;
+                    }
+
+                aisling.SecondaryOffensiveElement = ElementManager.Element.None;
+                aisling.SecondaryDefensiveElement = ElementManager.Element.None;
+                break;
+        }
+    }
 }
