@@ -69,6 +69,7 @@ public class Generic(Item item) : ItemScript(item)
                 if (aisling.EquipmentManager.Equipment[12]?.Item?.Template.Name == "Anklet")
                 {
                     client.Aisling.BootsImg = 8;
+                    client.Aisling.BootColor = 0;
                 }
                 break;
             case 14: // First Accessory
@@ -119,7 +120,7 @@ public class Generic(Item item) : ItemScript(item)
                 if (aisling.EquipmentManager.Equipment[13]?.Item != null)
                 {
                     client.Aisling.BootsImg = (short)aisling.EquipmentManager.Equipment[13].Item.Image;
-                    client.Aisling.BodyColor = (byte)aisling.EquipmentManager.Equipment[13].Item.Template.Color;
+                    client.Aisling.BootColor = (byte)aisling.EquipmentManager.Equipment[13].Item.Template.Color;
                 }
                 break;
             case 14: // First Accessory

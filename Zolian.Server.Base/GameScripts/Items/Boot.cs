@@ -33,6 +33,7 @@ public class Boot(Item item) : ItemScript(item)
             if (aisling.EquipmentManager.Equipment[12].Item.Template.Name == "Anklet")
             {
                 client.Aisling.BootsImg = 8;
+                client.Aisling.BootColor = 0;
                 return;
             }
         }
@@ -50,6 +51,6 @@ public class Boot(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.BootsImg = 0;
-        client.Aisling.BodyColor = 0;
+        client.Aisling.BootColor = 0;
     }
 }
