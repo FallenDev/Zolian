@@ -29,7 +29,7 @@ public record AislingStorage : Sql, IAislingStorage
 
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
-        await LoadLock.WaitAsync().ConfigureAwait(false);
+        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         var aisling = new Aisling();
 
@@ -64,7 +64,7 @@ public record AislingStorage : Sql, IAislingStorage
         var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
 
-        await PasswordSaveLock.WaitAsync().ConfigureAwait(false);
+        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         try
         {
@@ -97,7 +97,7 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return;
         if (obj.Loading) return;
 
-        await BuffDebuffSaveLock.WaitAsync().ConfigureAwait(false);
+        await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         try
         {
@@ -127,7 +127,7 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return false;
         if (obj.Loading) return false;
 
-        await SaveLock.WaitAsync().ConfigureAwait(false);
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
@@ -341,7 +341,7 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (playerList.Count == 0) return false;
 
-        await SaveLock.WaitAsync().ConfigureAwait(false);
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
@@ -795,7 +795,7 @@ public record AislingStorage : Sql, IAislingStorage
 
     public async Task Create(Aisling obj)
     {
-        await CreateLock.WaitAsync().ConfigureAwait(false);
+        await CreateLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 

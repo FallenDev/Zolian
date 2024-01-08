@@ -707,7 +707,7 @@ public sealed class Item : Sprite, IItem
     public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await StorageManager.AislingBucket.SaveLock.WaitAsync().ConfigureAwait(false);
+        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         try
         {
