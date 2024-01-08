@@ -81,6 +81,7 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; } = new();
     public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = new();
     public ConcurrentDictionary<uint, Trap> Traps { get; set; } = new();
+    public ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = new();

@@ -55,6 +55,7 @@ public interface IServerContext
     ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     ConcurrentDictionary<uint, Trap> Traps { get; set; }
+    ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; }

@@ -183,6 +183,7 @@ public interface IWorldClient : ISocketClient
     void WarpToAndRefresh(Position position);
     void CheckWarpTransitions(WorldClient client);
     void CheckWarpTransitions(WorldClient client, int x, int y);
+    void ReapplyKillCount();
     WorldClient Enter();
     WorldClient LeaveArea(int travelTo, bool update = false, bool delete = false);
     void CompleteMapTransition();

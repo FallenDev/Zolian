@@ -8,7 +8,6 @@ using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
-
 using ServiceStack;
 
 using System.Collections.Concurrent;
@@ -140,84 +139,110 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     {
         if (monster.Target is not Aisling aisling) return;
         var readyTime = DateTime.UtcNow;
+        var killRecord = new KillRecord
+        {
+            TotalKills = 1,
+            TimeKilled = readyTime
+        };
 
         if (aisling.GroupParty is not null)
         {
-            foreach (var player in aisling.GroupParty.PartyMembers)
+            foreach (var player in aisling.GroupParty.PartyMembers.Where(player => player.Map.ID == aisling.Map.ID))
             {
-                if (player.Map.ID != aisling.Map.ID) continue;
                 if (!player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
                 {
-                    player.MonsterKillCounters[monster.Template.BaseName] =
-                        new KillRecord
-                        {
-                            TotalKills = 1,
-                            TimeKilled = readyTime
-                        };
+                    player.MonsterKillCounters.TryAdd(monster.Template.BaseName, killRecord);
                 }
                 else
                 {
                     value.TotalKills++;
                     value.TimeKilled = readyTime;
+                    player.MonsterKillCounters.TryUpdate(monster.Template.BaseName, value, value);
                 }
 
-                if (monster.Template.BaseName == player.QuestManager.KeelaKill)
+                var hasKills = ServerSetup.Instance.GlobalKillRecordCache.TryGetValue(player.Serial, out var killRecords);
+                if (hasKills)
                 {
-                    var returnPlayer = player.QuestManager.KeelaCount <= value?.TotalKills;
-                    QuestTracking(player, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+                    ServerSetup.Instance.GlobalKillRecordCache.TryUpdate(player.Serial, player.MonsterKillCounters, killRecords);
                 }
-
-                if (monster.Template.BaseName == player.QuestManager.NealKill)
+                else
                 {
-                    var returnPlayer = player.QuestManager.NealCount <= value?.TotalKills;
-                    QuestTracking(player, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+                    ServerSetup.Instance.GlobalKillRecordCache.TryAdd(player.Serial, player.MonsterKillCounters);
                 }
 
-                if (monster.Template.BaseName != "Mouse" || player.QuestManager.PeteComplete) continue;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+                QuestTracking(monster, player);
             }
         }
         else
         {
             if (!aisling.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
             {
-                aisling.MonsterKillCounters[monster.Template.BaseName] =
-                    new KillRecord
-                    {
-                        TotalKills = 1,
-                        TimeKilled = readyTime
-                    };
+                aisling.MonsterKillCounters.TryAdd(monster.Template.BaseName, killRecord);
             }
             else
             {
                 value.TotalKills++;
                 value.TimeKilled = readyTime;
+                aisling.MonsterKillCounters.TryUpdate(monster.Template.BaseName, value, value);
             }
 
-            if (monster.Template.BaseName == aisling.QuestManager.KeelaKill)
+            var hasKills = ServerSetup.Instance.GlobalKillRecordCache.TryGetValue(aisling.Serial, out var killRecords);
+            if (hasKills)
             {
-                var returnPlayer = aisling.QuestManager.KeelaCount <= value?.TotalKills;
-                QuestTracking(aisling, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+                ServerSetup.Instance.GlobalKillRecordCache.TryUpdate(aisling.Serial, aisling.MonsterKillCounters, killRecords);
             }
-
-            if (monster.Template.BaseName == aisling.QuestManager.NealKill)
+            else
             {
-                var returnPlayer = aisling.QuestManager.NealCount <= value?.TotalKills;
-                QuestTracking(aisling, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+                ServerSetup.Instance.GlobalKillRecordCache.TryAdd(aisling.Serial, aisling.MonsterKillCounters);
             }
 
-            if (monster.Template.BaseName != "Mouse" || aisling.QuestManager.PeteComplete) return;
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+            QuestTracking(monster, aisling);
         }
     }
 
-    private static void QuestTracking(IAisling aisling, byte responseId, bool returnPlayer, string text = "")
+    private static void QuestTracking(Monster monster, Aisling player)
     {
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, text);
+        var killRecordFound = player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value);
+        if (!killRecordFound) return;
+        
+        if (monster.Template.BaseName == player.QuestManager.KeelaKill)
+        {
+            var returnPlayer = player.QuestManager.KeelaCount <= value?.TotalKills;
+            TrackingNpcAndText(player, 0x01, returnPlayer, $"{{=aKeela Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+
+        if (monster.Template.BaseName == player.QuestManager.NealKill)
+        {
+            var returnPlayer = player.QuestManager.NealCount <= value?.TotalKills;
+            TrackingNpcAndText(player, 0x03, returnPlayer, $"{{=aNeal Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+
+        if (monster.Template.BaseName == "Mouse" && player.QuestManager.PeteKill != 0 && !player.QuestManager.PeteComplete)
+        {
+            var returnPlayer = player.QuestManager.PeteKill <= value?.TotalKills;
+            TrackingNpcAndText(player, 0x05, returnPlayer, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+
+        if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && player.QuestManager.Lau == 1)
+        {
+            var returnPlayer = player.HasKilled("Undead Guard", 5) && player.HasKilled("Undead Wizard", 5);
+            TrackingNpcAndText(player, 0x07, returnPlayer, $"{{=aLau Quest: {{=q{value?.TotalKills} {{=akilled");
+        }
+    }
+
+    private static void TrackingNpcAndText(IAisling aisling, byte responseId, bool returnPlayer, string text = "")
+    {
+        aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, text);
         if (!returnPlayer) return;
-        var npc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value.Name == "Nadia");
-        var scriptObj = npc.Value.Scripts.FirstOrDefault();
-        scriptObj.Value?.OnResponse(aisling.Client, responseId, $"{npc.Value.Serial}");
+
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+        {
+            if (npc.Value.Scripts is null) continue;
+            if (npc.Value.Scripts.TryGetValue("Quest Helper", out var scriptObj))
+            {
+                scriptObj.OnResponse(aisling.Client, responseId, $"{npc.Value.Serial}");
+            }
+        }
     }
 
     public static void CreateFromTemplate(MonsterTemplate template, Area map)

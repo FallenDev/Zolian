@@ -22,12 +22,12 @@ public class QuestHelper(WorldServer server, Mundane mundane) : MundaneScript(se
                 {
                     // Keela
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x02, "{=qReturn me"),
-                    new(0x0320, "{=bNo, I'll stay")
-                };
+                    {
+                        new(0x02, "{=qReturn me"),
+                        new(0x0320, "{=bNo, I'll stay")
+                    };
 
-                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?", options.ToArray());
                     break;
                 }
             case 2:
@@ -40,18 +40,54 @@ public class QuestHelper(WorldServer server, Mundane mundane) : MundaneScript(se
                 {
                     // Neal
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x04, "{=qReturn me"),
-                    new(0x0320, "{=bNo, I'll stay")
-                };
+                    {
+                        new(0x04, "{=qReturn me"),
+                        new(0x0320, "{=bNo, I'll stay")
+                    };
 
-                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?", options.ToArray());
                     break;
                 }
             case 4:
                 {
                     client.CloseDialog();
                     client.TransitionToMap(301, new Position(7, 7));
+                    break;
+                }
+            case 5:
+                {
+                    // Pete
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x06, "{=qReturn me"),
+                        new(0x0320, "{=bNo, I'll stay")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "Ahh completed your first quest! Would you like to return?", options.ToArray());
+                    break;
+                }
+            case 6:
+                {
+                    client.CloseDialog();
+                    client.TransitionToMap(500, new Position(40, 44));
+                    break;
+                }
+            case 7:
+                {
+                    // Lau
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x08, "{=qReturn me"),
+                        new(0x0320, "{=bNo, I'll stay")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "You've completed your quest, would you like to return?", options.ToArray());
+                    break;
+                }
+            case 8:
+                {
+                    client.CloseDialog();
+                    client.TransitionToMap(305, new Position(6, 11));
                     break;
                 }
             case 800:

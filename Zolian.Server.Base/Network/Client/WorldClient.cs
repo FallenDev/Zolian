@@ -786,6 +786,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         Aisling.Hacked = false;
         Aisling.PasswordAttempts = 0;
         Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+        ReapplyKillCount();
         Aisling.Loading = true;
     }
 
@@ -4837,6 +4838,15 @@ public class WorldClient : SocketClientBase, IWorldClient
             }
 
             if (breakOuterLoop) break;
+        }
+    }
+
+    public void ReapplyKillCount()
+    {
+        var hasKills = ServerSetup.Instance.GlobalKillRecordCache.TryGetValue(Aisling.Serial, out var killRecords);
+        if (hasKills)
+        {
+            Aisling.MonsterKillCounters = killRecords;
         }
     }
 

@@ -37,7 +37,7 @@ public class Lau : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 0) || client.Aisling.GameMaster)
+        if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1) || client.Aisling.GameMaster)
         {
             options.Add(new(0x0B, "I have done what was asked"));
         }
@@ -289,6 +289,7 @@ public class Lau : MundaneScript
                 }
             case 0x0009:
                 {
+                    client.Aisling.QuestManager.Lau++;
                     client.SendOptionsDialog(Mundane, $"{{=aHead to Tagor's Necropolis and slay {{=c5{{=a Undead Guards, and {{=c5{{=a Undead Wizards");
                     break;
                 }
@@ -313,7 +314,7 @@ public class Lau : MundaneScript
                         // Logic to give quest based on secondary class first
                         if (client.Aisling.Path == Class.Berserker)
                         {
-                            if (client.Aisling.QuestManager.Lau == 0)
+                            if (client.Aisling.QuestManager.Lau == 1)
                             {
                                 var skill = Skill.GiveTo(client.Aisling, "Retribution", 1);
                                 if (skill) client.LoadSkillBook();
@@ -324,7 +325,7 @@ public class Lau : MundaneScript
                                 client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Indeed you are worthy, now pay close attention. I will not teach it again.");
 
-                                if (client.Aisling.QuestManager.Lau == 1)
+                                if (client.Aisling.QuestManager.Lau == 2)
                                 {
                                     var item = new Legend.LegendItem
                                     {
@@ -343,7 +344,7 @@ public class Lau : MundaneScript
 
                         if (client.Aisling.Path == Class.Defender)
                         {
-                            if (client.Aisling.QuestManager.Lau == 0)
+                            if (client.Aisling.QuestManager.Lau == 1)
                             {
                                 var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash", 1);
                                 if (skill) client.LoadSkillBook();
@@ -354,7 +355,7 @@ public class Lau : MundaneScript
                                 client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Indeed you are worthy, now pay close attention. I will not teach it again.");
 
-                                if (client.Aisling.QuestManager.Lau == 1)
+                                if (client.Aisling.QuestManager.Lau == 2)
                                 {
                                     var item = new Legend.LegendItem
                                     {
@@ -374,7 +375,7 @@ public class Lau : MundaneScript
                         // Logic to complete quest if past class qualifies
                         if (client.Aisling.PastClass == Class.Berserker)
                         {
-                            if (client.Aisling.QuestManager.Lau == 0)
+                            if (client.Aisling.QuestManager.Lau == 1)
                             {
                                 var skill = Skill.GiveTo(client.Aisling, "Retribution", 1);
                                 if (skill) client.LoadSkillBook();
@@ -385,7 +386,7 @@ public class Lau : MundaneScript
                                 client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Indeed you are worthy, now pay close attention. I will not teach it again.");
 
-                                if (client.Aisling.QuestManager.Lau == 1)
+                                if (client.Aisling.QuestManager.Lau == 2)
                                 {
                                     var item = new Legend.LegendItem
                                     {
@@ -404,7 +405,7 @@ public class Lau : MundaneScript
 
                         if (client.Aisling.PastClass == Class.Defender)
                         {
-                            if (client.Aisling.QuestManager.Lau == 0)
+                            if (client.Aisling.QuestManager.Lau == 1)
                             {
                                 var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash", 1);
                                 if (skill) client.LoadSkillBook();
@@ -415,7 +416,7 @@ public class Lau : MundaneScript
                                 client.SendAttributes(StatUpdateType.ExpGold);
                                 client.SendOptionsDialog(Mundane, "Indeed you are worthy, now pay close attention. I will not teach it again.");
 
-                                if (client.Aisling.QuestManager.Lau == 1)
+                                if (client.Aisling.QuestManager.Lau == 2)
                                 {
                                     var item = new Legend.LegendItem
                                     {
@@ -440,7 +441,7 @@ public class Lau : MundaneScript
                         client.SendAttributes(StatUpdateType.ExpGold);
                         client.SendOptionsDialog(Mundane, "Thank you, I have nothing to teach your kind, but I appreciate the assist");
 
-                        if (client.Aisling.QuestManager.Lau == 1)
+                        if (client.Aisling.QuestManager.Lau == 2)
                         {
                             var item = new Legend.LegendItem
                             {
