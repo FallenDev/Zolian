@@ -23,9 +23,7 @@ public static class NpcShopExtensions
     public static IEnumerable<ItemTemplate> BuyFromStoreInventory(Mundane mundane)
     {
         var defaultBag = mundane.Template.DefaultMerchantStock.Select(i =>
-            ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(i, out var value)
-                ? value
-                : null);
+            ServerSetup.Instance.GlobalItemTemplateCache.GetValueOrDefault(i));
 
         // NpcKey is generally blank in the database, it gives another way to declare an Npc can carry an item
         return ServerSetup.Instance.GlobalItemTemplateCache.Values.Where(i => i.NpcKey == mundane.Template.Name)

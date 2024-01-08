@@ -97,11 +97,9 @@ public class MetafileManager
         Metafiles.Add(metaFile);
     }
 
-    public Metafile GetMetaFile(string name) => Metafiles.Find(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    public static Metafile GetMetaFile(string name) => Metafiles.Find(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-    public MetafileCollection GetMetaFiles() => Metafiles;
-
-    public MetafileCollection GetMetaFilesWithoutExtendedClasses()
+    public static MetafileCollection GetMetaFilesWithoutExtendedClasses()
     {
         var metaCollection = new MetafileCollection(short.MaxValue);
         metaCollection.AddRange(Metafiles.Where(file => !file.Name.Contains("SClass")));
@@ -151,83 +149,7 @@ public class MetafileManager
     private static void CreateFromTemplates()
     {
         GenerateItemInfoMeta();
-
-        HumanMeta.GenerateHumanBezerkerMeta();
-        HumanMeta.GenerateHumanDefenderMeta();
-        HumanMeta.GenerateHumanAssassinMeta();
-        HumanMeta.GenerateHumanClericMeta();
-        HumanMeta.GenerateHumanArcanusMeta();
-        HumanMeta.GenerateHumanMonkMeta();
-
-        HalfElfMeta.GenerateHalfElfBezerkerMeta();
-        HalfElfMeta.GenerateHalfElfDefenderMeta();
-        HalfElfMeta.GenerateHalfElfAssassinMeta();
-        HalfElfMeta.GenerateHalfElfClericMeta();
-        HalfElfMeta.GenerateHalfElfArcanusMeta();
-        HalfElfMeta.GenerateHalfElfMonkMeta();
-
-        HighElfMeta.GenerateHighElfBezerkerMeta();
-        HighElfMeta.GenerateHighElfDefenderMeta();
-        HighElfMeta.GenerateHighElfAssassinMeta();
-        HighElfMeta.GenerateHighElfClericMeta();
-        HighElfMeta.GenerateHighElfArcanusMeta();
-        HighElfMeta.GenerateHighElfMonkMeta();
-
-        DarkElfMeta.GenerateDarkElfBezerkerMeta();
-        DarkElfMeta.GenerateDarkElfDefenderMeta();
-        DarkElfMeta.GenerateDarkElfAssassinMeta();
-        DarkElfMeta.GenerateDarkElfClericMeta();
-        DarkElfMeta.GenerateDarkElfArcanusMeta();
-        DarkElfMeta.GenerateDarkElfMonkMeta();
-
-        WoodElfMeta.GenerateWoodElfBezerkerMeta();
-        WoodElfMeta.GenerateWoodElfDefenderMeta();
-        WoodElfMeta.GenerateWoodElfAssassinMeta();
-        WoodElfMeta.GenerateWoodElfClericMeta();
-        WoodElfMeta.GenerateWoodElfArcanusMeta();
-        WoodElfMeta.GenerateWoodElfMonkMeta();
-
-        OrcMeta.GenerateOrcBezerkerMeta();
-        OrcMeta.GenerateOrcDefenderMeta();
-        OrcMeta.GenerateOrcAssassinMeta();
-        OrcMeta.GenerateOrcClericMeta();
-        OrcMeta.GenerateOrcArcanusMeta();
-        OrcMeta.GenerateOrcMonkMeta();
-
-        DwarfMeta.GenerateDwarfBezerkerMeta();
-        DwarfMeta.GenerateDwarfDefenderMeta();
-        DwarfMeta.GenerateDwarfAssassinMeta();
-        DwarfMeta.GenerateDwarfClericMeta();
-        DwarfMeta.GenerateDwarfArcanusMeta();
-        DwarfMeta.GenerateDwarfMonkMeta();
-
-        HalflingMeta.GenerateHalflingBezerkerMeta();
-        HalflingMeta.GenerateHalflingDefenderMeta();
-        HalflingMeta.GenerateHalflingAssassinMeta();
-        HalflingMeta.GenerateHalflingClericMeta();
-        HalflingMeta.GenerateHalflingArcanusMeta();
-        HalflingMeta.GenerateHalflingMonkMeta();
-
-        DragonkinMeta.GenerateDragonkinBezerkerMeta();
-        DragonkinMeta.GenerateDragonkinDefenderMeta();
-        DragonkinMeta.GenerateDragonkinAssassinMeta();
-        DragonkinMeta.GenerateDragonkinClericMeta();
-        DragonkinMeta.GenerateDragonkinArcanusMeta();
-        DragonkinMeta.GenerateDragonkinMonkMeta();
-
-        HalfBeastMeta.GenerateHalfBeastBezerkerMeta();
-        HalfBeastMeta.GenerateHalfBeastDefenderMeta();
-        HalfBeastMeta.GenerateHalfBeastAssassinMeta();
-        HalfBeastMeta.GenerateHalfBeastClericMeta();
-        HalfBeastMeta.GenerateHalfBeastArcanusMeta();
-        HalfBeastMeta.GenerateHalfBeastMonkMeta();
-
-        MerfolkMeta.GenerateMerfolkBezerkerMeta();
-        MerfolkMeta.GenerateMerfolkDefenderMeta();
-        MerfolkMeta.GenerateMerfolkAssassinMeta();
-        MerfolkMeta.GenerateMerfolkClericMeta();
-        MerfolkMeta.GenerateMerfolkArcanusMeta();
-        MerfolkMeta.GenerateMerfolkMonkMeta();
+        AbilityMetaBuilder.AbilityMeta();
     }
 
     private static void GenerateItemInfoMeta()

@@ -42,6 +42,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using Darkages.Managers;
 using JetBrains.Annotations;
+using CollectionExtensions = System.Collections.Generic.CollectionExtensions;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ExchangeArgs = Chaos.Networking.Entities.Client.ExchangeArgs;
 using GroupRequestArgs = Chaos.Networking.Entities.Client.GroupRequestArgs;
@@ -64,7 +65,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
-    private static Dictionary<(Race race, Class path, Class pastClass), string> _skillMap = new();
+    public static Dictionary<(Race race, Class path, Class pastClass), string> SkillMap = new();
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
     private readonly Stopwatch _itemGroundCheckControl = new();
@@ -153,7 +154,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void SkillMapper()
     {
-        _skillMap = new Dictionary<(Race race, Class path, Class pastClass), string>
+        SkillMap = new Dictionary<(Race race, Class path, Class pastClass), string>
         {
             {(Race.Human, Class.Berserker, Class.Berserker), "SClass1"},
             {(Race.Human, Class.Berserker, Class.Defender), "SClass2"},
@@ -3424,8 +3425,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static string DecideOnSkillsToPull(IWorldClient client)
     {
-        if (client.Aisling == null) return null;
-        return _skillMap.TryGetValue((client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass), out var skillCode) ? skillCode : null;
+        return client.Aisling == null ? null : CollectionExtensions.GetValueOrDefault(SkillMap, (client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass));
     }
 
     #endregion

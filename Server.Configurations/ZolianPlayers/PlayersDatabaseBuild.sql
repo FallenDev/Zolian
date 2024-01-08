@@ -56,6 +56,7 @@ DROP PROCEDURE [dbo].[LoadItemsToCache]
 DROP PROCEDURE [dbo].[BuffSave]
 DROP PROCEDURE [dbo].[AddLegendMark]
 DROP PROCEDURE [dbo].[ItemUpsert]
+DROP PROCEDURE [dbo].[ObtainMailBoxNumber]
 GO
 
 DROP TYPE dbo.PlayerType
@@ -1553,4 +1554,16 @@ BEGIN
     WHEN NOT MATCHED THEN
     INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial)
     VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial);
+END
+
+-- Obtain MailboxNumber
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtainMailBoxNumber] @Serial BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MailBoxNumber FROM ZolianPlayers.dbo.PlayersQuests WHERE Serial = @Serial
 END

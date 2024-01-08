@@ -129,9 +129,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public int Dex => (_Dex + BonusDex).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Luck => _Luck + BonusLuck;
 
-    public Area Map => ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var mapId)
-        ? mapId
-        : null;
+    public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
 
     public Position Position => new(Pos);
 

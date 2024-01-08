@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
+using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Client;
 
@@ -72,8 +73,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
         Send(args);
     }
 
-    public void SendMetaData(MetaDataRequestType metaDataRequestType, [NotNull] MetafileManager metaDataStore,
-        [CanBeNull] string name = null)
+    public void SendMetaData(MetaDataRequestType metaDataRequestType, [NotNull] MetafileManager metaDataStore, [CanBeNull] string name = null)
     {
         var args = new MetaDataArgs
         {
@@ -84,33 +84,51 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
         {
             case MetaDataRequestType.DataByName:
             {
-                ArgumentNullException.ThrowIfNull(name);
-                var metaData = metaDataStore.GetMetaFile(name);
-                args.MetaDataInfo = new MetaDataInfo
+                try
                 {
-                    Name = metaData.Name,
-                    Data = metaData.DeflatedData,
-                    CheckSum = metaData.Hash
-                };
+                    var metaData = MetafileManager.GetMetaFile(name);
+                    args.MetaDataInfo = new MetaDataInfo
+                    {
+                        Name = metaData.Name,
+                        Data = metaData.DeflatedData,
+                        CheckSum = metaData.Hash
+                    };
+                }
+                catch (Exception ex)
+                {
+                    ServerSetup.Logger(ex.Message, LogLevel.Error);
+                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    Crashes.TrackError(ex);
+                }
+                
                 break;
             }
             case MetaDataRequestType.AllCheckSums:
             {
-                args.MetaDataCollection = new List<MetaDataInfo>();
-                var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
-
-                foreach (var file in metaFiles)
+                try
                 {
-                    var metafileInfo = new MetaDataInfo
+                    args.MetaDataCollection = new List<MetaDataInfo>();
+                    var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
+
+                    foreach (var file in metaFiles)
                     {
-                        CheckSum = file.Hash,
-                        Data = file.DeflatedData,
-                        Name = file.Name
-                    };
+                        var metafileInfo = new MetaDataInfo
+                        {
+                            CheckSum = file.Hash,
+                            Data = file.DeflatedData,
+                            Name = file.Name
+                        };
 
-                    args.MetaDataCollection.Add(metafileInfo);
+                        args.MetaDataCollection.Add(metafileInfo);
+                    }
                 }
-
+                catch (Exception ex)
+                {
+                    ServerSetup.Logger(ex.Message, LogLevel.Error);
+                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    Crashes.TrackError(ex);
+                }
+                
                 break;
             }
         }

@@ -2305,54 +2305,71 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             case MetaDataRequestType.DataByName:
                 {
-                    ArgumentNullException.ThrowIfNull(name);
-                    var metaData = metaDataStore.GetMetaFile(name);
-
-                    if (!name.Contains("Class"))
+                    try
                     {
+                        var metaData = MetafileManager.GetMetaFile(name);
+
+                        if (!name!.Contains("Class"))
+                        {
+                            args.MetaDataInfo = new MetaDataInfo
+                            {
+                                Name = metaData.Name,
+                                Data = metaData.DeflatedData,
+                                CheckSum = metaData.Hash
+                            };
+
+                            break;
+                        }
+
+                        var orgFileName = Aisling.Path switch
+                        {
+                            Class.Berserker => "SClass1",
+                            Class.Defender => "SClass2",
+                            Class.Assassin => "SClass3",
+                            Class.Cleric => "SClass4",
+                            Class.Arcanus => "SClass5",
+                            Class.Monk => "SClass6",
+                            _ => metaData.Name
+                        };
+
                         args.MetaDataInfo = new MetaDataInfo
                         {
-                            Name = metaData.Name,
+                            Name = orgFileName,
                             Data = metaData.DeflatedData,
                             CheckSum = metaData.Hash
                         };
-
-                        break;
                     }
-
-                    var orgFileName = Aisling.Path switch
+                    catch (Exception ex)
                     {
-                        Class.Berserker => "SClass1",
-                        Class.Defender => "SClass2",
-                        Class.Assassin => "SClass3",
-                        Class.Cleric => "SClass4",
-                        Class.Arcanus => "SClass5",
-                        Class.Monk => "SClass6",
-                        _ => metaData.Name
-                    };
-
-                    args.MetaDataInfo = new MetaDataInfo
-                    {
-                        Name = orgFileName,
-                        Data = metaData.DeflatedData,
-                        CheckSum = metaData.Hash
-                    };
+                        ServerSetup.Logger(ex.Message, LogLevel.Error);
+                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        Crashes.TrackError(ex);
+                    }
 
                     break;
                 }
             case MetaDataRequestType.AllCheckSums:
                 {
-                    args.MetaDataCollection = new List<MetaDataInfo>();
-                    var metaFiles = metaDataStore.GetMetaFilesWithoutExtendedClasses();
+                    try
+                    {
+                        args.MetaDataCollection = new List<MetaDataInfo>();
+                        var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
 
-                    foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
+                        foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
+                                 {
+                                     CheckSum = metaFile.Hash,
+                                     Data = metaFile.DeflatedData,
+                                     Name = metaFile.Name
+                                 }))
+                        {
+                            args.MetaDataCollection.Add(metafileInfo);
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        CheckSum = metaFile.Hash,
-                        Data = metaFile.DeflatedData,
-                        Name = metaFile.Name
-                    }))
-                    {
-                        args.MetaDataCollection.Add(metafileInfo);
+                        ServerSetup.Logger(ex.Message, LogLevel.Error);
+                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        Crashes.TrackError(ex);
                     }
 
                     break;

@@ -57,7 +57,7 @@ public class InventoryManager : ObjectManager, IInventory
 
     public Item FindInSlot(int slot)
     {
-        return Items.TryGetValue(slot, out var item) ? item : null;
+        return Items.GetValueOrDefault(slot);
     }
 
     public new IEnumerable<Item> Get(Predicate<Item> prediate)
