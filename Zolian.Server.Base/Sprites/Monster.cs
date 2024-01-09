@@ -226,7 +226,10 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && player.QuestManager.Lau == 1)
         {
             var returnPlayer = player.HasKilled("Undead Guard", 5) && player.HasKilled("Undead Wizard", 5);
-            TrackingNpcAndText(player, 0x07, returnPlayer, $"{{=aLau Quest: {{=q{value?.TotalKills} {{=akilled");
+            player.MonsterKillCounters.TryGetValue("Undead Guard", out var monA);
+            player.MonsterKillCounters.TryGetValue("Undead Wizard", out var monB);
+
+            TrackingNpcAndText(player, 0x07, returnPlayer, $"{{=aQuest: Guard {{=q{monA?.TotalKills} {{=aWizard {{=q{monB?.TotalKills}");
         }
     }
 
