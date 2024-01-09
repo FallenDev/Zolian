@@ -39,7 +39,7 @@ public class Lau : MundaneScript
 
         if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1) || client.Aisling.GameMaster)
         {
-            options.Add(new(0x0B, "I have done what was asked"));
+            options.Add(new(0x0B, $"{{=qI have done what was asked"));
         }
 
         if (_skillList.Count > 0)
