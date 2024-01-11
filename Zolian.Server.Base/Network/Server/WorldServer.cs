@@ -74,6 +74,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private const int GameSpeed = 30;
     private Task _componentRunTask;
     private Task _updateObjectsTask;
+    private Task _updateGroundItemsTask;
     private Task _updateMapsTask;
     private Task _updateClientsTask;
 
@@ -117,6 +118,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.Instance.Running = true;
             _componentRunTask = Task.Run(UpdateComponentsRoutine, stoppingToken);
             _updateObjectsTask = Task.Run(UpdateObjectsRoutine, stoppingToken);
+            _updateGroundItemsTask = Task.Run(UpdateGroundItemsRoutine, stoppingToken);
             _updateMapsTask = Task.Run(UpdateMapsRoutine, stoppingToken);
             _updateClientsTask = Task.Run(UpdateClients, stoppingToken);
         }
@@ -676,6 +678,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
+    private void UpdateGroundItemsRoutine()
+    {
+        var groundWatch = new Stopwatch();
+        groundWatch.Start();
+
+        while (ServerSetup.Instance.Running)
+        {
+            var groundElapsed = groundWatch.Elapsed;
+            if (!(groundElapsed.TotalMilliseconds > GameSpeed)) continue;
+            UpdateGroundItems();
+            groundWatch.Restart();
+        }
+    }
+
     private void UpdateObjectsRoutine()
     {
         var monstersWatch = new Stopwatch();
@@ -687,8 +703,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var monstersElapsed = monstersWatch.Elapsed;
             var mundanesElapsed = mundanesWatch.Elapsed;
-
-            UpdateGroundItems();
 
             if (monstersElapsed.TotalMilliseconds > GameSpeed)
             {
@@ -790,7 +804,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var item in items.Values)
+            Parallel.ForEach(items.Values, item =>
             {
                 if (item == null) return;
                 if (item.ItemPane != Item.ItemPanes.Ground)
@@ -803,7 +817,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
                 if (!removed) return;
                 itemToBeRemoved.Remove();
-            }
+            });
         }
         catch (Exception ex)
         {
