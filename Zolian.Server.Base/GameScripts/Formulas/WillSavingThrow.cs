@@ -1,4 +1,5 @@
-﻿using Darkages.ScriptingBase;
+﻿using Darkages.Enums;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Formulas;
@@ -32,9 +33,22 @@ public class WillSavingThrow(Sprite obj) : FormulaScript
             return value;
         }
 
-        if (dmgMitigation >= 0.70f)
-            dmgMitigation = 0.70f;
-
+        if (obj is Monster monster)
+        {
+            dmgMitigation = monster.Template.MonsterArmorType switch
+            {
+                MonsterArmorType.Caster when dmgMitigation >= 0.90f => 0.90f,
+                MonsterArmorType.Common when dmgMitigation >= 0.70f => 0.70f,
+                MonsterArmorType.Tank when dmgMitigation >= 0.65f => 0.65f,
+                _ => dmgMitigation
+            };
+        }
+        else
+        {
+            if (dmgMitigation >= 0.70f)
+                dmgMitigation = 0.70f;
+        }
+        
         var dmgReducedByMitigation = dmgMitigation * value;
         value -= (int)dmgReducedByMitigation;
 

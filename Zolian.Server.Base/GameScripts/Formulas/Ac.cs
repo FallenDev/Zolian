@@ -1,4 +1,5 @@
-﻿using Darkages.ScriptingBase;
+﻿using Darkages.Enums;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Formulas;
@@ -32,8 +33,21 @@ public class Ac(Sprite obj) : FormulaScript
             return value;
         }
 
-        if (dmgMitigation >= 0.98f)
-            dmgMitigation = 0.98f;
+        if (obj is Monster monster)
+        {
+            dmgMitigation = monster.Template.MonsterArmorType switch
+            {
+                MonsterArmorType.Caster when dmgMitigation >= 0.90f => 0.90f,
+                MonsterArmorType.Common when dmgMitigation >= 0.95f => 0.95f,
+                MonsterArmorType.Tank when dmgMitigation >= 0.98f => 0.98f,
+                _ => dmgMitigation
+            };
+        }
+        else
+        {
+            if (dmgMitigation >= 0.98f)
+                dmgMitigation = 0.98f;
+        }
 
         var dmgReducedByMitigation = dmgMitigation * value;
         value -= (int)dmgReducedByMitigation;
