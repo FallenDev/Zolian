@@ -39,6 +39,7 @@ public interface IWorldClient : ISocketClient
     DateTime LastWorldListRequest { get; set; }
     DateTime LastClientRefresh { get; set; }
     DateTime LastWarp { get; set; }
+    Area LastMap { get; set; }
     Item LastItemDropped { get; set; }
     DateTime LastLocationSent { get; set; }
     DateTime LastMapUpdated { get; set; }

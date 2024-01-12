@@ -690,7 +690,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var groundElapsed = groundWatch.Elapsed;
-            if (!(groundElapsed.TotalMilliseconds > GameSpeed)) continue;
+            if (!(groundElapsed.TotalMilliseconds > 1000)) continue;
             UpdateGroundItems();
             groundWatch.Restart();
         }
@@ -718,7 +718,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var monstersElapsed = monstersWatch.Elapsed;
-            if (monstersElapsed.TotalMilliseconds < GameSpeed) continue;
+            if (monstersElapsed.TotalMilliseconds < 50) continue;
             UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
         }
@@ -733,7 +733,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var gameTimeElapsed = gameWatch.Elapsed;
 
-            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
+            if (gameTimeElapsed.TotalMilliseconds < 1000) continue;
             UpdateMaps(gameTimeElapsed);
             gameWatch.Restart();
         }
@@ -748,7 +748,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var gameTimeElapsed = gameWatch.Elapsed;
 
-            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
+            if (gameTimeElapsed.TotalMilliseconds < 1000) continue;
             CheckTraps(gameTimeElapsed);
             gameWatch.Restart();
         }
@@ -856,9 +856,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            foreach (var monster in updateList)
+            Parallel.ForEach(updateList, monster =>
             {
-                if (monster?.Scripts == null) continue;
+                if (monster?.Scripts == null) return;
                 if (monster.CurrentHp <= 0)
                 {
                     monster.Skulled = true;
@@ -890,12 +890,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 monster.LastUpdated = DateTime.UtcNow;
 
-                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) continue;
+                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds <
+                    monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
 
                 monster.UpdateBuffs(elapsedTime);
                 monster.UpdateDebuffs(elapsedTime);
                 monster.MonsterBuffAndDebuffStopWatch.Restart();
-            }
+            });
         }
         catch (Exception ex)
         {

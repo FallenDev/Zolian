@@ -171,6 +171,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     public DateTime LastWorldListRequest { get; set; }
     public DateTime LastClientRefresh { get; set; }
     public DateTime LastWarp { get; set; }
+    public Area LastMap { get; set; }
     public Item LastItemDropped { get; set; }
     public DateTime LastLocationSent { get; set; }
     public DateTime LastMapUpdated { get; set; }
@@ -1683,7 +1684,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 PostId = postFormat.PostId,
                 Subject = postFormat.SubjectLine
             }).ToList();
-            
+
             var boardInfo = new BoardInfo
             {
                 BoardId = (ushort)Aisling.QuestManager.MailBoxNumber,
@@ -2357,11 +2358,11 @@ public class WorldClient : SocketClientBase, IWorldClient
                         var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
 
                         foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
-                                 {
-                                     CheckSum = metaFile.Hash,
-                                     Data = metaFile.DeflatedData,
-                                     Name = metaFile.Name
-                                 }))
+                        {
+                            CheckSum = metaFile.Hash,
+                            Data = metaFile.DeflatedData,
+                            Name = metaFile.Name
+                        }))
                         {
                             args.MetaDataCollection.Add(metafileInfo);
                         }
@@ -4879,46 +4880,40 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public void CompleteMapTransition()
     {
-        var oldMap = new Area();
-        var newMap = new Area();
-
         foreach (var (_, area) in ServerSetup.Instance.GlobalMapCache)
         {
-            if (area.ID == Aisling.CurrentMapId)
+            if (Aisling.CurrentMapId != area.ID) continue;
+            var mapFound = ServerSetup.Instance.GlobalMapCache.TryGetValue(area.ID, out var newMap);
+            if (mapFound)
             {
-                var onMap = Aisling.Map.IsLocationOnMap(Aisling);
+                Aisling.CurrentMapId = newMap.ID;
 
+                var onMap = Aisling.Map.IsLocationOnMap(Aisling);
                 if (!onMap)
                 {
-                    TransitionToMap(136, new Position(5, 7));
+                    TransitionToMap(3052, new Position(27, 18));
                     SendServerMessage(ServerMessageType.OrangeBar1, "Something grabs your hand...");
+                    return;
                 }
 
-                newMap = area;
-
-                if (area.ID == 7000 && oldMap != newMap)
+                if (newMap.ID == 7000)
                 {
                     SendServerMessage(ServerMessageType.ScrollWindow,
                         "{=bLife{=a, all that you know, love, and cherish. Everything, and the very fabric of their being. \n\nThe aisling spark, creativity, passion. All of that lives within you." +
                         "\n\nThis story begins shortly after Anaman Pact successfully revives {=bChadul{=a. \n\n-{=cYou feel a sense of unease come over you{=a-");
                 }
             }
-
-            if (area.ID == Aisling.LastMapId)
+            else
             {
-                oldMap = area;
+                TransitionToMap(3052, new Position(27, 18));
+                SendServerMessage(ServerMessageType.OrangeBar1, "Something grabs your hand...");
+                return;
             }
         }
 
-        if (Aisling.CurrentMapId == Aisling.LastMapId) return;
-        Aisling.LastMapId = Aisling.CurrentMapId;
-
-        if (Aisling.DiscoveredMaps.All(i => i != Aisling.CurrentMapId))
-            AddDiscoveredMapToDb();
-
         var objects = ObjectHandlers.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
 
-        if (objects.Count() != 0)
+        if (objects.Count != 0)
         {
             objects.Reverse();
             SendVisibleEntities(objects);
@@ -4926,10 +4921,16 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         SendMapChangeComplete();
 
-        if (oldMap.Music != newMap.Music)
+        if (LastMap == null || LastMap.Music != Aisling.Map.Music)
         {
             SendSound((byte)Aisling.Map.Music, true);
         }
+
+        Aisling.LastMapId = Aisling.CurrentMapId;
+        LastMap = Aisling.Map;
+
+        if (Aisling.DiscoveredMaps.All(i => i != Aisling.CurrentMapId))
+            AddDiscoveredMapToDb();
 
         SendMapLoadComplete();
         SendDisplayAisling(Aisling);
@@ -5107,12 +5108,4 @@ public class WorldClient : SocketClientBase, IWorldClient
     }
 
     #endregion
-}
-
-public class NullsLastComparer<T> : IComparer<T?> where T : struct
-{
-    public int Compare(T? x, T? y)
-    {
-        return Nullable.Compare(x, y);
-    }
 }

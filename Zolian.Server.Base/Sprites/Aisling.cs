@@ -731,14 +731,6 @@ public sealed class Aisling : Player, IAisling
     {
         if (CantMove) return false;
 
-        if (Resting != Enums.RestPosition.Standing)
-        {
-            Resting = Enums.RestPosition.Standing;
-            Client.SendAttributes(StatUpdateType.Full);
-            Client.UpdateDisplay();
-            Client.SendDisplayAisling(this);
-        }
-
         var oldPosX = X;
         var oldPosY = Y;
 
