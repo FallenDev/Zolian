@@ -68,9 +68,12 @@ public class ServerSetup : IServerContext
     public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = new();
     public FrozenDictionary<uint, string> GlobalKnownGoodActorsCache { get; set; }
     public Dictionary<uint, string> TempGlobalKnownGoodActorsCache { get; set; } = new();
-    
+
+    // Frozen Live
+    public FrozenDictionary<int, Area> GlobalMapCache { get; set; }
+    public ConcurrentDictionary<int, Area> TempGlobalMapCache { get; set; } = new();
+
     // Live
-    public ConcurrentDictionary<int, Area> GlobalMapCache { get; set; } = new();
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
     public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = new();
     public ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; } = new();

@@ -43,7 +43,7 @@ public static class Commander
         #endregion
 
         #region GM Control
-        
+
         ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Learn Spell", "spell")
             .SetAction(OnLearnSpell)
@@ -341,7 +341,7 @@ public static class Commander
         ServerSetup.Logger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
         // Wipe
-        ServerSetup.Instance.GlobalMapCache = new ConcurrentDictionary<int, Area>();
+        ServerSetup.Instance.TempGlobalMapCache = new ConcurrentDictionary<int, Area>();
         ServerSetup.Instance.TempGlobalWarpTemplateCache = new();
 
         foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)

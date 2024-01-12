@@ -1,4 +1,6 @@
-﻿using Chaos.Cryptography;
+﻿using System.Collections.Frozen;
+
+using Chaos.Cryptography;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
@@ -69,7 +71,7 @@ public record AreaStorage : IAreaStorage
                         temp.Script = new Tuple<string, AreaScript>(temp.ScriptKey, script);
                 }
 
-                ServerSetup.Instance.GlobalMapCache[temp.ID] = temp;
+                ServerSetup.Instance.TempGlobalMapCache[temp.ID] = temp;
             }
 
             reader.Close();
@@ -84,6 +86,7 @@ public record AreaStorage : IAreaStorage
             LoadLock.Release();
         }
 
+        ServerSetup.Instance.GlobalMapCache = ServerSetup.Instance.TempGlobalMapCache.ToFrozenDictionary();
         ServerSetup.Logger($"Maps: {ServerSetup.Instance.GlobalMapCache.Count}");
     }
 

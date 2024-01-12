@@ -60,14 +60,17 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
     {
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Default)) return;
         if (map.Height < 15 || map.Width < 15) return;
-        
-        map.MiningNodesCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i.Template is { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
-            or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }).Count();
-
-        if (map.MiningNodesCount >= map.Height * map.Width / 200) return;
 
         try
         {
+            map.MiningNodesCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i is
+            {
+                Template: { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
+                or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }
+            }).Count();
+
+            if (map.MiningNodesCount >= map.Height * map.Width / 200) return;
+
             var node = MiningNode(map);
             if (node == null) return;
             var x = Generator.GenerateMapLocation(map.Height);
@@ -82,9 +85,9 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
                 break;
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Crashes.TrackError(ex);
+            // ignored
         }
     }
 

@@ -718,7 +718,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var monstersElapsed = monstersWatch.Elapsed;
-            if (monstersElapsed.TotalMilliseconds < GameSpeed) continue;
+            if (monstersElapsed.TotalMilliseconds < 300) continue;
             UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
         }
@@ -826,20 +826,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            Parallel.ForEach(items.Values, item =>
+            foreach(var item in items.Values)
             {
-                if (item == null) return;
+                if (item == null) continue;
                 if (item.ItemPane != Item.ItemPanes.Ground)
                 {
                     ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
-                    return;
+                    continue;
                 }
                 var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
-                if (abandonedDiff.TotalMinutes <= 30) return;
+                if (abandonedDiff.TotalMinutes <= 30) continue;
                 var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
                 if (!removed) return;
                 itemToBeRemoved.Remove();
-            });
+            }
         }
         catch (Exception ex)
         {
