@@ -40,7 +40,7 @@ public sealed class Aisling : Player, IAisling
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
     public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = new();
     public AislingTrackers AislingTrackers { get; }
-    public Stopwatch LawsOfAosda { get; set; }
+    public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;
     public uint MaximumWeight => GameMaster switch
     {

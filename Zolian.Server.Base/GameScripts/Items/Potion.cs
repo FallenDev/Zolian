@@ -92,6 +92,32 @@ public class Potion(Item item) : ItemScript(item)
                                 client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(46, null, client.Aisling.Serial));
                             }
                             break;
+                        case "Elemental Essence":
+                            {
+                                if (client.Aisling.HasBuff("Ard Fas Nadur"))
+                                {
+                                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
+                                    return;
+                                }
+
+                                if (client.Aisling.HasBuff("Mor Fas Nadur"))
+                                {
+                                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
+                                    return;
+                                }
+
+                                if (client.Aisling.HasBuff("Fas Nadur") || client.Aisling.HasBuff("Beag Fas Nadur"))
+                                {
+                                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
+                                    return;
+                                }
+
+                                var buff = new BuffMorFasNadur();
+                                buff.OnApplied(client.Aisling, buff);
+                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(67, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(20, false));
+                            }
+                            break;
                         case "Minor Ao Puinsein Deum":
                             {
                                 if (client.Aisling.HasDebuff("Beag Puinsein"))
@@ -171,16 +197,16 @@ public class Potion(Item item) : ItemScript(item)
                             }
                             break;
                         case "Eyedrops":
-                        {
-                            if (client.Aisling.HasDebuff("Blind"))
                             {
-                                client.Aisling.Debuffs.TryRemove("Blind", out var debuff);
-                                debuff?.OnEnded(client.Aisling, debuff);
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
-                            }
+                                if (client.Aisling.HasDebuff("Blind"))
+                                {
+                                    client.Aisling.Debuffs.TryRemove("Blind", out var debuff);
+                                    debuff?.OnEnded(client.Aisling, debuff);
+                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
 
                         #endregion
 

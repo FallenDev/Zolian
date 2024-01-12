@@ -73,9 +73,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
     private Task _componentRunTask;
-    private Task _updateObjectsTask;
+    private Task _updateMundanessTask;
+    private Task _updateMonstersTask;
     private Task _updateGroundItemsTask;
     private Task _updateMapsTask;
+    private Task _updateTrapsTasks;
     private Task _updateClientsTask;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
@@ -117,9 +119,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.Instance.Running = true;
             _componentRunTask = Task.Run(UpdateComponentsRoutine, stoppingToken);
-            _updateObjectsTask = Task.Run(UpdateObjectsRoutine, stoppingToken);
+            _updateMundanessTask = Task.Run(UpdateMundanesRoutine, stoppingToken);
+            _updateMonstersTask = Task.Run(UpdateMonstersRoutine, stoppingToken);
             _updateGroundItemsTask = Task.Run(UpdateGroundItemsRoutine, stoppingToken);
             _updateMapsTask = Task.Run(UpdateMapsRoutine, stoppingToken);
+            _updateTrapsTasks = Task.Run(UpdateTrapsRoutine, stoppingToken);
             _updateClientsTask = Task.Run(UpdateClients, stoppingToken);
         }
         catch (Exception ex)
@@ -692,27 +696,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateObjectsRoutine()
+    private void UpdateMundanesRoutine()
     {
-        var monstersWatch = new Stopwatch();
-        monstersWatch.Start();
         var mundanesWatch = new Stopwatch();
         mundanesWatch.Start();
 
         while (ServerSetup.Instance.Running)
         {
-            var monstersElapsed = monstersWatch.Elapsed;
             var mundanesElapsed = mundanesWatch.Elapsed;
-
-            if (monstersElapsed.TotalMilliseconds > GameSpeed)
-            {
-                UpdateMonsters(monstersElapsed);
-                monstersWatch.Restart();
-            }
-
             if (mundanesElapsed.TotalMilliseconds < 1500) continue;
             UpdateMundanes(mundanesElapsed);
             mundanesWatch.Restart();
+        }
+    }
+
+    private void UpdateMonstersRoutine()
+    {
+        var monstersWatch = new Stopwatch();
+        monstersWatch.Start();
+
+        while (ServerSetup.Instance.Running)
+        {
+            var monstersElapsed = monstersWatch.Elapsed;
+            if (monstersElapsed.TotalMilliseconds < GameSpeed) continue;
+            UpdateMonsters(monstersElapsed);
+            monstersWatch.Restart();
         }
     }
 
@@ -727,6 +735,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
             UpdateMaps(gameTimeElapsed);
+            gameWatch.Restart();
+        }
+    }
+
+    private void UpdateTrapsRoutine()
+    {
+        var gameWatch = new Stopwatch();
+        gameWatch.Start();
+
+        while (ServerSetup.Instance.Running)
+        {
+            var gameTimeElapsed = gameWatch.Elapsed;
+
+            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
             CheckTraps(gameTimeElapsed);
             gameWatch.Restart();
         }

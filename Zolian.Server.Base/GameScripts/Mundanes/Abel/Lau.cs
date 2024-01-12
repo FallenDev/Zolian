@@ -37,7 +37,7 @@ public class Lau : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1) || client.Aisling.GameMaster)
+        if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1))
         {
             options.Add(new(0x0B, $"{{=qI have done what was asked"));
         }
@@ -309,7 +309,7 @@ public class Lau : MundaneScript
                 }
             case 0x000B:
                 {
-                    if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1) || client.Aisling.GameMaster)
+                    if ((client.Aisling.HasKilled("Undead Guard", 5) && client.Aisling.HasKilled("Undead Wizard", 5) && client.Aisling.QuestManager.Lau == 1))
                     {
                         // Logic to give quest based on secondary class first
                         if (client.Aisling.Path == Class.Berserker)

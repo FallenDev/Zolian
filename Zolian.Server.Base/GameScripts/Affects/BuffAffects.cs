@@ -1602,7 +1602,6 @@ public class aura_LawsOfAosda : Buff
     public override int Length => 32767;
     public override string Name => "Laws of Aosda";
 
-
     public override void OnApplied(Sprite affected, Buff buff)
     {
         if (affected.Buffs.TryAdd(buff.Name, buff))
@@ -1621,23 +1620,43 @@ public class aura_LawsOfAosda : Buff
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
         if (affected is not Aisling aisling) return;
-        if (aisling.PartyMembers == null) return;
-
-        foreach (var player in aisling.PartyMembers)
+        if (aisling.Skulled)
         {
-            if (player == null) continue;
-            if (!player.Skulled) continue;
-            if (!player.WithinRangeOf(aisling)) continue;
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
-            aisling.CurrentHp = aisling.MaximumHp;
-            aisling.Client.SendAttributes(StatUpdateType.Vitality);
-            if (!aisling.LawsOfAosda.IsRunning)
-                aisling.LawsOfAosda.Start();
+            aisling.ReviveFromAfar(aisling);
+
+            if (aisling.LawsOfAosda.IsRunning)
+            {
+                aisling.LawsOfAosda.Stop();
+                aisling.LawsOfAosda.Reset();
+            }
+
+            OnEnded(aisling, buff);
+            return;
+        }
+
+        if (aisling.PartyMembers != null)
+        {
+            foreach (var player in aisling.PartyMembers)
+            {
+                if (player == null) continue;
+                if (player == aisling) continue;
+                if (!player.Skulled) continue;
+                if (!player.WithinRangeOf(aisling)) continue;
+
+                // Start the Clock if a player needs rescue
+                if (!aisling.LawsOfAosda.IsRunning)
+                    aisling.LawsOfAosda.Start();
+
+                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
+                aisling.CurrentHp = aisling.MaximumHp;
+                aisling.Client.SendAttributes(StatUpdateType.Vitality);
+            }
         }
 
         if (!aisling.LawsOfAosda.IsRunning) return;
-        if (aisling.LawsOfAosda.Elapsed.TotalSeconds < 10) return;
+        if (aisling.LawsOfAosda.Elapsed.TotalMilliseconds < 7000) return;
         aisling.LawsOfAosda.Stop();
+        aisling.LawsOfAosda.Reset();
         OnEnded(aisling, buff);
     }
 

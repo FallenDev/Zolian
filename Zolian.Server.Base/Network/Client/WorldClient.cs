@@ -3418,7 +3418,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// 0x19 - Send Sound
     /// </summary>
     /// <param name="sound">Sound Number</param>
-    /// <param name="isMusic">Whether or not the sound is a song</param>
+    /// <param name="isMusic">Whether the sound is a song</param>
     public void SendSound(byte sound, bool isMusic)
     {
         var args = new SoundArgs
