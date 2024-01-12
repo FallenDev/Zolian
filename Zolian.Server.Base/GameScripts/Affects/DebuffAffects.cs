@@ -2248,6 +2248,15 @@ public class DebuffReaping : Debuff
                 return;
             }
 
+            // Prevent Dojo / Training deaths
+            if (aisling.Map.ID is 7000 or 717 or 721 or 5257 or 192 or 290 or 14758)
+            {
+                debuff.Cancelled = true;
+                debuff.OnEnded(aisling, debuff);
+                aisling.Client.Revive();
+                return;
+            }
+            
             var randCheck = Generator.RandNumGen100();
 
             if (randCheck <= 50)
@@ -2271,16 +2280,6 @@ public class DebuffReaping : Debuff
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
-        if (affected.Map.ID is 192 or 290 or 14758)
-        {
-            affected.Debuffs.TryRemove(debuff.Name, out _);
-            if (affected is not Aisling playerAffected) return;
-            playerAffected.Client.SendEffect(byte.MinValue, Icon);
-            playerAffected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot die here, saved");
-            DeleteDebuff(playerAffected, debuff);
-            return;
-        }
-
         switch (affected)
         {
             case Aisling aisling when !debuff.Cancelled:
