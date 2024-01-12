@@ -57,11 +57,9 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
             if (obj is Monster monster)
             {
-                if (monster.Summoner != null) continue;
-
                 var valueCollection = monster.Scripts?.Values;
-
-                if (valueCollection != null)
+                
+                if (valueCollection is { Count: >= 1 })
                     foreach (var script in valueCollection)
                         script.OnLeave(client.Client);
             }
@@ -85,11 +83,8 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             if (obj is Monster monster)
             {
                 var valueCollection = monster.Scripts?.Values;
-
-                if (monster.Template != null && monster.Map != null)
-                    Monster.InitScripting(monster.Template, monster.Map, monster);
-
-                if (valueCollection != null && valueCollection.Any())
+                
+                if (valueCollection is { Count: >= 1 })
                     foreach (var script in valueCollection)
                         script.OnApproach(self.Client);
             }

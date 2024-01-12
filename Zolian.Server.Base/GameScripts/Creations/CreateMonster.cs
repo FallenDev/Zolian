@@ -130,6 +130,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         obj.CurrentHp = obj.MaximumHp;
         obj.CurrentMp = obj.MaximumMp;
 
+        Monster.InitScripting(template, map, obj);
+
         return obj;
     }
 
