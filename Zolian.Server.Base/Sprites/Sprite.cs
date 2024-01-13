@@ -1371,8 +1371,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (CurrentHp > MaximumHp)
             CurrentHp = MaximumHp;
 
-        // ToDo: Create logic for "Over Damage"
-
         CurrentHp -= (int)dmg;
 
         if (damageDealingSprite is Aisling aisling)
@@ -1387,7 +1385,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             ShowDmg(aisling, estTime);
         }
 
-        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+        if (this is Aisling damagedPlayer)
+        {
+            damagedPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            if (CurrentHp <= 0)
+                damagedPlayer.Client.DeathStatusCheck();
+        }
+        else
+            PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         if (dmg > 50)
             ApplyEquipmentDurability((int)dmg);
