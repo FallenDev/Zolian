@@ -129,7 +129,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                     // Withdraw
                     if (client.PendingItemSessions != null)
                     {
-                        CompleteWithdrawItem(client, amount);
+                        CompleteStackedWithdraw(client, amount);
                         return;
                     }
 
@@ -381,13 +381,15 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     private void StartWithdrawItem(WorldClient client, string args)
     {
+        // Obtain the first item to check if its stackable etc
         var bankToInv = client.Aisling.BankManager.Items.Values.FirstOrDefault(x => x.NoColorDisplayName == args);
         if (bankToInv == null) return;
         if (bankToInv.Stacks >= 1 && bankToInv.Template.CanStack)
         {
+            // Set the name only
             client.PendingItemSessions = new PendingSell
             {
-                ID = bankToInv.ItemId,
+                ID = 0,
                 Name = bankToInv.DisplayName,
                 Quantity = 0
             };
@@ -396,6 +398,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
+        // Handle non-stackable
         client.Aisling.BankManager.Items.TryRemove(bankToInv.ItemId, out var verifiedItem);
         if (verifiedItem == null)
         {
@@ -421,11 +424,22 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
     /// </summary>
     /// <param name="client"></param>
     /// <param name="amount"></param>
-    private void CompleteWithdrawItem(WorldClient client, ushort amount)
+    private void CompleteStackedWithdraw(WorldClient client, ushort amount)
     {
         client.PendingItemSessions.Quantity = amount;
+
+        // Search for an IDs large enough to accommodate capacity requested
+        var matchingItems = client.Aisling.BankManager.Items.Values.Where(itemBanked => itemBanked.DisplayName == client.PendingItemSessions.Name).Where(itemBanked => itemBanked.Stacks >= amount).ToList();
+
+        // Pick the smallest stack capable of fulfilling the request
+        var bestFit = matchingItems.MinBy(i => i.Stacks);
+        client.PendingItemSessions.ID = bestFit.ItemId;
+
+        // Grab the item
         client.Aisling.BankManager.Items.TryGetValue(client.PendingItemSessions.ID, out var itemInBank);
 
+        #region Validation Checks
+        
         if (itemInBank == null)
         {
             client.SendOptionsDialog(Mundane, "We don't seem to have that. *checks ledger*");
@@ -448,9 +462,19 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
+        #endregion
+
         if (itemInBank.Stacks == client.PendingItemSessions.Quantity)
         {
-            client.Aisling.BankManager.Items.TryRemove(itemInBank.ItemId, out var verifiedItem);
+            var removed = client.Aisling.BankManager.Items.TryRemove(itemInBank.ItemId, out var verifiedItem);
+
+            if (!removed)
+            {
+                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I'm sorry it seems you don't have that.");
+                TopMenu(client);
+                return;
+            }
+
             if (verifiedItem == null)
             {
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I'm sorry it seems you don't have that.");
@@ -461,23 +485,25 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             var itemGiven = verifiedItem.GiveTo(client.Aisling);
             if (!itemGiven)
             {
+                verifiedItem.ItemPane = Item.ItemPanes.Bank;
                 client.Aisling.BankManager.Items.TryAdd(verifiedItem.ItemId, verifiedItem);
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, looks like you can't hold that. I'll hold onto it.");
                 return;
             }
 
             client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, here is your {verifiedItem.DisplayName ?? ""} x{verifiedItem.Stacks}");
+            client.Aisling.Inventory.UpdatePlayersWeight(client);
             client.PendingItemSessions = null;
             TopMenu(client);
             return;
         }
 
+        // If the stack in the bank has leftover quantities
         if (itemInBank.Stacks > client.PendingItemSessions.Quantity)
         {
             // Modify Existing
-            var tempItem = itemInBank;
-            tempItem.Stacks -= client.PendingItemSessions.Quantity;
-            client.Aisling.BankManager.Items.TryUpdate(itemInBank.ItemId, tempItem, itemInBank);
+            itemInBank.Stacks -= client.PendingItemSessions.Quantity;
+            client.Aisling.BankManager.Items.TryUpdate(itemInBank.ItemId, itemInBank, itemInBank);
 
             // Create
             var itemCreateFromTemplate = new Item();
@@ -488,7 +514,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             var itemGiven = itemCreated.GiveTo(client.Aisling);
             if (!itemGiven)
             {
-                client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
+                itemInBank.Stacks += client.PendingItemSessions.Quantity;
+                client.Aisling.BankManager.Items.TryUpdate(itemInBank.ItemId, itemInBank, itemInBank);
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, looks like you can't hold that. I'll hold onto it.");
                 return;
             }

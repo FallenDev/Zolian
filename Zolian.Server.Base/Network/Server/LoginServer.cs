@@ -144,8 +144,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
                 localClient.SendLoginMessage(LoginMessageType.Confirm);
             }
-            else
-                localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unable to create character, bad request.");
         }
     }
 
@@ -168,8 +166,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             }
             else
             {
-                ServerSetup.Logger($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
-                Analytics.TrackEvent($"Character creation failed - {localArgs.Name} - {localClient.RemoteIp}");
+                localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "That name is unavailable.");
             }
         }
     }

@@ -643,7 +643,12 @@ public sealed class Item : Sprite, IItem
 
             if (item != null)
             {
+                // Add count to an existing stack
                 aisling.Inventory.AddRange(aisling.Client, item, numStacks);
+
+                // Delete existing item since we're adding it to another stack
+                aisling.Inventory.RemoveFromInventory(aisling.Client, this);
+
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Received {DisplayName}, You now have {(item.Stacks == 0 ? item.Stacks + 1 : item.Stacks)}");
                 aisling.Client.SendAttributes(StatUpdateType.Primary);
                 aisling.Client.SendAttributes(StatUpdateType.ExpGold);
@@ -661,7 +666,6 @@ public sealed class Item : Sprite, IItem
                 return false;
             }
 
-            aisling.Client.SendRemoveItemFromPane(InventorySlot);
             aisling.Inventory.Items.TryUpdate(InventorySlot, this, null);
             aisling.Inventory.UpdateSlot(aisling.Client, this);
             aisling.Client.SendAttributes(StatUpdateType.Primary);
