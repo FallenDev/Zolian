@@ -2205,7 +2205,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         var convDmg = (int)finalDmg;
         CurrentHp -= convDmg;
-        PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+
+        if (this is Aisling aisling)
+        {
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            if (CurrentHp <= 0)
+                aisling.Client.DeathStatusCheck();
+        }
+        else
+            PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return convDmg;
     }

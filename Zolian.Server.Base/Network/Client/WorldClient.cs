@@ -231,7 +231,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         CheckDayDreaming();
         CheckForMail();
         HandleBadTrades();
-        DeathStatusCheck();
         ShowAggro();
         DisplayQualityPillar();
         ApplyAffliction();
@@ -499,29 +498,39 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
 
         if (_aggroMessageControl.Elapsed.TotalMilliseconds < _aggroTimer.Delay.TotalMilliseconds) return;
-        _aggroMessageControl.Restart();
-        Aisling.ThreatTimer = Aisling.Camouflage ? new WorldServerTimer(TimeSpan.FromSeconds(30)) : new WorldServerTimer(TimeSpan.FromSeconds(60));
-        var color = "a";
-        var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
-        var group = Aisling.GroupParty?.PartyMembers;
 
-        if (group?.Count > 0)
+        try
         {
-            var target = group.MaxBy(dmg => dmg.ThreatMeter);
-            if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
-            var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
-            aggro = (long)Math.Clamp(percent, 0, 100);
-        }
-        else return;
+            _aggroMessageControl.Restart();
+            Aisling.ThreatTimer = Aisling.Camouflage
+                ? new WorldServerTimer(TimeSpan.FromSeconds(30))
+                : new WorldServerTimer(TimeSpan.FromSeconds(60));
+            var color = "a";
+            var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
+            var group = Aisling.GroupParty?.PartyMembers;
 
-        foreach (var key in AggroColors.Keys.Reverse())
+            if (group?.Count > 0)
+            {
+                var target = group.MaxBy(dmg => dmg.ThreatMeter);
+                if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
+                var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
+                aggro = (long)Math.Clamp(percent, 0, 100);
+            }
+            else return;
+
+            foreach (var key in AggroColors.Keys.Reverse())
+            {
+                if (aggro < key) continue;
+                color = AggroColors[key];
+                break;
+            }
+
+            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
+        }
+        catch
         {
-            if (aggro < key) continue;
-            color = AggroColors[key];
-            break;
+            // Ignore
         }
-
-        Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
     }
 
     private void DisplayQualityPillar()
