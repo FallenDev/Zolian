@@ -58,15 +58,12 @@ public class EnemyRewards : RewardScript
                     items.Add(equipItem);
                     continue;
                 }
-                
+
                 equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
                 ItemQualityVariance.ItemDurability(equipItem, Quality.Common);
                 items.Add(equipItem);
                 continue;
             }
-
-            //var normalChance = Generator.RandomNumPercentGen();
-            //if (normalChance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
 
             var item2 = new Item();
             item2 = item2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
@@ -106,6 +103,94 @@ public class EnemyRewards : RewardScript
         }
     }
 
+    private void DetermineDefinedMonsterDrop(Monster monster, Aisling player)
+    {
+        var templateDrops = monster.Template.Drops;
+        if (templateDrops.Count <= 0) return;
+        var items = new List<Item>();
+
+        // Build item list based off of rewards a player can receive from the Monster's level
+        foreach (var drop in templateDrops.Where(drop => ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(drop)))
+        {
+            // Equipment & Enchantable
+            if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) || ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
+            {
+                var chance = Generator.RandomNumPercentGen();
+                if (chance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
+
+                var equipItem = new Item();
+
+                if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
+                {
+                    var quality = ItemQualityVariance.DetermineQuality();
+                    var variance = ItemQualityVariance.DetermineVariance();
+                    var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+                    equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance);
+                    ItemQualityVariance.ItemDurability(equipItem, quality);
+                    items.Add(equipItem);
+                    continue;
+                }
+
+                equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
+                ItemQualityVariance.ItemDurability(equipItem, Quality.Common);
+                items.Add(equipItem);
+                continue;
+            }
+
+            var item2 = new Item();
+            item2 = item2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
+            items.Add(item2);
+        }
+
+        // Build a list of items based on chance
+        var buildItemsList = BuildLowChanceItemList(items);
+        var monsterDefinedDrop = RandomPullOneItem(buildItemsList);
+
+        // Display reward
+        foreach (var item in monsterDefinedDrop)
+        {
+            item.Release(_monster, _monster.Position);
+            ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
+
+            if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
+            {
+                Task.Delay(100).ContinueWith(ct =>
+                {
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
+                });
+            }
+
+            if (item.Enchantable && item.ItemQuality is Item.Quality.Mythic)
+            {
+                Task.Delay(100).ContinueWith(ct =>
+                {
+                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
+                });
+            }
+        }
+    }
+
+    private static List<Item> BuildLowChanceItemList(List<Item> itemsList)
+    {
+        var buildItemsList = new List<Item>();
+
+        foreach (var item in itemsList)
+        {
+            var chance = Generator.RandomNumPercentGen();
+            switch (chance)
+            {
+                // If greater than equal 40%, don't add the item
+                case >= .40:
+                    continue;
+                default:
+                    buildItemsList.Add(item);
+                    continue;
+            }
+        }
+
+        return buildItemsList;
+    }
+
     private static List<Item> BuildItemList(List<Item> itemsList)
     {
         var buildItemsList = new List<Item>();
@@ -125,6 +210,23 @@ public class EnemyRewards : RewardScript
         }
 
         return buildItemsList;
+    }
+
+    private static List<Item> RandomPullOneItem(List<Item> itemsList)
+    {
+        var randomItem = new List<Item>();
+
+        if (itemsList.Count > 1)
+        {
+            var item = itemsList.RandomIEnum();
+            randomItem.Add(item);
+        }
+        else
+        {
+            return itemsList;
+        }
+
+        return randomItem;
     }
 
     private static List<Item> RandomPullMaxItems(List<Item> itemsList, int count)
@@ -150,6 +252,7 @@ public class EnemyRewards : RewardScript
     private void GenerateDrops(Monster monster, Aisling player)
     {
         DetermineRandomSpecialDrop(monster, player);
+        DetermineDefinedMonsterDrop(monster, player);
     }
 
     private void GenerateExperience(Aisling player, bool canCrit = false)
@@ -186,7 +289,7 @@ public class EnemyRewards : RewardScript
             player.Client.EnqueueExperienceEvent(player, exp, true, false);
 
         if (player.PartyMembers == null) return;
-        
+
         // Enqueue experience event for party members
         foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
@@ -229,7 +332,7 @@ public class EnemyRewards : RewardScript
         player.Client.EnqueueAbilityEvent(player, ap, true, false);
 
         if (player.PartyMembers == null) return;
-        
+
         // Enqueue experience event for party members
         foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
@@ -250,7 +353,7 @@ public class EnemyRewards : RewardScript
         if (!_monster.Template.LootType.LootFlagIsSet(LootQualifer.Gold)) return;
 
         var sum = (uint)Random.Shared.Next(_monster.Template.Level * 13, _monster.Template.Level * 200);
-        
+
         if (_monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinG) ||
             _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinY) ||
             _monster.Template.LootType.LootFlagIsSet(LootQualifer.LootGoblinP) ||
@@ -267,7 +370,6 @@ public class EnemyRewards : RewardScript
     private static List<string> JoinList(Monster monster)
     {
         var dropList = new List<string>();
-        var templateDrops = monster.Template.Drops;
         var ring = GenerateDropsBasedOnLevel(monster, RingDrops);
         var belt = GenerateDropsBasedOnLevel(monster, BeltDrops);
         var boot = GenerateDropsBasedOnLevel(monster, BootDrops);
@@ -278,8 +380,6 @@ public class EnemyRewards : RewardScript
         var offHand = GenerateDropsBasedOnLevel(monster, OffHandDrops);
         var shield = GenerateDropsBasedOnLevel(monster, ShieldDrops);
         var wrist = GenerateDropsBasedOnLevel(monster, WristDrops);
-        if (templateDrops.Count > 0)
-            dropList.AddRange(templateDrops);
         if (ring != null)
             dropList.AddRange(ring);
         if (belt != null)
