@@ -15,8 +15,6 @@ namespace Darkages.GameScripts.Areas;
 public class Intro : AreaScript
 {
     private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = new();
-    private Item _item;
-    private bool _givenClothes;
 
     public Intro(Area area) : base(area) => Area = area;
 
@@ -33,29 +31,10 @@ public class Intro : AreaScript
                 client.Aisling.Gender == Gender.Female
                     ? ServerSetup.Instance.GlobalItemTemplateCache["Blouse"]
                     : ServerSetup.Instance.GlobalItemTemplateCache["Peasant Attire"]);
-            _item = new Item
-            {
-                Template = item.Template,
-                ItemId = item.ItemId,
-                Slot = 2,
-                Image = item.Template.Image,
-                DisplayImage = item.Template.DisplayImage,
-                Durability = item.Durability,
-                Serial = client.Aisling.Serial,
-                ItemQuality = Item.Quality.Common,
-                OriginalQuality = Item.Quality.Common,
-                ItemVariance = Item.Variance.None,
-                WeapVariance = Item.WeaponVariance.None,
-                Enchantable = item.Template.Enchantable
-            };
-
-            _item.GetDisplayName();
-            _item.NoColorGetDisplayName();
+            item.GetDisplayName();
+            item.NoColorGetDisplayName();
             if (client.Aisling.EquipmentManager.Equipment[2] == null)
-                client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
-            client.SendAttributes(StatUpdateType.Primary);
-            client.UpdateDisplay();
-            _givenClothes = true;
+                client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
         });
 
         await Task.Delay(350).ContinueWith(ct =>
@@ -95,7 +74,6 @@ public class Intro : AreaScript
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
-        if (_givenClothes) return;
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         var item = new Item();
@@ -103,28 +81,10 @@ public class Intro : AreaScript
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Blouse"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Peasant Attire"]);
-        _item = new Item
-        {
-            Template = item.Template,
-            ItemId = item.ItemId,
-            Slot = 2,
-            Image = item.Template.Image,
-            DisplayImage = item.Template.DisplayImage,
-            Durability = item.Durability,
-            Serial = client.Aisling.Serial,
-            ItemQuality = Item.Quality.Common,
-            OriginalQuality = Item.Quality.Common,
-            ItemVariance = Item.Variance.None,
-            WeapVariance = Item.WeaponVariance.None,
-            Enchantable = item.Template.Enchantable
-        };
-
-        _item.GetDisplayName();
-        _item.NoColorGetDisplayName();
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
         if (client.Aisling.EquipmentManager.Equipment[2] == null)
-            client.Aisling.EquipmentManager.Add(_item.Template.EquipmentSlot, _item);
-        client.SendAttributes(StatUpdateType.Primary);
-        client.UpdateDisplay();
+            client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
     }
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
     public override void OnGossip(WorldClient client, string message) { }

@@ -164,12 +164,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         client.Aisling.PastClass = client.Aisling.Path;
         client.LoadSkillBook();
         client.LoadSpellBook();
-        client.SendAttributes(StatUpdateType.Primary);
-        client.UpdateDisplay();
+
         await Task.Delay(500).ContinueWith(ct =>
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "You wake from your slumber.. music begins to fill the air.");
         });
+
         client.TransitionToMap(137, new Position(1, 4));
     }
 
@@ -181,9 +181,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Leather Bliaut"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Leather Tunic"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
@@ -194,11 +197,14 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         item = item.Create(client.Aisling, client.Aisling.Gender == Gender.Female
             ? ServerSetup.Instance.GlobalItemTemplateCache["Leather Donet"]
             : ServerSetup.Instance.GlobalItemTemplateCache["Leather Guard"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
         var item2 = new Item();
         item2 = item2.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Wooden Shield"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
         item2.GiveTo(client.Aisling);
     }
@@ -211,9 +217,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Cotte"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Scout Leather"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Snow Dagger"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
@@ -225,9 +234,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Bodice"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Dobok"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Leather Bracer"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
@@ -239,9 +251,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Gorget Gown"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Cowl"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 
@@ -258,9 +273,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             client.Aisling.Gender == Gender.Female
                 ? ServerSetup.Instance.GlobalItemTemplateCache["Magi Skirt"]
                 : ServerSetup.Instance.GlobalItemTemplateCache["Gardcorp"]);
+        item.GetDisplayName();
+        item.NoColorGetDisplayName();
+        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
-        item.GiveTo(client.Aisling);
         item1.GiveTo(client.Aisling);
     }
 

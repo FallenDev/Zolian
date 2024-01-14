@@ -53,7 +53,10 @@ public class EquipmentManager
         HandleEquipmentSwap(displaySlot, item);
     }
 
-    private void AddEquipment(int displaySlot, Item item, bool remove = true)
+    /// <summary>
+    /// Made public for adding items directly on character creation
+    /// </summary>
+    public void AddEquipment(int displaySlot, Item item, bool remove = true)
     {
         Equipment[displaySlot] = new EquipmentSlot(displaySlot, item);
         if (remove) RemoveFromInventoryToEquip(item);
