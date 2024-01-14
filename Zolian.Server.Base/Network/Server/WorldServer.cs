@@ -615,19 +615,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (component)
                 {
                     case ObjectComponent objectComponent:
-                        if (objectElapsed.TotalMilliseconds < 30) break;
+                        if (objectElapsed.TotalMilliseconds < 50) break;
                         objectComponent.Update(objectElapsed);
                         objectWatch.Restart();
                         break;
-                    case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
-                        if (playerStatusElapsed.TotalMilliseconds < 30) break;
-                        statusBarAndThreatComponent.Update(playerStatusElapsed);
-                        playerStatusWatch.Restart();
-                        break;
                     case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
-                        if (playerSkillSpellElapsed.TotalMilliseconds < 50) break;
+                        if (playerSkillSpellElapsed.TotalMilliseconds < 250) break;
                         skillSpellCooldownComponent.Update(playerSkillSpellElapsed);
                         playerSkillSpellWatch.Restart();
+                        break;
+                    case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
+                        if (playerStatusElapsed.TotalMilliseconds < 500) break;
+                        statusBarAndThreatComponent.Update(playerStatusElapsed);
+                        playerStatusWatch.Restart();
                         break;
                     case PlayerRegenerationComponent playerRegenerationComponent:
                         if (playerRegenElapsed.TotalSeconds < 1) break;
@@ -826,7 +826,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach(var item in items.Values)
+            foreach (var item in items.Values)
             {
                 if (item == null) continue;
                 if (item.ItemPane != Item.ItemPanes.Ground)
@@ -856,7 +856,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            foreach(var monster in updateList)
+            foreach (var monster in updateList)
             {
                 if (monster?.Scripts == null) continue;
                 if (monster.CurrentHp <= 0)
