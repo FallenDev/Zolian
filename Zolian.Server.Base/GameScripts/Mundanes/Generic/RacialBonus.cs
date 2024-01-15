@@ -259,11 +259,11 @@ public static class RacialBonus
 
         var item = new Legend.LegendItem
         {
-            Category = "Race",
+            Key = "Race",
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,
-            Value = $"Racial Origins: {race}"
+            Text = $"Racial Origins: {race}"
         };
 
         client.Aisling.LegendBook.AddLegend(item, client.Aisling.Client);
@@ -276,11 +276,11 @@ public static class RacialBonus
 
         var item = new Legend.LegendItem
         {
-            Category = "Race",
+            Key = "Race",
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,
-            Value = $"Racial Origins: {race} - {subRace}"
+            Text = $"Racial Origins: {race} - {subRace}"
         };
 
         client.Aisling.LegendBook.AddLegend(item, client.Aisling.Client);

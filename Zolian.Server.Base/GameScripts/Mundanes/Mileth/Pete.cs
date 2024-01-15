@@ -94,11 +94,11 @@ public class Pete(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                         var legend = new Legend.LegendItem
                         {
-                            Category = "LPete1",
+                            Key = "LPete1",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Brass,
+                            Color = LegendColor.PaleSkinToTanSkinG8,
                             Icon = (byte)LegendIcon.Heart,
-                            Value = "Saved Mileth's Mead"
+                            Text = "Saved Mileth's Mead"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);

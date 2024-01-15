@@ -117,11 +117,11 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"You can now access {{=qTagor Dungeon");
                 var legend = new Legend.LegendItem
                 {
-                    Category = "LTodesbaum1",
+                    Key = "LTodesbaum1",
                     Time = DateTime.UtcNow,
                     Color = LegendColor.Yellow,
                     Icon = (byte)LegendIcon.Victory,
-                    Value = "Granted access to Tagor Dungeon"
+                    Text = "Granted access to Tagor Dungeon"
                 };
 
                 client.Aisling.LegendBook.AddLegend(legend, client);

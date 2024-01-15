@@ -140,11 +140,11 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             client.SendAttributes(StatUpdateType.ExpGold);
                             var item = new Legend.LegendItem
                             {
-                                Category = "LBeggar1",
+                                Key = "LBeggar1",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Yellow,
                                 Icon = (byte)LegendIcon.Warrior,
-                                Value = "Terror of the Crypt"
+                                Text = "Terror of the Crypt"
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);

@@ -105,11 +105,11 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel refreshed.");
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LCamille1",
+                        Key = "LCamille1",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.Invisible,
                         Icon = (byte)LegendIcon.Invisible,
-                        Value = ""
+                        Text = "Completed LCamille1"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);

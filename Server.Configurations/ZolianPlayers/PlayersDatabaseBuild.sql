@@ -607,14 +607,14 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[AddLegendMark]
-@LegendId INT, @Serial BIGINT, @Category VARCHAR(20), @Time DATETIME,
-@Color VARCHAR (25), @Icon INT, @Value VARCHAR(50)
+@LegendId INT, @Serial BIGINT, @Key VARCHAR(20), @Time DATETIME,
+@Color VARCHAR (25), @Icon INT, @Text VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersLegend]
-	([LegendId], [Serial], [Category], [Time], [Color], [Icon], [Value])
-    VALUES	(@LegendId, @Serial, @Category, @Time, @Color, @Icon, @Value);
+	([LegendId], [Serial], [Key], [Time], [Color], [Icon], [Text])
+    VALUES	(@LegendId, @Serial, @Key, @Time, @Color, @Icon, @Text);
 END
 GO
 

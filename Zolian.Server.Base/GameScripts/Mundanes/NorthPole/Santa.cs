@@ -104,11 +104,11 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                         var legend = new Legend.LegendItem
                         {
-                            Category = "LSanta1",
+                            Key = "LSanta1",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Lavender,
+                            Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,
-                            Value = "Restored Santa's Spirit"
+                            Text = "Restored Santa's Spirit"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);

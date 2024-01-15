@@ -1307,11 +1307,11 @@ public class WorldClient : SocketClientBase, IWorldClient
                 var newLegend = new Legend.LegendItem()
                 {
                     LegendId = legend.LegendId,
-                    Category = legend.Category,
+                    Key = legend.Key,
                     Time = legend.Time,
                     Color = legend.Color,
                     Icon = legend.Icon,
-                    Value = legend.Value
+                    Text = legend.Text
                 };
 
                 Aisling.LegendBook.LegendMarks.Add(newLegend);
@@ -2822,34 +2822,34 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     private static List<LegendMarkInfo> ObtainProfileLegendMarks(Aisling aisling)
     {
-        var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
+        var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
         var legendCount = aisling.LegendBook.LegendMarks;
         var legendMarks = legends
-            .Where(legend => legend != null && !string.IsNullOrEmpty(legend.Value))
+            .Where(legend => legend != null && legend.Color != LegendColor.Invisible)
             .Select(legend =>
             {
-                var markCount = legendCount.Count(item => item.Value == legend.Value);
-                var legendText = $"{legend.Value} - {legend.Time?.ToShortDateString()} ({markCount})";
+                var markCount = legendCount.Count(item => item.Text == legend.Text);
+                var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
                 return new LegendMarkInfo
                 {
                     Color = (MarkColor)legend.Color,
                     Icon = (MarkIcon)legend.Icon,
-                    Key = legend.Category,
+                    Key = legend.Key,
                     Text = legendText
                 };
             })
             .ToList();
-        var nullLegends = legends
-            .Where(legend => legend != null && string.IsNullOrEmpty(legend.Value))
+        var invisibleLegends = legends
+            .Where(legend => legend is { Color: LegendColor.Invisible })
             .Select(legend => new LegendMarkInfo
             {
                 Color = (MarkColor)legend.Color,
                 Icon = (MarkIcon)legend.Icon,
-                Key = legend.Category,
-                Text = ""
+                Key = legend.Key,
+                Text = legend.Text
             });
 
-        legendMarks.AddRange(nullLegends);
+        legendMarks.AddRange(invisibleLegends);
         return legendMarks;
     }
 
@@ -3379,34 +3379,34 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     private List<LegendMarkInfo> ObtainSelfProfileLegendMarks()
     {
-        var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Value).ToList();
+        var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
         var legendCount = Aisling.LegendBook.LegendMarks;
         var legendMarks = legends
-            .Where(legend => legend != null && !string.IsNullOrEmpty(legend.Value))
+            .Where(legend => legend != null && legend.Color != LegendColor.Invisible)
             .Select(legend =>
             {
-                var markCount = legendCount.Count(item => item.Value == legend.Value);
-                var legendText = $"{legend.Value} - {legend.Time?.ToShortDateString()} ({markCount})";
+                var markCount = legendCount.Count(item => item.Text == legend.Text);
+                var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
                 return new LegendMarkInfo
                 {
                     Color = (MarkColor)legend.Color,
                     Icon = (MarkIcon)legend.Icon,
-                    Key = legend.Category,
+                    Key = legend.Key,
                     Text = legendText
                 };
             })
             .ToList();
-        var nullLegends = legends
-            .Where(legend => legend != null && string.IsNullOrEmpty(legend.Value))
+        var invisibleLegends = legends
+            .Where(legend => legend is { Color: LegendColor.Invisible })
             .Select(legend => new LegendMarkInfo
             {
                 Color = (MarkColor)legend.Color,
                 Icon = (MarkIcon)legend.Icon,
-                Key = legend.Category,
-                Text = ""
+                Key = legend.Key,
+                Text = legend.Text
             });
 
-        legendMarks.AddRange(nullLegends);
+        legendMarks.AddRange(invisibleLegends);
         return legendMarks;
     }
 
@@ -4257,11 +4257,11 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         var item = new Legend.LegendItem
         {
-            Category = "Event",
+            Key = "Event",
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Warrior,
-            Value = "Fragment of spark taken.."
+            Text = "Fragment of spark taken.."
         };
 
         Aisling.LegendBook.AddLegend(item, this);

@@ -398,11 +398,11 @@ public class Dar : MundaneScript
                         {
                             var legend = new Legend.LegendItem
                             {
-                                Category = "LDar1",
+                                Key = "LDar1",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Invisible,
                                 Icon = (byte)LegendIcon.Invisible,
-                                Value = ""
+                                Text = "Completed LDar1"
                             };
 
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -449,11 +449,11 @@ public class Dar : MundaneScript
                         {
                             var legend = new Legend.LegendItem
                             {
-                                Category = "LDar2",
+                                Key = "LDar2",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Invisible,
                                 Icon = (byte)LegendIcon.Invisible,
-                                Value = ""
+                                Text = "Completed LDar2"
                             };
 
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -507,11 +507,11 @@ public class Dar : MundaneScript
                     {
                         var item = new Legend.LegendItem
                         {
-                            Category = "LDar3",
+                            Key = "LDar3",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Blue,
+                            Color = LegendColor.BlueG1,
                             Icon = (byte)LegendIcon.Wizard,
-                            Value = "A Dark Favor"
+                            Text = "A Dark Favor"
                         };
 
                         client.Aisling.LegendBook.AddLegend(item, client);

@@ -140,22 +140,22 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
     {
         var legend = new Legend.LegendItem
         {
-            Category = "Class",
+            Key = "Class",
             Time = DateTime.UtcNow,
-            Color = LegendColor.Blue,
+            Color = LegendColor.BlueG1,
             Icon = (byte)LegendIcon.Victory,
-            Value = $"Devoted to the path of {path}"
+            Text = $"Devoted to the path of {path}"
         };
 
         client.Aisling.LegendBook.AddLegend(legend, client);
 
         var legendItem = new Legend.LegendItem
         {
-            Category = "Alpha Aisling",
+            Key = "Alpha Aisling",
             Time = DateTime.UtcNow,
             Color = LegendColor.Yellow,
             Icon = (byte)LegendIcon.Heart,
-            Value = "Enduring Alpha Testing"
+            Text = "Enduring Alpha Testing"
         };
 
         client.Aisling.LegendBook.AddLegend(legendItem, client);

@@ -142,11 +142,11 @@ public class Yeti(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                         var legend = new Legend.LegendItem
                         {
-                            Category = "LYeti1",
+                            Key = "LYeti1",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Lavender,
+                            Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,
-                            Value = "Thwarted the Yeti's Plot on Christmas"
+                            Text = "Thwarted the Yeti's Plot on Christmas"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);

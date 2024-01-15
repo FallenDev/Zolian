@@ -329,11 +329,11 @@ public class Lau : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LLau1",
+                                        Key = "LLau1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Lau's Training (Retribution)"
+                                        Text = "Lau's Training (Retribution)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -359,11 +359,11 @@ public class Lau : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LLau1",
+                                        Key = "LLau1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Lau's Training (Vampiric Slash)"
+                                        Text = "Lau's Training (Vampiric Slash)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -390,11 +390,11 @@ public class Lau : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LLau1",
+                                        Key = "LLau1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Lau's Training (Retribution)"
+                                        Text = "Lau's Training (Retribution)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -420,11 +420,11 @@ public class Lau : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LLau1",
+                                        Key = "LLau1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Lau's Training (Vampiric Slash)"
+                                        Text = "Lau's Training (Vampiric Slash)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -445,11 +445,11 @@ public class Lau : MundaneScript
                         {
                             var item = new Legend.LegendItem
                             {
-                                Category = "LLau1",
+                                Key = "LLau1",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.White,
                                 Icon = (byte)LegendIcon.Warrior,
-                                Value = "Lau's Discipline"
+                                Text = "Lau's Discipline"
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);

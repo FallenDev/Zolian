@@ -130,11 +130,11 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LMineS1",
+                        Key = "LMineS1",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Mining: Novice"
+                        Text = "Mining: Novice"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -147,11 +147,11 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LMineS2",
+                        Key = "LMineS2",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Mining: Apprentice"
+                        Text = "Mining: Apprentice"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -164,11 +164,11 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LMineS3",
+                        Key = "LMineS3",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Mining: Journeyman"
+                        Text = "Mining: Journeyman"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -181,11 +181,11 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LMineS4",
+                        Key = "LMineS4",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Mining: Expert"
+                        Text = "Mining: Expert"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -198,11 +198,11 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LMineS5",
+                        Key = "LMineS5",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Mining: Artisan"
+                        Text = "Mining: Artisan"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);

@@ -321,11 +321,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
-                                    Category = "Class",
+                                    Key = "Class",
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
-                                    Value = "Advanced to the path of Berserker"
+                                    Text = "Advanced to the path of Berserker"
                                 };
                                 Berserker(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
@@ -385,11 +385,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
-                                Category = "Class",
+                                Key = "Class",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
-                                Value = "Advanced to the path of Defender"
+                                Text = "Advanced to the path of Defender"
                             };
                             Defender(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -440,11 +440,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
-                                Category = "Class",
+                                Key = "Class",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
-                                Value = "Advanced to the path of Assassin"
+                                Text = "Advanced to the path of Assassin"
                             };
                             Assassin(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -497,11 +497,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
-                                    Category = "Class",
+                                    Key = "Class",
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
-                                    Value = "Advanced to the path of Cleric"
+                                    Text = "Advanced to the path of Cleric"
                                 };
                                 Cleric(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
@@ -561,11 +561,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                             var legend = new Legend.LegendItem
                             {
-                                Category = "Class",
+                                Key = "Class",
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Red,
                                 Icon = (byte)LegendIcon.Victory,
-                                Value = "Advanced to the path of Arcanus"
+                                Text = "Advanced to the path of Arcanus"
                             };
                             Arcanus(client);
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -618,11 +618,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                                 var legend = new Legend.LegendItem
                                 {
-                                    Category = "Class",
+                                    Key = "Class",
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.Red,
                                     Icon = (byte)LegendIcon.Victory,
-                                    Value = "Advanced to the path of Monk"
+                                    Text = "Advanced to the path of Monk"
                                 };
                                 Monk(client);
                                 client.Aisling.LegendBook.AddLegend(legend, client);
@@ -706,11 +706,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                         var legend = new Legend.LegendItem
                         {
-                            Category = "Class",
+                            Key = "Class",
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Yellow,
                             Icon = (byte)LegendIcon.Victory,
-                            Value = $"Dedication to {client.Aisling.Path}"
+                            Text = $"Dedication to {client.Aisling.Path}"
                         };
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.Aisling.Stage = ClassStage.Dedicated;
@@ -768,11 +768,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         });
                         var legend = new Legend.LegendItem
                         {
-                            Category = "Master",
+                            Key = "Master",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Teal,
+                            Color = LegendColor.TurquoiseG8,
                             Icon = (byte)LegendIcon.Victory,
-                            Value = $"Mastery of the path of {client.Aisling.Path}"
+                            Text = $"Mastery of the path of {client.Aisling.Path}"
                         };
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.Aisling.Stage = ClassStage.Master;

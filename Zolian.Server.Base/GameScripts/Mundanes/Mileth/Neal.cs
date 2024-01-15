@@ -270,11 +270,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal1",
+                                        Key = "LNeal1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Aid)"
+                                        Text = "Neal's Training (Aid)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -319,11 +319,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal1",
+                                        Key = "LNeal1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Rescue)"
+                                        Text = "Neal's Training (Rescue)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -368,11 +368,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal1",
+                                        Key = "LNeal1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Aid)"
+                                        Text = "Neal's Training (Aid)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -417,11 +417,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal1",
+                                        Key = "LNeal1",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Rescue)"
+                                        Text = "Neal's Training (Rescue)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -475,11 +475,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal2",
+                                        Key = "LNeal2",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Lullaby Strike)"
+                                        Text = "Neal's Training (Lullaby Strike)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -508,11 +508,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal2",
+                                        Key = "LNeal2",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Raise Threat)"
+                                        Text = "Neal's Training (Raise Threat)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -541,11 +541,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal2",
+                                        Key = "LNeal2",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Lullaby Strike)"
+                                        Text = "Neal's Training (Lullaby Strike)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -574,11 +574,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal2",
+                                        Key = "LNeal2",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Raise Threat)"
+                                        Text = "Neal's Training (Raise Threat)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -633,11 +633,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Key = "Skill",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Desolate)"
+                                        Text = "Neal's Training (Desolate)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -647,11 +647,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal3",
+                                        Key = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
-                                        Value = "Finished Neal's Training"
+                                        Text = "Finished Neal's Training"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -680,11 +680,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Spell",
+                                        Key = "Spell",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Peony,
+                                        Color = LegendColor.PinkRedG7,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Defensive Stance)"
+                                        Text = "Neal's Training (Defensive Stance)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -694,11 +694,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal3",
+                                        Key = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
-                                        Value = "Finished Neal's Training"
+                                        Text = "Finished Neal's Training"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -727,11 +727,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Key = "Skill",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Desolate)"
+                                        Text = "Neal's Training (Desolate)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -741,11 +741,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal3",
+                                        Key = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
-                                        Value = "Finished Neal's Training"
+                                        Text = "Finished Neal's Training"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -774,11 +774,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "Spell",
+                                        Key = "Spell",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Peony,
+                                        Color = LegendColor.PinkRedG7,
                                         Icon = (byte)LegendIcon.Warrior,
-                                        Value = "Neal's Training (Defensive Stance)"
+                                        Text = "Neal's Training (Defensive Stance)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);
@@ -788,11 +788,11 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Category = "LNeal3",
+                                        Key = "LNeal3",
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
-                                        Value = "Finished Neal's Training"
+                                        Text = "Finished Neal's Training"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(item, client);

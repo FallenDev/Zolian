@@ -1092,11 +1092,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LBlackS1",
+                        Key = "LBlackS1",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Blacksmithing: Novice"
+                        Text = "Blacksmithing: Novice"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -1109,11 +1109,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LBlackS2",
+                        Key = "LBlackS2",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Blacksmithing: Apprentice"
+                        Text = "Blacksmithing: Apprentice"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -1126,11 +1126,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LBlackS3",
+                        Key = "LBlackS3",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Blacksmithing: Journeyman"
+                        Text = "Blacksmithing: Journeyman"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -1143,11 +1143,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LBlackS4",
+                        Key = "LBlackS4",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Blacksmithing: Expert"
+                        Text = "Blacksmithing: Expert"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -1160,11 +1160,11 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
                     var legend = new Legend.LegendItem
                     {
-                        Category = "LBlackS5",
+                        Key = "LBlackS5",
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Blue,
+                        Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
-                        Value = "Blacksmithing: Artisan"
+                        Text = "Blacksmithing: Artisan"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);

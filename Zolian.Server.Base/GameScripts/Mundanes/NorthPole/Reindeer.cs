@@ -90,11 +90,11 @@ public class Reindeer(WorldServer server, Mundane mundane) : MundaneScript(serve
 
                         var legend = new Legend.LegendItem
                         {
-                            Category = "LReindeer1",
+                            Key = "LReindeer1",
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Lavender,
+                            Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,
-                            Value = "Stopped Vixen's Scheme"
+                            Text = "Stopped Vixen's Scheme"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);

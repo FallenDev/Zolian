@@ -153,11 +153,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Yellow Belt");
                     var yellowBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Yellow Belt Attainment"
+                        Text = "Yellow Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(yellowBelt, client);
@@ -195,11 +195,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Orange Belt");
                     var orangeBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Orange Belt Attainment"
+                        Text = "Orange Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(orangeBelt, client);
@@ -237,11 +237,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Green Belt");
                     var greenBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Green Belt Attainment"
+                        Text = "Green Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(greenBelt, client);
@@ -279,11 +279,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Purple Belt");
                     var purpleBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Purple Belt Attainment"
+                        Text = "Purple Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(purpleBelt, client);
@@ -321,11 +321,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Blue Belt");
                     var blueBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Blue Belt Attainment"
+                        Text = "Blue Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(blueBelt, client);
@@ -363,11 +363,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Brown Belt");
                     var brownBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Brown Belt Attainment"
+                        Text = "Brown Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(brownBelt, client);
@@ -405,11 +405,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Red Belt");
                     var redBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Red Belt Attainment"
+                        Text = "Red Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(redBelt, client);
@@ -448,11 +448,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Black Belt");
                     var blackBelt = new Legend.LegendItem
                     {
-                        Category = "Training",
+                        Key = "Training",
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
-                        Value = "Black Belt Attainment"
+                        Text = "Black Belt Attainment"
                     };
 
                     client.Aisling.LegendBook.AddLegend(blackBelt, client);
@@ -481,11 +481,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 client.GiveItem("White Belt");
                 var item = new Legend.LegendItem
                 {
-                    Category = "Training",
+                    Key = "Training",
                     Time = DateTime.UtcNow,
                     Color = LegendColor.White,
                     Icon = (byte)LegendIcon.Monk,
-                    Value = "White Belt Attainment"
+                    Text = "White Belt Attainment"
                 };
 
                 client.Aisling.LegendBook.AddLegend(item, client);

@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
+﻿using Chaos.Common.Identity;
 
 using Dapper;
 
@@ -33,7 +32,7 @@ public class Legend
 
     public bool Has(string lpVal)
     {
-        return LegendMarks.Any(i => i.Value != null && i.Value.Equals(lpVal));
+        return LegendMarks.Any(i => i.Text != null && i.Text.Equals(lpVal));
     }
 
     public void Remove(LegendItem legend, WorldClient client)
@@ -46,19 +45,19 @@ public class Legend
 
     public class LegendItem
     {
-        public int LegendId { get; init; }
-        public string Category { get; init; }
-        public DateTime? Time { get; init; }
+        public uint LegendId { get; init; }
+        public string Key { get; init; }
+        public DateTime Time { get; init; }
         public LegendColor Color { get; init; }
         public byte Icon { get; init; }
-        public string Value { get; init; }
+        public string Text { get; init; }
     }
 
-    private static async void AddToAislingDb(Aisling aisling, LegendItem legend)
+    private static void AddToAislingDb(Aisling aisling, LegendItem legend)
     {
         try
         {
-            await using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+            var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
             var cmd = new SqlCommand("AddLegendMark", sConn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -67,33 +66,17 @@ public class Legend
 
             cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
-            cmd.Parameters.Add("@Category", SqlDbType.VarChar).Value = legend.Category;
-            if (legend.Time != null)
-                cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
-            else
-                cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = DBNull.Value;
+            cmd.Parameters.Add("@Key", SqlDbType.VarChar).Value = legend.Key;
+            cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
             cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
             cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;
-            if (!legend.Value.IsNullOrEmpty())
-                cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = legend.Value;
+            if (!legend.Text.IsNullOrEmpty())
+                cmd.Parameters.Add("@Text", SqlDbType.VarChar).Value = legend.Text;
             else
-                cmd.Parameters.Add("@Value", SqlDbType.VarChar).Value = DBNull.Value;
+                cmd.Parameters.Add("@Text", SqlDbType.VarChar).Value = DBNull.Value;
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
             sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving legend mark. Contact GM");
-                Crashes.TrackError(e);
-                return;
-            }
-
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {
@@ -103,7 +86,7 @@ public class Legend
         }
     }
 
-    private static async void DeleteFromAislingDb(LegendItem legend)
+    private static void DeleteFromAislingDb(LegendItem legend)
     {
         if (legend.LegendId == 0) return;
 
@@ -112,14 +95,8 @@ public class Legend
             var sConn = new SqlConnection(AislingStorage.ConnectionString);
             sConn.Open();
             const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersLegend WHERE LegendId = @LegendId";
-            await sConn.ExecuteAsync(cmd, new { legend.LegendId });
+            sConn.Execute(cmd, new { legend.LegendId });
             sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
         }
         catch (Exception e)
         {

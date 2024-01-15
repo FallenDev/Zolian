@@ -275,11 +275,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Obtained Ceannlaidir's Tamed Sword"
+                                    Text = "Obtained Ceannlaidir's Tamed Sword"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);
@@ -295,11 +295,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Warrior,
-                                    Value = "Obtained Ceannlaidir's Enchanted Sword"
+                                    Text = "Obtained Ceannlaidir's Enchanted Sword"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);
@@ -315,11 +315,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Rogue,
-                                    Value = "Obtained Fiosachd's Lost Flute"
+                                    Text = "Obtained Fiosachd's Lost Flute"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);
@@ -335,11 +335,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Priest,
-                                    Value = "Obtained Glioca's Secret"
+                                    Text = "Obtained Glioca's Secret"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);
@@ -355,11 +355,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Wizard,
-                                    Value = "Obtained Luathas's Lost Relic"
+                                    Text = "Obtained Luathas's Lost Relic"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);
@@ -375,11 +375,11 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 }
                                 var item = new Legend.LegendItem
                                 {
-                                    Category = "LArtur1",
+                                    Key = "LArtur1",
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Teal,
+                                    Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Monk,
-                                    Value = "Obtained Cail's Hourglass"
+                                    Text = "Obtained Cail's Hourglass"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(item, client);

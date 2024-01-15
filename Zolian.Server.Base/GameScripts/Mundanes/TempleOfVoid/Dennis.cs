@@ -55,11 +55,11 @@ public class Dennis(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                 var legend = new Legend.LegendItem
                 {
-                    Category = "LDennis1",
+                    Key = "LDennis1",
                     Time = DateTime.UtcNow,
-                    Color = LegendColor.Pink,
+                    Color = LegendColor.PinkRedG5,
                     Icon = (byte)LegendIcon.Priest,
-                    Value = "Traversing the Divide (Blink)"
+                    Text = "Traversing the Divide (Blink)"
                 };
 
                 if (!client.Aisling.LegendBook.Has("Traversing the Divide (Blink)"))

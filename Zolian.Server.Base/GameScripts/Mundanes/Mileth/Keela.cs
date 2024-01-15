@@ -369,11 +369,11 @@ public class Keela : MundaneScript
 
                                 var legend = new Legend.LegendItem
                                 {
-                                    Category = "LKeela1",
+                                    Key = "LKeela1",
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.Invisible,
                                     Icon = (byte)LegendIcon.Invisible,
-                                    Value = ""
+                                    Text = "Completed LKeela1"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(legend, client);
@@ -428,11 +428,11 @@ public class Keela : MundaneScript
                                 {
                                     var legend = new Legend.LegendItem
                                     {
-                                        Category = "LKeela2",
+                                        Key = "LKeela2",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Rogue,
-                                        Value = "Keela's Training (Sneak)"
+                                        Text = "Keela's Training (Sneak)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -488,11 +488,11 @@ public class Keela : MundaneScript
                                 {
                                     var legend = new Legend.LegendItem
                                     {
-                                        Category = "Skill",
+                                        Key = "Skill",
                                         Time = DateTime.UtcNow,
-                                        Color = LegendColor.Pink,
+                                        Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Rogue,
-                                        Value = "Keela's Training (Shadow Step)"
+                                        Text = "Keela's Training (Shadow Step)"
                                     };
 
                                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -509,11 +509,11 @@ public class Keela : MundaneScript
                     {
                         var item = new Legend.LegendItem
                         {
-                            Category = "LKeela3",
+                            Key = "LKeela3",
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Yellow,
                             Icon = (byte)LegendIcon.Victory,
-                            Value = "Walks in the Shadows"
+                            Text = "Walks in the Shadows"
                         };
 
                         client.Aisling.LegendBook.AddLegend(item, client);

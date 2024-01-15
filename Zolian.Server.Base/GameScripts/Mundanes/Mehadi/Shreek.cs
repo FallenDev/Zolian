@@ -92,11 +92,11 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                         var legend = new Legend.LegendItem
                         {
-                            Category = "LShreek1",
+                            Key = "LShreek1",
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Invisible,
                             Icon = (byte)LegendIcon.Invisible,
-                            Value = ""
+                            Text = "Completed LShreek1"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);
