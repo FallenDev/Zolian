@@ -35,6 +35,11 @@ public class Legend
         return LegendMarks.Any(i => i.Text != null && i.Text.Equals(lpVal));
     }
 
+    public bool HasKey(string key)
+    {
+        return LegendMarks.Any(i => i.Key != null && i.Key.Equals(key));
+    }
+
     public void Remove(LegendItem legend, WorldClient client)
     {
         if (legend == null) return;

@@ -821,12 +821,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (_itemGroundCheckControl.Elapsed.TotalMilliseconds < _itemGroundCheckTimer.Delay.TotalMilliseconds) return;
         _itemGroundCheckControl.Restart();
 
-        var items = ServerSetup.Instance.GlobalGroundItemCache;
-
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var item in items.Values)
+            foreach (var item in ServerSetup.Instance.GlobalGroundItemCache.Values)
             {
                 if (item == null) continue;
                 if (item.ItemPane != Item.ItemPanes.Ground)
@@ -850,13 +848,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
-        // Cache traps to reduce Select operation on each iteration
-        var traps = ServerSetup.Instance.Traps.Values;
-        var updateList = ServerSetup.Instance.GlobalMonsterCache.Values;
-
         try
         {
-            foreach (var monster in updateList)
+            foreach (var monster in ServerSetup.Instance.GlobalMonsterCache.Values)
             {
                 if (monster?.Scripts == null) continue;
                 if (monster.CurrentHp <= 0)
@@ -877,7 +871,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 monster.Scripts.Values.First().Update(elapsedTime);
 
-                foreach (var trap in traps)
+                foreach (var trap in ServerSetup.Instance.Traps.Values)
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
                         monster.X != trap.Location.X || monster.Y != trap.Location.Y ||

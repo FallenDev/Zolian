@@ -223,7 +223,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             TrackingNpcAndText(player, 0x05, returnPlayer, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
         }
 
-        if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && player.QuestManager.Lau == 1)
+        if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && !player.LegendBook.HasKey("LLau1"))
         {
             var returnPlayer = player.HasKilled("Undead Guard", 5) && player.HasKilled("Undead Wizard", 5);
             player.MonsterKillCounters.TryGetValue("Undead Guard", out var monA);
