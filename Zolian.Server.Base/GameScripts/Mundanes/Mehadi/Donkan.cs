@@ -24,7 +24,7 @@ public class Donkan(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.QuestManager.SwampCount == 0)
+        if (client.Aisling.QuestManager.SwampCount == 0 && client.Aisling.ExpLevel >= 41)
         {
             options.Add(new(0x01, "Ok.."));
             client.SendOptionsDialog(Mundane, "Oh, he doesn't like you. I know! Let's make waffles!", options.ToArray());

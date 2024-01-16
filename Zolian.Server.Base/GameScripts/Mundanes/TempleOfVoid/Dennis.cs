@@ -25,10 +25,10 @@ public class Dennis(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         var options = new List<Dialog.OptionsDataItem>
         {
-            new(0x01, "Where am I?"),
-            new(0x02, "The VoidSphere"),
-            new(0x03, "Item Shop"),
-            new(0x04, "Can you repair my items?")
+            //new(0x01, "Where am I?"),
+            //new(0x02, "The VoidSphere"),
+            //new(0x03, "Item Shop"),
+            //new(0x04, "Can you repair my items?")
         };
 
         if (client.Aisling.Path is Class.Cleric || client.Aisling.PastClass is Class.Cleric)

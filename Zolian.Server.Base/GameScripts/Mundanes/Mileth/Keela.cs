@@ -44,10 +44,10 @@ public class Keela : MundaneScript
         {
             switch (client.Aisling.QuestManager.Keela)
             {
-                case 0 when client.Aisling.Level >= 3 || client.Aisling.GameMaster:
+                case 0 when client.Aisling.Level >= 3:
                     options.Add(new(0x0B, $"{{=cI have returned{{=a."));
                     break;
-                case 1 when client.Aisling.Level >= 30 || client.Aisling.GameMaster:
+                case 1 when client.Aisling.Level >= 30:
                     options.Add(new(0x0D, $"{{=cI found the path{{=a."));
                     break;
             }
@@ -69,7 +69,7 @@ public class Keela : MundaneScript
         options.Add(new(0x02, "Forget Skill"));
         options.Add(new(0x0011, "Forget Spell"));
 
-        if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster))
+        if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty() && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin))
         {
             switch (client.Aisling.QuestManager.Keela)
             {
@@ -341,19 +341,19 @@ public class Keela : MundaneScript
             case 0x000A:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x0009, "Sure."),
-                    new (0x0008, "Not right now.")
-                };
+                    {
+                        new (0x0009, "Sure."),
+                        new (0x0008, "Not right now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"I want you to slay some monsters to test your worth.", options.ToArray());
                     break;
                 }
             case 0x000B:
                 {
-                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.KeelaKill, client.Aisling.QuestManager.KeelaCount) || client.Aisling.GameMaster)
+                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.KeelaKill, client.Aisling.QuestManager.KeelaCount))
                     {
-                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
+                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin)
                         {
                             if (client.Aisling.QuestManager.Keela == 0)
                             {
@@ -395,10 +395,10 @@ public class Keela : MundaneScript
             case 0x000C:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x0016, "Sure."),
-                    new (0x0008, "Not right now.")
-                };
+                    {
+                        new (0x0016, "Sure."),
+                        new (0x0008, "Not right now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, "There is a hidden store for us in Abel, find it.", options.ToArray());
                     break;
@@ -407,7 +407,7 @@ public class Keela : MundaneScript
                 {
                     if (client.Aisling.HasItem("Assassin Notes"))
                     {
-                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
+                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin)
                         {
                             if (client.Aisling.QuestManager.Keela == 1)
                             {
@@ -468,7 +468,7 @@ public class Keela : MundaneScript
                 {
                     if (client.Aisling.HasKilled("Succubus", 5))
                     {
-                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin || client.Aisling.GameMaster)
+                        if (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin)
                         {
                             if (client.Aisling.QuestManager.Keela == 2)
                             {

@@ -34,7 +34,7 @@ public class Pete(WorldServer server, Mundane mundane) : MundaneScript(server, m
             options.Add(new(0x04, $"{{=cI took care of them{{=a."));
 
         client.SendOptionsDialog(Mundane, !client.Aisling.QuestManager.PeteComplete
-            ? "What to do.. Oh what to do?"
+            ? "What to do.. Oh, what to do?"
             : "Thank you friend, please enjoy some mead on us in the tavern!", options.ToArray());
     }
 
@@ -65,6 +65,7 @@ public class Pete(WorldServer server, Mundane mundane) : MundaneScript(server, m
             case 0x03:
                 {
                     var killCount = Generator.RandNumGen10();
+                    killCount += 1;
                     client.Aisling.QuestManager.PeteKill = killCount;
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Player Coordinates are in the bottom center-left corner");
                     client.SendOptionsDialog(Mundane, $"Please cull {killCount} mice anywhere in the crypt. {{=cCoords{{=a: {{=q89{{=a,{{=q 52");

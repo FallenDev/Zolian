@@ -25,9 +25,11 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
         var options = new List<Dialog.OptionsDataItem>
         {
-            new(0x01, "Dedicate experience"),
-            new(0x02, "Dedicate ability")
+            new(0x01, "Dedicate experience")
         };
+
+        if (client.Aisling.ExpLevel >= 250)
+            options.Add(new Dialog.OptionsDataItem(0x02, "Dedicate ability"));
 
         client.SendOptionsDialog(Mundane, "I can help you transpose your experience with your health.", options.ToArray());
     }

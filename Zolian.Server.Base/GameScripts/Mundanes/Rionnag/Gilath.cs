@@ -48,7 +48,7 @@ public class Gilath : MundaneScript
 
         options.Add(new(0x02, "Forget Skill"));
         options.Add(new(0x0011, "Forget Spell"));
-        options.Add(new(0x0017, "Inventory"));
+        options.Add(new(0x0017, "{=cInventory"));
         options.Add(new(0x0018, "Sell"));
 
 

@@ -137,7 +137,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Yellow")) return;
                 client.Aisling.QuestManager.BeltQuest = "Yellow";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bGoblin Soldier");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "In Eastern Woodlands, search and kill a Goblin Soldier. Return to me when you've completed your task");
                 break;
             case 0x22:
@@ -179,7 +178,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Orange")) return;
                 client.Aisling.QuestManager.BeltQuest = "Orange";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bPolyp x2");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "In Abel Dungeon, search and kill two Polyps. Return to me when you've completed your task");
                 break;
             case 0x23:
@@ -221,7 +219,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Green")) return;
                 client.Aisling.QuestManager.BeltQuest = "Green";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bGrimlok Worker x3");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "In Pravat Mines, search and kill three Grimlok Workers. Return to me when you've completed your task");
                 break;
             case 0x24:
@@ -263,7 +260,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Purple")) return;
                 client.Aisling.QuestManager.BeltQuest = "Purple";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bMarauder x5");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "Deep in Mileth's Crypt, search and kill five Marauders. Return to me when you've completed your task");
                 break;
             case 0x25:
@@ -305,7 +301,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Blue")) return;
                 client.Aisling.QuestManager.BeltQuest = "Blue";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bWisp x2");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "Travel to either Western or Eastern Woodlands, search and kill two Wisps. Return to me when you've completed your task");
                 break;
             case 0x26:
@@ -347,7 +342,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Brown")) return;
                 client.Aisling.QuestManager.BeltQuest = "Brown";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bFlies");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "Don't you just hate flies? Search and kill a group of them. Return to me when you've completed your task");
                 break;
             case 0x27:
@@ -389,7 +383,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Red")) return;
                 client.Aisling.QuestManager.BeltQuest = "Red";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bLich Lord");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "I promise this will be the last run to the crypt I send you on. I need you to kill a Lich Lord. Return to me when you've completed your task");
                 break;
             case 0x28:
@@ -431,7 +424,6 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 if (!args.Equals("Black")) return;
                 client.Aisling.QuestManager.BeltQuest = "Black";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOld One");
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Note: Kill quests require you remain logged in.");
                 client.SendOptionsDialog(Mundane, "Soon I will call you my equal, my brother. Go find and kill an ancient one called -Old One-, return to me when you've completed your task");
                 break;
             case 0x29:

@@ -30,7 +30,7 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
             if (client.Aisling.QuestManager.PeteComplete)
                 options.Add(new Dialog.OptionsDataItem(0x02, "{=qI'll take a pint."));
 
-            if (client.Aisling.Level <= 50 && !client.Aisling.QuestManager.CamilleGreetingComplete)
+            if (!client.Aisling.QuestManager.CamilleGreetingComplete)
             {
                 options.Add(new Dialog.OptionsDataItem(0x04, "Good Morning, Camille"));
             }

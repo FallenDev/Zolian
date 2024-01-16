@@ -53,11 +53,11 @@ public class Dar : MundaneScript
                     _0X0B = true;
                     options.Add(new(0x0B, $"{{=cIs this what you're looking for{{=a?"));
                     break;
-                case 8 when client.Aisling.Level >= 23 || client.Aisling.GameMaster:
+                case 8:
                     _0X0D = true;
                     options.Add(new(0x0D, $"{{=cIs this what you're looking for{{=a?"));
                     break;
-                case 9 when client.Aisling.Level >= 34 || client.Aisling.GameMaster:
+                case 9:
                     _0X0F = true;
                     options.Add(new(0x0F, $"{{=cIs this what you're looking for{{=a?"));
                     break;
@@ -81,17 +81,17 @@ public class Dar : MundaneScript
         {
             switch (client.Aisling.QuestManager.Dar)
             {
-                case <= 7 when client.Aisling.Level <= 22 || client.Aisling.GameMaster:
+                case <= 7:
                     _0X0A = true;
-                    options.Add(new(0x0A, "Dark Things"));
+                    options.Add(new(0x0A, "{=bDark Things"));
                     break;
-                case 8 when client.Aisling.Level is <= 33 and >= 23 || client.Aisling.GameMaster:
+                case 8:
                     _0X0C = true;
-                    options.Add(new(0x0C, "Darker Things"));
+                    options.Add(new(0x0C, "{=bDarker Things"));
                     break;
-                case 9 when client.Aisling.Level is <= 50 and >= 34 || client.Aisling.GameMaster:
+                case 9:
                     _0X0E = true;
-                    options.Add(new(0x0E, "Things that bump in the Twilight"));
+                    options.Add(new(0x0E, "{=bThings that bump in the Twilight"));
                     break;
             }
         }
@@ -374,10 +374,10 @@ public class Dar : MundaneScript
                 {
                     if (!_0X0A) return;
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x09, "Sure."),
-                    new (0x08, "Sorry, I'm busy.")
-                };
+                    {
+                        new (0x09, "Sure."),
+                        new (0x08, "Sorry, I'm busy.")
+                    };
 
                     client.SendOptionsDialog(Mundane, "I need a few ingredients for my studies, care to help me?", options.ToArray());
                     break;
@@ -424,10 +424,10 @@ public class Dar : MundaneScript
                 {
                     if (!_0X0C) return;
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x09, "Sure."),
-                    new (0x08, "Sorry I'm busy.")
-                };
+                    {
+                        new (0x09, "Sure."),
+                        new (0x08, "Sorry I'm busy.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"Hello there again, I need ingredients.. Hic! ..they're a bit harder to come by. \nCurrently I'm looking for {{=q{client.Aisling.QuestManager.DarItem}{{=a.", options.ToArray());
                     break;
@@ -475,10 +475,10 @@ public class Dar : MundaneScript
                 {
                     if (!_0X0E) return;
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x09, "Sure."),
-                    new (0x08, "Sorry I'm busy.")
-                };
+                    {
+                        new (0x09, "Sure."),
+                        new (0x08, "Sorry I'm busy.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"Hic! The items I require are ....   \n*snores* ...    {{=q{client.Aisling.QuestManager.DarItem}{{=a.", options.ToArray());
                     break;

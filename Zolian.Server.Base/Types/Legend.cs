@@ -70,10 +70,7 @@ public class Legend
             cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
             cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
             cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;
-            if (!legend.Text.IsNullOrEmpty())
-                cmd.Parameters.Add("@Text", SqlDbType.VarChar).Value = legend.Text;
-            else
-                cmd.Parameters.Add("@Text", SqlDbType.VarChar).Value = DBNull.Value;
+            cmd.Parameters.Add("@Text", SqlDbType.VarChar).Value = legend.Text;
             cmd.CommandTimeout = 5;
             cmd.ExecuteNonQuery();
             sConn.Close();

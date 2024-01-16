@@ -41,17 +41,17 @@ public class Neal : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (!client.Aisling.QuestManager.NealKill.IsNullOrEmpty() || client.Aisling.GameMaster)
+        if (!client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
         {
             switch (client.Aisling.QuestManager.Neal)
             {
-                case <= 1 when client.Aisling.Level >= 3 || client.Aisling.GameMaster:
+                case <= 1 when client.Aisling.Level >= 3:
                     options.Add(new(0x0B, $"{{=cI have attempted the trial{{=a."));
                     break;
-                case 2 when client.Aisling.Level >= 50 || client.Aisling.GameMaster:
+                case 2 when client.Aisling.Level >= 50:
                     options.Add(new(0x0D, $"{{=cI have attempted the trial{{=a."));
                     break;
-                case 3 when client.Aisling.Level >= 80 || client.Aisling.GameMaster:
+                case 3 when client.Aisling.Level >= 80:
                     options.Add(new(0x0F, $"{{=cI have attempted the trial{{=a."));
                     break;
             }
@@ -70,7 +70,7 @@ public class Neal : MundaneScript
         options.Add(new(0x02, "Forget Skill"));
         options.Add(new(0x0011, "Forget Spell"));
 
-        if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty() && (client.Aisling.Path is Class.Berserker or Class.Defender || client.Aisling.PastClass is Class.Berserker or Class.Defender) || client.Aisling.GameMaster)
+        if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty() && (client.Aisling.Path is Class.Berserker or Class.Defender || client.Aisling.PastClass is Class.Berserker or Class.Defender))
         {
             switch (client.Aisling.QuestManager.Neal)
             {
@@ -223,17 +223,17 @@ public class Neal : MundaneScript
             case 0x000A:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x0009, "Sure."),
-                    new (0x0008, "Not right now.")
-                };
+                    {
+                        new (0x0009, "Sure."),
+                        new (0x0008, "Not right now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"This trial will test your might against a foe of my choosing.", options.ToArray());
                     break;
                 }
             case 0x000B:
                 {
-                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
+                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount))
                     {
                         if (client.Aisling.Path == Class.Berserker)
                         {
@@ -444,17 +444,17 @@ public class Neal : MundaneScript
             case 0x000C:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x0016, "Sure."),
-                    new (0x0008, "Not right now.")
-                };
+                    {
+                        new (0x0016, "Sure."),
+                        new (0x0008, "Not right now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"This trial is more advanced and will let me know if you're ready for the next phase.", options.ToArray());
                     break;
                 }
             case 0x000D:
                 {
-                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount) || client.Aisling.GameMaster)
+                    if (client.Aisling.HasKilled(client.Aisling.QuestManager.NealKill, client.Aisling.QuestManager.NealCount))
                     {
                         if (client.Aisling.Path == Class.Berserker)
                         {
@@ -601,10 +601,10 @@ public class Neal : MundaneScript
             case 0x000E:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x0017, "Sure."),
-                    new (0x0008, "Not right now.")
-                };
+                    {
+                        new (0x0017, "Sure."),
+                        new (0x0008, "Not right now.")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"This is your final trial. If you pass, I'll teach you something special.\nFor your trial I want you to kill {{=q5 {{=bWraith's{{=a.", options.ToArray());
 
@@ -612,7 +612,7 @@ public class Neal : MundaneScript
                 }
             case 0x000F:
                 {
-                    if (client.Aisling.HasKilled("Wraith", 5) || client.Aisling.GameMaster)
+                    if (client.Aisling.HasKilled("Wraith", 5))
                     {
                         if (client.Aisling.Path == Class.Berserker)
                         {
