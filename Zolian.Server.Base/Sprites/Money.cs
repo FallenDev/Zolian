@@ -62,10 +62,12 @@ public sealed class Money : Sprite
 
         Type = Amount switch
         {
-            > 0 and < 10 => MoneySprites.SilverCoin,
-            >= 10 and < 100 => MoneySprites.GoldCoin,
-            >= 100 and < 1000 => MoneySprites.SilverPile,
-            >= 1000 and < 1000000 => MoneySprites.GoldPile,
+            > 0 and < 10 => MoneySprites.CopperCoin,
+            >= 10 and < 100 => MoneySprites.CopperPile,
+            >= 100 and < 500 => MoneySprites.SilverCoin,
+            >= 500 and < 1000 => MoneySprites.SilverPile,
+            >= 1000 and < 50000 => MoneySprites.GoldCoin,
+            >= 50000 and < 1000000 => MoneySprites.GoldPile,
             >= 1000000 => MoneySprites.MassGoldPile,
             _ => Type
         };

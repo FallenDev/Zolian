@@ -12,7 +12,7 @@ public enum ItemFlags
     Repairable = 1 << 6,
     Stackable = 1 << 7,
     Consumable = 1 << 8,
-    PerishIFEquipped = 1 << 9,
+    PerishIfEquipped = 1 << 9,
     Elemental = 1 << 10,
     QuestRelated = 1 << 11,
     Upgradeable = 1 << 12,
@@ -66,10 +66,6 @@ public enum ItemFlags
     NonPerishableUpgradeWeapon = Equipable | Bankable | Tradeable | Dropable | Sellable | Repairable | Upgradeable,
     DualNonPerishableUpgradeWeapon = Equipable | Bankable | Tradeable | Dropable | Sellable | Repairable | Upgradeable | DualWield,
 
-    // 4205 Dragon Slayer, Cutlass, Dragon Scale Sword, Scimitar
-    NonPerishableUpgradeNoBankWeapon = Equipable | Sellable | Repairable | Tradeable | Dropable | Upgradeable,
-    DualNonPerishableUpgradeNoBankWeapon = Equipable | Sellable | Repairable | Tradeable | Dropable | Upgradeable | DualWield,
-
     // 4223 Hatchet, Wood Axe, Prim Spear, Wooden Club, Spiked Club, Talg Axe, Scythe, Chain Mace, Stone Axe
     PerishableUpgradeWeapon = Equipable | Bankable | Perishable | Tradeable | Dropable | Sellable | Repairable | Upgradeable,
     DualPerishableUpgradeWeapon = Equipable | Bankable | Perishable | Tradeable | Dropable | Sellable | Repairable | Upgradeable | DualWield,
@@ -77,8 +73,6 @@ public enum ItemFlags
     // Two Hand
     // 12413 Claidhmore, Emerald, Gladius, Kindjal
     NonPerishableUpgradeWeaponTwoHand = Equipable | Bankable | Tradeable | Dropable | Sellable | Repairable | Upgradeable | TwoHanded,
-    // 12397 Hy-Brasyl Battle Axe, Gold Kindjal
-    NonPerishableNoBankWeaponTwoHand = Equipable | Sellable | Repairable | Tradeable | Dropable | Upgradeable | TwoHanded,
     // 12415 Giant Club, Stone Hammer
     PerishableUpgradeWeaponTwoHand = Equipable | Bankable | Perishable | Tradeable | Dropable | Sellable | Repairable | Upgradeable | TwoHanded,
     // 20607 All long range weapons (bows)

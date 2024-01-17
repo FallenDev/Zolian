@@ -79,7 +79,7 @@ public class Death
                 obj.Item.Durability = 0;
             }
 
-            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.PerishIFEquipped) ||
+            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.PerishIfEquipped) ||
                 obj.Item.Template.Flags.FlagIsSet(ItemFlags.Perishable))
             {
                 if (obj.Item.ItemQuality == Item.Quality.Damaged)
