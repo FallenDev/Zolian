@@ -142,6 +142,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 };
 
                 await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
+                ServerSetup.Instance.GlobalCreationCount.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
                 localClient.SendLoginMessage(LoginMessageType.Confirm);
             }
         }
@@ -157,16 +158,21 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharRequestArgs localArgs)
         {
+            ServerSetup.Instance.GlobalCreationCount.TryGetValue(localClient.RemoteIp, out var created);
             var result = await ValidateUsernameAndPassword(localClient, localArgs.Name, localArgs.Password);
 
-            if (result)
+            switch (result)
             {
-                CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
-                localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
-            }
-            else
-            {
-                localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "That name is unavailable.");
+                case true when created <= 2:
+                    CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
+                    break;
+                case true:
+                    localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "That name is unavailable.");
+                    break;
+                default:
+                    localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Slow down on character creation.");
+                    break;
             }
         }
     }

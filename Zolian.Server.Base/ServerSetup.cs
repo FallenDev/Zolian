@@ -88,6 +88,7 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = new();
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = new();
+    public ConcurrentDictionary<IPAddress, byte> GlobalCreationCount { get; set; } = new();
 
     public ServerSetup(IOptions<ServerOptions> options)
     {

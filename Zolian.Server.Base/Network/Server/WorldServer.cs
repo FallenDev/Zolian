@@ -151,7 +151,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
             [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
             [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
-            [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this)
+            [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),
+            [typeof(ClientCreationLimit)] = new ClientCreationLimit(this)
         };
 
         Console.WriteLine();
@@ -593,6 +594,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         playerSkillSpellWatch.Start();
         var moonPhaseWatch = new Stopwatch();
         moonPhaseWatch.Start();
+        var creationWatch = new Stopwatch();
+        creationWatch.Start();
 
         while (ServerSetup.Instance.Running)
         {
@@ -609,6 +612,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var playerStatusElapsed = playerStatusWatch.Elapsed;
             var playerSkillSpellElapsed = playerSkillSpellWatch.Elapsed;
             var moonPhaseElapsed = moonPhaseWatch.Elapsed;
+            var creationElapsed = creationWatch.Elapsed;
 
             Parallel.ForEach(_serverComponents.Values, component =>
             {
@@ -674,6 +678,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         if (moonPhaseElapsed.TotalMinutes < 30) break;
                         moonPhaseComponent.Update(moonPhaseElapsed);
                         moonPhaseWatch.Restart();
+                        break;
+                    case ClientCreationLimit clientCreationLimitComponent:
+                        if (creationElapsed.TotalMinutes < 60) break;
+                        clientCreationLimitComponent.Update(creationElapsed);
+                        creationWatch.Restart();
                         break;
                 }
             });

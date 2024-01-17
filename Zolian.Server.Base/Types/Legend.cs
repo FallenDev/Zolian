@@ -10,9 +10,6 @@ using Darkages.Sprites;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-
-using ServiceStack;
-
 using System.Data;
 
 namespace Darkages.Types;

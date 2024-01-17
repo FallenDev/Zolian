@@ -60,6 +60,7 @@ public interface IServerContext
     ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; }
     ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; }
+    ConcurrentDictionary<IPAddress, byte> GlobalCreationCount { get; set; }
     bool Running { get; set; }
     SqlConnection ServerSaveConnection { get; set; }
     IServerConstants Config { get; set; }

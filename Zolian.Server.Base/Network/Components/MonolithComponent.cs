@@ -3,9 +3,6 @@ using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
-
 using System.Numerics;
 using Darkages.Enums;
 
