@@ -168,9 +168,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
                     break;
                 case true:
-                    localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "That name is unavailable.");
-                    break;
-                default:
                     localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Slow down on character creation.");
                     break;
             }
@@ -727,7 +724,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             return false;
         }
 
-        client.SendLoginMessage(LoginMessageType.Confirm, "Character already exists.");
+        client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Character already exists.");
         return false;
     }
 
