@@ -287,7 +287,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 Quantity = 0
             };
 
-            client.SendTextInput(Mundane, "How many would you like to deposit?", "Amount:", 3);
+            client.SendTextInput(Mundane, $"How many would you like to deposit?\nYou currently have: {inventoryItem.Stacks}", "Amount:", 3);
             return;
         }
 
