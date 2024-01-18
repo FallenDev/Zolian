@@ -30,6 +30,7 @@ public class Mileth : AreaScript
         { 88, new List<string> { "Metal Club", "Gladius", "Chain Mace", "Skiv", "Balanced Shuriken" } },
         { 99, new List<string> { "Stone Axe", "Gold Kindjal", "Blood Bane", "Blood Skiv" } },
         { 120, new List<string> { "Scythe", "Golden Dragon Buster Blade", "Desert Skiv" } },
+        { 150, new List<string> { "Splish", "Splash" } }
     };
 
     private readonly SortedDictionary<Item.Quality, int> _qualityLuckModifiers = new()
@@ -72,15 +73,17 @@ public class Mileth : AreaScript
         if (loop == 0) loop = 1;
 
         if (_qualityLuckModifiers.TryGetValue(itemDropped.ItemQuality, out var qualityLuck))
-        {
             luck += qualityLuck;
+
+        if (itemDropped.Template.Group is "Scrolls" or "Health" or "Cures" or "Mana" or "Food" or "Spirits" or "Paper")
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{{=bThe item(s), fumble, and vanished into the altar..");
+            return;
         }
 
+        // Temple Logic
         switch (itemDropped.DisplayName)
         {
-            case "Mead":
-                client.SendServerMessage(ServerMessageType.OrangeBar1, "The mead disappears, nothing happens.");
-                return;
             case "Succubus Hair":
                 {
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
@@ -107,90 +110,97 @@ public class Mileth : AreaScript
                 }
         }
 
-        var weapons = new List<string> { "Stick" };
-        foreach (var kvp in _ceannlaidirWeaponDictionary.Where(kvp => client.Aisling.Level >= kvp.Key))
-        {
-            weapons.AddRange(kvp.Value);
-        }
-        var weapon = weapons[Random.Shared.Next(weapons.Count)];
-
         for (var i = 0; i < loop; i++)
         {
-            var quality = ItemQualityVariance.DetermineQuality();
-            var variance = ItemQualityVariance.DetermineVariance();
-            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-            Item item = null;
             var result = Generator.RandNumGen100();
             result += luck;
 
             switch (result)
             {
                 case >= 95:
-                    item = new Item();
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You hear Ceannlaidir's voice as a weapon manifests before you.");
-                    ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
-                    if (ceanWeapon != null)
-                        item = item.Create(client.Aisling, ceanWeapon, NpcShopExtensions.DungeonHighQuality(), variance, wVariance);
-                    Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, client.Aisling.Serial)); });
+                    var weapon = CreateItem(client);
+                    if (weapon == null) continue;
+                    var receivedWeapon = GiveItem(client, weapon);
+                    if (receivedWeapon)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "You hear Ceannlaidir's voice if but for a moment.");
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, client.Aisling.Position));
+                    }
                     break;
                 case >= 75 and < 95:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a warmth placed on your shoulder. (100 Exp)");
                     client.GiveExp(100);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel a warmth placed on your shoulder. (100 Exp)");
                     break;
                 case >= 62 and < 75:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Thoughts of past achievements fill you with joy. (75 Exp)");
                     client.GiveExp(75);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Thoughts of past achievements fill you with joy. (75 Exp)");
                     break;
                 case >= 50 and < 62:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A vision of Spring time and gentle rain overcomes you. (75 Exp)");
                     client.GiveExp(75);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A vision of Spring time and gentle rain overcomes you. (75 Exp)");
                     break;
                 case >= 37 and < 50:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You briefly hear whispers. What was that? (50 Exp)");
                     client.GiveExp(50);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You briefly hear whispers. What was that? (50 Exp)");
                     break;
                 case >= 25 and < 37:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "... (50 Exp)");
                     client.GiveExp(50);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "... (50 Exp)");
                     break;
                 case >= 12 and < 25:
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Light fills you. (25 Exp)");
                     client.GiveExp(25);
-                    client.SendAttributes(StatUpdateType.ExpGold);
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Light fills you. (25 Exp)");
                     break;
                 case >= 0 and < 12:
-                    item = new Item();
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Glioca manifests before you, then quickly tucks a potion in your bag.");
+                    var item = new Item();
                     ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue("Ard Ioc Deum", out var potion);
-                    if (potion != null)
-                        item = item.Create(client.Aisling, potion);
-                    Task.Delay(350).ContinueWith(ct => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(5, null, client.Aisling.Serial)));
+                    if (potion == null) continue;
+
+                    item = item.Create(client.Aisling, potion);
+                    var receivedPotion = GiveItem(client, item);
+                    if (receivedPotion)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "The feeling of a motherly embrace comes over you.. Glioca?");
+                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(5, client.Aisling.Position));
+                    }
                     break;
             }
-
-            if (item == null) continue;
-
-            var carry = item.Template.CarryWeight + client.Aisling.CurrentWeight;
-            if (carry <= client.Aisling.MaximumWeight)
-            {
-                ItemDura(item, quality);
-                var given = item.GiveTo(client.Aisling);
-                if (!given)
-                {
-                    client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
-                }
-            }
-            else
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
-
-            client.SendAttributes(StatUpdateType.Primary);
         }
+
+        client.SendAttributes(StatUpdateType.Full);
+    }
+
+    private Item CreateItem(WorldClient client)
+    {
+        Item item = new();
+        var weapons = new List<string> { "Stick" };
+        foreach (var kvp in _ceannlaidirWeaponDictionary.Where(kvp => client.Aisling.Level >= kvp.Key))
+        {
+            weapons.AddRange(kvp.Value);
+        }
+
+        var weapon = weapons.RandomIEnum();
+        ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(weapon, out var ceanWeapon);
+        return ceanWeapon == null ? null : item.Create(client.Aisling, ceanWeapon, NpcShopExtensions.DungeonHighQuality(), ItemQualityVariance.DetermineVariance(), ItemQualityVariance.DetermineWeaponVariance());
+    }
+
+    private static bool GiveItem(WorldClient client, Item item)
+    {
+        if (item == null) return false;
+
+        var carry = item.Template.CarryWeight + client.Aisling.CurrentWeight;
+        if (carry <= client.Aisling.MaximumWeight)
+        {
+            ItemDura(item, ItemQualityVariance.DetermineQuality());
+            var given = item.GiveTo(client.Aisling);
+            if (given) return true;
+            client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
+            return true;
+        }
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
+        return false;
     }
 
     private static void ItemDura(Item item, Item.Quality quality)
@@ -198,18 +208,6 @@ public class Mileth : AreaScript
         var temp = item.Template.MaxDurability;
         switch (quality)
         {
-            case Item.Quality.Damaged:
-                item.MaxDurability = (uint)(temp / 1.4);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Common:
-                item.MaxDurability = temp / 1;
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Uncommon:
-                item.MaxDurability = (uint)(temp / 0.9);
-                item.Durability = item.MaxDurability;
-                break;
             case Item.Quality.Rare:
                 item.MaxDurability = (uint)(temp / 0.8);
                 item.Durability = item.MaxDurability;
@@ -226,9 +224,12 @@ public class Mileth : AreaScript
                 item.MaxDurability = (uint)(temp / 0.5);
                 item.Durability = item.MaxDurability;
                 break;
+            case Item.Quality.Damaged:
+            case Item.Quality.Common:
+            case Item.Quality.Uncommon:
             case Item.Quality.Mythic:
-                item.MaxDurability = (uint)(temp / 0.3);
-                item.Durability = item.MaxDurability;
+            case Item.Quality.Primordial:
+            case Item.Quality.Transcendent:
                 break;
         }
     }
