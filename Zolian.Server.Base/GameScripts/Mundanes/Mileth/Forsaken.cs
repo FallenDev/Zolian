@@ -56,16 +56,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
 
         switch (client.Aisling.Stage)
         {
+            case ClassStage.Dedicated:
             case ClassStage.Class:
-                options.Add(new Dialog.OptionsDataItem(0x02, "Advanced classing"));
-                options.Add(new Dialog.OptionsDataItem(0x03, "Dedication to my class"));
+                options.Add(new Dialog.OptionsDataItem(0x02, "Advancing"));
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hello there young one.", options.ToArray());
-                break;
-            case ClassStage.Dedicated:
-                options.Add(new Dialog.OptionsDataItem(0x01, "Ascending to Master"));
-                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
-                client.SendOptionsDialog(Mundane, "Hello there devoted one.", options.ToArray());
                 break;
             case ClassStage.Advance:
                 options.Add(new Dialog.OptionsDataItem(0x01, "Ascending to Master"));
@@ -73,19 +68,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                 client.SendOptionsDialog(Mundane, "Advanced one, what is it you wish to learn?", options.ToArray());
                 break;
             case ClassStage.Master:
-                options.Add(new Dialog.OptionsDataItem(0x05, "Reaching Zenith"));
+                options.Add(new Dialog.OptionsDataItem(0x03, "Stat Reallocation"));
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hope you are well, experienced one.", options.ToArray());
-                break;
-            case ClassStage.Job:
-                options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
-                client.SendOptionsDialog(Mundane, "Ah, brother; What can I do for you?", options.ToArray());
-                break;
-            case ClassStage.Quest:
-            case ClassStage.MasterLearn:
-            case ClassStage.DedicatedLearn:
-            case ClassStage.AdvanceLearn:
-            case ClassStage.ForsakenLearn:
                 break;
         }
     }
@@ -133,34 +118,73 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         "If only I advanced my class in my youth. What class are you pondering about?", options.ToArray());
                 }
                 break;
-            // Dedication
+            // Reallocation
             case 0x03:
                 {
                     var options = new List<Dialog.OptionsDataItem>
                     {
-                        new (0x030, "I'm devote"),
+                        new (0x04, "Let's proceed"),
                         new (0x05, "No")
                     };
 
-                    client.SendOptionsDialog(Mundane,
-                        $"Ah devotee, there is nothing wrong with honing your current abilities and sharpening them to learn anew.",
-                        options.ToArray());
+                    client.SendOptionsDialog(Mundane, $"It will cost you; 5,000 Health and 5,000 Mana to proceed.\n{{=bYou will need a base of 5,128 hp/mp", options.ToArray());
                 }
                 break;
-            // Forsaken
             case 0x04:
                 {
-                    var options = new List<Dialog.OptionsDataItem>
+                    if (client.Aisling.BaseHp >= 5128 && client.Aisling.BaseMp >= 5128)
                     {
-                        new (0x05, "I seek power"),
-                        new (0x05, "No")
-                    };
+                        var levelAbove250 = client.Aisling.ExpLevel >= 250;
+                        client.Aisling.BaseHp -= 5000;
+                        client.Aisling.BaseMp -= 5000;
+                        client.Aisling._Str = 5;
+                        client.Aisling._Int = 5;
+                        client.Aisling._Wis = 5;
+                        client.Aisling._Con = 5;
+                        client.Aisling._Dex = 5;
 
-                    var (str, intel, wis, con, dex, abilityReq) = _forsaking.First(x => client.Aisling.Path <= x.Key).Value;
+                        if (levelAbove250)
+                        {
+                            var points = 500 + (client.Aisling.ExpLevel - 250);
+                            points += client.Aisling.AbpLevel;
+                            client.Aisling.StatPoints += (short)points;
+                        }
+                        else
+                        {
+                            client.Aisling.StatPoints += (short)(client.Aisling.ExpLevel * 2);
+                        }
 
-                    client.SendOptionsDialog(Mundane,
-                        $"The forsaking happens when one reaches their Zenith. After such an event happens, you move as if you're a tier above others",
-                        options.ToArray());
+                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
+                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+
+                        var legend = new Legend.LegendItem
+                        {
+                            Key = "Reallocation",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.Red,
+                            Icon = (byte)LegendIcon.Victory,
+                            Text = "Refocused their Chi"
+                        };
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                        client.SendAttributes(StatUpdateType.Full);
+
+                        foreach (var player in ServerSetup.Instance.Game.Aislings)
+                        {
+                            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has realigned their chi");
+                        }
+
+                        client.CloseDialog();
+                    }
+                    else
+                    {
+                        var options = new List<Dialog.OptionsDataItem>
+                                {
+                                    new (0x05, "Alright")
+                                };
+
+                        client.SendOptionsDialog(Mundane, "You currently do not meet the vitality requirement.", options.ToArray());
+                    }
                 }
                 break;
             case 0x05:
@@ -665,70 +689,6 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                     }
                 }
                 break;
-            case 0x030:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
-                {
-                    new (0x031, "Let's proceed"),
-                    new (0x05, "I've changed my mind")
-                };
-                    client.SendServerMessage(ServerMessageType.ScrollWindow, "{=qDedicated Buffs:\n" +
-                                             "{=gBase HP: {=e1000\n" +
-                                             "{=gBase MP: {=e1000\n" +
-                                             "{=gStr: {=e5\n" +
-                                             "{=gInt: {=e5\n" +
-                                             "{=gWis: {=e5\n" +
-                                             "{=gCon: {=e5\n" +
-                                             "{=gDex: {=e5\n" +
-                                             "{=gDmg: {=e5\n" +
-                                             "{=gReflex: {=e5\n");
-                    client.SendOptionsDialog(Mundane,
-                        "Pledging your loyalty to your current class is a noble gesture. If you're sure we can proceed, I just need to ensure that you're the correct insight first (Level 50).",
-                        options.ToArray());
-                    break;
-                }
-            case 0x031:
-                {
-                    if (client.Aisling.ExpLevel >= 50)
-                    {
-                        client.Aisling.BaseHp += 1000;
-                        client.Aisling.BaseMp += 1000;
-                        client.Aisling._Str += 5;
-                        client.Aisling._Int += 5;
-                        client.Aisling._Wis += 5;
-                        client.Aisling._Con += 5;
-                        client.Aisling._Dex += 5;
-                        client.Aisling._Dmg += 5;
-                        client.Aisling._Hit += 5;
-                        client.Aisling.PastClass = client.Aisling.Path;
-                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
-                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
-                        var legend = new Legend.LegendItem
-                        {
-                            Key = "Class",
-                            Time = DateTime.UtcNow,
-                            Color = LegendColor.Yellow,
-                            Icon = (byte)LegendIcon.Victory,
-                            Text = $"Dedication to {client.Aisling.Path}"
-                        };
-                        client.Aisling.LegendBook.AddLegend(legend, client);
-                        client.Aisling.Stage = ClassStage.Dedicated;
-                        client.SendAttributes(StatUpdateType.Full);
-                        foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                        {
-                            announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has reaffirmed their dedication to their class");
-                        }
-
-                        var options = new List<Dialog.OptionsDataItem>
-                        {
-                            new (0x05, "Thank you")
-                        };
-
-                        client.SendOptionsDialog(Mundane, "It's a long road to perfecting something. Perform it daily until it is unrecognizable.", options.ToArray());
-                    }
-                    break;
-                }
             case 0x032:
                 if (client.Aisling.ExpLevel >= 120)
                 {

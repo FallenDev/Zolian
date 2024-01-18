@@ -341,7 +341,7 @@ public static class Commander
         ServerSetup.Logger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
         // Wipe
-        ServerSetup.Instance.TempGlobalMapCache = new ConcurrentDictionary<int, Area>();
+        ServerSetup.Instance.TempGlobalMapCache = new Dictionary<int, Area>();
         ServerSetup.Instance.TempGlobalWarpTemplateCache = new();
 
         foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)

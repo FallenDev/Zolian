@@ -36,6 +36,7 @@ using RestSharp;
 using ServiceStack;
 
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -65,7 +66,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
-    public static Dictionary<(Race race, Class path, Class pastClass), string> SkillMap = new();
+    public static FrozenDictionary<(Race race, Class path, Class pastClass), string> SkillMap;
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
     private readonly Stopwatch _itemGroundCheckControl = new();
@@ -161,7 +162,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static void SkillMapper()
     {
-        SkillMap = new Dictionary<(Race race, Class path, Class pastClass), string>
+        // Pre-allocation to a prime number
+        var skillMap = new Dictionary<(Race race, Class path, Class pastClass), string>(397)
         {
             {(Race.Human, Class.Berserker, Class.Berserker), "SClass1"},
             {(Race.Human, Class.Berserker, Class.Defender), "SClass2"},
@@ -560,6 +562,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {(Race.Merfolk, Class.Monk, Class.Arcanus), "SClass395"},
             {(Race.Merfolk, Class.Monk, Class.Monk), "SClass396"}
         };
+
+        // Set frozen dict then cleanup unused dict
+        SkillMap = skillMap.ToFrozenDictionary();
     }
 
     #endregion

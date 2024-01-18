@@ -151,11 +151,11 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
         var legendItem = new Legend.LegendItem
         {
-            Key = "Alpha Aisling",
+            Key = "Beta Aisling",
             Time = DateTime.UtcNow,
-            Color = LegendColor.Yellow,
+            Color = LegendColor.TurquoiseG7,
             Icon = (byte)LegendIcon.Heart,
-            Text = "Enduring Alpha Testing"
+            Text = "Beta Tester"
         };
 
         client.Aisling.LegendBook.AddLegend(legendItem, client);

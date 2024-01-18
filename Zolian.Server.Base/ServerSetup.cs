@@ -71,7 +71,7 @@ public class ServerSetup : IServerContext
 
     // Frozen Live
     public FrozenDictionary<int, Area> GlobalMapCache { get; set; }
-    public ConcurrentDictionary<int, Area> TempGlobalMapCache { get; set; } = new();
+    public Dictionary<int, Area> TempGlobalMapCache { get; set; } = new();
 
     // Live
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
