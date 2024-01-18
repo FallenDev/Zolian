@@ -1546,7 +1546,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.Client.SpellControl.Start();
 
         if (client.Aisling.Client.SpellControl.Elapsed.TotalMilliseconds <
-            client.Aisling.Client.SkillSpellTimer.Delay.TotalMilliseconds - 350) return default;
+            client.Aisling.Client.SkillSpellTimer.Delay.TotalMilliseconds - 200) return default;
 
         client.Aisling.Client.SpellControl.Restart();
         return ExecuteHandler(client, args, InnerOnUseSpell);
