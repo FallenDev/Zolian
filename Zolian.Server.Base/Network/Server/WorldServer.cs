@@ -1967,25 +1967,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case "#" when client.Aisling.GameMaster:
                     foreach (var player in Aislings)
                     {
-                        player.Client?.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username}: {message}");
+                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=q{client.Aisling.Username}: {message}");
                     }
                     return default;
                 case "#" when client.Aisling.GameMaster != true:
                     client.SystemMessage("You cannot broadcast in this way.");
                     return default;
-                case "!" when !string.IsNullOrEmpty(client.Aisling.Clan):
+                case "!":
                     foreach (var player in Aislings)
                     {
                         if (player.Client is null) continue;
                         if (!player.GameSettings.GroupChat) continue;
-                        if (player.Clan == client.Aisling.Clan)
-                        {
-                            player.Client.SendServerMessage(ServerMessageType.GuildChat, $"<!{client.Aisling.Username}> {message}");
-                        }
+                        player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {message}");
                     }
-                    return default;
-                case "!" when string.IsNullOrEmpty(client.Aisling.Clan):
-                    client.SystemMessage("{=eYou're not in a guild.");
                     return default;
                 case "!!" when client.Aisling.PartyMembers != null:
                     foreach (var player in Aislings)
