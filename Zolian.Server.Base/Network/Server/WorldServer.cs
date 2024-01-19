@@ -1795,6 +1795,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var time = DateTime.UtcNow;
             ServerSetup.Logger($"{redirect.Name} logged in at: {time}");
+            Analytics.TrackEvent($"{client.Aisling.Username} logged in at {DateTime.Now} local time on {client.RemoteIp}");
         }
     }
 

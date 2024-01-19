@@ -464,57 +464,59 @@ public class Charge(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         aisling.ActionUsed = "Charge";
-
-        foreach (var i in _enemyList.Where(i => i.Attackable))
+        
+        if (_target == null)
         {
-            if (i != _target) continue;
-            var dmgCalc = DamageCalc(aisling);
-            var position = _target.Position;
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(7, aisling);
-            var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
-            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+            OnFailed(aisling);
+            return;
+        }
 
-            if (mapCheck != aisling.Map.ID) return;
+        var dmgCalc = DamageCalc(aisling);
+        var position = _target.Position;
+        var mapCheck = aisling.Map.ID;
+        var wallPosition = aisling.GetPendingChargePosition(7, aisling);
+        var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
+        var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
 
-            if (targetPos <= wallPos)
+        if (mapCheck != aisling.Map.ID) return;
+
+        if (targetPos <= wallPos)
+        {
+            switch (aisling.Direction)
             {
-                switch (aisling.Direction)
-                {
-                    case 0:
-                        position.Y++;
-                        break;
-                    case 1:
-                        position.X--;
-                        break;
-                    case 2:
-                        position.Y--;
-                        break;
-                    case 3:
-                        position.X++;
-                        break;
-                }
-
-                if (aisling.Position != position)
-                {
-                    _skillMethod.Step(aisling, position.X, position.Y);
-                }
-
-                _target.ApplyDamage(aisling, dmgCalc, skill);
-                _skillMethod.Train(client, skill);
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, _target.Serial));
-
-                if (!_crit) return;
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                case 0:
+                    position.Y++;
+                    break;
+                case 1:
+                    position.X--;
+                    break;
+                case 2:
+                    position.Y--;
+                    break;
+                case 3:
+                    position.X++;
+                    break;
             }
-            else
+
+            if (aisling.Position != position)
             {
-                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
-
-                var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+                _skillMethod.Step(aisling, position.X, position.Y);
             }
+
+            _target.ApplyDamage(aisling, dmgCalc, skill);
+            _skillMethod.Train(client, skill);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, _target.Serial));
+
+            if (!_crit) return;
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+        }
+        else
+        {
+            _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+
+            var stunned = new DebuffBeagsuain();
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
         }
     }
 
@@ -568,7 +570,7 @@ public class Charge(Skill skill) : SkillScript(skill)
         if (_target == null)
         {
             var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(7, aisling);
+            var wallPosition = aisling.GetPendingChargePositionNoTarget(7, aisling);
             var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
 
             if (mapCheck != aisling.Map.ID) return;
@@ -792,7 +794,7 @@ public class Draconic_Leash(Skill skill) : SkillScript(skill)
             monster.Pos = aisling.Pos;
             monster.UpdateAddAndRemove();
         }
-        
+
         _skillMethod.Train(client, skill);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(139, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -850,7 +852,7 @@ public class Taunt(Skill skill) : SkillScript(skill)
             monster.Target = aisling;
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, monster.Position));
         }
-        
+
         _skillMethod.Train(client, skill);
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
@@ -886,7 +888,7 @@ public class Briarthorn(Skill skill) : SkillScript(skill)
         var hasLawAura = aisling.Buffs.TryGetValue("Laws of Aosda", out var laws);
         if (hasLawAura)
             laws.OnEnded(aisling, laws);
-        
+
         var buff = new aura_BriarThorn();
         client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
         _skillMethod.Train(client, skill);
@@ -923,7 +925,7 @@ public class LawsOfAosda(Skill skill) : SkillScript(skill)
         var hasBriarAura = aisling.Buffs.TryGetValue("Briarthorn Aura", out var briar);
         if (hasBriarAura)
             briar.OnEnded(aisling, briar);
-        
+
         var buff = new aura_LawsOfAosda();
         client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
         _skillMethod.Train(client, skill);
@@ -1057,7 +1059,7 @@ public class BlessedShield(Skill skill) : SkillScript(skill)
             OnFailed(aisling);
             return;
         }
-        
+
         OnSuccess(aisling);
     }
 }

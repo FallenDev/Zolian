@@ -977,7 +977,7 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var targetPos = aisling.GetFromAllSidesEmpty(aisling, _target);
+        var targetPos = aisling.GetFromAllSidesEmpty(_target);
 
         if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
         {

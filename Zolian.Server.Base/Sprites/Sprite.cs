@@ -302,7 +302,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
 
-    private IEnumerable<Sprite> GetInFrontToSide(int tileCount = 1)
+    public List<Sprite> GetInFrontToSide(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -344,7 +344,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> MonsterGetInFrontToSide(int tileCount = 1)
+    public List<Sprite> MonsterGetInFrontToSide(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -386,7 +386,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> GetHorizontalInFront(int tileCount = 1)
+    public List<Sprite> GetHorizontalInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -420,7 +420,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private Position GetFromAllSidesEmpty(Sprite target, int tileCount = 1)
+    public Position GetFromAllSidesEmpty(Sprite target, int tileCount = 1)
     {
         var empty = Position;
         var blocks = target.Position.SurroundingContent(Map);
@@ -436,7 +436,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return empty;
     }
 
-    private IEnumerable<Sprite> GetAllInFront(int tileCount = 1)
+    public List<Sprite> GetAllInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -463,7 +463,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> DamageableGetInFront(int tileCount = 1)
+    public List<Sprite> DamageableGetInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -490,7 +490,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Position> GetTilesInFront(int tileCount = 1)
+    public List<Position> GetTilesInFront(int tileCount = 1)
     {
         var results = new List<Position>();
 
@@ -517,7 +517,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> DamageableGetAwayInFront(int tileCount = 2)
+    public List<Sprite> DamageableGetAwayInFront(int tileCount = 2)
     {
         var results = new List<Sprite>();
 
@@ -544,7 +544,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> DamageableGetBehind(int tileCount = 1)
+    public List<Sprite> DamageableGetBehind(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -571,7 +571,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    private IEnumerable<Sprite> MonsterGetInFront(int tileCount = 1)
+    public List<Sprite> MonsterGetInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();
 
@@ -598,20 +598,48 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
-    public List<Sprite> GetAllInFront(Sprite sprite, int tileCount = 1) => GetAllInFront(tileCount).Where(i => i != null && i.Serial != sprite.Serial).ToList();
-    public List<Sprite> GetAllInFront(int tileCount = 1, bool intersect = false) => GetAllInFront(tileCount).ToList();
-    public List<Sprite> DamageableGetInFront(int tileCount = 1, bool intersect = false) => DamageableGetInFront(tileCount).ToList();
-    public List<Position> GetTilesInFront(int tileCount = 1, bool intersect = false) => GetTilesInFront(tileCount).ToList();
-    public List<Sprite> DamageableGetAwayInFront(int tileCount = 2, bool intersect = false) => DamageableGetAwayInFront(tileCount).ToList();
-    public List<Sprite> DamageableGetBehind(int tileCount = 1, bool intersect = false) => DamageableGetBehind(tileCount).ToList();
-    public List<Sprite> MonsterGetInFront(int tileCount = 1, bool intersect = false) => MonsterGetInFront(tileCount).ToList();
-    public List<Sprite> MonsterGetInFrontToSide(int tileCount = 1, bool intersect = false) => MonsterGetInFrontToSide(tileCount).ToList();
-    public List<Sprite> GetInFrontToSide(int tileCount = 1, bool intersect = false) => GetInFrontToSide(tileCount).ToList();
-    public List<Sprite> GetHorizontalInFront(int tileCount = 1, bool intersect = false) => GetHorizontalInFront(tileCount).ToList();
-    public Position GetFromAllSidesEmpty(Sprite sprite, Sprite target, int tileCount = 1) => GetFromAllSidesEmpty(target, tileCount);
-    public Position GetFromAllSidesEmpty(Sprite target, int tileCount = 1, bool intersect = false) => GetFromAllSidesEmpty(target, tileCount);
-
     public Position GetPendingChargePosition(int warp, Sprite sprite)
+    {
+        var pendingX = X;
+        var pendingY = Y;
+
+        for (var i = 0; i < warp; i++)
+        {
+            if (Direction == 0)
+                pendingY--;
+            if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
+            pendingY++;
+            break;
+        }
+        for (var i = 0; i < warp; i++)
+        {
+            if (Direction == 1)
+                pendingX++;
+            if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
+            pendingX--;
+            break;
+        }
+        for (var i = 0; i < warp; i++)
+        {
+            if (Direction == 2)
+                pendingY++;
+            if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
+            pendingY--;
+            break;
+        }
+        for (var i = 0; i < warp; i++)
+        {
+            if (Direction == 3)
+                pendingX--;
+            if (!sprite.Map.IsWall(pendingX, pendingY)) continue;
+            pendingX++;
+            break;
+        }
+
+        return new Position(pendingX, pendingY);
+    }
+
+    public Position GetPendingChargePositionNoTarget(int warp, Sprite sprite)
     {
         var pendingX = X;
         var pendingY = Y;

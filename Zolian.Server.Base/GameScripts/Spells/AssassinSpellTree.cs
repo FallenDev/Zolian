@@ -397,7 +397,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
 
         if (target.Serial == damageDealingSprite.Serial) return;
 
-        var targetPos = damageDealingSprite.GetFromAllSidesEmpty(damageDealingSprite, target);
+        var targetPos = damageDealingSprite.GetFromAllSidesEmpty(target);
         if (targetPos == null || targetPos == target.Position) return;
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
@@ -514,7 +514,7 @@ public class Shunshin(Spell spell) : SpellScript(spell)
 
         if (target.Serial == damageDealingSprite.Serial) return;
 
-        var targetPos = damageDealingSprite.GetFromAllSidesEmpty(damageDealingSprite, target);
+        var targetPos = damageDealingSprite.GetFromAllSidesEmpty(target);
         if (targetPos == null || targetPos == target.Position)
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Something got in the way.");

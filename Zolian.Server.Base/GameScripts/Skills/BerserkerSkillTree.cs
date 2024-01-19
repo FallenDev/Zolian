@@ -275,7 +275,7 @@ public class Blitz(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var targetPos = aisling.GetFromAllSidesEmpty(aisling, _target);
+        var targetPos = aisling.GetFromAllSidesEmpty(_target);
 
         if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
         {
@@ -892,57 +892,59 @@ public class Rush(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         aisling.ActionUsed = "Rush";
-
-        foreach (var i in _enemyList.Where(i => i.Attackable))
+        
+        if (_target == null)
         {
-            if (i != _target) continue;
-            var dmgCalc = DamageCalc(aisling);
-            var position = _target.Position;
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(3, aisling);
-            var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
-            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+            OnFailed(aisling);
+            return;
+        }
+        
+        var dmgCalc = DamageCalc(aisling);
+        var position = _target.Position;
+        var mapCheck = aisling.Map.ID;
+        var wallPosition = aisling.GetPendingChargePosition(3, aisling);
+        var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
+        var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
 
-            if (mapCheck != aisling.Map.ID) return;
+        if (mapCheck != aisling.Map.ID) return;
 
-            if (targetPos <= wallPos)
+        if (targetPos <= wallPos)
+        {
+            switch (aisling.Direction)
             {
-                switch (aisling.Direction)
-                {
-                    case 0:
-                        position.Y++;
-                        break;
-                    case 1:
-                        position.X--;
-                        break;
-                    case 2:
-                        position.Y--;
-                        break;
-                    case 3:
-                        position.X++;
-                        break;
-                }
-
-                if (aisling.Position != position)
-                {
-                    _skillMethod.Step(aisling, position.X, position.Y);
-                }
-
-                _target.ApplyDamage(aisling, dmgCalc, skill);
-                _skillMethod.Train(client, skill);
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, _target.Serial));
-
-                if (!_crit) return;
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                case 0:
+                    position.Y++;
+                    break;
+                case 1:
+                    position.X--;
+                    break;
+                case 2:
+                    position.Y--;
+                    break;
+                case 3:
+                    position.X++;
+                    break;
             }
-            else
+
+            if (aisling.Position != position)
             {
-                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
-
-                var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+                _skillMethod.Step(aisling, position.X, position.Y);
             }
+
+            _target.ApplyDamage(aisling, dmgCalc, skill);
+            _skillMethod.Train(client, skill);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, _target.Serial));
+
+            if (!_crit) return;
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+        }
+        else
+        {
+            _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+
+            var stunned = new DebuffBeagsuain();
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
         }
     }
 
@@ -996,7 +998,7 @@ public class Rush(Skill skill) : SkillScript(skill)
         if (_target == null)
         {
             var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(3, aisling);
+            var wallPosition = aisling.GetPendingChargePositionNoTarget(3, aisling);
             var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
 
             if (mapCheck != aisling.Map.ID) return;
@@ -1340,7 +1342,7 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var targetPos = aisling.GetFromAllSidesEmpty(aisling, _target);
+        var targetPos = aisling.GetFromAllSidesEmpty(_target);
 
         if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
         {
