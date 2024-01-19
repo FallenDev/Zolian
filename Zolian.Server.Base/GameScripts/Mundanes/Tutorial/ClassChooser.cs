@@ -183,7 +183,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                 : ServerSetup.Instance.GlobalItemTemplateCache["Leather Tunic"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
@@ -199,7 +199,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             : ServerSetup.Instance.GlobalItemTemplateCache["Leather Guard"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Eppe"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
@@ -219,7 +219,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                 : ServerSetup.Instance.GlobalItemTemplateCache["Scout Leather"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Snow Dagger"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
@@ -236,7 +236,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                 : ServerSetup.Instance.GlobalItemTemplateCache["Dobok"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Leather Bracer"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
@@ -253,7 +253,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                 : ServerSetup.Instance.GlobalItemTemplateCache["Cowl"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);
@@ -275,7 +275,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
                 : ServerSetup.Instance.GlobalItemTemplateCache["Gardcorp"]);
         item.GetDisplayName();
         item.NoColorGetDisplayName();
-        client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+        client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
 
         var item1 = new Item();
         item1 = item1.Create(client.Aisling, ServerSetup.Instance.GlobalItemTemplateCache["Stick"], Item.Quality.Common, Item.Variance.None, Item.WeaponVariance.None);

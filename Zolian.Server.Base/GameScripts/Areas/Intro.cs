@@ -34,7 +34,7 @@ public class Intro : AreaScript
             item.GetDisplayName();
             item.NoColorGetDisplayName();
             if (client.Aisling.EquipmentManager.Equipment[2] == null)
-                client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+                client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
         });
 
         await Task.Delay(350).ContinueWith(ct =>
@@ -84,7 +84,7 @@ public class Intro : AreaScript
         item.GetDisplayName();
         item.NoColorGetDisplayName();
         if (client.Aisling.EquipmentManager.Equipment[2] == null)
-            client.Aisling.EquipmentManager.AddEquipment(item.Template.EquipmentSlot, item, false);
+            client.Aisling.EquipmentManager.Add(item.Template.EquipmentSlot, item);
     }
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
     public override void OnGossip(WorldClient client, string message) { }
