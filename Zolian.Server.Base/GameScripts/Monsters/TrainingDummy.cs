@@ -12,13 +12,13 @@ namespace Darkages.GameScripts.Monsters;
 [Script("Training Dmg")]
 public class TrainingDummy : MonsterScript
 {
-    private Stopwatch _stopwatch = new();
+    private readonly Stopwatch _stopwatch = new();
     private long _damage;
 
     public TrainingDummy(Monster monster, Area map) : base(monster, map)
     {
         Monster.BonusMr = 0;
-        Monster.MonsterBank = new List<Item>();
+        Monster.MonsterBank = [];
     }
 
     public override void OnClick(WorldClient client)
@@ -52,6 +52,9 @@ public class TrainingDummy : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
+        if (Monster.CurrentHp < Monster.MaximumHp)
+            Monster.CurrentHp = Monster.MaximumHp;
+
         foreach (var debuff in Monster.Debuffs.Values)
         {
             if (debuff != null)
@@ -95,7 +98,7 @@ public class TrainingDummy2 : MonsterScript
     public TrainingDummy2(Monster monster, Area map) : base(monster, map)
     {
         Monster.BonusMr = 0;
-        Monster.MonsterBank = new List<Item>();
+        Monster.MonsterBank = [];
     }
 
     public override void OnClick(WorldClient client)
@@ -131,6 +134,9 @@ public class TrainingDummy2 : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
+        if (Monster.CurrentHp < Monster.MaximumHp)
+            Monster.CurrentHp = Monster.MaximumHp;
+
         foreach (var debuff in Monster.Debuffs.Values)
         {
             if (debuff != null)

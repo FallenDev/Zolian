@@ -38,8 +38,9 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             CurrentMapId = map.ID
         };
 
-        LoadSkillScript("Assail", obj);
-        if (template.Level > 10)
+        if (template.MonsterRace != MonsterRace.Dummy)
+            LoadSkillScript("Assail", obj);
+        if (template.Level > 10 && template.MonsterRace != MonsterRace.Dummy)
             MonsterSkillSet(obj);
 
         // Initialize the dictionary with the maximum level as the key and the hpMultiplier and mpMultiplier as the value
