@@ -240,18 +240,13 @@ public class Smite(Skill skill) : SkillScript(skill)
 [Script("Remedy")]
 public class Remedy(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
-
         client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to focus");
-        if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)

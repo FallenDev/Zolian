@@ -1549,7 +1549,6 @@ public class Calming_Mist(Skill skill) : SkillScript(skill)
 public class HealingPalms(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
-    private bool _success;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
