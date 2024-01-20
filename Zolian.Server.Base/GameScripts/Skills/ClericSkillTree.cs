@@ -316,7 +316,7 @@ public class HolyLance(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 30,
-            BodyAnimation = BodyAnimation.Stab,
+            BodyAnimation = BodyAnimation.Assail,
             Sound = null,
             SourceId = sprite.Serial
         };
@@ -433,7 +433,7 @@ public class Recite(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 20,
-            BodyAnimation = BodyAnimation.Punch,
+            BodyAnimation = BodyAnimation.PriestCast,
             Sound = null,
             SourceId = sprite.Serial
         };
@@ -585,7 +585,7 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 20,
-            BodyAnimation = BodyAnimation.Punch,
+            BodyAnimation = BodyAnimation.Assail,
             Sound = null,
             SourceId = sprite.Serial
         };
@@ -700,7 +700,7 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 20,
-            BodyAnimation = BodyAnimation.Punch,
+            BodyAnimation = BodyAnimation.Assail,
             Sound = null,
             SourceId = sprite.Serial
         };
@@ -815,7 +815,7 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 20,
-            BodyAnimation = BodyAnimation.Punch,
+            BodyAnimation = BodyAnimation.PriestCast,
             Sound = null,
             SourceId = sprite.Serial
         };
