@@ -21,6 +21,8 @@ public interface IAisling : ISprite
     DialogSequence ActiveSequence { get; set; }
     ExchangeSession Exchange { get; set; }
     NameDisplayStyle NameStyle { get; set; }
+    ElementManager.Element TempOffensiveHold { get; set; }
+    ElementManager.Element TempDefensiveHold { get; set; }
     bool IsCastingSpell { get; set; }
     bool ProfileOpen { get; set; }
     Summon SummonObjects { get; set; }

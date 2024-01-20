@@ -85,7 +85,7 @@ public class EnemyRewards : RewardScript
             item.Release(_monster, _monster.Position);
             ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
 
-            if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
+            if (item.Enchantable && item.ItemQuality is Quality.Epic or Quality.Legendary or Quality.Forsaken)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
@@ -93,7 +93,7 @@ public class EnemyRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Item.Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
@@ -152,7 +152,7 @@ public class EnemyRewards : RewardScript
             item.Release(_monster, _monster.Position);
             ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
 
-            if (item.Enchantable && item.ItemQuality is Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
+            if (item.Enchantable && item.ItemQuality is Quality.Epic or Quality.Legendary or Quality.Forsaken)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
@@ -160,7 +160,7 @@ public class EnemyRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Item.Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {

@@ -50,8 +50,8 @@ public class Position
 
     public int DistanceFrom(ushort xDist, ushort yDist)
     {
-        double xDiff = Math.Abs(xDist - this.X);
-        double yDiff = Math.Abs(yDist - this.Y);
+        double xDiff = Math.Abs(xDist - X);
+        double yDiff = Math.Abs(yDist - Y);
 
         return (int)(xDiff > yDiff ? xDiff : yDiff);
     }

@@ -48,7 +48,7 @@ public class FirstAcc(Item item) : ItemScript(item)
                     aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
                 else
                 {
-                    if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                    if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
                         aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
                 }
 
@@ -57,7 +57,7 @@ public class FirstAcc(Item item) : ItemScript(item)
 
         if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
             aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
-        if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+        if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
             aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
     }
 
@@ -90,7 +90,7 @@ public class FirstAcc(Item item) : ItemScript(item)
                     aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
                 else
                 {
-                    if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                    if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
                         aisling.SecondaryDefensiveElement = ElementManager.Element.None;
                 }
 

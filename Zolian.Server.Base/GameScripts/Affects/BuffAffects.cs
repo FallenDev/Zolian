@@ -1303,14 +1303,12 @@ public class buff_randWeaponElement : Buff
         {
             BuffSpell = buff;
             BuffSpell.TimeLeft = BuffSpell.Length;
-            while (affected.SecondaryOffensiveElement == ElementManager.Element.None)
-            {
-                affected.SecondaryOffensiveElement = Generator.RandomEnumValue<ElementManager.Element>();
-            }
+            affected.SecondaryOffensiveElement = Generator.RandomEnumValue<ElementManager.Element>();
         }
 
         if (affected is Aisling aisling)
         {
+            aisling.TempOffensiveHold = aisling.SecondaryOffensiveElement;
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Secondary Offensive element has changed {aisling.SecondaryOffensiveElement}");
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, null, affected.Serial));
             aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
@@ -1325,7 +1323,11 @@ public class buff_randWeaponElement : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is Aisling aisling)
+            aisling.SecondaryOffensiveElement = aisling.TempOffensiveHold;
+    }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -1333,6 +1335,26 @@ public class buff_randWeaponElement : Buff
         affected.SecondaryOffensiveElement = ElementManager.Element.None;
 
         if (affected is not Aisling aisling) return;
+        aisling.TempOffensiveHold = ElementManager.Element.None;
+
+        // Off-Hand elements override First Accessory
+        if (aisling.EquipmentManager.Equipment[3]?.Item != null && aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+        {
+            if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryOffensiveElement;
+
+            if (aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
+        }
+        else if (aisling.EquipmentManager.Equipment[14]?.Item != null && aisling.EquipmentManager.Equipment[14].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
+        {
+            if (aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
+                aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryOffensiveElement;
+
+            if (aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryDefensiveElement;
+        }
+
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Element enhancement has worn off");
         DeleteBuff(aisling, buff);

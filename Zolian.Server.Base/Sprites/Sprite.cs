@@ -270,7 +270,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool CanBeAttackedHere(Sprite source)
     {
-        if (source is not Sprites.Aisling || this is not Sprites.Aisling) return true;
+        if (source is not Aisling || this is not Aisling) return true;
         if (CurrentMapId <= 0 || !ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var value)) return true;
 
         return value.Flags.MapFlagIsSet(MapFlags.PlayerKill);
