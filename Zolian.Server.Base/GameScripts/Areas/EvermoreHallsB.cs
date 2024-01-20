@@ -36,7 +36,7 @@ public class EvermoreHallsB : AreaScript
 
     public override void Update(TimeSpan elapsedTime)
     {
-        List<Vector2> rollingTraps = new();
+        List<Vector2> rollingTraps = [];
 
         if (!_vectorRoll.IsRunning)
         {
@@ -159,7 +159,7 @@ public class EvermoreHallsB : AreaScript
     {
         foreach (var trapPosition in trapList)
         {
-            if (_playersOnMap.Count == 0) return;
+            if (_playersOnMap.IsEmpty) return;
             _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(112, new Position(trapPosition)));
 
             foreach (var player in _playersOnMap.Values)

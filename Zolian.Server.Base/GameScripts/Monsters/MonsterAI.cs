@@ -2745,8 +2745,8 @@ public class GeneralPirate : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _pirateSayings = "Arrr!|Arr! Let's sing a sea shanty.|Out'a me way!|Aye, yer sister is real nice|Gimmie yar gold!|Bet yar can't take me Bucko|Look at me funny and I'll a slit yar throat!|Scallywag!|Shiver my timbers|A watery grave for anyone who make us angry!|Arrr! Out'a me way and gimme yar gold!";
-    private string _pirateChase = "Ya landlubber can't run from us!|Harhar!! Running away eh?|Time fer a plundering!";
+    private readonly string _pirateSayings = "Arrr!|Arr! Let's sing a sea shanty.|Out'a me way!|Aye, yer sister is real nice|Gimmie yar gold!|Bet yar can't take me Bucko|Look at me funny and I'll a slit yar throat!|Scallywag!|Shiver my timbers|A watery grave for anyone who make us angry!|Arrr! Out'a me way and gimme yar gold!";
+    private readonly string _pirateChase = "Ya landlubber can't run from us!|Harhar!! Running away eh?|Time fer a plundering!";
     private string[] Arggh => _pirateSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] Arrrgh => _pirateChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => Arggh.Length;
@@ -4519,8 +4519,8 @@ public class AosdaRemnant : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _aosdaSayings = "Why are you here?|Do you understand, that for which you walk?|Many years, have I walked this path";
-    private string _aosdaChase = "Come back, we can stay here together..  Forever|Don't leave me, anything but that";
+    private readonly string _aosdaSayings = "Why are you here?|Do you understand, that for which you walk?|Many years, have I walked this path";
+    private readonly string _aosdaChase = "Come back, we can stay here together..  Forever|Don't leave me, anything but that";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
@@ -5134,8 +5134,8 @@ public class DraconicOmega : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
-    private string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
+    private readonly string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
+    private readonly string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
@@ -5749,8 +5749,8 @@ public class JackFrost : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _aosdaSayings = "How about this!|I do not know what I am doing... help me|I feel the light";
-    private string _aosdaChase = "Hey, hey. Slow down, slow down|Don't run, I will turn you to Ice!|But you've came all this way!";
+    private readonly string _aosdaSayings = "How about this!|I do not know what I am doing... help me|I feel the light";
+    private readonly string _aosdaChase = "Hey, hey. Slow down, slow down|Don't run, I will turn you to Ice!|But you've came all this way!";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
@@ -6364,8 +6364,8 @@ public class Yeti : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone";
-    private string _aosdaChase = "Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
+    private readonly string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone";
+    private readonly string _aosdaChase = "Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;

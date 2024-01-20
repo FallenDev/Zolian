@@ -202,12 +202,12 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly object _debuffQueueLockApply = new();
     private readonly object _buffQueueLockUpdate = new();
     private readonly object _debuffQueueLockUpdate = new();
-    private Task _experienceTask;
-    private Task _apTask;
-    private Task _applyBuffTask;
-    private Task _applyDebuffTask;
-    private Task _updateBuffTask;
-    private Task _updateDebuffTask;
+    private readonly Task _experienceTask;
+    private readonly Task _apTask;
+    private readonly Task _applyBuffTask;
+    private readonly Task _applyDebuffTask;
+    private readonly Task _updateBuffTask;
+    private readonly Task _updateDebuffTask;
 
     public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,

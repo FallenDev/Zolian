@@ -1219,7 +1219,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < skillCount; i++)
         {
-            if (!randomIndices.Any()) // All skills have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1293,7 +1293,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < skillCount; i++)
         {
-            if (!randomIndices.Any()) // All abilities have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1332,7 +1332,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1371,7 +1371,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1410,7 +1410,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1449,7 +1449,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1488,7 +1488,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
@@ -1522,7 +1522,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         for (var i = 0; i < spellCount; i++)
         {
-            if (!randomIndices.Any()) // All spells have been assigned
+            if (randomIndices.Count == 0) // All abilities have been assigned
             {
                 break;
             }
