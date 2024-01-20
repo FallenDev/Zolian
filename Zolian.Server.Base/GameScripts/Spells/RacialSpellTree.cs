@@ -29,7 +29,7 @@ public class Tail_Flip(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Tail Flip";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 290);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 290);
     }
 }
 
@@ -94,22 +94,22 @@ public class Calming_Voice(Spell spell) : SpellScript(spell)
         if (sprite.CantCast) return;
         if (sprite is not Aisling aisling)
         {
-            _spellMethod.SpellOnFailed(sprite, target, spell);
+            _spellMethod.SpellOnFailed(sprite, target, Spell);
             return;
         }
 
         if (target is not Aisling targetAisling)
         {
-            _spellMethod.SpellOnFailed(sprite, target, spell);
+            _spellMethod.SpellOnFailed(sprite, target, Spell);
             return;
         }
 
         var client = aisling.Client;
-        _spellMethod.Train(aisling.Client, spell);
+        _spellMethod.Train(aisling.Client, Spell);
 
-        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= spell.Template.ManaCost;
+            aisling.CurrentMp -= Spell.Template.ManaCost;
         }
         else
         {
@@ -120,7 +120,7 @@ public class Calming_Voice(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        var success = _spellMethod.Execute(client, spell);
+        var success = _spellMethod.Execute(client, Spell);
 
         if (success)
         {
@@ -133,11 +133,11 @@ public class Calming_Voice(Spell spell) : SpellScript(spell)
 
             targetAisling.ThreatMeter = 0;
 
-            _spellMethod.SpellOnSuccess(sprite, target, spell);
+            _spellMethod.SpellOnSuccess(sprite, target, Spell);
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, spell);
+            _spellMethod.SpellOnFailed(aisling, target, Spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);
@@ -162,12 +162,12 @@ public class Stone_Skin(Spell spell) : SpellScript(spell)
         if (target.Immunity)
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -188,18 +188,18 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         damageDealingSprite.ActionUsed = "Destructive Force";
         if (target == null)
         {
-            _spellMethod.SpellOnFailed(damageDealingSprite, null, spell);
+            _spellMethod.SpellOnFailed(damageDealingSprite, null, Spell);
             return;
         }
 
         if (target.CurrentHp > 0)
         {
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
+            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         var mapCheck = damageDealingSprite.Map.ID;
@@ -218,16 +218,16 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         if (sprite.CantCast) return;
         if (sprite is not Aisling aisling)
         {
-            _spellMethod.SpellOnFailed(sprite, target, spell);
+            _spellMethod.SpellOnFailed(sprite, target, Spell);
             return;
         }
 
         var client = aisling.Client;
-        _spellMethod.Train(aisling.Client, spell);
+        _spellMethod.Train(aisling.Client, Spell);
 
-        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= spell.Template.ManaCost;
+            aisling.CurrentMp -= Spell.Template.ManaCost;
         }
         else
         {
@@ -260,7 +260,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
                 monster.ThrownBack = true;
             }
 
-            var success = _spellMethod.Execute(damageDealingSprite.Client, spell);
+            var success = _spellMethod.Execute(damageDealingSprite.Client, Spell);
 
             if (success)
             {
@@ -268,7 +268,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(damageDealingSprite, _target, spell);
+                _spellMethod.SpellOnFailed(damageDealingSprite, _target, Spell);
             }
         }
     }
@@ -316,20 +316,20 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
         if (sprite is not Aisling aisling) return;
         if (target == null) return;
         var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
-        dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, spell, 95);
+        dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, Spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
-        target.ApplyElementalSpellDamage(aisling, dmg, randomEle, spell);
+        target.ApplyElementalSpellDamage(aisling, dmg, randomEle, Spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -339,7 +339,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Elemental Bolt";
 
-        if (!spell.CanUse())
+        if (!Spell.CanUse())
         {
             if (sprite is Aisling aisling2)
                 aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -352,18 +352,18 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
             if (sprite is Aisling)
                 sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {spell.Template.Name}.");
+                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}.");
 
             sprite = Spell.SpellReflect(target, sprite);
         }
 
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        _spellMethod.Train(client, spell);
+        _spellMethod.Train(client, Spell);
 
-        if (aisling.CurrentMp - spell.Template.ManaCost > 0)
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
-            aisling.CurrentMp -= spell.Template.ManaCost;
+            aisling.CurrentMp -= Spell.Template.ManaCost;
         }
         else
         {
@@ -376,7 +376,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
-                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {spell.Template.Name}.");
+                target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}.");
 
             return;
         }
@@ -388,7 +388,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (mR > target.Will)
         {
-            var success = _spellMethod.Execute(client, spell);
+            var success = _spellMethod.Execute(client, Spell);
 
             if (success)
             {
@@ -396,7 +396,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, spell);
+                _spellMethod.SpellOnFailed(aisling, target, Spell);
             }
         }
 
@@ -419,7 +419,7 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling playerAction) return;
         playerAction.ActionUsed = "Magic Missile";
-        _spellMethod.Train(playerAction.Client, spell);
+        _spellMethod.Train(playerAction.Client, Spell);
 
         var targetList = playerAction.MonstersNearby().ToList();
         var count = targetList.Count();
@@ -428,12 +428,12 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
         {
             if (count == 0)
             {
-                _spellMethod.SpellOnFailed(sprite, null, spell);
+                _spellMethod.SpellOnFailed(sprite, null, Spell);
                 return;
             }
             var rand = Random.Shared.Next(0, count);
             var randTarget = targetList[rand];
-            _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, spell, 90 + playerAction.ExpLevel);
+            _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, Spell, 90 + playerAction.ExpLevel);
         }
     }
 }

@@ -72,7 +72,15 @@ public sealed class UserOptions
             UserOption.Setting10 => string.Format(optionsFormat, "10", UseAbilitiesType ? "ON" : "OFF"),
             UserOption.Setting11 => string.Format(optionsFormat, "11", ClickOpenProfile ? "ON" : "OFF"),
             UserOption.Setting12 => string.Format(optionsFormat, "12", NpcChatListen ? "ON" : "OFF"),
-            UserOption.Setting13 => string.Format(optionsFormat, "13", PartyRequest ? "ON" : "OFF")
+            UserOption.Setting13 => string.Format(optionsFormat, "13", PartyRequest ? "ON" : "OFF"),
+            UserOption.Setting14 => "",
+            UserOption.Setting15 => "",
+            UserOption.Setting16 => "",
+            UserOption.Setting17 => "",
+            UserOption.Setting18 => "",
+            UserOption.Setting19 => "",
+            UserOption.Setting20 => "",
+            _ => ""
         };
     }
 

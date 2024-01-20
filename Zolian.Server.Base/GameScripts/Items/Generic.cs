@@ -63,7 +63,7 @@ public class Generic(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        switch (item.Template.EquipmentSlot)
+        switch (Item.Template.EquipmentSlot)
         {
             case 12: // Legs, ShinGuards
                 if (aisling.EquipmentManager.Equipment[12]?.Item?.Template.Name == "Anklet")
@@ -91,7 +91,7 @@ public class Generic(Item item) : ItemScript(item)
                             aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
                         else
                         {
-                            if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                            if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
                                 aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
                         }
 
@@ -100,7 +100,7 @@ public class Generic(Item item) : ItemScript(item)
 
                 if (Item.Template.SecondaryOffensiveElement != ElementManager.Element.None)
                     aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
-                if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
                     aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
                 break;
         }
@@ -114,7 +114,7 @@ public class Generic(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        switch (item.Template.EquipmentSlot)
+        switch (Item.Template.EquipmentSlot)
         {
             case 12: // Legs, ShinGuards
                 if (aisling.EquipmentManager.Equipment[13]?.Item != null)
@@ -142,7 +142,7 @@ public class Generic(Item item) : ItemScript(item)
                             aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[3].Item.Template.SecondaryDefensiveElement;
                         else
                         {
-                            if (item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
+                            if (Item.Template.SecondaryDefensiveElement != ElementManager.Element.None)
                                 aisling.SecondaryDefensiveElement = ElementManager.Element.None;
                         }
 

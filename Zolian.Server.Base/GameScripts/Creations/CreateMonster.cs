@@ -1199,15 +1199,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         var skillList = monster.Template.Level switch
         {
-            <= 11 => new List<string>
-            {
-                "Onslaught", "Assault", "Clobber", "Bite", "Claw"
-            },
-            > 11 and <= 50 => new List<string>
-            {
+            <= 11 => ["Onslaught", "Assault", "Clobber", "Bite", "Claw"],
+            > 11 and <= 50 =>
+            [
                 "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
                 "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
-            },
+            ],
             _ => new List<string>
             {
                 "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
@@ -1248,30 +1245,39 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var skillList = monster.Template.Level switch
         {
-            <= 25 => new List<string>
-            {
-                "Stab", "Dual Slice", "Wind Slice", "Wind Blade",
-            },
-            > 25 and <= 60 => new List<string>
-            {
-                "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice",
-                "Desolate", "Dual Slice", "Rush", "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance", "Bite'n Shake", "Howl'n Call", "Death From Above",
+            <= 25 =>
+            [
+                "Stab", "Dual Slice", "Wind Slice", "Wind Blade"
+            ],
+            > 25 and <= 60 =>
+            [
+                "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
+                "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice",
+                "Desolate", "Dual Slice", "Rush", "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance",
+                "Bite'n Shake", "Howl'n Call", "Death From Above",
                 "Pounce", "Roll Over", "Corrosive Touch"
-            },
-            > 60 and <= 75 => new List<string>
-            {
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
-                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge",
-                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over",
+            ],
+            > 60 and <= 75 =>
+            [
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
+                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
+                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever",
+                "Wind Slice", "Beag Suain", "Charge",
+                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call",
+                "Death From Above", "Pounce", "Roll Over",
                 "Swallow Whole", "Tentacle", "Corrosive Touch"
-            },
-            > 75 and <= 120 => new List<string>
-            {
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
-                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
-                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
-            },
+            ],
+            > 75 and <= 120 =>
+            [
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
+                "Krane Kick", "Palm Heel Strike",
+                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate",
+                "Dual Slice", "Lullaby Strike", "Rush",
+                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance",
+                "Ebb'n Flow", "Retribution", "Flame Thrower",
+                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle",
+                "Corrosive Touch", "Tantalizing Gaze"
+            ],
             _ => new List<string>
             {
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
@@ -1555,7 +1561,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aquatic)) return;
         var skillList = new List<string> { "Bite", "Tail Slap" };
         var abilityList = new List<string> { "Bubble Burst", "Swallow Whole" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void BeastSet(Monster monster)
@@ -1608,7 +1614,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Elemental)) return;
         var skillList = new List<string> { "Onslaught", "Assault" };
         var abilityList = new List<string> { "Atlantean Weapon", "Elemental Bane" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void FairySet(Monster monster)
@@ -1634,7 +1640,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fungi)) return;
         var skillList = new List<string> { "Wallop", "Clobber" };
         var abilityList = new List<string> { "Dual Slice", "Wind Blade", "Vampiric Slash" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void GargoyleSet(Monster monster)
@@ -1678,7 +1684,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Humanoid)) return;
         var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
         var abilityList = new List<string> { "Camouflage", "Adrenaline" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void InsectSet(Monster monster)
@@ -1686,7 +1692,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Insect)) return;
         var skillList = new List<string> { "Bite" };
         var abilityList = new List<string> { "Corrosive Touch" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void KoboldSet(Monster monster)
@@ -1702,7 +1708,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Magical)) return;
         var spellList = new List<string> { "Aite", "Mor Fas Nadur", "Deireas Faileas" };
-        MonsterLoader(new List<string>(), new List<string>(), spellList, monster);
+        MonsterLoader([], [], spellList, monster);
     }
 
     private void MukulSet(Monster monster)
@@ -1746,14 +1752,14 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Reptile)) return;
         var skillList = new List<string> { "Tail Slap", "Head Butt" };
         var abilityList = new List<string> { "Pounce", "Death From Above" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void RoboticSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Robotic)) return;
         var spellList = new List<string> { "Mor Dion", "Perfect Defense" };
-        MonsterLoader(new List<string>(), new List<string>(), spellList, monster);
+        MonsterLoader([], [], spellList, monster);
     }
 
     private void ShadowSet(Monster monster)
@@ -1761,7 +1767,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Shadow)) return;
         var skillList = new List<string> { "Thrust" };
         var abilityList = new List<string> { "Lullaby Strike", "Vampiric Slash" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void RodentSet(Monster monster)
@@ -1769,7 +1775,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent)) return;
         var skillList = new List<string> { "Bite", "Assault" };
         var abilityList = new List<string> { "Rush" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void UndeadSet(Monster monster)
@@ -1777,7 +1783,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) return;
         var skillList = new List<string> { "Wallop" };
         var abilityList = new List<string> { "Corrosive Touch", "Retribution" };
-        MonsterLoader(skillList, abilityList, new List<string>(), monster);
+        MonsterLoader(skillList, abilityList, [], monster);
     }
 
     private void MonsterLoader(List<string> skills, List<string> abilities, List<string> spells, Monster monster)

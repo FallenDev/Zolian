@@ -13,8 +13,6 @@ namespace Darkages.GameScripts.Mundanes.Arena;
 [Script("Pit Master")]
 public class PitMaster(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private long _repairSum;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

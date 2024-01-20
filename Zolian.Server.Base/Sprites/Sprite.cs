@@ -142,19 +142,19 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     };
 
     private static readonly int[][] Directions =
-    {
-        new[] { +0, -1 },
-        new[] { +1, +0 },
-        new[] { +0, +1 },
-        new[] { -1, +0 }
-    };
+    [
+        [+0, -1],
+        [+1, +0],
+        [+0, +1],
+        [-1, +0]
+    ];
 
     private static int[][] DirectionTable { get; } =
-    {
-        new[] { -1, +3, -1 },
-        new[] { +0, -1, +2 },
-        new[] { -1, +1, -1 }
-    };
+    [
+        [-1, +3, -1],
+        [+0, -1, +2],
+        [-1, +1, -1]
+    ];
 
     private double TargetDistance { get; set; }
 

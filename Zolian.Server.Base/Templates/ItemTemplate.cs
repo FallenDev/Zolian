@@ -78,14 +78,14 @@ public class ItemTemplate : Template
         if (StageRequired >= ClassStage.Master)
             stage = 1;
 
-        return new[]
-        {
+        return
+        [
             $"{LevelRequired}/{stage}/{JobLevelRequired}\n",
             $"{ClassStrings.ItemClassToIntMetaData(Class.ToString())}\n",
             $"{CarryWeight}\n",
             category,
             $"{Gender}\n{Description}"
-        };
+        ];
     }
 }
 

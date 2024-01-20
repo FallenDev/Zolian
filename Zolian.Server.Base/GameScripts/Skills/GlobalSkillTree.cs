@@ -87,13 +87,13 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);
@@ -156,13 +156,13 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);
@@ -225,13 +225,13 @@ public class InspectItem(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
         OnSuccess(aisling);

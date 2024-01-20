@@ -28,7 +28,7 @@ public class Sun_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Sun Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -38,12 +38,12 @@ public class Sun_Seal(Spell spell) : SpellScript(spell)
             target.HasDebuff("Dark Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -66,7 +66,7 @@ public class Penta_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Sun Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -74,7 +74,7 @@ public class Penta_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Penta Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -83,12 +83,12 @@ public class Penta_Seal(Spell spell) : SpellScript(spell)
             target.HasDebuff("Dark Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -112,7 +112,7 @@ public class Moon_Seal(Spell spell) : SpellScript(spell)
             target.HasDebuff("Penta Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -120,7 +120,7 @@ public class Moon_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Moon Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -128,12 +128,12 @@ public class Moon_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Dark Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -158,7 +158,7 @@ public class Dark_Seal(Spell spell) : SpellScript(spell)
             target.HasDebuff("Moon Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -166,12 +166,12 @@ public class Dark_Seal(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Dark Seal"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -194,7 +194,7 @@ public class CroichArdCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Ard Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -208,12 +208,12 @@ public class CroichArdCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -236,7 +236,7 @@ public class CroichMorCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Ard Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -244,7 +244,7 @@ public class CroichMorCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Mor Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -257,12 +257,12 @@ public class CroichMorCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -286,7 +286,7 @@ public class CroichCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Croich Mor Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -294,7 +294,7 @@ public class CroichCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -306,12 +306,12 @@ public class CroichCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -336,7 +336,7 @@ public class CroichBeagCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Croich Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -344,7 +344,7 @@ public class CroichBeagCradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Croich Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -355,12 +355,12 @@ public class CroichBeagCradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -390,7 +390,7 @@ public class Ard_Cradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Croich Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -398,7 +398,7 @@ public class Ard_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Ard Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -406,12 +406,12 @@ public class Ard_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Mor Cradh") || target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -434,7 +434,7 @@ public class Ard_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Ard Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -442,12 +442,12 @@ public class Ard_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Mor Puinsein") || target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -478,7 +478,7 @@ public class Mor_Cradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Ard Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -486,7 +486,7 @@ public class Mor_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Mor Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -494,12 +494,12 @@ public class Mor_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Cradh") || target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -522,7 +522,7 @@ public class Mor_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Ard Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -530,7 +530,7 @@ public class Mor_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Mor Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -538,12 +538,12 @@ public class Mor_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Puinsein") || target.HasDebuff("Beag Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -567,7 +567,7 @@ public class Silence(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Silence";
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -595,7 +595,7 @@ public class Cradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Mor Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -603,7 +603,7 @@ public class Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -611,12 +611,12 @@ public class Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -639,7 +639,7 @@ public class Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -647,7 +647,7 @@ public class Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -655,12 +655,12 @@ public class Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Beag Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -683,12 +683,12 @@ public class Blind(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Blind"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -721,7 +721,7 @@ public class Beag_Cradh(Spell spell) : SpellScript(spell)
             target.HasDebuff("Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -729,12 +729,12 @@ public class Beag_Cradh(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Beag Cradh"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 
@@ -757,7 +757,7 @@ public class Beag_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Ard Puinsein") || target.HasDebuff("Mor Puinsein") || target.HasDebuff("Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -765,12 +765,12 @@ public class Beag_Puinsein(Spell spell) : SpellScript(spell)
         if (target.HasDebuff("Beag Puinsein"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.AfflictionOnUse(sprite, target, spell, _debuff);
+        _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
 

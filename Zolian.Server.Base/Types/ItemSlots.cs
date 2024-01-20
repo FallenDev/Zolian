@@ -45,6 +45,7 @@ public static class ItemSlots
             16 => "Overhelms",
             17 => "Other",
             18 => "Other",
+            _ => "Other"
         };
     }
 }

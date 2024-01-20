@@ -86,7 +86,7 @@ public sealed class ObjectService
 public class SpriteCollection<T>(IEnumerable<T> values) : IEnumerable<T>
     where T : Sprite
 {
-    private readonly List<T> _values = new List<T>(values);
+    private readonly List<T> _values = [..values];
 
     public void Add(T obj)
     {

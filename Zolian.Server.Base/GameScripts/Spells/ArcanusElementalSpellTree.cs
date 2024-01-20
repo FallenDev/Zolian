@@ -24,7 +24,7 @@ public class Tornado(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -42,7 +42,7 @@ public class Landslide(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -60,7 +60,7 @@ public class Monsoon(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -78,7 +78,7 @@ public class Eruption(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -96,7 +96,7 @@ public class Twilight(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -114,7 +114,7 @@ public class Sanctified(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Ard Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 300);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 300);
     }
 }
 
@@ -136,7 +136,7 @@ public class Mor_Athar(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -154,7 +154,7 @@ public class Mor_Creag(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -172,7 +172,7 @@ public class Mor_Sal(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -190,7 +190,7 @@ public class Mor_Srad(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -208,7 +208,7 @@ public class Mor_Dorcha(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -226,7 +226,7 @@ public class Mor_Eadrom(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Mor Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 150);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 150);
     }
 }
 
@@ -248,7 +248,7 @@ public class Athar(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -266,7 +266,7 @@ public class Creag(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -284,7 +284,7 @@ public class Sal(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -302,7 +302,7 @@ public class Srad(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -320,7 +320,7 @@ public class Dorcha(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -338,7 +338,7 @@ public class Eadrom(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 80);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 80);
     }
 }
 
@@ -360,7 +360,7 @@ public class Beag_Athar(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Athar";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 
@@ -378,7 +378,7 @@ public class Beag_Creag(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Creag";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 
@@ -396,7 +396,7 @@ public class Beag_Sal(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Sal";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 
@@ -414,7 +414,7 @@ public class Beag_Srad(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Srad";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 
@@ -432,7 +432,7 @@ public class Beag_Dorcha(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Dorcha";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 
@@ -450,7 +450,7 @@ public class Beag_Eadrom(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Beag Eadrom";
 
-        _spellMethod.ElementalOnUse(sprite, target, spell, 40);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, 40);
     }
 }
 

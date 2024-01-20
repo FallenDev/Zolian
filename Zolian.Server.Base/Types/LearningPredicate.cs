@@ -21,7 +21,7 @@ public class ItemPredicate
 public class LearningPredicate
 {
     private Template _template;
-    public List<ItemPredicate> ItemsRequired = new();
+    public List<ItemPredicate> ItemsRequired = [];
     public string DisplayName { get; set; }
     public Class ClassRequired { get; set; }
     public Class SecondaryClassRequired { get; set; }
@@ -42,15 +42,15 @@ public class LearningPredicate
     public ClassStage StageRequired { get; set; }
     private bool MasterRequired => StageRequired.StageFlagIsSet(ClassStage.Master);
 
-    internal string[] MetaData => new[]
-    {
+    internal string[] MetaData =>
+    [
         $"{ExpLevelRequired}/{Convert.ToByte(MasterRequired)}/{AbpLevelRequired}",
         $"{(_template is SkillTemplate template ? template.Icon : ((SpellTemplate) _template).Icon)}/0/0",
         $"{(StrRequired == 0 ? 5 : StrRequired)}/{(IntRequired == 0 ? 5 : IntRequired)}/{(WisRequired == 0 ? 5 : WisRequired)}/{(DexRequired == 0 ? 5 : DexRequired)}/{(ConRequired == 0 ? 5 : ConRequired)}",
         $"{(!string.IsNullOrEmpty(SkillRequired) ? SkillRequired : "0")}/{(SkillLevelRequired > 0 ? SkillLevelRequired : 0)}",
         $"{(!string.IsNullOrEmpty(SpellRequired) ? SpellRequired : "0")}/{(SpellLevelRequired > 0 ? SpellLevelRequired : 0)}",
-        $"{_template.Description}\n\nItems Required: {(ItemsRequired.Count > 0 ? string.Join(",", ItemsRequired.Select(i => i.AmountRequired + " " + i.Item)) : "None")} \nGold: {(GoldRequired > 0 ? GoldRequired : 0)}\n{Script()}",
-    };
+        $"{_template.Description}\n\nItems Required: {(ItemsRequired.Count > 0 ? string.Join(",", ItemsRequired.Select(i => i.AmountRequired + " " + i.Item)) : "None")} \nGold: {(GoldRequired > 0 ? GoldRequired : 0)}\n{Script()}"
+    ];
 
     private string Script()
     {

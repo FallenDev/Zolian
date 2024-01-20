@@ -31,12 +31,12 @@ public class Asgall(Spell spell) : SpellScript(spell)
         if (sprite.HasBuff("Asgall"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -62,12 +62,12 @@ public class Defensive_Stance(Spell spell) : SpellScript(spell)
         if (sprite.HasBuff("Defensive Stance") || sprite.HasBuff("Spectral Shield"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -95,11 +95,11 @@ public class Perfect_Defense(Spell spell) : SpellScript(spell)
         if (sprite.HasBuff("Perfect Defense") || sprite.HasBuff("Deireas Faileas"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, spell);
+            _spellMethod.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, spell, _buff);
+        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }

@@ -19,18 +19,18 @@ public class Mileth : AreaScript
 
     private readonly SortedDictionary<int, List<string>> _ceannlaidirWeaponDictionary = new()
     {
-        { 7, new List<string> { "Loures Saber", "Holy Hermes", "Center Shuriken", "Centered Dagger", "Magus Ares" } },
-        { 11, new List<string> { "Claidheamh", "Holy Diana", "Blessed Dagger", "Magus Zeus" } },
-        { 22, new List<string> { "Battle Sword", "Blossom Shuriken", "Moon Dagger", "Ether Wand" } },
-        { 33, new List<string> { "Masquerade", "Razor Claws", "Wood Axe" } },
-        { 44, new List<string> { "Primitive Spear", "Nunchucks", "Scimitar", "Luminous Dagger" } },
-        { 55, new List<string> { "Long Sword", "Luminous Shuriken", "Sun Dagger" } },
-        { 66, new List<string> { "Spiked Club", "Metal Chain", "Lotus Dagger" } },
-        { 77, new List<string> { "Emerald", "Sun Shuriken" } },
-        { 88, new List<string> { "Metal Club", "Gladius", "Chain Mace", "Skiv", "Balanced Shuriken" } },
-        { 99, new List<string> { "Stone Axe", "Gold Kindjal", "Blood Bane", "Blood Skiv" } },
-        { 120, new List<string> { "Scythe", "Golden Dragon Buster Blade", "Desert Skiv" } },
-        { 150, new List<string> { "Splish", "Splash" } }
+        { 7, ["Loures Saber", "Holy Hermes", "Center Shuriken", "Centered Dagger", "Magus Ares"] },
+        { 11, ["Claidheamh", "Holy Diana", "Blessed Dagger", "Magus Zeus"] },
+        { 22, ["Battle Sword", "Blossom Shuriken", "Moon Dagger", "Ether Wand"] },
+        { 33, ["Masquerade", "Razor Claws", "Wood Axe"] },
+        { 44, ["Primitive Spear", "Nunchucks", "Scimitar", "Luminous Dagger"] },
+        { 55, ["Long Sword", "Luminous Shuriken", "Sun Dagger"] },
+        { 66, ["Spiked Club", "Metal Chain", "Lotus Dagger"] },
+        { 77, ["Emerald", "Sun Shuriken"] },
+        { 88, ["Metal Club", "Gladius", "Chain Mace", "Skiv", "Balanced Shuriken"] },
+        { 99, ["Stone Axe", "Gold Kindjal", "Blood Bane", "Blood Skiv"] },
+        { 120, ["Scythe", "Golden Dragon Buster Blade", "Desert Skiv"] },
+        { 150, ["Splish", "Splash"] }
     };
 
     private readonly SortedDictionary<Item.Quality, int> _qualityLuckModifiers = new()

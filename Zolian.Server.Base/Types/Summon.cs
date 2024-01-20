@@ -18,7 +18,7 @@ public abstract class Summon(WorldClient client) : ObjectManager, IEphermeral
     private WorldServerTimer ObjectsUpdateTimer { get; set; }
     private WorldServerTimer ObjectsRemovedTimer { get; set; }
 
-    public List<(string, Monster)> Spawns = new();
+    public List<(string, Monster)> Spawns = [];
 
     private KeyValuePair<string, MonsterTemplate> Template { get; set; }
     private string Script { get; set; }
@@ -83,7 +83,11 @@ public abstract class Summon(WorldClient client) : ObjectManager, IEphermeral
                         monsterTemplate.LootType = LootQualifer.None;
                         monsterTemplate.DefenseElement = client.Aisling.DefenseElement;
                         monsterTemplate.OffenseElement = client.Aisling.OffenseElement;
-                        monsterTemplate.SkillScripts = new List<string>(client.Aisling.SkillBook.Skills.Where(n => n.Value != null).Select(n => n.Value.Template.ScriptName).ToList());
+                        monsterTemplate.SkillScripts =
+                        [
+                            ..client.Aisling.SkillBook.Skills.Where(n => n.Value != null)
+                                .Select(n => n.Value.Template.ScriptName).ToList()
+                        ];
 
                         var monster = Monster.Create(monsterTemplate, client.Aisling.Map);
 

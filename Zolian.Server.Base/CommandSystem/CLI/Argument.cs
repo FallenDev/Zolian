@@ -334,8 +334,8 @@ public class Argument : IArguable
         internal static readonly ValidationRule AlwaysTrue;
 
         private static readonly Regex
-            AlphaNumericRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]*$"),
-            EmailRegex = new Regex("^[A-Z0-9._%+-]+@[A-Z]{1}[A-Z0-9.-]+\\.[A-Z]{2,26}$", RegexOptions.IgnoreCase);
+            AlphaNumericRegex = new("^[a-zA-Z][a-zA-Z0-9]*$"),
+            EmailRegex = new("^[A-Z0-9._%+-]+@[A-Z]{1}[A-Z0-9.-]+\\.[A-Z]{2,26}$", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// A user friendly name that will be displayed in an error.

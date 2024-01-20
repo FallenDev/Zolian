@@ -21,7 +21,7 @@ public class Bite(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -31,7 +31,7 @@ public class Bite(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -46,13 +46,13 @@ public class Bite(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -82,7 +82,7 @@ public class Gatling(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -105,13 +105,13 @@ public class Gatling(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -136,7 +136,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -146,7 +146,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -161,7 +161,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
@@ -182,7 +182,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -207,7 +207,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -217,7 +217,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -232,7 +232,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
@@ -254,7 +254,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -279,7 +279,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -289,7 +289,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -304,13 +304,13 @@ public class Stomp(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -335,7 +335,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -345,7 +345,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -360,13 +360,13 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -391,7 +391,7 @@ public class Claw(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -401,7 +401,7 @@ public class Claw(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -416,13 +416,13 @@ public class Claw(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -447,7 +447,7 @@ public class MuleKick(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -457,7 +457,7 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -472,13 +472,13 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(sprite, skill, action);
+            _skillMethod.FailedAttempt(sprite, Skill, action);
             OnFailed(sprite);
             return;
         }
 
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -508,7 +508,7 @@ public class OmegaAvoid(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         _skillMethod.ApplyPhysicalBuff(sprite, _buff1);
         _skillMethod.ApplyPhysicalBuff(sprite, _buff2);
@@ -526,7 +526,7 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
     {
         if (_target is not { Alive: true }) return;
         if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, _target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -536,7 +536,7 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-        if (!skill.CanUse()) return;
+        if (!Skill.CanUse()) return;
 
         var action = new BodyAnimationArgs
         {
@@ -559,13 +559,13 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
             {
-                _skillMethod.FailedAttempt(sprite, skill, action);
+                _skillMethod.FailedAttempt(sprite, Skill, action);
                 OnFailed(sprite);
                 continue;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccess(_target, sprite, skill, dmgCalc, _crit, action);
+            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 

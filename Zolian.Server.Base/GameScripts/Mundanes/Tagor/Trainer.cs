@@ -16,9 +16,8 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
 {
     private List<Skill> _skillList;
     private List<Spell> _spellList;
-    private readonly List<Vector2> _dojoSpots = new()
-    {
-        // Far Left
+    private readonly List<Vector2> _dojoSpots =
+    [
         new(12, 22),
         new(13, 21),
         new(14, 22),
@@ -64,9 +63,9 @@ public class Trainer(WorldServer server, Mundane mundane) : MundaneScript(server
         new(18, 16),
         new(19, 15),
         new(20, 16),
-        new(19, 17),
+        new(19, 17)
 
-    };
+    ];
 
     public override void OnClick(WorldClient client, uint serial)
     {

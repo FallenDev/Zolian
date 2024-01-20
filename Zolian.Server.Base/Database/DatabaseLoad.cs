@@ -252,10 +252,12 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = { "Consumables", "EnemyDrops", "Gems", "Potions", "Quest", "Scrolls" };
-            string[] dbTables1 = { "ArmorArcanus", "ArmorAssassin", "ArmorCleric", "ArmorMonk", "ArmorDefender", "ArmorBerserker", "ArmorGeneric" };
-            string[] dbTables2 = { "Belts", "Boots", "Earrings", "Hands", "Greaves", "Necklaces", "Rings" };
-            string[] dbTables3 = { "WeaponPeasant", "WeaponBerserker", "WeaponDefender", "WeaponAssassin", "WeaponCleric", "WeaponArcanus", "WeaponMonk", "Shields", "Sources" };
+            string[] dbTables = ["Consumables", "EnemyDrops", "Gems", "Potions", "Quest", "Scrolls"];
+            string[] dbTables1 = ["ArmorArcanus", "ArmorAssassin", "ArmorCleric", "ArmorMonk", "ArmorDefender", "ArmorBerserker", "ArmorGeneric"
+            ];
+            string[] dbTables2 = ["Belts", "Boots", "Earrings", "Hands", "Greaves", "Necklaces", "Rings"];
+            string[] dbTables3 = ["WeaponPeasant", "WeaponBerserker", "WeaponDefender", "WeaponAssassin", "WeaponCleric", "WeaponArcanus", "WeaponMonk", "Shields", "Sources"
+            ];
 
             foreach (var table in dbTables)
             {
@@ -302,10 +304,12 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = { "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
+            string[] dbTables =
+            [
+                "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
                 "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos",
                 "NorthPole", "Dubhaim"
-            };
+            ];
 
             foreach (var table in dbTables)
             {
@@ -327,8 +331,11 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = { "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor",
-                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole" };
+            string[] dbTables =
+            [
+                "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor",
+                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole"
+            ];
 
             foreach (var table in dbTables)
             {
@@ -376,7 +383,7 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = { "Hyrule", "Lorule", "HiddenValley", "HighSeas" };
+            string[] dbTables = ["Hyrule", "Lorule", "HiddenValley", "HighSeas"];
 
             foreach (var table in dbTables)
             {
