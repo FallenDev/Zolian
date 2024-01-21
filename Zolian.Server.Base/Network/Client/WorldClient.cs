@@ -4321,7 +4321,10 @@ public class WorldClient : SocketClientBase, IWorldClient
         var user = ObjectHandlers.GetObject<Aisling>(map, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
 
         if (user != null)
+        {
             user.CurrentHp = 0;
+            user.Client.DeathStatusCheck();
+        }
     }
 
     #endregion

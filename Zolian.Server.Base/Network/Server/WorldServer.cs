@@ -65,6 +65,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
+    private static readonly string GameMasterIpC = ServerSetup.Instance.GmC;
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     public static FrozenDictionary<(Race race, Class path, Class pastClass), string> SkillMap;
     public readonly ObjectService ObjectFactory = new();
@@ -1738,9 +1739,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 var gmA = IPAddress.Parse(GameMasterIpA);
                 var gmB = IPAddress.Parse(GameMasterIpB);
+                var gmC = IPAddress.Parse(GameMasterIpC);
                 var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                if (!(client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal)))
+                if (!(client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.RemoteIp.Equals(gmC) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal)))
                 {
                     ServerSetup.Logger($"Failed to login GM from {client.RemoteIp}.");
                     Analytics.TrackEvent($"Failed to login GM from {client.RemoteIp}.");

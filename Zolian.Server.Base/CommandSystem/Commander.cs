@@ -37,6 +37,10 @@ public static class Commander
             .SetAction(Chaos));
 
         ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Cancel Chaos", "cc", "- Halt shutdown:")
+            .SetAction(CancelChaos));
+
+        ServerSetup.Instance.Parser.AddCommand(Command
             .Create("Reload Maps", "rm", "- Reload all maps:")
             .SetAction(OnMapReload));
 
@@ -117,27 +121,74 @@ public static class Commander
             client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Shuts down server");
             return;
         }
+
         var players = ServerSetup.Instance.Game.Aislings;
         var playersList = players.ToList();
         ServerSetup.Logger("--------------------------------------------", LogLevel.Warning);
         ServerSetup.Logger("", LogLevel.Warning);
         ServerSetup.Logger("--------------- Server Chaos ---------------", LogLevel.Warning);
 
-        _ = StorageManager.AislingBucket.ServerSave(playersList);
-
         foreach (var connected in playersList)
         {
-            _ = StorageManager.AislingBucket.AuxiliarySave(connected);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
-            connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
-            Task.Delay(500).ContinueWith(ct =>
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 1 minute.");
+
+            Task.Delay(15000).ContinueWith(ct =>
             {
-                connected.Client.Disconnect();
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 45 seconds.");
+            });
+            Task.Delay(30000).ContinueWith(ct =>
+            {
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 30 seconds.");
+            });
+
+            Task.Delay(45000).ContinueWith(ct =>
+            {
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 15 seconds.");
+            });
+
+            Task.Delay(55000).ContinueWith(ct =>
+            {
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 5 seconds.");
+            });
+
+            Task.Delay(58000).ContinueWith(ct =>
+            {
+                if (client.Aisling.GameMasterChaosCancel) return;
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
+                connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
+            });
+
+            Task.Delay(60000).ContinueWith(ct =>
+            {
+                if (!client.Aisling.GameMasterChaosCancel)
+                    connected.Client.Disconnect();
+
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bChaos has been cancelled.");
             });
         }
 
-        ServerSetup.Instance.Running = false;
+        if (!client.Aisling.GameMasterChaosCancel)
+            ServerSetup.Instance.Running = false;
     }
+
+    /// <summary>
+    /// Cancels chaos before it completes
+    /// </summary>
+    private static void CancelChaos(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Cancel Chaos");
+            return;
+        }
+
+        ServerSetup.Logger("Chaos Cancelled", LogLevel.Warning);
+        client.Aisling.GameMasterChaosCancel = !client.Aisling.GameMasterChaosCancel;
+    }
+
 
     /// <summary>
     /// Restarts server by forcing an Exit Program command

@@ -46,6 +46,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
     private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
+    private static readonly string GameMasterIpC = ServerSetup.Instance.GmC;
     private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
 
     public LoginServer(
@@ -251,7 +252,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             switch (maintCheck)
             {
                 case "asdf":
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Maintenance Account, denied access");
+                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Locked Account, denied access");
                     return;
                 case "death":
                     {
@@ -280,9 +281,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     {
                         var gmA = IPAddress.Parse(GameMasterIpA);
                         var gmB = IPAddress.Parse(GameMasterIpB);
+                        var gmC = IPAddress.Parse(GameMasterIpC);
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                        if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                        if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.RemoteIp.Equals(gmC) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
                         {
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();
