@@ -49,6 +49,7 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
         if (!AuthenticateUser(client)) return;
 
         var exp = Random.Shared.Next(1000000, 5000000);
+        var exp2 = Random.Shared.Next(2000000, 25000000);
 
         switch (responseID)
         {
@@ -111,6 +112,38 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                 }
             case 0x05:
                 {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x02, "Do you know the Muffin Man?")
+                    };
+
+                    var item = client.Aisling.HasItemReturnItem("Red Onion");
+
+                    if (item != null)
+                    {
+                        client.Aisling.QuestManager.SwampCount++;
+                        client.Aisling.Inventory.RemoveRange(client, item, 7);
+                        client.GiveExp(exp2);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp2} experience.");
+                        client.SendAttributes(StatUpdateType.WeightGold);
+
+                        var legend = new Legend.LegendItem
+                        {
+                            Key = "LShreek2",
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.BlueG7,
+                            Icon = (byte)LegendIcon.Community,
+                            Text = "Gained Shreek's friendship"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "WHERE ARE THEY!?");
+                    }
+
+                    client.SendOptionsDialog(Mundane, "Huh, you actually got them for meh? I guess you're not that bad.", options.ToArray());
                     break;
                 }
         }

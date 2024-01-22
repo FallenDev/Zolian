@@ -308,7 +308,7 @@ public abstract class DatabaseLoad
             [
                 "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
                 "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos",
-                "NorthPole", "Dubhaim"
+                "NorthPole", "Dubhaim", "MehadiSwamp"
             ];
 
             foreach (var table in dbTables)

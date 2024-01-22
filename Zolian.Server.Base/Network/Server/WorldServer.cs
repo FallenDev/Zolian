@@ -1970,7 +1970,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case "#" when client.Aisling.GameMaster:
                     foreach (var player in Aislings)
                     {
-                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=q{client.Aisling.Username}: {message}");
+                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=b{client.Aisling.Username}{{=q: {message}");
                     }
                     return default;
                 case "#" when client.Aisling.GameMaster != true:
