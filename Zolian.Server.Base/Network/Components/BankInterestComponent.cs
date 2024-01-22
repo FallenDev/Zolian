@@ -30,14 +30,16 @@ public class BankInterestComponent(WorldServer server) : WorldServerComponent(se
 
             var calc = Math.Round(player.BankedGold * 0.00333).ToString(CultureInfo.CurrentCulture);
             var interest = (uint)Math.Round(player.BankedGold * 0.00333);
+            if (interest >= 1000000)
+                interest = 1000000;
             if (player.BankedGold + interest >= uint.MaxValue)
             {
                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
-                    $"{{=uKing Bruce wishes to see you. - No interest gained -");
+                    $"{{=uBank Cap - No interest gained -");
                 return;
             }
 
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {calc}");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {calc} coins");
             player.BankedGold += interest;
         });
     }
