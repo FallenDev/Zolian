@@ -1080,14 +1080,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 localClient.Aisling.Map.Script.Item2.OnPlayerWalk(localClient.Aisling.Client, localClient.Aisling.LastPosition, localClient.Aisling.Position);
 
-                if (!localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) return default;
-
                 foreach (var trap in ServerSetup.Instance.Traps.Select(i => i.Value))
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == localClient.Aisling.Serial ||
                         localClient.Aisling.X != trap.Location.X ||
                         localClient.Aisling.Y != trap.Location.Y ||
                         localClient.Aisling.Map != trap.TrapItem.Map) continue;
+
+                    if (trap.Owner is Aisling && !localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
                     var triggered = Trap.Activate(trap, localClient.Aisling);
                     if (triggered) break;

@@ -114,7 +114,12 @@ public class Area : Map, IArea
 
         var grid = sprite.Map.ObjectGrid;
         if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
-        return !grid[x, y].Sprites.IsNullOrEmpty();
+
+        // Grab list of sprites on x & y
+        var spritesOnLocation = grid[x, y].Sprites.ToList();
+        if (spritesOnLocation.IsNullOrEmpty()) return false;
+        var first = spritesOnLocation.First();
+        return sprite.Target?.Pos != first.Pos;
     }
 
     /// <summary>

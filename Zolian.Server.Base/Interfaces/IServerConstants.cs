@@ -46,7 +46,7 @@ public interface IServerConstants
     int LOGIN_PORT { get; }
     int LOBBY_PORT { get; }
     bool LogServerPackets { get; }
-    uint MaxCarryGold { get; }
+    ulong MaxCarryGold { get; }
     int MaxHP { get; }
     string MerchantCancelMessage { get; }
     string MerchantConfirmMessage { get; }

@@ -69,7 +69,7 @@ public class ServerConstants : IServerConstants
     // Players
     public int PlayerLevelCap { get; set; }
     public double GroupExpBonus { get; set; }
-    public uint MaxCarryGold { get; set; }
+    public ulong MaxCarryGold { get; set; }
     public int StatCap { get; set; }
     public int StatsPerLevel { get; set; }
     public double WeightIncreaseModifer { get; set; }

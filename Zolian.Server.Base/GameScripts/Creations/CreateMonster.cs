@@ -123,11 +123,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
 
         obj.AbandonedDate = DateTime.UtcNow;
-
-        obj.Image = template.ImageVarience > 0
-            ? (ushort)Random.Shared.Next(template.Image, template.Image + template.ImageVarience)
-            : template.Image;
-
+        obj.Image = template.Image;
         obj.CurrentHp = obj.MaximumHp;
         obj.CurrentMp = obj.MaximumMp;
 
@@ -227,6 +223,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterRace.Goblin] = GoblinSet,
             [MonsterRace.Grimlok] = GrimlokSet,
             [MonsterRace.Humanoid] = HumanoidSet,
+            [MonsterRace.ShapeShifter] = ShapeShifter,
             [MonsterRace.Insect] = InsectSet,
             [MonsterRace.Kobold] = KoboldSet,
             [MonsterRace.Magical] = MagicalSet,
@@ -239,7 +236,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterRace.Shadow] = ShadowSet,
             [MonsterRace.Rodent] = RodentSet,
             [MonsterRace.Undead] = UndeadSet,
-            // Dummy, Inanimate, LowerBeing, HigherBeing have no set action, so they are omitted here
+            // Dummy, LowerBeing, HigherBeing have no set action, so they are omitted here
         };
 
         if (monsterRaceActions.TryGetValue(template.MonsterRace, out var raceAction))
@@ -248,14 +245,17 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
 
         // Load Random Generated Abilities to Monster
-        Assails(obj);
-        BasicAbilities(obj);
-        BeagSpells(obj);
-        NormalSpells(obj);
-        MorSpells(obj);
-        ArdSpells(obj);
-        MasterSpells(obj);
-        JobSpells(obj);
+        if (!obj.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.ShapeShifter))
+        {
+            Assails(obj);
+            BasicAbilities(obj);
+            BeagSpells(obj);
+            NormalSpells(obj);
+            MorSpells(obj);
+            ArdSpells(obj);
+            MasterSpells(obj);
+            JobSpells(obj);
+        }
 
         // Load Abilities from Template to Monster
         if (template.SkillScripts != null)
@@ -1685,6 +1685,14 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
         var abilityList = new List<string> { "Camouflage", "Adrenaline" };
         MonsterLoader(skillList, abilityList, [], monster);
+    }
+
+    private void ShapeShifter(Monster monster)
+    {
+        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.ShapeShifter)) return;
+        var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
+        var spellList = new List<string> { "Spring Trap", "Snare Trap", "Blind", "Prahm" };
+        MonsterLoader(skillList, [], spellList, monster);
     }
 
     private void InsectSet(Monster monster)

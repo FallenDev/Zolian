@@ -81,7 +81,7 @@ public enum MonsterRace
     Goblin = 1 << 15,
     Grimlok = 1 << 16,
     Humanoid = 1 << 17,
-    Inanimate = 1 << 18,
+    ShapeShifter = 1 << 18,
     Insect = 1 << 19,
     Kobold = 1 << 20,
     Magical = 1 << 21,

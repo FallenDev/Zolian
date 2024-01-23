@@ -3518,7 +3518,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                         var creatureInfo = new CreatureInfo
                         {
                             Id = creature.Serial,
-                            Sprite = creature.Template.Image,
+                            Sprite = creature.Image,
                             X = creature.X,
                             Y = creature.Y,
                             CreatureType = CreatureType.Normal,
@@ -3540,7 +3540,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                         var npcInfo = new CreatureInfo
                         {
                             Id = npc.Serial,
-                            Sprite = npc.Template.Image,
+                            Sprite = npc.Sprite,
                             X = npc.X,
                             Y = npc.Y,
                             CreatureType = CreatureType.Merchant,
