@@ -38,13 +38,13 @@ public interface ISprite
 
     #region Stats
 
-    int CurrentHp { get; set; }
-    int BaseHp { get; set; }
-    int BonusHp { get; set; }
+    long CurrentHp { get; set; }
+    long BaseHp { get; set; }
+    long BonusHp { get; set; }
 
-    int CurrentMp { get; set; }
-    int BaseMp { get; set; }
-    int BonusMp { get; set; }
+    long CurrentMp { get; set; }
+    long BaseMp { get; set; }
+    long BonusMp { get; set; }
 
     int _Regen { get; set; }
     int BonusRegen { get; set; }
@@ -127,7 +127,7 @@ public interface ISprite
     void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false);
     void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound);
     void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false);
-    void ApplyEquipmentDurability(int dmg);
+    void ApplyEquipmentDurability(long dmg);
     long ApplyWeaponBonuses(Sprite source, long dmg);
     double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element);
     long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier);

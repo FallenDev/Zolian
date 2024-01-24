@@ -1834,7 +1834,7 @@ public class BuffFasSpiorad : Buff
             aisling.CurrentHp = 1;
         }
         else
-            aisling.CurrentHp -= (int)reduce;
+            aisling.CurrentHp -= (long)reduce;
 
         aisling.CurrentMp = aisling.MaximumMp;
 

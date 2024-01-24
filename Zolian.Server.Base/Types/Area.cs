@@ -20,7 +20,6 @@ public class Area : Map, IArea
     public ushort Hash;
     public bool Ready;
     private readonly List<List<TileGrid>> _tiles = new();
-    private List<List<TileGrid>> _masterGrid = new();
     private readonly object _mapLoadLock = new();
 
     public int MiningNodesCount { get; set; }
@@ -241,9 +240,9 @@ public class Area : Map, IArea
         {
             if (sprite.Target == null) return path;
             if (sprite.Map.ID != sprite.Target?.Map.ID) return path;
-            if (_masterGrid.Count == 0) return path;
+            if (sprite.MasterGrid.Count == 0) return path;
 
-            viewable.Add(_masterGrid[(int)start.X][(int)start.Y]);
+            viewable.Add(sprite.MasterGrid[(int)start.X][(int)start.Y]);
         }
         catch (Exception ex)
         {
@@ -261,7 +260,7 @@ public class Area : Map, IArea
 
         while (viewable.Count > 0 && !((int)viewable[0].Pos.X == (int)end.X && (int)viewable[0].Pos.Y == (int)end.Y))
         {
-            CheckDirectionOfNode(_masterGrid, viewable, used);
+            CheckDirectionOfNode(sprite.MasterGrid, viewable, used);
         }
 
         if (viewable.Count <= 0) return path;
@@ -289,13 +288,13 @@ public class Area : Map, IArea
 
             if ((int)currentNode.Parent.X != -1 && (int)currentNode.Parent.Y != -1)
             {
-                if ((int)currentNode.Pos.X == (int)_masterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.X && (int)currentNode.Pos.Y == (int)_masterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.Y)
+                if ((int)currentNode.Pos.X == (int)sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.X && (int)currentNode.Pos.Y == (int)sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.Y)
                 {
                     currentNode = viewable[currentViewableStart];
                     currentViewableStart++;
                 }
 
-                currentNode = _masterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y];
+                currentNode = sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y];
             }
             else
             {
@@ -316,13 +315,13 @@ public class Area : Map, IArea
     private Action CheckNode(Sprite sprite)
     {
         var tempGrid = sprite.Map._tiles;
-        _masterGrid = new List<List<TileGrid>>();
+        sprite.MasterGrid = new List<List<TileGrid>>();
 
         return delegate
         {
             for (var x = 0; x < tempGrid.Count; x++)
             {
-                _masterGrid.Add(new List<TileGrid>());
+                sprite.MasterGrid.Add(new List<TileGrid>());
 
                 for (var y = 0; y < tempGrid.Count; y++)
                 {
@@ -340,7 +339,7 @@ public class Area : Map, IArea
                         cost = 999;
                     }
 
-                    _masterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
+                    sprite.MasterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
                 }
             }
         };

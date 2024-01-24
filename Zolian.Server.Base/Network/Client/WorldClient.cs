@@ -4302,8 +4302,8 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         Aisling.Flags = AislingFlags.Normal;
         Aisling.RegenTimerDisabled = false;
-        Aisling.CurrentHp = (int)(Aisling.MaximumHp * 0.80);
-        Aisling.CurrentMp = (int)(Aisling.MaximumMp * 0.80);
+        Aisling.CurrentHp = (long)(Aisling.MaximumHp * 0.80);
+        Aisling.CurrentMp = (long)(Aisling.MaximumMp * 0.80);
 
         SendAttributes(StatUpdateType.Vitality);
         return Aisling.CurrentHp > 0;
@@ -4533,8 +4533,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             player.StatPoints += (short)ServerSetup.Instance.Config.StatsPerLevel;
 
         // Set vitality
-        player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
-        player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
+        player.BaseHp += (long)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
+        player.BaseMp += (long)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
         player.CurrentHp = player.MaximumHp;
         player.CurrentMp = player.MaximumMp;
         player.Client.SendAttributes(StatUpdateType.Full);
@@ -4642,8 +4642,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         player.StatPoints += 1;
 
         // Set vitality
-        player.BaseHp += (int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23);
-        player.BaseMp += (int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90);
+        player.BaseHp += (long)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23);
+        player.BaseMp += (long)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90);
         player.CurrentHp = player.MaximumHp;
         player.CurrentMp = player.MaximumMp;
         player.Client.SendAttributes(StatUpdateType.Full);

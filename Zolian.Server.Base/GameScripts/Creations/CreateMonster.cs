@@ -44,7 +44,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             MonsterSkillSet(obj);
 
         // Initialize the dictionary with the maximum level as the key and the hpMultiplier and mpMultiplier as the value
-        var levelMultipliers = new SortedDictionary<int, (int hpMultiplier, int mpMultiplier)>
+        var levelMultipliers = new SortedDictionary<int, (long hpMultiplier, long mpMultiplier)>
         {
             { 9, (115, 80)},
             { 19, (150, 100)},
@@ -89,7 +89,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             var currentMpMultiplier = 4000;
 
             // Generate multipliers for levels above 249
-            for (var level = 250; level <= 500; level += 5)
+            for (var level = 250; level <= 1000; level += 5)
             {
                 currentHpMultiplier = (int)(currentHpMultiplier * 1.05);
                 currentMpMultiplier = (int)(currentMpMultiplier * 1.05);
@@ -450,7 +450,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         };
 
         const int startLevel = 200;
-        const int endLevel = 500;
+        const int endLevel = 1000;
         // ToDo: Increment this in the future if higher levels need more experience
         var stepSize = 5;
 
@@ -551,9 +551,24 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 500, (294, 3523) }
         };
 
-        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+        const int startLevel = 500;
+        const int endLevel = 1000;
+        // ToDo: Increment this in the future if higher levels need more experience
+        var stepSize = 5;
 
-        obj.Ability = (uint)Generator.GenerateDeterminedNumberRange(start, end);
+        for (var level = startLevel + stepSize; level <= endLevel; level += stepSize)
+        {
+            // Retrieve the last entry's value
+            var lastEntry = levelExperienceRange[level - stepSize];
+            var newEntry = IncrementByFivePercent(lastEntry);
+            levelExperienceRange.Add(level, newEntry);
+        }
+
+        var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
+        var minXp = (int)(start * 0.9);
+        var maxXp = (int)(end * 1.1);
+
+        obj.Ability = (uint)Generator.GenerateDeterminedNumberRange(minXp, maxXp);
     }
 
     private static void MonsterElementalAlignment(Sprite obj)
@@ -694,7 +709,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster._Con += statGen3;
                 monster._Str += statGen2;
                 monster._Dex -= statGen1;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.012);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.012);
                 monster.Experience += (uint)(monster.Experience * 0.02);
                 monster.Ability += (uint)(monster.Ability * 0.02);
             },
@@ -703,7 +718,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster._Con += statGen3;
                 monster._Str += statGen3;
                 monster._Dex -= statGen2;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.024);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.024);
                 monster.Experience += (uint)(monster.Experience * 0.06);
                 monster.Ability += (uint)(monster.Ability * 0.06);
             },
@@ -712,7 +727,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster._Con += statGen3;
                 monster._Str += statGen3;
                 monster._Dex += statGen3;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.036);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.036);
                 monster.Experience += (uint)(monster.Experience * 0.10);
                 monster.Ability += (uint)(monster.Ability * 0.10);
             },
@@ -721,7 +736,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster._Con += statGen4;
                 monster._Str += statGen4;
                 monster._Dex += statGen4;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.048);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.048);
                 monster.Experience += (uint)(monster.Experience * 0.15);
                 monster.Ability += (uint)(monster.Ability * 0.15);
             },
@@ -841,12 +856,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [PrimaryStat.WIS] = monster =>
             {
                 monster.BonusWis += (int)(monster._Wis * 1.2);
-                monster.BonusMp += (int)(monster.BaseMp * 1.2);
+                monster.BonusMp += (long)(monster.BaseMp * 1.2);
             },
             [PrimaryStat.CON] = monster =>
             {
                 monster.BonusCon += (int)(monster._Con * 1.2);
-                monster.BonusHp += (int)(monster.BaseHp * 1.2);
+                monster.BonusHp += (long)(monster.BaseHp * 1.2);
             },
             [PrimaryStat.DEX] = monster =>
             {
@@ -872,7 +887,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += (int)(monster._Str * 1.2);
                 monster.BonusDex += (int)(monster._Dex * 1.2);
                 monster.BonusDmg += (int)(monster._Dmg * 1.2);
-                monster.BonusHp += (int)(monster.MaximumHp * 0.012);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.012);
             },
             [MonsterType.Magical] = monster =>
             {
@@ -913,7 +928,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 5;
                 monster.BonusDex += monster._Dex * 5;
                 monster.BonusDmg += monster._Dmg * 5;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.03);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.03);
             },
             [MonsterType.Above99M] = monster =>
             {
@@ -926,7 +941,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 7;
                 monster.BonusDex += monster._Dex * 7;
                 monster.BonusDmg += monster._Dmg * 7;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.05);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.05);
             },
             [MonsterType.Above150M] = monster =>
             {
@@ -939,7 +954,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 9;
                 monster.BonusDex += monster._Dex * 9;
                 monster.BonusDmg += monster._Dmg * 9;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.07);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.07);
             },
             [MonsterType.Above200M] = monster =>
             {
@@ -952,7 +967,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 10;
                 monster.BonusDex += monster._Dex * 10;
                 monster.BonusDmg += monster._Dmg * 10;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.08);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.08);
             },
             [MonsterType.Above250M] = monster =>
             {
@@ -1006,7 +1021,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 13;
                 monster.BonusDex += monster._Dex * 13;
                 monster.BonusDmg += monster._Dmg * 13;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.11);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.11);
             },
             [MonsterType.Above300M] = monster =>
             {
@@ -1019,7 +1034,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 14;
                 monster.BonusDex += monster._Dex * 14;
                 monster.BonusDmg += monster._Dmg * 14;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.13);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.13);
             },
             [MonsterType.Above350M] = monster =>
             {
@@ -1032,7 +1047,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusStr += monster._Str * 16;
                 monster.BonusDex += monster._Dex * 16;
                 monster.BonusDmg += monster._Dmg * 16;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.15);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.15);
             },
             [MonsterType.Above400M] = monster =>
             {
@@ -1047,7 +1062,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusDex += monster._Dex * 19;
                 monster.BonusDmg += monster._Dmg * 19;
                 monster.BonusHp += monster.BaseHp * 10;
-                monster.BonusHp += (int)(monster.MaximumHp * 0.17);
+                monster.BonusHp += (long)(monster.MaximumHp * 0.17);
             },
             [MonsterType.Above450M] = monster =>
             {

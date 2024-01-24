@@ -28,9 +28,9 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         var targets = GetObjects(aisling.Map, i => i.WithinRangeOf(aisling), Get.Monsters);
 
         // Damage Calc
-        var manaSap = (int)(aisling.MaximumMp * .33);
-        var healthSap = (int)(aisling.MaximumHp * .33);
-        var damage = (int)((healthSap + manaSap) * 0.01) * 200;
+        var manaSap = (long)(aisling.MaximumMp * .33);
+        var healthSap = (long)(aisling.MaximumHp * .33);
+        var damage = (long)((healthSap + manaSap) * 0.01) * 200;
 
         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, aisling.Serial));
 
@@ -68,8 +68,8 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         if (!Spell.CanUse()) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        var manaLoss = (int)(aisling.MaximumMp * .33);
-        var healthLoss = (int)(aisling.MaximumHp * .33);
+        var manaLoss = (long)(aisling.MaximumMp * .33);
+        var healthLoss = (long)(aisling.MaximumHp * .33);
         var healthBoundsCheck = aisling.CurrentHp - healthLoss;
         var manaBoundsCheck = aisling.CurrentMp - manaLoss;
 
@@ -123,7 +123,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         var client = aisling.Client;
         aisling.ActionUsed = "Ao Sith Gar";
 
-        var manaSap = (int)(aisling.MaximumMp * .85);
+        var manaSap = (long)(aisling.MaximumMp * .85);
 
         if (aisling.CurrentMp < manaSap)
         {

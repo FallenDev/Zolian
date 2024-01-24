@@ -390,7 +390,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
 
                 var healBase = target.MaximumHp * 0.15;
                 aisling.ThreatMeter += (long)healBase;
-                target.CurrentHp += (int)healBase;
+                target.CurrentHp += (long)healBase;
 
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
@@ -410,7 +410,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
-            var healBase = (int)(sprite.BaseHp * 0.10);
+            var healBase = (long)(sprite.BaseHp * 0.10);
 
             if (sprite.CurrentHp >= sprite.MaximumHp) return;
             sprite.CurrentHp += healBase;
@@ -499,7 +499,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
 
                 var healBase = target.MaximumHp * 0.30;
                 aisling.ThreatMeter += (long)healBase;
-                target.CurrentHp += (int)healBase;
+                target.CurrentHp += (long)healBase;
 
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
@@ -519,7 +519,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
-            var healBase = (int)(sprite.BaseHp * 0.25);
+            var healBase = (long)(sprite.BaseHp * 0.25);
 
             if (sprite.CurrentHp >= sprite.MaximumHp) return;
             sprite.CurrentHp += healBase;
@@ -608,7 +608,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
 
                 var healBase = target.MaximumHp * 0.65;
                 aisling.ThreatMeter += (long)healBase;
-                target.CurrentHp += (int)healBase;
+                target.CurrentHp += (long)healBase;
 
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
@@ -628,7 +628,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
-            var healBase = (int)(sprite.BaseHp * 0.45);
+            var healBase = (long)(sprite.BaseHp * 0.45);
 
             if (sprite.CurrentHp >= sprite.MaximumHp) return;
             sprite.CurrentHp += healBase;
@@ -728,7 +728,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
 
                 var healBase = target.MaximumHp * 0.80;
                 aisling.ThreatMeter += (long)healBase;
-                target.CurrentHp += (int)healBase;
+                target.CurrentHp += (long)healBase;
 
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
@@ -748,7 +748,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
             sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
-            var healBase = (int)(sprite.BaseHp * 0.70);
+            var healBase = (long)(sprite.BaseHp * 0.70);
 
             if (sprite.CurrentHp >= sprite.MaximumHp) return;
             sprite.CurrentHp += healBase;
@@ -846,7 +846,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             {
                 if (partyMember.Dead) continue;
                 aisling.ThreatMeter += (long)healBase;
-                partyMember.CurrentHp += (int)healBase;
+                partyMember.CurrentHp += (long)healBase;
 
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
@@ -858,7 +858,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
         }
         else
         {
-            aisling.CurrentHp += (int)healBase;
+            aisling.CurrentHp += (long)healBase;
             if (aisling.CurrentHp > aisling.MaximumHp)
                 aisling.CurrentHp = aisling.MaximumHp;
 

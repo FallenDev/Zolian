@@ -254,7 +254,7 @@ public class Remedy(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Remedy";
 
-        var manaSap = (int)(aisling.MaximumMp * .85);
+        var manaSap = (long)(aisling.MaximumMp * .85);
 
         if (aisling.CurrentMp < manaSap)
         {

@@ -1368,10 +1368,10 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(sprite);
 
             if (_target.MaximumHp * 0.30 < dmgCalc)
-                dmgCalc = (int)(_target.MaximumHp * 0.30);
+                dmgCalc = (long)(_target.MaximumHp * 0.30);
 
             aisling.ThreatMeter += dmgCalc;
-            _target.CurrentHp += (int)dmgCalc;
+            _target.CurrentHp += dmgCalc;
 
             if (_target.CurrentHp > _target.MaximumHp)
                 _target.CurrentHp = _target.MaximumHp;
@@ -1417,9 +1417,9 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
                 var dmgCalc = DamageCalc(sprite);
 
                 if (_target.MaximumHp * 0.30 < dmgCalc)
-                    dmgCalc = (int)(_target.MaximumHp * 0.30);
+                    dmgCalc = (long)(_target.MaximumHp * 0.30);
 
-                _target.CurrentHp += (int)dmgCalc;
+                _target.CurrentHp += dmgCalc;
 
                 if (_target.CurrentHp > _target.MaximumHp)
                     _target.CurrentHp = _target.MaximumHp;
@@ -1517,20 +1517,20 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
             if (_target.MaximumHp * 0.15 < dmgCalc)
             {
-                _target.CurrentHp += (int)(_target.MaximumHp * 0.15);
+                _target.CurrentHp += (long)(_target.MaximumHp * 0.15);
             }
             else
             {
-                _target.CurrentHp += (int)dmgCalc;
+                _target.CurrentHp += dmgCalc;
             }
 
             if (_target.MaximumMp * 0.20 < dmgCalc)
             {
-                _target.CurrentMp += (int)(_target.MaximumMp * 0.20);
+                _target.CurrentMp += (long)(_target.MaximumMp * 0.20);
             }
             else
             {
-                _target.CurrentMp += (int)dmgCalc;
+                _target.CurrentMp += dmgCalc;
             }
 
             if (_target.CurrentHp > _target.MaximumHp)
@@ -1581,20 +1581,20 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
                 if (_target.MaximumHp * 0.15 < dmgCalc)
                 {
-                    _target.CurrentHp += (int)(_target.MaximumHp * 0.15);
+                    _target.CurrentHp += (long)(_target.MaximumHp * 0.15);
                 }
                 else
                 {
-                    _target.CurrentHp += (int)dmgCalc;
+                    _target.CurrentHp += dmgCalc;
                 }
 
                 if (_target.MaximumMp * 0.20 < dmgCalc)
                 {
-                    _target.CurrentMp += (int)(_target.MaximumMp * 0.20);
+                    _target.CurrentMp += (long)(_target.MaximumMp * 0.20);
                 }
                 else
                 {
-                    _target.CurrentMp += (int)dmgCalc;
+                    _target.CurrentMp += dmgCalc;
                 }
 
                 if (_target.CurrentHp > _target.MaximumHp)

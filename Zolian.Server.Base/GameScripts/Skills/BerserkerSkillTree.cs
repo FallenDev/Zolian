@@ -674,8 +674,8 @@ public class Crasher(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Crasher";
 
-        var criticalHp = (int)(aisling.MaximumHp * .95);
-        var crasherHp = (int)(aisling.CurrentHp * .05);
+        var criticalHp = (long)(aisling.MaximumHp * .95);
+        var crasherHp = (long)(aisling.CurrentHp * .05);
 
         var action = new BodyAnimationArgs
         {
@@ -695,7 +695,7 @@ public class Crasher(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var dmg = (int)(criticalHp * 1.5);
+        var dmg = (long)(criticalHp * 1.5);
         aisling.CurrentHp = crasherHp >= aisling.CurrentHp ? 1 : crasherHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I feel drained...");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
@@ -739,7 +739,7 @@ public class Crasher(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var dmg = (int)(sprite.CurrentHp * 1.5);
+            var dmg = (long)(sprite.CurrentHp * 1.5);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmg, false, action);
         }
     }
@@ -1141,8 +1141,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
                     debuff.OnApplied(_target, debuff);
             }
 
-            var dmg = sprite.MaximumHp * 1;
-            sprite.CurrentHp = (int)(sprite.CurrentHp * 0.3);
+            var dmg = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmg, false, action);
         }
     }

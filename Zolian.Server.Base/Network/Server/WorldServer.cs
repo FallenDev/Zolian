@@ -865,9 +865,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            foreach (var monster in ServerSetup.Instance.GlobalMonsterCache.Values)
+            Parallel.ForEach(ServerSetup.Instance.GlobalMonsterCache.Values, monster =>
             {
-                if (monster?.Scripts == null) continue;
+                if (monster?.Scripts == null) return;
                 if (monster.CurrentHp <= 0)
                 {
                     monster.Skulled = true;
@@ -881,7 +881,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         monster.Scripts.Values.First().OnDeath();
                     }
 
-                    continue;
+                    return;
                 }
 
                 monster.Scripts.Values.First().Update(elapsedTime);
@@ -902,12 +902,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 monster.LastUpdated = DateTime.UtcNow;
 
                 if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds <
-                    monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) continue;
+                    monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
 
                 monster.UpdateBuffs(elapsedTime);
                 monster.UpdateDebuffs(elapsedTime);
                 monster.MonsterBuffAndDebuffStopWatch.Restart();
-            }
+            });
         }
         catch (Exception ex)
         {

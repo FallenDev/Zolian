@@ -765,8 +765,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
                     debuff.OnApplied(_target, debuff);
             }
 
-            var dmg = (int)(sprite.MaximumHp * 1.2);
-            sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
+            var dmg = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmg, false, action);
         }
     }
@@ -813,8 +812,8 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Kelberoth Strike";
 
-        var criticalHp = (int)(aisling.MaximumHp * .33);
-        var kelbHp = (int)(aisling.CurrentHp * .66);
+        var criticalHp = (long)(aisling.MaximumHp * .33);
+        var kelbHp = (long)(aisling.CurrentHp * .66);
 
         var action = new BodyAnimationArgs
         {
@@ -834,7 +833,7 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var dmg = (int)(criticalHp * 2.5);
+        var dmg = (long)(criticalHp * 2.5);
         aisling.CurrentHp = kelbHp >= aisling.CurrentHp ? 1 : kelbHp;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahhhhh!");
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
@@ -878,7 +877,7 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var dmg = (int)(sprite.CurrentHp * 2.5);
+            var dmg = (long)(sprite.CurrentHp * 2.5);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmg, false, action);
         }
     }
@@ -1585,7 +1584,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
         {
             _target = i;
             if (_target.CurrentHp <= 1) continue;
-            _target.CurrentHp += (int)dmgCalc;
+            _target.CurrentHp += dmgCalc;
 
             if (_target.CurrentHp > _target.MaximumHp)
                 _target.CurrentHp = _target.MaximumHp;
@@ -1597,7 +1596,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
         }
 
-        aisling.CurrentHp += (int)dmgCalc;
+        aisling.CurrentHp += dmgCalc;
 
         if (aisling.CurrentHp > aisling.MaximumHp)
             aisling.CurrentHp = aisling.MaximumHp;
@@ -1616,7 +1615,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
 
         if (aisling.CurrentMp >= manaReq)
         {
-            aisling.CurrentMp -= (int)manaReq;
+            aisling.CurrentMp -= (long)manaReq;
             OnSuccess(aisling);
             return;
         }

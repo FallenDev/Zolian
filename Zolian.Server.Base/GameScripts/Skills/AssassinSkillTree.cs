@@ -346,8 +346,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
                     debuff.OnApplied(_target, debuff);
             }
 
-            var dmg = (int)(sprite.MaximumHp * 1.2);
-            sprite.CurrentHp = (int)(sprite.CurrentHp * 0.8);
+            var dmg = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmg, false, action);
         }
     }

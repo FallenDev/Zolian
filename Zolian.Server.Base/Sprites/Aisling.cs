@@ -529,7 +529,7 @@ public sealed class Aisling : Player, IAisling
         return false;
     }
 
-    public Aisling GiveHealth(Sprite target, int value)
+    public Aisling GiveHealth(Sprite target, long value)
     {
         target.CurrentHp += value;
 

@@ -1022,7 +1022,7 @@ public class ShieldBash(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 40 + Skill.Level;
-            dmg = client.Aisling.Str * 8 + client.Aisling.Dex * 8 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 2);
+            dmg = client.Aisling.Str * 18 + client.Aisling.Dex * 10 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 2);
             dmg += dmg * imp / 100;
         }
 

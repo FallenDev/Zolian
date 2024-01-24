@@ -37,7 +37,7 @@ public static class Generator
         return enumeratedArray.ElementAt(index);
     }
 
-    public static int RandomMonsterStatVariance(int value)
+    public static long RandomMonsterStatVariance(long value)
     {
         var variance = RandomNumberGenerator.GetInt32(9);
         var percent = variance switch
@@ -53,7 +53,7 @@ public static class Generator
             _ => 0.18
         };
 
-        var bonusValue = (int)(value * percent);
+        var bonusValue = (long)(value * percent);
         value += bonusValue;
 
         return value;

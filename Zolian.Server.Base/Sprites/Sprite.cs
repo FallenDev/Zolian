@@ -28,6 +28,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 {
     public bool Abyss;
     public Position LastPosition;
+    public List<List<TileGrid>> MasterGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly WorldServerTimer BuffAndDebuffTimer;
     public Stopwatch MonsterBuffAndDebuffStopWatch = new();
@@ -49,8 +50,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                             HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool Hastened => HasBuff("Hastenga") || HasBuff("Hasten") || HasBuff("Haste");
     public bool SpellReflect => HasBuff("Deireas Faileas");
-    public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
-    public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
+    public bool SpellNegate => HasBuff("Perfect Defense")/* || this is Aisling { GameMaster: true }*/;
+    public bool SkillReflect => HasBuff("Asgall")/* || this is Aisling { GameMaster: true }*/;
     public bool IsBleeding => HasDebuff("Bleeding");
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
@@ -90,10 +91,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool CantAttack => (IsFrozen || IsStopped || IsSleeping || IsCharmed);
     public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed);
     public bool HasDoT => (IsBleeding || IsPoisoned);
-    private int CheckHp => BaseHp + BonusHp;
-    public int MaximumHp => Math.Clamp(CheckHp, 0, int.MaxValue);
-    private int CheckMp => BaseMp + BonusMp;
-    public int MaximumMp => Math.Clamp(CheckMp, 0, int.MaxValue);
+    private long CheckHp => Math.Clamp(BaseHp + BonusHp, 0, long.MaxValue);
+    public long MaximumHp => Math.Clamp(CheckHp, 0, long.MaxValue);
+    private long CheckMp => Math.Clamp(BaseMp + BonusMp, 0, long.MaxValue);
+    public long MaximumMp => Math.Clamp(CheckMp, 0, long.MaxValue);
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
     public int Dmg => _Dmg + BonusDmg;
     public double SealedModifier { get; set; }
@@ -223,13 +224,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #region Stats
 
-    public int CurrentHp { get; set; }
-    public int BaseHp { get; set; }
-    public int BonusHp { get; set; }
+    public long CurrentHp { get; set; }
+    public long BaseHp { get; set; }
+    public long BonusHp { get; set; }
 
-    public int CurrentMp { get; set; }
-    public int BaseMp { get; set; }
-    public int BonusMp { get; set; }
+    public long CurrentMp { get; set; }
+    public long BaseMp { get; set; }
+    public long BonusMp { get; set; }
 
     public int _Regen { get; set; }
     public int BonusRegen { get; set; }
@@ -1392,14 +1393,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         if (IsAited && dmg > 100)
-            dmg -= (int)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
+            dmg -= (long)(dmg * ServerSetup.Instance.Config.AiteDamageReductionMod);
 
         dmg = LuckModifier(dmg);
 
         if (CurrentHp > MaximumHp)
             CurrentHp = MaximumHp;
 
-        CurrentHp -= (int)dmg;
+        CurrentHp -= dmg;
 
         if (damageDealingSprite is Aisling aisling)
         {
@@ -1423,7 +1424,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         if (dmg > 50)
-            ApplyEquipmentDurability((int)dmg);
+            ApplyEquipmentDurability(dmg);
 
         OnDamaged(damageDealingSprite, dmg);
         return;
@@ -1437,8 +1438,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         long PainBane()
         {
-            if (damageDealingSprite is not Aisling aisling) return dmg;
-            if (aisling.PainBane)
+            if (damageDealingSprite is not Aisling aisling2) return dmg;
+            if (aisling2.PainBane)
                 return (long)(dmg * 0.95);
             return dmg;
         }
@@ -2229,15 +2230,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         var dmgApplied = (long)Math.Abs(dmg * amplifier);
         var finalDmg = LevelDamageMitigation(damageDealingSprite, dmgApplied);
-
-        // Over damage converts to max integer
-        if (finalDmg > int.MaxValue)
-        {
-            finalDmg = int.MaxValue;
-        }
-
-        var convDmg = (int)finalDmg;
-        CurrentHp -= convDmg;
+        CurrentHp -= finalDmg;
 
         if (this is Aisling aisling)
         {
@@ -2248,10 +2241,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         else
             PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
-        return convDmg;
+        return finalDmg;
     }
 
-    public void ApplyEquipmentDurability(int dmg)
+    public void ApplyEquipmentDurability(long dmg)
     {
         if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
             aisling.EquipmentManager.DecreaseDurability();

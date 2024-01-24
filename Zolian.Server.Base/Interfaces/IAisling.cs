@@ -67,7 +67,7 @@ public interface IAisling : ISprite
     IEnumerable<Skill> GetAssails();
     Skill GetSkill(string s);
     bool GiveGold(uint offer, bool sendClientUpdate = true);
-    Aisling GiveHealth(Sprite target, int value);
+    Aisling GiveHealth(Sprite target, long value);
     void GoHome();
     bool HasInInventory(string item, int count);
     bool HasItem(string item);
