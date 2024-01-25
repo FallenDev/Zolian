@@ -387,6 +387,121 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return results;
     }
 
+    public List<Sprite> MonsterGetFiveByFourRectInFront()
+    {
+        var results = new List<Sprite>();
+
+        switch (Direction)
+        {
+            // North
+            case 0:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 1));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 3));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y - 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 4));
+                break;
+            // East
+            case 1:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 3, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 3, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 3, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 3, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 3, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 4, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 4, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 4, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 4, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 4, (int)Pos.Y - 2));
+                break;
+            // South
+            case 2:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 1));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 3));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 3));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X, (int)Pos.Y + 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 1, (int)Pos.Y + 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X + 2, (int)Pos.Y + 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 4));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 4));
+                break;
+            // West
+            case 3:
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 1, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 2, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 3, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 3, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 3, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 3, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 3, (int)Pos.Y - 2));
+
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 4, (int)Pos.Y));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 4, (int)Pos.Y + 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 4, (int)Pos.Y + 2));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 4, (int)Pos.Y - 1));
+                results.AddRange(MonsterGetDamageableSprites((int)Pos.X - 4, (int)Pos.Y - 2));
+                break;
+        }
+
+        return results;
+    }
+
     public List<Sprite> GetHorizontalInFront(int tileCount = 1)
     {
         var results = new List<Sprite>();

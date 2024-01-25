@@ -388,14 +388,6 @@ public class BaseMonsterIntelligence : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -426,14 +418,6 @@ public class BaseMonsterIntelligence : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -972,14 +956,6 @@ public class WeakCommon : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -1010,14 +986,6 @@ public class WeakCommon : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -1575,14 +1543,6 @@ public class ShapeShifter : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -1613,14 +1573,6 @@ public class ShapeShifter : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -2737,14 +2689,6 @@ public class AlertSummon : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -2775,14 +2719,6 @@ public class AlertSummon : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -3728,14 +3664,6 @@ public class GeneralPirate : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -3766,14 +3694,6 @@ public class GeneralPirate : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -4331,14 +4251,6 @@ public class ShadowSight : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -4369,14 +4281,6 @@ public class ShadowSight : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -4914,14 +4818,6 @@ public class WeakShadowSight : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -4952,14 +4848,6 @@ public class WeakShadowSight : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -5509,14 +5397,6 @@ public class AosdaRemnant : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -5547,14 +5427,6 @@ public class AosdaRemnant : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -6124,14 +5996,6 @@ public class DraconicOmega : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -6162,14 +6026,6 @@ public class DraconicOmega : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -6739,14 +6595,6 @@ public class JackFrost : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -6777,14 +6625,6 @@ public class JackFrost : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -7415,14 +7255,6 @@ public class Yeti : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
@@ -7453,14 +7285,6 @@ public class Yeti : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -7651,20 +7475,20 @@ public class Yeti : MonsterScript
 }
 
 [Script("World Boss Astrid")]
-public class WorldBossShalator : MonsterScript
+public class WorldBossBahamut : MonsterScript
 {
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private readonly string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
-    private readonly string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
+    private readonly string _aosdaSayings = "I've met hatchlings fiercer than you|I'm going to melt you right where you stand.|Asra Leckto Moltuv, esta drakto|Don't die on me, I like torturing";
+    private readonly string _aosdaChase = "Hahahaha, scared? You should be.|Come back, I have a question|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
     private int RunCount => GhostChase.Length;
     private bool _deathCry;
 
-    public WorldBossShalator(Monster monster, Area map) : base(monster, map)
+    public WorldBossBahamut(Monster monster, Area map) : base(monster, map)
     {
         Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
         Monster.CastTimer.RandomizedVariance = 60;
@@ -7769,9 +7593,8 @@ public class WorldBossShalator : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        return;
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
-        Task.Delay(300).Wait();
+        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Like a phoenix, I will return."));
+        Task.Delay(600).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
@@ -7797,7 +7620,7 @@ public class WorldBossShalator : MonsterScript
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 100000, Monster.Template.Level * 200000);
 
             if (sum > 0)
             {
@@ -7828,17 +7651,21 @@ public class WorldBossShalator : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
             }
 
             if (aisling.Skulled || aisling.Dead)
             {
+                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
                 if (!Monster.WalkEnabled) return;
                 if (Monster.CantMove || Monster.Blind) return;
                 if (walk) Walk();
 
                 return;
             }
+
+            if (Monster.Image == Monster.Template.ImageVarience)
+                Bash();
 
             if (Monster.BashEnabled)
             {
@@ -7869,7 +7696,10 @@ public class WorldBossShalator : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
+    public override void OnApproach(WorldClient client)
+    {
+        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
+    }
 
     public override void OnLeave(WorldClient client)
     {
@@ -7890,6 +7720,21 @@ public class WorldBossShalator : MonsterScript
     {
         try
         {
+            var critical = (long)(Monster.CurrentHp * 0.01);
+            if (Monster.CurrentHp <= critical)
+            {
+                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
+                Monster.Image = (ushort)Monster.Template.ImageVarience;
+
+                var objects = ServerSetup.Instance.Game.ObjectHandlers.GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
+                objects.Reverse();
+
+                foreach (var aisling in Monster.AislingsNearby())
+                {
+                    if (objects.Count == 0) continue;
+                    aisling.Client.SendVisibleEntities(objects);
+                }
+            }
             var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
             if (!tagged)
                 Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
@@ -8031,13 +7876,14 @@ public class WorldBossShalator : MonsterScript
     private void Bash()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
+        if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+        {
             if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
             {
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
-                return;
             }
+        }
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -8069,14 +7915,6 @@ public class WorldBossShalator : MonsterScript
     private void Ability()
     {
         if (Monster.CantAttack) return;
-        if (Monster.Target != null)
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-            {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
-                return;
-            }
-
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
@@ -8127,7 +7965,7 @@ public class WorldBossShalator : MonsterScript
         if (!Monster.CantCast && !Monster.Aggressive)
         {
             var rand = Generator.RandomNumPercentGen();
-            if (rand >= 0.93)
+            if (rand >= 0.90)
             {
                 Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
@@ -8166,22 +8004,17 @@ public class WorldBossShalator : MonsterScript
                 }
             }
 
-            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+            if (Monster.MonsterGetFiveByFourRectInFront().Contains(Monster.Target))
             {
-                if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
-                {
-                    Monster.BashEnabled = true;
-                    Monster.AbilityEnabled = true;
-                    Monster.CastEnabled = true;
-                }
-                else
-                {
-                    Monster.BashEnabled = false;
-                    Monster.AbilityEnabled = true;
-                    Monster.CastEnabled = true;
-                    Monster.Direction = (byte)direction;
-                    Monster.Turn();
-                }
+                Monster.BashEnabled = true;
+                Monster.AbilityEnabled = true;
+                Monster.CastEnabled = true;
+            }
+            else if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+            {
+                if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction)) return;
+                Monster.Direction = (byte)direction;
+                Monster.Turn();
             }
             else
             {

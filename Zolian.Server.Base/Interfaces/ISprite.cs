@@ -94,6 +94,7 @@ public interface ISprite
     List<Sprite> DamageableGetBehind(int tileCount = 1);
     List<Sprite> MonsterGetInFront(int tileCount = 1);
     List<Sprite> MonsterGetInFrontToSide(int tileCount = 1);
+    List<Sprite> MonsterGetFiveByFourRectInFront();
     List<Sprite> GetInFrontToSide(int tileCount = 1);
     List<Sprite> GetHorizontalInFront(int tileCount = 1);
     Position GetFromAllSidesEmpty(Sprite target, int tileCount = 1);
