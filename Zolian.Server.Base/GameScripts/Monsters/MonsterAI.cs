@@ -7480,8 +7480,8 @@ public class WorldBossBahamut : MonsterScript
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
-    private readonly string _aosdaSayings = "I've met hatchlings fiercer than you|I'm going to melt you right where you stand.|Asra Leckto Moltuv, esta drakto|Don't die on me, I like torturing";
-    private readonly string _aosdaChase = "Hahahaha, scared? You should be.|Come back, I have a question|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
+    private readonly string _aosdaSayings = "I've met hatchlings fiercer than you|I'm going to enjoy this|Asra Leckto Moltuv, esta drakto|Don't die on me now|Endure!";
+    private readonly string _aosdaChase = "Hahahaha, scared? You should be.|Come back, I just have a question|Such haste! Did you leave your courage behind?|Flee now.. live to cower another day hahaha, mortal";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
@@ -7786,6 +7786,7 @@ public class WorldBossBahamut : MonsterScript
     {
         Monster.CastEnabled = false;
         Monster.BashEnabled = false;
+        Monster.AbilityEnabled = false;
         Monster.WalkEnabled = true;
 
         if (Monster.Target is Aisling)
@@ -7926,8 +7927,7 @@ public class WorldBossBahamut : MonsterScript
             return;
         }
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -7939,8 +7939,6 @@ public class WorldBossBahamut : MonsterScript
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
-
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -7962,15 +7960,6 @@ public class WorldBossBahamut : MonsterScript
 
     private void Walk()
     {
-        if (!Monster.CantCast && !Monster.Aggressive)
-        {
-            var rand = Generator.RandomNumPercentGen();
-            if (rand >= 0.90)
-            {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
-            }
-        }
-
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
         {
@@ -8009,6 +7998,12 @@ public class WorldBossBahamut : MonsterScript
                 Monster.BashEnabled = true;
                 Monster.AbilityEnabled = true;
                 Monster.CastEnabled = true;
+
+                var rand = Generator.RandomNumPercentGen();
+                if (rand >= 0.90)
+                {
+                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                }
             }
             else if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
             {
@@ -8019,6 +8014,7 @@ public class WorldBossBahamut : MonsterScript
             else
             {
                 Monster.BashEnabled = false;
+                Monster.AbilityEnabled = true;
                 Monster.CastEnabled = true;
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
@@ -8073,6 +8069,7 @@ public class WorldBossBahamut : MonsterScript
         else
         {
             Monster.BashEnabled = false;
+            Monster.AbilityEnabled = false;
             Monster.CastEnabled = false;
 
             if (Monster.Template.PathQualifer.PathFlagIsSet(PathQualifer.Patrol))

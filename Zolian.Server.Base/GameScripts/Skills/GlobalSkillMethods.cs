@@ -155,10 +155,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var target = enemy;
 
         // Damage
-        target = Skill.Reflect(target, attacker, skill);
-
         if (dmg > 0)
+        {
+            target = Skill.Reflect(target, attacker, skill);
             target.ApplyDamage(attacker, dmg, skill);
+        }
 
         // Training
         if (attacker is Aisling aisling)
@@ -177,10 +178,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var target = enemy;
 
         // Damage
-        target = Skill.Reflect(target, attacker, skill);
-
         if (dmg > 0)
+        {
+            target = Skill.Reflect(target, attacker, skill);
             target.ApplyDamage(attacker, dmg, skill);
+        }
 
         // Training
         if (attacker is Aisling aisling)
@@ -198,10 +200,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         var target = enemy;
 
         // Damage
-        target = Skill.Reflect(target, attacker, skill);
-
         if (dmg > 0)
+        {
+            target = Skill.Reflect(target, attacker, skill);
             target.ApplyDamage(attacker, dmg, skill);
+        }
 
         // Training
         if (attacker is Aisling aisling)

@@ -1,10 +1,12 @@
 ﻿using Chaos.Common.Definitions;
+using Chaos.Extensions.Common;
 using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Spells;
+using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -639,14 +641,13 @@ public class FireWheel(Skill skill) : SkillScript(skill)
         }
 
         sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
     }
 
     private long FireDamageCalc(Sprite sprite)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Int * 18 + damageMonster.Wis * 8;
+        var dmg = damageMonster.Int * 72 + damageMonster.Wis * 38;
         var critCheck = _skillMethod.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -656,9 +657,70 @@ public class FireWheel(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 10 + damageMonster.Dex * 13;
+        var dmg = damageMonster.Str * 95 + damageMonster.Dex * 86;
         var critCheck = _skillMethod.OnCrit(dmg);
         _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Megaflare")]
+public class Megaflare(Skill skill) : SkillScript(skill)
+{
+    private readonly List<Sprite> _targets = new();
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite) { }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var nearby = sprite.GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
+
+        foreach (var player in nearby)
+        {
+            if (player == null) continue;
+            var rand = Generator.RandomNumPercentGen();
+            if (rand >= .60) continue;
+            _targets.Add(player);
+        }
+
+        if (_targets.Count == 0)
+        {
+            OnFailed(sprite);
+            return;
+        }
+
+        foreach (var enemy in _targets.Where(enemy => enemy != null && enemy.Serial != sprite.Serial && enemy.Attackable))
+        {
+            if (enemy is not Aisling aisling) continue;
+            var dmgCalc = DamageCalc(sprite);
+            aisling.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(217, aisling.Position));
+        }
+
+        sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Str * 65 + damageMonster.Int * 90;
+        var critCheck = _skillMethod.OnCrit(dmg);
         return critCheck.Item2;
     }
 }

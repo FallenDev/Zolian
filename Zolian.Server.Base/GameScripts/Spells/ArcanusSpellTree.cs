@@ -165,11 +165,30 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (!Spell.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        _spellMethod.Train(client, Spell);
-        OnSuccess(aisling, target);
-        client.SendAttributes(StatUpdateType.Vitality);
+        if (sprite is Aisling aisling)
+        {
+            var client = aisling.Client;
+            _spellMethod.Train(client, Spell);
+            OnSuccess(aisling, target);
+            client.SendAttributes(StatUpdateType.Vitality);
+            return;
+        }
+
+        foreach (var targetObj in sprite.AislingsNearby())
+        {
+            if (targetObj == null) continue;
+            targetObj.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
+            foreach (var debuff in targetObj.Debuffs.Values)
+            {
+                if (debuff.Name == "Skulled") continue;
+                debuff.OnEnded(targetObj, debuff);
+            }
+
+            foreach (var buff in targetObj.Buffs.Values)
+            {
+                buff.OnEnded(targetObj, buff);
+            }
+        }
     }
 }
 

@@ -1135,18 +1135,25 @@ public class EmberStrike(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
-            _target = enemy;
+            var enemy = sprite.MonsterGetInFrontToSide();
 
-            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            if (enemy.Count == 0)
             {
-                _skillMethod.FailedAttempt(sprite, Skill, action);
                 OnFailed(sprite);
                 return;
             }
 
-            var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            foreach (var i in enemy.Where(i => i.Attackable))
+            {
+                if (i is not Aisling aislingTarget) continue;
+                _target = aislingTarget;
+                var dmgCalc = DamageCalc(sprite);
+                _target.ApplyElementalSkillDamage(aislingTarget, dmgCalc, ElementManager.Element.Fire, Skill);
+                aislingTarget.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(17, null, _target.Serial));
+                _skillMethod.OnSuccessWithoutAction(_target, aislingTarget, Skill, 0, _crit);
+            }
+
+            _skillMethod.OnSuccess(_target, sprite, Skill, 0, _crit, action);
         }
     }
 
@@ -1619,7 +1626,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
             OnSuccess(aisling);
             return;
         }
-        
+
         OnFailed(aisling);
     }
 

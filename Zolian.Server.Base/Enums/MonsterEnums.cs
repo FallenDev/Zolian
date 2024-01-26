@@ -71,6 +71,7 @@ public enum MonsterRace
     Contruct = 1 << 5,
     Demon = 1 << 6,
     Dragon = 1 << 7,
+    Bahamut = Dragon + 1,
     Dummy = 1 << 8,
     Elemental = 1 << 9,
     Fairy = 1 << 10,

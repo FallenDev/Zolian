@@ -19,7 +19,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 {
     public override Monster Create()
     {
-        if (template.CastSpeed <= 6000) template.CastSpeed = 6000;
         if (template.AttackSpeed <= 500) template.AttackSpeed = 500;
         if (template.MovementSpeed <= 500) template.MovementSpeed = 500;
         if (template.Level <= 1) template.Level = 1;
@@ -214,6 +213,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterRace.Contruct] = ContructSet,
             [MonsterRace.Demon] = DemonSet,
             [MonsterRace.Dragon] = DragonSet,
+            [MonsterRace.Bahamut] = BahamutDragonSet,
             [MonsterRace.Elemental] = ElementalSet,
             [MonsterRace.Fairy] = FairySet,
             [MonsterRace.Fiend] = FiendSet,
@@ -248,13 +248,17 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         if (!obj.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.ShapeShifter))
         {
             Assails(obj);
-            BasicAbilities(obj);
-            BeagSpells(obj);
-            NormalSpells(obj);
-            MorSpells(obj);
-            ArdSpells(obj);
-            MasterSpells(obj);
-            JobSpells(obj);
+
+            if (!obj.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Bahamut))
+            {
+                BasicAbilities(obj);
+                BeagSpells(obj);
+                NormalSpells(obj);
+                MorSpells(obj);
+                ArdSpells(obj);
+                MasterSpells(obj);
+                JobSpells(obj);
+            }
         }
 
         // Load Abilities from Template to Monster
@@ -1621,6 +1625,15 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         var skillList = new List<string> { "Thrash", "Ambidextrous", "Slash", "Claw", "Tail Slap" };
         var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick" };
         var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion", "Deireas Faileas" };
+        MonsterLoader(skillList, abilityList, spellList, monster);
+    }
+
+    private void BahamutDragonSet(Monster monster)
+    {
+        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Bahamut)) return;
+        var skillList = new List<string> { "Fire Wheel", "Thrash", "Ambidextrous", "Slash", "Claw" };
+        var abilityList = new List<string> { "Megaflare", "Lava Armor", "Ember Strike", "Silent Siren" };
+        var spellList = new List<string> { "Heavens Fall", "Liquid Hell", "Ao Sith Gar" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
