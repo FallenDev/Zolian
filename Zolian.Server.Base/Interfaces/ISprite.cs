@@ -120,6 +120,7 @@ public interface ISprite
     bool Walk();
     bool WalkTo(int x, int y);
     void Wander();
+    void CheckTraps(Monster monster);
     void Turn();
 
     // Damage Begin -- Going to refactor damage out of sprite

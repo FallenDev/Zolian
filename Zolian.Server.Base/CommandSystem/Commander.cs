@@ -413,7 +413,7 @@ public static class Commander
 
         foreach (var connected in players)
         {
-            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qDeath Invokes Reload Maps");
+            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} Invokes Reload Maps");
             connected.Client.ClientRefreshed();
         }
     }

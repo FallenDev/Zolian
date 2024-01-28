@@ -70,14 +70,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public static FrozenDictionary<(Race race, Class path, Class pastClass), string> SkillMap;
     public readonly ObjectService ObjectFactory = new();
     public readonly ObjectManager ObjectHandlers = new();
-    private readonly Stopwatch _itemGroundCheckControl = new();
-    private readonly WorldServerTimer _itemGroundCheckTimer = new(TimeSpan.FromMilliseconds(5000));
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
     private Task _componentRunTask;
     private Task _updateMundanessTask;
     private Task _updateMonstersTask;
     private Task _updateGroundItemsTask;
+    private Task _updateGroundMoneyTask;
     private Task _updateMapsTask;
     private Task _updateTrapsTasks;
     private Task _updateClientsTask;
@@ -124,6 +123,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             _updateMundanessTask = Task.Run(UpdateMundanesRoutine, stoppingToken);
             _updateMonstersTask = Task.Run(UpdateMonstersRoutine, stoppingToken);
             _updateGroundItemsTask = Task.Run(UpdateGroundItemsRoutine, stoppingToken);
+            _updateGroundMoneyTask = Task.Run(UpdateGroundMoneyRoutine, stoppingToken);
             _updateMapsTask = Task.Run(UpdateMapsRoutine, stoppingToken);
             _updateTrapsTasks = Task.Run(UpdateTrapsRoutine, stoppingToken);
             _updateClientsTask = Task.Run(UpdateClients, stoppingToken);
@@ -697,7 +697,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateGroundItemsRoutine()
+    private static void UpdateGroundItemsRoutine()
     {
         var groundWatch = new Stopwatch();
         groundWatch.Start();
@@ -705,13 +705,27 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var groundElapsed = groundWatch.Elapsed;
-            if (groundElapsed.TotalMilliseconds < 1000) continue;
+            if (groundElapsed.TotalMinutes < 1) continue;
             UpdateGroundItems();
             groundWatch.Restart();
         }
     }
 
-    private void UpdateMundanesRoutine()
+    private static void UpdateGroundMoneyRoutine()
+    {
+        var groundWatch = new Stopwatch();
+        groundWatch.Start();
+
+        while (ServerSetup.Instance.Running)
+        {
+            var groundElapsed = groundWatch.Elapsed;
+            if (groundElapsed.TotalMinutes < 1) continue;
+            UpdateGroundMoney();
+            groundWatch.Restart();
+        }
+    }
+
+    private static void UpdateMundanesRoutine()
     {
         var mundanesWatch = new Stopwatch();
         mundanesWatch.Start();
@@ -725,7 +739,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateMonstersRoutine()
+    private static void UpdateMonstersRoutine()
     {
         var monstersWatch = new Stopwatch();
         monstersWatch.Start();
@@ -739,7 +753,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateMapsRoutine()
+    private static void UpdateMapsRoutine()
     {
         var gameWatch = new Stopwatch();
         gameWatch.Start();
@@ -826,16 +840,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private void UpdateGroundItems()
+    private static void UpdateGroundItems()
     {
-        if (!_itemGroundCheckControl.IsRunning)
-        {
-            _itemGroundCheckControl.Start();
-        }
-
-        if (_itemGroundCheckControl.Elapsed.TotalMilliseconds < _itemGroundCheckTimer.Delay.TotalMilliseconds) return;
-        _itemGroundCheckControl.Restart();
-
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
@@ -861,13 +867,39 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
+    private static void UpdateGroundMoney()
+    {
+        try
+        {
+            foreach (var money in ServerSetup.Instance.GlobalGroundMoneyCache.Values)
+            {
+                if (money == null) continue;
+                var abandonedDiff = DateTime.UtcNow.Subtract(money.AbandonedDate);
+                if (abandonedDiff.TotalMinutes <= 30) continue;
+                var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out var itemToBeRemoved);
+                if (!removed) return;
+                itemToBeRemoved.Remove();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Track issues in App Center only
+            Crashes.TrackError(ex);
+        }
+    }
+
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
         try
         {
             Parallel.ForEach(ServerSetup.Instance.GlobalMonsterCache.Values, monster =>
             {
-                if (monster?.Scripts == null) return;
+                if (monster.Scripts == null)
+                {
+                    ServerSetup.Instance.GlobalMonsterCache.TryRemove(monster.Serial, out _);
+                    return;
+                }
+
                 if (monster.CurrentHp <= 0)
                 {
                     monster.Skulled = true;
@@ -885,21 +917,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
 
                 monster.Scripts.Values.First().Update(elapsedTime);
-
-                foreach (var trap in ServerSetup.Instance.Traps.Values)
-                {
-                    if (trap?.Owner == null || trap.Owner.Serial == monster.Serial ||
-                        monster.X != trap.Location.X || monster.Y != trap.Location.Y ||
-                        monster.Map != trap.TrapItem.Map) continue;
-
-                    var triggered = Trap.Activate(trap, monster);
-                    if (triggered) break;
-                }
+                monster.LastUpdated = DateTime.UtcNow;
 
                 if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
                     monster.MonsterBuffAndDebuffStopWatch.Start();
-
-                monster.LastUpdated = DateTime.UtcNow;
 
                 if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds <
                     monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
@@ -960,9 +981,36 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
+            Analytics.TrackEvent($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
+
+            // Wipe Caches
+            ServerSetup.Instance.TempGlobalMapCache = [];
+            ServerSetup.Instance.TempGlobalWarpTemplateCache = [];
+
+            foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
+            {
+                ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
+            }
+
+            ServerSetup.Instance.GlobalMonsterCache = [];
+
+            foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
+            {
+                ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);
+            }
+
+            ServerSetup.Instance.GlobalMundaneCache = [];
+
+            // Reload
+            AreaStorage.Instance.CacheFromDatabase();
+            DatabaseLoad.CacheFromDatabase(new WarpTemplate());
+
+            foreach (var connected in ServerSetup.Instance.Game.Aislings)
+            {
+                connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSelf-Heal Routine Invokes Reload Maps");
+                connected.Client.ClientRefreshed();
+            }
         }
     }
 
@@ -1031,7 +1079,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling?.Map is not { Ready: true }) return default;
         var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastMapUpdated).TotalSeconds > 1)
-            if (readyTime.Subtract(client.LastMovement).TotalSeconds < 0.2) return default;
+            if (readyTime.Subtract(client.LastMovement).TotalSeconds < 0.40 && client.Aisling.MonsterForm == 0) return default;
 
         if (client.Aisling.CantMove)
         {
@@ -1196,7 +1244,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (obj is not Money money) continue;
 
-                money.GiveTo(money.Amount, localClient.Aisling);
+                Money.GiveTo(money, localClient.Aisling);
             }
 
             return default;

@@ -413,7 +413,7 @@ public sealed class Item : Sprite, IItem
         }
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
@@ -480,7 +480,7 @@ public sealed class Item : Sprite, IItem
         }
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
@@ -531,7 +531,7 @@ public sealed class Item : Sprite, IItem
         }
 
         obj.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        obj.ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
         obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
@@ -594,7 +594,7 @@ public sealed class Item : Sprite, IItem
             GearEnhancement = GearEnhancements.None,
             ItemMaterial = ItemMaterials.None,
             Serial = owner.Serial,
-            ItemId = EphemeralRandomIdGenerator<uint>.Shared.NextId
+            ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId
         };
 
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);

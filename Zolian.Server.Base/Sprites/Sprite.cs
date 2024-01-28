@@ -31,7 +31,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public List<List<TileGrid>> MasterGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly WorldServerTimer BuffAndDebuffTimer;
-    public Stopwatch MonsterBuffAndDebuffStopWatch = new();
+    public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();
     private readonly object _walkLock = new();
 
@@ -176,8 +176,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         Amplified = 0;
         SealedModifier = 0;
         Target = null;
-        Buffs = new ConcurrentDictionary<string, Buff>();
-        Debuffs = new ConcurrentDictionary<string, Debuff>();
+        Buffs = [];
+        Debuffs = [];
         LastTargetAcquired = readyTime;
         LastMovementChanged = readyTime;
         LastTurnUpdated = readyTime;
@@ -1072,6 +1072,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             // Commit Walk to other Player Clients
             Step0C(currentPosX, currentPosY);
 
+            // Check Trap Activation
+            if (this is Monster trapCheck)
+                CheckTraps(trapCheck);
+
             // Reset our PendingX & PendingY
             PendingX = currentPosX;
             PendingY = currentPosY;
@@ -1155,6 +1159,20 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         LastTurnUpdated = DateTime.UtcNow;
+    }
+
+    public void CheckTraps(Monster monster)
+    {
+        foreach (var trap in ServerSetup.Instance.Traps.Values.Where(t => t.TrapItem.Map.ID == monster.Map.ID))
+        {
+            if (trap.Owner == null || trap.Owner.Serial == monster.Serial ||
+                monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
+
+            var triggered = Trap.Activate(trap, monster);
+            if (!triggered) continue;
+            ServerSetup.Instance.Traps.TryRemove(trap.Serial, out _);
+            break;
+        }
     }
 
     public void Turn()

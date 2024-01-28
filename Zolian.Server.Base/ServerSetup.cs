@@ -52,44 +52,45 @@ public class ServerSetup : IServerContext
 
     // Templates
     public FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
-    public Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; } = new();
+    public Dictionary<int, WorldMapTemplate> TempGlobalWorldMapTemplateCache { get; set; } = [];
     public FrozenDictionary<int, WarpTemplate> GlobalWarpTemplateCache { get; set; }
-    public Dictionary<int, WarpTemplate> TempGlobalWarpTemplateCache { get; set; } = new();
+    public Dictionary<int, WarpTemplate> TempGlobalWarpTemplateCache { get; set; } = [];
     public FrozenDictionary<string, SkillTemplate> GlobalSkillTemplateCache { get; set; }
-    public Dictionary<string, SkillTemplate> TempGlobalSkillTemplateCache { get; set; } = new();
+    public Dictionary<string, SkillTemplate> TempGlobalSkillTemplateCache { get; set; } = [];
     public FrozenDictionary<string, SpellTemplate> GlobalSpellTemplateCache { get; set; }
-    public Dictionary<string, SpellTemplate> TempGlobalSpellTemplateCache { get; set; } = new();
+    public Dictionary<string, SpellTemplate> TempGlobalSpellTemplateCache { get; set; } = [];
     public FrozenDictionary<string, ItemTemplate> GlobalItemTemplateCache { get; set; }
-    public Dictionary<string, ItemTemplate> TempGlobalItemTemplateCache { get; set; } = new();
+    public Dictionary<string, ItemTemplate> TempGlobalItemTemplateCache { get; set; } = [];
     public FrozenDictionary<string, NationTemplate> GlobalNationTemplateCache { get; set; }
-    public Dictionary<string, NationTemplate> TempGlobalNationTemplateCache { get; set; } = new();
+    public Dictionary<string, NationTemplate> TempGlobalNationTemplateCache { get; set; } = [];
     public FrozenDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
-    public Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; } = new();
+    public Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; } = [];
     public FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
-    public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = new();
+    public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = [];
     public FrozenDictionary<uint, string> GlobalKnownGoodActorsCache { get; set; }
-    public Dictionary<uint, string> TempGlobalKnownGoodActorsCache { get; set; } = new();
+    public Dictionary<uint, string> TempGlobalKnownGoodActorsCache { get; set; } = [];
 
     // Frozen Live
     public FrozenDictionary<int, Area> GlobalMapCache { get; set; }
-    public Dictionary<int, Area> TempGlobalMapCache { get; set; } = new();
+    public Dictionary<int, Area> TempGlobalMapCache { get; set; } = [];
 
     // Live
-    public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = new();
-    public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = new();
-    public ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; } = new();
-    public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = new();
-    public ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; } = new();
-    public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = new();
-    public ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; } = new();
-    public ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; } = new();
-    public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = new();
-    public ConcurrentDictionary<uint, Trap> Traps { get; set; } = new();
-    public ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; } = new();
-    public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = new();
-    public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = new();
-    public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = new();
-    public ConcurrentDictionary<IPAddress, byte> GlobalCreationCount { get; set; } = new();
+    public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = [];
+    public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = [];
+    public ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; } = [];
+    public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = [];
+    public ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; } = [];
+    public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = [];
+    public ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; } = [];
+    public ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; } = [];
+    public ConcurrentDictionary<long, Money> GlobalGroundMoneyCache { get; set; } = [];
+    public ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; } = [];
+    public ConcurrentDictionary<uint, Trap> Traps { get; set; } = [];
+    public ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; } = [];
+    public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = [];
+    public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = [];
+    public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = [];
+    public ConcurrentDictionary<IPAddress, byte> GlobalCreationCount { get; set; } = [];
 
     public ServerSetup(IOptions<ServerOptions> options)
     {

@@ -54,6 +54,7 @@ public interface IServerContext
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
     ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; }
     ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; }
+    ConcurrentDictionary<long, Money> GlobalGroundMoneyCache { get; set; }
     ConcurrentDictionary<int, IDictionary<Type, object>> SpriteCollections { get; set; }
     ConcurrentDictionary<uint, Trap> Traps { get; set; }
     ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; }

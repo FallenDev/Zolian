@@ -10,7 +10,8 @@ namespace Darkages.Sprites;
 
 public sealed class Money : Sprite
 {
-    public uint Amount { get; private set; }
+    public long MoneyId { get; private set; }
+    private ulong Amount { get; set; }
     public ushort Image { get; private set; }
     private MoneySprites Type { get; set; }
 
@@ -19,13 +20,14 @@ public sealed class Money : Sprite
         TileType = TileContent.Money;
     }
 
-    public static void Create(Sprite parent, uint amount, Position location)
+    public static void Create(Sprite parent, ulong amount, Position location)
     {
         if (parent == null) return;
 
         var money = new Money();
         money.CalcAmount(amount);
         money.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        money.MoneyId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         var readyTime = DateTime.UtcNow;
         money.AbandonedDate = readyTime;
         money.CurrentMapId = parent.CurrentMapId;
@@ -35,28 +37,28 @@ public sealed class Money : Sprite
         if (mt > 0) money.Image = (ushort)mt;
 
         parent.AddObject(money);
+        ServerSetup.Instance.GlobalGroundMoneyCache.TryAdd(money.MoneyId, money);
     }
 
-    public void GiveTo(uint amount, Aisling aisling)
+    public static void GiveTo(Money money, Aisling aisling)
     {
+        var amount = money.Amount;
         if (aisling.GoldPoints + amount > ServerSetup.Instance.Config.MaxCarryGold)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Can't quite hold that much.");
             return;
         }
-
+        
         aisling.GoldPoints += amount;
-
-        if (aisling.GoldPoints > ServerSetup.Instance.Config.MaxCarryGold)
-            aisling.GoldPoints = int.MaxValue;
-
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
         aisling.Client.SendAttributes(StatUpdateType.ExpGold);
 
-        Remove();
+        var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out var itemToBeRemoved);
+        if (!removed) return;
+        itemToBeRemoved.Remove();
     }
 
-    private void CalcAmount(uint amount)
+    private void CalcAmount(ulong amount)
     {
         Amount = amount;
 
