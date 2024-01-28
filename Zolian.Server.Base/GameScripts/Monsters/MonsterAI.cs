@@ -3254,8 +3254,8 @@ public class Turret : MonsterScript
             return;
         }
 
-        var gatling = Monster.SkillScripts.First(i => i.Skill.CanUse() && i.Skill.Template.Name == "Gatling");
-        if (gatling.Skill == null) return;
+        var gatling = Monster.SkillScripts.FirstOrDefault(i => i.Skill.CanUse() && i.Skill.Template.Name == "Gatling");
+        if (gatling?.Skill == null) return;
 
         gatling.Skill.InUse = true;
         gatling.OnUse(Monster);
