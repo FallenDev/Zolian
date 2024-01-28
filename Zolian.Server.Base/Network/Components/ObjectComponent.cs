@@ -32,10 +32,11 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         if (user?.Map == null) return;
         if (!user.LoggedIn || !user.Map.Ready) return;
 
-        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToArray();
-        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToArray();
-        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToArray();
+        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
+        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
+        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
 
+        CheckIfSpritesStillInView(user, objectsInView);
         RemoveObjects(user, objectsNotInView);
         AddObjects(payload, user, objectsInView);
 
@@ -44,56 +45,58 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         user.Client.SendVisibleEntities(payload);
     }
 
-    private static void RemoveObjects(Aisling client, Sprite[] objectsToRemove)
+    private static void CheckIfSpritesStillInView(Aisling self, ICollection<Sprite> objectsInView)
     {
-        if (objectsToRemove == null) return;
-        if (client == null) return;
-
-        foreach (var obj in objectsToRemove)
+        foreach (var (serial, sprite) in self.SpritesInView)
         {
-            if (obj.Serial == client.Serial) continue;
-            if (!client.View.ContainsKey(obj.Serial)) continue;
-            if (!client.View.TryRemove(obj.Serial, out _)) continue;
-
-            if (obj is Monster monster)
-            {
-                var valueCollection = monster.Scripts?.Values;
-                
-                if (valueCollection is { Count: >= 1 })
-                    foreach (var script in valueCollection)
-                        script.OnLeave(client.Client);
-            }
-
-            obj.HideFrom(client);
+            if (objectsInView.Contains(sprite)) continue;
+            self.SpritesInView.TryRemove(serial, out _);
         }
     }
 
-    private static void AddObjects(ICollection<Sprite> payload, Aisling self, IEnumerable<Sprite> objectsToAdd)
+    private static void RemoveObjects(Aisling self, IReadOnlyCollection<Sprite> objectsToRemove)
     {
-        if (payload == null) return;
+        if (objectsToRemove == null) return;
         if (self == null) return;
-        if (objectsToAdd == null) return;
 
-        foreach (var obj in objectsToAdd)
+        Parallel.ForEach(objectsToRemove, obj =>
         {
-            // If object is not an item or money, try to add it; If you cannot add it, continue
-            if (obj is not Item or Money)
-                if (!self.View.TryAdd(obj.Serial, obj)) continue;
+            if (obj.Serial == self.Serial) return;
 
             if (obj is Monster monster)
             {
-                var valueCollection = monster.Scripts?.Values;
-                
-                if (valueCollection is { Count: >= 1 })
-                    foreach (var script in valueCollection)
-                        script.OnApproach(self.Client);
+                var script = monster.Scripts?.Values.First();
+                script?.OnLeave(self.Client);
+            }
+
+            self.SpritesInView.TryRemove(obj.Serial, out _);
+            obj.HideFrom(self);
+        });
+    }
+
+    private static void AddObjects(List<Sprite> payload, Aisling self, IReadOnlyCollection<Sprite> objectsToAdd)
+    {
+        payload ??= []; 
+        if (self == null) return;
+        if (objectsToAdd == null) return;
+
+        Parallel.ForEach(objectsToAdd, obj =>
+        {
+            // If value is in view, don't add it
+            if (self.SpritesInView.TryGetValue(obj.Serial, out _)) return;
+
+            if (obj is Monster monster)
+            {
+                var script = monster.Scripts?.Values.First();
+                script?.OnApproach(self.Client);
             }
 
             if (obj is Aisling other)
             {
-                if (self.Serial == other.Serial)
-                    continue;
+                // Self Check
+                if (self.Serial == other.Serial) return;
 
+                // Invisible Checks
                 if (self.CanSeeSprite(other))
                     other.ShowTo(self);
 
@@ -102,9 +105,9 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             }
             else
             {
-                self.View.TryAdd(obj.Serial, obj);
                 payload.Add(obj);
+                self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
             }
-        }
+        });
     }
 }

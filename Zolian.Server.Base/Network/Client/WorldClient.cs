@@ -4886,7 +4886,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (Aisling.LastMapId != travelTo && Aisling.Map.Script.Item2 != null)
             Aisling.Map.Script.Item2.OnMapExit(this);
 
-        Aisling.View.Clear();
         return this;
     }
 

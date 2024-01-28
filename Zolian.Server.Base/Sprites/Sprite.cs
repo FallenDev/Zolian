@@ -295,6 +295,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (this is Aisling aisling)
         {
             nearbyAisling.Client.SendDisplayAisling(aisling);
+            aisling.SpritesInView.AddOrUpdate(nearbyAisling.Serial, nearbyAisling, (_, _) => nearbyAisling);
         }
         else
         {

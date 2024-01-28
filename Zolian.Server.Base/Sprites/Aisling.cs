@@ -35,11 +35,11 @@ public record IgnoredRecord
 public sealed class Aisling : Player, IAisling
 {
     public WorldClient Client { get; set; }
+    public readonly ConcurrentDictionary<uint, Sprite> SpritesInView = [];
     public bool GameMasterChaosCancel { get; set; }
     public int EquipmentDamageTaken = 0;
-    public readonly ConcurrentDictionary<uint, Sprite> View = new();
-    public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = new();
-    public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = new();
+    public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = [];
+    public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = [];
     public AislingTrackers AislingTrackers { get; }
     public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;
@@ -72,8 +72,8 @@ public sealed class Aisling : Player, IAisling
         Remains = new Death();
         Hacked = false;
         PasswordAttempts = 0;
-        DiscoveredMaps = new List<int>();
-        IgnoredList = new List<string>();
+        DiscoveredMaps = [];
+        IgnoredList = [];
         GroupId = 0;
         AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
