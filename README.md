@@ -52,5 +52,6 @@ Zolian is a fair-use project and accepts zero compensations of any kind
 ## License   
 - [Fair Use in accordance of U.S. Const. Art. I, § 8, cl. 8. under Section 107 of the Copyright Act "Nonprofit Educational Purposes & Transformative](https://www.copyright.gov/title17/92chap1.html#107)
 - [Copyright.gov - U.S. Copyright Office Fair Use Index](https://www.copyright.gov/fair-use/)
-- Zolian source, and components are released under the GNU AGPL v3
 - Please visit: https://www.thebucknetwork.com/Privacy
+- Zolian source, and components are released under  
+[![agplv3-155x51](https://github.com/FallenDev/Zolian/assets/12104989/45b34ff3-156e-4c71-b860-5af1d4ca5c25)](https://www.gnu.org/licenses/agpl-3.0.html)
