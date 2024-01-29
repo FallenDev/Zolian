@@ -1,12 +1,9 @@
 ﻿using Chaos.Common.Definitions;
-using Chaos.Extensions.Common;
 using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.GameScripts.Spells;
-using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;

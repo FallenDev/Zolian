@@ -2,8 +2,6 @@
 
 using Darkages.Network.Server;
 
-using System.Globalization;
-
 namespace Darkages.Network.Components;
 
 public class BankInterestComponent(WorldServer server) : WorldServerComponent(server)
@@ -28,18 +26,16 @@ public class BankInterestComponent(WorldServer server) : WorldServerComponent(se
                 return;
             }
 
-            var calc = Math.Round(player.BankedGold * 0.00333).ToString(CultureInfo.CurrentCulture);
             var interest = (uint)Math.Round(player.BankedGold * 0.00333);
             if (interest >= 1000000)
                 interest = 1000000;
-            if (player.BankedGold + interest >= uint.MaxValue)
+            if (player.BankedGold + interest >= ulong.MaxValue)
             {
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
-                    $"{{=uBank Cap - No interest gained -");
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uBank Cap - No interest gained -");
                 return;
             }
 
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {calc} coins");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=uInterest Accrued: {interest} coins");
             player.BankedGold += interest;
         });
     }
