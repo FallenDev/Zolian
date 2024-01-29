@@ -1079,7 +1079,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling?.Map is not { Ready: true }) return default;
         var readyTime = DateTime.UtcNow;
         if (readyTime.Subtract(client.LastMapUpdated).TotalSeconds > 1)
-            if (readyTime.Subtract(client.LastMovement).TotalSeconds < 0.40 && client.Aisling.MonsterForm == 0) return default;
+            if (readyTime.Subtract(client.LastMovement).TotalSeconds < 0.30 && client.Aisling.MonsterForm == 0) return default;
 
         if (client.Aisling.CantMove)
         {
