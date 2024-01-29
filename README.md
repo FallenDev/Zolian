@@ -31,11 +31,10 @@ Server is a custom implementation of the doomvas emulator. Most of the mechanics
 
 ## Contributing
 Zolian is an open-source project, there are quite a few ways you can contribute here:
-* Join the Community: https://discord.gg/WbP2wU5CcB
 * Designing new sprites
-* Developing directly to the project
-* Helping create a wiki
-* By joining our Discord and making suggestions
+* Designing new quests
+* Helping create fan pages
+* By joining our Discord and making suggestions: https://discord.gg/WbP2wU5CcB
 
 ## Community
 Zolian isn't the only project out there, nor does it claim to have any exlusivity over any of the others. Please visit their projects and enjoy what they've built.   
