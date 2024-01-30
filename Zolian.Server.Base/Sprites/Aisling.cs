@@ -695,7 +695,7 @@ public sealed class Aisling : Player, IAisling
         if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(ServerSetup.Instance.Config.DeathMap)) return;
         if (CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
 
-        Remains.Reap(this);
+        Death.Reap(this);
         RemoveBuffsAndDebuffs();
         WarpToHell();
     }

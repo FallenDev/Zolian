@@ -7,33 +7,31 @@ namespace Darkages.Types;
 
 public class Death
 {
-    public void Reap(Aisling player)
+    public static void Reap(Aisling player)
     {
         if (player == null) return;
         player.DeathLocation = player.Pos;
         player.DeathMapId = player.CurrentMapId;
-
-        ReapEquipment(player);
+        
         ReapInventory(player);
         ReapGold(player);
+        ReapEquipment(player);
 
         player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.DeathReapingMessage}");
-        player.CurrentWeight = 0;
         player.Client.GiveScar();
     }
 
-    private void ReapInventory(Aisling player)
+    private static void ReapInventory(Aisling player)
     {
         var batch = player.Inventory.Items.Select(i => i.Value).Where(i => i != null).Where(i => i is { Template: not null }).ToList();
 
-        foreach (var obj in batch)
+        foreach (var obj in from obj in batch 
+                 where obj.Template.Flags.FlagIsSet(ItemFlags.Dropable) 
+                 where !obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuest) 
+                 where !obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestNoConsume) 
+                 where !obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestUnique) 
+                 where !obj.Template.Flags.FlagIsSet(ItemFlags.DropScript) select obj)
         {
-            if (!obj.Template.Flags.FlagIsSet(ItemFlags.Dropable)) continue;
-            if (obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuest)) continue;
-            if (obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestNoConsume)) continue;
-            if (obj.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestUnique)) continue;
-            if (obj.Template.Flags.FlagIsSet(ItemFlags.DropScript)) continue;
-
             if (obj.Durability > 0 && obj.Template.Flags.FlagIsSet(ItemFlags.Equipable))
             {
                 var duraLost = obj.Durability * 10 / 100;
@@ -56,18 +54,12 @@ public class Death
         }
     }
 
-    private void ReapEquipment(Aisling player)
+    private static void ReapEquipment(Aisling player)
     {
         var batch = player.EquipmentManager.Equipment.Select(i => i.Value).Where(i => i != null).Where(i => i is { Item.Template: not null }).ToList();
 
         foreach (var obj in batch)
         {
-            if (!obj.Item.Template.Flags.FlagIsSet(ItemFlags.Dropable)) continue;
-            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuest)) continue;
-            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestNoConsume)) continue;
-            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.NonDropableQuestUnique)) continue;
-            if (obj.Item.Template.Flags.FlagIsSet(ItemFlags.DropScript)) continue;
-
             var duraLost = obj.Item.Durability * 10 / 100;
 
             if (obj.Item.Durability > duraLost)
@@ -90,8 +82,7 @@ public class Death
                 obj.Item.Tarnished = true;
             }
 
-            player.EquipmentManager.RemoveFromSlot(obj.Slot);
-            ReleaseItem(player, obj.Item);
+            player.EquipmentManager.RemoveFromExisting(obj.Slot);
         }
 
         player.ArmorImg = 0;
@@ -106,7 +97,7 @@ public class Death
         player.BootsImg = 0;
     }
 
-    private void ReapGold(Aisling player)
+    private static void ReapGold(Aisling player)
     {
         var gold = player.GoldPoints;
         if (gold <= 0) return;
@@ -114,7 +105,7 @@ public class Death
         player.GoldPoints = 0;
     }
 
-    private void ReleaseItem(Aisling player, Item item)
+    private static void ReleaseItem(Aisling player, Item item)
     {
         item.Pos = player.DeathLocation;
         item.CurrentMapId = player.DeathMapId;
