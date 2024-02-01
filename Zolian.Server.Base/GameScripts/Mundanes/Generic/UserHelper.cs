@@ -68,6 +68,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var playerAegis = client.Aisling.Aegis.ToString();
         var playerReaping = client.Aisling.Reaping.ToString();
         var playerVamp = client.Aisling.Vampirism.ToString();
+        var playerGhost = client.Aisling.Ghosting.ToString();
         var playerHaste = client.Aisling.Haste.ToString();
         var playerSpikes = client.Aisling.Spikes.ToString();
         var playerGust = client.Aisling.Gust.ToString();
@@ -92,7 +93,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
                                                                  $"   {{=gDefense| {{=sAC{{=c:{{=a{playerAc}{{=c, {{=gRegen{{=c:{{=a{playerRegen}{{=c, {{=sSecondary{{=c:{{=a{playerDefElement}\n" +
                                                                  $"{{=eSaving Throws{{=c: {{=sFort{{=c:{{=a{playerFort}%{{=c, {{=sReflex{{=c:{{=a{playerReflex}%{{=c, {{=sWill{{=c:{{=a{playerWill}%\n" +
                                                                  $"{{=bBleeding{{=c: {{=a{playerBleeding}{{=c, {{=rRending{{=c: {{=a{playerRending}{{=c, {{=sAegis{{=c: {{=a{playerAegis}{{=c, {{=nReaping{{=c: {{=a{playerReaping}\n" +
-                                                                 $"{{=bVampirism{{=c: {{=a{playerVamp}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +
+                                                                 $"{{=bVamp{{=c: {{=a{playerVamp}{{=c, {{=uGhost{{=c: {{=a{playerGhost}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +
                                                                  $"{{=uQuake{{=c: {{=a{playerQuake}{{=c, {{=uRain{{=c: {{=a{playerRain}, {{=uFlame{{=c: {{=a{playerFlame}{{=c, {{=uDusk{{=c: {{=a{playerDusk}{{=c, {{=uDawn{{=c: {{=a{playerDawn}");
     }
 

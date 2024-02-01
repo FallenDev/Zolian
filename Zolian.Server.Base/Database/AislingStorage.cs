@@ -145,20 +145,18 @@ public record AislingStorage : Sql, IAislingStorage
             var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
             dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
-                obj.OffenseElement.ToString(), obj.DefenseElement.ToString(), obj.SecondaryOffensiveElement.ToString(),
-                obj.SecondaryDefensiveElement.ToString(), obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
+                obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
                 obj._Regen, obj._Dmg, obj._Hit, obj._Mr, obj._Str, obj._Int, obj._Wis, obj._Con, obj._Dex, obj._Luck, obj.AbpLevel,
                 obj.AbpNext, obj.AbpTotal, obj.ExpLevel, obj.ExpNext, obj.ExpTotal, obj.Stage.ToString(), obj.JobClass.ToString(),
                 obj.Path.ToString(), obj.PastClass.ToString(), obj.Race.ToString(), obj.Afflictions.ToString(), obj.Gender.ToString(),
                 obj.HairColor, obj.HairStyle, obj.NameColor, obj.ProfileMessage, obj.Nation, obj.Clan, obj.ClanRank, obj.ClanTitle,
-                obj.AnimalForm.ToString(), obj.MonsterForm, obj.ActiveStatus.ToString(), obj.Flags.ToString(), obj.CurrentWeight, obj.World,
+                obj.MonsterForm, obj.ActiveStatus.ToString(), obj.Flags.ToString(), obj.CurrentWeight, obj.World,
                 obj.Lantern, obj.IsInvisible, obj.Resting.ToString(), obj.FireImmunity, obj.WaterImmunity, obj.WindImmunity, obj.EarthImmunity,
                 obj.LightImmunity, obj.DarkImmunity, obj.PoisonImmunity, obj.EnticeImmunity, obj.PartyStatus.ToString(), obj.RaceSkill,
-                obj.RaceSpell, obj.GameMaster, obj.ArenaHost, obj.Developer, obj.Ranger, obj.Knight, obj.GoldPoints, obj.StatPoints, obj.GamePoints,
+                obj.RaceSpell, obj.GameMaster, obj.ArenaHost, obj.Knight, obj.GoldPoints, obj.StatPoints, obj.GamePoints,
                 obj.BankedGold, obj.ArmorImg, obj.HelmetImg, obj.ShieldImg, obj.WeaponImg, obj.BootsImg, obj.HeadAccessoryImg, obj.Accessory1Img,
                 obj.Accessory2Img, obj.Accessory3Img, obj.Accessory1Color, obj.Accessory2Color, obj.Accessory3Color, obj.BodyColor, obj.BodySprite,
-                obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants, obj.Aegis, obj.Bleeding, obj.Spikes, obj.Rending,
-                obj.Reaping, obj.Vampirism, obj.Haste, obj.Gust, obj.Quake, obj.Rain, obj.Flame, obj.Dusk, obj.Dawn);
+                obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants);
 
             if (obj.QuestManager == null) return false;
             qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
@@ -364,20 +362,18 @@ public record AislingStorage : Sql, IAislingStorage
                 var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
 
                 dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
-                    player.OffenseElement.ToString(), player.DefenseElement.ToString(), player.SecondaryOffensiveElement.ToString(),
-                    player.SecondaryDefensiveElement.ToString(), player.Direction, player.CurrentHp, player.BaseHp, player.CurrentMp, player.BaseMp, player._ac,
+                    player.Direction, player.CurrentHp, player.BaseHp, player.CurrentMp, player.BaseMp, player._ac,
                     player._Regen, player._Dmg, player._Hit, player._Mr, player._Str, player._Int, player._Wis, player._Con, player._Dex, player._Luck, player.AbpLevel,
                     player.AbpNext, player.AbpTotal, player.ExpLevel, player.ExpNext, player.ExpTotal, player.Stage.ToString(), player.JobClass.ToString(),
                     player.Path.ToString(), player.PastClass.ToString(), player.Race.ToString(), player.Afflictions.ToString(), player.Gender.ToString(),
                     player.HairColor, player.HairStyle, player.NameColor, player.ProfileMessage, player.Nation, player.Clan, player.ClanRank, player.ClanTitle,
-                    player.AnimalForm.ToString(), player.MonsterForm, player.ActiveStatus.ToString(), player.Flags.ToString(), player.CurrentWeight, player.World,
+                    player.MonsterForm, player.ActiveStatus.ToString(), player.Flags.ToString(), player.CurrentWeight, player.World,
                     player.Lantern, player.IsInvisible, player.Resting.ToString(), player.FireImmunity, player.WaterImmunity, player.WindImmunity, player.EarthImmunity,
                     player.LightImmunity, player.DarkImmunity, player.PoisonImmunity, player.EnticeImmunity, player.PartyStatus.ToString(), player.RaceSkill,
-                    player.RaceSpell, player.GameMaster, player.ArenaHost, player.Developer, player.Ranger, player.Knight, player.GoldPoints, player.StatPoints, player.GamePoints,
+                    player.RaceSpell, player.GameMaster, player.ArenaHost, player.Knight, player.GoldPoints, player.StatPoints, player.GamePoints,
                     player.BankedGold, player.ArmorImg, player.HelmetImg, player.ShieldImg, player.WeaponImg, player.BootsImg, player.HeadAccessoryImg, player.Accessory1Img,
                     player.Accessory2Img, player.Accessory3Img, player.Accessory1Color, player.Accessory2Color, player.Accessory3Color, player.BodyColor, player.BodySprite,
-                    player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants, player.Aegis, player.Bleeding, player.Spikes, player.Rending,
-                    player.Reaping, player.Vampirism, player.Haste, player.Gust, player.Quake, player.Rain, player.Flame, player.Dusk, player.Dawn);
+                    player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants);
 
                 qDt.Rows.Add(player.Serial, player.QuestManager.MailBoxNumber, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
                     player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.Dar, player.QuestManager.DarItem,
@@ -940,10 +936,6 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("X", typeof(byte));
         dt.Columns.Add("Y", typeof(byte));
         dt.Columns.Add("CurrentMapId", typeof(int));
-        dt.Columns.Add("OffenseElement", typeof(string));
-        dt.Columns.Add("DefenseElement", typeof(string));
-        dt.Columns.Add("SecondaryOffensiveElement", typeof(string));
-        dt.Columns.Add("SecondaryDefensiveElement", typeof(string));
         dt.Columns.Add("Direction", typeof(byte));
         dt.Columns.Add("CurrentHp", typeof(int));
         dt.Columns.Add("BaseHp", typeof(int));
@@ -981,7 +973,6 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("Clan", typeof(string));
         dt.Columns.Add("ClanRank", typeof(string));
         dt.Columns.Add("ClanTitle", typeof(string));
-        dt.Columns.Add("AnimalForm", typeof(string));
         dt.Columns.Add("MonsterForm", typeof(short));
         dt.Columns.Add("ActiveStatus", typeof(string));
         dt.Columns.Add("Flags", typeof(string));
@@ -1003,8 +994,6 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("RaceSpell", typeof(string));
         dt.Columns.Add("GameMaster", typeof(bool));
         dt.Columns.Add("ArenaHost", typeof(bool));
-        dt.Columns.Add("Developer", typeof(bool));
-        dt.Columns.Add("Ranger", typeof(bool));
         dt.Columns.Add("Knight", typeof(bool));
         dt.Columns.Add("GoldPoints", typeof(long));
         dt.Columns.Add("StatPoints", typeof(short));
@@ -1029,19 +1018,6 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("BootColor", typeof(byte));
         dt.Columns.Add("OverCoatColor", typeof(byte));
         dt.Columns.Add("Pants", typeof(byte));
-        dt.Columns.Add("Aegis", typeof(byte));
-        dt.Columns.Add("Bleeding", typeof(byte));
-        dt.Columns.Add("Spikes", typeof(byte));
-        dt.Columns.Add("Rending", typeof(byte));
-        dt.Columns.Add("Reaping", typeof(byte));
-        dt.Columns.Add("Vampirism", typeof(byte));
-        dt.Columns.Add("Haste", typeof(byte));
-        dt.Columns.Add("Gust", typeof(byte));
-        dt.Columns.Add("Quake", typeof(byte));
-        dt.Columns.Add("Rain", typeof(byte));
-        dt.Columns.Add("Flame", typeof(byte));
-        dt.Columns.Add("Dusk", typeof(byte));
-        dt.Columns.Add("Dawn", typeof(byte));
         return dt;
     }
 

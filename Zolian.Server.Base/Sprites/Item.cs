@@ -71,6 +71,7 @@ public sealed class Item : Sprite, IItem
         Aegis,
         Reaping,
         Vampirism,
+        Ghosting,
         Haste,
         Gust,
         Quake,
@@ -807,6 +808,7 @@ public sealed class Item : Sprite, IItem
         client.Aisling.Aegis = 0;
         client.Aisling.Reaping = 0;
         client.Aisling.Vampirism = 0;
+        client.Aisling.Ghosting = 0;
         client.Aisling.Haste = 0;
         client.Aisling.Gust = 0;
         client.Aisling.Quake = 0;
@@ -924,6 +926,7 @@ public sealed class Item : Sprite, IItem
             {WeaponVariance.Aegis, c => c.Aisling.Aegis += 1},
             {WeaponVariance.Reaping, c => c.Aisling.Reaping += 1},
             {WeaponVariance.Vampirism, c => c.Aisling.Vampirism += 1},
+            {WeaponVariance.Ghosting, c => c.Aisling.Ghosting += 1},
             {WeaponVariance.Haste, c => c.Aisling.Haste += 1},
             {WeaponVariance.Gust, c => c.Aisling.Gust += 1},
             {WeaponVariance.Quake, c => c.Aisling.Quake += 1},

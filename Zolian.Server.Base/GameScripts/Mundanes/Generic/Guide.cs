@@ -303,7 +303,8 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 };
 
                     client.SendServerMessage(ServerMessageType.ScrollWindow, "{=qAegis (2% or 4%){=a: casts magic reflect (Deireas Faileas). " +
-                                                                              "\n\n{=qVampirism (2% or 4%){=a: absorbs health; 7% DMG Dealt with 1 point, 14% DMG Dealt with 2 points. " +
+                                                                              "\n\n{=qVampirism (2% or 4%){=a: absorbs health; 7% DMG dealt with 1 point, 14% DMG dealt with 2 points. " +
+                                                                              "\n\n{=qGhosting (2% or 4%){=a: absorbs mana; 7% DMG dealt with 1 point, 14% DMG dealt with 2 points. " +
                                                                               "\n\n{=qHaste (2% or 4%){=a: decrease cooldown timers for assails, abilities, and spells; 25% with 1 point, 50% with 2 points. " +
                                                                               "\n\n{=qBleeding (2% or 4%){=a: bleed the target 2% health over 7 seconds. " +
                                                                               "\n\n{=qRending (2% or 4%){=a: remove 10 armor for 30 seconds. " +

@@ -3640,8 +3640,6 @@ public class WorldClient : SocketClientBase, IWorldClient
             color = ListColor.Clan;
         if (user.GameMaster)
             color = ListColor.Red;
-        if (user.Ranger)
-            color = ListColor.Green;
         if (user.Knight)
             color = ListColor.Green;
         if (user.ArenaHost)

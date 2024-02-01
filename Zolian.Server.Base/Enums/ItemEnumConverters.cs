@@ -67,6 +67,7 @@ public static class ItemEnumConverters
             Item.WeaponVariance.Aegis => "Aegis",
             Item.WeaponVariance.Reaping => "Reaping",
             Item.WeaponVariance.Vampirism => "Vampirism",
+            Item.WeaponVariance.Ghosting => "Ghosting",
             Item.WeaponVariance.Haste => "Haste",
             Item.WeaponVariance.Gust => "Gust",
             Item.WeaponVariance.Quake => "Quake",

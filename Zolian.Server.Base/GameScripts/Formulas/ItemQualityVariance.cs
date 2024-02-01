@@ -72,7 +72,7 @@ public static class ItemQualityVariance
                 item.MaxDurability = (uint)(temp / 0.5);
                 break;
             case Item.Quality.Mythic:
-                item.MaxDurability = (uint)(temp / 0.2);
+                item.MaxDurability = (uint)(temp / 0.3);
                 break;
         }
     }
@@ -118,13 +118,14 @@ public static class ItemQualityVariance
 
         return weaponVariance switch
         {
-            >= 0 and <= .64 => Item.WeaponVariance.None,
-            >= .65 and <= .67 => Item.WeaponVariance.Aegis,
-            >= .68 and <= .70 => Item.WeaponVariance.Bleeding,
-            >= .71 and <= .73 => Item.WeaponVariance.Rending,
-            >= .74 and <= .76 => Item.WeaponVariance.Reaping,
-            >= .77 and <= .79 => Item.WeaponVariance.Vampirism,
-            >= .80 and <= .82 => Item.WeaponVariance.Haste,
+            >= 0 and <= .50 => Item.WeaponVariance.None,
+            >= .51 and <= .55 => Item.WeaponVariance.Aegis,
+            >= .56 and <= .60 => Item.WeaponVariance.Bleeding,
+            >= .61 and <= .65 => Item.WeaponVariance.Rending,
+            >= .66 and <= .70 => Item.WeaponVariance.Reaping,
+            >= .71 and <= .74 => Item.WeaponVariance.Vampirism,
+            >= .75 and <= .78 => Item.WeaponVariance.Ghosting,
+            >= .79 and <= .82 => Item.WeaponVariance.Haste,
             >= .83 and <= .85 => Item.WeaponVariance.Gust,
             >= .86 and <= .88 => Item.WeaponVariance.Quake,
             >= .89 and <= .91 => Item.WeaponVariance.Rain,

@@ -56,8 +56,6 @@ public class Player : Sprite
     public string RaceSpell { get; set; }
     public bool GameMaster { get; set; }
     public bool ArenaHost { get; set; }
-    public bool Developer { get; set; }
-    public bool Ranger { get; set; }
     public bool Knight { get; set; }
     public ulong GoldPoints { get; set; }
     public short StatPoints { get; set; }
@@ -88,6 +86,7 @@ public class Player : Sprite
     public byte Rending { get; set; }
     public byte Reaping { get; set; }
     public byte Vampirism { get; set; }
+    public byte Ghosting { get; set; }
     public byte Haste { get; set; }
     public byte Gust { get; set; }
     public byte Quake { get; set; }
