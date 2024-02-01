@@ -2046,7 +2046,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (damageDealingSprite.Vampirism == 0 && damageDealingSprite.Rending == 0 && damageDealingSprite.Bleeding == 0 && damageDealingSprite.Reaping == 0
             && damageDealingSprite.Gust == 0 && damageDealingSprite.Quake == 0 && damageDealingSprite.Rain == 0
             && damageDealingSprite.Flame == 0 && damageDealingSprite.Dusk == 0 && damageDealingSprite.Dawn == 0) return;
-        
+
         switch (damageDealingSprite.Vampirism)
         {
             case 1 when vampChance >= 99:
@@ -2054,7 +2054,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
@@ -2087,7 +2087,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
@@ -2117,6 +2117,76 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 }
         }
 
+        switch (damageDealingSprite.Ghosting)
+        {
+            case 1 when vampChance >= 99:
+                {
+                    switch (target)
+                    {
+                        case Aisling:
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
+                            return;
+                    }
+
+                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    const double absorbPct = 0.07;
+                    var absorb = absorbPct * dmg;
+                    damageDealingSprite.CurrentMp += (int)absorb;
+                    if (target.CurrentMp >= (int)absorb)
+                        target.CurrentMp -= (int)absorb;
+                    client.SendAttributes(StatUpdateType.Vitality);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
+                    break;
+                }
+            case 2 when vampChance >= 97:
+                {
+                    switch (target)
+                    {
+                        case Aisling:
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
+                            return;
+                    }
+
+                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    const double absorbPct = 0.14;
+                    var absorb = absorbPct * dmg;
+                    damageDealingSprite.CurrentMp += (int)absorb;
+                    if (target.CurrentMp >= (int)absorb)
+                        target.CurrentMp -= (int)absorb;
+                    client.SendAttributes(StatUpdateType.Vitality);
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
+                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
+                    break;
+                }
+        }
+
         switch (damageDealingSprite.Bleeding)
         {
             case 1 when bleedingChance >= 99:
@@ -2124,7 +2194,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
@@ -2153,7 +2223,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
@@ -2206,7 +2276,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
@@ -2234,7 +2304,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     switch (target)
                     {
                         case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss) 
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
                                                   || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
