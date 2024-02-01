@@ -4082,7 +4082,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (skill.Level >= skill.Template.MaxLevel) return;
 
         var levelUpRand = Generator.RandomNumPercentGen();
-        if (skill.Uses >= 200)
+        if (skill.Uses >= 40 && skill.Template.SkillType != SkillScope.Assail)
             levelUpRand += 0.1;
 
         switch (levelUpRand)
