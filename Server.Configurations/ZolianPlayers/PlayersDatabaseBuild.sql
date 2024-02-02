@@ -462,6 +462,7 @@ CREATE TYPE dbo.ComboType AS TABLE
 CREATE TYPE dbo.QuestType AS TABLE
 (
     Serial BIGINT,
+	MailBoxNumber INT,
     TutorialCompleted BIT,
     BetaReset BIT,
     ArtursGift INT,
@@ -469,8 +470,15 @@ CREATE TYPE dbo.QuestType AS TABLE
     ConnPotions BIT,
     CryptTerror BIT,
     CryptTerrorSlayed BIT,
+	CryptTerrorContinued BIT,
+    CryptTerrorContSlayed BIT,
+	NightTerror BIT,
+    NightTerrorSlayed BIT,
+	DreamWalking BIT,
+    DreamWalkingSlayed BIT,
     Dar INT,
     DarItem VARCHAR (20),
+	ReleasedTodesbaum BIT,
     DrunkenHabit BIT,
     EternalLove BIT,
     FionaDance BIT,
@@ -513,8 +521,8 @@ CREATE TYPE dbo.QuestType AS TABLE
     AdventuresGuildReputation INT,
     BeltQuest VARCHAR (6),
     SavedChristmas BIT,
-    RescuedReindeer BIT,
-    YetiKilled BIT
+	RescuedReindeer BIT,
+	YetiKilled BIT
 );
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -717,10 +725,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[InsertQuests]
-    @Serial BIGINT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @StoneSmithingTier VARCHAR (10), @MilethRep INT,
-	@ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @Dar INT,
-	@DarItem VARCHAR (20), @EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20),
-	@KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT,
+    @Serial BIGINT, @MailBoxNumber INT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @StoneSmithingTier VARCHAR (10), @MilethRep INT,
+	@ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @CryptTerrorContinued BIT, @CryptTerrorContSlayed BIT,
+	@NightTerror BIT, @NightTerrorSlayed BIT, @DreamWalking BIT, @DreamWalkingSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @ReleasedTodesbaum BIT, @EternalLove BIT, @Fiona BIT,
+	@Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT,
 	@PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
     @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
     @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
@@ -733,10 +741,10 @@ BEGIN
     SET NOCOUNT ON;
     
     INSERT INTO [ZolianPlayers].[dbo].[PlayersQuests] (
-        [Serial], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
-		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [Dar], [DarItem],
-        [EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting],
-        [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill],
+        [Serial], [MailBoxNumber], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
+		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [CryptTerrorContinued], [CryptTerrorContSlayed],
+		[NightTerror], [NightTerrorSlayed], [DreamWalking], [DreamWalkingSlayed], [Dar], [DarItem], [ReleasedTodesbaum], [EternalLove], [FionaDance],
+		[Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill],
         [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
         [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
@@ -745,10 +753,10 @@ BEGIN
 		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled]
     )
     VALUES (
-        @Serial, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep, @ArtursGift,
-        @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @Dar, @DarItem,
-        @EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting,
-        @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill,
+        @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep, @ArtursGift,
+        @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @CryptTerrorContinued, @CryptTerrorContSlayed,
+		@NightTerror, @NightTerrorSlayed, @DreamWalking, @DreamWalkingSlayed, @Dar, @DarItem, @ReleasedTodesbaum, @EternalLove, @Fiona, 
+		@Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill,
         @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau,
         @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
@@ -864,6 +872,7 @@ BEGIN
 
     WHEN MATCHED THEN
     UPDATE SET
+		[MailBoxNumber] = source.MailBoxNumber,
         [TutorialCompleted] = source.TutorialCompleted,
         [BetaReset] = source.BetaReset,
         [ArtursGift] = source.ArtursGift,
@@ -871,8 +880,15 @@ BEGIN
         [ConnPotions] = source.ConnPotions,
         [CryptTerror] = source.CryptTerror,
         [CryptTerrorSlayed] = source.CryptTerrorSlayed,
+		[CryptTerrorContinued] = source.CryptTerrorContinued,
+		[CryptTerrorContSlayed] = source.CryptTerrorContSlayed,
+		[NightTerror] = source.NightTerror,
+		[NightTerrorSlayed] = source.NightTerrorSlayed,
+		[DreamWalking] = source.DreamWalking,
+		[DreamWalkingSlayed] = source.DreamWalkingSlayed,
         [Dar] = source.Dar,
         [DarItem] = source.DarItem,
+		[ReleasedTodesbaum] = source.ReleasedTodesbaum,
         [DrunkenHabit] = source.DrunkenHabit,
         [EternalLove] = source.EternalLove,
         [FionaDance] = source.FionaDance,
@@ -1354,10 +1370,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT TutorialCompleted, BetaReset, StoneSmithing, StoneSmithingTier, MilethReputation, ArtursGift,
-           CamilleGreetingComplete, ConnPotions, CryptTerror, CryptTerrorSlayed, Dar,
-           DarItem, DrunkenHabit, EternalLove, FionaDance, Keela, KeelaCount, KeelaKill,
-           KeelaQuesting, KillerBee, Neal, NealCount, NealKill, AbelShopAccess, PeteKill,
+    SELECT MailBoxNumber, TutorialCompleted, BetaReset, StoneSmithing, StoneSmithingTier, MilethReputation, ArtursGift,
+           CamilleGreetingComplete, ConnPotions, CryptTerror, CryptTerrorSlayed, CryptTerrorContinued, CryptTerrorContSlayed, 
+		   NightTerror, NightTerrorSlayed, DreamWalking, DreamWalkingSlayed, Dar, DarItem, ReleasedTodesbaum, DrunkenHabit, EternalLove, FionaDance,
+		   Keela, KeelaCount, KeelaKill, KeelaQuesting, KillerBee, Neal, NealCount, NealKill, AbelShopAccess, PeteKill,
            PeteComplete, SwampAccess, SwampCount, TagorDungeonAccess, Lau,
            AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
            OrenReputation, PietReputation, LouresReputation, UndineReputation,

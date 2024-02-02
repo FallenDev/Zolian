@@ -182,7 +182,6 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);
-
                             client.SendOptionsDialog(Mundane, "Finally, some peace.");
                         }
                         else
@@ -228,7 +227,6 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);
-
                             client.SendOptionsDialog(Mundane, "Finally, some peace.");
                         }
                         else
@@ -268,13 +266,12 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             {
                                 Key = "LBeggar3",
                                 Time = DateTime.UtcNow,
-                                Color = LegendColor.BlueG6,
-                                Icon = (byte)LegendIcon.Victory,
+                                Color = LegendColor.Yellow,
+                                Icon = (byte)LegendIcon.Warrior,
                                 Text = "Grotesque Nightmare of the Crypt"
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);
-
                             client.SendOptionsDialog(Mundane, "Finally, some peace.");
                         }
                         else
@@ -314,7 +311,7 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     break;
                 case 0x12:
                     {
-                        if (client.Aisling.HasKilled("Dream Walker", 1))
+                        if (client.Aisling.HasKilled("Dream Walker", 1) && !client.Aisling.QuestManager.DreamWalkingSlayed)
                         {
                             client.Aisling.QuestManager.DreamWalkingSlayed = true;
                             client.Aisling.QuestManager.MilethReputation += 1;
@@ -325,13 +322,12 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             {
                                 Key = "LBeggar4",
                                 Time = DateTime.UtcNow,
-                                Color = LegendColor.BlueG8,
+                                Color = LegendColor.TurquoiseG3,
                                 Icon = (byte)LegendIcon.Victory,
                                 Text = "Vanquished a Dream Walker"
                             };
 
                             client.Aisling.LegendBook.AddLegend(item, client);
-
                             client.SendOptionsDialog(Mundane, "I can feel it, you did it; You actually did it!");
                         }
                         else

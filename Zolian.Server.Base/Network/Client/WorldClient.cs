@@ -3760,6 +3760,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public void ClientRefreshed()
     {
+        if (Aisling.Map.ID != ServerSetup.Instance.Config.TransitionZone) MapOpen = false;
         if (MapOpen) return;
         if (!CanRefresh) return;
 
@@ -4695,9 +4696,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             Aisling.LastPosition = new Position(Aisling.Pos);
             Aisling.Pos = new Vector2(position.X, position.Y);
             Aisling.CurrentMapId = area.ID;
-
-            WarpTo(position);
-            ClientRefreshed();
+            WarpToAndRefresh(position);
         }
 
         // ToDo: Logic to only play this if a menu is opened.
@@ -4726,10 +4725,11 @@ public class WorldClient : SocketClientBase, IWorldClient
             Aisling.LastPosition = new Position(Aisling.Pos);
             Aisling.Pos = new Vector2(position.X, position.Y);
             Aisling.CurrentMapId = target.ID;
-
-            WarpTo(new Position(Aisling.Pos));
-            ClientRefreshed();
+            WarpToAndRefresh(position);
         }
+
+        // ToDo: Logic to only play this if a menu is opened.
+        this.CloseDialog();
 
         return this;
     }
@@ -4758,7 +4758,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         else
         {
-            WarpTo(warps.To.Location);
+            WarpToAndRefresh(warps.To.Location);
         }
     }
 

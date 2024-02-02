@@ -154,6 +154,7 @@ public class Quests
     public bool DreamWalkingSlayed { get; set; }
     public int Dar { get; set; }
     public string DarItem { get; set; } = string.Empty;
+    public bool ReleasedTodesbaum { get; set; }
     public bool DrunkenHabit { get; set; }
     public bool EternalLove { get; set; }
     public bool FionaDance { get; set; }
