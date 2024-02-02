@@ -25,9 +25,10 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.QuestManager.TagorDungeonAccess)
+        if (client.Aisling.QuestManager.TagorDungeonAccess && client.Aisling.QuestManager.DreamWalking)
         {
             // Add logic for freeing Todesbaum -- continuation of storyline
+            options.Add(new Dialog.OptionsDataItem(0x06, "Dream Walker"));
         }
         else
         {
@@ -128,6 +129,10 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                 break;
             case 0x05:
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: So be it, if that changes, I'll be here");
+                client.CloseDialog();
+                break;
+            case 0x06:
+                client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: The dream walker.... I remember that name. (Quest to be released later)");
                 client.CloseDialog();
                 break;
         }

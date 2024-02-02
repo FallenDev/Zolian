@@ -160,21 +160,21 @@ public record AislingStorage : Sql, IAislingStorage
 
             if (obj.QuestManager == null) return false;
             qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
-                obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem,
-                obj.QuestManager.DrunkenHabit, obj.QuestManager.EternalLove, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount,
-                obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting, obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount,
-                obj.QuestManager.NealKill, obj.QuestManager.AbelShopAccess, obj.QuestManager.PeteKill, obj.QuestManager.PeteComplete, obj.QuestManager.SwampAccess,
-                obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
-                obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
-                obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
-                obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
-                obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
-                obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled);
+            obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.CryptTerrorContinued, obj.QuestManager.CryptTerrorContSlayed,
+            obj.QuestManager.NightTerror, obj.QuestManager.NightTerrorSlayed, obj.QuestManager.DreamWalking, obj.QuestManager.DreamWalkingSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem,
+            obj.QuestManager.DrunkenHabit, obj.QuestManager.EternalLove, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount, obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting,
+            obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount, obj.QuestManager.NealKill, obj.QuestManager.AbelShopAccess, obj.QuestManager.PeteKill, obj.QuestManager.PeteComplete,
+            obj.QuestManager.SwampAccess, obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
+            obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
+            obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
+            obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
+            obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
+            obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
-                obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
-                obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
+            obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
+            obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
 
             foreach (var item in itemList)
             {
@@ -376,11 +376,11 @@ public record AislingStorage : Sql, IAislingStorage
                     player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants);
 
                 qDt.Rows.Add(player.Serial, player.QuestManager.MailBoxNumber, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
-                    player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.Dar, player.QuestManager.DarItem,
-                    player.QuestManager.DrunkenHabit, player.QuestManager.EternalLove, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount,
-                    player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting, player.QuestManager.KillerBee, player.QuestManager.Neal, player.QuestManager.NealCount,
-                    player.QuestManager.NealKill, player.QuestManager.AbelShopAccess, player.QuestManager.PeteKill, player.QuestManager.PeteComplete, player.QuestManager.SwampAccess,
-                    player.QuestManager.SwampCount, player.QuestManager.TagorDungeonAccess, player.QuestManager.Lau, player.QuestManager.BeltDegree, player.QuestManager.MilethReputation,
+                    player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.CryptTerrorContinued, player.QuestManager.CryptTerrorContSlayed,
+                    player.QuestManager.NightTerror, player.QuestManager.NightTerrorSlayed, player.QuestManager.DreamWalking, player.QuestManager.DreamWalkingSlayed, player.QuestManager.Dar, player.QuestManager.DarItem,
+                    player.QuestManager.DrunkenHabit, player.QuestManager.EternalLove, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount, player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting,
+                    player.QuestManager.KillerBee, player.QuestManager.Neal, player.QuestManager.NealCount, player.QuestManager.NealKill, player.QuestManager.AbelShopAccess, player.QuestManager.PeteKill, player.QuestManager.PeteComplete,
+                    player.QuestManager.SwampAccess, player.QuestManager.SwampCount, player.QuestManager.TagorDungeonAccess, player.QuestManager.Lau, player.QuestManager.BeltDegree, player.QuestManager.MilethReputation,
                     player.QuestManager.AbelReputation, player.QuestManager.RucesionReputation, player.QuestManager.SuomiReputation, player.QuestManager.RionnagReputation, player.QuestManager.OrenReputation,
                     player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
                     player.QuestManager.BlackSmithingTier, player.QuestManager.ArmorSmithing, player.QuestManager.ArmorSmithingTier, player.QuestManager.JewelCrafting, player.QuestManager.JewelCraftingTier,
@@ -1082,6 +1082,12 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("ConnPotions", typeof(bool));
         qDt.Columns.Add("CryptTerror", typeof(bool));
         qDt.Columns.Add("CryptTerrorSlayed", typeof(bool));
+        qDt.Columns.Add("CryptTerrorContinued", typeof(bool));
+        qDt.Columns.Add("CryptTerrorContSlayed", typeof(bool));
+        qDt.Columns.Add("NightTerror", typeof(bool));
+        qDt.Columns.Add("NightTerrorSlayed", typeof(bool));
+        qDt.Columns.Add("DreamWalking", typeof(bool));
+        qDt.Columns.Add("DreamWalkingSlayed", typeof(bool));
         qDt.Columns.Add("Dar", typeof(int));
         qDt.Columns.Add("DarItem", typeof(string));
         qDt.Columns.Add("DrunkenHabit", typeof(bool));

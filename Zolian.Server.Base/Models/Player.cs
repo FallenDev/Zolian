@@ -146,6 +146,12 @@ public class Quests
     public bool ConnPotions { get; set; }
     public bool CryptTerror { get; set; }
     public bool CryptTerrorSlayed { get; set; }
+    public bool CryptTerrorContinued { get; set; }
+    public bool CryptTerrorContSlayed { get; set; }
+    public bool NightTerror { get; set; }
+    public bool NightTerrorSlayed { get; set; }
+    public bool DreamWalking { get; set; }
+    public bool DreamWalkingSlayed { get; set; }
     public int Dar { get; set; }
     public string DarItem { get; set; } = string.Empty;
     public bool DrunkenHabit { get; set; }
