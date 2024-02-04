@@ -59,7 +59,7 @@ public record AreaStorage : IAreaStorage
 
                 if (!LoadMap(temp, mapFile))
                 {
-                    ServerSetup.Logger($"Map Load Unsuccessful: {temp.ID}_{temp.Name}");
+                    ServerSetup.EventsLogger($"Map Load Unsuccessful: {temp.ID}_{temp.Name}");
                     continue;
                 }
 
@@ -79,7 +79,7 @@ public record AreaStorage : IAreaStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
         }
         finally
         {
@@ -87,7 +87,7 @@ public record AreaStorage : IAreaStorage
         }
 
         ServerSetup.Instance.GlobalMapCache = ServerSetup.Instance.TempGlobalMapCache.ToFrozenDictionary();
-        ServerSetup.Logger($"Maps: {ServerSetup.Instance.GlobalMapCache.Count}");
+        ServerSetup.EventsLogger($"Maps: {ServerSetup.Instance.GlobalMapCache.Count}");
     }
 
     public bool LoadMap(Area mapObj, string mapFile)

@@ -724,8 +724,8 @@ public sealed class Item : Sprite, IItem
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -771,8 +771,8 @@ public sealed class Item : Sprite, IItem
             }
             catch (Exception e)
             {
-                ServerSetup.Logger(e.Message, LogLevel.Error);
-                ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+                ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+                ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
                 Crashes.TrackError(e);
             }
         }

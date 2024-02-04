@@ -149,7 +149,7 @@ public static class ItemStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -237,7 +237,7 @@ public static class ItemStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -327,7 +327,7 @@ public static class ItemStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -419,7 +419,7 @@ public static class ItemStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -484,7 +484,7 @@ public static class ItemStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }

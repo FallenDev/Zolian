@@ -93,12 +93,12 @@ public abstract class DatabaseLoad
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
         }
 
         ServerSetup.Instance.GlobalNationTemplateCache = ServerSetup.Instance.TempGlobalNationTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalNationTemplateCache.Clear();
-        ServerSetup.Logger($"Nation Templates: {ServerSetup.Instance.GlobalNationTemplateCache.Count}");
+        ServerSetup.EventsLogger($"Nation Templates: {ServerSetup.Instance.GlobalNationTemplateCache.Count}");
     }
 
     private static void Warps(string conn)
@@ -240,12 +240,12 @@ public abstract class DatabaseLoad
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
         }
 
         ServerSetup.Instance.GlobalWarpTemplateCache = ServerSetup.Instance.TempGlobalWarpTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalWarpTemplateCache.Clear();
-        ServerSetup.Logger($"Warp Templates: {ServerSetup.Instance.GlobalWarpTemplateCache.Count}");
+        ServerSetup.EventsLogger($"Warp Templates: {ServerSetup.Instance.GlobalWarpTemplateCache.Count}");
     }
 
     private static void Items(string conn)
@@ -281,13 +281,13 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
         ServerSetup.Instance.GlobalItemTemplateCache = ServerSetup.Instance.TempGlobalItemTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalItemTemplateCache.Clear();
-        ServerSetup.Logger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count}");
+        ServerSetup.EventsLogger($"Item Templates: {ServerSetup.Instance.GlobalItemTemplateCache.Count}");
 
         try
         {
@@ -295,7 +295,7 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -318,13 +318,13 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
         ServerSetup.Instance.GlobalMonsterTemplateCache = ServerSetup.Instance.TempGlobalMonsterTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalMonsterTemplateCache.Clear();
-        ServerSetup.Logger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count}");
+        ServerSetup.EventsLogger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count}");
     }
 
     private static void Mundanes(string conn)
@@ -344,13 +344,13 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
         ServerSetup.Instance.GlobalMundaneTemplateCache = ServerSetup.Instance.TempGlobalMundaneTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalMundaneTemplateCache.Clear();
-        ServerSetup.Logger($"Mundane Templates: {ServerSetup.Instance.GlobalMundaneTemplateCache.Count}");
+        ServerSetup.EventsLogger($"Mundane Templates: {ServerSetup.Instance.GlobalMundaneTemplateCache.Count}");
     }
 
     private static void Abilities(string conn, int num)
@@ -362,19 +362,19 @@ public abstract class DatabaseLoad
                 SkillStorage.CacheFromDatabase(conn);
                 ServerSetup.Instance.GlobalSkillTemplateCache = ServerSetup.Instance.TempGlobalSkillTemplateCache.ToFrozenDictionary();
                 ServerSetup.Instance.TempGlobalSkillTemplateCache.Clear();
-                ServerSetup.Logger($"Skill Templates: {ServerSetup.Instance.GlobalSkillTemplateCache.Count}");
+                ServerSetup.EventsLogger($"Skill Templates: {ServerSetup.Instance.GlobalSkillTemplateCache.Count}");
             }
             else
             {
                 SpellStorage.CacheFromDatabase(conn);
                 ServerSetup.Instance.GlobalSpellTemplateCache = ServerSetup.Instance.TempGlobalSpellTemplateCache.ToFrozenDictionary();
                 ServerSetup.Instance.TempGlobalSpellTemplateCache.Clear();
-                ServerSetup.Logger($"Spell Templates: {ServerSetup.Instance.GlobalSpellTemplateCache.Count}");
+                ServerSetup.EventsLogger($"Spell Templates: {ServerSetup.Instance.GlobalSpellTemplateCache.Count}");
             }
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
@@ -392,13 +392,13 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
         ServerSetup.Instance.GlobalWorldMapTemplateCache = ServerSetup.Instance.TempGlobalWorldMapTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalWorldMapTemplateCache.Clear();
-        ServerSetup.Logger($"World Map Templates: {ServerSetup.Instance.GlobalWorldMapTemplateCache.Count}");
+        ServerSetup.EventsLogger($"World Map Templates: {ServerSetup.Instance.GlobalWorldMapTemplateCache.Count}");
     }
 
     private static void BoardsPosts(string conn)
@@ -409,10 +409,10 @@ public abstract class DatabaseLoad
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
-        ServerSetup.Logger($"Boards Loaded: {ServerSetup.Instance.GlobalBoardPostCache.Count}");
+        ServerSetup.EventsLogger($"Boards Loaded: {ServerSetup.Instance.GlobalBoardPostCache.Count}");
     }
 }

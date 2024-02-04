@@ -96,7 +96,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             }
             else
             {
-                ServerSetup.Logger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
+                ServerSetup.ConnectionLogger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 Analytics.TrackEvent($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 localClient.Disconnect();
             }
@@ -214,7 +214,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 if (result.PasswordAttempts <= 9)
                 {
-                    ServerSetup.Logger($"{localClient.RemoteIp}: {result.Username} attempted an incorrect password.");
+                    ServerSetup.ConnectionLogger($"{localClient.RemoteIp}: {result.Username} attempted an incorrect password.");
                     result.LastIP = localClient.RemoteIp.ToString();
                     result.LastAttemptIP = localClient.RemoteIp.ToString();
                     result.PasswordAttempts += 1;
@@ -223,7 +223,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 }
                 else
                 {
-                    ServerSetup.Logger($"{result.Username} was locked to protect their account.");
+                    ServerSetup.ConnectionLogger($"{result.Username} was locked to protect their account.");
                     client.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
                     result.LastIP = localClient.RemoteIp.ToString();
                     result.LastAttemptIP = localClient.RemoteIp.ToString();
@@ -389,7 +389,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 if (aisling.Result.PasswordAttempts <= 9)
                 {
-                    ServerSetup.Logger($"{aisling.Result} attempted an incorrect password.");
+                    ServerSetup.ConnectionLogger($"{aisling.Result} attempted an incorrect password.");
                     aisling.Result.LastIP = localClient.RemoteIp.ToString();
                     aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
                     aisling.Result.PasswordAttempts += 1;
@@ -398,7 +398,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     return;
                 }
 
-                ServerSetup.Logger($"{aisling.Result} was locked to protect their account.");
+                ServerSetup.ConnectionLogger($"{aisling.Result} was locked to protect their account.");
                 localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
                 aisling.Result.LastIP = localClient.RemoteIp.ToString();
                 aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
@@ -430,7 +430,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ValueTask InnerOnExitRequest(ILoginClient localClient)
         {
             ClientRegistry.TryRemove(localClient.Id, out _);
-            ServerSetup.Logger($"{localClient.RemoteIp} disconnected from Login Server");
+            ServerSetup.ConnectionLogger($"{localClient.RemoteIp} disconnected from Login Server");
             return default;
         }
     }
@@ -462,7 +462,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         try
         {
             if (handler is not null) return handler(client, in packet);
-            ServerSetup.Logger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
+            ServerSetup.PacketLogger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
             Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
         }
         catch
@@ -488,16 +488,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
     }
 
-    protected override void OnConnection(IAsyncResult ar)
+    protected override void OnConnected(Socket clientSocket)
     {
-        var serverSocket = (Socket)ar.AsyncState!;
-        var clientSocket = serverSocket.EndAccept(ar);
-        ServerSetup.Logger($"Login connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
-        serverSocket.BeginAccept(OnConnection, serverSocket);
+        ServerSetup.ConnectionLogger($"Login connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
-            ServerSetup.Logger("Socket not a valid endpoint");
+            ServerSetup.ConnectionLogger("Socket not a valid endpoint");
             return;
         }
 
@@ -528,7 +525,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         if (!ClientRegistry.TryAdd(client))
         {
-            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
+            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
             try
             {
                 client.Disconnect();
@@ -552,9 +549,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 // ignored
             }
-            ServerSetup.Logger("---------Login-Server---------");
+            ServerSetup.ConnectionLogger("---------Login-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.Logger(comment, LogLevel.Warning);
+            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
             ReportEndpoint(ipAddress.ToString(), comment);
             return;
         }
@@ -587,7 +584,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             var keyCode = ServerSetup.Instance.KeyCode;
             if (keyCode is null || keyCode.Length == 0)
             {
-                ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
                 return false;
             }
 
@@ -606,7 +603,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -619,45 +616,45 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 if (tor == true)
                 {
-                    ServerSetup.Logger("---------Login-Server---------");
-                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------Login-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
-                    ServerSetup.Logger("---------Login-Server---------");
-                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------Login-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
                 switch (abuseConfidenceScore)
                 {
                     case >= 5:
-                        ServerSetup.Logger("---------Login-Server---------");
+                        ServerSetup.ConnectionLogger("---------Login-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
-                        ServerSetup.Logger(comment, LogLevel.Warning);
+                        ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
+                        ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
+                ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
-            ServerSetup.Logger($"{ex}");
+            ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
+            ServerSetup.ConnectionLogger($"{ex}");
             Crashes.TrackError(ex);
             return true;
         }
@@ -670,7 +667,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
         {
-            ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
             return;
         }
 
@@ -693,8 +690,8 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.ConnectionLogger(ex.Message, LogLevel.Error);
+            ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
 

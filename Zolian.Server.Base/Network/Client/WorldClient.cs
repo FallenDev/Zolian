@@ -747,9 +747,9 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger($"Unhandled Exception in {nameof(Load)}.");
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger($"Unhandled Exception in {nameof(Load)}.");
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
 
             LoadLock.Release();
@@ -854,8 +854,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -902,8 +902,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                         }
 
                         if (routineCheck != 4) continue;
-                        ServerSetup.Logger(
-                            $"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
+                        ServerSetup.EventsLogger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
                         Disconnect();
                         break;
                     }
@@ -944,8 +943,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1023,8 +1022,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1069,8 +1068,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1115,8 +1114,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1169,8 +1168,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1216,8 +1215,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1249,8 +1248,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1284,8 +1283,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1321,8 +1320,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -1344,8 +1343,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -1363,8 +1362,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -2352,8 +2351,8 @@ public class WorldClient : SocketClientBase, IWorldClient
                     }
                     catch (Exception ex)
                     {
-                        ServerSetup.Logger(ex.Message, LogLevel.Error);
-                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+                        ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                         Crashes.TrackError(ex);
                     }
 
@@ -2378,8 +2377,8 @@ public class WorldClient : SocketClientBase, IWorldClient
                     }
                     catch (Exception ex)
                     {
-                        ServerSetup.Logger(ex.Message, LogLevel.Error);
-                        ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                        ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+                        ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                         Crashes.TrackError(ex);
                     }
 
@@ -4501,7 +4500,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"Issue giving {player.Username} experience.");
+            ServerSetup.EventsLogger($"Issue giving {player.Username} experience.");
             Crashes.TrackError(e);
         }
     }
@@ -4613,7 +4612,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"Issue giving {player.Username} ability points.");
+            ServerSetup.EventsLogger($"Issue giving {player.Username} ability points.");
             Crashes.TrackError(e);
         }
     }
@@ -4966,16 +4965,10 @@ public class WorldClient : SocketClientBase, IWorldClient
             });
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -4996,16 +4989,10 @@ public class WorldClient : SocketClientBase, IWorldClient
             });
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -5036,14 +5023,14 @@ public class WorldClient : SocketClientBase, IWorldClient
                 return;
             }
 
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -5074,14 +5061,14 @@ public class WorldClient : SocketClientBase, IWorldClient
                 return;
             }
 
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -5102,16 +5089,10 @@ public class WorldClient : SocketClientBase, IWorldClient
             });
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
-        }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }

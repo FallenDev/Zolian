@@ -37,7 +37,7 @@ public class MServerTable : CompressableObject
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}");
+            ServerSetup.EventsLogger($"{e}");
         }
 
         return result;

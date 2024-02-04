@@ -124,9 +124,9 @@ public static class Commander
 
         var players = ServerSetup.Instance.Game.Aislings;
         var playersList = players.ToList();
-        ServerSetup.Logger("--------------------------------------------", LogLevel.Warning);
-        ServerSetup.Logger("", LogLevel.Warning);
-        ServerSetup.Logger("--------------- Server Chaos ---------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("--------------------------------------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("", LogLevel.Warning);
+        ServerSetup.EventsLogger("--------------- Server Chaos ---------------", LogLevel.Warning);
 
         foreach (var connected in playersList)
         {
@@ -185,7 +185,7 @@ public static class Commander
             return;
         }
 
-        ServerSetup.Logger("Chaos Cancelled", LogLevel.Warning);
+        ServerSetup.EventsLogger("Chaos Cancelled", LogLevel.Warning);
         client.Aisling.GameMasterChaosCancel = !client.Aisling.GameMasterChaosCancel;
     }
 
@@ -196,9 +196,9 @@ public static class Commander
     public static void Restart(Argument[] args, object arg)
     {
         var players = ServerSetup.Instance.Game.Aislings.ToList();
-        ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
-        ServerSetup.Logger("", LogLevel.Warning);
-        ServerSetup.Logger("------------- Server Restart Initiated -------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("", LogLevel.Warning);
+        ServerSetup.EventsLogger("------------- Server Restart Initiated -------------", LogLevel.Warning);
 
         // Announce to all players
         foreach (var connected in players)
@@ -388,8 +388,8 @@ public static class Commander
         if (client == null) return;
         Analytics.TrackEvent($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
         var players = ServerSetup.Instance.Game.Aislings;
-        ServerSetup.Logger("---------------------------------------------", LogLevel.Warning);
-        ServerSetup.Logger("------------- Maps Reloaded -------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
+        ServerSetup.EventsLogger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
         // Wipe
         ServerSetup.Instance.TempGlobalMapCache = new Dictionary<int, Area>();
@@ -524,5 +524,5 @@ public static class Commander
 
     public static void ParseChatMessage(WorldClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
 
-    private static void OnParseError(object obj, string command) => ServerSetup.Logger($"[Chat Parser] Error: {command}");
+    private static void OnParseError(object obj, string command) => ServerSetup.EventsLogger($"[Chat Parser] Error: {command}");
 }

@@ -116,7 +116,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
         finally
         {
@@ -148,7 +148,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
     }
 
@@ -166,7 +166,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue adding item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue adding item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
     }
 
@@ -182,7 +182,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue updating slot on item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue updating slot on item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
     }
 
@@ -268,7 +268,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue outer swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue outer swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
         }
 
         return (true, 0);
@@ -314,7 +314,7 @@ public class InventoryManager : ObjectManager, IInventory
         }
         catch
         {
-            ServerSetup.Logger($"Issue inner swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
+            ServerSetup.EventsLogger($"Issue inner swapping items from {client.RemoteIp} - {client.Aisling.Serial}");
         }
 
         return (true, 0);

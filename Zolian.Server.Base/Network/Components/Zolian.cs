@@ -15,8 +15,8 @@ public static class ZolianUpdateDelegate
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
     }

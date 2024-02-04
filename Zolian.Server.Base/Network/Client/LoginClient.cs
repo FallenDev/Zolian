@@ -96,8 +96,8 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
                 }
                 catch (Exception ex)
                 {
-                    ServerSetup.Logger(ex.Message, LogLevel.Error);
-                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                     Crashes.TrackError(ex);
                 }
                 
@@ -124,8 +124,8 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
                 }
                 catch (Exception ex)
                 {
-                    ServerSetup.Logger(ex.Message, LogLevel.Error);
-                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                     Crashes.TrackError(ex);
                 }
                 

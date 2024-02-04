@@ -37,14 +37,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="1.1.9" />
+		<PackageReference Include="Chaos-Networking" Version="1.2.0" />
 		<PackageReference Include="Dapper.StrongName" Version="2.1.28" />
 		<PackageReference Include="Microsoft.AppCenter" Version="5.0.3">
 		  <TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
 		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.3" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0-preview5.24024.3" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
 		<PackageReference Include="ServiceStack" Version="8.0.0" />
 		<PackageReference Include="ServiceStack.Text" Version="8.0.0" />

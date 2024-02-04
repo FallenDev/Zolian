@@ -59,7 +59,7 @@ public class BaseMonsterIntelligence : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -237,7 +237,7 @@ public class BaseMonsterIntelligence : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -255,7 +255,7 @@ public class BaseMonsterIntelligence : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -314,7 +314,7 @@ public class BaseMonsterIntelligence : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -627,7 +627,7 @@ public class WeakCommon : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -805,7 +805,7 @@ public class WeakCommon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -823,7 +823,7 @@ public class WeakCommon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -882,7 +882,7 @@ public class WeakCommon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -1195,7 +1195,7 @@ public class ShapeShifter : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -1373,7 +1373,7 @@ public class ShapeShifter : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -1410,7 +1410,7 @@ public class ShapeShifter : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -1469,7 +1469,7 @@ public class ShapeShifter : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -1777,7 +1777,7 @@ public class LootGoblin : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -1868,7 +1868,7 @@ public class SelfDestruct : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -2011,7 +2011,7 @@ public class SelfDestruct : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2029,7 +2029,7 @@ public class SelfDestruct : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2088,7 +2088,7 @@ public class SelfDestruct : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2357,7 +2357,7 @@ public class AlertSummon : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -2538,7 +2538,7 @@ public class AlertSummon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2556,7 +2556,7 @@ public class AlertSummon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2615,7 +2615,7 @@ public class AlertSummon : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -2936,7 +2936,7 @@ public class Turret : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -3090,7 +3090,7 @@ public class Turret : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3108,7 +3108,7 @@ public class Turret : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3166,7 +3166,7 @@ public class Turret : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3339,7 +3339,7 @@ public class GeneralPirate : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -3513,7 +3513,7 @@ public class GeneralPirate : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3531,7 +3531,7 @@ public class GeneralPirate : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3590,7 +3590,7 @@ public class GeneralPirate : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -3923,7 +3923,7 @@ public class ShadowSight : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -4101,7 +4101,7 @@ public class ShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -4119,7 +4119,7 @@ public class ShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -4177,7 +4177,7 @@ public class ShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -4490,7 +4490,7 @@ public class WeakShadowSight : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -4668,7 +4668,7 @@ public class WeakShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -4686,7 +4686,7 @@ public class WeakShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -4744,7 +4744,7 @@ public class WeakShadowSight : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5073,7 +5073,7 @@ public class AosdaRemnant : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -5247,7 +5247,7 @@ public class AosdaRemnant : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5265,7 +5265,7 @@ public class AosdaRemnant : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5323,7 +5323,7 @@ public class AosdaRemnant : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5672,7 +5672,7 @@ public class DraconicOmega : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -5846,7 +5846,7 @@ public class DraconicOmega : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5864,7 +5864,7 @@ public class DraconicOmega : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -5922,7 +5922,7 @@ public class DraconicOmega : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -6271,7 +6271,7 @@ public class JackFrost : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -6445,7 +6445,7 @@ public class JackFrost : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -6463,7 +6463,7 @@ public class JackFrost : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -6521,7 +6521,7 @@ public class JackFrost : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -6874,7 +6874,7 @@ public class Yeti : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -7105,7 +7105,7 @@ public class Yeti : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -7123,7 +7123,7 @@ public class Yeti : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -7181,7 +7181,7 @@ public class Yeti : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -7530,7 +7530,7 @@ public class WorldBossBahamut : MonsterScript
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
             Crashes.TrackError(e);
         }
     }
@@ -7711,7 +7711,7 @@ public class WorldBossBahamut : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -7744,7 +7744,7 @@ public class WorldBossBahamut : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }
@@ -7803,7 +7803,7 @@ public class WorldBossBahamut : MonsterScript
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.ToString());
+            ServerSetup.EventsLogger(ex.ToString());
             Crashes.TrackError(ex);
         }
     }

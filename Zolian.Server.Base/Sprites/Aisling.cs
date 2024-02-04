@@ -442,9 +442,9 @@ public sealed class Aisling : Player, IAisling
         catch (Exception e)
         {
             if (info == null)
-                ServerSetup.Logger($"{Username} tried to cast {spell.Name} and info was null");
+                ServerSetup.EventsLogger($"{Username} tried to cast {spell.Name} and info was null");
             if (info?.Target == 0)
-                ServerSetup.Logger($"{Username} tried to cast {spell.Name} and target was 0");
+                ServerSetup.EventsLogger($"{Username} tried to cast {spell.Name} and target was 0");
             Crashes.TrackError(e);
         }
 

@@ -103,8 +103,8 @@ public class LearningPredicate
             player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, you're not ready yet.");
             player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(94, null, player.Serial));
 
-            ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
             Crashes.TrackError(ex);
 
             return false;

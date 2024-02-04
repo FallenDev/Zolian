@@ -8,7 +8,6 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +25,7 @@ namespace Darkages;
 public class ServerSetup : IServerContext
 {
     public static ServerSetup Instance { get; private set; }
-    private static ILogger<ServerSetup> _log;
+    private static ILogger<ServerSetup> _eventsLogger;
     public static IOptions<ServerOptions> ServerOptions;
     public readonly RestClient RestClient;
     public readonly RestClient RestReport;
@@ -108,11 +107,21 @@ public class ServerSetup : IServerContext
         RestReport = new RestClient(restSettings.Item2);
     }
 
-    public static void Logger(string logMessage, LogLevel logLevel = LogLevel.Information)
+    public static void ConnectionLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
     {
-        _log?.Log(logLevel, "{logMessage}", logMessage);
+        _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
     }
 
+    public static void PacketLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
+    {
+        _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
+    }
+
+    public static void EventsLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
+    { 
+        _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
+    }
+    
     private static (RestClientOptions, RestClientOptions) SetupRestClients()
     {
         var optionsCheck = new RestClientOptions("https://api.abuseipdb.com/api/v2/check")
@@ -141,7 +150,7 @@ public class ServerSetup : IServerContext
     public void Start(IServerConstants config, ILogger<ServerSetup> logger)
     {
         Config = config;
-        _log = logger;
+        _eventsLogger = logger;
         Commander.CompileCommands();
         Startup();
         CommandHandler();
@@ -156,9 +165,8 @@ public class ServerSetup : IServerContext
         }
         catch (Exception ex)
         {
-            Logger(ex.Message, LogLevel.Error);
-            Logger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            EventsLogger(ex.Message);
+            EventsLogger(ex.StackTrace);
         }
     }
 
@@ -192,9 +200,9 @@ public class ServerSetup : IServerContext
     public void LoadExtensions()
     {
         CacheBuffs();
-        Logger($"Buff Cache: {GlobalBuffCache.Count}");
+        EventsLogger($"Buff Cache: {GlobalBuffCache.Count}");
         CacheDebuffs();
-        Logger($"Debuff Cache: {GlobalDeBuffCache.Count}");
+        EventsLogger($"Debuff Cache: {GlobalDeBuffCache.Count}");
     }
 
     public void CacheBuffs()

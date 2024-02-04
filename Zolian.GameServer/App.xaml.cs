@@ -70,8 +70,8 @@ public partial class App
         const string logTemplate = "[{Timestamp:MMM-dd HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
 
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("_Zolian_General.txt", LogEventLevel.Verbose, logTemplate)
-            .WriteTo.Async(wt => wt.Console(LogEventLevel.Verbose, logTemplate, theme: AnsiConsoleTheme.Literate))
+            .WriteTo.File("_Zolian_logs_.txt", LogEventLevel.Verbose, logTemplate, rollingInterval: RollingInterval.Day)
+            .WriteTo.Console(LogEventLevel.Verbose, logTemplate, theme: AnsiConsoleTheme.Literate)
             .CreateLogger();
 
         Win32.AllocConsole();
@@ -134,7 +134,7 @@ public partial class App
         }
         catch (Exception exception)
         {
-            ServerSetup.Logger($"{exception}");
+            Crashes.TrackError(exception);
         }
     }
 

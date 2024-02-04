@@ -96,7 +96,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger($"{ex}\nUnknown exception in RegenHPCalculator method.");
+            ServerSetup.EventsLogger($"{ex}\nUnknown exception in RegenHPCalculator method.");
             Crashes.TrackError(ex);
         }
     }
@@ -115,7 +115,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger($"{ex}\nUnknown exception in RegenHPCalculator method.");
+            ServerSetup.EventsLogger($"{ex}\nUnknown exception in RegenHPCalculator method.");
             Crashes.TrackError(ex);
         }
     }

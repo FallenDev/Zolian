@@ -130,8 +130,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.ConnectionLogger(ex.Message, LogLevel.Error);
+            ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
 
@@ -158,7 +158,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         };
 
         Console.WriteLine();
-        ServerSetup.Logger($"Server Components Loaded: {_serverComponents.Count}");
+        ServerSetup.ConnectionLogger($"Server Components Loaded: {_serverComponents.Count}");
     }
 
     private static void SkillMapper()
@@ -821,8 +821,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
                 catch (Exception ex)
                 {
-                    ServerSetup.Logger(ex.Message, LogLevel.Error);
-                    ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+                    ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                     Crashes.TrackError(ex);
 
                     clientsToRemove.Add(player.Client.Id);
@@ -932,8 +932,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
     }
@@ -951,8 +951,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
     }
@@ -967,8 +967,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
     }
@@ -1023,8 +1023,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             Crashes.TrackError(ex);
         }
     }
@@ -1719,7 +1719,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
-                ServerSetup.Logger($"{client.RemoteIp} tried to redirect to the world with invalid details.");
+                ServerSetup.ConnectionLogger($"{client.RemoteIp} tried to redirect to the world with invalid details.");
                 localClient.Disconnect();
                 return default;
             }
@@ -1727,19 +1727,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             //keep this case sensitive
             if (localArgs.Name != redirect.Name)
             {
-                ServerSetup.Logger($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
+                ServerSetup.ConnectionLogger($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
                 localClient.Disconnect();
                 return default;
             }
 
-            ServerSetup.Logger($"Received successful redirect: {redirect.Id}");
+            ServerSetup.ConnectionLogger($"Received successful redirect: {redirect.Id}");
             var existingAisling = Aislings.FirstOrDefault(user => user.Username.EqualsI(redirect.Name));
 
             //double logon, disconnect both clients
             if (existingAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
             localClient.Disconnect();
             if (redirect.Type == ServerType.Lobby) return default;
-            ServerSetup.Logger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
+            ServerSetup.ConnectionLogger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
             existingAisling?.Client.Disconnect();
             return default;
         }
@@ -1755,7 +1755,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
             if (aisling == null)
             {
-                ServerSetup.Logger($"Unable to retrieve player data: {client.RemoteIp}");
+                ServerSetup.ConnectionLogger($"Unable to retrieve player data: {client.RemoteIp}");
                 client.Disconnect();
                 return;
             }
@@ -1770,7 +1770,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (client.Aisling._Str <= 0 || client.Aisling._Int <= 0 || client.Aisling._Wis <= 0 ||
                 client.Aisling._Con <= 0 || client.Aisling._Dex <= 0)
             {
-                ServerSetup.Logger($"Player {client.Aisling.Username} has corrupt stats.");
+                ServerSetup.ConnectionLogger($"Player {client.Aisling.Username} has corrupt stats.");
                 client.Disconnect();
                 return;
             }
@@ -1792,7 +1792,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (!(client.RemoteIp.Equals(gmA) || client.RemoteIp.Equals(gmB) || client.RemoteIp.Equals(gmC) || client.IsLoopback() || client.RemoteIp.Equals(ipLocal)))
                 {
-                    ServerSetup.Logger($"Failed to login GM from {client.RemoteIp}.");
+                    ServerSetup.ConnectionLogger($"Failed to login GM from {client.RemoteIp}.");
                     Analytics.TrackEvent($"Failed to login GM from {client.RemoteIp}.");
                     client.Disconnect();
                     return;
@@ -1805,7 +1805,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (load == null)
                 {
-                    ServerSetup.Logger($"Failed to load player to client - exiting");
+                    ServerSetup.ConnectionLogger($"Failed to load player to client - exiting");
                     client.Disconnect();
                     return;
                 }
@@ -1830,21 +1830,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             catch (Exception e)
             {
-                ServerSetup.Logger($"Failed to add player {redirect.Name} to world server.");
+                ServerSetup.ConnectionLogger($"Failed to add player {redirect.Name} to world server.");
                 Crashes.TrackError(e);
                 client.Disconnect();
             }
         }
         catch (Exception e)
         {
-            ServerSetup.Logger($"Client with ip {client.RemoteIp} failed to load player {redirect.Name}.");
+            ServerSetup.ConnectionLogger($"Client with ip {client.RemoteIp} failed to load player {redirect.Name}.");
             Crashes.TrackError(e);
             client.Disconnect();
         }
         finally
         {
             var time = DateTime.UtcNow;
-            ServerSetup.Logger($"{redirect.Name} logged in at: {time}");
+            ServerSetup.ConnectionLogger($"{redirect.Name} logged in at: {time}");
             Analytics.TrackEvent($"{client.Aisling.Username} logged in at {DateTime.Now} local time on {client.RemoteIp}");
         }
     }
@@ -2598,17 +2598,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case PanelType.Inventory:
                     var itemSwap = localClient.Aisling.Inventory.TrySwap(localClient.Aisling.Client, slot1, slot2);
                     if (itemSwap is { Item1: false, Item2: 0 })
-                        ServerSetup.Logger($"{localClient.Aisling.Username} - Swap item issue");
+                        ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.SpellBook:
                     var spellSwap = localClient.Aisling.SpellBook.AttemptSwap(localClient.Aisling.Client, slot1, slot2);
                     if (!spellSwap)
-                        ServerSetup.Logger($"{localClient.Aisling.Username} - Swap item issue");
+                        ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.SkillBook:
                     var skillSwap = localClient.Aisling.SkillBook.AttemptSwap(localClient.Aisling.Client, slot1, slot2);
                     if (!skillSwap)
-                        ServerSetup.Logger($"{localClient.Aisling.Username} - Swap item issue");
+                        ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.Equipment:
                     break;
@@ -3039,21 +3039,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return default;
         }
     }
-
-    public ValueTask OnException(IWorldClient client, in ClientPacket clientPacket)
-    {
-        var args = PacketSerializer.Deserialize<ExceptionArgs>(in clientPacket);
-        return ExecuteHandler(client, args, InnerOnException);
-
-        ValueTask InnerOnException(IWorldClient localClient, ExceptionArgs localArgs)
-        {
-            var ex = localArgs.exceptionMsg;
-            client.Save();
-            Crashes.TrackError(new Exception($"{ex}"));
-            return default;
-        }
-    }
-
+    
     /// <summary>
     /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
@@ -3536,7 +3522,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             if (handler is not null) return handler(client, in packet);
-            ServerSetup.Logger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
+            ServerSetup.PacketLogger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
             Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
         }
         catch
@@ -3581,7 +3567,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.BoardRequest] = OnBoardRequest; // 0x3B
         ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
-        ClientHandlers[(byte)ClientOpCode.Exception] = OnException;
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
@@ -3594,16 +3579,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest; // 0x7B
     }
 
-    protected override void OnConnection(IAsyncResult ar)
+    protected override void OnConnected(Socket clientSocket)
     {
-        var serverSocket = (Socket)ar.AsyncState!;
-        var clientSocket = serverSocket.EndAccept(ar);
-        ServerSetup.Logger($"World connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
-        serverSocket.BeginAccept(OnConnection, serverSocket);
+        ServerSetup.ConnectionLogger($"World connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
-            ServerSetup.Logger("Socket not a valid endpoint");
+            ServerSetup.ConnectionLogger("Socket not a valid endpoint");
             return;
         }
 
@@ -3634,7 +3616,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (!ClientRegistry.TryAdd(client))
         {
-            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
+            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
             try
             {
                 client.Disconnect();
@@ -3659,9 +3641,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 // ignored
             }
-            ServerSetup.Logger("---------World-Server---------");
+            ServerSetup.ConnectionLogger("---------World-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.Logger(comment, LogLevel.Warning);
+            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
             ReportEndpoint(ipAddress.ToString(), comment);
             return;
         }
@@ -3683,7 +3665,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (aisling.Client.ExitConfirmed)
         {
             await StorageManager.AislingBucket.AuxiliarySave(client.Aisling);
-            ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
+            ServerSetup.ConnectionLogger($"{client.Aisling.Username} either logged out or was removed from the server.");
             return;
         }
 
@@ -3708,11 +3690,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             // Cleanup
             client.Aisling.Remove(true);
             ClientRegistry.TryRemove(client.Id, out _);
-            ServerSetup.Logger($"{client.Aisling.Username} either logged out or was removed from the server.");
+            ServerSetup.ConnectionLogger($"{client.Aisling.Username} either logged out or was removed from the server.");
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger($"Exception thrown while {aisling?.Username} was trying to disconnect");
+            ServerSetup.ConnectionLogger($"Exception thrown while {aisling?.Username} was trying to disconnect");
             Crashes.TrackError(ex);
         }
     }
@@ -3733,7 +3715,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var keyCode = ServerSetup.Instance.KeyCode;
             if (keyCode is null || keyCode.Length == 0)
             {
-                ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
                 return false;
             }
 
@@ -3752,7 +3734,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -3765,45 +3747,45 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (tor == true)
                 {
-                    ServerSetup.Logger("---------World-Server---------");
-                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------World-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
-                    ServerSetup.Logger("---------World-Server---------");
-                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------World-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
                 switch (abuseConfidenceScore)
                 {
                     case >= 5:
-                        ServerSetup.Logger("---------World-Server---------");
+                        ServerSetup.ConnectionLogger("---------World-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
-                        ServerSetup.Logger(comment, LogLevel.Warning);
+                        ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
+                        ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
+                ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
-            ServerSetup.Logger($"{ex}");
+            ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
+            ServerSetup.ConnectionLogger($"{ex}");
             Crashes.TrackError(ex);
             return true;
         }
@@ -3816,7 +3798,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
         {
-            ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
             return;
         }
 

@@ -99,7 +99,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                         localClient.Crypto.Seed);
 
                     RedirectManager.Add(redirect);
-                    ServerSetup.Logger($"Redirecting {client.RemoteIp} to Login Server");
+                    ServerSetup.ConnectionLogger($"Redirecting {client.RemoteIp} to Login Server");
                     localClient.SendRedirect(redirect);
                     break;
                 case ServerTableRequestType.RequestTable:
@@ -127,7 +127,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         try
         {
             if (handler is not null) return handler(client, in packet);
-            ServerSetup.Logger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
+            ServerSetup.PacketLogger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
             Crashes.TrackError(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
         }
         catch
@@ -145,16 +145,13 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 
-    protected override void OnConnection(IAsyncResult ar)
+    protected override void OnConnected(Socket clientSocket)
     {
-        var serverSocket = (Socket)ar.AsyncState!;
-        var clientSocket = serverSocket.EndAccept(ar);
-        ServerSetup.Logger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
-        serverSocket.BeginAccept(OnConnection, serverSocket);
+        ServerSetup.ConnectionLogger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
         if (clientSocket.RemoteEndPoint is not IPEndPoint ip)
         {
-            ServerSetup.Logger("Socket not a valid endpoint");
+            ServerSetup.ConnectionLogger("Socket not a valid endpoint");
             return;
         }
 
@@ -185,7 +182,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         if (!ClientRegistry.TryAdd(client))
         {
-            ServerSetup.Logger("Two clients ended up with the same id - newest client disconnected");
+            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
             try
             {
                 client.Disconnect();
@@ -227,8 +224,8 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var bogonCheck = BannedIpCheck(remoteIp);
         if (bogonCheck)
         {
-            ServerSetup.Logger("-----------------------------------");
-            ServerSetup.Logger($"{remoteIp} is banned and unable to connect");
+            ServerSetup.ConnectionLogger("-----------------------------------");
+            ServerSetup.ConnectionLogger($"{remoteIp} is banned and unable to connect");
             return true;
         }
 
@@ -237,7 +234,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             var keyCode = ServerSetup.Instance.KeyCode;
             if (keyCode is null || keyCode.Length == 0)
             {
-                ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
                 return false;
             }
 
@@ -256,7 +253,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 if (json is null || json.Length == 0)
                 {
-                    ServerSetup.Logger($"{remoteIp} - API Issue, response is null or length is 0");
+                    ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response is null or length is 0");
                     return false;
                 }
 
@@ -269,45 +266,45 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 if (tor == true)
                 {
-                    ServerSetup.Logger("---------Lobby-Server---------");
-                    ServerSetup.Logger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------Lobby-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
                     return true;
                 }
 
                 if (usageType == "Reserved")
                 {
-                    ServerSetup.Logger("---------Lobby-Server---------");
-                    ServerSetup.Logger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    ServerSetup.ConnectionLogger("---------Lobby-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
                     return true;
                 }
 
                 switch (abuseConfidenceScore)
                 {
                     case >= 5:
-                        ServerSetup.Logger("---------Lobby-Server---------");
+                        ServerSetup.ConnectionLogger("---------Lobby-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
-                        ServerSetup.Logger(comment, LogLevel.Warning);
+                        ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
                         return false;
                     case null:
                         // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.Logger($"{remoteIp} - API Issue, confidence score was null");
+                        ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, confidence score was null");
                         return false;
                 }
             }
             else
             {
                 // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.Logger($"{remoteIp} - API Issue, response was not successful");
+                ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response was not successful");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
-            ServerSetup.Logger($"{ex}");
+            ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
+            ServerSetup.ConnectionLogger($"{ex}");
             Crashes.TrackError(ex);
             return true;
         }
@@ -320,7 +317,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
         {
-            ServerSetup.Logger("Keycode not valid or not set within ServerConfig.json");
+            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
             return;
         }
 

@@ -21,8 +21,8 @@ public static class CompressionProvider
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
             Crashes.TrackError(ex);
             return null;
         }
@@ -49,8 +49,8 @@ public static class CompressionProvider
         }
         catch (Exception ex)
         {
-            ServerSetup.Logger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
-            ServerSetup.Logger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
+            ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
             Crashes.TrackError(ex);
             return null;
         }

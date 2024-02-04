@@ -1109,7 +1109,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             }
             catch (Exception ex)
             {
-                ServerSetup.Logger($"{ex}\nUnknown exception in WalkTo method.");
+                ServerSetup.EventsLogger($"{ex}\nUnknown exception in WalkTo method.");
                 Crashes.TrackError(ex);
             }
 

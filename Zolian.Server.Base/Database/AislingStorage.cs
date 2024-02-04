@@ -45,8 +45,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -80,8 +80,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -108,8 +108,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -319,8 +319,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -535,8 +535,8 @@ public record AislingStorage : Sql, IAislingStorage
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Issue with database connection");
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally
@@ -572,8 +572,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -595,8 +595,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -627,8 +627,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -662,8 +662,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -686,8 +686,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -710,8 +710,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
 
@@ -757,7 +757,7 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
 
@@ -783,8 +783,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
     }
@@ -915,8 +915,8 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.Logger(e.Message, LogLevel.Error);
-            ServerSetup.Logger(e.StackTrace, LogLevel.Error);
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             Crashes.TrackError(e);
         }
         finally

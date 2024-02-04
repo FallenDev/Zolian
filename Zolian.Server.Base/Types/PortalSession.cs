@@ -29,7 +29,7 @@ public class PortalSession : IPortalSession
         {
             if (worldMap.Portals.Any(ports => !ServerSetup.Instance.GlobalMapCache.ContainsKey(ports.Destination.AreaID)))
             {
-                ServerSetup.Logger("No Valid Configured World Map.");
+                ServerSetup.EventsLogger("No Valid Configured World Map.");
                 return;
             }
         }

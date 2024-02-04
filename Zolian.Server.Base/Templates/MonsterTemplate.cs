@@ -171,7 +171,7 @@ public static class MonsterStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.Logger(e.ToString());
+            ServerSetup.EventsLogger(e.ToString());
             Crashes.TrackError(e);
         }
     }
