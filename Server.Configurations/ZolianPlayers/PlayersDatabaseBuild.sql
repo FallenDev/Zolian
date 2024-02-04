@@ -727,9 +727,9 @@ GO
 CREATE PROCEDURE [dbo].[InsertQuests]
     @Serial BIGINT, @MailBoxNumber INT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @StoneSmithingTier VARCHAR (10), @MilethRep INT,
 	@ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @CryptTerrorContinued BIT, @CryptTerrorContSlayed BIT,
-	@NightTerror BIT, @NightTerrorSlayed BIT, @DreamWalking BIT, @DreamWalkingSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @ReleasedTodesbaum BIT, @EternalLove BIT, @Fiona BIT,
-	@Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT, @NealKill VARCHAR (20), @AbelShopAccess BIT,
-	@PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
+	@NightTerror BIT, @NightTerrorSlayed BIT, @DreamWalking BIT, @DreamWalkingSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @ReleasedTodesbaum BIT, @DrunkenHabit BIT,
+	@EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT,
+	@NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
     @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
     @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
     @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
@@ -743,9 +743,9 @@ BEGIN
     INSERT INTO [ZolianPlayers].[dbo].[PlayersQuests] (
         [Serial], [MailBoxNumber], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
 		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [CryptTerrorContinued], [CryptTerrorContSlayed],
-		[NightTerror], [NightTerrorSlayed], [DreamWalking], [DreamWalkingSlayed], [Dar], [DarItem], [ReleasedTodesbaum], [EternalLove], [FionaDance],
-		[Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount], [NealKill], [AbelShopAccess], [PeteKill],
-        [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
+		[NightTerror], [NightTerrorSlayed], [DreamWalking], [DreamWalkingSlayed], [Dar], [DarItem], [ReleasedTodesbaum], [DrunkenHabit],
+		[EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount],
+		[NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
         [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
         [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
@@ -753,11 +753,11 @@ BEGIN
 		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled]
     )
     VALUES (
-        @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep, @ArtursGift,
-        @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @CryptTerrorContinued, @CryptTerrorContSlayed,
-		@NightTerror, @NightTerrorSlayed, @DreamWalking, @DreamWalkingSlayed, @Dar, @DarItem, @ReleasedTodesbaum, @EternalLove, @Fiona, 
-		@Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount, @NealKill, @AbelShopAccess, @PeteKill,
-        @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau,
+        @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
+		@ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @CryptTerrorContinued, @CryptTerrorContSlayed,
+		@NightTerror, @NightTerrorSlayed, @DreamWalking, @DreamWalkingSlayed, @Dar, @DarItem, @ReleasedTodesbaum, @DrunkenHabit,
+		@EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount,
+		@NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau,
         @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
         @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,

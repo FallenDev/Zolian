@@ -866,8 +866,16 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@ConnPotions", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@CryptTerror", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@CryptTerrorSlayed", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CryptTerrorContinued", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CryptTerrorContSlayed", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@NightTerror", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@NightTerrorSlayed", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@DreamWalking", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@DreamWalkingSlayed", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Dar", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@DarItem", SqlDbType.VarChar).Value = "";
+            cmd5.Parameters.Add("@ReleasedTodesbaum", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@DrunkenHabit", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@EternalLove", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Fiona", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Keela", SqlDbType.Int).Value = 0;
