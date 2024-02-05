@@ -285,7 +285,7 @@ public class EnemyRewards : RewardScript
         };
 
         // Enqueue experience event
-        if (player.WithinRangeOf(_monster, 13))
+        if (player.WithinRangeOf(_monster, 16))
             player.Client.EnqueueExperienceEvent(player, exp, true, false);
 
         if (player.PartyMembers == null) return;
@@ -294,8 +294,25 @@ public class EnemyRewards : RewardScript
         foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
         {
             if (party.Map != _monster.Map) continue;
-            if (party.WithinRangeOf(_monster, 13))
-                party.Client.EnqueueExperienceEvent(party, exp, true, false);
+            if (!party.WithinRangeOf(_monster, 16)) continue;
+
+            var partyExp = exp;
+            var partyDiff = party.ExpLevel - _monster.Template.Level;
+            partyExp = partyDiff switch
+            {
+                // Monster is higher level than player
+                <= -50 => (int)(partyExp * 0.25),
+                <= -30 => (int)(partyExp * 0.5),
+                <= -15 => (int)(partyExp * 0.75),
+                // Monster is lower level than player
+                >= 80 => 1,
+                >= 50 => (int)(partyExp * 0.15),
+                >= 30 => (int)(partyExp * 0.33),
+                >= 15 => (int)(partyExp * 0.66),
+                _ => partyExp
+            };
+
+            party.Client.EnqueueExperienceEvent(party, partyExp, true, false);
         }
     }
 
