@@ -140,24 +140,28 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
             client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, targetObj.Serial));
             foreach (var debuff in targetObj.Debuffs.Values)
             {
+                if (debuff.Affliction) continue;
                 if (debuff.Name == "Skulled") continue;
                 debuff.OnEnded(targetObj, debuff);
             }
 
             foreach (var buff in targetObj.Buffs.Values)
             {
+                if (buff.Affliction) continue;
                 buff.OnEnded(targetObj, buff);
             }
         }
 
         foreach (var debuff in aisling.Debuffs.Values)
         {
+            if (debuff.Affliction) continue;
             if (debuff.Name == "Skulled") continue;
             debuff.OnEnded(aisling, debuff);
         }
 
         foreach (var buff in aisling.Buffs.Values)
         {
+            if (buff.Affliction) continue;
             buff.OnEnded(aisling, buff);
         }
     }
@@ -180,12 +184,14 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
             targetObj.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
             foreach (var debuff in targetObj.Debuffs.Values)
             {
+                if (debuff.Affliction) continue;
                 if (debuff.Name == "Skulled") continue;
                 debuff.OnEnded(targetObj, debuff);
             }
 
             foreach (var buff in targetObj.Buffs.Values)
             {
+                if (buff.Affliction) continue;
                 buff.OnEnded(targetObj, buff);
             }
         }

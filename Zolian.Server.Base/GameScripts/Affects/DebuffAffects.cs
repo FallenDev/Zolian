@@ -11,118 +11,6 @@ namespace Darkages.GameScripts.Affects;
 
 #region Afflictions
 
-public class Lycanisim : Debuff
-{
-    private static int DexModifier => 30;
-    private static byte DmgModifier => 50;
-    public override byte Icon => 183;
-    public override int Length => int.MaxValue;
-    public override string Name => "Lycanisim";
-
-    public override void OnApplied(Sprite affected, Debuff debuff)
-    {
-        if (affected is not Aisling aisling) return;
-        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
-        {
-            DebuffSpell = debuff;
-            DebuffSpell.TimeLeft = DebuffSpell.Length;
-        }
-
-        InsertDebuff(aisling, debuff);
-        var vamp = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
-
-        if (vamp)
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bThey do not realize who they've bitten");
-            return;
-        }
-
-        aisling.BonusDex += DexModifier;
-        aisling.BonusDmg += DmgModifier;
-        aisling.Afflictions |= Afflictions.Lycanisim;
-        aisling.Afflictions &= ~Afflictions.Normal;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-    }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
-    public override void OnEnded(Sprite affected, Debuff debuff)
-    {
-        affected.Debuffs.TryRemove(debuff.Name, out _);
-        if (affected is not Aisling aisling) return;
-        aisling.BonusDex -= DexModifier;
-        aisling.BonusDmg -= DmgModifier;
-        aisling.Afflictions &= ~Afflictions.Lycanisim;
-        aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        DeleteDebuff(aisling, debuff);
-    }
-
-    public override void OnItemChange(Aisling affected, Debuff debuff)
-    {
-        affected.BonusDex += DexModifier;
-        affected.BonusDmg += DmgModifier;
-    }
-}
-
-public class Vampirisim : Debuff
-{
-    private static int DexModifier => 30;
-    private static byte HitModifier => 50;
-    public override byte Icon => 172;
-    public override int Length => int.MaxValue;
-    public override string Name => "Vampirisim";
-
-    public override void OnApplied(Sprite affected, Debuff debuff)
-    {
-        if (affected is not Aisling aisling) return;
-        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
-        {
-            DebuffSpell = debuff;
-            DebuffSpell.TimeLeft = DebuffSpell.Length;
-        }
-
-        InsertDebuff(aisling, debuff);
-        var lycan = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
-
-        if (lycan)
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bClawing me? Hah!");
-            return;
-        }
-
-        aisling.BonusDex += DexModifier;
-        aisling.BonusDmg += HitModifier;
-        aisling.Afflictions |= Afflictions.Vampirisim;
-        aisling.Afflictions &= ~Afflictions.Normal;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-    }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
-    public override void OnEnded(Sprite affected, Debuff debuff)
-    {
-        affected.Debuffs.TryRemove(debuff.Name, out _);
-        if (affected is not Aisling aisling) return;
-        aisling.BonusDex -= DexModifier;
-        aisling.BonusDmg -= HitModifier;
-        aisling.Afflictions &= ~Afflictions.Vampirisim;
-        aisling.Client.SendEffect(byte.MinValue, Icon);
-        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The disease that gripped me, has passed");
-        aisling.Client.SendAttributes(StatUpdateType.Full);
-        DeleteDebuff(aisling, debuff);
-    }
-
-    public override void OnItemChange(Aisling affected, Debuff debuff)
-    {
-        affected.BonusDex += DexModifier;
-        affected.BonusDmg += HitModifier;
-    }
-}
-
 public class Plagued : Debuff
 {
     private static int HpModifier => 500;
@@ -131,6 +19,7 @@ public class Plagued : Debuff
     public override byte Icon => 211;
     public override int Length => int.MaxValue;
     public override string Name => "Plagued";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -212,6 +101,7 @@ public class TheShakes : Debuff
     public override byte Icon => 177;
     public override int Length => int.MaxValue;
     public override string Name => "The Shakes";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -273,6 +163,7 @@ public class Stricken : Debuff
     public override byte Icon => 162;
     public override int Length => int.MaxValue;
     public override string Name => "Stricken";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -331,6 +222,7 @@ public class Rabies : Debuff
     public override byte Icon => 122;
     public override int Length => 300;
     public override string Name => "Rabies";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -382,6 +274,7 @@ public class LockJoint : Debuff
     public override byte Icon => 176;
     public override int Length => int.MaxValue;
     public override string Name => "Lock Joint";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -442,6 +335,7 @@ public class NumbFall : Debuff
     public override byte Icon => 147;
     public override int Length => int.MaxValue;
     public override string Name => "Numb Fall";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -498,6 +392,7 @@ public class Diseased : Debuff
     public override byte Icon => 209;
     public override int Length => int.MaxValue;
     public override string Name => "Diseased";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -557,6 +452,7 @@ public class Hallowed : Debuff
     public override byte Icon => 200;
     public override int Length => int.MaxValue;
     public override string Name => "Hallowed";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
@@ -600,6 +496,7 @@ public class Petrified : Debuff
     public override byte Icon => 201;
     public override int Length => int.MaxValue;
     public override string Name => "Petrified";
+    public override bool Affliction => true;
 
     public override void OnApplied(Sprite affected, Debuff debuff)
     {

@@ -10,6 +10,7 @@ public interface IDebuff
     byte Icon { get; set; }
     int Length { get; set; }
     string Name { get; set; }
+    bool Affliction { get; set; }
     int TimeLeft { get; set; }
     Debuff DebuffSpell { get; set; }
 

@@ -22,6 +22,7 @@ public class Buff : IBuff
     public virtual byte Icon { get; set; }
     public virtual int Length { get; set; }
     public virtual string Name { get; set; }
+    public virtual bool Affliction { get; set; }
     public int TimeLeft { get; set; }
     public Buff BuffSpell { get; set; }
 
@@ -70,6 +71,8 @@ public class Buff : IBuff
             "Mor Fas Nadur" => new BuffMorFasNadur(),
             "Fas Nadur" => new BuffFasNadur(),
             "Fas Spiorad" => new BuffFasSpiorad(),
+            "Vampirisim" => new BuffVampirisim(),
+            "Lycanisim" => new BuffLycanisim(),
             _ => BuffSpell
         };
 

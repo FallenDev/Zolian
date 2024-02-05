@@ -8,6 +8,130 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Affects;
 
+#region Afflictions
+
+public class BuffLycanisim : Buff
+{
+    private static int DexModifier => 30;
+    private static byte DmgModifier => 50;
+    public override byte Icon => 183;
+    public override int Length => int.MaxValue;
+    public override string Name => "Lycanisim";
+    public override bool Affliction => true;
+
+    public override void OnApplied(Sprite affected, Buff affliction)
+    {
+        if (affected is not Aisling aisling) return;
+        var vamp = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
+
+        if (vamp)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bThey do not realize who they've bitten");
+            return;
+        }
+
+        if (affected.Buffs.TryAdd(affliction.Name, affliction))
+        {
+            BuffSpell = affliction;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        InsertBuff(aisling, affliction);
+
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYou begin to howl uncontrollably");
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
+        aisling.BonusDex += DexModifier;
+        aisling.BonusDmg += DmgModifier;
+        aisling.Afflictions |= Afflictions.Lycanisim;
+        aisling.Afflictions &= ~Afflictions.Normal;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff affliction) { }
+
+    public override void OnEnded(Sprite affected, Buff affliction)
+    {
+        if (affected is not Aisling aisling) return;
+        affected.Buffs.TryRemove(affliction.Name, out _);
+        aisling.BonusDex -= DexModifier;
+        aisling.BonusDmg -= DmgModifier;
+        aisling.Afflictions &= ~Afflictions.Lycanisim;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The desire to kill has passed.");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteBuff(aisling, affliction);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff affliction)
+    {
+        affected.BonusDex += DexModifier;
+        affected.BonusDmg += DmgModifier;
+    }
+}
+
+public class BuffVampirisim : Buff
+{
+    private static int DexModifier => 30;
+    private static byte HitModifier => 50;
+    public override byte Icon => 172;
+    public override int Length => int.MaxValue;
+    public override string Name => "Vampirisim";
+    public override bool Affliction => true;
+
+    public override void OnApplied(Sprite affected, Buff affliction)
+    {
+        if (affected is not Aisling aisling) return;
+        var lycan = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
+
+        if (lycan)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bClawing me? Hah!");
+            return;
+        }
+
+        if (affected.Buffs.TryAdd(affliction.Name, affliction))
+        {
+            BuffSpell = affliction;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        InsertBuff(aisling, affliction);
+
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYour thirst is unquenchable!");
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
+        aisling.BonusDex += DexModifier;
+        aisling.BonusDmg += HitModifier;
+        aisling.Afflictions |= Afflictions.Vampirisim;
+        aisling.Afflictions &= ~Afflictions.Normal;
+        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff affliction) { }
+
+    public override void OnEnded(Sprite affected, Buff affliction)
+    {
+        if (affected is not Aisling aisling) return;
+        affected.Buffs.TryRemove(affliction.Name, out _);
+        aisling.BonusDex -= DexModifier;
+        aisling.BonusDmg -= HitModifier;
+        aisling.Afflictions &= ~Afflictions.Vampirisim;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The thirst for others has passed.");
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+        DeleteBuff(aisling, affliction);
+    }
+
+    public override void OnItemChange(Aisling affected, Buff affliction)
+    {
+        affected.BonusDex += DexModifier;
+        affected.BonusDmg += HitModifier;
+    }
+}
+
+#endregion
+
 #region Armor
 
 public class buff_DiaAite : Buff

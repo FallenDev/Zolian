@@ -599,22 +599,22 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim))
         {
             hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Lycanisim");
-            if (!debuff)
+            var buff = Aisling.HasBuff("Lycanisim");
+            if (!buff)
             {
-                var applyDebuff = new Lycanisim();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+                var applyDebuff = new BuffLycanisim();
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
         if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim))
         {
             hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Vampirisim");
-            if (!debuff)
+            var buff = Aisling.HasBuff("Vampirisim");
+            if (!buff)
             {
-                var applyDebuff = new Vampirisim();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+                var applyDebuff = new BuffVampirisim();
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
