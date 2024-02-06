@@ -16,11 +16,11 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
     {
         var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
+        if (readyLoggedIn.Length == 0) return;
 
-        Parallel.ForEach(readyLoggedIn, (user) =>
+        Parallel.ForEach(readyLoggedIn.Where(player => player is { LoggedIn: true }), (user) =>
         {
             if (user?.Client == null) return;
-            if (!user.LoggedIn) return;
             UpdateClientObjects(user);
         });
     }
@@ -61,6 +61,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         Parallel.ForEach(objectsToRemove, obj =>
         {
+            if (obj == null) return;
             if (obj.Serial == self.Serial) return;
 
             if (obj is Monster monster)
@@ -82,6 +83,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         Parallel.ForEach(objectsToAdd, obj =>
         {
+            if (obj == null) return;
             // If value is in view, don't add it
             if (self.SpritesInView.TryGetValue(obj.Serial, out _)) return;
 
