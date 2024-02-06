@@ -62,6 +62,44 @@ public static class WorldExtensions
 
     #region Buy/Sell Dialog
 
+    /// <summary>
+    /// ItemShop with PursuitId
+    /// </summary>
+    public static void SendItemShopDialog(this IWorldClient worldClient, Mundane npc, string message, ushort dialogId, IEnumerable<ItemTemplate> item)
+    {
+        var args = new MenuArgs
+        {
+            Args = null,
+            Color = DisplayColor.Default,
+            EntityType = EntityType.Creature,
+            Items = item.Select(i => new ItemInfo
+            {
+                Color = (DisplayColor)i.Color,
+                Cost = (int?)i.Value,
+                Count = i.MaxStack,
+                CurrentDurability = 0,
+                MaxDurability = 0,
+                Name = i.Name,
+                Group = i.Group,
+                Slot = 0,
+                Sprite = i.DisplayImage,
+                Stackable = i.CanStack
+            }).ToList(),
+            MenuType = MenuType.ShowItems,
+            Name = npc.Name,
+            Options = null,
+            PursuitId = dialogId,
+            Skills = null,
+            Slots = null,
+            SourceId = npc.Serial,
+            Spells = null,
+            Sprite = npc.Template.Image,
+            Text = message
+        };
+
+        worldClient.Send(args);
+    }
+
     public static void SendItemShopDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<ItemTemplate> item)
     {
         var args = new MenuArgs

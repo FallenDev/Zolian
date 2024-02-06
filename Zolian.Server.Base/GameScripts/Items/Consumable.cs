@@ -21,10 +21,23 @@ public class Consumable(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        #region Quest Items
-
         switch (Item.Template.Name)
         {
+            case "Zolian Guide":
+                {
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                    {
+                        if (npc.Value.Scripts is null) continue;
+                        if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
+                        {
+                            scriptObj.OnClick(client, npc.Value.Serial);
+                        }
+                    }
+                    return;
+                }
+
+            #region Quest Items
+
             case "Stocking Stuffer":
                 {
                     var rand = Generator.RandomNumPercentGen();
@@ -76,23 +89,15 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.Client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");
                     return;
                 }
-            case "Zolian Guide":
-                {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
-                    }
-                    return;
-                }
             case "Captured Golden Floppy":
                 {
                     aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
                     return;
                 }
+
+            #endregion
+            #region Mining
+
             case "Raw Dark Iron":
                 {
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
@@ -165,6 +170,10 @@ public class Consumable(Item item) : ItemScript(item)
                     }
                     return;
                 }
+
+            #endregion
+            #region Blacksmithing
+
             case "Basic Combo Scroll":
                 {
                     var skills = new List<Skill>();
@@ -469,297 +478,413 @@ public class Consumable(Item item) : ItemScript(item)
                     }
                     return;
                 }
-        }
 
-        #endregion
+            #endregion
+            #region Hair-dye & Style
 
-        #region Hair Products
-
-        switch (Item.Template.Name)
-        {
-            case "Lavender Hairdye":
+            case "Lavender Hair-dye":
                 client.Aisling.HairColor = 0;
+                client.Aisling.OldColor = 0;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Black Hairdye":
+            case "Black Hair-dye":
                 client.Aisling.HairColor = 1;
+                client.Aisling.OldColor = 1;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Red Hairdye":
+            case "Red Hair-dye":
                 client.Aisling.HairColor = 2;
+                client.Aisling.OldColor = 2;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Orange Hairdye":
+            case "Orange Hair-dye":
                 client.Aisling.HairColor = 3;
+                client.Aisling.OldColor = 3;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Blonde Hairdye":
+            case "Blonde Hair-dye":
                 client.Aisling.HairColor = 4;
+                client.Aisling.OldColor = 4;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Cyan Hairdye":
+            case "Cyan Hair-dye":
                 client.Aisling.HairColor = 5;
+                client.Aisling.OldColor = 5;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Blue Hairdye":
+            case "Blue Hair-dye":
                 client.Aisling.HairColor = 6;
+                client.Aisling.OldColor = 6;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Mulberry Hairdye":
+            case "Mulberry Hair-dye":
                 client.Aisling.HairColor = 7;
+                client.Aisling.OldColor = 7;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Olive Hairdye":
+            case "Olive Hair-dye":
                 client.Aisling.HairColor = 8;
+                client.Aisling.OldColor = 8;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Green Hairdye":
+            case "Green Hair-dye":
                 client.Aisling.HairColor = 9;
+                client.Aisling.OldColor = 9;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Fire Hairdye":
+            case "Fire Hair-dye":
                 client.Aisling.HairColor = 10;
+                client.Aisling.OldColor = 10;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Brown Hairdye":
+            case "Brown Hair-dye":
                 client.Aisling.HairColor = 11;
+                client.Aisling.OldColor = 11;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Grey Hairdye":
+            case "Grey Hair-dye":
                 client.Aisling.HairColor = 12;
+                client.Aisling.OldColor = 12;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Navy Hairdye":
+            case "Navy Hair-dye":
                 client.Aisling.HairColor = 13;
+                client.Aisling.OldColor = 13;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Tan Hairdye":
+            case "Tan Hair-dye":
                 client.Aisling.HairColor = 14;
+                client.Aisling.OldColor = 14;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "White Hairdye":
+            case "White Hair-dye":
                 client.Aisling.HairColor = 15;
+                client.Aisling.OldColor = 15;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Pink Hairdye":
+            case "Pink Hair-dye":
                 client.Aisling.HairColor = 16;
+                client.Aisling.OldColor = 16;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Chartreuse Hairdye":
+            case "Chartreuse Hair-dye":
                 client.Aisling.HairColor = 17;
+                client.Aisling.OldColor = 17;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Golden Hairdye":
+            case "Golden Hair-dye":
                 client.Aisling.HairColor = 18;
+                client.Aisling.OldColor = 18;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Lemon Hairdye":
+            case "Lemon Hair-dye":
                 client.Aisling.HairColor = 19;
+                client.Aisling.OldColor = 19;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Royal Hairdye":
+            case "Royal Hair-dye":
                 client.Aisling.HairColor = 20;
+                client.Aisling.OldColor = 20;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Platinum Hairdye":
+            case "Platinum Hair-dye":
                 client.Aisling.HairColor = 21;
+                client.Aisling.OldColor = 21;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Lilac Hairdye":
+            case "Lilac Hair-dye":
                 client.Aisling.HairColor = 22;
+                client.Aisling.OldColor = 22;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Fuchsia Hairdye":
+            case "Fuchsia Hair-dye":
                 client.Aisling.HairColor = 23;
+                client.Aisling.OldColor = 23;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Magenta Hairdye":
+            case "Magenta Hair-dye":
                 client.Aisling.HairColor = 24;
+                client.Aisling.OldColor = 24;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Peacock Hairdye":
+            case "Peacock Hair-dye":
                 client.Aisling.HairColor = 25;
+                client.Aisling.OldColor = 25;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Neon Pink Hairdye":
+            case "Neon Pink Hair-dye":
                 client.Aisling.HairColor = 26;
+                client.Aisling.OldColor = 26;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Arctic Hairdye":
+            case "Arctic Hair-dye":
                 client.Aisling.HairColor = 27;
+                client.Aisling.OldColor = 27;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Mauve Hairdye":
+            case "Mauve Hair-dye":
                 client.Aisling.HairColor = 28;
+                client.Aisling.OldColor = 28;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Neon Orange Hairdye":
+            case "Neon Orange Hair-dye":
                 client.Aisling.HairColor = 29;
+                client.Aisling.OldColor = 29;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Sky Hairdye":
+            case "Sky Hair-dye":
                 client.Aisling.HairColor = 30;
+                client.Aisling.OldColor = 30;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Neon Green Hairdye":
+            case "Neon Green Hair-dye":
                 client.Aisling.HairColor = 31;
+                client.Aisling.OldColor = 31;
                 client.UpdateDisplay();
-                Item.Remove();
                 return;
-            case "Pistachio Hairdye":
+            case "Pistachio Hair-dye":
                 client.Aisling.HairColor = 32;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Corn Hairdye":
-                client.Aisling.HairColor = 33;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Cerulean Hairdye":
-                client.Aisling.HairColor = 34;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Chocolate Hairdye":
-                client.Aisling.HairColor = 35;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Ruby Hairdye":
-                client.Aisling.HairColor = 36;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Hunter Hairdye":
-                client.Aisling.HairColor = 37;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Crimson Hairdye":
-                client.Aisling.HairColor = 38;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Ocean Hairdye":
-                client.Aisling.HairColor = 39;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Ginger Hairdye":
-                client.Aisling.HairColor = 40;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Mustard Hairdye":
-                client.Aisling.HairColor = 41;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Apple Hairdye":
-                client.Aisling.HairColor = 42;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Leaf Hairdye":
-                client.Aisling.HairColor = 43;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Cobalt Hairdye":
-                client.Aisling.HairColor = 44;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Strawberry Hairdye":
-                client.Aisling.HairColor = 45;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Unusual Hairdye":
-                client.Aisling.HairColor = 46;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Sea Hairdye":
-                client.Aisling.HairColor = 47;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Harlequin Hairdye":
-                client.Aisling.HairColor = 48;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Amethyst Hairdye":
-                client.Aisling.HairColor = 49;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Neon Red Hairdye":
-                client.Aisling.HairColor = 50;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Neon Yellow Hairdye":
-                client.Aisling.HairColor = 51;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Rose Hairdye":
-                client.Aisling.HairColor = 52;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Salmon Hairdye":
-                client.Aisling.HairColor = 53;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Scarlet Hairdye":
-                client.Aisling.HairColor = 54;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-            case "Honey Hairdye":
-                client.Aisling.HairColor = 55;
-                client.UpdateDisplay();
-                Item.Remove();
-                return;
-        }
+                client.Aisling.OldColor = 32;
 
-        #endregion
+                client.UpdateDisplay();
+                return;
+            case "Corn Hair-dye":
+                client.Aisling.HairColor = 33;
+                client.Aisling.OldColor = 33;
+                client.UpdateDisplay();
+                return;
+            case "Cerulean Hair-dye":
+                client.Aisling.HairColor = 34;
+                client.Aisling.OldColor = 34;
+                client.UpdateDisplay();
+                return;
+            case "Chocolate Hair-dye":
+                client.Aisling.HairColor = 35;
+                client.Aisling.OldColor = 35;
+                client.UpdateDisplay();
+                return;
+            case "Ruby Hair-dye":
+                client.Aisling.HairColor = 36;
+                client.Aisling.OldColor = 36;
+                client.UpdateDisplay();
+                return;
+            case "Hunter Hair-dye":
+                client.Aisling.HairColor = 37;
+                client.Aisling.OldColor = 37;
+                client.UpdateDisplay();
+                return;
+            case "Crimson Hair-dye":
+                client.Aisling.HairColor = 38;
+                client.Aisling.OldColor = 38;
+                client.UpdateDisplay();
+                return;
+            case "Ocean Hair-dye":
+                client.Aisling.HairColor = 39;
+                client.Aisling.OldColor = 39;
+                client.UpdateDisplay();
+                return;
+            case "Ginger Hair-dye":
+                client.Aisling.HairColor = 40;
+                client.Aisling.OldColor = 40;
+                client.UpdateDisplay();
+                return;
+            case "Mustard Hair-dye":
+                client.Aisling.HairColor = 41;
+                client.Aisling.OldColor = 41;
+                client.UpdateDisplay();
+                return;
+            case "Apple Hair-dye":
+                client.Aisling.HairColor = 42;
+                client.Aisling.OldColor = 42;
+                client.UpdateDisplay();
+                return;
+            case "Leaf Hair-dye":
+                client.Aisling.HairColor = 43;
+                client.Aisling.OldColor = 43;
+                client.UpdateDisplay();
+                return;
+            case "Cobalt Hair-dye":
+                client.Aisling.HairColor = 44;
+                client.Aisling.OldColor = 44;
+                client.UpdateDisplay();
+                return;
+            case "Strawberry Hair-dye":
+                client.Aisling.HairColor = 45;
+                client.Aisling.OldColor = 45;
+                client.UpdateDisplay();
+                return;
+            case "Unusual Hair-dye":
+                client.Aisling.HairColor = 46;
+                client.Aisling.OldColor = 46;
+                client.UpdateDisplay();
+                return;
+            case "Sea Hair-dye":
+                client.Aisling.HairColor = 47;
+                client.Aisling.OldColor = 47;
+                client.UpdateDisplay();
+                return;
+            case "Harlequin Hair-dye":
+                client.Aisling.HairColor = 48;
+                client.Aisling.OldColor = 48;
+                client.UpdateDisplay();
+                return;
+            case "Amethyst Hair-dye":
+                client.Aisling.HairColor = 49;
+                client.Aisling.OldColor = 49;
+                client.UpdateDisplay();
+                return;
+            case "Neon Red Hair-dye":
+                client.Aisling.HairColor = 50;
+                client.Aisling.OldColor = 50;
+                client.UpdateDisplay();
+                return;
+            case "Neon Yellow Hair-dye":
+                client.Aisling.HairColor = 51;
+                client.Aisling.OldColor = 51;
+                client.UpdateDisplay();
+                return;
+            case "Rose Hair-dye":
+                client.Aisling.HairColor = 52;
+                client.Aisling.OldColor = 52;
+                client.UpdateDisplay();
+                return;
+            case "Salmon Hair-dye":
+                client.Aisling.HairColor = 53;
+                client.Aisling.OldColor = 53;
+                client.UpdateDisplay();
+                return;
+            case "Scarlet Hair-dye":
+                client.Aisling.HairColor = 54;
+                client.Aisling.OldColor = 54;
+                client.UpdateDisplay();
+                return;
+            case "Honey Hair-dye":
+                client.Aisling.HairColor = 55;
+                client.Aisling.OldColor = 55;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #1":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #2":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #3":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #4":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #5":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #6":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #7":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #8":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #9":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #10":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #11":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #12":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #13":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #14":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #15":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #16":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #17":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #18":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #19":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #20":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #21":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #22":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #23":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #24":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #25":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #26":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #27":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #28":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #29":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+            case "Special Cut #30":
+                client.Aisling.HairStyle = 0;
+                client.UpdateDisplay();
+                return;
+                #endregion
+        }
     }
 
     public override void Equipped(Sprite sprite, byte displaySlot) { }

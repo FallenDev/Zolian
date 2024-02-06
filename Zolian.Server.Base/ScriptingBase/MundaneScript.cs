@@ -60,7 +60,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
             return false;
         }
 
-        // If the user is not longer within distance of the npc, return
+        // If the user is not within distance of the npc, return
         if (_onClickCheck != 0) return Mundane.WithinEarShotOf(client.Aisling);
 
         // Otherwise disconnect the client

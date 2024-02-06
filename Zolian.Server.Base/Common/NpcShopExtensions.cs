@@ -17,7 +17,7 @@ public static class NpcShopExtensions
 
     /// <summary>
     /// Takes the default list of strings containing item names. It compares that list against the Global Item Cache for matches
-    /// Looks to see if items specify an Npc, if they do and they match the current Npc. It then adds them to the default list
+    /// Looks to see if items specify a Npc, if they do, and they match the current Npc. It then adds them to the default list
     /// </summary>
     /// <returns>List of ItemTemplates</returns>
     public static IEnumerable<ItemTemplate> BuyFromStoreInventory(Mundane mundane)
@@ -25,7 +25,7 @@ public static class NpcShopExtensions
         var defaultBag = mundane.Template.DefaultMerchantStock.Select(i =>
             ServerSetup.Instance.GlobalItemTemplateCache.GetValueOrDefault(i));
 
-        // NpcKey is generally blank in the database, it gives another way to declare an Npc can carry an item
+        // NpcKey is generally blank in the database, it gives another way to declare a Npc can carry an item
         return ServerSetup.Instance.GlobalItemTemplateCache.Values.Where(i => i.NpcKey == mundane.Template.Name)
             .ToList().Concat(defaultBag.Where(n => n != null));
     }
