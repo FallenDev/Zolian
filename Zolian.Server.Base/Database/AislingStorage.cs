@@ -169,7 +169,8 @@ public record AislingStorage : Sql, IAislingStorage
             obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
             obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
             obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
-            obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled);
+            obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
+            obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -385,7 +386,8 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
                     player.QuestManager.BlackSmithingTier, player.QuestManager.ArmorSmithing, player.QuestManager.ArmorSmithingTier, player.QuestManager.JewelCrafting, player.QuestManager.JewelCraftingTier,
                     player.QuestManager.StoneSmithing, player.QuestManager.StoneSmithingTier, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
-                    player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled);
+                    player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled, player.QuestManager.UnknownStart, player.QuestManager.PirateShipAccess,
+                    player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -916,6 +918,11 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@SavedChristmas", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@RescuedReindeer", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@YetiKilled", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@UnknownStart", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@PirateShipAccess", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ScubaSchematics", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ScubaMaterialsQuest", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ScubaGearCrafted", SqlDbType.Bit).Value = false;
 
             #endregion
 
@@ -1143,6 +1150,11 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("SavedChristmas", typeof(bool));
         qDt.Columns.Add("RescuedReindeer", typeof(bool));
         qDt.Columns.Add("YetiKilled", typeof(bool));
+        qDt.Columns.Add("UnknownStart", typeof(bool));
+        qDt.Columns.Add("PirateShipAccess", typeof(bool));
+        qDt.Columns.Add("ScubaSchematics", typeof(bool));
+        qDt.Columns.Add("ScubaMaterialsQuest", typeof(bool));
+        qDt.Columns.Add("ScubaGearCrafted", typeof(bool));
         return qDt;
     }
 

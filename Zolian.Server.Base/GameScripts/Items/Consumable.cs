@@ -86,12 +86,43 @@ public class Consumable(Item item) : ItemScript(item)
                 }
             case "Necra Scribblings":
                 {
-                    aisling.Client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");
+                    client.SendServerMessage(ServerMessageType.WoodenBoard, "\n\n     Ye alt tot legen Hier das text von alt\r\n     *lich scribblings*\r\n     seta nemka thulu zaaaa \r\n     nema nemka thula zeeee\r\n     seta nemka thali toee");
+                    return;
+                }
+            case "Message in a Bottle":
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou've freed the parchment from the bottle");
+                    var bottle = new Item();
+                    bottle = bottle.Create(aisling, "Illegible Treasure Map");
+                    bottle.GiveTo(aisling);
+                    client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                    return;
+                }
+            case "Illegible Treasure Map":
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSomething is written on the back!");
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "If you are reading this, then I've failed in my endeavors. " +
+                                                                             "It was my dream to unearth the most hidden treasures this world had to offer, " +
+                                                                             "but I'm afraid that I dug too deep this time. I found traces of a hidden treasure " +
+                                                                             "rumored to contain untold Legendary Items, but it has proven to be more than I can handle. " +
+                                                                             "If you think you are strong enough, I've left some information with my Dear Brother Isaias. " +
+                                                                             "He doesn't have the full picture, but it should be enough to get you started if you are smart enough. " +
+                                                                             "What fun is a treasure hunt if you have all the answers? May your sails be filled with favorable winds fellow Treasure Hunter!");
+                    return;
+                }
+            case "Breath Sack":
+                {
+                    aisling.CurrentMp += 5000;
+                    if (aisling.CurrentMp > aisling.MaximumMp)
+                        aisling.CurrentMp = aisling.MaximumMp;
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel refreshed (+5k MP)");
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(19, aisling.Position));
+                    client.Aisling.Inventory.RemoveRange(client, Item, 1);
                     return;
                 }
             case "Captured Golden Floppy":
                 {
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Not sure if I should have ate that");
                     return;
                 }
 

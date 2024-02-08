@@ -178,4 +178,9 @@ public class Quests
     public bool SavedChristmas { get; set; }
     public bool RescuedReindeer { get; set; }
     public bool YetiKilled { get; set; }
+    public bool UnknownStart { get; set; }
+    public bool PirateShipAccess { get; set; }
+    public bool ScubaSchematics { get; set; }
+    public bool ScubaMaterialsQuest { get; set; }
+    public bool ScubaGearCrafted { get; set; }
 }

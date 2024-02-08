@@ -333,7 +333,7 @@ public abstract class DatabaseLoad
         {
             string[] dbTables =
             [
-                "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor",
+                "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor", "Nobis",
                 "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole"
             ];
 

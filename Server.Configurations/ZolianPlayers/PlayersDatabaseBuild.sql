@@ -522,8 +522,13 @@ CREATE TYPE dbo.QuestType AS TABLE
     BeltQuest VARCHAR (6),
     SavedChristmas BIT,
 	RescuedReindeer BIT,
-	YetiKilled BIT
-);
+	YetiKilled BIT,
+	UnknownStart BIT,
+	PirateShipAccess BIT,
+	ScubaSchematics BIT,
+	ScubaMaterialsQuest BIT,
+	ScubaGearCrafted BIT
+	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
 (  
@@ -735,7 +740,8 @@ CREATE PROCEDURE [dbo].[InsertQuests]
     @TagorReputation INT, @ThievesGuildReputation INT, @AssassinsGuildReputation INT, @AdventuresGuildReputation INT,
     @BlackSmithing INT, @BlackSmithingTier VARCHAR (10), @ArmorSmithing INT, @ArmorSmithingTier VARCHAR (10),
 	@JewelCrafting INT, @JewelCraftingTier VARCHAR (10), @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
-    @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT
+    @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT, @UnknownStart BIT, @PirateShipAccess BIT,
+	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -750,7 +756,8 @@ BEGIN
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
         [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
         [BlackSmithing], [BlackSmithingTier], [ArmorSmithing], [ArmorSmithingTier], [JewelCrafting], [JewelCraftingTier],
-		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled]
+		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled], [UnknownStart], [PirateShipAccess],
+		[ScubaSchematics], [ScubaMaterialsQuest], [ScubaGearCrafted]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -762,7 +769,8 @@ BEGIN
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
         @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,
         @BlackSmithing, @BlackSmithingTier, @ArmorSmithing, @ArmorSmithingTier, @JewelCrafting, @JewelCraftingTier,
-		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled
+		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled, @UnknownStart, @PirateShipAccess,
+		@ScubaSchematics, @ScubaMaterialsQuest, @ScubaGearCrafted
     );
 END
 GO
@@ -932,7 +940,12 @@ BEGIN
         [BeltQuest] = source.BeltQuest,
         [SavedChristmas] = source.SavedChristmas,
 		[RescuedReindeer] = source.RescuedReindeer,
-		[YetiKilled] = source.YetiKilled;
+		[YetiKilled] = source.YetiKilled,
+		[UnknownStart] = source.UnknownStart,
+		[PirateShipAccess] = source.PirateShipAccess,
+		[ScubaSchematics] = source.ScubaSchematics,
+		[ScubaMaterialsQuest] = source.ScubaMaterialsQuest,
+		[ScubaGearCrafted] = source.ScubaGearCrafted;
 END
 GO
 
@@ -1379,7 +1392,8 @@ BEGIN
            OrenReputation, PietReputation, LouresReputation, UndineReputation,
            TagorReputation, ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
            BlackSmithing, BlackSmithingTier, ArmorSmithing, ArmorSmithingTier, JewelCrafting, JewelCraftingTier,
-		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled
+		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled, UnknownStart, PirateShipAccess, 
+		   ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END
