@@ -26,7 +26,7 @@ public class Mileth : AreaScript
         { 44, ["Primitive Spear", "Nunchucks", "Scimitar", "Luminous Dagger"] },
         { 55, ["Long Sword", "Luminous Shuriken", "Sun Dagger"] },
         { 66, ["Spiked Club", "Metal Chain", "Lotus Dagger"] },
-        { 77, ["Emerald", "Sun Shuriken"] },
+        { 77, ["Emerald Short Sword", "Sun Shuriken"] },
         { 88, ["Metal Club", "Gladius", "Chain Mace", "Skiv", "Balanced Shuriken"] },
         { 99, ["Stone Axe", "Gold Kindjal", "Blood Bane", "Blood Skiv"] },
         { 120, ["Scythe", "Golden Dragon Buster Blade", "Desert Skiv"] },
