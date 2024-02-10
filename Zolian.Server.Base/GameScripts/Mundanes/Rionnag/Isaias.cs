@@ -83,6 +83,19 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         //continuation of quest-line
 
+
+        if (client.Aisling.LegendBook.Has("Sea Legs") && !client.Aisling.LegendBook.Has("Sea Worthy"))
+        {
+            client.SendOptionsDialog(Mundane, "Ah, Sea Legs, I have nothing for you at this moment.", options.ToArray());
+            return;
+        }
+
+        if (client.Aisling.LegendBook.Has("Sea Worthy"))
+        {
+            client.SendOptionsDialog(Mundane, "Ah, fellow Pirate how fares the seas?", options.ToArray());
+            return;
+        }
+
         client.SendOptionsDialog(Mundane, "Bugger Off! I've no interest in the affairs of fledgling adventurers!", options.ToArray());
     }
 
@@ -170,6 +183,11 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
                         new (0x08, "Why Rum?")
                     };
 
+                    client.Aisling.QuestManager.ScubaMaterialsQuest = true;
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, "Flawless Ruby x1\n" +
+                        "Human Skin x10\n" +
+                        "Breath Sack x2\n" +
+                        "Rum x25");
                     client.SendOptionsDialog(Mundane, "I'm a Pirate! We never do anything fun while sober! Har Har!!", options.ToArray());
                     break;
                 }
@@ -310,7 +328,6 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
         if (item4 != null)
             client.Aisling.Inventory.RemoveRange(client, item4, 25);
 
-        client.Aisling.QuestManager.ScubaMaterialsQuest = true;
         client.GiveExp(exp);
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
         client.SendAttributes(StatUpdateType.WeightGold);

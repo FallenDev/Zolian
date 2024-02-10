@@ -1,15 +1,11 @@
 ﻿using Chaos.Common.Definitions;
 
 using Darkages.Common;
-using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-
-using Microsoft.IdentityModel.Tokens;
-
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.Generic;

@@ -137,9 +137,11 @@ public class EnemyRewards : RewardScript
                 continue;
             }
 
+            var chance2 = Generator.RandomNumPercentGen();
             var item2 = new Item();
             item2 = item2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
-            items.Add(item2);
+            if (chance2 <= item2.Template.DropRate)
+                items.Add(item2);
         }
 
         // Build a list of items based on chance

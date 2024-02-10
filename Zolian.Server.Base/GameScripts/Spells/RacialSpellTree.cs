@@ -34,7 +34,6 @@ public class Tail_Flip(Spell spell) : SpellScript(spell)
 }
 
 // Human
-// Trap does moderate damage based on Int & Dex
 [Script("Caltrops")]
 public class Caltrops(Spell spell) : SpellScript(spell)
 {

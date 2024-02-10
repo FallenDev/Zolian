@@ -308,7 +308,7 @@ public abstract class DatabaseLoad
             [
                 "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
                 "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos",
-                "NorthPole", "Dubhaim", "MehadiSwamp", "Astrid"
+                "NorthPole", "Dubhaim", "MehadiSwamp", "Astrid", "Lynith"
             ];
 
             foreach (var table in dbTables)
@@ -334,7 +334,8 @@ public abstract class DatabaseLoad
             string[] dbTables =
             [
                 "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor", "Nobis",
-                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole"
+                "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole",
+                "Lynith"
             ];
 
             foreach (var table in dbTables)
