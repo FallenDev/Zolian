@@ -29,7 +29,7 @@ public class NorthLynith : AreaScript
             case 15 when newLocation.Y == 9:
                 if (client.Aisling.QuestManager.ScubaGearCrafted && client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear")
                 {
-                    client.TransitionToMap(5110, new Position(1, 14));
+                    client.TransitionToMap(5110, new Position(2, 14));
                     return;
                 }
 

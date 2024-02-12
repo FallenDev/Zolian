@@ -28,6 +28,7 @@ public class UnderWater : AreaScript
         if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
 
         if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
         var drown = new DebuffReaping();
@@ -39,6 +40,7 @@ public class UnderWater : AreaScript
         if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
 
         if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
         var drown = new DebuffReaping();
@@ -50,6 +52,7 @@ public class UnderWater : AreaScript
         if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
 
         if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
         var drown = new DebuffReaping();

@@ -65,7 +65,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
         npc.Direction = npc.Template.Direction;
         npc.CurrentMapId = npc.Template.AreaID;
 
-        if (npc.Template.ChatRate == 0) npc.Template.ChatRate = 10;
+        if (npc.Template.ChatRate == 0) npc.Template.ChatRate = 5;
 
         if (npc.Template.TurnRate == 0) npc.Template.TurnRate = 8;
 
@@ -141,11 +141,11 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
         if (Template.ChatTimer != null && Template.EnableSpeech)
         {
             Template.ChatTimer.UpdateTime(update);
-            var speak = Generator.RandNumGen100();
+            var speak = Generator.RandomNumPercentGen();
 
             if (Template.ChatTimer.Elapsed && Template.Speech.Count > 0)
             {
-                if (speak >= 90)
+                if (speak >= .85)
                 {
                     var idx = Random.Shared.Next(Template.Speech.Count);
                     var msg = Template.Speech[idx];
