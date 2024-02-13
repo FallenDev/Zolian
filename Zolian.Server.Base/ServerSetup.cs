@@ -44,9 +44,7 @@ public class ServerSetup : IServerContext
     public string KeyCode { get; set; }
     public string Unlock { get; set; }
     public IPAddress IpAddress { get; set; }
-    public string GmA { get; }
-    public string GmB { get; }
-    public string GmC { get; }
+    public string[] GameMastersIPs { get; set; }
     public string InternalAddress { get; set; }
 
     // Templates
@@ -99,9 +97,7 @@ public class ServerSetup : IServerContext
         KeyCode = ServerOptions.Value.KeyCode;
         Unlock = ServerOptions.Value.Unlock;
         InternalAddress = ServerOptions.Value.InternalIp;
-        GmA = ServerOptions.Value.GmA;
-        GmB = ServerOptions.Value.GmB;
-        GmC = ServerOptions.Value.GmC;
+        GameMastersIPs = ServerOptions.Value.GameMastersIPs;
         var restSettings = SetupRestClients();
         RestClient = new RestClient(restSettings.Item1);
         RestReport = new RestClient(restSettings.Item2);

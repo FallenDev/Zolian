@@ -44,9 +44,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
-    private static readonly string GameMasterIpA = ServerSetup.Instance.GmA;
-    private static readonly string GameMasterIpB = ServerSetup.Instance.GmB;
-    private static readonly string GameMasterIpC = ServerSetup.Instance.GmC;
+    private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
     private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
 
     public LoginServer(
@@ -277,14 +275,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Account, denied access");
                         return;
                     }
-                case "scythe":
+                case "alvino":
                     {
-                        var gmA = IPAddress.Parse(GameMasterIpA);
-                        var gmB = IPAddress.Parse(GameMasterIpB);
-                        var gmC = IPAddress.Parse(GameMasterIpC);
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                        if (localClient.RemoteIp.Equals(gmA) || localClient.RemoteIp.Equals(gmB) || localClient.RemoteIp.Equals(gmC) || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                        if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip))) 
+                            || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
                         {
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();

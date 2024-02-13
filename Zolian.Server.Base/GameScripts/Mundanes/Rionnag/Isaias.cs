@@ -287,7 +287,7 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     private static void GoingSailing(WorldClient client)
     {
-        var exp = Random.Shared.Next(29430000, 34335000); // level 190 * 30 - 35 reward
+        var exp = Random.Shared.Next(32000000, 44000000); // level 190 * 30 - 35 reward
         var item = client.Aisling.HasItemReturnItem("Scuba Schematics");
         if (item != null)
             client.Aisling.Inventory.RemoveFromInventory(client, item);
@@ -314,7 +314,7 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     private static void GoingFishing(WorldClient client)
     {
-        var exp = Random.Shared.Next(29430000, 34335000); // level 220 * 30 - 35 reward
+        var exp = Random.Shared.Next(48000000, 63000000); // level 220 * 30 - 35 reward
         var item = client.Aisling.HasItemReturnItem("Flawless Ruby");
         if (item != null)
             client.Aisling.Inventory.RemoveRange(client, item, 1);

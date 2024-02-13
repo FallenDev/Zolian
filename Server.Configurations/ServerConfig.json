@@ -12,9 +12,10 @@
     // Default: 127.0.0.1 -- leave as-is if you're developing and not publically hosting
     "ServerIp": "127.0.0.1",
     // Game Master IP addresses - this allows you to securely give access to GM Accounts
-    "GmA": "127.0.0.1",
-    "GmB": "127.0.0.1",
-    "GmC": "127.0.0.1",
+    "GameMastersIPs": [
+      "127.0.0.1",
+      "127.0.0.1"
+    ],
     // Set this address internally as a static IP behind your router, this will allow you to restrict Admin access
     "InternalIp": "192.168.50.1"
   },
