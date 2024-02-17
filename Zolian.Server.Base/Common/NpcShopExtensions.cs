@@ -536,7 +536,7 @@ public static class NpcShopExtensions
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && i.Template.CanStack == false && i.Template.Enchantable));
 
-        return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon or Item.Quality.Rare).Select(i => i.InventorySlot).ToList();
+        return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon).Select(i => i.InventorySlot).ToList();
     }
 
     public static List<byte> GetCharacterDetailingByteListForHighGradePolish(WorldClient client)

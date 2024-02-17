@@ -8,10 +8,10 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Mileth;
+namespace Darkages.GameScripts.Mundanes.Undine;
 
-[Script("Callum")]
-public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
+[Script("Ameen")]
+public class Ameen(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private Item _itemDetail;
     private uint _cost;
@@ -52,7 +52,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
                         return;
                     }
 
-                    if (_itemDetail.ItemQuality is Item.Quality.Uncommon or Item.Quality.Rare or Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
+                    if (_itemDetail.ItemQuality is Item.Quality.Rare or Item.Quality.Epic or Item.Quality.Legendary or Item.Quality.Forsaken)
                     {
                         client.SendOptionsDialog(Mundane, "Sorry, I don't have the expertise to polish and upgrade items of this quality.");
                         return;
@@ -92,7 +92,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
             case 0x03:
                 {
-                    var qualitySort = NpcShopExtensions.GetCharacterDetailingByteListForLowGradePolish(client);
+                    var qualitySort = NpcShopExtensions.GetCharacterDetailingByteListForMidGradePolish(client);
 
                     if (qualitySort.Count == 0)
                     {
@@ -158,7 +158,26 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
                                     }
                                     break;
                                 case Item.Quality.Uncommon:
-                                    client.SendOptionsDialog(Mundane, "Sorry, I don't have the skill to do that.");
+                                    switch (_itemDetail.OriginalQuality)
+                                    {
+                                        case Item.Quality.Damaged:
+                                        case Item.Quality.Common:
+                                            break;
+                                        case Item.Quality.Uncommon:
+                                            _itemDetail.OriginalQuality = Item.Quality.Rare;
+                                            _itemDetail.ItemQuality = Item.Quality.Rare;
+                                            break;
+                                        case Item.Quality.Rare:
+                                        case Item.Quality.Epic:
+                                        case Item.Quality.Legendary:
+                                        case Item.Quality.Forsaken:
+                                        case Item.Quality.Mythic:
+                                            _itemDetail.ItemQuality = Item.Quality.Rare;
+                                            break;
+                                        default:
+                                            client.SendOptionsDialog(Mundane, "Sorry, I don't have the skill to do that.");
+                                            break;
+                                    }
                                     break;
                                 case Item.Quality.Rare:
                                     client.SendOptionsDialog(Mundane, "Sorry, I don't have the skill to do that.");
@@ -219,7 +238,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
-        if (item.OriginalQuality is Item.Quality.Common or Item.Quality.Damaged)
+        if (item.OriginalQuality is Item.Quality.Uncommon or Item.Quality.Common or Item.Quality.Damaged)
         {
             OnResponse(client, 0x00, item.InventorySlot.ToString());
             return;

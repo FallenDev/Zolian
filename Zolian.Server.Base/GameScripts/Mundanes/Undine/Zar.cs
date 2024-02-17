@@ -1,5 +1,4 @@
 ﻿using Chaos.Common.Definitions;
-
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -9,25 +8,15 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-using ServiceStack;
+namespace Darkages.GameScripts.Mundanes.Undine;
 
-namespace Darkages.GameScripts.Mundanes.Mileth;
-
-[Script("Dar")]
-public class Dar : MundaneScript
+[Script("Zar")]
+public class Zar : MundaneScript
 {
-    private string _retrieve;
-    private string _retrieveAdv;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
-    private bool _0X0A;
-    private bool _0X0B;
-    private bool _0X0C;
-    private bool _0X0D;
-    private bool _0X0E;
-    private bool _0X0F;
 
-    public Dar(WorldServer server, Mundane mundane) : base(server, mundane)
+    public Zar(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
         _spellList = ObtainSpellList();
@@ -45,25 +34,6 @@ public class Dar : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (!client.Aisling.QuestManager.DarItem.IsNullOrEmpty())
-        {
-            switch (client.Aisling.QuestManager.Dar)
-            {
-                case <= 7:
-                    _0X0B = true;
-                    options.Add(new(0x0B, $"{{=cIs this what you're looking for{{=a?"));
-                    break;
-                case 8:
-                    _0X0D = true;
-                    options.Add(new(0x0D, $"{{=cIs this what you're looking for{{=a?"));
-                    break;
-                case 9:
-                    _0X0F = true;
-                    options.Add(new(0x0F, $"{{=cIs this what you're looking for{{=a?"));
-                    break;
-            }
-        }
-
         if (_skillList.Count > 0)
         {
             options.Add(new(0x01, "Show Available Skills"));
@@ -77,66 +47,13 @@ public class Dar : MundaneScript
         options.Add(new(0x02, "Forget Skill"));
         options.Add(new(0x0011, "Forget Spell"));
 
-        if (client.Aisling.QuestManager.DarItem.IsNullOrEmpty())
-        {
-            switch (client.Aisling.QuestManager.Dar)
-            {
-                case <= 7:
-                    _0X0A = true;
-                    options.Add(new(0x0A, "{=bDark Things"));
-                    break;
-                case 8:
-                    _0X0C = true;
-                    options.Add(new(0x0C, "{=bDarker Things"));
-                    break;
-                case 9:
-                    _0X0E = true;
-                    options.Add(new(0x0E, "{=bThings that bump in the Twilight"));
-                    break;
-            }
-        }
 
-        client.SendOptionsDialog(Mundane, "Looking into the darker things is what I like to do, how may I help you?", options.ToArray());
+        client.SendOptionsDialog(Mundane, "The arcane arts are not definitive. Why are you here?", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
     {
         if (!AuthenticateUser(client)) return;
-
-        var darkThings = Random.Shared.Next(1, 12);
-        var advExp = Random.Shared.Next(150000, 300000);
-        var advExp2 = Random.Shared.Next(500000, 1000000);
-
-        _retrieve = darkThings switch
-        {
-            1 => "Spider Leg",
-            2 => "Spider Eye",
-            3 => "Centipede Gland",
-            4 => "Mold",
-            5 => "Spider Silk",
-            6 => "Raw Wax",
-            7 => "Spoiled Cherries",
-            8 => "Rotten Veggies",
-            9 => "Spoiled Grapes",
-            10 => "Royal Wax",
-            11 => "Mead",
-            _ => _retrieve
-        };
-
-        _retrieveAdv = darkThings switch
-        {
-            1 => "Wolf Fur",
-            2 => "Wolf Skin",
-            3 => "Bee Sting",
-            4 => "Great Bat Wing",
-            5 => "Scorpion Sting",
-            6 => "Scorpion Venom",
-            7 => "Wolf Lock",
-            8 => "Mantis Eye",
-            9 => "Goblin Skull",
-            10 => "Mead",
-            _ => _retrieve
-        };
 
         switch (responseId)
         {
@@ -344,184 +261,6 @@ public class Dar : MundaneScript
                 }
 
             #endregion
-
-            case 8:
-                {
-                    client.SendOptionsDialog(Mundane, "Come back if you're interested in helping me.");
-                    break;
-                }
-            case 9:
-                {
-                    if (client.Aisling.QuestManager.DarItem.IsNullOrEmpty())
-                    {
-                        client.Aisling.QuestManager.DarItem = client.Aisling.QuestManager.Dar switch
-                        {
-                            <= 7 => _retrieve,
-                            8 => _retrieveAdv,
-                            9 => "Kardi Fur",
-                            _ => client.Aisling.QuestManager.DarItem
-                        };
-                    }
-
-                    client.SendOptionsDialog(Mundane, $"Currently I'm looking for {{=q{client.Aisling.QuestManager.DarItem}{{=a. *drinks a strong smelling mead*");
-
-                    break;
-                }
-
-            #region Dark Things
-
-            case 10:
-                {
-                    if (!_0X0A) return;
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x09, "Sure."),
-                        new (0x08, "Sorry, I'm busy.")
-                    };
-
-                    client.SendOptionsDialog(Mundane, "I need a few ingredients for my studies, care to help me?", options.ToArray());
-                    break;
-                }
-            case 11:
-                {
-                    if (!_0X0B) return;
-                    if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
-                    {
-                        client.Aisling.QuestManager.Dar++;
-                        client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
-                        client.Aisling.QuestManager.DarItem = null;
-                        client.GiveExp(8000);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "You've gained 8,000 experience.");
-                        client.SendAttributes(StatUpdateType.WeightGold);
-                        client.SendOptionsDialog(Mundane, $"Ah, there it is.. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
-                        if (client.Aisling.QuestManager.Dar >= 7)
-                        {
-                            var legend = new Legend.LegendItem
-                            {
-                                Key = "LDar1",
-                                Time = DateTime.UtcNow,
-                                Color = LegendColor.Invisible,
-                                Icon = (byte)LegendIcon.Invisible,
-                                Text = "Completed LDar1"
-                            };
-
-                            client.Aisling.LegendBook.AddLegend(legend, client);
-                        }
-                    }
-                    else
-                    {
-                        client.SendOptionsDialog(Mundane, $"No, I don't see any {{=q{client.Aisling.QuestManager.DarItem}{{=a on your person.");
-                    }
-
-                    break;
-                }
-
-            #endregion
-
-            #region Darker Things
-
-            case 12:
-                {
-                    if (!_0X0C) return;
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x09, "Sure."),
-                        new (0x08, "Sorry I'm busy.")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"Hello there again, I need ingredients.. Hic! ..they're a bit harder to come by. \nCurrently I'm looking for {{=q{client.Aisling.QuestManager.DarItem}{{=a.", options.ToArray());
-                    break;
-                }
-            case 13:
-                {
-                    if (!_0X0D) return;
-                    if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
-                    {
-                        client.Aisling.QuestManager.Dar++;
-                        client.Aisling.QuestManager.MilethReputation += 1;
-                        client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
-                        client.Aisling.QuestManager.DarItem = null;
-                        client.GiveExp(advExp);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp} experience.");
-                        client.SendAttributes(StatUpdateType.WeightGold);
-                        client.SendOptionsDialog(Mundane, $"Hic! That's what I was looking for. \n\nFavors Completed: {{=q{client.Aisling.QuestManager.Dar}");
-                        if (client.Aisling.QuestManager.Dar >= 8)
-                        {
-                            var legend = new Legend.LegendItem
-                            {
-                                Key = "LDar2",
-                                Time = DateTime.UtcNow,
-                                Color = LegendColor.Invisible,
-                                Icon = (byte)LegendIcon.Invisible,
-                                Text = "Completed LDar2"
-                            };
-
-                            client.Aisling.LegendBook.AddLegend(legend, client);
-                        }
-                    }
-                    else
-                    {
-                        client.SendOptionsDialog(Mundane, $"No, I don't see any {{=q{client.Aisling.QuestManager.DarItem}{{=a on your person.    Hic!");
-                    }
-
-                    break;
-                }
-
-            #endregion
-
-            #region Things that bump in the Twilight
-
-            case 14:
-                {
-                    if (!_0X0E) return;
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x09, "Sure."),
-                        new (0x08, "Sorry I'm busy.")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"Hic! The items I require are ....   \n*snores* ...    {{=q{client.Aisling.QuestManager.DarItem}{{=a.", options.ToArray());
-                    break;
-                }
-            case 15:
-                {
-                    if (!_0X0F) return;
-                    if (client.Aisling.HasItem(client.Aisling.QuestManager.DarItem))
-                    {
-                        client.Aisling.QuestManager.Dar++;
-                        client.Aisling.QuestManager.MilethReputation += 1;
-                        client.TakeAwayQuantity(client.Aisling, client.Aisling.QuestManager.DarItem, 1);
-                        client.Aisling.QuestManager.DarItem = null;
-                        client.GiveExp(advExp2);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {advExp2} experience.");
-                        client.SendAttributes(StatUpdateType.WeightGold);
-                        client.SendOptionsDialog(Mundane, "I must of passed out again. Thank you, this will advance my research.");
-                    }
-                    else
-                    {
-                        client.SendOptionsDialog(Mundane,
-                            $"ZzZzzzZZzzZ *mumbles..*  ..{{=q{client.Aisling.QuestManager.DarItem}{{=a.           Hic!");
-                    }
-
-                    if (client.Aisling.QuestManager.Dar == 10)
-                    {
-                        var item = new Legend.LegendItem
-                        {
-                            Key = "LDar3",
-                            Time = DateTime.UtcNow,
-                            Color = LegendColor.BlueG1,
-                            Icon = (byte)LegendIcon.Wizard,
-                            Text = "A Dark Favor"
-                        };
-
-                        client.Aisling.LegendBook.AddLegend(item, client);
-                    }
-
-                    break;
-
-                }
-
-                #endregion
         }
     }
 }
