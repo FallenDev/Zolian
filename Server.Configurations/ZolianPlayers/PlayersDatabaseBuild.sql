@@ -480,7 +480,6 @@ CREATE TYPE dbo.QuestType AS TABLE
     DarItem VARCHAR (20),
 	ReleasedTodesbaum BIT,
     DrunkenHabit BIT,
-    EternalLove BIT,
     FionaDance BIT,
     Keela INT,
     KeelaCount INT,
@@ -527,7 +526,13 @@ CREATE TYPE dbo.QuestType AS TABLE
 	PirateShipAccess BIT,
 	ScubaSchematics BIT,
 	ScubaMaterialsQuest BIT,
-	ScubaGearCrafted BIT
+	ScubaGearCrafted BIT,
+	EternalLove BIT,
+    EternalLoveStarted BIT,
+    UnhappyEnding BIT,
+    HonoringTheFallen BIT,
+    ReadTheFallenNotes BIT,
+    GivenTarnishedBreastplate BIT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -733,7 +738,7 @@ CREATE PROCEDURE [dbo].[InsertQuests]
     @Serial BIGINT, @MailBoxNumber INT, @TutComplete BIT, @BetaReset BIT, @StoneSmith INT, @StoneSmithingTier VARCHAR (10), @MilethRep INT,
 	@ArtursGift INT, @CamilleGreeting BIT, @ConnPotions BIT, @CryptTerror BIT, @CryptTerrorSlayed BIT, @CryptTerrorContinued BIT, @CryptTerrorContSlayed BIT,
 	@NightTerror BIT, @NightTerrorSlayed BIT, @DreamWalking BIT, @DreamWalkingSlayed BIT, @Dar INT, @DarItem VARCHAR (20), @ReleasedTodesbaum BIT, @DrunkenHabit BIT,
-	@EternalLove BIT, @Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT,
+	@Fiona BIT, @Keela INT, @KeelaCount INT, @KeelaKill VARCHAR (20), @KeelaQuesting BIT, @KillerBee BIT, @Neal INT, @NealCount INT,
 	@NealKill VARCHAR (20), @AbelShopAccess BIT, @PeteKill INT, @PeteComplete BIT, @SwampAccess BIT, @SwampCount INT, @TagorDungeonAccess BIT, @Lau INT,
     @AbelReputation INT, @RucesionReputation INT, @SuomiReputation INT, @RionnagReputation INT,
     @OrenReputation INT, @PietReputation INT, @LouresReputation INT, @UndineReputation INT,
@@ -741,7 +746,8 @@ CREATE PROCEDURE [dbo].[InsertQuests]
     @BlackSmithing INT, @BlackSmithingTier VARCHAR (10), @ArmorSmithing INT, @ArmorSmithingTier VARCHAR (10),
 	@JewelCrafting INT, @JewelCraftingTier VARCHAR (10), @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
     @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT, @UnknownStart BIT, @PirateShipAccess BIT,
-	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT
+	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT, @EternalLove BIT, @EternalLoveStarted BIT, @UnhappyEnding BIT,
+	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -750,27 +756,29 @@ BEGIN
         [Serial], [MailBoxNumber], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
 		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [CryptTerrorContinued], [CryptTerrorContSlayed],
 		[NightTerror], [NightTerrorSlayed], [DreamWalking], [DreamWalkingSlayed], [Dar], [DarItem], [ReleasedTodesbaum], [DrunkenHabit],
-		[EternalLove], [FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount],
+		[FionaDance], [Keela], [KeelaCount], [KeelaKill], [KeelaQuesting], [KillerBee], [Neal], [NealCount],
 		[NealKill], [AbelShopAccess], [PeteKill], [PeteComplete], [SwampAccess], [SwampCount], [TagorDungeonAccess], [Lau],
         [AbelReputation], [RucesionReputation], [SuomiReputation], [RionnagReputation],
         [OrenReputation], [PietReputation], [LouresReputation], [UndineReputation],
         [TagorReputation], [ThievesGuildReputation], [AssassinsGuildReputation], [AdventuresGuildReputation],
         [BlackSmithing], [BlackSmithingTier], [ArmorSmithing], [ArmorSmithingTier], [JewelCrafting], [JewelCraftingTier],
 		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled], [UnknownStart], [PirateShipAccess],
-		[ScubaSchematics], [ScubaMaterialsQuest], [ScubaGearCrafted]
+		[ScubaSchematics], [ScubaMaterialsQuest], [ScubaGearCrafted], [EternalLove], [EternalLoveStarted], [UnhappyEnding],
+		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
 		@ArtursGift, @CamilleGreeting, @ConnPotions, @CryptTerror, @CryptTerrorSlayed, @CryptTerrorContinued, @CryptTerrorContSlayed,
 		@NightTerror, @NightTerrorSlayed, @DreamWalking, @DreamWalkingSlayed, @Dar, @DarItem, @ReleasedTodesbaum, @DrunkenHabit,
-		@EternalLove, @Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount,
+		@Fiona, @Keela, @KeelaCount, @KeelaKill, @KeelaQuesting, @KillerBee, @Neal, @NealCount,
 		@NealKill, @AbelShopAccess, @PeteKill, @PeteComplete, @SwampAccess, @SwampCount, @TagorDungeonAccess, @Lau,
         @AbelReputation, @RucesionReputation, @SuomiReputation, @RionnagReputation,
         @OrenReputation, @PietReputation, @LouresReputation, @UndineReputation,
         @TagorReputation, @ThievesGuildReputation, @AssassinsGuildReputation, @AdventuresGuildReputation,
         @BlackSmithing, @BlackSmithingTier, @ArmorSmithing, @ArmorSmithingTier, @JewelCrafting, @JewelCraftingTier,
 		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled, @UnknownStart, @PirateShipAccess,
-		@ScubaSchematics, @ScubaMaterialsQuest, @ScubaGearCrafted
+		@ScubaSchematics, @ScubaMaterialsQuest, @ScubaGearCrafted, @EternalLove, @EternalLoveStarted, @UnhappyEnding,
+		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate
     );
 END
 GO
@@ -898,7 +906,6 @@ BEGIN
         [DarItem] = source.DarItem,
 		[ReleasedTodesbaum] = source.ReleasedTodesbaum,
         [DrunkenHabit] = source.DrunkenHabit,
-        [EternalLove] = source.EternalLove,
         [FionaDance] = source.FionaDance,
         [Keela] = source.Keela,
         [KeelaCount] = source.KeelaCount,
@@ -945,7 +952,13 @@ BEGIN
 		[PirateShipAccess] = source.PirateShipAccess,
 		[ScubaSchematics] = source.ScubaSchematics,
 		[ScubaMaterialsQuest] = source.ScubaMaterialsQuest,
-		[ScubaGearCrafted] = source.ScubaGearCrafted;
+		[ScubaGearCrafted] = source.ScubaGearCrafted,
+        [EternalLove] = source.EternalLove,
+        [EternalLoveStarted] = source.EternalLoveStarted,
+        [UnhappyEnding] = source.UnhappyEnding,
+        [HonoringTheFallen] = source.HonoringTheFallen,
+        [ReadTheFallenNotes] = source.ReadTheFallenNotes,
+		[GivenTarnishedBreastplate] = source.GivenTarnishedBreastplate;
 END
 GO
 
@@ -1385,7 +1398,7 @@ BEGIN
 
     SELECT MailBoxNumber, TutorialCompleted, BetaReset, StoneSmithing, StoneSmithingTier, MilethReputation, ArtursGift,
            CamilleGreetingComplete, ConnPotions, CryptTerror, CryptTerrorSlayed, CryptTerrorContinued, CryptTerrorContSlayed, 
-		   NightTerror, NightTerrorSlayed, DreamWalking, DreamWalkingSlayed, Dar, DarItem, ReleasedTodesbaum, DrunkenHabit, EternalLove, FionaDance,
+		   NightTerror, NightTerrorSlayed, DreamWalking, DreamWalkingSlayed, Dar, DarItem, ReleasedTodesbaum, DrunkenHabit, FionaDance,
 		   Keela, KeelaCount, KeelaKill, KeelaQuesting, KillerBee, Neal, NealCount, NealKill, AbelShopAccess, PeteKill,
            PeteComplete, SwampAccess, SwampCount, TagorDungeonAccess, Lau,
            AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
@@ -1393,7 +1406,8 @@ BEGIN
            TagorReputation, ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
            BlackSmithing, BlackSmithingTier, ArmorSmithing, ArmorSmithingTier, JewelCrafting, JewelCraftingTier,
 		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled, UnknownStart, PirateShipAccess, 
-		   ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted
+		   ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted, EternalLove, EternalLoveStarted, UnhappyEnding,
+		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

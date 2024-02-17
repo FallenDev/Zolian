@@ -25,18 +25,13 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
     protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
-
         var options = new List<Dialog.OptionsDataItem>();
 
-        switch (client.Aisling.QuestManager.EternalLove)
-        {
-            case false when (client.Aisling.Level >= 50):
-                options.Add(new(0x06, "{=qEternal Love"));
-                break;
-            case true when (!client.Aisling.QuestManager.CryptTerrorSlayed):
-                options.Add(new(0x08, "..."));
-                break;
-        }
+        if (!client.Aisling.QuestManager.EternalLoveStarted && client.Aisling.ExpLevel >= 30)
+            options.Add(new(0x06, "{=qEternal Love"));
+
+        if (!client.Aisling.QuestManager.CryptTerrorSlayed)
+            options.Add(new(0x08, "..."));
 
         options.Add(new(0x07, "Rumors"));
         options.Add(new(0x02, "Buy"));
@@ -119,7 +114,7 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                     }
 
                     options.Add(new(0x09, "I'm sorry for their loss"));
-                    client.SendOptionsDialog(Mundane, "I have a friend who is grieving the lost of their loved one. They died tragically in the last great goblin war.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "I have a friend who is grieving the loss of their loved one. They died tragically in the last great goblin war.", options.ToArray());
                 }
                 break;
             case 0x07:
@@ -154,8 +149,8 @@ public class Eireann(WorldServer server, Mundane mundane) : MundaneScript(server
                 client.CloseDialog();
                 break;
             case 0x0A:
-                // ToDo: Finish "The Letter" questline
-                client.CloseDialog();
+                client.Aisling.QuestManager.EternalLoveStarted = true;
+                client.SendOptionsDialog(Mundane, "Okay, my friend's name is Corina. You should probably talk to her first. Good luck, and thank you.\n{=qHead to Undine Tavern");
                 break;
             case 0x19:
                 {

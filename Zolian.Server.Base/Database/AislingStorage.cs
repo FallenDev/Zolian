@@ -162,7 +162,7 @@ public record AislingStorage : Sql, IAislingStorage
             qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
             obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.CryptTerrorContinued, obj.QuestManager.CryptTerrorContSlayed,
             obj.QuestManager.NightTerror, obj.QuestManager.NightTerrorSlayed, obj.QuestManager.DreamWalking, obj.QuestManager.DreamWalkingSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem, obj.QuestManager.ReleasedTodesbaum,
-            obj.QuestManager.DrunkenHabit, obj.QuestManager.EternalLove, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount, obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting,
+            obj.QuestManager.DrunkenHabit, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount, obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting,
             obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount, obj.QuestManager.NealKill, obj.QuestManager.AbelShopAccess, obj.QuestManager.PeteKill, obj.QuestManager.PeteComplete,
             obj.QuestManager.SwampAccess, obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
             obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
@@ -170,7 +170,8 @@ public record AislingStorage : Sql, IAislingStorage
             obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
             obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
             obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
-            obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted);
+            obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted, obj.QuestManager.EternalLove, obj.QuestManager.EternalLoveStarted, obj.QuestManager.UnhappyEnding,
+            obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -379,7 +380,7 @@ public record AislingStorage : Sql, IAislingStorage
                 qDt.Rows.Add(player.Serial, player.QuestManager.MailBoxNumber, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
                     player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.CryptTerrorContinued, player.QuestManager.CryptTerrorContSlayed,
                     player.QuestManager.NightTerror, player.QuestManager.NightTerrorSlayed, player.QuestManager.DreamWalking, player.QuestManager.DreamWalkingSlayed, player.QuestManager.Dar, player.QuestManager.DarItem, player.QuestManager.ReleasedTodesbaum,
-                    player.QuestManager.DrunkenHabit, player.QuestManager.EternalLove, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount, player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting,
+                    player.QuestManager.DrunkenHabit, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount, player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting,
                     player.QuestManager.KillerBee, player.QuestManager.Neal, player.QuestManager.NealCount, player.QuestManager.NealKill, player.QuestManager.AbelShopAccess, player.QuestManager.PeteKill, player.QuestManager.PeteComplete,
                     player.QuestManager.SwampAccess, player.QuestManager.SwampCount, player.QuestManager.TagorDungeonAccess, player.QuestManager.Lau, player.QuestManager.BeltDegree, player.QuestManager.MilethReputation,
                     player.QuestManager.AbelReputation, player.QuestManager.RucesionReputation, player.QuestManager.SuomiReputation, player.QuestManager.RionnagReputation, player.QuestManager.OrenReputation,
@@ -387,7 +388,8 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.BlackSmithingTier, player.QuestManager.ArmorSmithing, player.QuestManager.ArmorSmithingTier, player.QuestManager.JewelCrafting, player.QuestManager.JewelCraftingTier,
                     player.QuestManager.StoneSmithing, player.QuestManager.StoneSmithingTier, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
                     player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled, player.QuestManager.UnknownStart, player.QuestManager.PirateShipAccess,
-                    player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted);
+                    player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted, player.QuestManager.EternalLove, player.QuestManager.EternalLoveStarted, player.QuestManager.UnhappyEnding,
+                    player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -878,7 +880,6 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@DarItem", SqlDbType.VarChar).Value = "";
             cmd5.Parameters.Add("@ReleasedTodesbaum", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@DrunkenHabit", SqlDbType.Bit).Value = false;
-            cmd5.Parameters.Add("@EternalLove", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Fiona", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@Keela", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@KeelaCount", SqlDbType.Int).Value = 0;
@@ -923,6 +924,12 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@ScubaSchematics", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@ScubaMaterialsQuest", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@ScubaGearCrafted", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@EternalLove", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@EternalLoveStarted", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@UnhappyEnding", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@HonoringTheFallen", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ReadTheFallenNotes", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@GivenTarnishedBreastplate", SqlDbType.Bit).Value = false;
 
             #endregion
 
@@ -1107,7 +1114,6 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("DarItem", typeof(string));
         qDt.Columns.Add("ReleasedTodesbaum", typeof(bool));
         qDt.Columns.Add("DrunkenHabit", typeof(bool));
-        qDt.Columns.Add("EternalLove", typeof(bool));
         qDt.Columns.Add("FionaDance", typeof(bool));
         qDt.Columns.Add("Keela", typeof(int));
         qDt.Columns.Add("KeelaCount", typeof(int));
@@ -1155,6 +1161,13 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("ScubaSchematics", typeof(bool));
         qDt.Columns.Add("ScubaMaterialsQuest", typeof(bool));
         qDt.Columns.Add("ScubaGearCrafted", typeof(bool));
+        qDt.Columns.Add("EternalLove", typeof(bool));
+        qDt.Columns.Add("EternalLoveStarted", typeof(bool));
+        qDt.Columns.Add("UnhappyEnding", typeof(bool));
+        qDt.Columns.Add("HonoringTheFallen", typeof(bool));
+        qDt.Columns.Add("ReadTheFallenNotes", typeof(bool));
+        qDt.Columns.Add("GivenTarnishedBreastplate", typeof(bool));
+
         return qDt;
     }
 

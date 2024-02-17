@@ -157,6 +157,11 @@ public class Quests
     public bool ReleasedTodesbaum { get; set; }
     public bool DrunkenHabit { get; set; }
     public bool EternalLove { get; set; }
+    public bool EternalLoveStarted { get; set; }
+    public bool UnhappyEnding { get; set; }
+    public bool HonoringTheFallen { get; set; }
+    public bool ReadTheFallenNotes { get; set; }
+    public bool GivenTarnishedBreastplate { get; set; }
     public bool FionaDance { get; set; }
     public int Keela { get; set; }
     public int KeelaCount { get; set; }

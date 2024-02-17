@@ -3688,10 +3688,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ClientRegistry.TryRemove(client.Id, out _);
             ServerSetup.ConnectionLogger($"{client.Aisling.Username} either logged out or was removed from the server.");
         }
-        catch (Exception ex)
+        catch
         {
-            ServerSetup.ConnectionLogger($"Exception thrown while {aisling?.Username} was trying to disconnect");
-            Crashes.TrackError(ex);
+            // ignored
         }
     }
 
