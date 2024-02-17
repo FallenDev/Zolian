@@ -190,12 +190,12 @@ public class WorldClient : SocketClientBase, IWorldClient
     public int MapClicks { get; set; }
     public uint EntryCheck { get; set; }
     private readonly object _warpCheckLock = new();
-    private readonly Queue<ExperienceEvent> _expQueue = new();
-    private readonly Queue<AbilityEvent> _apQueue = new();
-    private readonly Queue<DebuffEvent> _debuffApplyQueue = new();
-    private readonly Queue<BuffEvent> _buffApplyQueue = new();
-    private readonly Queue<DebuffEvent> _debuffUpdateQueue = new();
-    private readonly Queue<BuffEvent> _buffUpdateQueue = new();
+    private readonly Queue<ExperienceEvent> _expQueue = [];
+    private readonly Queue<AbilityEvent> _apQueue = [];
+    private readonly Queue<DebuffEvent> _debuffApplyQueue = [];
+    private readonly Queue<BuffEvent> _buffApplyQueue = [];
+    private readonly Queue<DebuffEvent> _debuffUpdateQueue = [];
+    private readonly Queue<BuffEvent> _buffUpdateQueue = [];
     private readonly object _expQueueLock = new();
     private readonly object _apQueueLock = new();
     private readonly object _buffQueueLockApply = new();
@@ -4269,7 +4269,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         if (Aisling.Inventory.Items != null)
         {
-            foreach (var inventory in Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable) && i.Value.Durability < i.Value.MaxDurability))
+            foreach (var inventory in Aisling.Inventory.Items.Where(i => i.Value != null && i.Value.Template.Flags.FlagIsSet(ItemFlags.Repairable)))
             {
                 var item = inventory.Value;
                 if (item.Template == null) continue;
@@ -4280,7 +4280,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             }
         }
 
-        foreach (var (key, value) in Aisling.EquipmentManager.Equipment.Where(equip => equip.Value != null && equip.Value.Item.Template.Flags.FlagIsSet(ItemFlags.Repairable) && equip.Value.Item.Durability < equip.Value.Item.MaxDurability))
+        foreach (var (key, value) in Aisling.EquipmentManager.Equipment.Where(equip => equip.Value != null && equip.Value.Item.Template.Flags.FlagIsSet(ItemFlags.Repairable)))
         {
             var item = value.Item;
             if (item.Template == null) continue;

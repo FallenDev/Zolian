@@ -18,7 +18,18 @@ public class Weapon(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        // If equipping a Bow, remove off-hand item if exists
+        // Unequip two-handed if already equipped
+        if (aisling.EquipmentManager.Equipment[1]?.Item != null)
+        {
+            var checkTwoHand = aisling.EquipmentManager.Equipment[1].Item;
+            if (checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) ||
+                checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
+            {
+                aisling.EquipmentManager.RemoveFromExisting(1);
+            }
+        }
+
+        // Bow skill check
         if (Item.Template.Flags.FlagIsSet(ItemFlags.LongRanged))
         {
             if (!client.Aisling.UseBows)
@@ -26,16 +37,9 @@ public class Weapon(Item item) : ItemScript(item)
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require a unique skill for this.");
                 return;
             }
-
-            var i = aisling.EquipmentManager.Equipment[3]?.Slot;
-            if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
-                return;
-            }
         }
 
-        // If equipping a two-handed weapon, remove off-hand item if exists
+        // Remove off-hand item if exists & Two-hand skill check
         if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded))
         {
             if (!client.Aisling.TwoHandedBasher)
@@ -52,7 +56,7 @@ public class Weapon(Item item) : ItemScript(item)
             }
         }
 
-        // If equipping a two-handed staff, remove off-hand item if exists
+        // Remove off-hand item if exists & Two-hand skill check
         if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
         {
             if (!client.Aisling.TwoHandedCaster)
@@ -69,6 +73,7 @@ public class Weapon(Item item) : ItemScript(item)
             }
         }
 
+        // Dual wield skill check
         if (client.Aisling.DualWield && Item.Template.Flags.FlagIsSet(ItemFlags.DualWield))
         {
             if (client.Aisling.EquipmentManager.Equipment.TryGetValue(1, out var weaponSlot))
