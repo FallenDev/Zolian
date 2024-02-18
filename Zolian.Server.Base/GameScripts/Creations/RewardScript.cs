@@ -1,4 +1,5 @@
 ﻿using Darkages.Interfaces;
+using Darkages.Network.Client;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Creations;
@@ -33,7 +34,7 @@ public abstract class RewardScript : IScriptBase
         [(450, 500)] = null
     };
 
-    protected static readonly Dictionary<(int, int), List<string>> BeltDrops = new()
+    protected internal static readonly Dictionary<(int, int), List<string>> BeltDrops = new()
     {
         [(1, 5)] = ["Fire Belt", "Wind Belt", "Earth Belt", "Sea Belt", "Dark Belt", "Light Belt"],
         [(6, 11)] = ["Fire Leather Belt", "Wind Leather Belt", "Earth Leather Belt", "Sea Leather Belt"],
@@ -283,7 +284,7 @@ public abstract class RewardScript : IScriptBase
         [(450, 500)] = null
     };
 
-    protected static readonly Dictionary<(int, int), List<string>> ShieldDrops = new()
+    protected internal static readonly Dictionary<(int, int), List<string>> ShieldDrops = new()
     {
         [(1, 5)] = ["Wooden Shield"],
         [(6, 11)] =
@@ -371,8 +372,15 @@ public abstract class RewardScript : IScriptBase
         [(450, 500)] = null
     };
 
+    // Reward based on Monster level
     protected static IEnumerable<string> GenerateDropsBasedOnLevel(Monster monster, Dictionary<(int, int), List<string>> dropsDict)
     {
         return monster == null ? null : (from entry in dropsDict where monster.Level >= entry.Key.Item1 && monster.Level <= entry.Key.Item2 select entry.Value).FirstOrDefault();
+    }
+
+    // Reward based on Player level
+    protected internal static IEnumerable<string> GenerateDropsCailFountain(WorldClient client, Dictionary<(int, int), List<string>> dropsDict)
+    {
+        return client.Aisling == null ? null : (from entry in dropsDict where client.Aisling.Level >= entry.Key.Item1 && client.Aisling.Level <= entry.Key.Item2 select entry.Value).FirstOrDefault();
     }
 }
