@@ -1331,13 +1331,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
-
-                    // Mileth Altar 
-                    if (localClient.Aisling.Map.ID == 500)
-                    {
-                        if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
-                            item.Remove();
-                    }
                 }
                 else
                 {
@@ -1352,18 +1345,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         ItemQuality = item.ItemQuality,
                         OriginalQuality = item.OriginalQuality,
                         Stacks = (ushort)count,
-                        Template = item.Template
+                        Template = item.Template,
+                        AbandonedDate = DateTime.UtcNow
                     };
 
-                    temp.AbandonedDate = DateTime.UtcNow;
                     temp.Release(localClient.Aisling, itemPosition);
 
-                    // Mileth Altar 
-                    if (localClient.Aisling.Map.ID == 500)
-                    {
-                        if (itemPosition.X == 31 && itemPosition.Y == 52 || itemPosition.X == 31 && itemPosition.Y == 53)
-                            temp.Remove();
-                    }
+                    CheckAltar(localClient, temp);
 
                     item.Stacks = (ushort)remaining;
                     localClient.SendRemoveItemFromPane(item.InventorySlot);
@@ -1377,17 +1365,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
-
-                    // Mileth Altar 
-                    if (localClient.Aisling.Map.ID == 500)
-                    {
-                        if (itemPosition.X == 31 && itemPosition.Y == 52 ||
-                            itemPosition.X == 31 && itemPosition.Y == 53)
-                        {
-                            ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
-                            item.Remove();
-                        }
-                    }
                 }
             }
 
@@ -1405,6 +1382,29 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             return default;
+        }
+    }
+
+    private static void CheckAltar(IWorldClient client, IItem item)
+    {
+        switch (client.Aisling.Map.ID)
+        {
+            // Mileth Altar
+            case 500:
+            {
+                if ((item.X != 31 || item.Y != 52) && (item.X != 31 || item.Y != 53)) return;
+                ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
+                item.Remove();
+                return;
+            }
+            // Undine Altar
+            case 504:
+            {
+                if ((item.X != 62 || item.Y != 47) && (item.X != 62 || item.Y != 48)) return;
+                ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
+                item.Remove();
+                return;
+            }
         }
     }
 
