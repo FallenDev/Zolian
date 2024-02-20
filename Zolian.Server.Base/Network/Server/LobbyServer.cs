@@ -306,7 +306,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
             ServerSetup.ConnectionLogger($"{ex}");
             Crashes.TrackError(ex);
-            return true;
+            return false;
         }
 
         return true;
