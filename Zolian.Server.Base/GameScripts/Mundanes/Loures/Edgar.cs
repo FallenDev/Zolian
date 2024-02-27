@@ -128,6 +128,7 @@ public class Edgar(WorldServer server, Mundane mundane) : MundaneScript(server, 
             case 0x08:
                 {
                     client.Aisling.QuestManager.ReadTheFallenNotes = true;
+                    client.Aisling.QuestManager.LouresReputation++;
                     var bottle = new Item();
                     bottle = bottle.Create(client.Aisling, "Teardrop Ruby");
                     bottle.GiveTo(client.Aisling);

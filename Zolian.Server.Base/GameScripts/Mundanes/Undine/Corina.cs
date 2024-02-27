@@ -137,6 +137,8 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
             case 0x08:
                 {
                     client.Aisling.QuestManager.HonoringTheFallen = true;
+                    client.Aisling.QuestManager.MilethReputation++;
+                    client.Aisling.QuestManager.UndineReputation++;
                     var bottle = new Item();
                     bottle = bottle.Create(client.Aisling, "Silver Ingot");
                     bottle.GiveTo(client.Aisling);
