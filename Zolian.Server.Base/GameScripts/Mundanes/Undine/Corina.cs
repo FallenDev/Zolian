@@ -41,6 +41,13 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
+        if (client.Aisling.QuestManager.ReadTheFallenNotes && !client.Aisling.QuestManager.HonoringTheFallen)
+        {
+            options.Add(new(0x06, "I've spoken to Edgar, and I've found this written to you"));
+            client.SendOptionsDialog(Mundane, "Ah Aisling, its nice to see you again. I tried to not get my hopes up...but did you find anything?", options.ToArray());
+            return;
+        }
+
         client.SendOptionsDialog(Mundane, !client.Aisling.QuestManager.EternalLove ? "*weeps*" : "Thank you, I now have some closure", options.ToArray());
     }
 
@@ -85,7 +92,7 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
                     };
 
                     client.SendOptionsDialog(Mundane, "I'm okay Aisling. I've lived with this pain for a long while, but time doesn't make it any easier " +
-                                                      "to accept. Though I do find some comfort in talking about my beloved <insert name here>. I only wish I had " +
+                                                      "to accept. Though I do find some comfort in talking about my beloved Rouel. I only wish I had " +
                                                       "something to remember him by. The war was so brutal, that many of those lost were never able to be properly " +
                                                       "commemorated. If only I had one small belonging of his....", options.ToArray());
                     break;
@@ -94,7 +101,7 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
                 {
                     var options = new List<Dialog.OptionsDataItem>
                     {
-                        new(0x04, "I know of a knight who fought there")
+                        new(0x05, "I know of a knight who fought there")
                     };
 
                     client.SendOptionsDialog(Mundane, "Please don't get my hopes up. The pain would be too great if you were to fail.", options.ToArray());
@@ -106,32 +113,57 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
                     client.SendOptionsDialog(Mundane, "Very well, do what you think you can. I shall be waiting with bated breath.");
                     break;
                 }
+            case 0x06:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x07, "Of course!")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "From Rouel!? Let me see.. *begins to read*", options.ToArray());
+                    break;
+                }
+            case 0x07:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x08, "A true hero, I am honored")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "To think he had this much on his shoulders and yet he still strode confidently onto that battle field. " +
+                                                      "I never expected to learn so much about his final moments and hardships. I am truly thankful for this Aisling!", options.ToArray());
+                    break;
+                }
+            case 0x08:
+                {
+                    client.Aisling.QuestManager.HonoringTheFallen = true;
+                    var bottle = new Item();
+                    bottle = bottle.Create(client.Aisling, "Silver Ingot");
+                    bottle.GiveTo(client.Aisling);
+                    client.Aisling.Inventory.RemoveFromInventory(client, client.Aisling.HasItemReturnItem("Letter to Corina"));
+                    var legend = new Legend.LegendItem
+                    {
+                        Key = "LEternal2",
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.PinkRedG13,
+                        Icon = (byte)LegendIcon.Heart,
+                        Text = "Entrusted with a Dying Wish"
+                    };
+
+                    client.Aisling.LegendBook.AddLegend(legend, client);
+
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x00, "Thank you")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "Please take this as a token of my appreciation. I broke it in a moment of anger, then had a blacksmith meld it to" +
+                                                      " an ingot when I learned about my lover's demise. I've no need for it now that I know the truth of it all. I believe I'll" +
+                                                      " go and see Edgar. It's been far too long.", options.ToArray());
+                    break;
+                }
         }
     }
 
     public override void OnGossip(WorldClient client, string message) { }
-
-    private static void MessageInABottle(WorldClient client)
-    {
-        var exp = Random.Shared.Next(29430000, 34335000); // level 160 * 30 - 35 reward
-        var item = client.Aisling.HasItemReturnItem("Illegible Treasure Map");
-        if (item != null)
-            client.Aisling.Inventory.RemoveFromInventory(client, item);
-
-        client.Aisling.QuestManager.UnknownStart = true;
-        client.GiveExp(exp);
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've gained {exp} experience.");
-        client.SendAttributes(StatUpdateType.WeightGold);
-
-        var legend = new Legend.LegendItem
-        {
-            Key = "LUnDepths1",
-            Time = DateTime.UtcNow,
-            Color = LegendColor.GreenG2,
-            Icon = (byte)LegendIcon.Community,
-            Text = "Fledgling Treasure Hunter"
-        };
-
-        client.Aisling.LegendBook.AddLegend(legend, client);
-    }
 }
