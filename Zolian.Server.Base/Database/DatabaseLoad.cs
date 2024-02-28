@@ -252,7 +252,7 @@ public abstract class DatabaseLoad
     {
         try
         {
-            string[] dbTables = ["Consumables", "EnemyDrops", "Gems", "Potions", "Quest", "Scrolls"];
+            string[] dbTables = ["Consumables", "EnemyDrops", "Gems", "Flowers", "Potions", "Quest", "Scrolls"];
             string[] dbTables1 = ["ArmorArcanus", "ArmorAssassin", "ArmorCleric", "ArmorMonk", "ArmorDefender", "ArmorBerserker", "ArmorGeneric"
             ];
             string[] dbTables2 = ["Belts", "Boots", "Earrings", "Hands", "Greaves", "Necklaces", "Rings"];

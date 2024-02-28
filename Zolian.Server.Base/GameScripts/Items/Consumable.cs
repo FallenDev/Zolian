@@ -2,7 +2,9 @@
 
 using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Formulas;
+using Darkages.GameScripts.Spells;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -111,83 +113,83 @@ public class Consumable(Item item) : ItemScript(item)
                     return;
                 }
             case "Enclosed Letter E Sealed":
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou've broken the wax seal with an E");
-                var bottle = new Item();
-                bottle = bottle.Create(aisling, "Letter to Edgar");
-                bottle.GiveTo(aisling);
-                client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                return;
-            }
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou've broken the wax seal with an E");
+                    var bottle = new Item();
+                    bottle = bottle.Create(aisling, "Letter to Edgar");
+                    bottle.GiveTo(aisling);
+                    client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                    return;
+                }
             case "Enclosed Letter C Sealed":
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou've broken the wax seal with a C");
-                var bottle = new Item();
-                bottle = bottle.Create(aisling, "Letter to Corina");
-                bottle.GiveTo(aisling);
-                client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                return;
-            }
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou've broken the wax seal with a C");
+                    var bottle = new Item();
+                    bottle = bottle.Create(aisling, "Letter to Corina");
+                    bottle.GiveTo(aisling);
+                    client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                    return;
+                }
             case "Letter to Edgar":
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qThis letter isn't addressed to you, but you're curious");
-                client.SendServerMessage(ServerMessageType.ScrollWindow, "My dear Brother. I've known we were kindred souls from " +
-                                                                         "the moment we met on the training fields. You've " +
-                                                                         "helped me grow into the man I am today, even if you " +
-                                                                         "didn't know it. Your strength and presence have pushed " +
-                                                                         "me to become better in all aspects of my life, and for " +
-                                                                         "that I shall be forever grateful. However, it is with " +
-                                                                         "a heavy heart that I write this letter, for I know that " +
-                                                                         "I shall never return from the battlefield with you after " +
-                                                                         "this day. I was given a Divine Vision before we even " +
-                                                                         "approached this retched place. I was shown our comrades " +
-                                                                         "torn apart and left bloody and dying. The horror of that " +
-                                                                         "nightmarish vision was almost enough to make me run from " +
-                                                                         "this fight in terror. However, I was given a ray of hope " +
-                                                                         "that I might change the events of this day if only I " +
-                                                                         "sacrifice myself in your stead. It was no easy decision, " +
-                                                                         "but I know that you would have done the same in my position, " +
-                                                                         "and that gives me solace. My only regret is that I shall " +
-                                                                         "leave my wonderful fiance alone in this world. I beg of " +
-                                                                         "you, please search her out and become her strength like " +
-                                                                         "you've always been mine. Please accompany her down the " +
-                                                                         "rocky road of life and share in each other's grief and " +
-                                                                         "happiness. I will forever watch over you both, and I hope " +
-                                                                         "that you can forgive my selfishness.                      " +
-                                                                         "                 " +
-                                                                         "- Your Brother -                                   " +
-                                                                         "~ Rouel");
-                return;
-            }
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qThis letter isn't addressed to you, but you're curious");
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "My dear Brother. I've known we were kindred souls from " +
+                                                                             "the moment we met on the training fields. You've " +
+                                                                             "helped me grow into the man I am today, even if you " +
+                                                                             "didn't know it. Your strength and presence have pushed " +
+                                                                             "me to become better in all aspects of my life, and for " +
+                                                                             "that I shall be forever grateful. However, it is with " +
+                                                                             "a heavy heart that I write this letter, for I know that " +
+                                                                             "I shall never return from the battlefield with you after " +
+                                                                             "this day. I was given a Divine Vision before we even " +
+                                                                             "approached this retched place. I was shown our comrades " +
+                                                                             "torn apart and left bloody and dying. The horror of that " +
+                                                                             "nightmarish vision was almost enough to make me run from " +
+                                                                             "this fight in terror. However, I was given a ray of hope " +
+                                                                             "that I might change the events of this day if only I " +
+                                                                             "sacrifice myself in your stead. It was no easy decision, " +
+                                                                             "but I know that you would have done the same in my position, " +
+                                                                             "and that gives me solace. My only regret is that I shall " +
+                                                                             "leave my wonderful fiance alone in this world. I beg of " +
+                                                                             "you, please search her out and become her strength like " +
+                                                                             "you've always been mine. Please accompany her down the " +
+                                                                             "rocky road of life and share in each other's grief and " +
+                                                                             "happiness. I will forever watch over you both, and I hope " +
+                                                                             "that you can forgive my selfishness.                      " +
+                                                                             "                 " +
+                                                                             "- Your Brother -                                   " +
+                                                                             "~ Rouel");
+                    return;
+                }
             case "Letter to Corina":
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qThis letter isn't addressed to you, but you're curious");
-                client.SendServerMessage(ServerMessageType.ScrollWindow, "My love, I hope that this letter makes it into your " +
-                                                                         "hands someday. I am truly sorry that I won't be " +
-                                                                         "returning and that I lied to you. I knew I was not " +
-                                                                         "destined to return before I even left that day. " +
-                                                                         "I was given a divine vision a week before I was " +
-                                                                         "destined to leave you. I was shown my brothers in " +
-                                                                         "arms being torn apart on the battlefield. They " +
-                                                                         "were left torn asunder, helpless and afraid. I was " +
-                                                                         "shown that I could save them if I sacrificed myself " +
-                                                                         "in their stead. It was not a decision I came too " +
-                                                                         "lightly, but I could not leave so many to their fate " +
-                                                                         "knowing that I could change the outcome. I hope that " +
-                                                                         "you can find it in your heart to forgive me my love, " +
-                                                                         "for I know it was a selfish decision to make. If I " +
-                                                                         "could ask for a final request, could you please look " +
-                                                                         "after Edgar? He is my closest comrade and brother, " +
-                                                                         "and I know that he will blame himself for the events " +
-                                                                         "yet to unfold. I hope that you both can come together " +
-                                                                         "in your grief and share the good times, as well as " +
-                                                                         "the bad as you move through life together. I will " +
-                                                                         "forever be watching over you from beyond, and you " +
-                                                                         "will forever have my heart.        " +
-                                                                         "- With Love -                                      " +
-                                                                         "~ Rouel");
-                return;
-            }
+                {
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qThis letter isn't addressed to you, but you're curious");
+                    client.SendServerMessage(ServerMessageType.ScrollWindow, "My love, I hope that this letter makes it into your " +
+                                                                             "hands someday. I am truly sorry that I won't be " +
+                                                                             "returning and that I lied to you. I knew I was not " +
+                                                                             "destined to return before I even left that day. " +
+                                                                             "I was given a divine vision a week before I was " +
+                                                                             "destined to leave you. I was shown my brothers in " +
+                                                                             "arms being torn apart on the battlefield. They " +
+                                                                             "were left torn asunder, helpless and afraid. I was " +
+                                                                             "shown that I could save them if I sacrificed myself " +
+                                                                             "in their stead. It was not a decision I came too " +
+                                                                             "lightly, but I could not leave so many to their fate " +
+                                                                             "knowing that I could change the outcome. I hope that " +
+                                                                             "you can find it in your heart to forgive me my love, " +
+                                                                             "for I know it was a selfish decision to make. If I " +
+                                                                             "could ask for a final request, could you please look " +
+                                                                             "after Edgar? He is my closest comrade and brother, " +
+                                                                             "and I know that he will blame himself for the events " +
+                                                                             "yet to unfold. I hope that you both can come together " +
+                                                                             "in your grief and share the good times, as well as " +
+                                                                             "the bad as you move through life together. I will " +
+                                                                             "forever be watching over you from beyond, and you " +
+                                                                             "will forever have my heart.        " +
+                                                                             "- With Love -                                      " +
+                                                                             "~ Rouel");
+                    return;
+                }
             case "Breath Sack":
                 {
                     aisling.CurrentMp += 5000;
@@ -277,6 +279,65 @@ public class Consumable(Item item) : ItemScript(item)
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
                     }
+                    return;
+                }
+
+            #endregion
+
+            #region Botony
+
+            case "Gloom Bloom":
+                {
+                    var enemies = client.Aisling.MonstersNearby().ToList();
+                    if (enemies.Count == 0)
+                    {
+                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                        return;
+                    }
+
+                    var enemy = enemies.RandomIEnum();
+
+                    if (enemy.HasDebuff("Croich Ard Cradh") ||
+                        enemy.HasDebuff("Croich Mor Cradh") ||
+                        enemy.HasDebuff("Croich Cradh") ||
+                        enemy.HasDebuff("Croich Beag Cradh") ||
+                        enemy.HasDebuff("Ard Cradh") ||
+                        enemy.HasDebuff("Mor Cradh") ||
+                        enemy.HasDebuff("Cradh"))
+                    {
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Cannot affect, a more potent effect is active");
+                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                        return;
+                    }
+
+                    if (enemy.HasDebuff("Beag Cradh"))
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Already affected by Gloom's pollen");
+                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                        return;
+                    }
+
+                    if (enemy.SpellReflect)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
+                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                        return;
+                    }
+
+                    if (enemy.SpellNegate)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
+                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(259, enemy.Position));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(27, false));
+                    var debuff = new DebuffBeagcradh();
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                     return;
                 }
 
