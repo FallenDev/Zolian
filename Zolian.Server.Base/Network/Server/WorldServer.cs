@@ -2124,22 +2124,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            if (localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped)
-            {
-                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
-                return default;
-            }
-
             // Speed equipping prevent (movement)
             if (!localClient.IsEquipping)
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
                 return default;
             }
-
+            
             var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
-
             if (item?.Template == null) return default;
+
+            if ((localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped) && item.Template.Name != "Betrayal Blossom")
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+                return default;
+            }
+
             if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
                 localClient.LastEquip = DateTime.UtcNow;
 

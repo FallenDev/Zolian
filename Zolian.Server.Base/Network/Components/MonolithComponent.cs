@@ -33,6 +33,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         {
             if (map == null || map.Height == 0 || map.Width == 0) return;
             PlaceNode(map);
+            PlaceFlower(map);
 
             var monstersOnMap = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Map == map);
             if (monstersOnMap >= map.Height * map.Width / 100) continue;
@@ -140,6 +141,109 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Obsidian"]);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Logic to check map for number of flowers on it
+    /// </summary>
+    private static void PlaceFlower(Area map)
+    {
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Default)) return;
+        if (map.Height < 15 || map.Width < 15) return;
+
+        try
+        {
+            map.WildFlowersCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i is
+            {
+                Template: { Name: "Gloom Bloom" } or { Name: "Betrayal Blossom" } or { Name: "Bocan Branch" }
+                or { Name: "Cactus Lilium" } or { Name: "Prahed Bellis" } or { Name: "Aiten Bloom" } or { Name: "Reict Weed" }
+            }).Count();
+
+            if (map.WildFlowersCount >= 2) return;
+
+            var node = FlowerNode(map);
+            if (node == null) return;
+            var x = Generator.GenerateMapLocation(map.Height);
+            var y = Generator.GenerateMapLocation(map.Width);
+
+            for (var i = 0; i < 10; i++)
+            {
+                if (map.IsWall(x, y)) continue;
+                node.Pos = new Vector2(x, y);
+
+                Server.ObjectHandlers.AddObject(node);
+                break;
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    /// <summary>
+    /// Logic to check what nodes can populate on a map, create them, then return them randomly
+    /// </summary>
+    private static Item FlowerNode(Area map)
+    {
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.GloomBloom))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Gloom Bloom"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Betrayal))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Betrayal Blossom"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Bocan))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Bocan Branch"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Cactus))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Cactus Lilium"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Prahed))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Prahed Bellis"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Aiten))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Aiten Bloom"]);
+        }
+
+        if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Reict))
+        {
+            var nodeChance = Generator.RandomNumPercentGen();
+
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Reict Weed"]);
         }
 
         return null;

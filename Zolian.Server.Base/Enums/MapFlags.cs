@@ -46,8 +46,24 @@ public enum MiningNodes : byte
     ObsidianDepths = CobaltSteel | Obsidian
 }
 
+[Flags]
+public enum WildFlowers : byte
+{
+    Default = 1,
+    GloomBloom = 1 << 1,
+    Betrayal = 1 << 2,
+    Bocan = 1 << 3,
+    Cactus = 1 << 4,
+    Prahed = 1 << 5,
+    Aiten = 1 << 6,
+    Reict = 1 << 7,
+
+    Misery = GloomBloom | Betrayal
+}
+
 public static class MapExtensions
 {
     public static bool MapFlagIsSet(this MapFlags self, MapFlags flag) => (self & flag) == flag;
     public static bool MapNodeFlagIsSet(this MiningNodes self, MiningNodes flag) => (self & flag) == flag;
+    public static bool MapFlowerFlagIsSet(this WildFlowers self, WildFlowers flag) => (self & flag) == flag;
 }

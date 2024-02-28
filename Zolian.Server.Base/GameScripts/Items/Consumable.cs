@@ -288,13 +288,9 @@ public class Consumable(Item item) : ItemScript(item)
 
             case "Gloom Bloom":
                 {
+                    client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                     var enemies = client.Aisling.MonstersNearby().ToList();
-                    if (enemies.Count == 0)
-                    {
-                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
-                        return;
-                    }
-
+                    if (enemies.Count == 0) return;
                     var enemy = enemies.RandomIEnum();
 
                     if (enemy.HasDebuff("Croich Ard Cradh") ||
@@ -306,14 +302,12 @@ public class Consumable(Item item) : ItemScript(item)
                         enemy.HasDebuff("Cradh"))
                     {
                         client.SendServerMessage(ServerMessageType.ActiveMessage, "Cannot affect, a more potent effect is active");
-                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                         return;
                     }
 
                     if (enemy.HasDebuff("Beag Cradh"))
                     {
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Already affected by Gloom's pollen");
-                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                         return;
                     }
 
@@ -321,7 +315,6 @@ public class Consumable(Item item) : ItemScript(item)
                     {
                         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
-                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                         return;
                     }
 
@@ -329,7 +322,6 @@ public class Consumable(Item item) : ItemScript(item)
                     {
                         aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
-                        client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
                         return;
                     }
 
@@ -337,7 +329,181 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(27, false));
                     var debuff = new DebuffBeagcradh();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
-                    client.Aisling.Client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);
+                    return;
+                }
+            case "Betrayal Blossom":
+                {
+                    var chance = Generator.RandomNumPercentGen();
+                    aisling.Debuffs.TryGetValue("Skulled", out var skulled);
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, aisling.Position));
+                    client.TakeAwayQuantity(client.Aisling, "Betrayal Blossom", 1);
+
+                    if (chance >= .50)
+                    {
+                        if (!aisling.Skulled) return;
+                        if (skulled == null) return;
+                        skulled.Cancelled = true;
+                        skulled.OnEnded(aisling, skulled);
+                        client.Revive();
+                        return;
+                    }
+
+                    skulled?.OnEnded(aisling, skulled);
+                    return;
+                }
+            case "Bocan Branch":
+                {
+                    client.TakeAwayQuantity(client.Aisling, "Bocan Branch", 1);
+                    var enemies = client.Aisling.MonstersNearby().ToList();
+                    if (enemies.Count == 0) return;
+                    var enemy = enemies.RandomIEnum();
+
+                    if (enemy.IsFrozen || enemy.IsSleeping || enemy.Level >= 300)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect them");
+                        return;
+                    }
+
+                    if (enemy.SpellReflect)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
+                        return;
+                    }
+
+                    if (enemy.SpellNegate)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(106, enemy.Position));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(26, false));
+                    var debuff = new DebuffDarkChain();
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    return;
+                }
+            case "Cactus Lilium":
+                {
+                    client.TakeAwayQuantity(client.Aisling, "Cactus Lilium", 1);
+                    var enemies = client.Aisling.MonstersNearby().ToList();
+                    if (enemies.Count == 0) return;
+                    var enemy = enemies.RandomIEnum();
+
+                    if (enemy.IsBeagParalyzed || enemy.Level >= 220)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect them");
+                        return;
+                    }
+
+                    if (enemy.SpellReflect)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
+                        return;
+                    }
+
+                    if (enemy.SpellNegate)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(95, enemy.Position));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(28, false));
+                    var debuff = new DebuffBeagsuain();
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    return;
+                }
+            case "Prahed Bellis":
+                {
+                    client.TakeAwayQuantity(client.Aisling, "Prahed Bellis", 1);
+                    var enemies = client.Aisling.MonstersNearby().ToList();
+                    if (enemies.Count == 0) return;
+                    var enemy = enemies.RandomIEnum();
+
+                    if (enemy.IsSleeping || enemy.Level >= 155)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect them");
+                        return;
+                    }
+
+                    if (enemy.SpellReflect)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
+                        return;
+                    }
+
+                    if (enemy.SpellNegate)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(107, enemy.Position));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(32, false));
+                    var debuff = new DebuffSleep();
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    return;
+                }
+            case "Aiten Bloom":
+                {
+                    client.TakeAwayQuantity(client.Aisling, "Aiten Bloom", 1);
+                    var chance = Generator.RandomNumPercentGen();
+                    if (aisling.IsAited)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect you");
+                        return;
+                    }
+
+                    if (chance >= .50)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(122, aisling.Position));
+                        var buff = new buff_DiaAite();
+                        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(193, aisling.Position));
+                    var debuff = new DebuffSunSeal();
+                    client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(60));
+                    return;
+                }
+            case "Reict Weed":
+                {
+                    client.TakeAwayQuantity(client.Aisling, "Reict Weed", 1);
+                    var enemies = client.Aisling.MonstersNearby().ToList();
+                    if (enemies.Count == 0) return;
+                    var enemy = enemies.RandomIEnum();
+
+                    if (enemy.IsPoisoned || enemy.Level >= 155)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect them");
+                        return;
+                    }
+
+                    if (enemy.SpellReflect)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
+                        return;
+                    }
+
+                    if (enemy.SpellNegate)
+                    {
+                        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
+                        return;
+                    }
+
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(196, enemy.Position));
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(137, false));
+                    var debuff = new DebuffArdPoison();
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
                     return;
                 }
 

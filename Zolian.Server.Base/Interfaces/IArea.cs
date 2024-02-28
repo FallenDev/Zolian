@@ -10,6 +10,7 @@ namespace Darkages.Interfaces;
 public interface IArea
 {
     int MiningNodesCount { get; set; }
+    int WildFlowersCount { get; set; }
     TileGrid[,] ObjectGrid { get; set; }
     TileContent[,] TileContent { get; set; }
     Tuple<string, AreaScript> Script { get; set; }

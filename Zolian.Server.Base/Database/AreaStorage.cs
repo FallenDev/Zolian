@@ -39,6 +39,7 @@ public record AreaStorage : IAreaStorage
             {
                 var flags = ServiceStack.AutoMappingUtils.ConvertTo<MapFlags>(reader["Flags"]);
                 var miningNodes = ServiceStack.AutoMappingUtils.ConvertTo<MiningNodes>(reader["MiningNodes"]);
+                var wildFlowers = ServiceStack.AutoMappingUtils.ConvertTo<WildFlowers>(reader["WildFlowers"]);
                 var rows = (int)reader["mRows"];
                 var cols = (int)reader["mCols"];
                 var temp = new Area
@@ -50,6 +51,7 @@ public record AreaStorage : IAreaStorage
                     Width = (ushort)cols,
                     ScriptKey = reader["ScriptKey"].ToString(),
                     MiningNodes = miningNodes,
+                    WildFlowers = wildFlowers,
                     Name = reader["Name"].ToString()
                 };
 
