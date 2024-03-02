@@ -188,5 +188,6 @@ public class Quests
     public bool ScubaSchematics { get; set; }
     public bool ScubaMaterialsQuest { get; set; }
     public bool ScubaGearCrafted { get; set; }
-    public string EternalBond { get; set; }
+    public string EternalBond { get; set; } = string.Empty;
+    public bool ArmorCraftingCodex { get; set; }
 }

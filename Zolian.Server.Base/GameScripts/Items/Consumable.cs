@@ -190,6 +190,32 @@ public class Consumable(Item item) : ItemScript(item)
                                                                              "~ Rouel");
                     return;
                 }
+            case "Buried Treasure Chest":
+                {
+                    if (aisling.HasItem("Moonstone Lockpick"))
+                    {
+                        var chance = Generator.RandomNumPercentGen();
+                        if (chance <= .20)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Ahh, Gold!!");
+                            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(132, false));
+                            client.Aisling.GiveGold((uint)Random.Shared.Next(50000000, 100000000));
+                            client.EnqueueExperienceEvent(client.Aisling, Random.Shared.Next(150000000, 250000000), false, false);
+                            var codex = new Item();
+                            codex = codex.Create(client.Aisling, "Ancient Smithing Codex");
+                            codex.GiveTo(client.Aisling);
+                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                        }
+
+                        var lockpick = aisling.HasItemReturnItem("Moonstone Lockpick");
+                        aisling.Inventory.RemoveRange(client, lockpick, 1);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
+                        return;
+                    }
+
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
+                    return;
+                }
             case "Breath Sack":
                 {
                     aisling.CurrentMp += 5000;

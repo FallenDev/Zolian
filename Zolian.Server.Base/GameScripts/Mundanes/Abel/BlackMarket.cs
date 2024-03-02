@@ -87,7 +87,7 @@ public class BlackMarket(WorldServer server, Mundane mundane) : MundaneScript(se
                 break;
             case 0x02:
                 {
-                    client.SendItemShopDialog(Mundane, "Here's what came in today.", NpcShopExtensions.BuyFromStoreInventory(Mundane));
+                    client.SendItemShopDialog(Mundane, "These may help you.", NpcShopExtensions.BuyFromStoreInventory(Mundane));
                 }
                 break;
             case 0x03:

@@ -420,6 +420,22 @@ public class Potion(Item item) : ItemScript(item)
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "I shouldn't eat these. -33% hp");
                             }
                             break;
+                        case "Red Tentacle":
+                            {
+                                hp = client.Aisling.MaximumHp * .35;
+
+                                client.Aisling.CurrentHp += (int)hp;
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow, that's really fresh! 35% hp");
+                            }
+                            break;
+                        case "Kraken Tentacle":
+                            {
+                                hp = client.Aisling.MaximumHp * .40;
+
+                                client.Aisling.CurrentHp += (int)hp;
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow, that's really fresh! 40% hp");
+                            }
+                            break;
                         case "Rotten Veggies":
                             {
                                 hp = client.Aisling.MaximumHp * .05;
@@ -458,7 +474,7 @@ public class Potion(Item item) : ItemScript(item)
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "This would be great in a stew. 3% mp");
                             }
                             break;
-                        case "Fresh Trout":
+                        case "Fresh Cod":
                             {
                                 hp = client.Aisling.MaximumHp * .25;
 
