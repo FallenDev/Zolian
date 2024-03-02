@@ -458,7 +458,29 @@ public class Potion(Item item) : ItemScript(item)
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "This would be great in a stew. 3% mp");
                             }
                             break;
+                        case "Fresh Trout":
+                            {
+                                hp = client.Aisling.MaximumHp * .25;
 
+                                client.Aisling.CurrentHp += (int)hp;
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow, that's really fresh! 25% hp");
+                            }
+                            break;
+                        case "Fresh Blowfish":
+                            {
+                                var rand = Generator.RandomNumPercentGen();
+                                if (rand >= 0.50)
+                                {
+                                    client.Aisling.CurrentHp = client.Aisling.MaximumHp;
+                                    client.SendServerMessage(ServerMessageType.OrangeBar1, "A fish with a bite! Yum! 100% hp");
+                                    return;
+                                }
+
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bA fish with a bite! Ouch!");
+                                var debuff = new DebuffReaping();
+                                client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(30));
+                            }
+                            break;
                             #endregion
                     }
                     break;

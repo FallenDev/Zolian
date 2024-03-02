@@ -135,6 +135,19 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         player.UpdateStats();
     }
 
+    public void GenerateInanimateRewards(Aisling player)
+    {
+        if (Rewarded) return;
+        if (player.Equals(null)) return;
+        if (player.Client.Aisling == null) return;
+
+        var script = ScriptManager.Load<RewardScript>(ServerSetup.Instance.Config.MonsterRewardScript, this, player).FirstOrDefault();
+        script.Value?.GenerateInanimateRewards(this, player);
+
+        Rewarded = true;
+        player.UpdateStats();
+    }
+
     public static void UpdateKillCounters(Monster monster)
     {
         if (monster.Target is not Aisling aisling) return;

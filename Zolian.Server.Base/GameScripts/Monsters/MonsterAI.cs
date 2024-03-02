@@ -1155,6 +1155,89 @@ public class WeakCommon : MonsterScript
     #endregion
 }
 
+[Script("Inanimate")]
+public class Inanimate : MonsterScript
+{
+
+    public Inanimate(Monster monster, Area map) : base(monster, map)
+    {
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
+        Monster.MonsterBank = [];
+    }
+
+    public override void Update(TimeSpan elapsedTime) { }
+
+    public override void OnClick(WorldClient client) => client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aHP: {Monster.CurrentHp}/{Monster.MaximumHp}");
+
+    public override void OnDeath(WorldClient client = null)
+    {
+        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        {
+            item.Release(Monster, Monster.Position);
+            item.AddObject(item);
+
+            foreach (var player in item.AislingsNearby())
+            {
+                item.ShowTo(player);
+            }
+        }
+
+        if (Monster.Target is null)
+        {
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
+            Monster.Target = recordTuple.player;
+        }
+
+        if (Monster.Target is Aisling aisling)
+        {
+            Monster.GenerateInanimateRewards(aisling);
+            Monster.UpdateKillCounters(Monster);
+        }
+        else
+        {
+            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+
+            if (sum > 0)
+            {
+                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
+            }
+        }
+
+        Monster.Remove();
+        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
+        DelObject(Monster);
+    }
+
+    public override void OnApproach(WorldClient client) { }
+
+    public override void OnLeave(WorldClient client) { }
+
+    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
+    {
+        try
+        {
+            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+            if (!tagged)
+                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
+            else
+                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger(ex.ToString());
+            Crashes.TrackError(ex);
+        }
+    }
+
+    public override void OnItemDropped(WorldClient client, Item item)
+    {
+        if (item == null) return;
+        if (client == null) return;
+        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
+        Monster.MonsterBank.Add(item);
+    }
+}
+
 [Script("Shape Shifter")]
 public class ShapeShifter : MonsterScript
 {

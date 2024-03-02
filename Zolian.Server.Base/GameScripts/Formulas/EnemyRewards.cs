@@ -31,6 +31,12 @@ public class EnemyRewards : RewardScript
         GenerateDrops(monster, player);
     }
 
+    public override void GenerateInanimateRewards(Monster monster, Aisling player)
+    {
+        GenerateGold();
+        DetermineDefinedMonsterDrop(monster, player);
+    }
+
     private void DetermineRandomSpecialDrop(Monster monster, Aisling player)
     {
         var dropList = JoinList(monster);

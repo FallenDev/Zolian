@@ -7,6 +7,7 @@ namespace Darkages.GameScripts.Creations;
 public abstract class RewardScript : IScriptBase
 {
     public abstract void GenerateRewards(Monster monster, Aisling player);
+    public abstract void GenerateInanimateRewards(Monster monster, Aisling player);
 
     protected static readonly Dictionary<(int, int), List<string>> RingDrops = new()
     {

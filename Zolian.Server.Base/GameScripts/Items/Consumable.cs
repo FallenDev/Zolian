@@ -283,7 +283,6 @@ public class Consumable(Item item) : ItemScript(item)
                 }
 
             #endregion
-
             #region Botony
 
             case "Gloom Bloom":
