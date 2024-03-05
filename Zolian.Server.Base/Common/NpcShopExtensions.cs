@@ -448,7 +448,7 @@ public static class NpcShopExtensions
 
     #endregion
 
-    #region Blacksmithing
+    #region Blacksmithing & Armorsmithing
 
     // Increase weapons to +1
     public static List<byte> GetCharacterNoviceWeaponImprove(WorldClient client)
@@ -515,6 +515,77 @@ public static class NpcShopExtensions
             Item.Quality.Legendary => 50000,
             Item.Quality.Forsaken => 100000,
             Item.Quality.Mythic => 300000,
+            _ => 0
+        };
+    }
+
+    // Increase armor to Iron
+    public static List<byte> GetCharacterNoviceArmorImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper).Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase armor to Elven
+    public static List<byte> GetCharacterApprenticeArmorImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+            or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven).Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase armor to Hybrasyl
+    public static List<byte> GetCharacterJourneymanArmorImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+            or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
+            or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl).Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase armor to Runic
+    public static List<byte> GetCharacterExpertArmorImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+            or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
+            or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl or Item.ItemMaterials.MoonStone
+            or Item.ItemMaterials.SunStone or Item.ItemMaterials.Ebony or Item.ItemMaterials.Runic).Select(i => i.InventorySlot).ToList();
+    }
+
+    // Increase armor to Chaos
+    public static List<byte> GetCharacterArtisanalArmorImprove(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+            or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
+            or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl or Item.ItemMaterials.MoonStone
+            or Item.ItemMaterials.SunStone or Item.ItemMaterials.Ebony or Item.ItemMaterials.Runic
+            or Item.ItemMaterials.Chaos).Select(i => i.InventorySlot).ToList();
+    }
+
+    public static uint GetArmorSmithingCosts(WorldClient client, string args)
+    {
+        ItemDetail = client.Aisling.Inventory.Get(i => i != null && i.InventorySlot == Convert.ToInt32(args)).FirstOrDefault();
+
+        if (ItemDetail == null) return 0;
+
+        return ItemDetail.ItemMaterial switch
+        {
+            Item.ItemMaterials.None => 1000,
+            Item.ItemMaterials.Copper => 5000,
+            Item.ItemMaterials.Iron => 15000,
+            Item.ItemMaterials.Steel => 59000,
+            Item.ItemMaterials.Forged => 210000,
+            Item.ItemMaterials.Elven => 300000,
+            Item.ItemMaterials.Dwarven => 570000,
+            Item.ItemMaterials.Mythril => 900000,
+            Item.ItemMaterials.Hybrasyl => 1800000,
+            Item.ItemMaterials.MoonStone => 12000000,
+            Item.ItemMaterials.SunStone => 20000000,
+            Item.ItemMaterials.Ebony => 43000000,
+            Item.ItemMaterials.Runic => 200000000,
+            Item.ItemMaterials.Chaos => 500000000,
             _ => 0
         };
     }

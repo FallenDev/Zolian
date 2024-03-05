@@ -4255,7 +4255,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         var item = new Legend.LegendItem
         {
-            Key = "Event",
+            Key = $"Sp{EphemeralRandomIdGenerator<uint>.Shared.NextId}ark{EphemeralRandomIdGenerator<uint>.Shared.NextId}",
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Warrior,

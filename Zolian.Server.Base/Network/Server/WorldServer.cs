@@ -1303,7 +1303,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             var itemPosition = new Position(destinationPoint.X, destinationPoint.Y);
 
-            if (localClient.Aisling.Position.DistanceFrom(itemPosition.X, itemPosition.Y) > 9)
+            if (localClient.Aisling.Position.DistanceFrom(itemPosition.X, itemPosition.Y) > 11)
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can not do that. Too far.");
                 return default;

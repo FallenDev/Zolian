@@ -83,9 +83,6 @@ public sealed class Item : Sprite, IItem
 
     /// <summary>
     /// Each tier is 5% boost to min/max dmg
-    /// Tier 3 gives +2 all stats 1k hp/mp
-    /// Tier 5 gives +3 all stats 2k hp/mp
-    /// Tier 6 gives +4 all stats 3k hp/mp
     /// </summary>
     public enum GearEnhancements
     {
@@ -95,19 +92,14 @@ public sealed class Item : Sprite, IItem
         Three,
         Four,
         Five,
-        Six
+        Six,
+        Seven,
+        Eight,
+        Nine
     }
 
     /// <summary>
-    /// Each tier is +1 AC, 5 MR, 5 HIT
-    /// Tier 3 (Steel) +1 all stats 500 hp/mp
-    /// Tier 5 (Elven) +2 all stats 750 hp/mp
-    /// Tier 7 (Mythril) +2 all stats 2500 hp/mp
-    /// Tier 9 (MoonStone) +3 all stats 3000 hp/mp
-    /// Tier 10 (SunStone) +3 all stats 5000 hp/mp
-    /// Tier 11 (Ebony) +4 all stats 6000 hp/mp
-    /// Tier 12 (Runic) +5 all stats 10000 hp/mp
-    /// Tier 13 (Chaos) +5 all stats 20000 hp/mp
+    /// Each tier is +1 AC, 5 DMG
     /// </summary>
     public enum ItemMaterials
     {
@@ -119,12 +111,12 @@ public sealed class Item : Sprite, IItem
         Elven,
         Dwarven,
         Mythril,
-        Hybrasyl,
-        MoonStone,
-        SunStone,
-        Ebony,
-        Runic,
-        Chaos
+        Hybrasyl, //    8   J-
+        MoonStone, //   9   E-
+        SunStone, //    10   E-
+        Ebony, //       11   E-
+        Runic, //       12   E-
+        Chaos //        13   A-
     }
 
     public long ItemId { get; set; }
@@ -185,8 +177,30 @@ public sealed class Item : Sprite, IItem
             _ => ""
         };
 
+        var itemMaterial = ItemMaterial switch
+        {
+            ItemMaterials.None => "",
+            ItemMaterials.Copper => "Copper ",
+            ItemMaterials.Iron => "Iron ",
+            ItemMaterials.Steel => "Steel ",
+            ItemMaterials.Forged => "Forged Steel ",
+            ItemMaterials.Elven => "Elven ",
+            ItemMaterials.Dwarven => "Dwarven ",
+            ItemMaterials.Mythril => "Mythril ",
+            ItemMaterials.Hybrasyl => "Hybrasyl ",
+            ItemMaterials.MoonStone => "MoonStone ",
+            ItemMaterials.SunStone => "SunStone ",
+            ItemMaterials.Ebony => "Ebony ",
+            ItemMaterials.Runic => "Runic ",
+            ItemMaterials.Chaos => "Chaos ",
+            _ => ""
+        };
+
         if (Tarnished)
             colorCode = "{=jTarnished ";
+
+        if (Template.EquipmentSlot == 2)
+            return itemMaterial + Template.Name;
 
         if (!Enchantable) return Template.Name;
         if (ItemVariance != Variance.None && ItemQuality != Quality.Common)
@@ -258,8 +272,30 @@ public sealed class Item : Sprite, IItem
             _ => ""
         };
 
+        var itemMaterial = ItemMaterial switch
+        {
+            ItemMaterials.None => "",
+            ItemMaterials.Copper => "Copper ",
+            ItemMaterials.Iron => "Iron ",
+            ItemMaterials.Steel => "Steel ",
+            ItemMaterials.Forged => "Forged Steel ",
+            ItemMaterials.Elven => "Elven ",
+            ItemMaterials.Dwarven => "Dwarven ",
+            ItemMaterials.Mythril => "Mythril ",
+            ItemMaterials.Hybrasyl => "Hybrasyl ",
+            ItemMaterials.MoonStone => "MoonStone ",
+            ItemMaterials.SunStone => "SunStone ",
+            ItemMaterials.Ebony => "Ebony ",
+            ItemMaterials.Runic => "Runic ",
+            ItemMaterials.Chaos => "Chaos ",
+            _ => ""
+        };
+
         if (Tarnished)
             colorCode = "Tarnished ";
+
+        if (Template.EquipmentSlot == 2)
+            return itemMaterial + Template.Name;
 
         if (!Enchantable) return Template.Name;
         if (ItemVariance != Variance.None && ItemQuality != Quality.Common)
@@ -758,7 +794,7 @@ public sealed class Item : Sprite, IItem
 
                     // Reapplies Stat modifiers
                     StatModifiersCalc(client, equipment.Value.Item);
-
+                    if (equipment.Value.Item.Template.EquipmentSlot == 2) ArmorSmithingQualities(client, equipment.Value.Item);
                     if (!equipment.Value.Item.Template.Enchantable) continue;
 
                     ItemVarianceCalc(client, equipment.Value.Item);
@@ -889,6 +925,31 @@ public sealed class Item : Sprite, IItem
             if (spell.Lines < 0) spell.Lines = 0;
 
             UpdateSpell(client, spell);
+        }
+    }
+
+    public void ArmorSmithingQualities(WorldClient client, Item equipment)
+    {
+        Dictionary<ItemMaterials, Action<WorldClient>> materialActions = new()
+        {
+            {ItemMaterials.Copper, c => { c.Aisling.BonusAc += 1; c.Aisling.BonusDmg += 5; }},
+            {ItemMaterials.Iron, c => { c.Aisling.BonusAc += 2; c.Aisling.BonusDmg += 10; c.Aisling.BonusHp += 2500; c.Aisling.BonusMp += 2500; }},
+            {ItemMaterials.Steel, c => { c.Aisling.BonusAc += 3; c.Aisling.BonusDmg += 15; c.Aisling.BonusHp += 5000; c.Aisling.BonusMp += 2500; }},
+            {ItemMaterials.Forged, c => { c.Aisling.BonusAc += 4; c.Aisling.BonusDmg += 20; c.Aisling.BonusHp += 7000; c.Aisling.BonusMp += 2500; }},
+            {ItemMaterials.Elven, c => { c.Aisling.BonusAc += 5; c.Aisling.BonusDmg += 25; c.Aisling.BonusHp += 4000; c.Aisling.BonusMp += 7000; }},
+            {ItemMaterials.Dwarven, c => { c.Aisling.BonusAc += 6; c.Aisling.BonusDmg += 30; c.Aisling.BonusHp += 6000; c.Aisling.BonusMp += 6000; }},
+            {ItemMaterials.Mythril, c => { c.Aisling.BonusAc += 7; c.Aisling.BonusDmg += 35; c.Aisling.BonusHp += 6500; c.Aisling.BonusMp += 8000; }},
+            {ItemMaterials.Hybrasyl, c => { c.Aisling.BonusAc += 8; c.Aisling.BonusDmg += 40; c.Aisling.BonusHp += 8000; c.Aisling.BonusMp += 8000; }},
+            {ItemMaterials.MoonStone, c => { c.Aisling.BonusAc += 9; c.Aisling.BonusDmg += 45; c.Aisling.BonusHp += 12500; c.Aisling.BonusMp += 15000; }},
+            {ItemMaterials.SunStone, c => { c.Aisling.BonusAc += 10; c.Aisling.BonusDmg += 50; c.Aisling.BonusHp += 17000; c.Aisling.BonusMp += 15000; }},
+            {ItemMaterials.Ebony, c => { c.Aisling.BonusAc += 11; c.Aisling.BonusDmg += 55; c.Aisling.BonusHp += 25000; c.Aisling.BonusMp += 25000; }},
+            {ItemMaterials.Runic, c => { c.Aisling.BonusAc += 12; c.Aisling.BonusDmg += 60; c.Aisling.BonusHp += 35000; c.Aisling.BonusMp += 35000; }},
+            {ItemMaterials.Chaos, c => { c.Aisling.BonusAc += 13; c.Aisling.BonusDmg += 65; c.Aisling.BonusHp += 50000; c.Aisling.BonusMp += 50000; }}
+        };
+
+        if (materialActions.TryGetValue(equipment.ItemMaterial, out var action))
+        {
+            action(client);
         }
     }
 

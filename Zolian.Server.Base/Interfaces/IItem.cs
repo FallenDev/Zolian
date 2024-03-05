@@ -25,6 +25,7 @@ public interface IItem : ISprite
     void RemoveModifiers(WorldClient client);
     void StatModifiersCalc(WorldClient client, Item equipment);
     void SpellLines(WorldClient client);
+    void ArmorSmithingQualities(WorldClient client, Item equipment);
     void ItemVarianceCalc(WorldClient client, Item equipment);
     void WeaponVarianceCalc(WorldClient client, Item equipment);
     void QualityVarianceCalc(WorldClient client, Item equipment);
