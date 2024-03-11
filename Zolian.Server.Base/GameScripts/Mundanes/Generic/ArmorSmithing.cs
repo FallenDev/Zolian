@@ -42,12 +42,22 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 break;
             case "Journeyman": // 180
                 options.Add(new(0x06, "Advance Armor"));
+
+                if (!client.Aisling.QuestManager.ArmorCraftingCodexLearned)
+                    options.Add(new(0x83, "Ancient Smithing Codex"));
+
+                if (client.Aisling.HasItem("Transcribed Armorsmithing Tablet"))
+                    options.Add(new(0x87, "Here's that tablet"));
                 break;
-            case "Expert": // 250
-                //options.Add(new(0x07, "Enhance Armor"));
-                break;
-            case "Artisan": // 400
-                //options.Add(new(0x08, "Enchant Armor"));
+            case "Expert" when client.Aisling.QuestManager.ArmorCraftingCodexLearned: // 250
+                options.Add(new(0x07, "Enhance Armor"));
+
+                if (!client.Aisling.QuestManager.ArmorCraftingAdvancedCodexLearned)
+                    options.Add(new(0x89, "Advanced Codex Research"));
+
+                if (client.Aisling.HasItem("Bahamut's Blood Ruby Eye"))
+                    options.Add(new(0x90, "I managed to obtain this"));
+
                 break;
         }
 
@@ -875,6 +885,78 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     }
                     break;
                 }
+
+            #region Questing
+
+            case 0x83:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x84, "Sure, is there anything important on it?")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"Ohhh, what ye have here {client.Aisling.Username}?\n" +
+                                                      $"What an ancient tablet.. Let me examine this further!", options.ToArray());
+                    break;
+                }
+            case 0x84:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x85, "What? Surely you're joking?")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"Is there?! Aisling, you just found schematics I don't even understand.", options.ToArray());
+                    break;
+                }
+            case 0x85:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x86, "Expect my return")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"I would speak with the Loures Apothecary about this, perhaps they can help me at least read it. " +
+                                                      $"If they can transcribe what's written here. Bring me back the transcription, and we'll see what we can " +
+                                                      $"make with it!", options.ToArray());
+                    break;
+                }
+            case 0x86:
+                {
+                    client.CloseDialog();
+                    client.Aisling.QuestManager.ArmorApothecaryAccepted = true;
+                    break;
+                }
+            case 0x87:
+                {
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x88, "Awesome! Let's get started")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"Ah Ha!! Sooo, we can use those as a catalyst! Well {client.Aisling.Username}, looks like we can now further " +
+                                                      $"enhance your armor.", options.ToArray());
+                    break;
+                }
+            case 0x88:
+                {
+                    client.CloseDialog();
+                    client.Aisling.QuestManager.ArmorCraftingCodexLearned = true;
+                    break;
+                }
+            case 0x89:
+                {
+                    client.SendOptionsDialog(Mundane, $"Unfortunately, our forge isn't hot enough to go further into the craft. The codex states that there is a place called {{=bChaos {{=athat " +
+                                                      $"has molten rock hot enough. However, you'll need a ruby infused with dragon fire as a catalyst.");
+                    break;
+                }
+            case 0x90:
+                {
+                    client.SendOptionsDialog(Mundane, "Once again, you are astounding! Meet me in the lower levels of chaos and we'll see about reforging your armor with this gem.");
+                    break;
+                }
+
+                #endregion
         }
     }
 

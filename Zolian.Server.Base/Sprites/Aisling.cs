@@ -77,7 +77,6 @@ public sealed class Aisling : Player, IAisling
         GroupId = 0;
         AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
-        ChantTimer = new ChantTimer(1500);
         TileType = TileContent.Aisling;
         AislingTrackers = new AislingTrackers(TimeSpan.FromSeconds(1));
     }
@@ -97,7 +96,6 @@ public sealed class Aisling : Player, IAisling
     public int LastMapId { get; set; }
     public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
-    public ChantTimer ChantTimer { get; }
     public UserOptions GameSettings { get; init; } = new();
     public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }

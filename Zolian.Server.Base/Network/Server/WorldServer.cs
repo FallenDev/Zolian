@@ -1256,6 +1256,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (client?.Aisling is null || client.Aisling.LoggedIn == false) return default;
         if (client.Aisling.Map is not { Ready: true }) return default;
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantDropItems))
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         if (client.Aisling.IsDead())
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
@@ -1587,6 +1593,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead() || client.Aisling.Skulled) return default;
+
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantUseAbilities))
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<SpellUseArgs>(in clientPacket);
 
         if (!client.Aisling.Client.SpellControl.IsRunning)
@@ -1887,6 +1900,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
+
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantUseAbilities))
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var readyTime = DateTime.UtcNow;
         var overburden = 0;
         if (client.Aisling.Overburden)
@@ -2121,6 +2141,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (localClient.Aisling.IsDead())
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
+                return default;
+            }
+
+            if (localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantUseItems))
+            {
+                localClient.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
                 return default;
             }
 
@@ -2968,6 +2994,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return default;
         }
 
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantUseAbilities))
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<SkillUseArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnUseSkill);
 
@@ -3378,21 +3410,27 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
+
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.CantUseItems))
+        {
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "You cannot do that.");
+            return default;
+        }
+
         var args = PacketSerializer.Deserialize<BeginChantArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnBeginChant);
 
         static ValueTask InnerOnBeginChant(IWorldClient localClient, BeginChantArgs localArgs)
         {
             localClient.Aisling.IsCastingSpell = true;
+            if (localArgs.CastLineCount <= 0) return default;
 
-            if (localArgs.CastLineCount <= 0)
-                return default;
-            localClient.Aisling.ChantTimer.Start(localArgs.CastLineCount);
             localClient.SpellCastInfo ??= new CastInfo
             {
                 SpellLines = Math.Clamp(localArgs.CastLineCount, (byte)0, (byte)9),
                 Started = DateTime.UtcNow
             };
+
             return default;
         }
     }

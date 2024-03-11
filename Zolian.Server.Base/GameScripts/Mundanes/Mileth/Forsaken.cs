@@ -68,7 +68,10 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                 client.SendOptionsDialog(Mundane, "Advanced one, what is it you wish to learn?", options.ToArray());
                 break;
             case ClassStage.Master:
-                options.Add(new Dialog.OptionsDataItem(0x03, "Stat Reallocation"));
+                options.Add(client.Aisling.ExpLevel >= 400
+                    ? new Dialog.OptionsDataItem(0x03, "Stat Reallocation")
+                    : new Dialog.OptionsDataItem(0x06, "Attempt Stat Reallocation"));
+
                 options.Add(new Dialog.OptionsDataItem(0x05, "Nothing for now"));
                 client.SendOptionsDialog(Mundane, "Hope you are well, experienced one.", options.ToArray());
                 break;
@@ -179,9 +182,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                     else
                     {
                         var options = new List<Dialog.OptionsDataItem>
-                                {
-                                    new (0x05, "Alright")
-                                };
+                        {
+                            new (0x05, "Alright")
+                        };
 
                         client.SendOptionsDialog(Mundane, "You currently do not meet the vitality requirement.", options.ToArray());
                     }
@@ -191,6 +194,11 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                 {
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "Come back if you need advancement.");
                     client.CloseDialog();
+                }
+                break;
+            case 0x06:
+                {
+                    client.SendOptionsDialog(Mundane, "I honestly love the enthusiasm, but if I were to cut your soul now. It would only damage it. Come back when you're around level 400.");
                 }
                 break;
             case 0x011:

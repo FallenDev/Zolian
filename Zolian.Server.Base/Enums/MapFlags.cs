@@ -5,15 +5,18 @@ public enum MapFlags : byte
 {
     Default = 0,
     Snow = 1, // Actual Map Flag
-    Rain = 1 << 1, // Actual Map Flag
+    Rain = 2, // Actual Map Flag
     Darkness = Snow | Rain, // Actual Map Flag
-    ArenaTeam = 1 << 2,
-    PlayerKill = 1 << 3,
-    CantTeleport = 1 << 4,
+    ArenaTeam = 4,
+    CantUseItems = 6,
+    CantDropItems = 7,
+    PlayerKill = 8,
+    CantTeleport = 16,
     EvilReaches = CantTeleport | Rain | PlayerKill,
-    CanUseAbilities = 1 << 5,
-    NoTabMap = 1 << 6, // Actual Map Flag
-    SnowTileSet = 1 << 7, // Actual Map Flag
+    CantUseAbilities = 32,
+    NoTabMap = 64, // Actual Map Flag
+    Jail = CantUseAbilities | CantUseItems | CantDropItems,
+    SnowTileSet = 128, // Actual Map Flag
     SnowingSnowTileSet = SnowTileSet | Snow,
     RainingSnowTileSet = SnowTileSet | Rain,
     DarknessSnowTileSet = SnowTileSet | Darkness,

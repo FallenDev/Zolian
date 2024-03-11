@@ -190,4 +190,7 @@ public class Quests
     public bool ScubaGearCrafted { get; set; }
     public string EternalBond { get; set; } = string.Empty;
     public bool ArmorCraftingCodex { get; set; }
+    public bool ArmorApothecaryAccepted { get; set; }
+    public bool ArmorCraftingCodexLearned { get; set; }
+    public bool ArmorCraftingAdvancedCodexLearned { get; set; }
 }
