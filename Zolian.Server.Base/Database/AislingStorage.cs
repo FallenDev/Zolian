@@ -171,7 +171,8 @@ public record AislingStorage : Sql, IAislingStorage
             obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
             obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
             obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted, obj.QuestManager.EternalLove, obj.QuestManager.EternalLoveStarted, obj.QuestManager.UnhappyEnding,
-            obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex);
+            obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
+            obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -389,7 +390,8 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.StoneSmithing, player.QuestManager.StoneSmithingTier, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
                     player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled, player.QuestManager.UnknownStart, player.QuestManager.PirateShipAccess,
                     player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted, player.QuestManager.EternalLove, player.QuestManager.EternalLoveStarted, player.QuestManager.UnhappyEnding,
-                    player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate, player.QuestManager.EternalBond, player.QuestManager.ArmorCraftingCodex);
+                    player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate, player.QuestManager.EternalBond, player.QuestManager.ArmorCraftingCodex,
+                    player.QuestManager.ArmorApothecaryAccepted, player.QuestManager.ArmorCodexDeciphered, player.QuestManager.ArmorCraftingCodexLearned, player.QuestManager.ArmorCraftingAdvancedCodexLearned);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -932,6 +934,11 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@GivenTarnishedBreastplate", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@EternalBond", SqlDbType.VarChar).Value = "";
             cmd5.Parameters.Add("@ArmorCraftingCodex", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ArmorApothecaryAccepted", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ArmorCodexDeciphered", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ArmorCraftingCodexLearned", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@ArmorCraftingAdvancedCodexLearned", SqlDbType.Bit).Value = false;
+
 
             #endregion
 
@@ -1171,6 +1178,10 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("GivenTarnishedBreastplate", typeof(bool));
         qDt.Columns.Add("EternalBond", typeof(string));
         qDt.Columns.Add("ArmorCraftingCodex", typeof(bool));
+        qDt.Columns.Add("ArmorApothecaryAccepted", typeof(bool));
+        qDt.Columns.Add("ArmorCodexDeciphered", typeof(bool));
+        qDt.Columns.Add("ArmorCraftingCodexLearned", typeof(bool));
+        qDt.Columns.Add("ArmorCraftingAdvancedCodexLearned", typeof(bool));
 
         return qDt;
     }

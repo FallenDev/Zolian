@@ -191,6 +191,7 @@ public class Quests
     public string EternalBond { get; set; } = string.Empty;
     public bool ArmorCraftingCodex { get; set; }
     public bool ArmorApothecaryAccepted { get; set; }
+    public bool ArmorCodexDeciphered { get; set; }
     public bool ArmorCraftingCodexLearned { get; set; }
     public bool ArmorCraftingAdvancedCodexLearned { get; set; }
 }

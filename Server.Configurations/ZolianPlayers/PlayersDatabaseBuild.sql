@@ -532,7 +532,13 @@ CREATE TYPE dbo.QuestType AS TABLE
     UnhappyEnding BIT,
     HonoringTheFallen BIT,
     ReadTheFallenNotes BIT,
-    GivenTarnishedBreastplate BIT
+    GivenTarnishedBreastplate BIT,
+	EternalBond VARCHAR (13),
+	ArmorCraftingCodex BIT,
+	ArmorApothecaryAccepted BIT,
+	ArmorCodexDeciphered BIT,
+	ArmorCraftingCodexLearned BIT,
+	ArmorCraftingAdvancedCodexLearned BIT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -747,7 +753,8 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 	@JewelCrafting INT, @JewelCraftingTier VARCHAR (10), @BeltDegree VARCHAR (6), @BeltQuest VARCHAR (6),
     @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT, @UnknownStart BIT, @PirateShipAccess BIT,
 	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT, @EternalLove BIT, @EternalLoveStarted BIT, @UnhappyEnding BIT,
-	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT
+	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
+	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -764,7 +771,8 @@ BEGIN
         [BlackSmithing], [BlackSmithingTier], [ArmorSmithing], [ArmorSmithingTier], [JewelCrafting], [JewelCraftingTier],
 		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled], [UnknownStart], [PirateShipAccess],
 		[ScubaSchematics], [ScubaMaterialsQuest], [ScubaGearCrafted], [EternalLove], [EternalLoveStarted], [UnhappyEnding],
-		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate]
+		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate], [EternalBond], [ArmorCraftingCodex],
+		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -778,7 +786,8 @@ BEGIN
         @BlackSmithing, @BlackSmithingTier, @ArmorSmithing, @ArmorSmithingTier, @JewelCrafting, @JewelCraftingTier,
 		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled, @UnknownStart, @PirateShipAccess,
 		@ScubaSchematics, @ScubaMaterialsQuest, @ScubaGearCrafted, @EternalLove, @EternalLoveStarted, @UnhappyEnding,
-		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate
+		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate, @EternalBond, @ArmorCraftingCodex,
+		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned
     );
 END
 GO
@@ -958,7 +967,13 @@ BEGIN
         [UnhappyEnding] = source.UnhappyEnding,
         [HonoringTheFallen] = source.HonoringTheFallen,
         [ReadTheFallenNotes] = source.ReadTheFallenNotes,
-		[GivenTarnishedBreastplate] = source.GivenTarnishedBreastplate;
+		[GivenTarnishedBreastplate] = source.GivenTarnishedBreastplate,
+		[EternalBond] = source.EternalBond,
+		[ArmorCraftingCodex] = source.ArmorCraftingCodex,
+		[ArmorApothecaryAccepted] = source.ArmorApothecaryAccepted,
+		[ArmorCodexDeciphered] = source.ArmorCodexDeciphered,
+		[ArmorCraftingCodexLearned] = source.ArmorCraftingCodexLearned,
+		[ArmorCraftingAdvancedCodexLearned] = source.ArmorCraftingAdvancedCodexLearned;
 END
 GO
 
@@ -1407,7 +1422,8 @@ BEGIN
            BlackSmithing, BlackSmithingTier, ArmorSmithing, ArmorSmithingTier, JewelCrafting, JewelCraftingTier,
 		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled, UnknownStart, PirateShipAccess, 
 		   ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted, EternalLove, EternalLoveStarted, UnhappyEnding,
-		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate
+		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond, ArmorCraftingCodex,
+		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

@@ -61,8 +61,10 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 break;
         }
 
-        client.SendOptionsDialog(Mundane, "It's a lot of work to get the right gear. How can I help?\n\n" +
-                                          $"Armorsmithing: {client.Aisling.QuestManager.ArmorSmithing}", options.ToArray());
+        client.SendOptionsDialog(Mundane,
+            client.Aisling.QuestManager.ArmorCraftingCodexLearned
+                ? $"Hail! {client.Aisling.Username}, let's get started!\n\nArmorsmithing: {client.Aisling.QuestManager.ArmorSmithing}"
+                : $"It's a log of work to get the right gear. How can I help?\n\nArmorsmithing: {client.Aisling.QuestManager.ArmorSmithing}", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)
@@ -929,30 +931,32 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 }
             case 0x87:
                 {
+                    client.Aisling.QuestManager.ArmorCraftingCodexLearned = true;
+
                     var options = new List<Dialog.OptionsDataItem>
                     {
-                        new (0x88, "Awesome! Let's get started")
+                        new (0x88, "Really?")
                     };
 
-                    client.SendOptionsDialog(Mundane, $"Ah Ha!! Sooo, we can use those as a catalyst! Well {client.Aisling.Username}, looks like we can now further " +
-                                                      $"enhance your armor.", options.ToArray());
+                    client.SendOptionsDialog(Mundane, $"Ah Ha!! Sooo, we can use those as a catalyst... ah and these! {client.Aisling.Username}, looks like you can enhance further. " +
+                                                      $"Have you ever been to {{=bChaos{{=a? There's a coalition deep within the cavern. I have a brother there who is a finer armor smith " +
+                                                      $"than I am. His forge is quite hotter than mine, so forging there is easier!", options.ToArray());
                     break;
                 }
             case 0x88:
                 {
                     client.CloseDialog();
-                    client.Aisling.QuestManager.ArmorCraftingCodexLearned = true;
                     break;
                 }
             case 0x89:
                 {
-                    client.SendOptionsDialog(Mundane, $"Unfortunately, our forge isn't hot enough to go further into the craft. The codex states that there is a place called {{=bChaos {{=athat " +
-                                                      $"has molten rock hot enough. However, you'll need a ruby infused with dragon fire as a catalyst.");
+                    client.SendOptionsDialog(Mundane, $"Unfortunately, our forge isn't hot enough to go further into the craft. Looks like if you haven't already, you'll have to visit " +
+                                                      $"my brother. He has molten rock hot enough. However, you'll need a ruby infused with dragon fire as a catalyst.");
                     break;
                 }
             case 0x90:
                 {
-                    client.SendOptionsDialog(Mundane, "Once again, you are astounding! Meet me in the lower levels of chaos and we'll see about reforging your armor with this gem.");
+                    client.SendOptionsDialog(Mundane, "Once again, you are astounding! Look for my brother in the lower levels of chaos and he'll see about reforging your armor with this gem.");
                     break;
                 }
 
