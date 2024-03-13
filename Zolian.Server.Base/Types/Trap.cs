@@ -40,16 +40,11 @@ public class Trap
             Flags = ItemFlags.Trap
         };
 
-        item.Template = itemTemplate;
-        var pos = obj.Position;
-
         if (obj is Aisling aisling)
-        {
             aisling.ActionUsed = "Trap";
-        }
 
         var trap = item.TrapCreate(obj, itemTemplate, duration, radius, cb);
-        trap.TrapItem.Release(obj, pos);
+        trap.TrapItem.Release(obj, trap.TrapItem.Position);
         ServerSetup.Instance.Traps.TryAdd(trap.Serial, trap);
     }
 

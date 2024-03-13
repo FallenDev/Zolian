@@ -58,7 +58,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
     public WorldServerTimer BashTimer { get; init; }
     public WorldServerTimer AbilityTimer { get; init; }
     public WorldServerTimer CastTimer { get; init; }
-    public MonsterTemplate Template { get; set; }
+    public MonsterTemplate Template { get; init; }
     public WorldServerTimer WalkTimer { get; init; }
     public WorldServerTimer ObjectUpdateTimer { get; init; }
     public bool IsAlive => CurrentHp > 0;

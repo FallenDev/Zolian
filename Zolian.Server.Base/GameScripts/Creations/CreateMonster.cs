@@ -19,10 +19,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 {
     public override Monster Create()
     {
-        if (template.AttackSpeed <= 500) template.AttackSpeed = 500;
-        if (template.MovementSpeed <= 500) template.MovementSpeed = 500;
-        if (template.Level <= 1) template.Level = 1;
-
         var obj = new Monster
         {
             Template = template,

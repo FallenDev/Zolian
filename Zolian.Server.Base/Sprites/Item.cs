@@ -103,20 +103,20 @@ public sealed class Item : Sprite, IItem
     /// </summary>
     public enum ItemMaterials
     {
-        None,
-        Copper,
-        Iron,
-        Steel,
-        Forged,
-        Elven,
-        Dwarven,
-        Mythril,
-        Hybrasyl, //    8   J-
-        MoonStone, //   9   E-
-        SunStone, //    10   E-
-        Ebony, //       11   E-
-        Runic, //       12   E-
-        Chaos //        13   A-
+        None, // N
+        Copper, // N
+        Iron, // N
+        Steel, // A
+        Forged, // A
+        Elven, // A
+        Dwarven, // J
+        Mythril, // J
+        Hybrasyl, // J
+        MoonStone, // E
+        SunStone, // E
+        Ebony, // E
+        Runic, // E
+        Chaos // A
     }
 
     public long ItemId { get; set; }
@@ -394,17 +394,14 @@ public sealed class Item : Sprite, IItem
         {
             if (obj.Template.MaxDurability == uint.MinValue)
             {
-                obj.Template.MaxDurability = ServerSetup.Instance.Config.DefaultItemDurability;
+                obj.MaxDurability = ServerSetup.Instance.Config.DefaultItemDurability;
                 obj.Durability = ServerSetup.Instance.Config.DefaultItemDurability;
             }
-
-            if (obj.Template.Value == uint.MinValue)
-                obj.Template.Value = ServerSetup.Instance.Config.DefaultItemValue;
         }
 
         if (obj.Template.Flags.FlagIsSet(ItemFlags.QuestRelated))
         {
-            obj.Template.MaxDurability = 0;
+            obj.MaxDurability = 0;
             obj.Durability = 0;
         }
 
@@ -502,17 +499,14 @@ public sealed class Item : Sprite, IItem
         {
             if (obj.Template.MaxDurability == uint.MinValue)
             {
-                obj.Template.MaxDurability = ServerSetup.Instance.Config.DefaultItemDurability;
+                obj.MaxDurability = ServerSetup.Instance.Config.DefaultItemDurability;
                 obj.Durability = ServerSetup.Instance.Config.DefaultItemDurability;
             }
-
-            if (obj.Template.Value == uint.MinValue)
-                obj.Template.Value = ServerSetup.Instance.Config.DefaultItemValue;
         }
 
         if (obj.Template.Flags.FlagIsSet(ItemFlags.QuestRelated))
         {
-            obj.Template.MaxDurability = 0;
+            obj.MaxDurability = 0;
             obj.Durability = 0;
         }
 
@@ -563,7 +557,7 @@ public sealed class Item : Sprite, IItem
 
         if (obj.Template.Flags.FlagIsSet(ItemFlags.QuestRelated))
         {
-            obj.Template.MaxDurability = 0;
+            obj.MaxDurability = 0;
             obj.Durability = 0;
         }
 

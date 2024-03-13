@@ -18,8 +18,8 @@ namespace Darkages.Sprites;
 
 public sealed class Mundane : Sprite, IDialogSourceEntity
 {
-    private readonly List<SkillScript> _skillScripts = new();
-    private readonly List<SpellScript> _spellScripts = new();
+    private readonly List<SkillScript> _skillScripts = [];
+    private readonly List<SpellScript> _spellScripts = [];
     private int _waypointIndex;
     private Position CurrentWaypoint
     {
