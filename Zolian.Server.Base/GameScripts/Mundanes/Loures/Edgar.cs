@@ -26,7 +26,7 @@ public class Edgar(WorldServer server, Mundane mundane) : MundaneScript(server, 
         switch (client.Aisling.QuestManager.UnhappyEnding)
         {
             case false when client.Aisling.QuestManager.EternalLove:
-                options.Add(new(0x01, "I've heard stories, that you fought in the war?"));
+                options.Add(new(0x01, "I've heard stories.. that you fought in the goblin war?"));
                 client.SendOptionsDialog(Mundane, "Eh? What do you want?", options.ToArray());
                 return;
             case false:

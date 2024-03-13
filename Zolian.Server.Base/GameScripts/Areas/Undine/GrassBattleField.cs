@@ -1,6 +1,4 @@
-﻿using Darkages.Common;
-using Darkages.Enums;
-using Darkages.GameScripts.Affects;
+﻿using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;

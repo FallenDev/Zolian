@@ -9,8 +9,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-using Gender = Darkages.Enums.Gender;
-
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
 [Script("Eireann")]
