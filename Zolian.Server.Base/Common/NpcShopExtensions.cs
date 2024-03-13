@@ -530,7 +530,7 @@ public static class NpcShopExtensions
     public static List<byte> GetCharacterApprenticeArmorImprove(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
-        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Iron or Item.ItemMaterials.Steel 
             or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven).Select(i => i.InventorySlot).ToList();
     }
 
@@ -538,7 +538,7 @@ public static class NpcShopExtensions
     public static List<byte> GetCharacterJourneymanArmorImprove(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
-        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Iron or Item.ItemMaterials.Steel 
             or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
             or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl).Select(i => i.InventorySlot).ToList();
     }
@@ -547,7 +547,7 @@ public static class NpcShopExtensions
     public static List<byte> GetCharacterExpertArmorImprove(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
-        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Iron or Item.ItemMaterials.Steel 
             or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
             or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl or Item.ItemMaterials.MoonStone
             or Item.ItemMaterials.SunStone or Item.ItemMaterials.Ebony or Item.ItemMaterials.Runic).Select(i => i.InventorySlot).ToList();
@@ -557,7 +557,7 @@ public static class NpcShopExtensions
     public static List<byte> GetCharacterArtisanalArmorImprove(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.EquipmentSlot == 2));
-        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Steel 
+        return inventory.Where(w => w.ItemMaterial is Item.ItemMaterials.None or Item.ItemMaterials.Copper or Item.ItemMaterials.Iron or Item.ItemMaterials.Steel 
             or Item.ItemMaterials.Forged or Item.ItemMaterials.Elven or Item.ItemMaterials.Dwarven
             or Item.ItemMaterials.Mythril or Item.ItemMaterials.Hybrasyl or Item.ItemMaterials.MoonStone
             or Item.ItemMaterials.SunStone or Item.ItemMaterials.Ebony or Item.ItemMaterials.Runic
