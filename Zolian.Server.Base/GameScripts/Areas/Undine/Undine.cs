@@ -172,7 +172,7 @@ public class Undine : AreaScript
         var carry = item.Template.CarryWeight + client.Aisling.CurrentWeight;
         if (carry <= client.Aisling.MaximumWeight)
         {
-            ItemDura(item, ItemQualityVariance.DetermineQuality());
+            ItemQualityVariance.ItemDurability(item, ItemQualityVariance.DetermineQuality());
             var given = item.GiveTo(client.Aisling);
             if (given) return true;
             client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
@@ -182,36 +182,5 @@ public class Undine : AreaScript
 
         client.SendServerMessage(ServerMessageType.ActiveMessage, "You couldn't hold the item, fumbled, and it vanished into the altar.");
         return false;
-    }
-
-    private static void ItemDura(Item item, Item.Quality quality)
-    {
-        var temp = item.Template.MaxDurability;
-        switch (quality)
-        {
-            case Item.Quality.Rare:
-                item.MaxDurability = (uint)(temp / 0.8);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Epic:
-                item.MaxDurability = (uint)(temp / 0.7);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Legendary:
-                item.MaxDurability = (uint)(temp / 0.6);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Forsaken:
-                item.MaxDurability = (uint)(temp / 0.5);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Damaged:
-            case Item.Quality.Common:
-            case Item.Quality.Uncommon:
-            case Item.Quality.Mythic:
-            case Item.Quality.Primordial:
-            case Item.Quality.Transcendent:
-                break;
-        }
     }
 }

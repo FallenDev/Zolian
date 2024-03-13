@@ -473,10 +473,8 @@ public static class ItemStorage
                     DisplayImage = item.Template.DisplayImage
                 };
 
-                ItemQualityVariance.SetMaxItemDurability(newItem, newItem.ItemQuality);
                 newItem.GetDisplayName();
                 newItem.NoColorGetDisplayName();
-
                 ServerSetup.Instance.GlobalSqlItemCache.TryAdd(newItem.ItemId, newItem);
             }
 

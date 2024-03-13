@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.GameScripts.Formulas;
 
 namespace Darkages.Sprites;
 
@@ -437,6 +438,7 @@ public sealed class Item : Sprite, IItem
 
             obj.ItemQuality = checkedQuality;
             obj.OriginalQuality = checkedQuality;
+            ItemQualityVariance.ItemDurability(obj, obj.OriginalQuality);
         }
         else
         {

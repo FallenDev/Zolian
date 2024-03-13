@@ -45,6 +45,9 @@ public static class ItemQualityVariance
         }
     }
 
+    /// <summary>
+    /// Used during item load during player login
+    /// </summary>
     public static void SetMaxItemDurability(Item item, Item.Quality quality)
     {
         var temp = item.Template.MaxDurability;

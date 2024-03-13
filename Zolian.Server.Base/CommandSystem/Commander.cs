@@ -475,53 +475,13 @@ public static class Commander
                     return;
                 }
                 item = item.Create(client.Aisling, template, quality, variance, wVariance);
-                ItemDura(item, quality);
+                ItemQualityVariance.ItemDurability(item, quality);
                 if (!item.CanCarry(client.Aisling)) continue;
                 item.GiveTo(client.Aisling);
             }
         }
     }
-
-    private static void ItemDura(Item item, Item.Quality quality)
-    {
-        var temp = item.Template.MaxDurability;
-        switch (quality)
-        {
-            case Item.Quality.Damaged:
-                item.MaxDurability = (uint)(temp / 1.4);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Common:
-                item.MaxDurability = temp / 1;
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Uncommon:
-                item.MaxDurability = (uint)(temp / 0.9);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Rare:
-                item.MaxDurability = (uint)(temp / 0.8);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Epic:
-                item.MaxDurability = (uint)(temp / 0.7);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Legendary:
-                item.MaxDurability = (uint)(temp / 0.6);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Forsaken:
-                item.MaxDurability = (uint)(temp / 0.5);
-                item.Durability = item.MaxDurability;
-                break;
-            case Item.Quality.Mythic:
-                item.MaxDurability = (uint)(temp / 0.3);
-                item.Durability = item.MaxDurability;
-                break;
-        }
-    }
-
+    
     public static void ParseChatMessage(WorldClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
 
     private static void OnParseError(object obj, string command) => ServerSetup.EventsLogger($"[Chat Parser] Error: {command}");
