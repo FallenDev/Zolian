@@ -127,7 +127,7 @@ CREATE TABLE Players
 	[Path] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
 	[PastClass] VARCHAR(10) NOT NULL DEFAULT 'Peasant',
 	[Race] VARCHAR(10) NOT NULL DEFAULT 'Human',
-	[Afflictions] VARCHAR(10) NOT NULL DEFAULT 'Normal',
+	[Afflictions] VARCHAR(120) NOT NULL DEFAULT 'Normal',
 	[Gender] VARCHAR(6) NOT NULL DEFAULT 'Both',
 	[HairColor] TINYINT NOT NULL DEFAULT 0,
 	[HairStyle] TINYINT NOT NULL DEFAULT 0,
@@ -163,7 +163,6 @@ CREATE TABLE Players
 	[StatPoints] SMALLINT NOT NULL DEFAULT 0,
 	[GamePoints] BIGINT NOT NULL DEFAULT 0,
 	[BankedGold] BIGINT NOT NULL DEFAULT 0,
-	[Display] VARCHAR(12) NOT NULL DEFAULT 'None',
 	[ArmorImg] SMALLINT NOT NULL DEFAULT 0,
 	[HelmetImg] SMALLINT NOT NULL DEFAULT 0,
 	[ShieldImg] SMALLINT NOT NULL DEFAULT 0,
@@ -213,8 +212,8 @@ CREATE TABLE PlayersSpellBook
 	[Level] INT NOT NULL DEFAULT 0,
 	[Slot] INT NULL,
 	[SpellName] VARCHAR(30) NULL,
-	[Casts] INT NOT NULL DEFAULT 0,
-	[CurrentCooldown] INT NULL
+	[CurrentCooldown] INT NULL,
+	[Casts] INT NOT NULL DEFAULT 0
 )
 
 CREATE TABLE PlayersSkillBook
@@ -223,19 +222,19 @@ CREATE TABLE PlayersSkillBook
 	[Level] INT NOT NULL DEFAULT 0,
 	[Slot] INT NULL,
 	[SkillName] VARCHAR(30) NULL,
-	[Uses] INT NOT NULL DEFAULT 0,
-	[CurrentCooldown] INT NULL
+	[CurrentCooldown] INT NULL,
+    [Uses] INT NOT NULL DEFAULT 0,
 )
 
 CREATE TABLE PlayersLegend
 (
 	[LegendId] INT NOT NULL PRIMARY KEY,
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[Category] VARCHAR(20) NOT NULL,
+    [Key] VARCHAR (25) NOT NULL,
 	[Time] DATETIME DEFAULT CURRENT_TIMESTAMP,
-	[Color] VARCHAR(25) NOT NULL DEFAULT 'Blue',
+	[Color] VARCHAR(30) NOT NULL DEFAULT 'White',
 	[Icon] INT NOT NULL DEFAULT 0,
-	[Value] VARCHAR(50) NOT NULL
+	[Text] VARCHAR(50) NOT NULL
 )
 
 CREATE TABLE PlayersItems
@@ -248,7 +247,7 @@ CREATE TABLE PlayersItems
     [InventorySlot] INT NOT NULL DEFAULT 0,
 	[Color] INT NOT NULL DEFAULT 0,
 	[Cursed] BIT NOT NULL DEFAULT 0,
-	[Durability] INT NOT NULL DEFAULT 0,
+	[Durability] BIGINT NOT NULL DEFAULT 0,
 	[Identified] BIT NOT NULL DEFAULT 0,
 	[ItemVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
 	[WeapVariance] VARCHAR(15) NOT NULL DEFAULT 'None',
@@ -284,6 +283,7 @@ CREATE TABLE PlayersCombos
 CREATE TABLE PlayersQuests
 (
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
+    [MailBoxNumber] int NOT NULL,
     [TutorialCompleted] BIT NULL,
     [BetaReset] BIT NULL,
     [ArtursGift] INT NULL,
@@ -291,10 +291,16 @@ CREATE TABLE PlayersQuests
     [ConnPotions] BIT NULL,
     [CryptTerror] BIT NULL,
     [CryptTerrorSlayed] BIT NULL,
+    [CryptTerrorContinued] BIT NULL,
+    [CryptTerrorContSlayed] BIT NULL,
+    [NightTerror] BIT NULL,
+    [NightTerrorSlayed] BIT NULL,
+    [DreamWalking] BIT NULL,
+    [DreamWalkingSlayed] BIT NULL,
     [Dar] INT NULL,
     [DarItem] VARCHAR (20) NULL,
+    [ReleasedTodesbaum] BIT NULL,
     [DrunkenHabit] BIT NULL,
-    [EternalLove] BIT NULL,
     [FionaDance] BIT NULL,
     [Keela] INT NULL,
     [KeelaCount] INT NULL,
@@ -336,7 +342,24 @@ CREATE TABLE PlayersQuests
     [BeltQuest] VARCHAR (6) NULL,
     [SavedChristmas] BIT NULL,
     [RescuedReindeer] BIT NULL,
-    [YetiKilled] BIT NULL
+    [YetiKilled] BIT NULL,
+    [UnknownStart] BIT NULL,
+    [PirateShipAccess] BIT NULL,
+    [ScubaSchematics] BIT NULL,
+    [ScubaMaterialsQuest] BIT NULL,
+    [ScubaGearCrafted] BIT NULL,
+    [EternalLove] BIT NULL,
+    [EternalLoveStarted] BIT NULL,
+    [UnhappyEnding] BIT NULL,
+    [HonoringTheFallen] BIT NULL,
+    [ReadTheFallenNotes] BIT NULL,
+    [GivenTarnishedBreastplate] BIT NULL,
+    [EternalBond] VARCHAR (13) NULL,
+    [ArmorCraftingCodex] BIT NULL,
+    [ArmorApothecaryAccepted] BIT NULL,
+    [ArmorCodexDeciphered] BIT NULL,
+    [ArmorCraftingCodexLearned] BIT NULL,
+    [ArmorCraftingAdvancedCodexLearned] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList

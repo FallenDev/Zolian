@@ -443,7 +443,6 @@ public static class Commander
                 var item = new Item();
                 item = item.Create(client.Aisling, template);
                 item.Stacks = template.MaxStack;
-                if (!item.CanCarry(client.Aisling)) continue;
                 item.GiveTo(client.Aisling);
             }
 
@@ -457,26 +456,33 @@ public static class Commander
                 }
                 item = item.Create(client.Aisling, template);
                 item.Stacks = (ushort)remaining;
-                if (!item.CanCarry(client.Aisling)) return;
                 item.GiveTo(client.Aisling);
             }
         }
         else
         {
+            var item = new Item();
+            var quality = Item.Quality.Common;
+            var variance = Item.Variance.None;
+            var wVariance = Item.WeaponVariance.None;
+            
             for (var i = 0; i < quantity; i++)
             {
-                var quality = ItemQualityVariance.DetermineHighQuality();
-                var variance = ItemQualityVariance.DetermineVariance();
-                var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-                var item = new Item();
                 if (client.Aisling.Inventory.IsFull)
                 {
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
                     return;
                 }
+
+                if (template.Enchantable)
+                {
+                    quality = ItemQualityVariance.DetermineHighQuality();
+                    variance = ItemQualityVariance.DetermineVariance();
+                    wVariance = ItemQualityVariance.DetermineWeaponVariance();
+                }
+
                 item = item.Create(client.Aisling, template, quality, variance, wVariance);
                 ItemQualityVariance.ItemDurability(item, quality);
-                if (!item.CanCarry(client.Aisling)) continue;
                 item.GiveTo(client.Aisling);
             }
         }
