@@ -59,7 +59,7 @@ public enum ClassStage
     Dedicated = 1 << 1,
     Advance = 1 << 2,
     Master = 1 << 3,
-    Job = 1 << 4,
+    Job = 1 << 4 | Master,
     Quest = 1 << 5,
 
     MasterLearn = Class | Dedicated | Advance | Master,
@@ -103,6 +103,7 @@ public enum SubClassDragonkin
 public static class SpriteClassRaceExtensions
 {
     public static bool ClassFlagIsSet(this Class self, Class flag) => (self & flag) == flag;
+    public static bool JobFlagIsSet(this Job self, Job flag) => (self & flag) == flag;
     public static bool RaceFlagIsSet(this Race self, Race flag) => (self & flag) == flag;
     public static bool StageFlagIsSet(this ClassStage self, ClassStage flag) => (self & flag) == flag;
     public static bool AfflictionFlagIsSet(this Afflictions self, Afflictions flag) => (self & flag) == flag;

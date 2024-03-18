@@ -40,6 +40,7 @@ public class LearningPredicate
     public int SpellLevelRequired { get; set; }
     public string SpellRequired { get; set; }
     public ClassStage StageRequired { get; set; }
+    public Job JobRequired { get; set; }
     private bool MasterRequired => StageRequired.StageFlagIsSet(ClassStage.Master);
 
     internal string[] MetaData =>

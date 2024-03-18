@@ -17,7 +17,7 @@ public class SkillTemplate : Template
     public byte Sound { get; set; }
     public PostQualifier PostQualifiers { get; set; }
     public LearningPredicate Prerequisites { get; set; }
-    public List<LearningPredicate> LearningRequirements { get; } = new();
+    public List<LearningPredicate> LearningRequirements { get; } = [];
     public ushort TargetAnimation { get; set; }
     public ushort MissAnimation { get; set; }
     public int MaxLevel { get; set; }
@@ -122,6 +122,7 @@ public static class SkillStorage
                     var secClass = reader2["SecondaryClass"].ConvertTo<Class>();
                     var race = reader2["Race"].ConvertTo<Race>();
                     var stage = reader2["Stage"].ConvertTo<ClassStage>();
+                    var job = reader2["Job"].ConvertTo<Job>();
                     temp.Prerequisites = learning;
                     temp.Prerequisites.ItemsRequired = itemList;
                     temp.Prerequisites.DisplayName = reader2["DisplayName"].ToString();
@@ -144,6 +145,7 @@ public static class SkillStorage
                     temp.Prerequisites.SpellLevelRequired = (int)reader2["SpellLevel"];
                     temp.Prerequisites.SpellRequired = reader2["SpellRequired"].ToString();
                     temp.Prerequisites.StageRequired = stage;
+                    temp.Prerequisites.JobRequired = job;
                 }
 
                 reader2.Close();
