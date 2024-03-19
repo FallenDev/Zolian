@@ -9,8 +9,6 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-using Gender = Darkages.Enums.Gender;
-
 namespace Darkages.GameScripts.Mundanes.Loures;
 
 [Script("Sir Dolvet")]
@@ -47,7 +45,7 @@ public class SirDolvet : MundaneScript
 
         if (client.Aisling.Stage <= ClassStage.Master
             && client.Aisling.ExpLevel >= 250
-            && client.Aisling.QuestManager.AssassinsGuildReputation >= 3
+            && client.Aisling.QuestManager.AssassinsGuildReputation >= 4
             && client.Aisling.QuestManager.UndineReputation >= 4
             && (client.Aisling.Path == Class.Berserker || client.Aisling.PastClass == Class.Berserker)
             && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin))
@@ -77,16 +75,27 @@ public class SirDolvet : MundaneScript
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>();
-                    // Logic for earning Dark Knight status
+                    var qualifiedItem = CheckForForsakenDragonSlayer(client);
+
+                    if (qualifiedItem != null)
+                    {
+                        options.Add(new(0x02, "Advance"));
+                        client.SendOptionsDialog(Mundane, "What a beautiful blade, are you ready to delve into the dark arts of swordplay?", options.ToArray());
+                        return;
+                    }
+
+                    options.Add(new(0x00, "On it"));
+                    client.SendOptionsDialog(Mundane, "Ah ha! *laughs loudly* Well then, bring me a worthy blade.\n" +
+                                                      $"{{=qEnhance or find a Dragon Slayer of Forsaken quality", options.ToArray());
                 }
                 break;
             case 0x02:
                 {
                     var options = new List<Dialog.OptionsDataItem> { new(0x00, "Thank you Sir Dolvet") };
-                    //var qualifiedItem = CheckForMoonStoneQualityItem(client);
+                    var qualifiedItem = CheckForForsakenDragonSlayer(client);
 
-                    //if (qualifiedItem != null)
-                    //    OnResponse(client, 0x999, $"{client.Aisling.Serial}");
+                    if (qualifiedItem != null)
+                        OnResponse(client, 0x999, $"{client.Aisling.Serial}");
 
                     client.SendOptionsDialog(Mundane, "I will now perform the seal which binds. Congratulations Dark Knight, come back to me " +
                                                       "whenever you're ready to advance your techniques.", options.ToArray());
@@ -95,11 +104,11 @@ public class SirDolvet : MundaneScript
             case 0x999:
                 {
                     if (responseId != client.Aisling.Serial) return;
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Samurai"));
+                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Dark Knight"));
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
-                    client.Aisling.JobClass = Job.Samurai;
+                    client.Aisling.JobClass = Job.DarkKnight;
                 }
                 break;
             case 0x20:
@@ -162,6 +171,12 @@ public class SirDolvet : MundaneScript
     }
 
     public override void OnGossip(WorldClient client, string message) { }
+
+    private static Item CheckForForsakenDragonSlayer(WorldClient client)
+    {
+        var item = client.Aisling.HasItemReturnItem("Dragon Slayer");
+        return item.OriginalQuality == Item.Quality.Forsaken ? item : null;
+    }
 
     #region Skills & Spells
 
