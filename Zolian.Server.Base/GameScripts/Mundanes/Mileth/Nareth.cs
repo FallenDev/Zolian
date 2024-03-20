@@ -36,9 +36,9 @@ public class Nareth : MundaneScript
         var options = new List<Dialog.OptionsDataItem>();
 
         if (_skillList.Count > 0 && client.Aisling.JobClass == Job.ShaolinMonk)
-            options.Add(new(0x20, "Learn Samurai Skills"));
+            options.Add(new(0x20, "Learn Shaolin Monk Skills"));
         if (_spellList.Count > 0 && client.Aisling.JobClass == Job.ShaolinMonk)
-            options.Add(new(0x30, "Learn Samurai Spells"));
+            options.Add(new(0x30, "Learn Shaolin Monk Spells"));
 
         if (client.Aisling.Stage <= ClassStage.Master
             && client.Aisling.ExpLevel >= 325
@@ -209,6 +209,10 @@ public class Nareth : MundaneScript
             Icon = (byte)LegendIcon.Victory,
             Text = "Advanced to Job - Shaolin Monk"
         };
+
+        var beads = new Item();
+        beads = beads.Create(client.Aisling, "Multi-Colored Zen Beads");
+        beads.GiveTo(client.Aisling);
 
         client.Aisling.LegendBook.AddLegend(legend, client);
         OnResponse(client, 0x999, $"{client.Aisling.Serial}");
