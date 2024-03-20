@@ -205,7 +205,7 @@ public class Nareth : MundaneScript
         {
             Key = "LJob1",
             Time = DateTime.UtcNow,
-            Color = LegendColor.GreenG2,
+            Color = LegendColor.TurquoiseG7,
             Icon = (byte)LegendIcon.Victory,
             Text = "Advanced to Job - Shaolin Monk"
         };
