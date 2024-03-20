@@ -35,13 +35,10 @@ public class SirDolvet : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.JobClass == Job.DarkKnight)
-        {
-            if (_skillList.Count > 0)
-                options.Add(new(0x20, "Learn Dark Knight Skills"));
-            if (_spellList.Count > 0)
-                options.Add(new(0x30, "Learn Dark Knight Spells"));
-        }
+        if (_skillList.Count > 0 && client.Aisling.JobClass == Job.DarkKnight)
+            options.Add(new(0x20, "Learn Dark Knight Skills"));
+        if (_spellList.Count > 0 && client.Aisling.JobClass == Job.DarkKnight)
+            options.Add(new(0x30, "Learn Dark Knight Spells"));
 
         if (client.Aisling.Stage <= ClassStage.Master
             && client.Aisling.ExpLevel >= 250
@@ -50,7 +47,7 @@ public class SirDolvet : MundaneScript
             && (client.Aisling.Path == Class.Berserker || client.Aisling.PastClass == Class.Berserker)
             && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin))
         {
-            options.Add(new(0x06, "I am but a canvas, teach me"));
+            options.Add(new(0x01, "I am but a canvas, teach me"));
             client.SendOptionsDialog(Mundane, "Ya know, you'd make a fine Dark Knight", options.ToArray());
             return;
         }
@@ -109,6 +106,17 @@ public class SirDolvet : MundaneScript
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
                     client.Aisling.JobClass = Job.DarkKnight;
+
+                    var legend = new Legend.LegendItem
+                    {
+                        Key = "LJob1",
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.GreenG2,
+                        Icon = (byte)LegendIcon.Victory,
+                        Text = "Advanced to Job - Dark Knight"
+                    };
+
+                    client.Aisling.LegendBook.AddLegend(legend, client);
                 }
                 break;
             case 0x20:

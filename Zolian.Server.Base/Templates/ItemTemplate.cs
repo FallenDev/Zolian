@@ -2,7 +2,6 @@
 
 using Darkages.Database;
 using Darkages.Enums;
-using Darkages.GameScripts.Formulas;
 using Darkages.Sprites;
 
 using Microsoft.AppCenter.Crashes;

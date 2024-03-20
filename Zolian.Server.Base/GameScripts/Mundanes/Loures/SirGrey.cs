@@ -37,13 +37,10 @@ public class SirGrey : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (client.Aisling.JobClass == Job.Samurai)
-        {
-            if (_skillList.Count > 0)
-                options.Add(new(0x20, "Learn Samurai Skills"));
-            if (_spellList.Count > 0)
-                options.Add(new(0x30, "Learn Samurai Spells"));
-        }
+        if (_skillList.Count > 0 && client.Aisling.JobClass == Job.Samurai)
+            options.Add(new(0x20, "Learn Samurai Skills"));
+        if (_spellList.Count > 0 && client.Aisling.JobClass == Job.Samurai)
+            options.Add(new(0x30, "Learn Samurai Spells"));
 
         if (client.Aisling.Stage <= ClassStage.Master
             && client.Aisling.ExpLevel >= 250
@@ -52,7 +49,7 @@ public class SirGrey : MundaneScript
             && (client.Aisling.Path == Class.Defender || client.Aisling.PastClass == Class.Defender)
             && (client.Aisling.Path == Class.Monk || client.Aisling.PastClass == Class.Monk))
         {
-            options.Add(new(0x06, "I would be eager to learn more"));
+            options.Add(new(0x01, "I would be eager to learn more"));
             client.SendOptionsDialog(Mundane, "Hmm, I can feel it. You have something about you.\n" +
                                               "How would you like to train to be a Samurai like me?", options.ToArray());
             return;
@@ -112,6 +109,17 @@ public class SirGrey : MundaneScript
                     client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
                     client.Aisling.JobClass = Job.Samurai;
+
+                    var legend = new Legend.LegendItem
+                    {
+                        Key = "LJob1",
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.GreenG2,
+                        Icon = (byte)LegendIcon.Victory,
+                        Text = "Advanced to Job - Samurai"
+                    };
+
+                    client.Aisling.LegendBook.AddLegend(legend, client);
                 }
                 break;
             case 0x20:
@@ -257,7 +265,7 @@ public class SirGrey : MundaneScript
 
         newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
-        if (newSpells.Count > 0)
+        if (newSpells.Count > 0 && client.Aisling.JobClass == Job.Samurai)
         {
             client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x31, newSpells);
         }
