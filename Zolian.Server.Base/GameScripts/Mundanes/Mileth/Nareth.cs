@@ -46,7 +46,7 @@ public class Nareth : MundaneScript
             && (client.Aisling.Path == Class.Monk || client.Aisling.PastClass == Class.Monk)
             && client.Aisling.QuestManager.BeltDegree.Equals("Black"))
         {
-            options.Add(new(0x06, "Teach me Sensei"));
+            options.Add(new(0x01, "Teach me Sensei"));
             client.SendOptionsDialog(Mundane, "Your hands are weathered, your soul refined. Do you walk the path, one with nature?", options.ToArray());
             return;
         }
