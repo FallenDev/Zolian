@@ -10,10 +10,10 @@ using Darkages.Types;
 using System.Numerics;
 using Darkages.Templates;
 
-namespace Darkages.GameScripts.Mundanes.Tagor;
+namespace Darkages.GameScripts.Mundanes.Mileth;
 
-[Script("Tagor Training")]
-public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
+[Script("Mileth Training")]
+public class MilethTrainer(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private List<Skill> _skillList;
     private List<Spell> _spellList;
@@ -173,7 +173,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                     if (client.Aisling.GoldPoints >= 100000)
                     {
                         client.Aisling.GoldPoints -= 100000;
-                        client.TransitionToMap(5257, new Position(17, 17));
+                        client.TransitionToMap(5269, new Position(17, 17));
                         await Task.Delay(100).ContinueWith(ct =>
                         {
                             client.CloseDialog();
@@ -226,7 +226,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                     if (client.Aisling.GoldPoints >= 200000)
                     {
                         client.Aisling.GoldPoints -= 200000;
-                        client.TransitionToMap(5257, new Position(17, 17));
+                        client.TransitionToMap(5269, new Position(17, 17));
                         await Task.Delay(100).ContinueWith(ct =>
                         {
                             client.CloseDialog();
