@@ -2926,7 +2926,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
             GuildRank = aisling.GameMaster
                 ? "Game Master"
-                : $"Vit: {aisling.BaseHp + aisling.BaseMp * 2}",
+                : $"Gear Score: {aisling.GamePoints}",
             Id = aisling.Serial,
             LegendMarks = legendMarks,
             Name = aisling.Username,
@@ -3483,7 +3483,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
             GuildRank = Aisling.GameMaster
                 ? "Game Master"
-                : $"Vit: {Aisling.BaseHp + Aisling.BaseMp * 2}",
+                : $"012345678910111213141516",
             IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
             LegendMarks = legendMarks,
             Name = Aisling.Username,

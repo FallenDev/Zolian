@@ -17,6 +17,7 @@ using Microsoft.AppCenter.Crashes;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
+using ServiceStack;
 
 namespace Darkages.Sprites;
 
@@ -55,6 +56,9 @@ public sealed class Aisling : Player, IAisling
     public bool Skulled => HasDebuff("Skulled");
     public Party GroupParty => ServerSetup.Instance.GlobalGroupCache.GetValueOrDefault(GroupId);
     public List<Aisling> PartyMembers => GroupParty?.PartyMembers;
+    public string SpellTrainOne;
+    public string SpellTrainTwo;
+    public string SpellTrainThree;
     public int AreaId => CurrentMapId;
 
     public Aisling()
@@ -514,6 +518,11 @@ public sealed class Aisling : Player, IAisling
         return SkillBook.GetSkills(i => i?.Template.Name == s).First();
     }
 
+    public Spell GetSpell(string s)
+    {
+        return SpellBook.TryGetSpells(i => i?.Template.Name == s).First();
+    }
+
     public bool GiveGold(uint offer, bool sendClientUpdate = true)
     {
         if (GoldPoints + offer < ServerSetup.Instance.Config.MaxCarryGold)
@@ -830,5 +839,73 @@ public sealed class Aisling : Player, IAisling
         }
 
         stopWatch.Stop();
+    }
+
+    public async void AutoCastRoutine()
+    {
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+        var pos = Pos;
+        var spells = SetSpellsToCast();
+
+        while (pos == Pos && Client.Connected)
+        {
+            if (!(stopWatch.Elapsed.TotalMilliseconds > 1000)) continue;
+            stopWatch.Restart();
+
+            var monster = MonstersNearby().RandomIEnum();
+            if (monster == null) return;
+            Target = monster;
+
+            foreach (var spell in spells)
+            {
+                if (spell is null) continue;
+                if (!spell.CanUse()) continue;
+                if (spell.Scripts is null || spell.Scripts.IsEmpty) continue;
+
+                spell.InUse = true;
+                var script = spell.Scripts.Values.First();
+                script?.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);
+                spell.CurrentCooldown = spell.Template.Cooldown;
+                Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+                spell.LastUsedSpell = DateTime.UtcNow;
+                spell.InUse = false;
+                await Task.Delay(spell.Lines * 1000);
+            }
+        }
+
+        stopWatch.Stop();
+    }
+
+    private List<Spell> SetSpellsToCast()
+    {
+        var spells = new List<Spell>();
+
+        if (!SpellTrainOne.IsEmpty())
+        {
+            if (SpellBook.HasSpell(SpellTrainOne))
+            {
+                var spell = GetSpell(SpellTrainOne);
+                spells.Add(spell);
+            }
+        }
+
+        if (!SpellTrainTwo.IsEmpty())
+        {
+            if (SpellBook.HasSpell(SpellTrainTwo))
+            {
+                var spell = GetSpell(SpellTrainTwo);
+                spells.Add(spell);
+            }
+        }
+
+        if (SpellTrainThree.IsEmpty()) return spells;
+        {
+            if (!SpellBook.HasSpell(SpellTrainThree)) return spells;
+            var spell = GetSpell(SpellTrainThree);
+            spells.Add(spell);
+        }
+
+        return spells;
     }
 }

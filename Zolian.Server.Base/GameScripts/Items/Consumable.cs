@@ -546,6 +546,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
@@ -554,6 +555,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
@@ -596,6 +598,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
@@ -604,6 +607,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
@@ -612,6 +616,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
@@ -620,6 +625,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
@@ -662,6 +668,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
@@ -670,6 +677,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
@@ -678,6 +686,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
@@ -686,6 +695,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
@@ -694,6 +704,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo6.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo6))
@@ -702,6 +713,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo7.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo7))
@@ -744,6 +756,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo2.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo2))
@@ -752,6 +765,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo3.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo3))
@@ -760,6 +774,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo4.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo4))
@@ -768,6 +783,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo5.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo5))
@@ -776,6 +792,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo6.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo6))
@@ -784,6 +801,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo7.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo7))
@@ -792,6 +810,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo8.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo8))
@@ -800,6 +819,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo9.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo9))
@@ -808,6 +828,7 @@ public class Consumable(Item item) : ItemScript(item)
                             skills.Add(skill);
                         }
                     }
+
                     if (!aisling.ComboManager.Combo10.IsNullOrEmpty())
                     {
                         if (aisling.SkillBook.HasSkill(aisling.ComboManager.Combo10))

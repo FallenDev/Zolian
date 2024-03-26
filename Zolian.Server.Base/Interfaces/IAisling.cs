@@ -65,6 +65,7 @@ public interface IAisling : ISprite
     void FinishExchange();
     IEnumerable<Skill> GetAssails();
     Skill GetSkill(string s);
+    Spell GetSpell(string s);
     bool GiveGold(uint offer, bool sendClientUpdate = true);
     Aisling GiveHealth(Sprite target, long value);
     void GoHome();
@@ -86,4 +87,5 @@ public interface IAisling : ISprite
     void UpdateStats();
     void WarpToHell();
     void AutoRoutine();
+    void AutoCastRoutine();
 }
