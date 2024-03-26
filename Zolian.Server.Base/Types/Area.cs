@@ -19,7 +19,6 @@ public class Area : Map, IArea
     public byte[] Data;
     public ushort Hash;
     public bool Ready;
-    private readonly List<List<TileGrid>> _tiles = new();
     private readonly object _mapLoadLock = new();
 
     public int MiningNodesCount { get; set; }
@@ -151,11 +150,8 @@ public class Area : Map, IArea
 
                 for (byte y = 0; y < Height; y++)
                 {
-                    _tiles.Add(new List<TileGrid>());
-
                     for (byte x = 0; x < Width; x++)
                     {
-                        _tiles[y].Add(new TileGrid(x));
                         ObjectGrid[x, y] = new TileGrid(this, x, y);
 
                         reader.BaseStream.Seek(2, SeekOrigin.Current);
@@ -315,16 +311,15 @@ public class Area : Map, IArea
 
     private Action CheckNode(Sprite sprite)
     {
-        var tempGrid = sprite.Map._tiles;
-        sprite.MasterGrid = new List<List<TileGrid>>();
+        sprite.MasterGrid = [];
 
         return delegate
         {
-            for (var x = 0; x < tempGrid.Count; x++)
+            for (var x = 0; x < sprite.Map.Height; x++)
             {
-                sprite.MasterGrid.Add(new List<TileGrid>());
+                sprite.MasterGrid.Add([]);
 
-                for (var y = 0; y < tempGrid.Count; y++)
+                for (var y = 0; y < sprite.Map.Width; y++)
                 {
                     var impassable = sprite.Map.IsAStarWall(sprite, x, y);
                     var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);
@@ -340,7 +335,8 @@ public class Area : Map, IArea
                         cost = 999;
                     }
 
-                    sprite.MasterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, 99999999));
+                    if (sprite.Target == null) return;
+                    sprite.MasterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, sprite.Position.DistanceFrom(sprite.Target.Position)));
                 }
             }
         };
