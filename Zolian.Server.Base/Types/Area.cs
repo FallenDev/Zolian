@@ -110,12 +110,10 @@ public class Area : Map, IArea
         if (sprite is not Mundane)
             if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
-
-        var grid = sprite.Map.ObjectGrid;
-        if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
+        if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
 
         // Grab list of sprites on x & y
-        var spritesOnLocation = grid[x, y].Sprites.ToList();
+        var spritesOnLocation = sprite.Map.ObjectGrid[x, y].Sprites.ToList();
         if (spritesOnLocation.IsNullOrEmpty()) return false;
         var first = spritesOnLocation.First();
         return sprite.Target?.Pos != first.Pos;
@@ -128,10 +126,8 @@ public class Area : Map, IArea
     public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
-
-        var grid = sprite.Map.ObjectGrid;
-        if (x >= grid.GetLength(0) || y >= grid.GetLength(1)) return false; // Bounds check, return false
-        return !grid[x, y].Sprites.IsNullOrEmpty();
+        if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
+        return !sprite.Map.ObjectGrid[x, y].Sprites.IsNullOrEmpty();
     }
 
     public bool OnLoaded()
@@ -228,7 +224,7 @@ public class Area : Map, IArea
         if (start == Vector2.Zero) return path;
         if (end == Vector2.Zero) return path;
 
-        List<TileGrid> viewable = new(), used = new();
+        List<TileGrid> viewable = [], used = [];
         await Task.Run(CheckNode(sprite));
 
         #region Try to set viewable Nodes
