@@ -331,8 +331,7 @@ public class Area : Map, IArea
                         cost = 999;
                     }
 
-                    if (sprite.Target == null) return;
-                    sprite.MasterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, sprite.Position.DistanceFrom(sprite.Target.Position)));
+                    sprite.MasterGrid[x].Add(new TileGrid(new Vector2(x, y), cost, impassable, sprite.Position.DistanceFrom(sprite.Target?.Position)));
                 }
             }
         };

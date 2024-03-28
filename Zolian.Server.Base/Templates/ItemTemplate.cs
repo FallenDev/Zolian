@@ -44,12 +44,13 @@ public class ItemTemplate : Template
     public Element SecondaryOffensiveElement { get; init; }
     public byte CarryWeight { get; init; }
     public ItemFlags Flags { get; init; }
-    public uint MaxDurability { get; set; }
-    public uint Value { get; set; }
+    public uint MaxDurability { get; init; }
+    public uint Value { get; init; }
     public int EquipmentSlot { get; set; }
     public string NpcKey { get; init; }
     public Class Class { get; init; }
     public ushort LevelRequired { get; init; }
+    public Job JobRequired { get; init; } = Job.None;
     public ushort JobLevelRequired { get; init; }
     public ClassStage StageRequired { get; init; }
     public int DmgMin { get; init; }
@@ -381,6 +382,100 @@ public static class ItemStorage
                     NpcKey = reader["NpcKey"].ToString(),
                     Class = itemClass,
                     LevelRequired = (ushort)level,
+                    JobLevelRequired = (ushort)jobLevel,
+                    DmgMin = (int)reader["DmgMin"],
+                    DmgMax = (int)reader["DmgMax"],
+                    DropRate = (double)drop,
+                    StageRequired = classStage,
+                    HasPants = (bool)reader["HasPants"],
+                    Color = color,
+                    WeaponScript = reader["WeaponScript"].ToString(),
+                    Name = reader["Name"].ToString(),
+                    Group = reader["GroupIn"].ToString(),
+                    HealthModifer = (int)reader["HP"],
+                    ManaModifer = (int)reader["MP"],
+                    AcModifer = (int)reader["ArmorClass"],
+                    StrModifer = (int)reader["Strength"],
+                    IntModifer = (int)reader["Intelligence"],
+                    WisModifer = (int)reader["Wisdom"],
+                    ConModifer = (int)reader["Constitution"],
+                    DexModifer = (int)reader["Dexterity"],
+                    MrModifer = (int)reader["MagicResistance"],
+                    HitModifer = (int)reader["Hit"],
+                    DmgModifer = (int)reader["Dmg"],
+                    RegenModifer = (int)reader["Regen"],
+                    SpellLinesModifier = (int)reader["SpellLinesModifier"],
+                    IsPositiveSpellLines = (int)reader["IsPositiveSpellLines"],
+                    SpellMinValue = (int)reader["SpellMinValue"],
+                    SpellMaxValue = (int)reader["SpellMaxValue"]
+                };
+
+                if (temp.Name == null) continue;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
+            }
+
+            reader.Close();
+            sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.EventsLogger(e.ToString());
+            Crashes.TrackError(e);
+        }
+    }
+
+    public static void CacheFromDatabaseOffenseJobs(string conn)
+    {
+        try
+        {
+            var sConn = new SqlConnection(conn);
+            const string sql = "SELECT * FROM Zolian.dbo.WeaponJobs";
+
+            sConn.Open();
+
+            var cmd = new SqlCommand(sql, sConn);
+            cmd.CommandTimeout = 5;
+
+            var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var image = (int)reader["Image"];
+                var offhand = (int)reader["OffHandImage"];
+                var disImage = (int)reader["DisplayImage"];
+                var flags = ServiceStack.AutoMappingUtils.ConvertTo<ItemFlags>(reader["Flags"]);
+                var gender = ServiceStack.AutoMappingUtils.ConvertTo<Gender>(reader["Gender"]);
+                var offEle = ServiceStack.AutoMappingUtils.ConvertTo<Element>(reader["SecondaryOffensiveElement"]);
+                var defEle = ServiceStack.AutoMappingUtils.ConvertTo<Element>(reader["SecondaryDefensiveElement"]);
+                var weight = (int)reader["CarryWeight"];
+                var maxDura = (int)reader["MaxDurability"];
+                var worth = (int)reader["Worth"];
+                var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
+                var level = (int)reader["LevelRequired"];
+                var job = ServiceStack.AutoMappingUtils.ConvertTo<Job>(reader["JobRequired"]);
+                var jobLevel = (int)reader["JobLevelRequired"];
+                var drop = (decimal)reader["DropRate"];
+                var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
+                var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
+                var temp = new ItemTemplate
+                {
+                    Image = (ushort)image,
+                    OffHandImage = (ushort)offhand,
+                    DisplayImage = (ushort)disImage,
+                    ScriptName = reader["ScriptName"].ToString(),
+                    Flags = flags,
+                    Gender = gender,
+                    SecondaryOffensiveElement = offEle,
+                    SecondaryDefensiveElement = defEle,
+                    CarryWeight = (byte)weight,
+                    Enchantable = (bool)reader["Enchantable"],
+                    MaxDurability = (uint)maxDura,
+                    Value = (uint)worth,
+                    EquipmentSlot = (int)reader["EquipmentSlot"],
+                    NpcKey = reader["NpcKey"].ToString(),
+                    Class = itemClass,
+                    LevelRequired = (ushort)level,
+                    JobRequired = job,
                     JobLevelRequired = (ushort)jobLevel,
                     DmgMin = (int)reader["DmgMin"],
                     DmgMax = (int)reader["DmgMax"],

@@ -4041,28 +4041,28 @@ public class WorldClient : SocketClientBase, IWorldClient
         // Durability check
         if (item.Durability <= 0 && item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "I'll need to repair this before I can use it again.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "I'll need to repair this before I can use it again.");
             return false;
         }
 
         // Level check
         if (client.Aisling.ExpLevel < item.Template.LevelRequired)
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "This item is simply too powerful for me.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "This item is simply too powerful for me.");
             return false;
         }
 
         // Stage check
         if (client.Aisling.Stage < item.Template.StageRequired)
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not have the current expertise for this.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "I do not have the expertise for this.");
             return false;
         }
 
         // Job Level Check
         if (client.Aisling.AbpLevel < item.Template.JobLevelRequired)
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "I do not have the expertise level for this.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "I do not have the expertise for this.");
             return false;
         }
 
@@ -4075,9 +4075,19 @@ public class WorldClient : SocketClientBase, IWorldClient
                 // Current class check
                 if (item.Template.Class != client.Aisling.Path)
                 {
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "This doesn't quite fit me.");
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "This doesn't fit my class.");
                     return false;
                 }
+            }
+        }
+
+        // Job Check
+        if (item.Template.JobRequired != Job.None)
+        {
+            if (client.Aisling.JobClass != item.Template.JobRequired)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "This doesn't quite match my profession.");
+                return false;
             }
         }
 
@@ -4095,7 +4105,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 return true;
         }
 
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "I can't seem to use this");
+        client.SendServerMessage(ServerMessageType.ActiveMessage, "Doesn't seem to fit.");
         return false;
     }
 

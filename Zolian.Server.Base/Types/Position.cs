@@ -58,7 +58,7 @@ public class Position
 
     public int DistanceFrom(Position pos)
     {
-        return DistanceFrom(pos.X, pos.Y);
+        return pos == null ? 0 : DistanceFrom(pos.X, pos.Y);
     }
 
     public bool IsNearby(Position pos)
