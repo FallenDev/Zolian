@@ -321,13 +321,25 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        var request = new RestRequest("", Method.Post);
-        request.AddHeader("Key", keyCode);
-        request.AddHeader("Accept", "application/json");
-        request.AddParameter("ip", remoteIp);
-        request.AddParameter("categories", "14, 15, 16, 21");
-        request.AddParameter("comment", comment);
-        ServerSetup.Instance.RestReport.Execute(request);
+        try
+        {
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Key", keyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ip", remoteIp);
+            request.AddParameter("categories", "14, 15, 16, 21");
+            request.AddParameter("comment", comment);
+            var response = ServerSetup.Instance.RestReport.Execute(request);
+
+            if (!response.IsSuccessful)
+            {
+                ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            }
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     private readonly HashSet<string> _bannedIPs = new();

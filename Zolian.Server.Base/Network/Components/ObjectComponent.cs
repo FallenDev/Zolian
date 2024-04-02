@@ -28,30 +28,32 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
     private static void UpdateClientObjects(Aisling user)
     {
         var payload = new List<Sprite>();
+        var loopBreak = false;
 
-        if (user?.Map == null) return;
-        if (!user.LoggedIn || !user.Map.Ready) return;
+        while (user.LoggedIn && user.Map.Ready && !loopBreak)
+        {
+            var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
+            var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
+            var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
 
-        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
-        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
-        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
+            CheckIfSpritesStillInView(user, objectsInView);
+            RemoveObjects(user, objectsNotInView);
+            AddObjects(payload, user, objectsInView);
 
-        CheckIfSpritesStillInView(user, objectsInView);
-        RemoveObjects(user, objectsNotInView);
-        AddObjects(payload, user, objectsInView);
-
-        if (payload.Count <= 0) return;
-        payload.Reverse();
-        user.Client.SendVisibleEntities(payload);
+            if (payload.Count <= 0) return;
+            payload.Reverse();
+            user.Client.SendVisibleEntities(payload);
+            loopBreak = true;
+        }
     }
 
-    private static void CheckIfSpritesStillInView(Aisling self, ICollection<Sprite> objectsInView)
+    private static void CheckIfSpritesStillInView(Aisling self, List<Sprite> objectsInView)
     {
-        foreach (var (serial, sprite) in self.SpritesInView)
+        Parallel.ForEach(self.SpritesInView, spritesPair =>
         {
-            if (objectsInView.Contains(sprite)) continue;
-            self.SpritesInView.TryRemove(serial, out _);
-        }
+            if (objectsInView.Contains(spritesPair.Value)) return;
+            self.SpritesInView.TryRemove(spritesPair.Key, out _);
+        });
     }
 
     private static void RemoveObjects(Aisling self, IReadOnlyCollection<Sprite> objectsToRemove)
