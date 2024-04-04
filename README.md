@@ -39,10 +39,9 @@ Zolian is an open-source project, there are quite a few ways you can contribute 
 ## Community
 Zolian isn't the only project out there, nor does it claim to have any exlusivity over any of the others. Please visit their projects and enjoy what they've built.   
 [Hybrasyl](https://www.hybrasyl.com/)   
-[Legends Age of Chaos](https://discord.gg/YekJdzKzQR)   
+[Legends: Age of Chaos](https://discord.gg/YekJdzKzQR)   
 [Fragments of Temuair](https://fragmentsoftemuair1.wixsite.com/website/downloads)   
-[Elia Online - LoD Project](https://discord.gg/SKvK6b4ECv)   
-Unora - Currently in Development
+[Unora: Elemental Harmony](https://discord.gg/WSTtd5qZPF)
 - If any of these links are broken, please report so in Zolian's Discord, and they'll be promptly fixed
 
 ## Financial
