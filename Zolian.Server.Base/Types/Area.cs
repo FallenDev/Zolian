@@ -311,11 +311,11 @@ public class Area : Map, IArea
 
         return delegate
         {
-            for (var x = 0; x < sprite.Map.Height; x++)
+            for (var x = 0; x < sprite.Map.Width; x++)
             {
                 sprite.MasterGrid.Add([]);
 
-                for (var y = 0; y < sprite.Map.Width; y++)
+                for (var y = 0; y < sprite.Map.Height; y++)
                 {
                     var impassable = sprite.Map.IsAStarWall(sprite, x, y);
                     var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);

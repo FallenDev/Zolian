@@ -5,11 +5,11 @@ namespace Darkages.Models;
 
 public class Map : ObjectManager
 {
-    public ushort Width { get; init; }
+    public byte Width { get; init; }
     public MapFlags Flags { get; set; }
     public int Music { get; init; }
     public string Name { get; init; }
-    public ushort Height { get; init; }
+    public byte Height { get; init; }
     public string ScriptKey { get; init; }
     public MiningNodes MiningNodes { get; init; }
     public WildFlowers WildFlowers { get; set; }

@@ -18,11 +18,18 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
         if (readyLoggedIn.Length == 0) return;
 
-        Parallel.ForEach(readyLoggedIn.Where(player => player is { LoggedIn: true }), (user) =>
+        try
         {
-            if (user?.Client == null) return;
-            UpdateClientObjects(user);
-        });
+            Parallel.ForEach(readyLoggedIn.Where(player => player is { LoggedIn: true }), (user) =>
+            {
+                if (user?.Client == null) return;
+                UpdateClientObjects(user);
+            });
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private static void UpdateClientObjects(Aisling user)

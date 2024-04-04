@@ -40,15 +40,15 @@ public record AreaStorage : IAreaStorage
                 var flags = ServiceStack.AutoMappingUtils.ConvertTo<MapFlags>(reader["Flags"]);
                 var miningNodes = ServiceStack.AutoMappingUtils.ConvertTo<MiningNodes>(reader["MiningNodes"]);
                 var wildFlowers = ServiceStack.AutoMappingUtils.ConvertTo<WildFlowers>(reader["WildFlowers"]);
-                var rows = (int)reader["mRows"];
-                var cols = (int)reader["mCols"];
+                var height = (int)reader["Height"];
+                var width = (int)reader["Width"];
                 var temp = new Area
                 {
                     ID = (int)reader["MapId"],
                     Flags = flags,
                     Music = (int)reader["Music"],
-                    Height = (ushort)rows,
-                    Width = (ushort)cols,
+                    Height = (byte)height,
+                    Width = (byte)width,
                     ScriptKey = reader["ScriptKey"].ToString(),
                     MiningNodes = miningNodes,
                     WildFlowers = wildFlowers,
