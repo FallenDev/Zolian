@@ -28,7 +28,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 {
     public bool Abyss;
     public Position LastPosition;
-    public List<List<TileGrid>> MasterGrid = [];
+    public List<TileGrid> TempAlgoGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly WorldServerTimer BuffAndDebuffTimer;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();

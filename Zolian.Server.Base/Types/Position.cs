@@ -63,7 +63,12 @@ public class Position
 
     public bool IsNearby(Position pos)
     {
-        return pos.DistanceFrom(X, Y) <= ServerSetup.Instance.Config.VeryNearByProximity;
+        return pos.DistanceFrom(X, Y) <= ServerSetup.Instance.Config.WithinRangeProximity;
+    }
+
+    public bool CanPathToSprite(Position pos)
+    {
+        return pos.DistanceFrom(X, Y) <= 20;
     }
 
     public bool IsNextTo(Position pos, int distance = 1)

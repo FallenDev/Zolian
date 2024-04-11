@@ -12,7 +12,7 @@ public class TileGrid : ObjectManager
     private readonly Area _map;
     private readonly int _x;
     private readonly int _y;
-    public readonly bool Impassable;
+    public readonly bool FilledNode;
     public bool HasBeenUsed, IsViewable;
     public float FScore;
     public readonly float Cost;
@@ -24,7 +24,7 @@ public class TileGrid : ObjectManager
         _map = map;
         _x = x;
         _y = y;
-        Impassable = false;
+        FilledNode = false;
         HasBeenUsed = false;
         IsViewable = false;
         Cost = 1.0f;
@@ -37,10 +37,10 @@ public class TileGrid : ObjectManager
         IsViewable = false;
     }
 
-    public TileGrid(Vector2 pos, float cost, bool filled, float fScore)
+    public TileGrid(Vector2 pos, float cost, bool impassable, float fScore)
     {
         Cost = cost;
-        Impassable = filled;
+        FilledNode = impassable;
         HasBeenUsed = false;
         IsViewable = false;
 
@@ -79,6 +79,6 @@ public class TileGrid : ObjectManager
 
         if (sprites != null) return sprites;
         Crashes.TrackError(lastException);
-        return Enumerable.Empty<Sprite>();
+        return [];
     }
 }
