@@ -310,7 +310,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -535,14 +535,14 @@ public class BaseMonsterIntelligence : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -878,7 +878,7 @@ public class WeakCommon : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -1103,14 +1103,14 @@ public class WeakCommon : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -1548,7 +1548,7 @@ public class ShapeShifter : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -1775,14 +1775,14 @@ public class ShapeShifter : MonsterScript
                             return;
                         }
 
-                        if (Monster.Path.Result.Count > 0)
+                        if (Monster.Path.Count > 0)
                         {
-                            Monster.AStarPath(Monster, Monster.Path.Result);
-                            if (!Monster.Path.Result.IsEmpty())
-                                Monster.Path.Result.RemoveAt(0);
+                            Monster.AStarPath(Monster, Monster.Path);
+                            if (!Monster.Path.IsEmpty())
+                                Monster.Path.RemoveAt(0);
                         }
 
-                        if (Monster.Path.Result.Count != 0) return;
+                        if (Monster.Path.Count != 0) return;
                         Monster.AStar = false;
 
                         if (Monster.Target == null)
@@ -2167,7 +2167,7 @@ public class SelfDestruct : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -2348,14 +2348,14 @@ public class SelfDestruct : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -2694,7 +2694,7 @@ public class AlertSummon : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -2930,14 +2930,14 @@ public class AlertSummon : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -3245,7 +3245,7 @@ public class Turret : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -3669,7 +3669,7 @@ public class GeneralPirate : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -3914,14 +3914,14 @@ public class GeneralPirate : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -4261,7 +4261,7 @@ public class PirateOfficer : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -4515,14 +4515,14 @@ public class PirateOfficer : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -4857,7 +4857,7 @@ public class ShadowSight : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -5082,14 +5082,14 @@ public class ShadowSight : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -5424,7 +5424,7 @@ public class WeakShadowSight : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -5649,14 +5649,14 @@ public class WeakShadowSight : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -6003,7 +6003,7 @@ public class AosdaRemnant : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -6248,14 +6248,14 @@ public class AosdaRemnant : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -6602,7 +6602,7 @@ public class DraconicOmega : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -6847,14 +6847,14 @@ public class DraconicOmega : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -7201,7 +7201,7 @@ public class JackFrost : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -7446,14 +7446,14 @@ public class JackFrost : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -7861,7 +7861,7 @@ public class Yeti : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -8106,14 +8106,14 @@ public class Yeti : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)
@@ -8483,7 +8483,7 @@ public class WorldBossBahamut : MonsterScript
 
         try
         {
-            Monster.Path?.Result?.Clear();
+            Monster.Path?.Clear();
         }
         catch (Exception ex)
         {
@@ -8727,14 +8727,14 @@ public class WorldBossBahamut : MonsterScript
                         return;
                     }
 
-                    if (Monster.Path.Result.Count > 0)
+                    if (Monster.Path.Count > 0)
                     {
-                        Monster.AStarPath(Monster, Monster.Path.Result);
-                        if (!Monster.Path.Result.IsEmpty())
-                            Monster.Path.Result.RemoveAt(0);
+                        Monster.AStarPath(Monster, Monster.Path);
+                        if (!Monster.Path.IsEmpty())
+                            Monster.Path.RemoveAt(0);
                     }
 
-                    if (Monster.Path.Result.Count != 0) return;
+                    if (Monster.Path.Count != 0) return;
                     Monster.AStar = false;
 
                     if (Monster.Target == null)

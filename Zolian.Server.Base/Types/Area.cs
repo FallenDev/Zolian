@@ -196,7 +196,7 @@ public class Area : Map, IArea
 
     #region A* (A Star)
 
-    public Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end)
+    public List<Vector2> GetPath(Monster sprite, Vector2 start, Vector2 end)
     {
         var path = new List<Vector2>();
 
@@ -220,162 +220,110 @@ public class Area : Map, IArea
         CheckNode(sprite, start);
 
         if (sprite.TempAlgoGrid.Count == 0) return path;
-        
-        // Set direction of node
-        while (sprite.TempAlgoGrid.Count > 0 && !((int)sprite.TempAlgoGrid[0].Pos.X == (int)end.X && (int)sprite.TempAlgoGrid[0].Pos.Y == (int)end.Y))
-        {
-            CheckDirectionOfNode(sprite.TempAlgoGrid);
-        }
 
-        if (sprite.TempAlgoGrid.Count <= 0) return path;
+        //Set direction of node
+        //CheckDirectionOfNode(sprite, start);
 
-
-        var currentNode = startTileGrid[0];
         path.Clear();
-        return SetPath(sprite, currentNode, path, start, startTileGrid);
+        return SetPath(sprite, path, start);
     }
 
     /// <summary>
     /// Check nodes near monster and apply cost, fscore
     /// </summary>
-    private Action CheckNode(Sprite sprite, Vector2 start)
+    private void CheckNode(Sprite sprite, Vector2 start)
     {
         sprite.TempAlgoGrid.Clear();
-        sprite.TempAlgoGrid =
-        [
-            new TileGrid(start, 999, true, 999)
-        ];
+        //sprite.TempCurrentGrid.Clear();
+        sprite.TempAlgoGrid = [new TileGrid(start, 0, 999, false, 999)];
+        //sprite.TempCurrentGrid = [new TileGrid(start, 0, 999, false, 999)];
 
-        return delegate
+        for (var x = 0; x < sprite.Map.Width; x++)
         {
-            for (var x = 0; x < sprite.Map.Width; x++)
+            for (var y = 0; y < sprite.Map.Height; y++)
             {
-                for (var y = 0; y < sprite.Map.Height; y++)
-                {
-                    var node = new Position(x, y);
-                    if (!sprite.Position.CanPathToSprite(node)) continue;
-                    if (sprite.Map.IsAStarWall(sprite, x, y)) continue;
-                    var targetDist = sprite.Position.DistanceFrom(sprite.Target?.Position);
-                    var nodeDist = node.DistanceFrom(sprite.Position);
-                    var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);
-                    var cost = 1;
-                    cost *= nodeDist;
-                    
-                    if (filled)
-                        cost *= 5;
+                var node = new Position(x, y);
+                if (!sprite.Position.CanPathToSprite(node)) continue;
+                if (sprite.Map.IsAStarWall(sprite, x, y)) continue;
+                var targetDist = node.DistanceFrom(sprite.Target?.Position);
+                var nodeDist = node.DistanceFrom(sprite.Position);
+                var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);
+                var cost = 1;
+                cost *= nodeDist;
 
-                    sprite.TempAlgoGrid.Add(new TileGrid(new Vector2(x, y), cost, filled, targetDist * cost));
-                }
+                if (filled)
+                    cost *= 5;
+
+                sprite.TempAlgoGrid.Add(new TileGrid(new Vector2(x, y), targetDist, cost, filled, nodeDist * cost));
             }
-        };
+        }
+
+        var list = sprite.TempAlgoGrid.OrderBy(o => o.Cost).ToList();
+        sprite.TempAlgoGrid = list;
     }
 
-    private void CheckDirectionOfNode(IList<TileGrid> masterGrid)
-    {
-        TileGrid currentNode;
-
-        //North
-        if (viewable[0].Pos.Y > 0 && viewable[0].Pos.Y < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1].FilledNode)
-        {
-            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y - 1];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
-        }
-
-        //East
-        if (viewable[0].Pos.X >= 0 && viewable[0].Pos.X + 1 < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y].FilledNode)
-        {
-            currentNode = masterGrid[(int)viewable[0].Pos.X + 1][(int)viewable[0].Pos.Y];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
-        }
+    //private void CheckDirectionOfNode(Sprite sprite, Vector2 start)
+    //{
+    //    var north = start with { Y = start.Y - 1 };
+    //    var east = start with { X = start.X + 1 };
+    //    var south = start with { Y = start.Y + 1 };
+    //    var west = start with { X = start.X - 1 };
         
-        //South
-        if (viewable[0].Pos.Y >= 0 && viewable[0].Pos.Y + 1 < masterGrid[0].Count && !masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1].FilledNode)
-        {
-            currentNode = masterGrid[(int)viewable[0].Pos.X][(int)viewable[0].Pos.Y + 1];
-            SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
-        }
+    //    if (tileGrid.Pos == north)
+    //    {
+    //        var nPos = new Position(north);
+    //        var targetDist = nPos.DistanceFrom(sprite.Target?.Position);
+    //        var northTile = new TileGrid(north, targetDist, tileGrid.Cost, tileGrid.FilledNode, tileGrid.FScore);
+    //        SetAStarNodeInsert(sprite.TempCurrentGrid, northTile);
+    //    }
 
-        //West
-        if (viewable[0].Pos.X > 0 && viewable[0].Pos.X < masterGrid.Count && !masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y].FilledNode)
-        {
-            currentNode = masterGrid[(int)viewable[0].Pos.X - 1][(int)viewable[0].Pos.Y];
-        SetAStarNode(viewable, currentNode, new Vector2(viewable[0].Pos.X, viewable[0].Pos.Y), viewable[0].CurrentDist, 1);
-        }
+    //    if (tileGrid.Pos == east)
+    //    {
+    //        var ePos = new Position(east);
+    //        var targetDist = ePos.DistanceFrom(sprite.Target?.Position);
+    //        var eastTile = new TileGrid(east, targetDist, tileGrid.Cost, tileGrid.FilledNode, tileGrid.FScore);
+    //        SetAStarNodeInsert(sprite.TempCurrentGrid, eastTile);
+    //    }
 
-        viewable[0].HasBeenUsed = true;
-        viewable.RemoveAt(0);
-    }
+    //    if (tileGrid.Pos == south)
+    //    {
+    //        var sPos = new Position(south);
+    //        var targetDist = sPos.DistanceFrom(sprite.Target?.Position);
+    //        var southTile = new TileGrid(south, targetDist, tileGrid.Cost, tileGrid.FilledNode, tileGrid.FScore);
+    //        SetAStarNodeInsert(sprite.TempCurrentGrid, southTile);
+    //    }
 
-    private void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
+    //    if (tileGrid.Pos == west)
+    //    {
+    //        var wPos = new Position(west);
+    //        var targetDist = wPos.DistanceFrom(sprite.Target?.Position);
+    //        var westTile = new TileGrid(west, targetDist, tileGrid.Cost, tileGrid.FilledNode, tileGrid.FScore);
+    //        SetAStarNodeInsert(sprite.TempCurrentGrid, westTile);
+    //    }
+
+
+    //    sprite.TempCurrentGrid[0].HasBeenUsed = true;
+    //    sprite.TempCurrentGrid.RemoveAt(0);
+    //}
+
+
+    private List<Vector2> SetPath(Sprite sprite, List<Vector2> path, Vector2 start)
     {
-        var addedDist = nextNode.Cost * distanceMultiply;
-
-        switch (nextNode.IsViewable)
-        {
-            case false when !nextNode.HasBeenUsed:
-                {
-                    nextNode.SetNode(nextParent, d, d + addedDist);
-                    nextNode.IsViewable = true;
-                    SetAStarNodeInsert(viewable, nextNode);
-                }
-                break;
-            case true:
-                {
-                    if (d < nextNode.FScore)
-                    {
-                        nextNode.SetNode(nextParent, d, d + addedDist);
-                    }
-                }
-                break;
-        }
-    }
-
-    private void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode)
-    {
-        var added = false;
-        for (var i = 0; i < list.Count; i++)
-        {
-            if (!(list[i].FScore > newNode.FScore)) continue;
-            list.Insert(Math.Max(1, i), newNode);
-            added = true;
-            break;
-        }
-
-        if (!added)
-        {
-            list.Add(newNode);
-        }
-    }
-
-    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, List<Vector2> path, Vector2 start, List<TileGrid> viewable)
-    {
-        var currentViewableStart = 0;
+        var count = 0;
+        var lastTile = new TileGrid(Vector2.Zero, 0, 0, false, 0);
 
         while (true)
         {
-            var tempPos = sprite.Map.GetPosFromLoc(currentNode.Pos) + Vector2.One / 2;
+            var tempTile = sprite.TempAlgoGrid[count];
+            var tempPos = sprite.Map.GetPosFromLoc(tempTile.Pos) + Vector2.One / 2;
+            if (tempTile.Cost <= lastTile.Cost) continue;
+
             path.Add(new Vector2((int)tempPos.X, (int)tempPos.Y));
+            lastTile = tempTile;
 
-            if (currentNode.Pos == start)
-            {
-                break;
-            }
+            if (tempTile.Pos == start) break;
 
-            if ((int)currentNode.Parent.X != -1 && (int)currentNode.Parent.Y != -1)
-            {
-                if ((int)currentNode.Pos.X == (int)sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.X && (int)currentNode.Pos.Y == (int)sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y].Pos.Y)
-                {
-                    currentNode = viewable[currentViewableStart];
-                    currentViewableStart++;
-                }
-
-                currentNode = sprite.MasterGrid[(int)currentNode.Parent.X][(int)currentNode.Parent.Y];
-            }
-            else
-            {
-                currentNode = viewable[currentViewableStart];
-                currentViewableStart++;
-            }
+            count++;
         }
 
         path.Reverse();

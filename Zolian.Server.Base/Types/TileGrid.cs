@@ -37,15 +37,15 @@ public class TileGrid : ObjectManager
         IsViewable = false;
     }
 
-    public TileGrid(Vector2 pos, float cost, bool impassable, float fScore)
+    public TileGrid(Vector2 pos, float currentDist, float cost, bool impassable, float fScore, bool hasBeenUsed = false, bool isViewable = false)
     {
+        Pos = pos;
+        CurrentDist = currentDist;
         Cost = cost;
         FilledNode = impassable;
-        HasBeenUsed = false;
-        IsViewable = false;
-
-        Pos = pos;
         FScore = fScore;
+        HasBeenUsed = hasBeenUsed;
+        IsViewable = isViewable;
     }
 
     public void SetNode(Vector2 parent, float fScore, float currentDist)

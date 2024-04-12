@@ -25,7 +25,7 @@ public record TargetRecord
 
 public sealed class Monster : Sprite, IDialogSourceEntity
 {
-    public Task<IList<Vector2>> Path;
+    public List<Vector2> Path;
 
     public Monster()
     {

@@ -26,5 +26,5 @@ public interface IArea
     bool OnLoaded();
     bool ParseMapWalls(int lWall, int rWall);
     void Update(in TimeSpan elapsedTime);
-    Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end);
+    List<Vector2> GetPath(Monster sprite, Vector2 start, Vector2 end);
 }
