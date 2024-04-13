@@ -157,6 +157,8 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.StatPoints += (short)(client.Aisling.ExpLevel * 2);
                         }
 
+                        RacialBonus(client);
+
                         await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
                         await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(97, false)); });
                         await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
@@ -812,4 +814,62 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
     }
 
     public override void OnGossip(WorldClient client, string message) { }
+
+    private static void RacialBonus(WorldClient client)
+    {
+        switch (client.Aisling.Race)
+        {
+            case Race.Human:
+                client.Aisling._Str += 1;
+                client.Aisling._Int += 1;
+                client.Aisling._Wis += 1;
+                client.Aisling._Con += 1;
+                client.Aisling._Dex += 1;
+                break;
+            case Race.HalfElf:
+                client.Aisling._Str += 1;
+                client.Aisling._Int += 1;
+                client.Aisling.StatPoints += 3;
+                break;
+            case Race.HighElf:
+                client.Aisling._Int += 8;
+                client.Aisling._Wis += 3;
+                client.Aisling._Dex += 2;
+                break;
+            case Race.DarkElf:
+                client.Aisling._Con += 2;
+                client.Aisling._Dex += 3;
+                break;
+            case Race.WoodElf:
+                client.Aisling._Wis += 2;
+                client.Aisling._Dex += 5;
+                break;
+            case Race.Orc:
+                client.Aisling._Str += 3;
+                client.Aisling._Int += 1;
+                client.Aisling._Con += 3;
+                break;
+            case Race.Dwarf:
+                client.Aisling._Str += 2;
+                client.Aisling._Con += 2;
+                break;
+            case Race.Halfling:
+                client.Aisling._Int += 2;
+                client.Aisling._Dex += 4;
+                break;
+            case Race.Dragonkin:
+                client.Aisling._Int += 2;
+                break;
+            case Race.HalfBeast:
+                client.Aisling.StatPoints += 30;
+                break;
+            case Race.Merfolk:
+                client.Aisling._Str += 2;
+                client.Aisling._Int += 2;
+                client.Aisling._Wis += 2;
+                client.Aisling._Con += 2;
+                client.Aisling._Dex += 2;
+                break;
+        }
+    }
 }
