@@ -61,7 +61,8 @@ public enum WildFlowers : byte
     Aiten = 1 << 6,
     Reict = 1 << 7,
 
-    Misery = GloomBloom | Betrayal
+    Misery = GloomBloom | Betrayal,
+    Sunset = Betrayal | Aiten
 }
 
 public static class MapExtensions
