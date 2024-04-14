@@ -131,7 +131,7 @@ public abstract class DatabaseLoad
                 var warp7 = new Warp();
                 var id = count;
                 var currentArea = (int)reader["CurrentArea"];
-                var nextArea = (int)reader["NextArea"];
+                var nextArea = 0;
                 var caX1 = (int)reader["CALocationX_1"];
                 var caY1 = (int)reader["CALocationY_1"];
                 var ca1 = new Position(caX1, caY1);
@@ -153,10 +153,10 @@ public abstract class DatabaseLoad
                 var caX7 = (int)reader["CALocationX_7"];
                 var caY7 = (int)reader["CALocationY_7"];
                 var ca7 = new Position(caX7, caY7);
-                var naX1 = (int)reader["NALocationX_1"];
-                var naY1 = (int)reader["NALocationY_1"];
+                var naX1 = 0;
+                var naY1 = 0;
                 var na1 = new Position(naX1, naY1);
-                var level = (int)reader["LevelRequired"];
+                var level = 1;
                 var portalKey = (int)reader["PortalKey"];
                 var positionCheck = new Vector2(0, 0);
 

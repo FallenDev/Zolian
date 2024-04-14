@@ -65,9 +65,23 @@ public enum WildFlowers : byte
     Sunset = Betrayal | Aiten
 }
 
+[Flags]
+public enum ChestType : byte
+{
+    Default = 1,
+    Normal = 1 << 1,
+    Rare = 1 << 2,
+    Epic = 1 << 3,
+    Legendary = 1 << 4,
+    Mythical = 1 << 5,
+    Godly = 1 << 6,
+    Divine = 1 << 7
+}
+
 public static class MapExtensions
 {
     public static bool MapFlagIsSet(this MapFlags self, MapFlags flag) => (self & flag) == flag;
     public static bool MapNodeFlagIsSet(this MiningNodes self, MiningNodes flag) => (self & flag) == flag;
     public static bool MapFlowerFlagIsSet(this WildFlowers self, WildFlowers flag) => (self & flag) == flag;
+    public static bool MapChestFlagIsSet(this ChestType self, ChestType flag) => (self & flag) == flag;
 }
