@@ -68,7 +68,7 @@ public enum MonsterRace
     Aquatic = 1 << 2,
     Beast = 1 << 3,
     Celestial = 1 << 4,
-    Contruct = 1 << 5,
+    Construct = 1 << 5,
     Demon = 1 << 6,
     Dragon = 1 << 7,
     Bahamut = Dragon + 1,

@@ -206,7 +206,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterRace.Aquatic] = AquaticSet,
             [MonsterRace.Beast] = BeastSet,
             [MonsterRace.Celestial] = CelestialSet,
-            [MonsterRace.Contruct] = ContructSet,
+            [MonsterRace.Construct] = ContructSet,
             [MonsterRace.Demon] = DemonSet,
             [MonsterRace.Dragon] = DragonSet,
             [MonsterRace.Bahamut] = BahamutDragonSet,
@@ -1599,7 +1599,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private void ContructSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Contruct)) return;
+        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Construct)) return;
         var skillList = new List<string> { "Stomp" };
         var abilityList = new List<string> { "Titan's Cleave", "Earthly Delights" };
         var spellList = new List<string> { "Dion", "Defensive Stance" };
