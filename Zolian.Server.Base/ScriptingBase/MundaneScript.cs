@@ -107,6 +107,8 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
         aisling.Client.CloseDialog();
     }
 
+    public virtual void OnApproach(WorldClient client) { }
+
     /// <summary>
     /// Skills NPC can teach
     /// </summary>

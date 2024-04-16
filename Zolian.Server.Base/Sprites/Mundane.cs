@@ -30,6 +30,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
     public ConcurrentDictionary<string, MundaneScript> Scripts { get; private set; }
     public MundaneTemplate Template { get; init; }
     public bool Bypass { get; set; }
+    public bool GuardModeActivated { get; set; }
 
     public Mundane()
     {

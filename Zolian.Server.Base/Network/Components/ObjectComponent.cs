@@ -46,7 +46,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         CheckIfSpritesStillInView(user, objectsInView);
         RemoveObjects(user, objectsNotInView);
         AddObjects(payload, user, objectsInView);
-
+        
         if (payload.Count <= 0) return;
         payload.Reverse();
         user.Client.SendVisibleEntities(payload);
@@ -97,6 +97,12 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             if (obj is Monster monster)
             {
                 var script = monster.Scripts?.Values.First();
+                script?.OnApproach(self.Client);
+            }
+
+            if (obj is Mundane npc)
+            {
+                var script = npc.Scripts?.Values.First();
                 script?.OnApproach(self.Client);
             }
 
