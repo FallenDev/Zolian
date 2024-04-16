@@ -20,10 +20,14 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         try
         {
-            Parallel.ForEach(readyLoggedIn.Where(player => player is { LoggedIn: true }), (user) =>
+            Parallel.ForEach(readyLoggedIn, (user) =>
             {
-                if (user?.Client == null) return;
-                UpdateClientObjects(user);
+                while (user.LoggedIn)
+                {
+                    if (user.Client == null) return;
+                    UpdateClientObjects(user);
+                    return;
+                }
             });
         }
         catch
@@ -35,23 +39,17 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
     private static void UpdateClientObjects(Aisling user)
     {
         var payload = new List<Sprite>();
-        var loopBreak = false;
+        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
+        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
+        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
 
-        while (user.LoggedIn && user.Map.Ready && !loopBreak)
-        {
-            var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
-            var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
-            var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
+        CheckIfSpritesStillInView(user, objectsInView);
+        RemoveObjects(user, objectsNotInView);
+        AddObjects(payload, user, objectsInView);
 
-            CheckIfSpritesStillInView(user, objectsInView);
-            RemoveObjects(user, objectsNotInView);
-            AddObjects(payload, user, objectsInView);
-
-            if (payload.Count <= 0) return;
-            payload.Reverse();
-            user.Client.SendVisibleEntities(payload);
-            loopBreak = true;
-        }
+        if (payload.Count <= 0) return;
+        payload.Reverse();
+        user.Client.SendVisibleEntities(payload);
     }
 
     private static void CheckIfSpritesStillInView(Aisling self, List<Sprite> objectsInView)
@@ -86,7 +84,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void AddObjects(List<Sprite> payload, Aisling self, IReadOnlyCollection<Sprite> objectsToAdd)
     {
-        payload ??= []; 
+        payload ??= [];
         if (self == null) return;
         if (objectsToAdd == null) return;
 

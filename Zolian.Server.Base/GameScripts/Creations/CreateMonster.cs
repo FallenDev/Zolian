@@ -64,17 +64,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 219, (7300, 2400) },
             { 229, (7800, 2800) },
             { 239, (8500, 3500) },
-            { 250, (9150, 4000) },
-            { 275, (11000, 8000) },
-            { 300, (13000, 12000) },
-            { 325, (15000, 16000) },
-            { 350, (18000, 24000) },
-            { 375, (22000, 30000) },
-            { 400, (25000, 40000) },
-            { 425, (27500, 50000) },
-            { 450, (30000, 60000) },
-            { 475, (40000, 70000) },
-            { 500, (50000, 80000) },
+            { 250, (9150, 4000) }
+            // Above level 250, the multipliers are generated
         };
 
         if (obj.Template.Level >= 250)
@@ -1058,10 +1049,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [MonsterType.Above450P] = monster =>
             {
                 monster.BonusStr += monster._Str * 19;
-                monster.BonusCon += monster._Con * 10;
                 monster.BonusDex += monster._Dex * 19;
                 monster.BonusDmg += monster._Dmg * 19;
-                monster.BonusHp += monster.BaseHp * 10;
                 monster.BonusHp += (long)(monster.MaximumHp * 0.17);
             },
             [MonsterType.Above450M] = monster =>
