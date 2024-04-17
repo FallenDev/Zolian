@@ -442,15 +442,22 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
     public void SpellOnFailed(Sprite sprite, Sprite target, Spell spell)
     {
-        switch (sprite)
+        try
         {
-            case Aisling aisling:
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has failed.");
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
-                break;
-            case Monster:
-                sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
-                break;
+            switch (sprite)
+            {
+                case Aisling aisling:
+                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{spell.Template.Name} has failed.");
+                    aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
+                    break;
+                case Monster:
+                    sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial, 50));
+                    break;
+            }
+        }
+        catch
+        {
+            // ignored
         }
     }
 
