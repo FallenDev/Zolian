@@ -124,14 +124,7 @@ public sealed class Aisling : Player, IAisling
     public Vector2 DeathLocation { get; set; }
     public int DeathMapId { get; set; }
 
-    public NationTemplate PlayerNation
-    {
-        get
-        {
-            if (Nation != null) return ServerSetup.Instance.GlobalNationTemplateCache[Nation];
-            throw new InvalidOperationException();
-        }
-    }
+    public NationTemplate PlayerNation => ServerSetup.Instance.GlobalNationTemplateCache[SpriteMaker.NationValue(Nation)];
 
     public bool LeaderPrivileges
     {

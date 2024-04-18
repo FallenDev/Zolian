@@ -40,6 +40,7 @@ public class Boot(Item item) : ItemScript(item)
 
         client.Aisling.BootsImg = (short)Item.Image;
         client.Aisling.BootColor = (byte)Item.Template.Color;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
@@ -52,5 +53,6 @@ public class Boot(Item item) : ItemScript(item)
 
         client.Aisling.BootsImg = 0;
         client.Aisling.BootColor = 0;
+        CalculateGearPoints(client);
     }
 }

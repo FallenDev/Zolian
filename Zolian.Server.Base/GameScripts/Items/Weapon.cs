@@ -143,6 +143,7 @@ public class Weapon(Item item) : ItemScript(item)
             client.Aisling.ShieldImg = (short)Item.Template.OffHandImage;
 
         client.Aisling.UsingTwoHanded = Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff);
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -181,5 +182,7 @@ public class Weapon(Item item) : ItemScript(item)
             if (spell == null) continue;
             client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
+
+        CalculateGearPoints(client);
     }
 }

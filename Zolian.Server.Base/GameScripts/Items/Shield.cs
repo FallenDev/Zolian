@@ -101,6 +101,7 @@ public class Shield(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
         aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
         aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -132,5 +133,7 @@ public class Shield(Item item) : ItemScript(item)
             if (spell == null) continue;
             client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
         }
+
+        CalculateGearPoints(client);
     }
 }

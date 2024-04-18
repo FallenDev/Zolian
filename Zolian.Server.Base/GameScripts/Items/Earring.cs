@@ -19,7 +19,16 @@ public class Earring(Item item) : ItemScript(item)
 
         if (client.CheckReqs(client, Item))
             client.Aisling.EquipmentManager.Add(Item.Template.EquipmentSlot, Item);
+
+        CalculateGearPoints(client);
     }
 
-    public override void UnEquipped(Sprite sprite, byte displaySlot) { }
+    public override void UnEquipped(Sprite sprite, byte displaySlot)
+    {
+        if (sprite == null) return;
+        if (Item?.Template == null) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        CalculateGearPoints(client);
+    }
 }

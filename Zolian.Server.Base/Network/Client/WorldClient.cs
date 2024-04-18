@@ -49,6 +49,7 @@ using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Gender = Chaos.Common.Definitions.Gender;
 using LanternSize = Chaos.Common.Definitions.LanternSize;
 using MapFlags = Darkages.Enums.MapFlags;
+using Nation = Chaos.Common.Definitions.Nation;
 using RestPosition = Chaos.Common.Definitions.RestPosition;
 
 namespace Darkages.Network.Client;
@@ -1596,8 +1597,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         //    break;
         //}
 
-        var gamePoints = CalculateGearPoints(this);
-
         var args = new AttributesArgs
         {
             Ability = abCap,
@@ -1610,7 +1609,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             DefenseElement = (Element)Aisling.DefenseElement,
             Dex = (byte)Math.Clamp(Aisling.Dex, 0, 255),
             Dmg = (byte)Math.Clamp((sbyte)Aisling.Dmg, sbyte.MinValue, sbyte.MaxValue),
-            GamePoints = gamePoints,
+            GamePoints = (uint)Aisling.GamePoints,
             Gold = (uint)Aisling.GoldPoints,
             Hit = (byte)Math.Clamp((sbyte)Aisling.Hit, sbyte.MinValue, sbyte.MaxValue),
             Int = (byte)Math.Clamp(Aisling.Int, 0, 255),
@@ -1634,125 +1633,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         };
 
         Send(args);
-    }
-
-    private uint CalculateGearPoints(WorldClient client)
-    {
-        var points = 0;
-        foreach (var slot in client.Aisling.EquipmentManager.Equipment.Values)
-        {
-            if (slot?.Item == null) continue;
-            switch (slot.Item.ItemQuality)
-            {
-                case Item.Quality.Damaged:
-                    points -= 100;
-                    break;
-                case Item.Quality.Common:
-                    break;
-                case Item.Quality.Uncommon:
-                    points += 50;
-                    break;
-                case Item.Quality.Rare:
-                    points += 100;
-                    break;
-                case Item.Quality.Epic:
-                    points += 200;
-                    break;
-                case Item.Quality.Legendary:
-                    points += 400;
-                    break;
-                case Item.Quality.Forsaken:
-                    points += 500;
-                    break;
-                case Item.Quality.Mythic:
-                    points += 1000;
-                    break;
-                case Item.Quality.Primordial:
-                case Item.Quality.Transcendent:
-                    points += 2000;
-                    break;
-            }
-
-            switch (slot.Item.ItemMaterial)
-            {
-                case Item.ItemMaterials.None:
-                    break;
-                case Item.ItemMaterials.Copper:
-                    points += 50;
-                    break;
-                case Item.ItemMaterials.Iron:
-                    points += 100;
-                    break;
-                case Item.ItemMaterials.Steel:
-                    points += 150;
-                    break;
-                case Item.ItemMaterials.Forged:
-                    points += 200;
-                    break;
-                case Item.ItemMaterials.Elven:
-                    points += 250;
-                    break;
-                case Item.ItemMaterials.Dwarven:
-                    points += 350;
-                    break;
-                case Item.ItemMaterials.Mythril:
-                    points += 450;
-                    break;
-                case Item.ItemMaterials.Hybrasyl:
-                    points += 600;
-                    break;
-                case Item.ItemMaterials.MoonStone:
-                    points += 800;
-                    break;
-                case Item.ItemMaterials.SunStone:
-                    points += 1000;
-                    break;
-                case Item.ItemMaterials.Ebony:
-                    points += 1500;
-                    break;
-                case Item.ItemMaterials.Runic:
-                    points += 2500;
-                    break;
-                case Item.ItemMaterials.Chaos:
-                    points += 4000;
-                    break;
-            }
-
-            switch (slot.Item.GearEnhancement)
-            {
-                case Item.GearEnhancements.None:
-                    break;
-                case Item.GearEnhancements.One:
-                    points += 50;
-                    break;
-                case Item.GearEnhancements.Two:
-                    points += 100;
-                    break;
-                case Item.GearEnhancements.Three:
-                    points += 200;
-                    break;
-                case Item.GearEnhancements.Four:
-                    points += 300;
-                    break;
-                case Item.GearEnhancements.Five:
-                    points += 400;
-                    break;
-                case Item.GearEnhancements.Six:
-                    points += 500;
-                    break;
-                case Item.GearEnhancements.Seven:
-                    points += 600;
-                    break;
-                case Item.GearEnhancements.Eight:
-                    points += 800;
-                    break;
-                case Item.GearEnhancements.Nine:
-                    points += 1500;
-                    break;
-            }
-        }
-
-        return (uint)points;
     }
 
     /// <summary>
@@ -2924,17 +2804,15 @@ public class WorldClient : SocketClientBase, IWorldClient
             Equipment = equipment,
             GroupOpen = partyOpen,
             GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
-            GuildRank = aisling.GameMaster
-                ? "Game Master"
-                : $"GP: {Aisling.GamePoints}",
+            GuildRank = $"GearP.: {aisling.GamePoints}",
             Id = aisling.Serial,
             LegendMarks = legendMarks,
             Name = aisling.Username,
-            Nation = Nation.Mileth,
+            Nation = (Nation)aisling.Nation,
             Portrait = aisling.PictureData,
             ProfileText = aisling.ProfileMessage,
             SocialStatus = (SocialStatus)aisling.ActiveStatus,
-            Title = $"Level: {aisling.ExpLevel}  DR: {aisling.AbpLevel}"
+            Title = $"Lvl: {aisling.ExpLevel}  Rnk: {aisling.AbpLevel}"
         };
 
         Send(args);
@@ -3481,17 +3359,15 @@ public class WorldClient : SocketClientBase, IWorldClient
             GroupOpen = partyOpen,
             GroupString = Aisling.GroupParty?.PartyMemberString ?? "",
             GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
-            GuildRank = Aisling.GameMaster
-                ? "Game Master"
-                : $"GP: {Aisling.GamePoints}",
+            GuildRank = $"GearP.: {Aisling.GamePoints}",
             IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
             LegendMarks = legendMarks,
             Name = Aisling.Username,
-            Nation = Nation.Mileth,
+            Nation = (Nation)Aisling.Nation,
             Portrait = Aisling.PictureData,
             ProfileText = Aisling.ProfileMessage,
-            SpouseName = null,
-            Title = $"Level: {Aisling.ExpLevel}  DR: {Aisling.AbpLevel}"
+            SpouseName = "",
+            Title = $"Lvl: {Aisling.ExpLevel}  Rnk: {Aisling.AbpLevel}"
         };
 
         Send(args);
@@ -3599,7 +3475,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (objects.Count <= 0) return;
 
         // Split this into chunks so as not to crash the client
-        foreach (var chunk in objects.OrderBy(o => o.AbandonedDate).Chunk(500))
+        foreach (var chunk in objects.Where(o => o != null).OrderBy(o => o.AbandonedDate).Chunk(500))
         {
             var args = new DisplayVisibleEntitiesArgs();
             var visibleArgs = new List<VisibleEntityInfo>();

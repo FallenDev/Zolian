@@ -94,6 +94,24 @@ public enum ActivityStatus : byte
     NeedHelp = 7
 }
 
+public enum Nation : byte
+{
+    Exile,
+    Suomi,
+    Ellas,
+    Loures,
+    Mileth,
+    Tagor,
+    Rucesion,
+    Noes,
+    Illuminati,
+    Piet,
+    Atlantis,
+    Abel,
+    Undine,
+    Purgatory
+}
+
 public static class PlayerExtensions
 {
     public static bool PlayerFlagIsSet(this AislingFlags self, AislingFlags flag) => (self & flag) == flag;

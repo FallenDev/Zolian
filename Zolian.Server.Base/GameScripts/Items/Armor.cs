@@ -29,6 +29,7 @@ public class Armor(Item item) : ItemScript(item)
 
         client.Aisling.Pants = (byte)(Item.Template.HasPants ? 1 : 0);
         client.Aisling.ArmorImg = (short)Item.Image;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -41,5 +42,6 @@ public class Armor(Item item) : ItemScript(item)
 
         client.Aisling.Pants = 0;
         client.Aisling.ArmorImg = 0;
+        CalculateGearPoints(client);
     }
 }

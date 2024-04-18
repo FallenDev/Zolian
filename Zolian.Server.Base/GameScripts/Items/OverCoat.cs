@@ -36,6 +36,7 @@ public class OverCoat(Item item) : ItemScript(item)
 
         client.Aisling.OverCoatImg = (short)Item.Image;
         client.Aisling.OverCoatColor = Item.Color;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -53,5 +54,6 @@ public class OverCoat(Item item) : ItemScript(item)
 
         client.Aisling.OverCoatImg = 0;
         client.Aisling.OverCoatColor = 0;
+        CalculateGearPoints(client);
     }
 }

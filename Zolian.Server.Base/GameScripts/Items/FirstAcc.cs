@@ -26,6 +26,7 @@ public class FirstAcc(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.Accessory1Img = (short)Item.Image;
         client.Aisling.Accessory1Color = Item.Color;
@@ -68,6 +69,7 @@ public class FirstAcc(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.Accessory1Img = 0;
         client.Aisling.Accessory1Color = 0;

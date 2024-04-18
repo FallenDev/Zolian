@@ -31,7 +31,7 @@ public class Player : Sprite
     public byte HairStyle { get; set; }
     public byte NameColor { get; set; }
     public string ProfileMessage { get; set; }
-    public string Nation { get; set; }
+    public Nation Nation { get; set; }
     public string Clan { get; set; }
     public string ClanRank { get; set; }
     public string ClanTitle { get; set; }

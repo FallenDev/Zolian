@@ -29,6 +29,7 @@ public class ThirdAcc(Item item) : ItemScript(item)
 
         client.Aisling.Accessory3Img = (short)Item.Image;
         client.Aisling.Accessory3Color = Item.Color;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -41,5 +42,6 @@ public class ThirdAcc(Item item) : ItemScript(item)
 
         client.Aisling.Accessory3Img = 0;
         client.Aisling.Accessory3Color = 0;
+        CalculateGearPoints(client);
     }
 }

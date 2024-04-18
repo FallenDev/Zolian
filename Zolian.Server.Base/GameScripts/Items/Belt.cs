@@ -23,21 +23,27 @@ public class Belt(Item item) : ItemScript(item)
     {
         if (sprite == null) return;
         if (Item?.Template == null) return;
-        if (sprite is not Aisling) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.DefenseElement = Item.Template.DefenseElement;
+        
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
     {
         if (sprite == null) return;
         if (Item?.Template == null) return;
-        if (sprite is not Aisling) return;
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.DefenseElement = ElementManager.Element.None;
+        
+        CalculateGearPoints(client);
     }
 }

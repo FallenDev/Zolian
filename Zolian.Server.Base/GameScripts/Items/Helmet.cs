@@ -28,6 +28,7 @@ public class Helmet(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.HelmetImg = (short)Item.Image;
+        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
@@ -39,5 +40,6 @@ public class Helmet(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
         client.Aisling.HelmetImg = 0;
+        CalculateGearPoints(client);
     }
 }
