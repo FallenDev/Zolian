@@ -4062,7 +4062,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         // Job Level Check
         if (client.Aisling.AbpLevel < item.Template.JobLevelRequired)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "I do not have the expertise for this.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "I do not have the job level for this.");
             return false;
         }
 

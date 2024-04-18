@@ -62,6 +62,18 @@ public class Scroll(Item item) : ItemScript(item)
                         case "Cascade Falls Scroll":
                             client.TransitionToMap(1201, new Position(9, 8));
                             return;
+                        case "Cthonic Guild Scroll":
+                            {
+                                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                                {
+                                    if (npc.Value.Scripts is null) continue;
+                                    if (npc.Value.Scripts.TryGetValue("Cthonic Portals", out var scriptObj))
+                                    {
+                                        scriptObj.OnClick(client, npc.Value.Serial);
+                                    }
+                                }
+                            }
+                            return;
                     }
 
                     return;

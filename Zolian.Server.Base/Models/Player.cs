@@ -194,4 +194,7 @@ public class Quests
     public bool ArmorCodexDeciphered { get; set; }
     public bool ArmorCraftingCodexLearned { get; set; }
     public bool ArmorCraftingAdvancedCodexLearned { get; set; }
+    public bool JoinedTheAdventurersGuild { get; set; }
+    public bool JoinedTheAssassinsGuild { get; set; }
+    public int CthonicRemainsExplorationLevel { get; set; }
 }
