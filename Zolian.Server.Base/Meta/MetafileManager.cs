@@ -1,4 +1,5 @@
 ﻿using Darkages.Compression;
+using Darkages.Enums;
 using Darkages.Models;
 using Newtonsoft.Json;
 
@@ -31,33 +32,33 @@ public class MetafileManager
             var metaFile = CompressableObject.Load<Metafile>(file);
 
             if (metaFile.Name.StartsWith("SEvent")) continue;
-
             if (metaFile.Name.StartsWith("SClass")) continue;
-
             if (metaFile.Name.StartsWith("ItemInfo")) continue;
+            if (metaFile.Name.StartsWith("NationDesc")) continue;
 
             Metafiles.Add(metaFile);
         }
 
         CreateFromTemplates();
         LoadQuestDescriptions();
+        CreateNationDescMeta();
     }
 
     private static void LoadQuestDescriptions()
     {
-        var metaFile1 = new Metafile { Name = "SEvent1", Nodes = new List<MetafileNode>() };
+        var metaFile1 = new Metafile { Name = "SEvent1", Nodes = [] };
         var metaFileLocation1 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle1";
-        var metaFile2 = new Metafile { Name = "SEvent2", Nodes = new List<MetafileNode>() };
+        var metaFile2 = new Metafile { Name = "SEvent2", Nodes = [] };
         var metaFileLocation2 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle2";
-        var metaFile3 = new Metafile { Name = "SEvent3", Nodes = new List<MetafileNode>() };
+        var metaFile3 = new Metafile { Name = "SEvent3", Nodes = [] };
         var metaFileLocation3 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle3";
-        var metaFile4 = new Metafile { Name = "SEvent4", Nodes = new List<MetafileNode>() };
+        var metaFile4 = new Metafile { Name = "SEvent4", Nodes = [] };
         var metaFileLocation4 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle4";
-        var metaFile5 = new Metafile { Name = "SEvent5", Nodes = new List<MetafileNode>() };
+        var metaFile5 = new Metafile { Name = "SEvent5", Nodes = [] };
         var metaFileLocation5 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle5";
-        var metaFile6 = new Metafile { Name = "SEvent6", Nodes = new List<MetafileNode>() };
+        var metaFile6 = new Metafile { Name = "SEvent6", Nodes = [] };
         var metaFileLocation6 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle6";
-        var metaFile7 = new Metafile { Name = "SEvent7", Nodes = new List<MetafileNode>() };
+        var metaFile7 = new Metafile { Name = "SEvent7", Nodes = [] };
         var metaFileLocation7 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle7";
 
         LoadCircleQuestDescriptions(metaFileLocation1, metaFile1);
@@ -67,6 +68,19 @@ public class MetafileManager
         LoadCircleQuestDescriptions(metaFileLocation5, metaFile5);
         LoadCircleQuestDescriptions(metaFileLocation6, metaFile6);
         LoadCircleQuestDescriptions(metaFileLocation7, metaFile7);
+    }
+
+    private static void CreateNationDescMeta()
+    {
+        var metaFile = new Metafile { Name = "NationDesc", Nodes = [] };
+
+        for (var i = 0; i <= 13; i++)
+        {
+            metaFile.Nodes.Add(new MetafileNode($"nation_{i}", SpriteMaker.NationMetafileProfileDisplay((Nation)i)));
+        }
+
+        CompileTemplate(metaFile);
+        Metafiles.Add(metaFile);
     }
 
     private static void LoadCircleQuestDescriptions(string dir, Metafile metaFile)
@@ -160,7 +174,7 @@ public class MetafileManager
                      .OrderBy(v => v.Value.LevelRequired)
                      .BatchesOf(1024))
         {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = new List<MetafileNode>() };
+            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
 
             foreach (var template in from v in batch select v.Value)
             {
@@ -178,7 +192,7 @@ public class MetafileManager
                      .OrderBy(v => v.Value.Template.LevelRequired)
                      .BatchesOf(1024))
         {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = new List<MetafileNode>() };
+            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
 
             foreach (var item in from v in batch select v.Value)
             {
