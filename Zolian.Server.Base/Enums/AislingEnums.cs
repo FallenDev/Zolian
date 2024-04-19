@@ -94,6 +94,7 @@ public enum ActivityStatus : byte
     NeedHelp = 7
 }
 
+[Flags]
 public enum Nation : byte
 {
     Exile,
@@ -115,4 +116,5 @@ public enum Nation : byte
 public static class PlayerExtensions
 {
     public static bool PlayerFlagIsSet(this AislingFlags self, AislingFlags flag) => (self & flag) == flag;
+    public static bool PlayerNationFlagIsSet(this Nation self, Nation flag) => (self & flag) == flag;
 }

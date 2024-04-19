@@ -10,6 +10,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
+using Nation = Darkages.Enums.Nation;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -473,5 +474,28 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
         {
             target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
+    }
+}
+
+[Script("Recall")]
+public class Recall(Spell spell) : SpellScript(spell)
+{
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        if (sprite is not Aisling playerAction) return;
+
+        if (!spell.CanUse())
+        {
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"That is on cooldown: {spell.CurrentCooldown}");
+            return;
+        }
+
+        playerAction.ActionUsed = "Recall";
+        playerAction.Client.TransitionToMap(playerAction.PlayerNation.AreaId, playerAction.PlayerNation.MapPosition);
     }
 }
