@@ -46,7 +46,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         CheckIfSpritesStillInView(user, objectsInView);
         RemoveObjects(user, objectsNotInView);
         AddObjects(payload, user, objectsInView);
-        
+
         if (payload.Count <= 0) return;
         payload.Reverse();
         user.Client.SendVisibleEntities(payload);
@@ -54,11 +54,11 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void CheckIfSpritesStillInView(Aisling self, List<Sprite> objectsInView)
     {
-        Parallel.ForEach(self.SpritesInView, spritesPair =>
+        foreach (var spritesPair in self.SpritesInView)
         {
-            if (objectsInView.Contains(spritesPair.Value)) return;
+            if (objectsInView.Contains(spritesPair.Value)) continue;
             self.SpritesInView.TryRemove(spritesPair.Key, out _);
-        });
+        }
     }
 
     private static void RemoveObjects(Aisling self, IReadOnlyCollection<Sprite> objectsToRemove)
@@ -66,10 +66,10 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         if (objectsToRemove == null) return;
         if (self == null) return;
 
-        Parallel.ForEach(objectsToRemove, obj =>
+        foreach (var obj in objectsToRemove)
         {
-            if (obj == null) return;
-            if (obj.Serial == self.Serial) return;
+            if (obj == null) continue;
+            if (obj.Serial == self.Serial) continue;
 
             if (obj is Monster monster)
             {
@@ -79,7 +79,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
             self.SpritesInView.TryRemove(obj.Serial, out _);
             obj.HideFrom(self);
-        });
+        }
     }
 
     private static void AddObjects(List<Sprite> payload, Aisling self, IReadOnlyCollection<Sprite> objectsToAdd)
@@ -88,11 +88,11 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         if (self == null) return;
         if (objectsToAdd == null) return;
 
-        Parallel.ForEach(objectsToAdd, obj =>
+        foreach (var obj in objectsToAdd)
         {
-            if (obj == null) return;
+            if (obj == null) continue;
             // If value is in view, don't add it
-            if (self.SpritesInView.TryGetValue(obj.Serial, out _)) return;
+            if (self.SpritesInView.TryGetValue(obj.Serial, out _)) continue;
 
             if (obj is Monster monster)
             {
@@ -109,7 +109,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             if (obj is Aisling other)
             {
                 // Self Check
-                if (self.Serial == other.Serial) return;
+                if (self.Serial == other.Serial) continue;
 
                 // Invisible Checks
                 if (self.CanSeeSprite(other))
@@ -123,6 +123,6 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
                 payload.Add(obj);
                 self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
             }
-        });
+        }
     }
 }
