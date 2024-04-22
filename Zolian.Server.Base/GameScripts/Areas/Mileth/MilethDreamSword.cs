@@ -66,7 +66,7 @@ public class MilethDreamSword : AreaScript
     {
         var a = AnimTimer.Update(elapsedTime);
         if (!a) return;
-        _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, new Position(11, 4)));
+        _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(86, new Position(11, 4)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

@@ -81,7 +81,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
                 : BodyAnimation.TwoHandAtk
             : BodyAnimation.Assail;
 
-        client?.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(client.Aisling.Serial, animationPick, 20));
+        client?.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(client.Aisling.Serial, animationPick, 20));
     }
 
     public void ApplyPhysicalBuff(Sprite target, Buff buff)
@@ -95,7 +95,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
                 : BodyAnimation.Assail;
 
             aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
             return;
         }
 
@@ -166,11 +166,11 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
     public void OnSuccessWithoutAction(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit)
@@ -189,10 +189,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
             Train(aisling.Client, skill);
 
         // Animation
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
     public void OnSuccessWithoutActionAnimation(Sprite enemy, Sprite attacker, Skill skill, long dmg, bool crit)
@@ -212,7 +212,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
         skill.LastUsedSkill = DateTime.UtcNow;
         if (!crit) return;
-        attacker.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+        attacker.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
     }
 
     public int Thrown(WorldClient client, Skill skill, bool crit)
@@ -232,7 +232,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
 
     public void FailedAttempt(Sprite sprite, Skill skill, BodyAnimationArgs action)
     {
-        sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
+        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
     }
 
     public (bool, long) OnCrit(long dmg)

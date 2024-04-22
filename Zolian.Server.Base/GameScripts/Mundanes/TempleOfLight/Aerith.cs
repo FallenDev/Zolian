@@ -77,8 +77,8 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                         client.Aisling.ExpTotal -= (uint)i;
                         client.Aisling.BaseMp += 25;
                         client.SendAttributes(StatUpdateType.ExpGold);
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(8, false));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
                     }
                     else
                     {
@@ -107,8 +107,8 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                         client.Aisling.ExpTotal -= (uint)i;
                         client.Aisling.BaseMp += 250;
                         client.SendAttributes(StatUpdateType.ExpGold);
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(8, false));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
                     }
                     else
                     {

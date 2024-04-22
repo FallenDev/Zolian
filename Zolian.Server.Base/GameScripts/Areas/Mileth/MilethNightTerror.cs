@@ -73,7 +73,7 @@ public class MilethNightTerror : AreaScript
     {
         var a = AnimTimer.Update(elapsedTime);
         if (!a) return;
-        _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, new Position(46, 1)));
+        _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(214, new Position(46, 1)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

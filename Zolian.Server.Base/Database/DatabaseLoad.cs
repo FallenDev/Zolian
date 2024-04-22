@@ -426,7 +426,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         ServerSetup.Instance.GlobalItemTemplateCache = ServerSetup.Instance.TempGlobalItemTemplateCache.ToFrozenDictionary();
@@ -440,7 +440,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -463,7 +463,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         ServerSetup.Instance.GlobalMonsterTemplateCache = ServerSetup.Instance.TempGlobalMonsterTemplateCache.ToFrozenDictionary();
@@ -490,7 +490,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         ServerSetup.Instance.GlobalMundaneTemplateCache = ServerSetup.Instance.TempGlobalMundaneTemplateCache.ToFrozenDictionary();
@@ -520,7 +520,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -538,7 +538,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         ServerSetup.Instance.GlobalWorldMapTemplateCache = ServerSetup.Instance.TempGlobalWorldMapTemplateCache.ToFrozenDictionary();
@@ -555,7 +555,7 @@ public abstract class DatabaseLoad
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         ServerSetup.EventsLogger($"Boards Loaded: {ServerSetup.Instance.GlobalBoardPostCache.Count}");

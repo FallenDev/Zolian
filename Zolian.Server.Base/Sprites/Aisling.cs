@@ -242,45 +242,45 @@ public sealed class Aisling : Player, IAisling
     /// <param name="op">Scope of the method call</param>
     /// <param name="method">IWorldClient method to send</param>
     /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
-    public void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
+    public void SendTargetedClientMethod(PlayerScope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
     {
         var selectedPlayers = new List<Aisling>();
 
         switch (op)
         {
-            case Scope.NearbyAislingsExludingSelf:
+            case PlayerScope.NearbyAislingsExludingSelf:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
                 break;
-            case Scope.NearbyAislings:
+            case PlayerScope.NearbyAislings:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)));
                 break;
-            case Scope.Clan:
+            case PlayerScope.Clan:
                 selectedPlayers.AddRange(GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, Clan, StringComparison.CurrentCultureIgnoreCase)));
                 break;
-            case Scope.VeryNearbyAislings:
+            case PlayerScope.VeryNearbyAislings:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)));
                 break;
-            case Scope.AislingsOnSameMap:
+            case PlayerScope.AislingsOnSameMap:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId));
                 break;
-            case Scope.GroupMembers:
+            case PlayerScope.GroupMembers:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && GroupParty.Has(otherPlayers)));
                 break;
-            case Scope.NearbyGroupMembersExcludingSelf:
+            case PlayerScope.NearbyGroupMembersExcludingSelf:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial));
                 break;
-            case Scope.NearbyGroupMembers:
+            case PlayerScope.NearbyGroupMembers:
                 selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)));
                 break;
-            case Scope.DefinedAislings when definer == null:
+            case PlayerScope.DefinedAislings when definer == null:
                 return;
-            case Scope.DefinedAislings:
+            case PlayerScope.DefinedAislings:
                 selectedPlayers.AddRange(definer);
                 break;
-            case Scope.All:
+            case PlayerScope.All:
                 selectedPlayers.AddRange(ServerSetup.Instance.Game.Aislings);
                 break;
-            case Scope.Self:
+            case PlayerScope.Self:
             default:
                 method(Client);
                 return;
@@ -437,7 +437,7 @@ public sealed class Aisling : Player, IAisling
                 ServerSetup.EventsLogger($"{Username} tried to cast {spell.Name} and info was null");
             if (info?.Target == 0)
                 ServerSetup.EventsLogger($"{Username} tried to cast {spell.Name} and target was 0");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         IsCastingSpell = false;
@@ -457,7 +457,7 @@ public sealed class Aisling : Player, IAisling
             _ => (BodyAnimation)6
         };
 
-        SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
+        SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
 
         return this;
     }
@@ -666,7 +666,7 @@ public sealed class Aisling : Player, IAisling
                 obj.RemoveDebuff("Skulled", true);
 
             obj.Client.Revive();
-            obj.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, null, obj.Serial));
+            obj.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(5, null, obj.Serial));
         }
 
         ApplyDamage(this, 0, null);
@@ -680,7 +680,7 @@ public sealed class Aisling : Player, IAisling
             aisling.RemoveDebuff("Skulled", true);
 
         aisling.Client.Revive();
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(5, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(5, null, aisling.Serial));
 
         ApplyDamage(this, 0, null);
         Client.SendSound(8, false);

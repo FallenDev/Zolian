@@ -81,6 +81,6 @@ public class InnKeeper(WorldServer server, Mundane mundane) : MundaneScript(serv
                 break;
         }
 
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
     }
 }

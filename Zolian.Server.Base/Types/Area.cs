@@ -75,7 +75,7 @@ public class Area : Map, IArea
         {
             ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
 
         return default;
@@ -173,7 +173,7 @@ public class Area : Map, IArea
             {
                 ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
                 ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
-                Crashes.TrackError(ex);
+                SentrySdk.CaptureException(ex);
                 return false;
             }
         }
@@ -238,7 +238,7 @@ public class Area : Map, IArea
         catch (Exception ex)
         {
             Console.Write($"Pathing Issue... {ex}\n");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
 
             return path;
         }

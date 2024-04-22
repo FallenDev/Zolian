@@ -40,7 +40,7 @@ public class Potion(Item item) : ItemScript(item)
                                 client.Aisling.CurrentHp += (int)hp;
 
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 75% HP");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(364, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(364, null, client.Aisling.Serial));
                             }
                             break;
                         case "Mor Ioc Deum":
@@ -49,7 +49,7 @@ public class Potion(Item item) : ItemScript(item)
                                 client.Aisling.CurrentHp += (int)hp;
 
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 50% HP");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(363, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(363, null, client.Aisling.Serial));
                             }
                             break;
                         case "Ioc Deum":
@@ -58,7 +58,7 @@ public class Potion(Item item) : ItemScript(item)
                                 client.Aisling.CurrentHp += (int)hp;
 
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered 25% HP");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(168, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(168, null, client.Aisling.Serial));
                             }
                             break;
                         case "Orcish Strength":
@@ -66,7 +66,7 @@ public class Potion(Item item) : ItemScript(item)
                                 var buff = new buff_OrcishStrength();
                                 client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your muscles harden (+50 STR)");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(34, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(34, null, client.Aisling.Serial));
                             }
                             break;
                         case "Gryphon's Grace":
@@ -74,7 +74,7 @@ public class Potion(Item item) : ItemScript(item)
                                 var buff = new buff_GryphonsGrace();
                                 client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "You feel lighter on your feet (+50 DEX)");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(86, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(86, null, client.Aisling.Serial));
                             }
                             break;
                         case "Feywild Nectar":
@@ -82,7 +82,7 @@ public class Potion(Item item) : ItemScript(item)
                                 var buff = new buff_FeywildNectar();
                                 client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Feys dance around you in delight (+50 INT & WIS");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(35, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(35, null, client.Aisling.Serial));
                             }
                             break;
                         case "Draconic Vitality":
@@ -90,7 +90,7 @@ public class Potion(Item item) : ItemScript(item)
                                 client.Aisling.CurrentHp = client.Aisling.MaximumHp;
                                 client.Aisling.CurrentMp = client.Aisling.MaximumMp;
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Recovered Fully");
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(46, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(46, null, client.Aisling.Serial));
                             }
                             break;
                         case "Elemental Essence":
@@ -115,8 +115,8 @@ public class Potion(Item item) : ItemScript(item)
 
                                 var buff = new BuffMorFasNadur();
                                 buff.OnApplied(client.Aisling, buff);
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(67, null, client.Aisling.Serial));
-                                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(20, false));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(67, null, client.Aisling.Serial));
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(20, false));
                             }
                             break;
                         case "Minor Ao Puinsein Deum":
@@ -125,7 +125,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -133,7 +133,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                 }
                             }
                             break;
@@ -143,7 +143,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -151,7 +151,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -159,7 +159,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Mor Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                 }
                             }
                             break;
@@ -169,7 +169,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Beag Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -177,7 +177,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -185,7 +185,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Mor Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                     break;
                                 }
 
@@ -193,7 +193,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Ard Puinsein", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                 }
                             }
                             break;
@@ -203,7 +203,7 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     client.Aisling.Debuffs.TryRemove("Blind", out var debuff);
                                     debuff?.OnEnded(client.Aisling, debuff);
-                                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                                 }
 
                                 break;

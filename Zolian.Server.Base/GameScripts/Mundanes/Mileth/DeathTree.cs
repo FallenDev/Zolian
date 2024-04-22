@@ -82,54 +82,54 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                     var item = client.Aisling.HasItemReturnItem("Necra Scribblings");
                     client.Aisling.Inventory.RemoveFromInventory(client, item);
                     client.SendPublicMessage(Mundane.Serial, PublicMessageType.Shout, $"{Mundane.Name}: Ahh! Only a few more! And I can be...");
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, new Position(9, 8)));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, new Position(9, 8)));
                     client.CloseDialog();
 
                     #region Animation Show
 
                     Task.Delay(350).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(50, null, Mundane.Serial));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(50, null, Mundane.Serial));
                     });
                     Task.Delay(350).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX1, randY1)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX1, randY1)));
                     });
                     Task.Delay(650).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX2, randY2)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX2, randY2)));
                     });
                     Task.Delay(950).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX3, randY3)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX3, randY3)));
                     });
                     Task.Delay(1250).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX4, randY4)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX4, randY4)));
                     });
                     Task.Delay(1550).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX5, randY5)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX5, randY5)));
                     });
                     Task.Delay(1850).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
                     });
                     Task.Delay(1850).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
                     });
                     Task.Delay(1850).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
                     });
                     Task.Delay(1850).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
                     });
                     Task.Delay(1850).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(15, new Position(randX6, randY6)));
                     });
                     Task.Delay(3500).ContinueWith(ct =>
                     {
@@ -197,7 +197,7 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                     client.WarpToAndRefresh(new Position(9, 9));
                     Task.Delay(150).ContinueWith(ct =>
                     {
-                        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, client.Aisling.Position));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(63, client.Aisling.Position));
                     });
                     Task.Delay(350).ContinueWith(ct =>
                     {

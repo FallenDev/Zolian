@@ -148,7 +148,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -236,7 +236,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -326,7 +326,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -418,7 +418,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -512,7 +512,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -575,7 +575,7 @@ public static class ItemStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 }

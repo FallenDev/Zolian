@@ -1,6 +1,6 @@
 ﻿namespace Darkages.Enums;
 
-public enum Scope
+public enum PlayerScope
 {
     Self = 0,
     All = 1,

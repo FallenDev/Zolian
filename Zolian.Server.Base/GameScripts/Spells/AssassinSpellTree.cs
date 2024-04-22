@@ -30,9 +30,9 @@ public class Needle_Trap(Spell spell) : SpellScript(spell)
         var dam = (int)(250 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -73,9 +73,9 @@ public class Stiletto_Trap(Spell spell) : SpellScript(spell)
         var dam = (int)(750 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -116,9 +116,9 @@ public class Coiled_Trap(Spell spell) : SpellScript(spell)
         var dam = (int)(6000 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -159,9 +159,9 @@ public class Spring_Trap(Spell spell) : SpellScript(spell)
         var dam = (int)(12000 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -202,9 +202,9 @@ public class Maiden_Trap(Spell spell) : SpellScript(spell)
         var dam = (int)(20000 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -246,13 +246,13 @@ public class Poison_Trap(Spell spell) : SpellScript(spell)
         {
             if (!target.HasDebuff(debuff.Name))
                 affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
-            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            affected.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
         {
             if (!target.HasDebuff(debuff.Name))
                 debuff.OnApplied(target, debuff);
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
 
@@ -295,13 +295,13 @@ public class Snare_Trap(Spell spell) : SpellScript(spell)
         {
             if (!target.HasDebuff(debuff.Name))
                 affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
-            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            affected.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
         {
             if (!target.HasDebuff(debuff.Name))
                 debuff.OnApplied(target, debuff);
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
 
@@ -344,13 +344,13 @@ public class Flash_Trap(Spell spell) : SpellScript(spell)
         {
             if (!target.HasDebuff(debuff.Name))
                 affected.Client.EnqueueDebuffAppliedEvent(affected, debuff, TimeSpan.FromSeconds(debuff.Length));
-            affected.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            affected.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
         else
         {
             if (!target.HasDebuff(debuff.Name))
                 debuff.OnApplied(target, debuff);
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         }
     }
 
@@ -401,7 +401,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
         if (targetPos == null || targetPos == target.Position) return;
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
+        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();
         client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, Spell.Template.Sound);
@@ -529,8 +529,8 @@ public class Shunshin(Spell spell) : SpellScript(spell)
 
         _spellMethod.Step(damageDealingSprite, targetPos.X, targetPos.Y);
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(63, new Position(oldPos)));
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
+        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(63, new Position(oldPos)));
+        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(76, damageDealingSprite.Position));
 
         damageDealingSprite.Direction = (byte)direction;
         damageDealingSprite.Turn();

@@ -50,7 +50,7 @@ public class NecroCourtyard : AreaScript
                 buff?.OnEnded(client.Aisling, buff);
             }
 
-            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
+            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
         }
 
         // Poison Pool 2
@@ -67,7 +67,7 @@ public class NecroCourtyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
     }
 
     private static bool ReflexCheck(Aisling aisling)

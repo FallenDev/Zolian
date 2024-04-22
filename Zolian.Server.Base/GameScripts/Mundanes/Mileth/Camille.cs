@@ -125,11 +125,11 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x07:
                 client.Aisling.Nation = Nation.Mileth;
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
                 break;
             case 0x08:
                 client.Aisling.Nation = Nation.Exile;
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, c.Aisling.Position));
                 break;
         }
     }

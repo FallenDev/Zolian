@@ -55,7 +55,7 @@ public class LouresGateKeeper(WorldServer server, Mundane mundane) : MundaneScri
         }
 
         client.CloseDialog();
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(199, null, client.Aisling.Serial));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(199, null, client.Aisling.Serial));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

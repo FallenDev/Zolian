@@ -45,21 +45,22 @@ public partial class App
 
         base.OnStartup(e);
         ServerCtx = new CancellationTokenSource();
-        var path = Directory.GetCurrentDirectory() + "\\SentrySecret.txt";
-        var debugKey = File.ReadLines(path).Skip(1).Take(1).First();
+        var path = Directory.GetCurrentDirectory() + "\\SentrySecrets.txt";
+        var secret = File.ReadLines(path).First();
 
         SentrySdk.Init(o =>
         {
             // Tells which project in Sentry to send events to:
+            o.Dsn = secret;
             // When configuring for the first time, to see what the SDK is doing:
-            o.Debug = true;
+            o.Debug = false;
             // Set TracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
             // We recommend adjusting this value in production.
             o.TracesSampleRate = 1.0;
-            // Sample rate for profiling, applied on top of othe TracesSampleRate,
+            // Sample rate for profiling, applied on top of the TracesSampleRate,
             // e.g. 0.2 means we want to profile 20 % of the captured transactions.
             // We recommend adjusting this value in production.
-            o.ProfilesSampleRate = 1.0;
+            o.ProfilesSampleRate = 0.2;
             // Requires NuGet package: Sentry.Profiling
             // Note: By default, the profiler is initialized asynchronously. This can
             // be tuned by passing a desired initialization timeout to the constructor.
@@ -139,13 +140,13 @@ public partial class App
         }
         catch (Exception exception)
         {
-            Crashes.TrackError(exception);
+            SentrySdk.CaptureException(exception);
         }
     }
 
     private static void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        Crashes.TrackError(e.Exception);
+        SentrySdk.CaptureException(e.Exception);
         e.Handled = true;
     }
 
@@ -153,11 +154,11 @@ public partial class App
     {
         if (e.IsTerminating)
         {
-            Crashes.TrackError(e.ExceptionObject as Exception);
+            SentrySdk.CaptureException(e.ExceptionObject as Exception ?? throw new InvalidOperationException());
         }
         else
         {
-            Analytics.TrackEvent($"{e.ExceptionObject}");
+            SentrySdk.CaptureMessage($"{e.ExceptionObject}");
         }
     }
 }

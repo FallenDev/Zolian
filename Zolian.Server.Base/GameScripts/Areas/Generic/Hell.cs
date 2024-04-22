@@ -59,7 +59,7 @@ public class Hell : AreaScript
         {
             var randA = RandomNumberGenerator.GetInt32(41);
             var randB = RandomNumberGenerator.GetInt32(41);
-            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(384, new Position(randA, randB)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(384, new Position(randA, randB)));
         }
     }
 }

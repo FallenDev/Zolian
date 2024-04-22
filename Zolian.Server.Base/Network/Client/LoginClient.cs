@@ -97,7 +97,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
                 {
                     ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
                     ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-                    Crashes.TrackError(ex);
+                    SentrySdk.CaptureException(ex);
                 }
                 
                 break;
@@ -125,7 +125,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
                 {
                     ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
                     ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-                    Crashes.TrackError(ex);
+                    SentrySdk.CaptureException(ex);
                 }
                 
                 break;

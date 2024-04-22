@@ -54,9 +54,9 @@ public class Caltrops(Spell spell) : SpellScript(spell)
         var dam = (int)(15000 + damageImp);
         target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -193,12 +193,12 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         var mapCheck = damageDealingSprite.Map.ID;
@@ -284,17 +284,17 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
             if (_target is Aisling targetAisling)
             {
                 targetAisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
-                targetAisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
+                targetAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
             }
             else
             {
                 stunned.OnApplied(_target, stunned);
-                _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
+                _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
             }
         }
 
         _target.Pos = new Vector2(targetPosition.X, targetPosition.Y);
-        _target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendCreatureWalk(_target.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)_target.Direction));
+        _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendCreatureWalk(_target.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)_target.Direction));
         _target.LastMovementChanged = readyTime;
         _target.LastPosition = new Position(targetPosition.X, targetPosition.Y);
         _target.UpdateAddAndRemove();
@@ -320,12 +320,12 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         target.ApplyElementalSpellDamage(aisling, dmg, randomEle, Spell);
@@ -347,7 +347,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (target.SpellReflect)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
             if (sprite is Aisling)
                 sprite.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             if (target is Aisling)
@@ -372,7 +372,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (target.SpellNegate)
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             if (target is Aisling)
                 target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}.");
@@ -467,11 +467,11 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
     {
         if (sprite.PlayerNearby?.Client != null)
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
         else
         {
-            target.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
+            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
         }
     }
 }

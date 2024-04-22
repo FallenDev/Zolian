@@ -54,7 +54,7 @@ public interface IAisling : ISprite
     Vector2 DeathLocation { get; set; }
     int DeathMapId { get; set; }
 
-    void SendTargetedClientMethod(Scope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null);
+    void SendTargetedClientMethod(PlayerScope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null);
     void AStarPath(List<Vector2> pathList);
     void CancelExchange();
     bool CanSeeGhosts();

@@ -95,7 +95,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         catch (Exception ex)
         {
             ServerSetup.EventsLogger($"{ex}\nUnknown exception in RegenHPCalculator method.");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -114,7 +114,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         catch (Exception ex)
         {
             ServerSetup.EventsLogger($"{ex}\nUnknown exception in RegenHPCalculator method.");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 

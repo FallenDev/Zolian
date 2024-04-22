@@ -814,7 +814,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
+                PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingY--;
@@ -827,7 +827,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
+                PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingX++;
@@ -840,7 +840,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
+                PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingY++;
@@ -853,7 +853,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!sprite.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
+                PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, sprite.Serial));
                 continue;
             }
             pendingX--;
@@ -1107,7 +1107,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             catch (Exception ex)
             {
                 ServerSetup.EventsLogger($"{ex}\nUnknown exception in WalkTo method.");
-                Crashes.TrackError(ex);
+                SentrySdk.CaptureException(ex);
             }
 
             var xDist = x - (int)pos.X;
@@ -1547,12 +1547,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (this is Aisling damagedPlayer)
         {
-            damagedPlayer.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            damagedPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
                 damagedPlayer.Client.DeathStatusCheck();
         }
         else
-            PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         if (dmg > 50)
             ApplyEquipmentDurability(dmg);
@@ -1826,7 +1826,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             {
                 PlayerNearby?.Client.SendHealthBar(this);
                 if (this is not Aisling aisling) return dmg;
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(92, aisling.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(92, aisling.Position));
             }
 
             if (fort <= Fortitude)
@@ -2005,7 +2005,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_spell_reflect();
                     if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when aegisChance >= 97:
@@ -2013,7 +2013,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_spell_reflect();
                     if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -2025,7 +2025,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_Haste();
                     damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to slow down around you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when hasteChance >= 97:
@@ -2033,7 +2033,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var buff = new buff_Hasten();
                     damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff, TimeSpan.FromSeconds(buff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to really slow down around you.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -2076,7 +2076,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         target.CurrentHp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when vampChance >= 97:
@@ -2109,7 +2109,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         target.CurrentHp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -2146,7 +2146,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         target.CurrentMp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
                     break;
                 }
             case 2 when vampChance >= 97:
@@ -2179,7 +2179,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                         target.CurrentMp -= (int)absorb;
                     client.SendAttributes(StatUpdateType.Vitality);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
                     break;
                 }
         }
@@ -2212,7 +2212,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new DebuffBleeding();
                     if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
                 }
             case 2 when bleedingChance >= 97:
@@ -2241,7 +2241,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new DebuffBleeding();
                     if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
                     break;
                 }
         }
@@ -2253,7 +2253,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
                 }
             case 2 when rendingChance >= 97:
@@ -2261,7 +2261,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                     var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff, TimeSpan.FromSeconds(deBuff.Length));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
                 }
         }
@@ -2514,7 +2514,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         var convDmg = (int)dmg;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
         damageDealingSprite.CurrentHp -= convDmg;
     }
 
@@ -2535,12 +2535,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (this is Aisling aisling)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
                 aisling.Client.DeathStatusCheck();
         }
         else
-            PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return finalDmg;
     }

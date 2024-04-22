@@ -91,7 +91,7 @@ public class Skill
             {
                 client.Aisling.SkillBook.Set((byte)slot, skill, null);
                 client.SendAddSkillToPane(skill);
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
             }
         }
 
@@ -119,19 +119,19 @@ public class Skill
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return false;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return true;
@@ -156,7 +156,7 @@ public class Skill
             {
                 aisling.SkillBook.Set((byte)slot, skill, null);
                 aisling.Client.SendAddSkillToPane(skill);
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
             }
         }
 
@@ -184,19 +184,19 @@ public class Skill
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return false;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return true;
@@ -228,7 +228,7 @@ public class Skill
         if (enemy is Aisling enemyAisling)
             sender = enemyAisling;
 
-        sender?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(27, null, enemy.Serial));
+        sender?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(27, null, enemy.Serial));
 
         return enemy;
     }

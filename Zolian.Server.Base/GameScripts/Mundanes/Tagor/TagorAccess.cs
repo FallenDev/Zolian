@@ -48,7 +48,7 @@ public class TagorAccess(WorldServer server, Mundane mundane) : MundaneScript(se
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qTout: {{=aGood luck!");
                 break;
             case 0x03:
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Shout, $"{Mundane.Name}: Step away from the kings guard!"));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Shout, $"{Mundane.Name}: Step away from the kings guard!"));
                 client.CloseDialog();
                 break;
         }

@@ -101,9 +101,9 @@ public class SirDolvet : MundaneScript
             case 0x999:
                 {
                     if (responseId != client.Aisling.Serial) return;
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Dark Knight"));
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(116, false));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Dark Knight"));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
                     client.Aisling.JobClass = Job.DarkKnight;
 

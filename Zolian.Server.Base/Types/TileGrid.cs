@@ -75,7 +75,7 @@ public class TileGrid : ObjectManager
         }
 
         if (sprites != null) return sprites;
-        Crashes.TrackError(lastException);
+        SentrySdk.CaptureException(lastException);
         return Enumerable.Empty<Sprite>();
     }
 }

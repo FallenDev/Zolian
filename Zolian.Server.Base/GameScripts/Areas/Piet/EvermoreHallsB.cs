@@ -160,7 +160,7 @@ public class EvermoreHallsB : AreaScript
         foreach (var trapPosition in trapList)
         {
             if (_playersOnMap.IsEmpty) return;
-            _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(112, new Position(trapPosition)));
+            _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(112, new Position(trapPosition)));
 
             foreach (var player in _playersOnMap.Values)
             {

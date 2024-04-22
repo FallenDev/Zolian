@@ -436,7 +436,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendAnimation(1, null, client.Aisling.Serial);
                     client.SendBodyAnimation(client.Aisling.Serial, BodyAnimation.HandsUp, 40);
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You've earned your Black belt!");
-                    client.Aisling.SendTargetedClientMethod(Scope.All, c => client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} earned their Black Belt!"));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.All, c => client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} earned their Black Belt!"));
                     client.GiveItem("Black Belt");
                     var blackBelt = new Legend.LegendItem
                     {

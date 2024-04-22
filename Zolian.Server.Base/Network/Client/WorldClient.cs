@@ -472,11 +472,11 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (target != null)
             {
                 if (target is Aisling aisling)
-                    aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
+                    aisling.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
             }
             else
             {
-                Aisling.SendTargetedClientMethod(Scope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
+                Aisling.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
             }
 
             return;
@@ -742,14 +742,14 @@ public class WorldClient : SocketClientBase, IWorldClient
             SendDisplayAisling(Aisling);
             Enter();
             if (Aisling.Username == "Death")
-                Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(391, Aisling.Position));
+                Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(391, Aisling.Position));
         }
         catch (Exception ex)
         {
             ServerSetup.EventsLogger($"Unhandled Exception in {nameof(Load)}.");
             ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
 
             LoadLock.Release();
             Disconnect();
@@ -855,7 +855,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         LoadSkillBook();
@@ -944,7 +944,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         var itemsAvailable = Aisling.Inventory.Items.Values;
@@ -1023,7 +1023,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return this;
@@ -1069,7 +1069,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         SkillCleanup();
@@ -1115,7 +1115,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         SpellCleanup();
@@ -1169,7 +1169,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return this;
@@ -1216,7 +1216,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return this;
@@ -1249,7 +1249,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return this;
@@ -1284,7 +1284,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return this;
@@ -1321,7 +1321,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         Aisling.Loading = false;
@@ -1344,7 +1344,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -1363,7 +1363,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -2352,7 +2352,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     {
                         ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
                         ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-                        Crashes.TrackError(ex);
+                        SentrySdk.CaptureException(ex);
                     }
 
                     break;
@@ -2378,7 +2378,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     {
                         ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
                         ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-                        Crashes.TrackError(ex);
+                        SentrySdk.CaptureException(ex);
                     }
 
                     break;
@@ -3721,7 +3721,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         // Recall message set in message variable back to the npc
         this.SendOptionsDialog(source, message);
-        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
         // After learning, ensure player's modifiers are set
         var item = new Item();
@@ -3745,7 +3745,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         // Recall message set in message variable back to the npc
         this.SendOptionsDialog(source, message);
-        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
 
         // After learning, ensure player's modifiers are set
         var item = new Item();
@@ -3793,8 +3793,8 @@ public class WorldClient : SocketClientBase, IWorldClient
         if (!((DateTime.UtcNow - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
         if (!Socket.Connected || !IsDayDreaming) return;
 
-        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
-        Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
         if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
         Aisling.Resting = Enums.RestPosition.RestPosition1;
         Aisling.Client.UpdateDisplay();
@@ -4506,7 +4506,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"Issue giving {player.Username} experience.");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -4543,7 +4543,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         player.Client.SendAttributes(StatUpdateType.Full);
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
-        player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(79, null, player.Serial, 64));
+        player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(79, null, player.Serial, 64));
     }
 
     public void GiveAp(int exp, bool overflow = false)
@@ -4618,7 +4618,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"Issue giving {player.Username} ability points.");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -4652,7 +4652,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         player.Client.SendAttributes(StatUpdateType.Full);
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Dark Rank:{player.AbpLevel}");
-        player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(385, null, player.Serial, 75));
+        player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(385, null, player.Serial, 75));
     }
 
     #endregion
@@ -4974,7 +4974,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -4998,7 +4998,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -5024,19 +5024,19 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (e.Message.Contains("PK__Players"))
             {
                 SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving new found map. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -5062,19 +5062,19 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (e.Message.Contains("PK__Players"))
             {
                 SendServerMessage(ServerMessageType.ActiveMessage, "Issue with saving player to ignored list. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -5098,7 +5098,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 

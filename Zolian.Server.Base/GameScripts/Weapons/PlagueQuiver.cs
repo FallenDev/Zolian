@@ -37,11 +37,11 @@ public class PlagueQuiver(Item item) : WeaponScript(item)
         var dmg = damageDealingSprite.Dex * 3 * Math.Max(damageDealingSprite.Position.DistanceFrom(enemy.Position), 5);
         // Rotten debuff
         dmg += dmg * 160 / 100;
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
+        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
         Task.Run(async () =>
         {
             await Task.Delay(100);
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(10000, null, enemy.Serial, 100, 10000, damageDealingSprite.Serial));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10000, null, enemy.Serial, 100, 10000, damageDealingSprite.Serial));
         });
         var debuff = new DebuffMorPoison();
         damageDealingSprite.Client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));

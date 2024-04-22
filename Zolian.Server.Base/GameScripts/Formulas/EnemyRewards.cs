@@ -95,7 +95,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
+                    player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(88, false));
                 });
             }
 
@@ -103,7 +103,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
+                    player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }
         }
@@ -164,7 +164,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(88, false));
+                    player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(88, false));
                 });
             }
 
@@ -172,7 +172,7 @@ public class EnemyRewards : RewardScript
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
-                    player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(157, false));
+                    player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(157, false));
                 });
             }
         }
@@ -274,7 +274,7 @@ public class EnemyRewards : RewardScript
             if (critical >= .85)
             {
                 exp *= 2;
-                player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(341, null, player.Serial));
+                player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(341, null, player.Serial));
             }
         }
 
@@ -337,7 +337,7 @@ public class EnemyRewards : RewardScript
             if (critical >= .85)
             {
                 ap *= 2;
-                player.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(386, null, player.Serial));
+                player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(386, null, player.Serial));
             }
         }
 

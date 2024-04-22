@@ -35,7 +35,7 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         }
         catch (Exception ex)
         {
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 }

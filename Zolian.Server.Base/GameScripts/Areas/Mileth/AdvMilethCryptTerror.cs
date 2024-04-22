@@ -73,7 +73,7 @@ public class AdvMilethCryptTerror : AreaScript
     {
         var a = AnimTimer.Update(elapsedTime);
         if (!a) return;
-        _playersOnMap.Values.First()?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 45)));
+        _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 45)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

@@ -41,7 +41,7 @@ public class Battlefield : AreaScript
         tarnishedArmor = tarnishedArmor.Create(client.Aisling, "Rouel's Tarnished Armor");
         tarnishedArmor.GiveTo(client.Aisling);
         client.Aisling.QuestManager.GivenTarnishedBreastplate = true;
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(vectorMap)));
         client.SendServerMessage(ServerMessageType.ActiveMessage, "Hmm, I found a few things just as Edgar said.");
     }
 }

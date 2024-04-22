@@ -16,7 +16,7 @@ public class Beggar(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     public override void OnItemDropped(WorldClient client, Item item)
     {
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: I'll make good use of it, that I will"));
+        client.Aisling.SendTargetedClientMethod(Darkages.Enums.PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: I'll make good use of it, that I will"));
         client.Aisling.Inventory.RemoveFromInventory(client, item);
     }
 
@@ -34,10 +34,10 @@ public class Beggar(WorldServer server, Mundane mundane) : MundaneScript(server,
             client.GiveExp((int)gold);
             client.SendAttributes(StatUpdateType.ExpGold);
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"Gained {gold} experience!");
-            client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: Blessed the stars!!!"));
+            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: Blessed the stars!!!"));
             return;
         }
 
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: Ya makin a foll of meh?"));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: Ya makin a foll of meh?"));
     }
 }

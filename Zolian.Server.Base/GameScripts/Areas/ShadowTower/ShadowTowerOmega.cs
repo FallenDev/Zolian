@@ -32,7 +32,7 @@ public class ShadowTowerOmega : AreaScript
         if (!mobsOnMap.IsNullOrEmpty()) return;
         var bossCreate = Monster.Create(boss, client.Aisling.Map);
         if (bossCreate == null) return;
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Omega Draconic, now online!"));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Omega Draconic, now online!"));
         ServerSetup.Instance.GlobalMonsterCache[bossCreate.Serial] = bossCreate;
         ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate);
     }

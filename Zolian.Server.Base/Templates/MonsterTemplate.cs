@@ -170,7 +170,7 @@ public static class MonsterStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 

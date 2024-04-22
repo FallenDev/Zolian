@@ -17,6 +17,7 @@ using RestSharp;
 using System.Net;
 using System.Net.Sockets;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
@@ -122,7 +123,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         {
             if (handler is not null) return handler(client, in packet);
             ServerSetup.PacketLogger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
-            Crashes.TrackError(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
+            SentrySdk.CaptureException(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
         }
         catch
         {
@@ -256,7 +257,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
@@ -299,7 +300,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         {
             ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
             ServerSetup.ConnectionLogger($"{ex}");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
             return false;
         }
 

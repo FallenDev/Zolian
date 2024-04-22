@@ -26,6 +26,7 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Darkages.Managers;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
@@ -89,7 +90,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             else
             {
                 ServerSetup.ConnectionLogger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
-                Analytics.TrackEvent($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
+                SentrySdk.CaptureMessage($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 localClient.Disconnect();
             }
 
@@ -453,7 +454,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             if (handler is not null) return handler(client, in packet);
             ServerSetup.PacketLogger($"Unknown message to login server with code {opCode} from {client.RemoteIp}");
-            Crashes.TrackError(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
+            SentrySdk.CaptureException(new Exception($"Unknown message to login server with code {opCode} from {client.RemoteIp}"));
         }
         catch
         {
@@ -602,7 +603,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
@@ -645,7 +646,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
             ServerSetup.ConnectionLogger($"{ex}");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
             return false;
         }
 
@@ -694,7 +695,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             ServerSetup.ConnectionLogger(ex.Message, LogLevel.Error);
             ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
 
         return true;
@@ -709,7 +710,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             if (regex.IsMatch(name))
             {
-                Analytics.TrackEvent($"Player attempted to create an unsupported username. {name} \n {client.Id}");
+                SentrySdk.CaptureMessage($"Player attempted to create an unsupported username. {name} \n {client.Id}");
                 client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unsupported username, please try again.");
                 return false;
             }

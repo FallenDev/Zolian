@@ -79,7 +79,7 @@ public class Legend
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class Legend
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 }

@@ -92,7 +92,7 @@ public static class BoardPostStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -144,7 +144,7 @@ public static class BoardPostStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -165,7 +165,7 @@ public static class BoardPostStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 }

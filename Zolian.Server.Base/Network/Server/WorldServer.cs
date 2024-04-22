@@ -37,6 +37,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using Darkages.Managers;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using CollectionExtensions = System.Collections.Generic.CollectionExtensions;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ExchangeArgs = Chaos.Networking.Entities.Client.ExchangeArgs;
@@ -124,7 +125,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.ConnectionLogger(ex.Message, LogLevel.Error);
             ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
 
         return base.ExecuteAsync(stoppingToken);
@@ -815,7 +816,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
                     ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-                    Crashes.TrackError(ex);
+                    SentrySdk.CaptureException(ex);
 
                     clientsToRemove.Add(player.Client.Id);
                     player.Client.Disconnect();
@@ -855,7 +856,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         catch (Exception ex)
         {
             // Track issues in App Center only
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -876,7 +877,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         catch (Exception ex)
         {
             // Track issues in App Center only
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -926,7 +927,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -945,7 +946,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -961,7 +962,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -973,8 +974,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            Crashes.TrackError(ex);
-            Analytics.TrackEvent($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
+            SentrySdk.CaptureException(ex);
+            SentrySdk.CaptureMessage($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
 
             // Wipe Caches
             ServerSetup.Instance.TempGlobalMapCache = [];
@@ -1017,7 +1018,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1553,7 +1554,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
             var toShowList = playersToShowList as Aisling[] ?? playersToShowList.ToArray();
-            localClient.Aisling.SendTargetedClientMethod(Scope.DefinedAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, publicMessageType, response), toShowList);
+            localClient.Aisling.SendTargetedClientMethod(PlayerScope.DefinedAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, publicMessageType, response), toShowList);
 
             var nearbyMundanes = localClient.Aisling.MundanesNearby();
 
@@ -1796,7 +1797,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     && !client.IsLoopback() && !client.RemoteIp.Equals(ipLocal))
                 {
                     ServerSetup.ConnectionLogger($"Failed to login GM from {client.RemoteIp}.");
-                    Analytics.TrackEvent($"Failed to login GM from {client.RemoteIp}.");
+                    SentrySdk.CaptureMessage($"Failed to login GM from {client.RemoteIp}.");
                     client.Disconnect();
                     return;
                 }
@@ -1834,21 +1835,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             catch (Exception e)
             {
                 ServerSetup.ConnectionLogger($"Failed to add player {redirect.Name} to world server.");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 client.Disconnect();
             }
         }
         catch (Exception e)
         {
             ServerSetup.ConnectionLogger($"Client with ip {client.RemoteIp} failed to load player {redirect.Name}.");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
             client.Disconnect();
         }
         finally
         {
             var time = DateTime.UtcNow;
             ServerSetup.ConnectionLogger($"{redirect.Name} logged in at: {time}");
-            Analytics.TrackEvent($"{client.Aisling.Username} logged in at {DateTime.Now} local time on {client.RemoteIp}");
+            SentrySdk.CaptureMessage($"{client.Aisling.Username} logged in at {DateTime.Now} local time on {client.RemoteIp}");
         }
     }
 
@@ -2211,7 +2212,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnEmote(IWorldClient localClient, EmoteArgs localArgs)
         {
             if ((int)localArgs.BodyAnimation <= 44)
-                localClient.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(localClient.Aisling.Serial, localArgs.BodyAnimation, 120));
+                localClient.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(localClient.Aisling.Serial, localArgs.BodyAnimation, 120));
 
             return default;
         }
@@ -2248,7 +2249,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     client.Aisling.GoldPoints = 0;
 
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.YouDroppedGoldMsg}");
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislingsExludingSelf, c => c.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}"));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislingsExludingSelf, c => c.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}"));
 
                 Money.Create(client.Aisling, (uint)amount, new Position(destinationPoint.X, destinationPoint.Y));
                 client.SendAttributes(StatUpdateType.ExpGold);
@@ -3442,7 +3443,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
         {
-            localClient.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, PublicMessageType.Chant, localArgs.ChantMessage));
+            localClient.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, PublicMessageType.Chant, localArgs.ChantMessage));
             return default;
         }
     }
@@ -3551,7 +3552,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (handler is not null) return handler(client, in packet);
             ServerSetup.PacketLogger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
-            Crashes.TrackError(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
+            SentrySdk.CaptureException(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
         }
         catch
         {
@@ -3770,7 +3771,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                Analytics.TrackEvent($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
 
                 if (tor == true)
                 {
@@ -3813,7 +3814,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
             ServerSetup.ConnectionLogger($"{ex}");
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
             return false;
         }
 

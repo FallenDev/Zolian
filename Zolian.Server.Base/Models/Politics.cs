@@ -1,4 +1,6 @@
-﻿namespace Darkages.Models;
+﻿using Newtonsoft.Json;
+
+namespace Darkages.Models;
 
 public class Politics
 {

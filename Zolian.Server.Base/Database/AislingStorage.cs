@@ -45,7 +45,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -80,7 +80,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -108,7 +108,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -322,7 +322,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -541,7 +541,7 @@ public record AislingStorage : Sql, IAislingStorage
             Console.WriteLine("Issue with database connection");
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -578,7 +578,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -601,7 +601,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -633,7 +633,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return false;
@@ -668,7 +668,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return false;
@@ -692,7 +692,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return aisling;
@@ -716,7 +716,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return board;
@@ -762,7 +762,7 @@ public record AislingStorage : Sql, IAislingStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return posts;
@@ -789,7 +789,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -946,7 +946,7 @@ public record AislingStorage : Sql, IAislingStorage
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {

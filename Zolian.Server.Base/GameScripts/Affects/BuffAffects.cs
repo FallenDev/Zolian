@@ -39,12 +39,12 @@ public class BuffLycanisim : Buff
         InsertBuff(aisling, affliction);
 
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYou begin to howl uncontrollably");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += DmgModifier;
         aisling.Afflictions |= Afflictions.Lycanisim;
         aisling.Afflictions &= ~Afflictions.Normal;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
@@ -99,12 +99,12 @@ public class BuffVampirisim : Buff
         InsertBuff(aisling, affliction);
 
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYour thirst is unquenchable!");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(345, aisling.Position));
         aisling.BonusDex += DexModifier;
         aisling.BonusDmg += HitModifier;
         aisling.Afflictions |= Afflictions.Vampirisim;
         aisling.Afflictions &= ~Afflictions.Normal;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(139, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
@@ -151,18 +151,18 @@ public class buff_DiaAite : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel Ceannlaidir's hand on your shoulder");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(314, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(314, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(314, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -196,16 +196,16 @@ public class buff_aite : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a sense of security");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(93, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -241,8 +241,8 @@ public class buff_SpectralShield : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spectral Shield has strengthened your resolve.");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(262, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
@@ -250,8 +250,8 @@ public class buff_SpectralShield : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(262, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(262, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -294,8 +294,8 @@ public class buff_DefenseUp : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're now aware of your surroundings.");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(83, false));
             InsertBuff(aisling, buff);
             aisling.Client.SendAttributes(StatUpdateType.Secondary);
         }
@@ -303,8 +303,8 @@ public class buff_DefenseUp : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(83, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(83, false));
         }
     }
 
@@ -350,8 +350,8 @@ public class buff_Hastenga : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
 
             foreach (var (_, skill) in aisling.SkillBook.Skills)
@@ -370,8 +370,8 @@ public class buff_Hastenga : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -385,7 +385,7 @@ public class buff_Hastenga : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
 
@@ -405,7 +405,7 @@ public class buff_Hastenga : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
         }
     }
 }
@@ -428,8 +428,8 @@ public class buff_Hasten : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
 
             foreach (var (_, skill) in aisling.SkillBook.Skills)
@@ -448,8 +448,8 @@ public class buff_Hasten : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -463,7 +463,7 @@ public class buff_Hasten : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
 
@@ -483,7 +483,7 @@ public class buff_Hasten : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
         }
     }
 }
@@ -506,8 +506,8 @@ public class buff_Haste : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
 
             foreach (var (_, skill) in aisling.SkillBook.Skills)
@@ -526,8 +526,8 @@ public class buff_Haste : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -541,7 +541,7 @@ public class buff_Haste : Buff
         {
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
             aisling.Client.SendEffect(byte.MinValue, Icon);
             DeleteBuff(aisling, buff);
 
@@ -561,7 +561,7 @@ public class buff_Haste : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
         }
     }
 }
@@ -584,16 +584,16 @@ public class buff_clawfist : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands are empowered!");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -633,7 +633,7 @@ public class buff_drunkenFist : Buff
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
         if (affected is not Aisling aisling) return;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -643,7 +643,7 @@ public class buff_drunkenFist : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou are no longer drunk!");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(1, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, aisling.Serial));
         DeleteBuff(aisling, buff);
     }
 }
@@ -670,7 +670,7 @@ public class buff_ninthGate : Buff
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
         if (affected is not Aisling aisling) return;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(305, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(305, null, aisling.Serial));
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -686,7 +686,7 @@ public class buff_ninthGate : Buff
             aisling.CurrentMp = 100;
 
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, null, aisling.Serial));
         DeleteBuff(aisling, buff);
     }
 }
@@ -712,14 +712,14 @@ public class buff_berserk : Buff
         aisling.CurrentMp = 0;
         aisling.Client.SendAttributes(StatUpdateType.Full);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bEverything turns red!");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(324, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, aisling.Serial));
         InsertBuff(aisling, buff);
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
         if (affected is not Aisling aisling) return;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation((ushort)Random.Shared.Next(367, 369), null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation((ushort)Random.Shared.Next(367, 369), null, aisling.Serial));
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -731,7 +731,7 @@ public class buff_berserk : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou begin to realize your actions");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(55, null, aisling.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(55, null, aisling.Serial));
         DeleteBuff(aisling, buff);
     }
 
@@ -767,16 +767,16 @@ public class buff_wingsOfProtect : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Wings of a guardian fall upon you");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -825,16 +825,16 @@ public class buff_ArdDion : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -883,16 +883,16 @@ public class buff_MorDion : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(244, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -941,16 +941,16 @@ public class buff_dion : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(6, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(6, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(6, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -999,16 +999,16 @@ public class buff_IronSkin : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to iron!");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1057,16 +1057,16 @@ public class buff_StoneSkin : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to stone!");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(89, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1116,7 +1116,7 @@ public class buff_hide : Buff
         {
             if (aisling.Client == null || aisling.IsDead()) return;
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blended into the shadows");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(43, false));
             InsertBuff(aisling, buff);
             aisling.Client.UpdateDisplay();
         }
@@ -1124,7 +1124,7 @@ public class buff_hide : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(43, false));
         }
     }
 
@@ -1176,7 +1176,7 @@ public class buff_ShadowFade : Buff
         {
             if (aisling.Client == null || aisling.IsDead()) return;
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Faded into the dark");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(43, false));
             InsertBuff(aisling, buff);
             aisling.Client.UpdateDisplay();
         }
@@ -1184,7 +1184,7 @@ public class buff_ShadowFade : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(43, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(43, false));
         }
     }
 
@@ -1228,8 +1228,8 @@ public class buff_DexUp : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Adrenaline starts pumping!");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(367, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             InsertBuff(aisling, buff);
         }
@@ -1237,8 +1237,8 @@ public class buff_DexUp : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(367, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(367, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1279,7 +1279,7 @@ public class buff_GryphonsGrace : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(139, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(139, false));
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             InsertBuff(aisling, buff);
         }
@@ -1287,8 +1287,8 @@ public class buff_GryphonsGrace : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(139, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(86, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(139, false));
         }
     }
 
@@ -1329,7 +1329,7 @@ public class buff_OrcishStrength : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(136, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(136, false));
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             InsertBuff(aisling, buff);
         }
@@ -1337,8 +1337,8 @@ public class buff_OrcishStrength : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(34, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(136, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(34, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(136, false));
         }
     }
 
@@ -1380,7 +1380,7 @@ public class buff_FeywildNectar : Buff
 
         if (affected is Aisling aisling)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(165, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(165, false));
             aisling.Client.SendAttributes(StatUpdateType.Primary);
             InsertBuff(aisling, buff);
         }
@@ -1388,8 +1388,8 @@ public class buff_FeywildNectar : Buff
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(35, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(165, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(35, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(165, false));
         }
     }
 
@@ -1434,16 +1434,16 @@ public class buff_randWeaponElement : Buff
         {
             aisling.TempOffensiveHold = aisling.SecondaryOffensiveElement;
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Secondary Offensive element has changed {aisling.SecondaryOffensiveElement}");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, null, affected.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(195, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(195, null, affected.Serial));
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(195, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1555,14 +1555,14 @@ public class buff_skill_reflect : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Physical attacks are now being repelled");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1611,14 +1611,14 @@ public class buff_spell_reflect : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being reflected back");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1667,14 +1667,14 @@ public class buff_PerfectDefense : Buff
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being deflected");
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
             InsertBuff(aisling, buff);
         }
         else
         {
             var playerNearby = affected.PlayerNearby;
             if (playerNearby == null) return;
-            playerNearby.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
 
@@ -1718,8 +1718,8 @@ public class aura_BriarThorn : Buff
         if (affected is not Aisling aisling) return;
         aisling.Spikes += 10;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Briarthorn");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(87, null, affected.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(87, null, affected.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         InsertBuff(aisling, buff);
     }
 
@@ -1758,8 +1758,8 @@ public class aura_LawsOfAosda : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Laws of Aosda");
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(236, null, affected.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(30, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(236, null, affected.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         InsertBuff(aisling, buff);
     }
 
@@ -1793,7 +1793,7 @@ public class aura_LawsOfAosda : Buff
                 if (!aisling.LawsOfAosda.IsRunning)
                     aisling.LawsOfAosda.Start();
 
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(236, null, aisling.Serial));
                 aisling.CurrentHp = aisling.MaximumHp;
                 aisling.Client.SendAttributes(StatUpdateType.Vitality);
             }
@@ -1950,7 +1950,7 @@ public class BuffFasSpiorad : Buff
         }
 
         if (affected is not Aisling aisling) return;
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
 
         var reduce = aisling.MaximumMp * 0.50;
         if (aisling.CurrentHp - reduce <= 0)
@@ -1963,7 +1963,7 @@ public class BuffFasSpiorad : Buff
         aisling.CurrentMp = aisling.MaximumMp;
 
         InsertBuff(aisling, buff);
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(26, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(26, false));
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff) { }

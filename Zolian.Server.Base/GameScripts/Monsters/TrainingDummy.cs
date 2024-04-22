@@ -70,7 +70,7 @@ public class TrainingDummy : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
+    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
 
     public override void Update(TimeSpan elapsedTime)
     {
@@ -85,7 +85,7 @@ public class TrainingDummy : MonsterScript
         if (_stopwatch.Elapsed.TotalMilliseconds < 1000) return;
         _stopwatch.Restart();
         if (_damage <= 0) return;
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
         _damage = 0;
     }
 }
@@ -124,7 +124,7 @@ public class TrainingDummy2 : MonsterScript
         _incoming.Damage = convDmg;
         var dmgDisplay = _incoming.Damage.ToString();
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n"));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}'s {_incoming.What}: {dmgDisplay} DMG.\n"));
         Monster.Facing((int)source.Pos.X, (int)source.Pos.Y, out var direction);
 
         if (!Monster.Position.IsNextTo(source.Position)) return;
@@ -152,7 +152,7 @@ public class TrainingDummy2 : MonsterScript
         Monster.BonusAc = 0;
     }
 
-    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
+    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
 
     public override void Update(TimeSpan elapsedTime)
     {

@@ -57,7 +57,7 @@ public class BaseMonsterIntelligence : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -235,7 +235,7 @@ public class BaseMonsterIntelligence : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -253,7 +253,7 @@ public class BaseMonsterIntelligence : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -312,7 +312,7 @@ public class BaseMonsterIntelligence : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -625,7 +625,7 @@ public class WeakCommon : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -803,7 +803,7 @@ public class WeakCommon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -821,7 +821,7 @@ public class WeakCommon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -880,7 +880,7 @@ public class WeakCommon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1222,7 +1222,7 @@ public class Inanimate : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1276,7 +1276,7 @@ public class ShapeShifter : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -1454,7 +1454,7 @@ public class ShapeShifter : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1491,7 +1491,7 @@ public class ShapeShifter : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1550,7 +1550,7 @@ public class ShapeShifter : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1858,7 +1858,7 @@ public class LootGoblin : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -1949,7 +1949,7 @@ public class SelfDestruct : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -2092,7 +2092,7 @@ public class SelfDestruct : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -2110,7 +2110,7 @@ public class SelfDestruct : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -2169,7 +2169,7 @@ public class SelfDestruct : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -2438,7 +2438,7 @@ public class AlertSummon : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -2619,7 +2619,7 @@ public class AlertSummon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -2637,7 +2637,7 @@ public class AlertSummon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -2696,7 +2696,7 @@ public class AlertSummon : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3017,7 +3017,7 @@ public class Turret : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -3171,7 +3171,7 @@ public class Turret : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3189,7 +3189,7 @@ public class Turret : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3247,7 +3247,7 @@ public class Turret : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3420,7 +3420,7 @@ public class GeneralPirate : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -3482,7 +3482,7 @@ public class GeneralPirate : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -3540,7 +3540,7 @@ public class GeneralPirate : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -3594,7 +3594,7 @@ public class GeneralPirate : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3612,7 +3612,7 @@ public class GeneralPirate : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3671,7 +3671,7 @@ public class GeneralPirate : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -3799,7 +3799,7 @@ public class GeneralPirate : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -3826,7 +3826,7 @@ public class GeneralPirate : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
             }
         }
 
@@ -3887,7 +3887,7 @@ public class GeneralPirate : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -4012,7 +4012,7 @@ public class PirateOfficer : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -4074,7 +4074,7 @@ public class PirateOfficer : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -4132,7 +4132,7 @@ public class PirateOfficer : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -4186,7 +4186,7 @@ public class PirateOfficer : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -4204,7 +4204,7 @@ public class PirateOfficer : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -4263,7 +4263,7 @@ public class PirateOfficer : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -4400,7 +4400,7 @@ public class PirateOfficer : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -4427,7 +4427,7 @@ public class PirateOfficer : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
             }
         }
 
@@ -4488,7 +4488,7 @@ public class PirateOfficer : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -4605,7 +4605,7 @@ public class ShadowSight : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -4783,7 +4783,7 @@ public class ShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -4801,7 +4801,7 @@ public class ShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -4859,7 +4859,7 @@ public class ShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -5172,7 +5172,7 @@ public class WeakShadowSight : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -5350,7 +5350,7 @@ public class WeakShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -5368,7 +5368,7 @@ public class WeakShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -5426,7 +5426,7 @@ public class WeakShadowSight : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -5746,7 +5746,7 @@ public class AosdaRemnant : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -5755,7 +5755,7 @@ public class AosdaRemnant : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -5817,7 +5817,7 @@ public class AosdaRemnant : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -5875,7 +5875,7 @@ public class AosdaRemnant : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -5929,7 +5929,7 @@ public class AosdaRemnant : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -5947,7 +5947,7 @@ public class AosdaRemnant : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -6005,7 +6005,7 @@ public class AosdaRemnant : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -6133,7 +6133,7 @@ public class AosdaRemnant : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -6160,7 +6160,7 @@ public class AosdaRemnant : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -6221,7 +6221,7 @@ public class AosdaRemnant : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -6345,7 +6345,7 @@ public class DraconicOmega : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -6354,7 +6354,7 @@ public class DraconicOmega : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -6416,7 +6416,7 @@ public class DraconicOmega : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -6474,7 +6474,7 @@ public class DraconicOmega : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -6528,7 +6528,7 @@ public class DraconicOmega : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -6546,7 +6546,7 @@ public class DraconicOmega : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -6604,7 +6604,7 @@ public class DraconicOmega : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -6732,7 +6732,7 @@ public class DraconicOmega : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -6759,7 +6759,7 @@ public class DraconicOmega : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -6820,7 +6820,7 @@ public class DraconicOmega : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -6944,7 +6944,7 @@ public class JackFrost : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -6953,7 +6953,7 @@ public class JackFrost : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -7015,7 +7015,7 @@ public class JackFrost : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Thank you, Merry Christmas!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Thank you, Merry Christmas!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -7073,7 +7073,7 @@ public class JackFrost : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooo..."));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooo..."));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -7127,7 +7127,7 @@ public class JackFrost : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7145,7 +7145,7 @@ public class JackFrost : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7203,7 +7203,7 @@ public class JackFrost : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7331,7 +7331,7 @@ public class JackFrost : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I do not control my actions!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I do not control my actions!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -7358,7 +7358,7 @@ public class JackFrost : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -7419,7 +7419,7 @@ public class JackFrost : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -7547,7 +7547,7 @@ public class Yeti : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -7556,7 +7556,7 @@ public class Yeti : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -7564,7 +7564,7 @@ public class Yeti : MonsterScript
     {
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.75 && !_phaseOne)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
+            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7578,7 +7578,7 @@ public class Yeti : MonsterScript
 
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.50 && !_phaseTwo)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
+            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7596,7 +7596,7 @@ public class Yeti : MonsterScript
 
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.25 && !_phaseThree)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
+            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7675,7 +7675,7 @@ public class Yeti : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -7733,7 +7733,7 @@ public class Yeti : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -7787,7 +7787,7 @@ public class Yeti : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7805,7 +7805,7 @@ public class Yeti : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7863,7 +7863,7 @@ public class Yeti : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -7991,7 +7991,7 @@ public class Yeti : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -8018,7 +8018,7 @@ public class Yeti : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -8079,7 +8079,7 @@ public class Yeti : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -8203,7 +8203,7 @@ public class WorldBossBahamut : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -8212,7 +8212,7 @@ public class WorldBossBahamut : MonsterScript
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
     }
 
@@ -8274,7 +8274,7 @@ public class WorldBossBahamut : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Like a phoenix, I will return."));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Like a phoenix, I will return."));
         Task.Delay(600).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -8332,12 +8332,12 @@ public class WorldBossBahamut : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
             }
 
             if (aisling.Skulled || aisling.Dead)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
                 if (!Monster.WalkEnabled) return;
                 if (Monster.CantMove || Monster.Blind) return;
                 if (walk) Walk();
@@ -8379,7 +8379,7 @@ public class WorldBossBahamut : MonsterScript
 
     public override void OnApproach(WorldClient client)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
     }
 
     public override void OnLeave(WorldClient client)
@@ -8393,7 +8393,7 @@ public class WorldBossBahamut : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -8404,7 +8404,7 @@ public class WorldBossBahamut : MonsterScript
             var critical = (long)(Monster.CurrentHp * 0.01);
             if (Monster.CurrentHp <= critical)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(Scope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
+                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
                 Monster.Image = (ushort)Monster.Template.ImageVarience;
 
                 var objects = ServerSetup.Instance.Game.ObjectHandlers.GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
@@ -8426,7 +8426,7 @@ public class WorldBossBahamut : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -8485,7 +8485,7 @@ public class WorldBossBahamut : MonsterScript
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -8683,7 +8683,7 @@ public class WorldBossBahamut : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.90)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
                 }
             }
             else if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
@@ -8700,7 +8700,7 @@ public class WorldBossBahamut : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods

@@ -77,7 +77,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
             case >= 0 and <= .92:
                 break;
             default:
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: {Messages[RandomNumberGenerator.GetInt32(Count + 1) % Messages.Length]}"));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: {Messages[RandomNumberGenerator.GetInt32(Count + 1) % Messages.Length]}"));
                 break;
         }
     }

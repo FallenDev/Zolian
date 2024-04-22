@@ -38,7 +38,7 @@ public class ShadowGames : AreaScript
                     client.Aisling.Inventory.RemoveFromInventory(client, item);
                     var bossCreate1 = Monster.Create(boss1, client.Aisling.Map);
                     if (bossCreate1 == null) return;
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Arc unit, now online!"));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Arc unit, now online!"));
                     ServerSetup.Instance.GlobalMonsterCache[bossCreate1.Serial] = bossCreate1;
                     ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate1);
                 }
@@ -51,7 +51,7 @@ public class ShadowGames : AreaScript
                     client.Aisling.Inventory.RemoveFromInventory(client, item);
                     var bossCreate2 = Monster.Create(boss2, client.Aisling.Map);
                     if (bossCreate2 == null) return;
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Neo unit, now online!"));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Neo unit, now online!"));
                     ServerSetup.Instance.GlobalMonsterCache[bossCreate2.Serial] = bossCreate2;
                     ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate2);
                 }

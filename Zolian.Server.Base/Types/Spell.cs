@@ -81,7 +81,7 @@ public class Spell
             {
                 client.Aisling.SpellBook.Set((byte)slot, spell, null);
                 client.SendAddSpellToPane(spell);
-                client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
             }
         }
 
@@ -109,19 +109,19 @@ public class Spell
             {
                 if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return false;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return true;
@@ -147,7 +147,7 @@ public class Spell
             {
                 aisling.SpellBook.Set((byte)slot, spell, null);
                 aisling.Client.SendAddSpellToPane(spell);
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
             }
         }
 
@@ -175,19 +175,19 @@ public class Spell
             {
                 if (!e.Message.Contains(aisling.Serial.ToString())) return false;
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving spell on issue. Contact GM");
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
                 return false;
             }
 
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
 
         return true;

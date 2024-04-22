@@ -1126,7 +1126,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{template.Name}: is missing a script for {skillScriptStr}\n");
+                SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 
@@ -1137,7 +1137,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
         catch (Exception ex)
         {
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1151,7 +1151,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{template.Name}: is missing a script for {spellScriptStr}\n");
+                SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {spellScriptStr}\n");
                 return;
             }
 
@@ -1164,7 +1164,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
         catch (Exception ex)
         {
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -1177,7 +1177,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
             if (scripts == null)
             {
-                Analytics.TrackEvent($"{template.Name}: is missing a script for {skillScriptStr}\n");
+                SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 
@@ -1188,7 +1188,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
         catch (Exception ex)
         {
-            Crashes.TrackError(ex);
+            SentrySdk.CaptureException(ex);
         }
     }
 

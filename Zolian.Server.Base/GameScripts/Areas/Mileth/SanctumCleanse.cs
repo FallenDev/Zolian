@@ -49,6 +49,6 @@ public class SanctumCleansingPool : AreaScript
         if (!client.Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal))
             client.Aisling.Afflictions |= Afflictions.Normal;
 
-        client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(195, new Position(vectorMap)));
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(195, new Position(vectorMap)));
     }
 }

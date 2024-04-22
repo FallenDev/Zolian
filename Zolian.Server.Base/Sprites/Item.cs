@@ -756,7 +756,7 @@ public sealed class Item : Sprite, IItem
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
             ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            Crashes.TrackError(e);
+            SentrySdk.CaptureException(e);
         }
         finally
         {
@@ -803,7 +803,7 @@ public sealed class Item : Sprite, IItem
             {
                 ServerSetup.EventsLogger(e.Message, LogLevel.Error);
                 ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-                Crashes.TrackError(e);
+                SentrySdk.CaptureException(e);
             }
         }
 

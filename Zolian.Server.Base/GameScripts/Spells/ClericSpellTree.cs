@@ -230,12 +230,12 @@ public class Detect(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
             return;
         }
 
@@ -343,7 +343,7 @@ public class Detect(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+                caster.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
                 return;
             }
 
@@ -385,8 +385,8 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.15;
                 aisling.ThreatMeter += (long)healBase;
@@ -401,14 +401,14 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.10);
 
@@ -494,8 +494,8 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.30;
                 aisling.ThreatMeter += (long)healBase;
@@ -510,14 +510,14 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.25);
 
@@ -603,8 +603,8 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
                 var healBase = target.MaximumHp * 0.65;
                 aisling.ThreatMeter += (long)healBase;
@@ -619,14 +619,14 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.45);
 
@@ -713,8 +713,8 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
 
             if (target.CurrentHp > 0)
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
                 if (target.HasBuff("Spectral Shield") || target.HasBuff("Defensive Stance"))
                 {
@@ -739,14 +739,14 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             }
             else
             {
-                aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
             }
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.70);
 
@@ -830,12 +830,12 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         var healBase = aisling.MaximumHp * 0.25;
@@ -851,8 +851,8 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
 
-                partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
-                partyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(267, null, partyMember.Serial));
+                partyMember.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
+                partyMember.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(267, null, partyMember.Serial));
                 partyMember.Client.SendAttributes(StatUpdateType.Vitality);
             }
         }
@@ -862,7 +862,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             if (aisling.CurrentHp > aisling.MaximumHp)
                 aisling.CurrentHp = aisling.MaximumHp;
 
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendHealthBar(aisling, 8));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(aisling, 8));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
         }
     }
@@ -939,12 +939,12 @@ public class Forestall(Spell spell) : SpellScript(spell)
         if (target is not Aisling savedAisling) return;
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         if (!savedAisling.Skulled) return;
@@ -1001,12 +1001,12 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
         if (sprite is not Aisling aisling) return;
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         if (aisling.GroupId != 0)
@@ -1017,7 +1017,7 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
                 deadPartyMember.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");
                 deadPartyMember.Client.SendAttributes(StatUpdateType.Full);
                 deadPartyMember.Client.TransitionToMap(aisling.CurrentMapId, new Position(aisling.X, aisling.Y));
-                Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(304, null, deadPartyMember.Serial)); });
+                Task.Delay(350).ContinueWith(ct => { deadPartyMember.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(304, null, deadPartyMember.Serial)); });
                 break;
             }
         }
@@ -1095,12 +1095,12 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
@@ -1144,7 +1144,7 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
         }
     }
 }
@@ -1166,12 +1166,12 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
@@ -1215,7 +1215,7 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
         }
     }
 }
@@ -1237,12 +1237,12 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
@@ -1286,7 +1286,7 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
         }
     }
 }
@@ -1308,12 +1308,12 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
         foreach (var monster in aisling.MonstersNearby())
@@ -1357,7 +1357,7 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
         }
     }
 }
@@ -1396,8 +1396,8 @@ public class AoPuinsein(Spell spell) : SpellScript(spell)
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (!cursed) return;
         if (aoDebuff == string.Empty) return;
@@ -1495,8 +1495,8 @@ public class AoDall(Spell spell) : SpellScript(spell)
         if (target is Aisling targetAisling)
             targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your ailment.");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1591,8 +1591,8 @@ public class AoBeagCradh(Spell spell) : SpellScript(spell)
         if (target is Aisling targetAisling)
             targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1688,8 +1688,8 @@ public class AoCradh(Spell spell) : SpellScript(spell)
         if (target is Aisling targetAisling)
             targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1785,8 +1785,8 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
         if (target is Aisling targetAisling)
             targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1882,8 +1882,8 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
         if (target is Aisling targetAisling)
             targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{aisling.Username} cured your curse mark");
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         foreach (var debuffs in ServerSetup.Instance.GlobalDeBuffCache.Values)
         {
@@ -1975,8 +1975,8 @@ public class AoSuain(Spell spell) : SpellScript(spell)
                 }
         }
 
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-        aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.HasDebuff("Frozen"))
             target.RemoveDebuff("Frozen");

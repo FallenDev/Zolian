@@ -36,17 +36,17 @@ public class IceQuiver(Item item) : WeaponScript(item)
         var dmg = damageDealingSprite.Dex * 3 * Math.Max(damageDealingSprite.Position.DistanceFrom(enemy.Position), 5);
         // Rotten debuff
         dmg += dmg * 130 / 100;
-        damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
+        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
         Task.Run(async () =>
         {
             await Task.Delay(100);
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(200);
-            damageDealingSprite.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
+            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
         });
 
         enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Wind, null);

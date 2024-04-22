@@ -33,7 +33,7 @@ public class NecroEntrance : AreaScript
                     client.TransitionToMap(1204, new Position(17, 37));
                 else
                 {
-                    client.Aisling.SendTargetedClientMethod(Scope.NearbyAislings, c => c.SendAnimation(75, null, client.Aisling.Serial));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, null, client.Aisling.Serial));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou are forcibly repelled!");
                 }
 
