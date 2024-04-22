@@ -1,4 +1,4 @@
-﻿using Elskom.Generic.Libs;
+﻿using ComponentAce.Compression.Libs.zlib;
 
 namespace Darkages.Compression;
 
@@ -8,12 +8,12 @@ public static class CompressionProvider
     {
         var iStream = new MemoryStream(buffer);
         var oStream = new MemoryStream();
-        var zStream = new ZOutputStream(oStream, (ZlibCompression)6);
+        var zStream = new ZOutputStream(oStream);
 
         try
         {
             CopyStream(iStream, zStream);
-            zStream.Finish();
+            zStream.finish();
 
             return oStream.ToArray();
         }
@@ -41,7 +41,7 @@ public static class CompressionProvider
         try
         {
             CopyStream(iStream, zStream);
-            zStream.Finish();
+            zStream.finish();
 
             return oStream.ToArray();
         }
