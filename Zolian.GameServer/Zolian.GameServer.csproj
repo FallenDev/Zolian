@@ -54,8 +54,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="AppCenterAPIKeys.txt">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		<None Update="SentrySecrets.txt">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
