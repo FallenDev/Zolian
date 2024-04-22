@@ -5,9 +5,6 @@ using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Templates;
-
-using Microsoft.AppCenter.Crashes;
-
 using System.Text;
 
 namespace Darkages.Types;

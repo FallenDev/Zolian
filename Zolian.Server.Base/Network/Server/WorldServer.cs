@@ -24,13 +24,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
-using Newtonsoft.Json;
-
 using RestSharp;
 
 using ServiceStack;

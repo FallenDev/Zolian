@@ -10,7 +10,6 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
-using Nation = Darkages.Enums.Nation;
 
 namespace Darkages.GameScripts.Spells;
 

@@ -10,10 +10,6 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
-
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,7 +21,6 @@ using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +28,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-
+using Sentry;
+using Sentry.Profiling;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Zolian.GameServer;
@@ -49,22 +45,31 @@ public partial class App
 
         base.OnStartup(e);
         ServerCtx = new CancellationTokenSource();
-
-        SetCountryCode();
-        await Crashes.SetEnabledAsync(true);
-        await Analytics.SetEnabledAsync(true);
-
-        var path = Directory.GetCurrentDirectory() + "\\AppCenterAPIKeys.txt";
+        var path = Directory.GetCurrentDirectory() + "\\SentrySecret.txt";
         var debugKey = File.ReadLines(path).Skip(1).Take(1).First();
-        var releaseKey = File.ReadLines(path).Skip(4).Take(1).First();
 
-#if DEBUG
-        AppCenter.Start(debugKey,
-            typeof(Analytics), typeof(Crashes));
-#endif
-#if RELEASE
-            AppCenter.Start(releaseKey, typeof(Analytics), typeof(Crashes));
-#endif
+        SentrySdk.Init(o =>
+        {
+            // Tells which project in Sentry to send events to:
+            // When configuring for the first time, to see what the SDK is doing:
+            o.Debug = true;
+            // Set TracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+            // We recommend adjusting this value in production.
+            o.TracesSampleRate = 1.0;
+            // Sample rate for profiling, applied on top of othe TracesSampleRate,
+            // e.g. 0.2 means we want to profile 20 % of the captured transactions.
+            // We recommend adjusting this value in production.
+            o.ProfilesSampleRate = 1.0;
+            // Requires NuGet package: Sentry.Profiling
+            // Note: By default, the profiler is initialized asynchronously. This can
+            // be tuned by passing a desired initialization timeout to the constructor.
+            o.AddIntegration(new ProfilingIntegration(
+                // During startup, wait up to 500ms to profile the app startup code.
+                // This could make launching the app a bit slower so comment it out if you
+                // prefer profiling to start asynchronously
+                TimeSpan.FromMilliseconds(500)
+            ));
+        });
 
         var providers = new LoggerProviderCollection();
         const string logTemplate = "[{Timestamp:MMM-dd HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
@@ -154,11 +159,5 @@ public partial class App
         {
             Analytics.TrackEvent($"{e.ExceptionObject}");
         }
-    }
-
-    private static void SetCountryCode()
-    {
-        var countryCode = RegionInfo.CurrentRegion.TwoLetterISORegionName;
-        AppCenter.SetCountryCode(countryCode);
     }
 }

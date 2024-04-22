@@ -1,7 +1,5 @@
 ﻿using Darkages.Network.Server;
 
-using Microsoft.AppCenter.Crashes;
-
 namespace Darkages.Network.Components;
 
 public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServerComponent(server)

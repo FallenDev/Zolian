@@ -3,8 +3,6 @@
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 
 using System.Data;

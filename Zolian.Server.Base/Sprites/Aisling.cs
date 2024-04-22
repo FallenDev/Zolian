@@ -11,9 +11,6 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
-
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;

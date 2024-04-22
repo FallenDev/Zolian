@@ -8,8 +8,6 @@ using Darkages.GameScripts.Affects;
 using Darkages.Interfaces;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 

@@ -1,7 +1,5 @@
 ﻿using Darkages.Models;
 
-using Newtonsoft.Json;
-
 namespace Darkages.Templates;
 
 public class ServerTemplate : Template

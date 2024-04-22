@@ -25,4 +25,4 @@ vs
 .git
 git\*
 *.7z
-/Zolian.GameServer/AppCenterAPIKeys.txt
+*.txt

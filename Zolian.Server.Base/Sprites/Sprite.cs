@@ -10,9 +10,6 @@ using Darkages.Interfaces;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
-
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;

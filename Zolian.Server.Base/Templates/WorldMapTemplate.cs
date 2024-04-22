@@ -1,8 +1,5 @@
 ﻿using Darkages.Models;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
-
 using Microsoft.Data.SqlClient;
 
 namespace Darkages.Templates;

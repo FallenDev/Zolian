@@ -1,7 +1,5 @@
 ﻿using Elskom.Generic.Libs;
 
-using Microsoft.AppCenter.Crashes;
-
 namespace Darkages.Compression;
 
 public static class CompressionProvider

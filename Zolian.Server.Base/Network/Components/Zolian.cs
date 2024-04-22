@@ -1,5 +1,4 @@
-﻿using Microsoft.AppCenter.Crashes;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Components;
 

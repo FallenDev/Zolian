@@ -6,10 +6,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
-
 using System.Numerics;
 
 namespace Darkages.GameScripts.Creations;

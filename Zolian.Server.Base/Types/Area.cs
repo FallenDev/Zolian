@@ -3,8 +3,6 @@ using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.IdentityModel.Tokens;
 
 using ServiceStack;

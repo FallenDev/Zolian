@@ -7,8 +7,6 @@ using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Analytics;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;

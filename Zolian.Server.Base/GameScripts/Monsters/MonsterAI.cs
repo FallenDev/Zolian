@@ -9,9 +9,6 @@ using Darkages.Network.Client.Abstractions;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
-
 using ServiceStack;
 
 using System.Numerics;

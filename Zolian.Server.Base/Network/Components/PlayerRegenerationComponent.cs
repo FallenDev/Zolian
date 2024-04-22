@@ -4,8 +4,6 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 
-using Microsoft.AppCenter.Crashes;
-
 namespace Darkages.Network.Components;
 
 public class PlayerRegenerationComponent(WorldServer server) : WorldServerComponent(server)

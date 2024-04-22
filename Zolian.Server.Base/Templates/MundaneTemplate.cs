@@ -1,8 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 
 using ServiceStack;

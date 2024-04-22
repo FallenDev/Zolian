@@ -29,8 +29,6 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using JetBrains.Annotations;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 

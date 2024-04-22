@@ -10,8 +10,6 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 

@@ -4,8 +4,6 @@ using Dapper;
 
 using Darkages.Database;
 using Darkages.Network.Client;
-using Microsoft.AppCenter.Crashes;
-
 using Microsoft.Data.SqlClient;
 
 namespace Darkages.Templates;

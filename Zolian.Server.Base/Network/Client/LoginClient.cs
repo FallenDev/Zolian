@@ -14,7 +14,6 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
-using Microsoft.AppCenter.Crashes;
 
 namespace Darkages.Network.Client;
 

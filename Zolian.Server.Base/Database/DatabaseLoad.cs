@@ -2,12 +2,7 @@
 using Darkages.Models;
 using Darkages.Templates;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
-
-using ServiceStack;
-
 using System.Collections.Frozen;
 using System.Numerics;
 

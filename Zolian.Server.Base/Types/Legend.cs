@@ -6,8 +6,6 @@ using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Sprites;
-
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Data;

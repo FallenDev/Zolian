@@ -17,13 +17,7 @@ using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
-
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using Microsoft.Extensions.Logging;
-
-using Newtonsoft.Json;
-
 using RestSharp;
 
 using System.Collections.Concurrent;
