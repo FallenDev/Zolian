@@ -4,18 +4,22 @@ namespace Darkages.Compression;
 
 public static class CompressionProvider
 {
-    public static byte[] Deflate(byte[] buffer)
+    public static byte[] Deflate(ReadOnlySpan<byte> buffer)
     {
-        var iStream = new MemoryStream(buffer);
-        var oStream = new MemoryStream();
-        var zStream = new ZOutputStream(oStream);
+        var ret = new MemoryStream();
+        using var compressed = new MemoryStream();
+        using var compressor = new ZOutputStream(compressed, zlibConst.Z_DEFAULT_COMPRESSION);
 
         try
         {
-            CopyStream(iStream, zStream);
-            zStream.finish();
+            compressor.Write(buffer);
+            compressor.finish();
 
-            return oStream.ToArray();
+            compressed.Position = 0;
+            compressed.CopyTo(ret);
+            ret.Position = 0;
+
+            return ret.ToArray();
         }
         catch (Exception ex)
         {
@@ -23,27 +27,25 @@ public static class CompressionProvider
             ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
             SentrySdk.CaptureException(ex);
             return null;
-        }
-        finally
-        {
-            zStream.Close();
-            oStream.Close();
-            iStream.Close();
         }
     }
 
     public static byte[] Inflate(byte[] buffer)
     {
-        var iStream = new MemoryStream(buffer);
-        var oStream = new MemoryStream();
-        var zStream = new ZOutputStream(oStream);
+        var ret = new MemoryStream();
+        using var outData = new MemoryStream();
+        using var decompressor = new ZOutputStream(outData);
 
         try
         {
-            CopyStream(iStream, zStream);
-            zStream.finish();
+            decompressor.Write(buffer);
+            decompressor.finish();
 
-            return oStream.ToArray();
+            outData.Position = 0;
+            outData.CopyTo(ret);
+            ret.Position = 0;
+
+            return ret.ToArray();
         }
         catch (Exception ex)
         {
@@ -52,21 +54,5 @@ public static class CompressionProvider
             SentrySdk.CaptureException(ex);
             return null;
         }
-        finally
-        {
-            zStream.Close();
-            oStream.Close();
-            iStream.Close();
-        }
-    }
-
-    private static void CopyStream(Stream src, Stream dst)
-    {
-        var buffer = new byte[4096];
-        int length;
-
-        while ((length = src.Read(buffer, 0, buffer.Length)) > 0) dst.Write(buffer, 0, length);
-
-        dst.Flush();
     }
 }

@@ -1,4 +1,7 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Numerics;
+using Chaos.Common.Definitions;
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
@@ -486,6 +489,458 @@ public class MuleKick(Skill skill) : SkillScript(skill)
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
         var dmg = damageMonster.Str * 6;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Tail Slap")]
+public class TailSlap(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFrontToSide();
+
+        if (enemy.Count == 0)
+        {
+            OnFailed(sprite);
+            return;
+        }
+
+        foreach (var i in enemy.Where(i => i.Attackable))
+        {
+            _target = i;
+            var dmgCalc = DamageCalc(sprite);
+            _skillMethod.OnSuccessWithoutAction(_target, sprite, Skill, dmgCalc, _crit);
+        }
+
+        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Str * 6 + damageMonster.Dex * 12;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Roll Over")]
+public class RollOver(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var debuff = new DebuffBleeding();
+
+        if (_target is Aisling targetPlayer)
+        {
+            if (!_target.HasDebuff(debuff.Name))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name))
+                debuff.OnApplied(_target, debuff);
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Con * 6 + damageMonster.Dex * 8;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Swallow Whole")]
+public class SwallowWhole(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var debuff = new DebuffBleeding();
+
+        if (_target is Aisling targetPlayer)
+        {
+            if (!_target.HasDebuff(debuff.Name))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name))
+                debuff.OnApplied(_target, debuff);
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Int * 6 + damageMonster.Wis * 8;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Howl'n Call")]
+public class HowlAndCall(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+        if (sprite is not Monster casterMonster) return;
+        if (casterMonster.Target is null) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        if (casterMonster.Target is not { CurrentHp: > 1 })
+        {
+            if (casterMonster.Target is not Aisling aisling) return;
+            casterMonster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+            casterMonster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            return;
+        }
+
+        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+
+        var monstersNearby = casterMonster.MonstersOnMap();
+
+        foreach (var monster in monstersNearby)
+        {
+            if (monster.WithinRangeOf(casterMonster)) continue;
+
+            var readyTime = DateTime.UtcNow;
+            monster.Pos = new Vector2(casterMonster.Pos.X, casterMonster.Pos.Y);
+
+            foreach (var player in casterMonster.AislingsNearby())
+            {
+                player.Client.SendCreatureWalk(monster.Serial, new Point(casterMonster.X, casterMonster.Y), (Direction)casterMonster.Direction);
+            }
+
+            monster.LastMovementChanged = readyTime;
+            monster.LastPosition = new Position(casterMonster.X, casterMonster.Y);
+            break;
+        }
+
+        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+    }
+}
+
+[Script("Death From Above")]
+public class DeathFromAbove(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront(3).FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Dex * 15 + damageMonster.Str * 3;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Pounce")]
+public class Pounce(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront(6).FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Dex * 9 + damageMonster.Str * 9 + damageMonster.Con * 9;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+[Script("Tentacle")]
+public class Tentacle(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var debuff = new DebuffBeagsuain();
+
+        if (_target is Aisling targetPlayer)
+        {
+            if (!_target.HasDebuff(debuff.Name))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name))
+                debuff.OnApplied(_target, debuff);
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Str * 4 + damageMonster.Dex * 4 + damageMonster.Con * 2;
         var critCheck = _skillMethod.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
