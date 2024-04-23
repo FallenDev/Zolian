@@ -1,8 +1,10 @@
 # Zolian - Kingdom of Ashes  
-[![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
 ![GitHub top language](https://img.shields.io/github/languages/top/FallenDev/Zolian)
 [![CodeFactor](https://www.codefactor.io/repository/github/fallendev/zolian/badge/master)](https://www.codefactor.io/repository/github/fallendev/zolian/overview/master)
 ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/FallenDev/Zolian)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/fallendev/zolian/total)  
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/fallendev/zolian)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/fallendev/zolian)
 ![GitHub](https://img.shields.io/github/license/FallenDev/Zolian)
 
 Darkages Server Emulator (Currently Emulating for 7.41 US Client)    
@@ -37,6 +39,8 @@ Zolian is an open-source project, there are quite a few ways you can contribute 
 * By joining our Discord and making suggestions: https://discord.gg/WbP2wU5CcB
 
 ## Community
+[![Discord](https://img.shields.io/discord/755487390935548024.svg)](https://discord.gg/WbP2wU5CcB "Join the conversation!")
+
 Zolian isn't the only project out there, nor does it claim to have any exlusivity over any of the others. Please visit their projects and enjoy what they've built.   
 [Hybrasyl](https://www.hybrasyl.com/)   
 [Legends: Age of Chaos](https://discord.gg/YekJdzKzQR)   
