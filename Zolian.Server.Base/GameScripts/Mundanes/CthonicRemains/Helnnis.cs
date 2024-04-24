@@ -54,18 +54,19 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
         if (client.Aisling.HasKilled("Lich Dragon", 1) && !client.Aisling.QuestManager.CthonicCleansingTwo)
             options.Add(new Dialog.OptionsDataItem(0x24, $"{{=bI have slain the dragon"));
 
-        switch (client.Aisling.QuestManager.CthonicRemainsExplorationLevel)
-        {
-            case 0:
-                options.Add(new Dialog.OptionsDataItem(0x15, "Depths 5 Exploration"));
-                break;
-            case 1:
-                options.Add(new Dialog.OptionsDataItem(0x17, "Depths 12 Exploration"));
-                break;
-            case 2:
-                options.Add(new Dialog.OptionsDataItem(0x19, "Visit Forward SpecOp Camp"));
-                break;
-        }
+        if (client.Aisling.QuestManager.AdventuresGuildReputation >= 5)
+            switch (client.Aisling.QuestManager.CthonicRemainsExplorationLevel)
+            {
+                case 0:
+                    options.Add(new Dialog.OptionsDataItem(0x15, "Depths 5 Exploration"));
+                    break;
+                case 1:
+                    options.Add(new Dialog.OptionsDataItem(0x17, "Depths 12 Exploration"));
+                    break;
+                case 2:
+                    options.Add(new Dialog.OptionsDataItem(0x19, "Visit Forward SpecOp Camp"));
+                    break;
+            }
 
         if (client.Aisling.HasVisitedMap(5036) && client.Aisling.QuestManager.CthonicRemainsExplorationLevel == 0)
             options.Add(new Dialog.OptionsDataItem(0x16, $"{{=bReport Back"));
@@ -89,8 +90,8 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
         if (!AuthenticateUser(client)) return;
 
         var randCounter = Random.Shared.Next(1, 12);
-        var huntingExp = Random.Shared.Next(200000000, 400000000);
-        var gatheringExp = Random.Shared.Next(300000000, 600000000);
+        var huntingExp = Random.Shared.Next(150000000, 300000000);
+        var gatheringExp = Random.Shared.Next(200000000, 500000000);
 
         if (client.Aisling.QuestManager.CthonicKillTarget.IsEmpty())
             _kill = randCounter switch
@@ -154,6 +155,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                         client.Aisling.QuestManager.CthonicKillTarget = string.Empty;
                         client.Aisling.QuestManager.CthonicKillCompletions += 1;
                         client.Aisling.QuestManager.AdventuresGuildReputation += 1;
+                        client.Aisling.MonsterKillCounters.Clear();
                         client.GiveExp(huntingExp);
                     }
                     else
@@ -182,6 +184,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                         client.Aisling.Inventory.RemoveRange(client, item, 3);
                         client.Aisling.QuestManager.CthonicFindTarget = string.Empty;
                         client.Aisling.QuestManager.AdventuresGuildReputation += 1;
+                        client.Aisling.MonsterKillCounters.Clear();
                         client.GiveExp(gatheringExp);
                     }
                     else
