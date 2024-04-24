@@ -170,7 +170,9 @@ public record AislingStorage : Sql, IAislingStorage
             obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
             obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted, obj.QuestManager.EternalLove, obj.QuestManager.EternalLoveStarted, obj.QuestManager.UnhappyEnding,
             obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
-            obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned);
+            obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
+            obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
+            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -389,7 +391,9 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled, player.QuestManager.UnknownStart, player.QuestManager.PirateShipAccess,
                     player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted, player.QuestManager.EternalLove, player.QuestManager.EternalLoveStarted, player.QuestManager.UnhappyEnding,
                     player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate, player.QuestManager.EternalBond, player.QuestManager.ArmorCraftingCodex,
-                    player.QuestManager.ArmorApothecaryAccepted, player.QuestManager.ArmorCodexDeciphered, player.QuestManager.ArmorCraftingCodexLearned, player.QuestManager.ArmorCraftingAdvancedCodexLearned);
+                    player.QuestManager.ArmorApothecaryAccepted, player.QuestManager.ArmorCodexDeciphered, player.QuestManager.ArmorCraftingCodexLearned, player.QuestManager.ArmorCraftingAdvancedCodexLearned,
+                    player.QuestManager.CthonicKillTarget, player.QuestManager.CthonicFindTarget, player.QuestManager.CthonicKillCompletions, player.QuestManager.CthonicCleansingOne, player.QuestManager.CthonicCleansingTwo,
+                    player.QuestManager.CthonicDepthsCleansing, player.QuestManager.CthonicRuinsAccess, player.QuestManager.CthonicRemainsExplorationLevel);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -936,7 +940,14 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@ArmorCodexDeciphered", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@ArmorCraftingCodexLearned", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@ArmorCraftingAdvancedCodexLearned", SqlDbType.Bit).Value = false;
-
+            cmd5.Parameters.Add("@CthonicKillTarget", SqlDbType.VarChar).Value = "";
+            cmd5.Parameters.Add("@CthonicFindTarget", SqlDbType.VarChar).Value = "";
+            cmd5.Parameters.Add("@CthonicKillCompletions", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@CthonicCleansingOne", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CthonicCleansingTwo", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CthonicDepthsCleansing", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CthonicRuinsAccess", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CthonicRemainsExplorationLevel", SqlDbType.Int).Value = 0;
 
             #endregion
 
@@ -1180,6 +1191,14 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("ArmorCodexDeciphered", typeof(bool));
         qDt.Columns.Add("ArmorCraftingCodexLearned", typeof(bool));
         qDt.Columns.Add("ArmorCraftingAdvancedCodexLearned", typeof(bool));
+        qDt.Columns.Add("CthonicKillTarget", typeof(string));
+        qDt.Columns.Add("CthonicFindTarget", typeof(string));
+        qDt.Columns.Add("CthonicKillCompletions", typeof(int));
+        qDt.Columns.Add("CthonicCleansingOne", typeof(bool));
+        qDt.Columns.Add("CthonicCleansingTwo", typeof(bool));
+        qDt.Columns.Add("CthonicDepthsCleansing", typeof(bool));
+        qDt.Columns.Add("CthonicRuinsAccess", typeof(bool));
+        qDt.Columns.Add("CthonicRemainsExplorationLevel", typeof(int));
 
         return qDt;
     }

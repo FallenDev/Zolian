@@ -194,10 +194,9 @@ public class Quests
     public bool ArmorCodexDeciphered { get; set; }
     public bool ArmorCraftingCodexLearned { get; set; }
     public bool ArmorCraftingAdvancedCodexLearned { get; set; }
-    public bool CthonicKillQuestOne { get; set; }
-    public bool CthonicKillQuestTwo { get; set; }
-    public bool CthonicKillQuestThree { get; set; }
-    public bool CthonicKillQuestFour { get; set; }
+    public string CthonicKillTarget { get; set; } = string.Empty;
+    public string CthonicFindTarget { get; set; } = string.Empty;
+    public int CthonicKillCompletions { get; set; }
     public bool CthonicCleansingOne { get; set; }
     public bool CthonicCleansingTwo { get; set; }
     public bool CthonicDepthsCleansing { get; set; }

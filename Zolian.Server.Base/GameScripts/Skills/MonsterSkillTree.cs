@@ -626,6 +626,77 @@ public class RollOver(Skill skill) : SkillScript(skill)
     }
 }
 
+[Script("Tantalizing Gaze")]
+public class TantalizingGaze(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        // Monster skill
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        _target = enemy;
+
+        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        {
+            _skillMethod.FailedAttempt(sprite, Skill, action);
+            OnFailed(sprite);
+            return;
+        }
+
+        var debuff = new DebuffCharmed();
+
+        if (_target is Aisling targetPlayer)
+        {
+            if (!_target.HasDebuff(debuff.Name))
+            {
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            }
+        }
+        else
+        {
+            if (!_target.HasDebuff(debuff.Name))
+                debuff.OnApplied(_target, debuff);
+        }
+
+        var dmgCalc = DamageCalc(sprite);
+        _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        if (sprite is not Monster damageMonster) return 0;
+        var dmg = damageMonster.Int * 6 + damageMonster.Wis * 8;
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
 [Script("Swallow Whole")]
 public class SwallowWhole(Skill skill) : SkillScript(skill)
 {

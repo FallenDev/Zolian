@@ -359,7 +359,15 @@ CREATE TABLE PlayersQuests
     [ArmorApothecaryAccepted] BIT NULL,
     [ArmorCodexDeciphered] BIT NULL,
     [ArmorCraftingCodexLearned] BIT NULL,
-    [ArmorCraftingAdvancedCodexLearned] BIT NULL
+    [ArmorCraftingAdvancedCodexLearned] BIT NULL,
+    [CthonicKillTarget] VARCHAR(20) NULL,
+    [CthonicFindTarget] VARCHAR(20) NULL,
+    [CthonicKillCompletions] INT NULL,
+    [CthonicCleansingOne] BIT NULL,
+    [CthonicCleansingTwo] BIT NULL,
+    [CthonicDepthsCleansing] BIT NULL,
+    [CthonicRuinsAccess] BIT NULL,
+    [CthonicRemainsExplorationLevel] INT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
@@ -561,7 +569,15 @@ CREATE TYPE dbo.QuestType AS TABLE
 	ArmorApothecaryAccepted BIT,
 	ArmorCodexDeciphered BIT,
 	ArmorCraftingCodexLearned BIT,
-	ArmorCraftingAdvancedCodexLearned BIT
+	ArmorCraftingAdvancedCodexLearned BIT,
+    CthonicKillTarget VARCHAR (20),
+    CthonicFindTarget VARCHAR (20),
+    CthonicKillCompletions INT,
+    CthonicCleansingOne BIT,
+    CthonicCleansingTwo BIT,
+    CthonicDepthsCleansing BIT,
+    CthonicRuinsAccess BIT,
+    CthonicRemainsExplorationLevel INT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -777,7 +793,9 @@ CREATE PROCEDURE [dbo].[InsertQuests]
     @SavedChristmas BIT, @RescuedReindeer BIT, @YetiKilled BIT, @UnknownStart BIT, @PirateShipAccess BIT,
 	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT, @EternalLove BIT, @EternalLoveStarted BIT, @UnhappyEnding BIT,
 	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
-	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT
+	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT,
+    @CthonicKillTarget VARCHAR(20), @CthonicFindTarget VARCHAR(20), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
+	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -795,7 +813,9 @@ BEGIN
 		[BeltDegree], [BeltQuest], [SavedChristmas], [RescuedReindeer], [YetiKilled], [UnknownStart], [PirateShipAccess],
 		[ScubaSchematics], [ScubaMaterialsQuest], [ScubaGearCrafted], [EternalLove], [EternalLoveStarted], [UnhappyEnding],
 		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate], [EternalBond], [ArmorCraftingCodex],
-		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned]
+		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned],
+        [CthonicKillTarget], [CthonicFindTarget], [CthonicKillCompletions], [CthonicCleansingOne], [CthonicCleansingTwo],
+        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -810,7 +830,9 @@ BEGIN
 		@BeltDegree, @BeltQuest, @SavedChristmas, @RescuedReindeer, @YetiKilled, @UnknownStart, @PirateShipAccess,
 		@ScubaSchematics, @ScubaMaterialsQuest, @ScubaGearCrafted, @EternalLove, @EternalLoveStarted, @UnhappyEnding,
 		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate, @EternalBond, @ArmorCraftingCodex,
-		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned
+		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned,
+        @CthonicKillTarget, @CthonicFindTarget, @CthonicKillCompletions, @CthonicCleansingOne, @CthonicCleansingTwo,
+        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel
     );
 END
 GO
@@ -996,7 +1018,15 @@ BEGIN
 		[ArmorApothecaryAccepted] = source.ArmorApothecaryAccepted,
 		[ArmorCodexDeciphered] = source.ArmorCodexDeciphered,
 		[ArmorCraftingCodexLearned] = source.ArmorCraftingCodexLearned,
-		[ArmorCraftingAdvancedCodexLearned] = source.ArmorCraftingAdvancedCodexLearned;
+		[ArmorCraftingAdvancedCodexLearned] = source.ArmorCraftingAdvancedCodexLearned,
+        [CthonicKillTarget] = source.CthonicKillTarget,
+        [CthonicFindTarget] = source.CthonicFindTarget,
+        [CthonicKillCompletions] = source.CthonicKillCompletions,
+        [CthonicCleansingOne] = source.CthonicCleansingOne,
+        [CthonicCleansingTwo] = source.CthonicCleansingTwo,
+        [CthonicDepthsCleansing] = source.CthonicDepthsCleansing,
+        [CthonicRuinsAccess] = source.CthonicRuinsAccess,
+        [CthonicRemainsExplorationLevel] = source.CthonicRemainsExplorationLevel;
 END
 GO
 
@@ -1446,7 +1476,9 @@ BEGIN
 		   BeltDegree, BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled, UnknownStart, PirateShipAccess, 
 		   ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted, EternalLove, EternalLoveStarted, UnhappyEnding,
 		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond, ArmorCraftingCodex,
-		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned
+		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
+           CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions, CthonicCleansingOne, CthonicCleansingTwo,
+		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END
