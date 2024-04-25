@@ -3535,12 +3535,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             if (handler is not null) return handler(client, in packet);
-            ServerSetup.PacketLogger($"Unknown message with code {opCode} from {client.RemoteIp}", LogLevel.Error);
-            SentrySdk.CaptureException(new Exception($"Unknown message with code {opCode} from {client.RemoteIp}"));
+            ServerSetup.PacketLogger("//////////////// Handled World Server Unknown Packet ////////////////", LogLevel.Error);
+            ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
         }
-        catch
+        catch (Exception ex)
         {
-            // ignored
+            SentrySdk.CaptureException(new Exception($"Unknown packet {opCode} from {client.RemoteIp} on WorldServer \n {ex}"));
         }
 
         return default;

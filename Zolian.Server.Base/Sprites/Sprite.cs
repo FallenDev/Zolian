@@ -40,33 +40,31 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     #region Buffs Debuffs
 
     private int _frozenStack;
-    public bool IsWeakened => (CurrentHp <= MaximumHp * .05);
+    public bool IsWeakened => CurrentHp <= MaximumHp * .05;
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
-
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
                             HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool Hastened => HasBuff("Hastenga") || HasBuff("Hasten") || HasBuff("Haste");
     public bool SpellReflect => HasBuff("Deireas Faileas");
     public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
     public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
-    public bool IsBleeding => HasDebuff("Bleeding");
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");
-    public bool IsArmorReduced => HasDebuff(i => i.Name.Contains("Cradh") || i.Name.Contains("Seal") || i.Name.Contains("Rend")) || HasDebuff("Hurricane") || HasDebuff("Decay")
-                                  || HasDebuff("Corrosive Touch") || HasDebuff("Shield Bash") || HasDebuff("Titan's Cleave") || HasDebuff("Retribution") || HasDebuff("Stab'n Twist");
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain");
-    public bool IsVulnerable => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain") || HasDebuff("Halt") || HasDebuff("Blind") || HasDebuff("Sleep") || HasBuff("Berserker Rage");
     public bool IsStopped => HasDebuff("Halt");
-    public bool IsCharmed => HasDebuff("Entice");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein"));
     public bool IsSleeping => HasDebuff("Sleep");
-    public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
-    public bool NinthGateReleased => HasBuff("Ninth Gate Release");
     public bool DrunkenFist => HasBuff("Drunken Fist");
-    public bool Berserk => HasBuff("Berserker Rage");
+    private bool NinthGateReleased => HasBuff("Ninth Gate Release");
+    private bool Berserk => HasBuff("Berserker Rage");
+    private bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
+    private bool IsCharmed => HasDebuff("Entice");
+    private bool IsBleeding => HasDebuff("Bleeding");
+    public bool IsVulnerable => IsFrozen || IsStopped || IsBlind || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
+
     public bool ClawFistEmpowerment { get; set; }
     public bool CanSeeInvisible
     {
@@ -1838,20 +1836,23 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
 
         dmg *= 2;
-        _frozenStack += 1;
 
         // Sleep gets removed on hit
         if (HasDebuff("Sleep")) RemoveDebuff("Sleep");
 
         // Frozen status gets removed after five successful hits
         if (!IsFrozen) return dmg;
-        if (_frozenStack != 5) return dmg;
+        _frozenStack += 1;
+        if (_frozenStack <= 4) return dmg;
+
         if (HasDebuff("Frozen"))
             RemoveDebuff("Frozen");
         if (HasDebuff("Dark Chain"))
             RemoveDebuff("Dark Chain");
 
+        // Reset Frozen Stack
         _frozenStack = 0;
+
         return dmg;
     }
 

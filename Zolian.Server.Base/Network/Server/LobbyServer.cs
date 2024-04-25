@@ -122,12 +122,12 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         try
         {
             if (handler is not null) return handler(client, in packet);
-            ServerSetup.PacketLogger($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}");
-            SentrySdk.CaptureException(new Exception($"Unknown message to lobby server with code {opCode} from {client.RemoteIp}"));
+            ServerSetup.PacketLogger("//////////////// Handled Lobby Server Unknown Packet ////////////////", LogLevel.Error);
+            ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
         }
-        catch
+        catch (Exception ex)
         {
-            // ignored
+            SentrySdk.CaptureException(new Exception($"Unknown packet {opCode} from {client.RemoteIp} on LobbyServer \n {ex}"));
         }
 
         return default;
