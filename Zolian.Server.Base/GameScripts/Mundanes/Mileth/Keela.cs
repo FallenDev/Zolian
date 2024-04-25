@@ -415,7 +415,7 @@ public class Keela : MundaneScript
                                 if (item == null) TopMenu(client);
                                 client.Aisling.Inventory.RemoveFromInventory(client, item);
 
-                                var skill = Skill.GiveTo(client.Aisling, "Sneak", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Sneak");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Keela++;
                                 client.Aisling.QuestManager.KeelaQuesting = false;
@@ -472,7 +472,7 @@ public class Keela : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Keela == 2)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Shadow Step", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Shadow Step");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Keela++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();

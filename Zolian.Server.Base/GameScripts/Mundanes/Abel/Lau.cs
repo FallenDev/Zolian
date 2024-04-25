@@ -316,7 +316,7 @@ public class Lau : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Lau == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Retribution", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Retribution");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Lau++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -346,7 +346,7 @@ public class Lau : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Lau == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Lau++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -377,7 +377,7 @@ public class Lau : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Lau == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Retribution", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Retribution");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Lau++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -407,7 +407,7 @@ public class Lau : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Lau == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Vampiric Slash");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Lau++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();

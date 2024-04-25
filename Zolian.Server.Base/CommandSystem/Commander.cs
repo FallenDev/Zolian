@@ -223,9 +223,9 @@ public static class Commander
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
-        if (int.TryParse(level, out var spellLevel))
+        if (int.TryParse(level, out _))
         {
-            var spell = Spell.GiveTo(client.Aisling, name, spellLevel);
+            var spell = Spell.GiveTo(client.Aisling, name);
             client.SystemMessage(spell ? $"Learned: {name}" : "Failed");
         }
         else
@@ -248,9 +248,9 @@ public static class Commander
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
-        if (int.TryParse(level, out var skillLevel))
+        if (int.TryParse(level, out _))
         {
-            var skill = Skill.GiveTo(client.Aisling, name, skillLevel);
+            var skill = Skill.GiveTo(client.Aisling, name);
             client.SystemMessage(skill ? $"Learned: {name}" : "Failed");
         }
         else

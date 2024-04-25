@@ -175,7 +175,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Berzerker(IWorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Onslaught", 1);
+        Skill.GiveTo(client.Aisling, "Onslaught");
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
@@ -192,7 +192,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Defender(IWorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Assault", 1);
+        Skill.GiveTo(client.Aisling, "Assault");
         var item = new Item();
         item = item.Create(client.Aisling, client.Aisling.Gender == Gender.Female
             ? ServerSetup.Instance.GlobalItemTemplateCache["Leather Donet"]
@@ -211,7 +211,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Assassin(IWorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Stab", 1);
+        Skill.GiveTo(client.Aisling, "Stab");
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
@@ -228,7 +228,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Monk(IWorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Punch", 1);
+        Skill.GiveTo(client.Aisling, "Punch");
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
@@ -245,7 +245,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Cleric(IWorldClient client)
     {
-        Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
+        Spell.GiveTo(client.Aisling, "Heal Minor Wounds");
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female
@@ -262,12 +262,12 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
 
     private static void Arcanus(IWorldClient client)
     {
-        Spell.GiveTo(client.Aisling, "Beag Athar", 1);
-        Spell.GiveTo(client.Aisling, "Beag Creag", 1);
-        Spell.GiveTo(client.Aisling, "Beag Sal", 1);
-        Spell.GiveTo(client.Aisling, "Beag Srad", 1);
-        Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
-        Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
+        Spell.GiveTo(client.Aisling, "Beag Athar");
+        Spell.GiveTo(client.Aisling, "Beag Creag");
+        Spell.GiveTo(client.Aisling, "Beag Sal");
+        Spell.GiveTo(client.Aisling, "Beag Srad");
+        Spell.GiveTo(client.Aisling, "Beag Dorcha");
+        Spell.GiveTo(client.Aisling, "Beag Eadrom");
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female

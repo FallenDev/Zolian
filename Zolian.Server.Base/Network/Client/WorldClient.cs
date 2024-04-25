@@ -1398,7 +1398,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         if (hasAssail) return;
 
-        Skill.GiveTo(Aisling, "Assail", 1);
+        Skill.GiveTo(Aisling, "Assail");
     }
 
     private void SpellCleanup()
@@ -3716,7 +3716,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             return;
         }
 
-        var skill = Skill.GiveTo(this, subject.Name);
+        var skill = Skill.GiveTo(Aisling, subject.Name);
         if (skill) LoadSkillBook();
 
         // Recall message set in message variable back to the npc
@@ -3740,7 +3740,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             return;
         }
 
-        var spell = Spell.GiveTo(this, subject.Name);
+        var spell = Spell.GiveTo(Aisling, subject.Name);
         if (spell) LoadSpellBook();
 
         // Recall message set in message variable back to the npc

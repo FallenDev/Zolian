@@ -255,7 +255,7 @@ public class Neal : MundaneScript
 
                             if (client.Aisling.QuestManager.Neal == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Aid");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -304,7 +304,7 @@ public class Neal : MundaneScript
 
                             if (client.Aisling.QuestManager.Neal == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Rescue");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -353,7 +353,7 @@ public class Neal : MundaneScript
 
                             if (client.Aisling.QuestManager.Neal == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Aid", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Aid");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -402,7 +402,7 @@ public class Neal : MundaneScript
 
                             if (client.Aisling.QuestManager.Neal == 1)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Rescue", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Rescue");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -460,7 +460,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 2)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -493,7 +493,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 2)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -526,7 +526,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 2)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Lullaby Strike");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -559,7 +559,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 2)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Raise Threat");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -618,7 +618,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 3)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Desolate");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -665,7 +665,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 3)
                             {
-                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
+                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance");
                                 if (spell) client.LoadSpellBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -712,7 +712,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 3)
                             {
-                                var skill = Skill.GiveTo(client.Aisling, "Desolate", 1);
+                                var skill = Skill.GiveTo(client.Aisling, "Desolate");
                                 if (skill) client.LoadSkillBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
@@ -759,7 +759,7 @@ public class Neal : MundaneScript
                         {
                             if (client.Aisling.QuestManager.Neal == 3)
                             {
-                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance", 1);
+                                var spell = Spell.GiveTo(client.Aisling, "Defensive Stance");
                                 if (spell) client.LoadSpellBook();
                                 client.Aisling.QuestManager.Neal++;
                                 client.Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();

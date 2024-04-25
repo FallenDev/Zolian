@@ -18,7 +18,7 @@ public static class RacialBonus
         client.Aisling._Dex += 1;
         client.Aisling._Luck += 1;
 
-        var raceBool = Skill.GiveTo(client.Aisling, skill, 1);
+        var raceBool = Skill.GiveTo(client.Aisling, skill);
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -33,7 +33,7 @@ public static class RacialBonus
         client.Aisling._Dex += 1;
         client.Aisling._Luck += 1;
 
-        var raceBool = Spell.GiveTo(client.Aisling, spell, 1);
+        var raceBool = Spell.GiveTo(client.Aisling, spell);
         if (raceBool) client.LoadSpellBook();
 
         RacialLegend(client);
@@ -47,7 +47,7 @@ public static class RacialBonus
         client.Aisling.RaceSkill = null;
         client.Aisling.RaceSpell = "Stone Skin";
 
-        var raceBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell, 1);
+        var raceBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell);
         if (raceBool) client.LoadSpellBook();
 
         RacialLegend(client);
@@ -61,7 +61,7 @@ public static class RacialBonus
         client.Aisling.RaceSkill = "Appraise";
         client.Aisling.RaceSpell = null;
 
-        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
+        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -73,7 +73,7 @@ public static class RacialBonus
         client.Aisling._Wis += 3;
         client.Aisling._Dex += 2;
 
-        var raceBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell, 1);
+        var raceBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell);
         if (raceBool) client.LoadSpellBook();
 
         RacialLegend(client);
@@ -87,7 +87,7 @@ public static class RacialBonus
         client.Aisling.RaceSkill = "Shadowfade";
         client.Aisling.RaceSpell = null;
 
-        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
+        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -100,8 +100,8 @@ public static class RacialBonus
         client.Aisling.RaceSkill = "Archery";
         client.Aisling.RaceSpell = null;
 
-        Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
-        var raceBool = Skill.GiveTo(client.Aisling, "Camouflage", 1);
+        Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
+        var raceBool = Skill.GiveTo(client.Aisling, "Camouflage");
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -112,7 +112,7 @@ public static class RacialBonus
         client.Aisling._Str += 1;
         client.Aisling.StatPoints += 4;
 
-        var raceBool = Skill.GiveTo(client.Aisling, skill, 1);
+        var raceBool = Skill.GiveTo(client.Aisling, skill);
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -123,7 +123,7 @@ public static class RacialBonus
         client.Aisling._Int += 1;
         client.Aisling.StatPoints += 4;
 
-        var raceBool = Spell.GiveTo(client.Aisling, spell, 1);
+        var raceBool = Spell.GiveTo(client.Aisling, spell);
         if (raceBool) client.LoadSpellBook();
 
         RacialLegend(client);
@@ -137,7 +137,7 @@ public static class RacialBonus
         client.Aisling.RaceSkill = "Pain Bane";
         client.Aisling.RaceSpell = null;
 
-        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
+        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
         if (raceBool) client.LoadSkillBook();
 
         RacialLegend(client);
@@ -213,7 +213,7 @@ public static class RacialBonus
         var raceSkillBool = false;
 
         if (client.Aisling.RaceSkill != null)
-            raceSkillBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
+            raceSkillBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
 
         if (raceSkillBool) client.LoadSkillBook();
 
@@ -245,9 +245,9 @@ public static class RacialBonus
         var raceSpellBool = false;
 
         if (client.Aisling.RaceSkill != null)
-            raceSkillBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill, 1);
+            raceSkillBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
         if (client.Aisling.RaceSpell != null)
-            raceSpellBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell, 1);
+            raceSpellBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell);
 
         if (raceSkillBool) client.LoadSkillBook();
         if (raceSpellBool) client.LoadSpellBook();

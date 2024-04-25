@@ -116,7 +116,7 @@ public class Dennis : MundaneScript
                 break;
             case 0x05:
                 {
-                    var skill = Skill.GiveTo(client.Aisling, "Blink", 1);
+                    var skill = Skill.GiveTo(client.Aisling, "Blink");
                     if (skill) client.LoadSkillBook();
                     client.GiveItem("Cleric's Feather");
                     client.SendOptionsDialog(Mundane, "I can see you're worthy, here is something I created personally.");

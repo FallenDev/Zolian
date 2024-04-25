@@ -3,10 +3,10 @@
 using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
-using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
@@ -54,102 +54,29 @@ public class Skill
     // Used for Monster Scripts Only
     public DateTime NextAvailableUse { get; set; }
 
-    public static void AttachScript(Skill skill)
-    {
-        skill.Scripts = ScriptManager.Load<SkillScript>(skill.Template.ScriptName, skill);
-    }
+    public bool CanUse() => Ready;
+
+    public static void AttachScript(Skill skill) => skill.Scripts = ScriptManager.Load<SkillScript>(skill.Template.ScriptName, skill);
 
     public static Skill Create(int slot, SkillTemplate skillTemplate)
     {
-        var obj = new Skill
+        return new Skill
         {
             Template = skillTemplate,
             Level = 1,
             Slot = (byte)slot,
             Icon = skillTemplate.Icon
         };
-
-        return obj;
     }
 
-    public static bool GiveTo(WorldClient client, string args)
+    public static bool GiveTo(Aisling aisling, string args)
     {
-        if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(args)) return false;
-
-        var skillTemplate = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-
-        if (skillTemplate == null) return false;
-        if (client.Aisling.SkillBook.Has(skillTemplate)) return false;
-
-        var slot = client.Aisling.SkillBook.FindEmpty(skillTemplate.Pane == Pane.Skills ? 0 : 72);
-
-        if (slot <= 0) return false;
-
-        var skill = Create(slot, skillTemplate);
-        {
-            AttachScript(skill);
-            {
-                client.Aisling.SkillBook.Set((byte)slot, skill, null);
-                client.SendAddSkillToPane(skill);
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, client.Aisling.Serial));
-            }
-        }
-
-        try
-        {
-            using var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            var cmd = new SqlCommand("SkillToPlayer", sConn);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = client.Aisling.Serial;
-            cmd.Parameters.Add("@Level", SqlDbType.Int).Value = 0;
-            cmd.Parameters.Add("@Slot", SqlDbType.Int).Value = skill.Slot;
-            cmd.Parameters.Add("@SkillName", SqlDbType.VarChar).Value = skill.Template.Name;
-            cmd.Parameters.Add("@Uses", SqlDbType.Int).Value = 0;
-            cmd.Parameters.Add("@CurrentCooldown", SqlDbType.Int).Value = 0;
-
-            cmd.CommandTimeout = 5;
-            cmd.ExecuteNonQuery();
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                if (!e.Message.Contains(client.Aisling.Serial.ToString())) return false;
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
-                SentrySdk.CaptureException(e);
-                return false;
-            }
-
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            SentrySdk.CaptureException(e);
-        }
-        catch (Exception e)
-        {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            SentrySdk.CaptureException(e);
-        }
-
-        return true;
-    }
-
-    public static bool GiveTo(Aisling aisling, string args, int level = 100)
-    {
-        if (!ServerSetup.Instance.GlobalSkillTemplateCache.ContainsKey(args)) return false;
-
-        var skillTemplate = ServerSetup.Instance.GlobalSkillTemplateCache[args];
-
+        if (!ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(args, out var skillTemplate)) return false;
         if (skillTemplate == null) return false;
         if (aisling.SkillBook.Has(skillTemplate)) return false;
 
         var slot = aisling.SkillBook.FindEmpty(skillTemplate.Pane == Pane.Skills ? 0 : 72);
-
         if (slot <= 0) return false;
-
         var skill = Create(slot, skillTemplate);
         {
             AttachScript(skill);
@@ -178,20 +105,6 @@ public class Skill
             cmd.ExecuteNonQuery();
             sConn.Close();
         }
-        catch (SqlException e)
-        {
-            if (e.Message.Contains("PK__Players"))
-            {
-                if (!e.Message.Contains(aisling.Serial.ToString())) return false;
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue saving skill on issue. Contact GM");
-                SentrySdk.CaptureException(e);
-                return false;
-            }
-
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
-            SentrySdk.CaptureException(e);
-        }
         catch (Exception e)
         {
             ServerSetup.EventsLogger(e.Message, LogLevel.Error);
@@ -200,11 +113,6 @@ public class Skill
         }
 
         return true;
-    }
-
-    public bool CanUse()
-    {
-        return Ready;
     }
 
     internal static Sprite Reflect(Sprite enemy, Sprite damageDealingSprite, Skill skill)

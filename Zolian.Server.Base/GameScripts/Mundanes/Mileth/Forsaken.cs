@@ -774,42 +774,42 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
 
     private static void Berserker(WorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Onslaught", 1);
+        Skill.GiveTo(client.Aisling, "Onslaught");
         client.LoadSkillBook();
     }
 
     private static void Defender(WorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Assault", 1);
+        Skill.GiveTo(client.Aisling, "Assault");
         client.LoadSkillBook();
     }
 
     private static void Assassin(WorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Stab", 1);
+        Skill.GiveTo(client.Aisling, "Stab");
         client.LoadSkillBook();
     }
 
     private static void Monk(WorldClient client)
     {
-        Skill.GiveTo(client.Aisling, "Punch", 1);
+        Skill.GiveTo(client.Aisling, "Punch");
         client.LoadSkillBook();
     }
 
     private static void Cleric(WorldClient client)
     {
-        Spell.GiveTo(client.Aisling, "Heal Minor Wounds", 1);
+        Spell.GiveTo(client.Aisling, "Heal Minor Wounds");
         client.LoadSpellBook();
     }
 
     private static void Arcanus(WorldClient client)
     {
-        Spell.GiveTo(client.Aisling, "Beag Athar", 1);
-        Spell.GiveTo(client.Aisling, "Beag Creag", 1);
-        Spell.GiveTo(client.Aisling, "Beag Sal", 1);
-        Spell.GiveTo(client.Aisling, "Beag Srad", 1);
-        Spell.GiveTo(client.Aisling, "Beag Dorcha", 1);
-        Spell.GiveTo(client.Aisling, "Beag Eadrom", 1);
+        Spell.GiveTo(client.Aisling, "Beag Athar");
+        Spell.GiveTo(client.Aisling, "Beag Creag");
+        Spell.GiveTo(client.Aisling, "Beag Sal");
+        Spell.GiveTo(client.Aisling, "Beag Srad");
+        Spell.GiveTo(client.Aisling, "Beag Dorcha");
+        Spell.GiveTo(client.Aisling, "Beag Eadrom");
         client.LoadSpellBook();
     }
 

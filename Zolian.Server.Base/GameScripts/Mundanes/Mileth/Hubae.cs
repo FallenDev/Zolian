@@ -53,42 +53,42 @@ public class Hubae(WorldServer server, Mundane mundane) : MundaneScript(server, 
         switch (responseID)
         {
             case 0x01:
-                var skill = Skill.GiveTo(client.Aisling, "Pummel", 1);
+                var skill = Skill.GiveTo(client.Aisling, "Pummel");
                 if (skill) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cPummel");
                 break;
             case 0x02:
-                var skill2 = Skill.GiveTo(client.Aisling, "Thump", 1);
+                var skill2 = Skill.GiveTo(client.Aisling, "Thump");
                 if (skill2) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cThump");
                 break;
             case 0x03:
-                var skill3 = Skill.GiveTo(client.Aisling, "Healing Palms", 1);
+                var skill3 = Skill.GiveTo(client.Aisling, "Healing Palms");
                 if (skill3) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cHealing Palms");
                 break;
             case 0x04:
-                var skill4 = Skill.GiveTo(client.Aisling, "Eye Gouge", 1);
+                var skill4 = Skill.GiveTo(client.Aisling, "Eye Gouge");
                 if (skill4) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cEye Gouge");
                 break;
             case 0x05:
-                var skill5 = Skill.GiveTo(client.Aisling, "Calming Mist", 1);
+                var skill5 = Skill.GiveTo(client.Aisling, "Calming Mist");
                 if (skill5) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cCalming Mist");
                 break;
             case 0x06:
-                var skill6 = Skill.GiveTo(client.Aisling, "Tiger Palm", 1);
+                var skill6 = Skill.GiveTo(client.Aisling, "Tiger Palm");
                 if (skill6) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cTiger Palm");
                 break;
             case 0x07:
-                var skill7 = Skill.GiveTo(client.Aisling, "Ember Strike", 1);
+                var skill7 = Skill.GiveTo(client.Aisling, "Ember Strike");
                 if (skill7) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cEmber Strike");
                 break;
             case 0x08:
-                var skill8 = Skill.GiveTo(client.Aisling, "Ninth Gate", 1);
+                var skill8 = Skill.GiveTo(client.Aisling, "Ninth Gate");
                 if (skill8) client.LoadSkillBook();
                 client.SendOptionsDialog(Mundane, $"Your dedication has taught you the ability of {{=cNinth Gate");
                 break;
