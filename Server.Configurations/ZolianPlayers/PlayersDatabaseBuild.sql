@@ -367,7 +367,8 @@ CREATE TABLE PlayersQuests
     [CthonicCleansingTwo] BIT NULL,
     [CthonicDepthsCleansing] BIT NULL,
     [CthonicRuinsAccess] BIT NULL,
-    [CthonicRemainsExplorationLevel] INT NULL
+    [CthonicRemainsExplorationLevel] INT NULL,
+    [EndedOmegasRein] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
@@ -577,7 +578,8 @@ CREATE TYPE dbo.QuestType AS TABLE
     CthonicCleansingTwo BIT,
     CthonicDepthsCleansing BIT,
     CthonicRuinsAccess BIT,
-    CthonicRemainsExplorationLevel INT
+    CthonicRemainsExplorationLevel INT,
+    EndedOmegasRein BIT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -795,7 +797,7 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
 	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT,
     @CthonicKillTarget VARCHAR(20), @CthonicFindTarget VARCHAR(20), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
-	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT
+	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -815,7 +817,7 @@ BEGIN
 		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate], [EternalBond], [ArmorCraftingCodex],
 		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned],
         [CthonicKillTarget], [CthonicFindTarget], [CthonicKillCompletions], [CthonicCleansingOne], [CthonicCleansingTwo],
-        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel]
+        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel], [EndedOmegasRein]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -832,7 +834,7 @@ BEGIN
 		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate, @EternalBond, @ArmorCraftingCodex,
 		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned,
         @CthonicKillTarget, @CthonicFindTarget, @CthonicKillCompletions, @CthonicCleansingOne, @CthonicCleansingTwo,
-        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel
+        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel, @EndedOmegasRein
     );
 END
 GO
@@ -1026,7 +1028,8 @@ BEGIN
         [CthonicCleansingTwo] = source.CthonicCleansingTwo,
         [CthonicDepthsCleansing] = source.CthonicDepthsCleansing,
         [CthonicRuinsAccess] = source.CthonicRuinsAccess,
-        [CthonicRemainsExplorationLevel] = source.CthonicRemainsExplorationLevel;
+        [CthonicRemainsExplorationLevel] = source.CthonicRemainsExplorationLevel,
+        [EndedOmegasRein] = source.EndedOmegasRein;
 END
 GO
 
@@ -1478,7 +1481,7 @@ BEGIN
 		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond, ArmorCraftingCodex,
 		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
            CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions, CthonicCleansingOne, CthonicCleansingTwo,
-		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel
+		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

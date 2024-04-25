@@ -33,6 +33,8 @@ public class VoidSphereEnt : AreaScript
                 break;
         }
 
+        if (client.Aisling.EquipmentManager.Equipment[18]?.Item.Template.Name == "Auto Spark") return;
+
         if (!(vectorMap.Y > 15) && !(vectorMap.Y < 3) && !(vectorMap.X > 15) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();
         client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));

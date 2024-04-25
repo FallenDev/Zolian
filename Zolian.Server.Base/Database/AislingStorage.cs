@@ -172,7 +172,7 @@ public record AislingStorage : Sql, IAislingStorage
             obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
             obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
             obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
-            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel);
+            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein);
 
             if (obj.ComboManager == null) return false;
             cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
@@ -393,7 +393,7 @@ public record AislingStorage : Sql, IAislingStorage
                     player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate, player.QuestManager.EternalBond, player.QuestManager.ArmorCraftingCodex,
                     player.QuestManager.ArmorApothecaryAccepted, player.QuestManager.ArmorCodexDeciphered, player.QuestManager.ArmorCraftingCodexLearned, player.QuestManager.ArmorCraftingAdvancedCodexLearned,
                     player.QuestManager.CthonicKillTarget, player.QuestManager.CthonicFindTarget, player.QuestManager.CthonicKillCompletions, player.QuestManager.CthonicCleansingOne, player.QuestManager.CthonicCleansingTwo,
-                    player.QuestManager.CthonicDepthsCleansing, player.QuestManager.CthonicRuinsAccess, player.QuestManager.CthonicRemainsExplorationLevel);
+                    player.QuestManager.CthonicDepthsCleansing, player.QuestManager.CthonicRuinsAccess, player.QuestManager.CthonicRemainsExplorationLevel, player.QuestManager.EndedOmegasRein);
 
                 cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
                     player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
@@ -948,6 +948,7 @@ public record AislingStorage : Sql, IAislingStorage
             cmd5.Parameters.Add("@CthonicDepthsCleansing", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@CthonicRuinsAccess", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@CthonicRemainsExplorationLevel", SqlDbType.Int).Value = 0;
+            cmd5.Parameters.Add("@EndedOmegasRein", SqlDbType.Bit).Value = false;
 
             #endregion
 
@@ -1199,6 +1200,7 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("CthonicDepthsCleansing", typeof(bool));
         qDt.Columns.Add("CthonicRuinsAccess", typeof(bool));
         qDt.Columns.Add("CthonicRemainsExplorationLevel", typeof(int));
+        qDt.Columns.Add("EndedOmegasRein", typeof(bool));
 
         return qDt;
     }
