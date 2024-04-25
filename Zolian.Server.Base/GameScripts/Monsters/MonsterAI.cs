@@ -8401,7 +8401,7 @@ public class WorldBossBahamut : MonsterScript
     {
         try
         {
-            var critical = (long)(Monster.CurrentHp * 0.01);
+            var critical = (long)(Monster.MaximumHp * 0.03);
             if (Monster.CurrentHp <= critical)
             {
                 Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));

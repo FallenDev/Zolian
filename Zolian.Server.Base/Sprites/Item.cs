@@ -742,7 +742,7 @@ public sealed class Item : Sprite, IItem
     public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await StorageManager.AislingBucket.ItemDeleteLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         try
         {
@@ -760,7 +760,7 @@ public sealed class Item : Sprite, IItem
         }
         finally
         {
-            StorageManager.AislingBucket.SaveLock.Release();
+            StorageManager.AislingBucket.ItemDeleteLock.Release();
         }
     }
 

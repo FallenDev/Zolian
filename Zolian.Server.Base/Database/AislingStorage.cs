@@ -20,6 +20,7 @@ public record AislingStorage : Sql, IAislingStorage
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True";
     public SemaphoreSlim SaveLock { get; } = new(1, 1);
+    public SemaphoreSlim ItemDeleteLock { get; } = new(1, 1);
     private SemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
     private SemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
@@ -338,11 +339,10 @@ public record AislingStorage : Sql, IAislingStorage
     /// Saves all players states
     /// Utilizes an active connection that self-heals if closed
     /// </summary>
-    public async Task<bool> ServerSave(List<Aisling> playerList)
+    public bool ServerSave(List<Aisling> playerList)
     {
         if (playerList.Count == 0) return false;
 
-        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
@@ -556,8 +556,6 @@ public record AislingStorage : Sql, IAislingStorage
                 ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
                 ServerSetup.Instance.ServerSaveConnection.Open();
             }
-
-            SaveLock.Release();
         }
 
         return true;
