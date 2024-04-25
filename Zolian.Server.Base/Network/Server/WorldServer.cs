@@ -38,7 +38,6 @@ using System.Numerics;
 using Darkages.Managers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using CollectionExtensions = System.Collections.Generic.CollectionExtensions;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ExchangeArgs = Chaos.Networking.Entities.Client.ExchangeArgs;
 using GroupRequestArgs = Chaos.Networking.Entities.Client.GroupRequestArgs;
@@ -814,10 +813,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
                 catch (Exception ex)
                 {
-                    ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
-                    ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
                     SentrySdk.CaptureException(ex);
-
                     clientsToRemove.Add(player.Client.Id);
                     player.Client.Disconnect();
                 }
@@ -855,7 +851,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            // Track issues in App Center only
             SentrySdk.CaptureException(ex);
         }
     }
@@ -876,7 +871,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            // Track issues in App Center only
             SentrySdk.CaptureException(ex);
         }
     }
@@ -925,8 +919,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }
     }
@@ -944,8 +936,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }
     }
@@ -960,8 +950,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }
     }
@@ -1016,8 +1004,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception ex)
         {
-            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }
     }
@@ -1725,7 +1711,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
-                ServerSetup.ConnectionLogger($"{client.RemoteIp} tried to redirect to the world with invalid details.");
+                SentrySdk.CaptureMessage($"{client.RemoteIp} tried to redirect to the world with invalid details.");
                 localClient.Disconnect();
                 return default;
             }
@@ -1733,7 +1719,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             //keep this case sensitive
             if (localArgs.Name != redirect.Name)
             {
-                ServerSetup.ConnectionLogger($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
+                SentrySdk.CaptureMessage($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
                 localClient.Disconnect();
                 return default;
             }
@@ -1761,7 +1747,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
             if (aisling == null)
             {
-                ServerSetup.ConnectionLogger($"Unable to retrieve player data: {client.RemoteIp}");
+                SentrySdk.CaptureMessage($"Unable to retrieve player data: {client.RemoteIp}");
                 client.Disconnect();
                 return;
             }
@@ -1776,7 +1762,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (client.Aisling._Str <= 0 || client.Aisling._Int <= 0 || client.Aisling._Wis <= 0 ||
                 client.Aisling._Con <= 0 || client.Aisling._Dex <= 0)
             {
-                ServerSetup.ConnectionLogger($"Player {client.Aisling.Username} has corrupt stats.");
+                SentrySdk.CaptureMessage($"Player {client.Aisling.Username} has corrupt stats.");
                 client.Disconnect();
                 return;
             }
@@ -1847,9 +1833,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         finally
         {
-            var time = DateTime.UtcNow;
-            ServerSetup.ConnectionLogger($"{redirect.Name} logged in at: {time}");
-            SentrySdk.CaptureMessage($"{client.Aisling.Username} logged in at {DateTime.Now} local time on {client.RemoteIp}");
+            ServerSetup.ConnectionLogger($"{redirect.Name} logged in at: {DateTime.Now} on {client.RemoteIp}");
         }
     }
 
@@ -3532,7 +3516,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static string DecideOnSkillsToPull(IWorldClient client)
     {
-        return client.Aisling == null ? null : CollectionExtensions.GetValueOrDefault(SkillMap, (client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass));
+        return client.Aisling == null ? null : SkillMap.GetValueOrDefault((client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass));
     }
 
     #endregion
@@ -3771,12 +3755,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
-
                 if (tor == true)
                 {
                     ServerSetup.ConnectionLogger("---------World-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -3784,6 +3767,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     ServerSetup.ConnectionLogger("---------World-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -3793,6 +3777,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         ServerSetup.ConnectionLogger("---------World-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                        SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
@@ -3840,10 +3825,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             request.AddParameter("comment", comment);
             var response = ServerSetup.Instance.RestReport.Execute(request);
 
-            if (!response.IsSuccessful)
-            {
-                ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
-            }
+            if (response.IsSuccessful) return;
+            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
         catch
         {

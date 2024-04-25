@@ -219,7 +219,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Spell- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Spell- on character: {client.Aisling.Username}");
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
@@ -244,7 +244,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Skill- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Skill- on character: {client.Aisling.Username}");
         var name = args.FromName("name").Replace("\"", "");
         var level = args.FromName("level");
 
@@ -280,7 +280,7 @@ public static class Commander
             return;
         }
         player.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
     }
 
     /// <summary>
@@ -295,7 +295,7 @@ public static class Commander
         var players = ServerSetup.Instance.Game.Aislings;
         var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
         if (player != null) client.TransitionToMap(player.Map, player.Position);
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
     }
 
     /// <summary>
@@ -312,7 +312,7 @@ public static class Commander
         var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
         if (player != null) player.Gender = (Gender)sResult;
         client.ClientRefreshed();
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
     }
 
     /// <summary>
@@ -327,7 +327,7 @@ public static class Commander
         var players = ServerSetup.Instance.Game.Aislings;
         var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
         client.KillPlayer(client.Aisling.Map, player?.Username);
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
     }
 
     /// <summary>
@@ -358,7 +358,7 @@ public static class Commander
             Party.AddPartyMember(client.Aisling, player);
         }
 
-        SentrySdk.CaptureMessage($"{client.RemoteIp} remotely grouped character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} remotely grouped character: {client.Aisling.Username}");
     }
 
     /// <summary>
@@ -373,7 +373,7 @@ public static class Commander
         var (_, area) = ServerSetup.Instance.GlobalMapCache.FirstOrDefault(i => i.Value.Name == mapName);
         if (area == null) return;
         client.TransitionToMap(area, new Position(x, y));
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
     }
 
     /// <summary>
@@ -384,7 +384,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
         var players = ServerSetup.Instance.Game.Aislings;
         ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("------------- Maps Reloaded -------------", LogLevel.Warning);
@@ -425,7 +425,7 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
-        SentrySdk.CaptureMessage($"{client.RemoteIp} used GM Command -Item Create- on character: {client.Aisling.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Item Create- on character: {client.Aisling.Username}");
 
         var name = args.FromName("item").Replace("\"", "");
         if (!int.TryParse(args.FromName("amount"), out var quantity)) return;

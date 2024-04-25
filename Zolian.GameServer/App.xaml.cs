@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Sentry;
-using Sentry.Profiling;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Zolian.GameServer;

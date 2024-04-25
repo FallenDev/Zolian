@@ -603,12 +603,11 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
-
                 if (tor == true)
                 {
                     ServerSetup.ConnectionLogger("---------Login-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -616,6 +615,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 {
                     ServerSetup.ConnectionLogger("---------Login-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -625,6 +625,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         ServerSetup.ConnectionLogger("---------Login-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                        SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
@@ -672,10 +673,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             request.AddParameter("comment", comment);
             var response = ServerSetup.Instance.RestReport.Execute(request);
 
-            if (!response.IsSuccessful)
-            {
-                ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
-            }
+            if (response.IsSuccessful) return;
+            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
         catch
         {
@@ -710,7 +710,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             if (regex.IsMatch(name))
             {
-                SentrySdk.CaptureMessage($"Player attempted to create an unsupported username. {name} \n {client.Id}");
+                SentrySdk.CaptureMessage($"Player attempted to create an unsupported username. {name} : {client.RemoteIp}");
                 client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unsupported username, please try again.");
                 return false;
             }

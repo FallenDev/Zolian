@@ -221,6 +221,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         {
             ServerSetup.ConnectionLogger("-----------------------------------");
             ServerSetup.ConnectionLogger($"{remoteIp} is banned and unable to connect");
+            SentrySdk.CaptureMessage($"{remoteIp} is banned and unable to connect");
             return true;
         }
 
@@ -257,12 +258,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
-                SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
-
                 if (tor == true)
                 {
                     ServerSetup.ConnectionLogger("---------Lobby-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -270,6 +270,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 {
                     ServerSetup.ConnectionLogger("---------Lobby-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                     return true;
                 }
 
@@ -279,6 +280,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                         ServerSetup.ConnectionLogger("---------Lobby-Server---------");
                         var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
                         ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                        SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
                         ReportEndpoint(remoteIp, comment);
                         return true;
                     case >= 0:
@@ -326,10 +328,9 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             request.AddParameter("comment", comment);
             var response = ServerSetup.Instance.RestReport.Execute(request);
 
-            if (!response.IsSuccessful)
-            {
-                ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
-            }
+            if (response.IsSuccessful) return;
+            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
         catch
         {
