@@ -44,8 +44,10 @@ public class SirDolvet : MundaneScript
             && client.Aisling.ExpLevel >= 250
             && client.Aisling.QuestManager.AssassinsGuildReputation >= 4
             && client.Aisling.QuestManager.UndineReputation >= 4
-            && (client.Aisling.Path == Class.Berserker || client.Aisling.PastClass == Class.Berserker)
-            && (client.Aisling.Path == Class.Assassin || client.Aisling.PastClass == Class.Assassin))
+            && (client.Aisling.Path == Class.Berserker 
+                || client.Aisling.PastClass == Class.Berserker 
+                || client.Aisling.Path == Class.Assassin 
+                || client.Aisling.PastClass == Class.Assassin))
         {
             options.Add(new(0x01, "I am but a canvas, teach me"));
             client.SendOptionsDialog(Mundane, "Ya know, you'd make a fine Dark Knight", options.ToArray());
