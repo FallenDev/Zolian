@@ -19,7 +19,7 @@ public class SpellBook : ObjectManager
         for (var i = 0; i < SpellLength; i++) Spells[i + 1] = null;
     }
 
-    public bool IsValidSlot(byte slot) => slot is > 0 and < SpellLength && !_invalidSlots.Contains(slot);
+    private bool IsValidSlot(byte slot) => slot is > 0 and < SpellLength && !_invalidSlots.Contains(slot);
 
     public int FindEmpty(int start = 0)
     {
@@ -61,8 +61,7 @@ public class SpellBook : ObjectManager
 
     public void Remove(WorldClient client, byte movingFrom)
     {
-        if (!Spells.ContainsKey(movingFrom)) return;
-        var copy = Spells[movingFrom];
+        if (!Spells.TryGetValue(movingFrom, out var copy)) return;
         if (Spells.TryUpdate(movingFrom, null, copy))
             client.SendRemoveSpellFromPane(movingFrom);
         client.DeleteSpellFromDb(copy);

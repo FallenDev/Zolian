@@ -19,7 +19,7 @@ public class SkillBook : ObjectManager
         for (var i = 0; i < SkillLength; i++) Skills[i + 1] = null;
     }
 
-    public bool IsValidSlot(byte slot) => slot is > 0 and < SkillLength && !_invalidSlots.Contains(slot);
+    private bool IsValidSlot(byte slot) => slot is > 0 and < SkillLength && !_invalidSlots.Contains(slot);
 
     public int FindEmpty(int start = 0)
     {
@@ -38,7 +38,7 @@ public class SkillBook : ObjectManager
         return -1;
     }
 
-    public Skill FindInSlot(int slot)
+    private Skill FindInSlot(int slot)
     {
         Skill ret = null;
 
@@ -52,7 +52,7 @@ public class SkillBook : ObjectManager
 
     public bool HasSkill(string s)
     {
-        if (Skills == null || Skills.Count == 0) return false;
+        if (Skills == null || Skills.IsEmpty) return false;
 
         return Skills.Values.Where(skill => skill is not null).Where(skill => !skill.Template.Name.IsNullOrEmpty()).Any(skill => skill.Template.Name.ToLower().Equals(s.ToLower()));
     }
@@ -61,8 +61,7 @@ public class SkillBook : ObjectManager
 
     public void Remove(WorldClient client, byte movingFrom)
     {
-        if (!Skills.ContainsKey(movingFrom)) return;
-        var copy = Skills[movingFrom];
+        if (!Skills.TryGetValue(movingFrom, out var copy)) return;
         if (Skills.TryUpdate(movingFrom, null, copy))
             client.SendRemoveSkillFromPane(movingFrom);
         client.DeleteSkillFromDb(copy);

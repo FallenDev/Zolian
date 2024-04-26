@@ -38,7 +38,7 @@ public sealed class Aisling : Player, IAisling
     public int EquipmentDamageTaken = 0;
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = [];
     public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = [];
-    public AislingTrackers AislingTrackers { get; }
+    public DateTime AislingTracker { get; set; }
     public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;
     public uint MaximumWeight => GameMaster switch
@@ -79,7 +79,7 @@ public sealed class Aisling : Player, IAisling
         AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         TileType = TileContent.Aisling;
-        AislingTrackers = new AislingTrackers(TimeSpan.FromSeconds(1));
+        AislingTracker = DateTime.UtcNow;
     }
 
     public bool Loading { get; set; }

@@ -35,7 +35,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
     public Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
-    public Trackers Trackers { get; set; }
 
     #region Buffs Debuffs
 
@@ -178,7 +177,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         LastTurnUpdated = readyTime;
         LastUpdated = readyTime;
         LastPosition = new Position(Vector2.Zero);
-        Trackers = new Trackers(TimeSpan.FromSeconds(1));
     }
 
     public uint Serial { get; set; }

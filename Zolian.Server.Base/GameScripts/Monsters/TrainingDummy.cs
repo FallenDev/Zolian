@@ -18,6 +18,7 @@ public class TrainingDummy : MonsterScript
     public TrainingDummy(Monster monster, Area map) : base(monster, map)
     {
         Monster.BonusMr = 0;
+        Monster.BonusAc = 0;
         Monster.MonsterBank = [];
     }
 
@@ -97,6 +98,7 @@ public class TrainingDummy2 : MonsterScript
 
     public TrainingDummy2(Monster monster, Area map) : base(monster, map)
     {
+        Monster.BonusAc = 0;
         Monster.BonusMr = 0;
         Monster.MonsterBank = [];
     }

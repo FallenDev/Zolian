@@ -552,7 +552,7 @@ public class DebuffWrathConsequences : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusMr -= WillModifer.Value;
+            affected.BonusMr -= WillModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -578,7 +578,7 @@ public class DebuffWrathConsequences : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusMr += WillModifer.Value;
+        affected.BonusMr += WillModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -589,7 +589,7 @@ public class DebuffWrathConsequences : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusMr -= WillModifer.Value;
+        affected.BonusMr -= WillModifer.Value.Item2;
     }
 }
 
@@ -770,7 +770,7 @@ public class DebuffCriochArdCradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -783,7 +783,7 @@ public class DebuffCriochArdCradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -794,7 +794,7 @@ public class DebuffCriochArdCradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -811,7 +811,7 @@ public class DebuffCriochMorCradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -824,7 +824,7 @@ public class DebuffCriochMorCradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -847,7 +847,7 @@ public class DebuffCriochCradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -860,7 +860,7 @@ public class DebuffCriochCradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -871,7 +871,7 @@ public class DebuffCriochCradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -888,7 +888,7 @@ public class DebuffCriochBeagCradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -901,7 +901,7 @@ public class DebuffCriochBeagCradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -912,7 +912,7 @@ public class DebuffCriochBeagCradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -929,7 +929,7 @@ public class DebuffArdcradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -942,7 +942,7 @@ public class DebuffArdcradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -953,7 +953,7 @@ public class DebuffArdcradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -970,7 +970,7 @@ public class DebuffMorcradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -983,7 +983,7 @@ public class DebuffMorcradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -994,7 +994,7 @@ public class DebuffMorcradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1011,7 +1011,7 @@ public class DebuffDecay : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -1031,7 +1031,7 @@ public class DebuffDecay : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = false;
@@ -1043,7 +1043,7 @@ public class DebuffDecay : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1060,7 +1060,7 @@ public class DebuffCradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -1073,7 +1073,7 @@ public class DebuffCradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1084,7 +1084,7 @@ public class DebuffCradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1101,7 +1101,7 @@ public class DebuffBeagcradh : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is not Aisling aisling) return;
@@ -1114,7 +1114,7 @@ public class DebuffBeagcradh : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
-        affected.BonusAc += AcModifer.Value;
+        affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1125,7 +1125,7 @@ public class DebuffBeagcradh : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1142,7 +1142,7 @@ public class DebuffRending : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1179,7 +1179,7 @@ public class DebuffRending : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1190,7 +1190,7 @@ public class DebuffRending : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1207,7 +1207,7 @@ public class DebuffCorrosiveTouch : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1244,7 +1244,7 @@ public class DebuffCorrosiveTouch : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1255,7 +1255,7 @@ public class DebuffCorrosiveTouch : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1272,7 +1272,7 @@ public class DebuffShieldBash : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1309,7 +1309,7 @@ public class DebuffShieldBash : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1320,7 +1320,7 @@ public class DebuffShieldBash : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1337,7 +1337,7 @@ public class DebuffTitansCleave : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1374,7 +1374,7 @@ public class DebuffTitansCleave : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1385,7 +1385,7 @@ public class DebuffTitansCleave : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1402,7 +1402,7 @@ public class DebuffRetribution : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1439,7 +1439,7 @@ public class DebuffRetribution : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1450,7 +1450,7 @@ public class DebuffRetribution : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1467,7 +1467,7 @@ public class DebuffStabnTwist : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1504,7 +1504,7 @@ public class DebuffStabnTwist : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1515,7 +1515,7 @@ public class DebuffStabnTwist : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1532,7 +1532,7 @@ public class DebuffHurricane : Debuff
         {
             DebuffSpell = debuff;
             DebuffSpell.TimeLeft = DebuffSpell.Length;
-            affected.BonusAc -= AcModifer.Value;
+            affected.BonusAc -= AcModifer.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -1569,7 +1569,7 @@ public class DebuffHurricane : Debuff
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         if (affected.Debuffs.TryRemove(debuff.Name, out _))
-            affected.BonusAc += AcModifer.Value;
+            affected.BonusAc += AcModifer.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -1580,7 +1580,7 @@ public class DebuffHurricane : Debuff
 
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
-        affected.BonusAc -= AcModifer.Value;
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 

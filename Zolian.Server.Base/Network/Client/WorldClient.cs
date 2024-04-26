@@ -3789,8 +3789,8 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         if (_dayDreamingControl.Elapsed.TotalMilliseconds < _dayDreamingTimer.Delay.TotalMilliseconds) return;
         _dayDreamingControl.Restart();
-        if (!(Aisling.Direction is 1 or 2)) return;
-        if (!((DateTime.UtcNow - Aisling.AislingTrackers.LastManualAction).TotalMinutes > 2)) return;
+        if (Aisling.Direction is not (1 or 2)) return;
+        if (!((DateTime.UtcNow - Aisling.AislingTracker).TotalMinutes > 2)) return;
         if (!Socket.Connected || !IsDayDreaming) return;
 
         Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));

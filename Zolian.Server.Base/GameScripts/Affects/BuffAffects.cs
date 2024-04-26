@@ -235,7 +235,7 @@ public class buff_SpectralShield : Buff
         {
             BuffSpell = buff;
             BuffSpell.TimeLeft = BuffSpell.Length;
-            affected.BonusAc += AcModifier.Value;
+            affected.BonusAc += AcModifier.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -260,7 +260,7 @@ public class buff_SpectralShield : Buff
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
-        affected.BonusAc -= AcModifier.Value;
+        affected.BonusAc -= AcModifier.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -271,7 +271,7 @@ public class buff_SpectralShield : Buff
 
     public override void OnItemChange(Aisling affected, Buff buff)
     {
-        affected.BonusAc += AcModifier.Value;
+        affected.BonusAc += AcModifier.Value.Item2;
     }
 }
 
@@ -288,7 +288,7 @@ public class buff_DefenseUp : Buff
         {
             BuffSpell = buff;
             BuffSpell.TimeLeft = BuffSpell.Length;
-            affected.BonusAc += AcModifier.Value;
+            affected.BonusAc += AcModifier.Value.Item2;
         }
 
         if (affected is Aisling aisling)
@@ -313,7 +313,7 @@ public class buff_DefenseUp : Buff
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
-        affected.BonusAc -= AcModifier.Value;
+        affected.BonusAc -= AcModifier.Value.Item2;
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -324,7 +324,7 @@ public class buff_DefenseUp : Buff
 
     public override void OnItemChange(Aisling affected, Buff buff)
     {
-        affected.BonusAc += AcModifier.Value;
+        affected.BonusAc += AcModifier.Value.Item2;
     }
 }
 

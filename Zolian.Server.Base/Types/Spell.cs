@@ -4,6 +4,7 @@ using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
@@ -45,7 +46,7 @@ public class Spell
 
     public static Spell Create(int slot, SpellTemplate spellTemplate)
     {
-        var obj = new Spell
+        return new Spell
         {
             Template = spellTemplate,
             Level = 1,
@@ -53,10 +54,8 @@ public class Spell
             Icon = spellTemplate.Icon,
             Lines = spellTemplate.BaseLines
         };
-
-        return obj;
     }
-    
+
     public static bool GiveTo(Aisling aisling, string spellName)
     {
         if (!aisling.LoggedIn) return false;

@@ -3527,10 +3527,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var opCode = packet.OpCode;
         var handler = ClientHandlers[(byte)packet.OpCode];
-        var trackers = client.Aisling?.AislingTrackers;
 
-        if (trackers != null && IsManualAction(packet.OpCode))
-            trackers.LastManualAction = DateTime.UtcNow;
+        if (client.Aisling is not null && IsManualAction(packet.OpCode))
+            client.Aisling.AislingTracker = DateTime.UtcNow;
 
         try
         {
