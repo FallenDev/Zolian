@@ -35,16 +35,16 @@ public class ObjectManager : IObjectManager
     public void AddObject<T>(T obj, Predicate<T> p = null) where T : Sprite
     {
         if (p != null && p(obj))
-            ServerSetup.Instance.Game.ObjectFactory.AddGameObject(obj);
+            ObjectService.AddGameObject(obj);
         else if (p == null)
-            ServerSetup.Instance.Game.ObjectFactory.AddGameObject(obj);
+            ObjectService.AddGameObject(obj);
     }
 
-    public void DelObject<T>(T obj) where T : Sprite => ServerSetup.Instance.Game?.ObjectFactory.RemoveGameObject(obj);
+    public void DelObject<T>(T obj) where T : Sprite => ObjectService.RemoveGameObject(obj);
 
-    public void DelObjects<T>(T[] obj) where T : Sprite => ServerSetup.Instance.Game?.ObjectFactory.RemoveAllGameObjects(obj);
+    public void DelObjects<T>(T[] obj) where T : Sprite => ObjectService.RemoveAllGameObjects(obj);
 
-    public T GetObject<T>(Area map, Predicate<T> p) where T : Sprite => ServerSetup.Instance.Game?.ObjectFactory.Query(map, p);
+    public T GetObject<T>(Area map, Predicate<T> p) where T : Sprite => ObjectService.Query(map, p);
 
     public Sprite GetObject(Area map, Predicate<Sprite> p, Get selections) => GetObjects(map, p, selections).FirstOrDefault();
 
@@ -70,7 +70,7 @@ public class ObjectManager : IObjectManager
         };
     }
 
-    public IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => ServerSetup.Instance.Game?.ObjectFactory.QueryAll(map, p);
+    public IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => ObjectService.QueryAll(map, p);
 
     public IEnumerable<Sprite> GetObjects(Area map, Predicate<Sprite> p, Get selections)
     {
