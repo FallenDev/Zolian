@@ -1,6 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Darkages.Enums;
+using Darkages.Object;
 using Darkages.Sprites;
 
 namespace Darkages.Types;
@@ -119,7 +120,7 @@ public class Death
         item.ItemPane = Item.ItemPanes.Ground;
         ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
 
-        item.AddObject(item);
+        ObjectManager.AddObject(item);
 
         foreach (var aisling in item.AislingsNearby())
             item.ShowTo(aisling);

@@ -1,10 +1,13 @@
-﻿using System.Collections.Frozen;
+﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 using Chaos.Cryptography;
 
 using Darkages.Enums;
 using Darkages.Interfaces;
+using Darkages.Object;
 using Darkages.ScriptingBase;
+using Darkages.Sprites;
 using Darkages.Types;
 
 using Microsoft.Data.SqlClient;
@@ -90,6 +93,7 @@ public record AreaStorage : IAreaStorage
 
         ServerSetup.Instance.GlobalMapCache = ServerSetup.Instance.TempGlobalMapCache.ToFrozenDictionary();
         ServerSetup.EventsLogger($"Maps: {ServerSetup.Instance.GlobalMapCache.Count}");
+        CreateMapCacheContainers();
     }
 
     public bool LoadMap(Area mapObj, string mapFile)
@@ -99,5 +103,19 @@ public record AreaStorage : IAreaStorage
         mapObj.Hash = Crc.Generate16(mapObj.Data);
 
         return mapObj.OnLoaded();
+    }
+
+    public void CreateMapCacheContainers()
+    {
+        foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
+        {
+            var spriteCollectionDict = new ConcurrentDictionary<Type, object>();
+            spriteCollectionDict.TryAdd(typeof(Monster), new SpriteCollection<Monster>());
+            spriteCollectionDict.TryAdd(typeof(Aisling), new SpriteCollection<Aisling>());
+            spriteCollectionDict.TryAdd(typeof(Mundane), new SpriteCollection<Mundane>());
+            spriteCollectionDict.TryAdd(typeof(Item), new SpriteCollection<Item>());
+            spriteCollectionDict.TryAdd(typeof(Money), new SpriteCollection<Money>());
+            ServerSetup.Instance.SpriteCollections.TryAdd(map.ID, spriteCollectionDict);
+        }
     }
 }

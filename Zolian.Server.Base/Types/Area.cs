@@ -4,9 +4,7 @@ using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Microsoft.IdentityModel.Tokens;
-
 using ServiceStack;
-
 using System.Numerics;
 
 namespace Darkages.Types;

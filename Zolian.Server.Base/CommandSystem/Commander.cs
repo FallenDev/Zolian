@@ -10,7 +10,7 @@ using Darkages.Types;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
-
+using Darkages.Object;
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.CommandSystem;
@@ -395,13 +395,13 @@ public static class Commander
 
         foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
         {
-            ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
+            ObjectManager.DelObject(mon);
         }
         ServerSetup.Instance.GlobalMonsterCache = new ConcurrentDictionary<uint, Monster>();
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
-            ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);
+            ObjectManager.DelObject(npc);
         }
         ServerSetup.Instance.GlobalMundaneCache = new ConcurrentDictionary<uint, Mundane>();
 

@@ -1212,7 +1212,7 @@ public class Megaflare(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var nearby = sprite.GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
+        var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
 
         foreach (var player in nearby)
         {

@@ -60,8 +60,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     public static FrozenDictionary<(Race race, Class path, Class pastClass), string> SkillMap;
-    public readonly ObjectService ObjectFactory = new();
-    public readonly ObjectManager ObjectHandlers = new();
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 30;
     private Task _componentRunTask;
@@ -971,14 +969,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
             {
-                ServerSetup.Instance.Game.ObjectHandlers.DelObject(mon);
+                ObjectManager.DelObject(mon);
             }
 
             ServerSetup.Instance.GlobalMonsterCache = [];
 
             foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
             {
-                ServerSetup.Instance.Game.ObjectHandlers.DelObject(npc);
+                ObjectManager.DelObject(npc);
             }
 
             ServerSetup.Instance.GlobalMundaneCache = [];
@@ -1155,8 +1153,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var (destinationSlot, sourcePoint) = localArgs;
             var map = localClient.Aisling.Map;
-            var itemObjs = ObjectHandlers.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Items).ToList();
-            var moneyObjs = ObjectHandlers.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Money);
+            var itemObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Items).ToList();
+            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Money);
 
             if (!itemObjs.IsEmpty())
             {
@@ -1441,7 +1439,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var aisling = localClient.Aisling;
             var mapInstance = aisling.Map;
-            var sprite = ObjectHandlers.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
+            var sprite = ObjectManager.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
 
             if (aisling.CanSeeSprite(sprite)) return default;
             if (sprite is not Monster monster) return default;
@@ -2264,9 +2262,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var (sourceSlot, targetId, count) = localArgs;
             var result = new List<Sprite>();
-            var listA = localClient.Aisling.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listB = localClient.Aisling.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listC = localClient.Aisling.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
             result.AddRange(listA);
             result.AddRange(listB);
             result.AddRange(listC);
@@ -2387,9 +2385,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var (amount, targetId) = localArgs;
             var result = new List<Sprite>();
-            var listA = localClient.Aisling.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listB = localClient.Aisling.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listC = localClient.Aisling.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
 
             result.AddRange(listA);
             result.AddRange(listB);
@@ -2499,8 +2497,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupRequestArgs localArgs)
         {
             var (groupRequestType, targetName) = localArgs;
-            var player = ObjectHandlers.GetObject<Aisling>(localClient.Aisling.Map, i => string.Equals(i.Username, targetName, StringComparison.CurrentCultureIgnoreCase)
-                && i.WithinRangeOf(localClient.Aisling));
+            var player = ObjectManager.GetObject<Aisling>(localClient.Aisling.Map, i => string.Equals(i.Username, targetName, StringComparison.CurrentCultureIgnoreCase)
+                                                                            && i.WithinRangeOf(localClient.Aisling));
 
             if (player == null)
             {
@@ -3107,7 +3105,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (isNpc) return default;
 
-            var obj = ObjectHandlers.GetObject(localClient.Aisling.Map, i => i.Serial == targetId, ObjectManager.Get.Aislings);
+            var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == targetId, ObjectManager.Get.Aislings);
             switch (obj)
             {
                 case null:
@@ -3263,7 +3261,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
         {
-            var otherPlayer = ObjectHandlers.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
+            var otherPlayer = ObjectManager.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
             var localPlayer = localClient.Aisling;
             if (localPlayer == null || otherPlayer == null) return default;
             if (!localPlayer.WithinRangeOf(otherPlayer)) return default;

@@ -267,7 +267,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
         if (newObj == null) return;
         ServerSetup.Instance.GlobalMonsterCache[newObj.Serial] = newObj;
-        ServerSetup.Instance.Game.ObjectHandlers.AddObject(newObj);
+        AddObject(newObj);
     }
 
     public void Patrol()

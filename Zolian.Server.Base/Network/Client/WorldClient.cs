@@ -56,7 +56,6 @@ namespace Darkages.Network.Client;
 public class WorldClient : SocketClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
-    public readonly ObjectManager ObjectHandlers = new();
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch SkillControl = new();
     public readonly Stopwatch SpellControl = new();
@@ -3763,7 +3762,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         SendAttributes(StatUpdateType.Full);
         UpdateDisplay(true);
 
-        var objects = ObjectHandlers.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
+        var objects = ObjectManager.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
 
         if (objects.Count != 0)
         {
@@ -3985,17 +3984,17 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public WorldClient Insert(bool update, bool delete)
     {
-        var obj = ObjectHandlers.GetObject<Aisling>(null, aisling => aisling.Serial == Aisling.Serial
-                                                                     || string.Equals(aisling.Username, Aisling.Username, StringComparison.CurrentCultureIgnoreCase));
+        var obj = ObjectManager.GetObject<Aisling>(null, aisling => aisling.Serial == Aisling.Serial
+                                                                    || string.Equals(aisling.Username, Aisling.Username, StringComparison.CurrentCultureIgnoreCase));
 
         if (obj == null)
         {
-            ObjectHandlers.AddObject(Aisling);
+            ObjectManager.AddObject(Aisling);
         }
         else
         {
             obj.Remove(update, delete);
-            ObjectHandlers.AddObject(Aisling);
+            ObjectManager.AddObject(Aisling);
         }
 
         return this;
@@ -4250,7 +4249,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     public void RevivePlayer(string u)
     {
         if (u is null) return;
-        var user = ObjectHandlers.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
+        var user = ObjectManager.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
 
         if (user is { LoggedIn: true })
             user.Client.Revive();
@@ -4321,7 +4320,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     public void KillPlayer(Area map, string u)
     {
         if (u is null) return;
-        var user = ObjectHandlers.GetObject<Aisling>(map, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
+        var user = ObjectManager.GetObject<Aisling>(map, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
 
         if (user != null)
         {
@@ -4924,7 +4923,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             }
         }
 
-        var objects = ObjectHandlers.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
+        var objects = ObjectManager.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
 
         if (objects.Count != 0)
         {

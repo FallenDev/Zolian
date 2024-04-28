@@ -7,6 +7,7 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.Object;
 
 namespace Darkages.GameScripts.Areas.ShadowTower;
 
@@ -40,7 +41,7 @@ public class ShadowGames : AreaScript
                     if (bossCreate1 == null) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Arc unit, now online!"));
                     ServerSetup.Instance.GlobalMonsterCache[bossCreate1.Serial] = bossCreate1;
-                    ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate1);
+                    ObjectManager.AddObject(bossCreate1);
                 }
                 break;
             case 7 when newLocation.Y == 1:
@@ -53,7 +54,7 @@ public class ShadowGames : AreaScript
                     if (bossCreate2 == null) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Neo unit, now online!"));
                     ServerSetup.Instance.GlobalMonsterCache[bossCreate2.Serial] = bossCreate2;
-                    ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate2);
+                    ObjectManager.AddObject(bossCreate2);
                 }
                 break;
             case 10 when newLocation.Y == 11:

@@ -2,24 +2,14 @@
 using Darkages.Types;
 
 using System.Collections;
-using System.Collections.Concurrent;
 
 namespace Darkages.Object;
 
-public sealed class ObjectService
+public abstract class ObjectService
 {
     public ObjectService()
     {
-        foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
-        {
-            var spriteCollectionDict = new ConcurrentDictionary<Type, object>();
-            spriteCollectionDict.TryAdd(typeof(Monster), new SpriteCollection<Monster>([]));
-            spriteCollectionDict.TryAdd(typeof(Aisling), new SpriteCollection<Aisling>([]));
-            spriteCollectionDict.TryAdd(typeof(Mundane), new SpriteCollection<Mundane>([]));
-            spriteCollectionDict.TryAdd(typeof(Item), new SpriteCollection<Item>([]));
-            spriteCollectionDict.TryAdd(typeof(Money), new SpriteCollection<Money>([]));
-            ServerSetup.Instance.SpriteCollections.TryAdd(map.ID, spriteCollectionDict);
-        }
+
     }
 
     public static void AddGameObject<T>(T obj) where T : Sprite
@@ -33,13 +23,13 @@ public sealed class ObjectService
 
     public static T Query<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
-        var collections = map == null ? ServerSetup.Instance.SpriteCollections.Values : new[] { ServerSetup.Instance.SpriteCollections[map.ID] };
+        var collections = map is null ? ServerSetup.Instance.SpriteCollections.Values : new[] { ServerSetup.Instance.SpriteCollections[map.ID] };
 
         foreach (var mapCollections in collections)
         {
             if (!mapCollections.TryGetValue(typeof(T), out var spriteCollection)) continue;
             var queriedObject = ((SpriteCollection<T>)spriteCollection).Query(predicate);
-            if (queriedObject != null) return queriedObject;
+            if (queriedObject is not null) return queriedObject;
         }
 
         return null;
@@ -47,11 +37,11 @@ public sealed class ObjectService
 
     public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
-        if (map == null)
+        if (map is null)
         {
             var collections = ServerSetup.Instance.SpriteCollections.Values
                 .Select(mapDict => mapDict.TryGetValue(typeof(T), out var collection) ? (SpriteCollection<T>)collection : null)
-                .Where(collection => collection != null && collection.Any());
+                .Where(collection => collection is not null && collection.Any());
             var stack = new List<T>();
 
             foreach (var obj in collections)
@@ -64,38 +54,28 @@ public sealed class ObjectService
         return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
     }
 
-    public static void RemoveAllGameObjects<T>(T[] objects) where T : Sprite
-    {
-        if (objects == null) return;
-        foreach (var obj in objects)
-            RemoveGameObject(obj);
-    }
-
     public static void RemoveGameObject<T>(T obj) where T : Sprite
     {
-        if (obj == null || !ServerSetup.Instance.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections)) return;
+        if (obj is null || !ServerSetup.Instance.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections)) return;
         if (mapCollections.TryGetValue(typeof(T), out var objCollection))
             ((SpriteCollection<T>)objCollection).Delete(obj);
     }
 }
 
-public class SpriteCollection<T>(IEnumerable<T> values) : IEnumerable<T>
-    where T : Sprite
+public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
 {
-    private readonly List<T> _values = [..values];
+    private readonly List<T> _values = [];
 
     public void Add(T obj)
     {
-        if (obj == null) return;
+        if (obj is null) return;
 
         lock (_values)
         {
-            if (_values.Any(i => i.Serial == obj.Serial))
+            var existingIndex = _values.FindIndex(i => i.Serial == obj.Serial);
+            if (existingIndex >= 0)
             {
-                var eObj = _values.FindIndex(idx => idx.Serial == obj.Serial);
-
-                if (eObj < 0) return;
-                _values[eObj] = obj;
+                _values[existingIndex] = obj;
                 return;
             }
 
@@ -105,46 +85,22 @@ public class SpriteCollection<T>(IEnumerable<T> values) : IEnumerable<T>
 
     public void Delete(T obj)
     {
-        if (obj == null) return;
+        if (obj is null) return;
+        _values.RemoveAll(item => item == obj);
+    }
 
-        for (var i = _values.Count - 1; i >= 0; i--)
+    public T Query(Predicate<T> predicate) => predicate is null ? default : (from item in _values where predicate(item) select item.Abyss ? default : item).FirstOrDefault();
+
+    public IEnumerable<T> QueryAll(Predicate<T> predicate)
+    {
+        if (predicate is null) yield break;
+
+        foreach (var item in _values.Where(item => predicate(item)))
         {
-            var subject = obj as Sprite;
-            var predicate = _values[i] as Sprite;
-
-            if (subject == predicate) _values.RemoveAt(i);
+            yield return item.Abyss ? default : item;
         }
     }
 
     public IEnumerator<T> GetEnumerator() => _values.GetEnumerator();
-
-    public T Query(Predicate<T> predicate)
-    {
-        if (predicate == null) return default;
-
-        for (var i = _values.Count - 1; i >= 0; i--)
-            if (_values.Count > i)
-            {
-                var subject = predicate(_values[i]);
-
-                if (subject)
-                    return _values[i].Abyss ? default : _values[i];
-            }
-
-        return default;
-    }
-
-    public IEnumerable<T> QueryAll(Predicate<T> predicate)
-    {
-        if (predicate == null) yield return default;
-
-        for (var i = _values.Count - 1; i >= 0; i--)
-            if (i < _values.Count)
-            {
-                var subject = predicate != null && predicate(_values[i]);
-                if (subject) yield return _values[i].Abyss ? default : _values[i];
-            }
-    }
-
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

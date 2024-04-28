@@ -39,7 +39,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
     private static void UpdateClientObjects(Aisling user)
     {
         var payload = new List<Sprite>();
-        var objects = user.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
+        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
         var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
         var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
 

@@ -4,7 +4,7 @@ using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 using System.Collections.Concurrent;
-
+using Darkages.Object;
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Managers;
@@ -173,7 +173,7 @@ public class EquipmentManager
         if (Client.Aisling.CurrentWeight < 0)
             Client.Aisling.CurrentWeight = 0;
 
-        Client.ObjectHandlers.DelObject(itemObj);
+        ObjectManager.DelObject(itemObj);
         Client.SendAttributes(StatUpdateType.Full);
         return true;
     }

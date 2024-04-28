@@ -36,7 +36,7 @@ public sealed class Money : Sprite
 
         if (mt > 0) money.Image = (ushort)mt;
 
-        parent.AddObject(money);
+        AddObject(money);
         ServerSetup.Instance.GlobalGroundMoneyCache.TryAdd(money.MoneyId, money);
     }
 

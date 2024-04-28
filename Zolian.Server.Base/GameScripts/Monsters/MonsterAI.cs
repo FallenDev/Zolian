@@ -122,7 +122,7 @@ public class BaseMonsterIntelligence : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -690,7 +690,7 @@ public class WeakCommon : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -1171,7 +1171,7 @@ public class Inanimate : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -1341,7 +1341,7 @@ public class ShapeShifter : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -1470,7 +1470,7 @@ public class ShapeShifter : MonsterScript
                 {
                     Monster.Image = (ushort)Monster.Template.ImageVarience;
 
-                    var objects = ServerSetup.Instance.Game.ObjectHandlers.GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
+                    var objects = GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
                     objects.Reverse();
 
                     foreach (var aisling in Monster.AislingsNearby())
@@ -1873,7 +1873,7 @@ public class LootGoblin : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -2014,7 +2014,7 @@ public class SelfDestruct : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -2503,7 +2503,7 @@ public class AlertSummon : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -3082,7 +3082,7 @@ public class Turret : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -3488,7 +3488,7 @@ public class GeneralPirate : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -4080,7 +4080,7 @@ public class PirateOfficer : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -4670,7 +4670,7 @@ public class ShadowSight : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -5237,7 +5237,7 @@ public class WeakShadowSight : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -5823,7 +5823,7 @@ public class AosdaRemnant : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -6422,7 +6422,7 @@ public class DraconicOmega : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -7021,7 +7021,7 @@ public class JackFrost : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -7681,7 +7681,7 @@ public class Yeti : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -8280,7 +8280,7 @@ public class WorldBossBahamut : MonsterScript
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
         {
             item.Release(Monster, Monster.Position);
-            item.AddObject(item);
+            AddObject(item);
 
             foreach (var player in item.AislingsNearby())
             {
@@ -8407,7 +8407,7 @@ public class WorldBossBahamut : MonsterScript
                 Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
                 Monster.Image = (ushort)Monster.Template.ImageVarience;
 
-                var objects = ServerSetup.Instance.Game.ObjectHandlers.GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
+                var objects = GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
                 objects.Reverse();
 
                 foreach (var aisling in Monster.AislingsNearby())

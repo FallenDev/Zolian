@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.Object;
 
 namespace Darkages.GameScripts.Areas.ShadowTower;
 
@@ -34,7 +35,7 @@ public class ShadowTowerOmega : AreaScript
         if (bossCreate == null) return;
         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Omega Draconic, now online!"));
         ServerSetup.Instance.GlobalMonsterCache[bossCreate.Serial] = bossCreate;
-        ServerSetup.Instance.Game.ObjectHandlers.AddObject(bossCreate);
+        ObjectManager.AddObject(bossCreate);
     }
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }

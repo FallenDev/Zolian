@@ -6,4 +6,5 @@ public interface IAreaStorage
 {
     void CacheFromDatabase();
     bool LoadMap(Area mapObj, string mapFile);
+    void CreateMapCacheContainers();
 }

@@ -42,7 +42,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
         if (template == null) return;
 
         var map = ServerSetup.Instance.GlobalMapCache[template.AreaID];
-        var existing = template.GetObject<Mundane>(map, p => p?.Template != null && p.Template.Name == template.Name);
+        var existing = GetObject<Mundane>(map, p => p?.Template != null && p.Template.Name == template.Name);
 
         if (existing != null) return;
 
@@ -82,7 +82,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
 
         npc.InitMundane();
         ServerSetup.Instance.GlobalMundaneCache.TryAdd(npc.Serial, npc);
-        npc.AddObject(npc);
+        AddObject(npc);
     }
 
     private void InitMundane()

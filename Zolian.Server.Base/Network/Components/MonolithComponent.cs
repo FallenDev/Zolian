@@ -5,6 +5,7 @@ using Darkages.Templates;
 using Darkages.Types;
 using System.Numerics;
 using Darkages.Enums;
+using Darkages.Object;
 
 namespace Darkages.Network.Components;
 
@@ -16,7 +17,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (newObj == null) return;
         ServerSetup.Instance.GlobalMonsterCache[newObj.Serial] = newObj;
-        Server.ObjectHandlers.AddObject(newObj);
+        ObjectManager.AddObject(newObj);
     }
 
     protected internal override void Update(TimeSpan elapsedTime)
@@ -61,7 +62,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         try
         {
-            map.MiningNodesCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i is
+            map.MiningNodesCount = ObjectManager.GetObjects<Item>(map, i => i is
             {
                 Template: { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
                 or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }
@@ -79,7 +80,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
                 if (map.IsWall(x, y)) continue;
                 node.Pos = new Vector2(x, y);
 
-                Server.ObjectHandlers.AddObject(node);
+                ObjectManager.AddObject(node);
                 break;
             }
         }
@@ -156,7 +157,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         try
         {
-            map.WildFlowersCount = Server.ObjectHandlers.GetObjects<Item>(map, i => i is
+            map.WildFlowersCount = ObjectManager.GetObjects<Item>(map, i => i is
             {
                 Template: { Name: "Gloom Bloom" } or { Name: "Betrayal Blossom" } or { Name: "Bocan Branch" }
                 or { Name: "Cactus Lilium" } or { Name: "Prahed Bellis" } or { Name: "Aiten Bloom" } or { Name: "Reict Weed" }
@@ -174,7 +175,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
                 if (map.IsWall(x, y)) continue;
                 node.Pos = new Vector2(x, y);
 
-                Server.ObjectHandlers.AddObject(node);
+                ObjectManager.AddObject(node);
                 break;
             }
         }
