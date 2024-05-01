@@ -645,7 +645,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         pingWatch.Restart();
                         break;
                     case PlayerSaveComponent playerSaveComponent:
-                        if (playerSaveElapsed.TotalSeconds < 10) break;
+                        if (playerSaveElapsed.TotalSeconds < 5) break;
                         playerSaveComponent.Update(playerSaveElapsed);
                         playerSaveWatch.Restart();
                         break;
@@ -3666,6 +3666,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var client = (IWorldClient)sender!;
         var aisling = client.Aisling;
+
         if (aisling == null)
         {
             ClientRegistry.TryRemove(client.Id, out _);
@@ -3674,8 +3675,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
-            await StorageManager.AislingBucket.AuxiliarySave(client.Aisling);
-            ServerSetup.ConnectionLogger($"{client.Aisling.Username} either logged out or was removed from the server.");
+            await StorageManager.AislingBucket.AuxiliarySave(aisling);
+            ServerSetup.ConnectionLogger($"{aisling.Username} either logged out or was removed from the server.");
             return;
         }
 
@@ -3683,24 +3684,25 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             // Close Popups
             client.CloseDialog();
-            client.Aisling.CancelExchange();
+            aisling.CancelExchange();
 
             // Exit Party
-            if (client.Aisling.GroupId != 0)
-                Party.RemovePartyMember(client.Aisling);
+            if (aisling.GroupId != 0)
+                Party.RemovePartyMember(aisling);
 
             // Set Timestamps
-            client.Aisling.LastLogged = DateTime.UtcNow;
-            client.Aisling.LoggedIn = false;
+            aisling.LastLogged = DateTime.UtcNow;
+            aisling.LoggedIn = false;
+            aisling.Client.LastSave = DateTime.UtcNow;
 
             // Save
-            await StorageManager.AislingBucket.AuxiliarySave(client.Aisling);
             await client.Save();
+            await StorageManager.AislingBucket.AuxiliarySave(aisling);
 
             // Cleanup
-            client.Aisling.Remove(true);
+            aisling.Remove(true);
             ClientRegistry.TryRemove(client.Id, out _);
-            ServerSetup.ConnectionLogger($"{client.Aisling.Username} either logged out or was removed from the server.");
+            ServerSetup.ConnectionLogger($"{aisling.Username} either logged out or was removed from the server.");
         }
         catch
         {

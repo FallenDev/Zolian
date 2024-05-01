@@ -8274,7 +8274,8 @@ public class WorldBossBahamut : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Like a phoenix, I will return."));
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Name}: {{=bLike a phoenix, I will return."));
+        Monster.LoadAndCastSpellScriptOnDeath("Double XP");
         Task.Delay(600).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))

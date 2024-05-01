@@ -6,8 +6,6 @@ using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Sprites;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-
 using System.Data;
 using Darkages.Models;
 using Darkages.Templates;
@@ -20,7 +18,7 @@ public record AislingStorage : Sql, IAislingStorage
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True";
     public SemaphoreSlim SaveLock { get; } = new(1, 1);
-    public SemaphoreSlim ItemDeleteLock { get; } = new(1, 1);
+    private SemaphoreSlim DisconnectSaveLock { get; } = new(1, 1);
     private SemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
     private SemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
@@ -44,8 +42,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
@@ -79,8 +75,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
@@ -107,8 +101,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
@@ -126,7 +118,7 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return false;
         if (obj.Loading) return false;
 
-        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await DisconnectSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
@@ -323,13 +315,11 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
         {
-            SaveLock.Release();
+            DisconnectSaveLock.Release();
         }
 
         return true;
@@ -541,10 +531,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Issue with database connection");
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
@@ -578,8 +564,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
     }
@@ -601,8 +585,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
     }
@@ -633,8 +615,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
 
@@ -668,8 +648,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
 
@@ -692,8 +670,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
 
@@ -716,8 +692,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
 
@@ -763,7 +737,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (SqlException e)
         {
-            ServerSetup.EventsLogger(e.ToString());
             SentrySdk.CaptureException(e);
         }
 
@@ -789,8 +762,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
     }
@@ -954,8 +925,6 @@ public record AislingStorage : Sql, IAislingStorage
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
@@ -1199,7 +1168,6 @@ public record AislingStorage : Sql, IAislingStorage
         qDt.Columns.Add("CthonicRuinsAccess", typeof(bool));
         qDt.Columns.Add("CthonicRemainsExplorationLevel", typeof(int));
         qDt.Columns.Add("EndedOmegasRein", typeof(bool));
-
         return qDt;
     }
 

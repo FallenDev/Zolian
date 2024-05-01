@@ -72,7 +72,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
     private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
     private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(30000));
-    public readonly object SyncClient = new();
+    public readonly object SyncModifierRemovalLock = new();
     public bool ExitConfirmed;
     private static readonly SortedDictionary<long, string> AggroColors = new()
     {
@@ -883,29 +883,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                     item.Template = template;
                 }
 
-                if (Aisling.Inventory.Items[item.InventorySlot] != null)
-                {
-                    var itemCheckCount = 0;
-                    var routineCheck = 0;
-
-                    for (byte i = 1; i < 60; i++)
-                    {
-                        itemCheckCount++;
-                        item.InventorySlot = i;
-
-                        if (itemCheckCount == 59)
-                        {
-                            routineCheck++;
-                            itemCheckCount = 0;
-                        }
-
-                        if (routineCheck != 4) continue;
-                        ServerSetup.EventsLogger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
-                        Disconnect();
-                        break;
-                    }
-                }
-
                 var color = (byte)ItemColors.ItemColorsToInt(item.Template.Color);
 
                 var newItem = new Item
@@ -931,6 +908,28 @@ public class WorldClient : SocketClientBase, IWorldClient
                     Image = item.Template.Image,
                     DisplayImage = item.Template.DisplayImage
                 };
+
+                if (Aisling.Inventory.Items[newItem.InventorySlot] != null)
+                {
+                    var routineCheck = 0;
+
+                    for (byte i = 1; i < 60; i++)
+                    {
+                        if (Aisling.Inventory.Items[i] is null)
+                        {
+                            newItem.InventorySlot = i;
+                            break;
+                        }
+
+                        if (i == 59)
+                            routineCheck++;
+
+                        if (routineCheck <= 4) continue;
+                        ServerSetup.EventsLogger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
+                        Disconnect();
+                        break;
+                    }
+                }
 
                 ItemQualityVariance.SetMaxItemDurability(newItem, newItem.ItemQuality);
                 newItem.GetDisplayName();
@@ -3809,13 +3808,9 @@ public class WorldClient : SocketClientBase, IWorldClient
     public async Task<bool> Save()
     {
         if (Aisling == null) return false;
-
-        var saved = await StorageManager.AislingBucket.Save(Aisling);
-
-        if (!saved) return false;
         LastSave = DateTime.UtcNow;
-
-        return true;
+        var saved = await StorageManager.AislingBucket.Save(Aisling);
+        return saved;
     }
 
     public WorldClient UpdateDisplay(bool excludeSelf = false)
@@ -4443,6 +4438,12 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         if (exp <= 0) exp = 1;
 
+        if (player.HasBuff("Double XP"))
+            exp *= 2;
+
+        if (player.HasBuff("Triple XP"))
+            exp *= 3;
+
         if (hunting)
         {
             if (player.GroupParty != null)
@@ -4556,6 +4557,12 @@ public class WorldClient : SocketClientBase, IWorldClient
     private static void HandleAp(Aisling player, int exp, bool hunting, bool overflow)
     {
         if (exp <= 0) exp = 1;
+
+        if (player.HasBuff("Double XP"))
+            exp *= 2;
+
+        if (player.HasBuff("Triple XP"))
+            exp *= 3;
 
         if (hunting)
         {

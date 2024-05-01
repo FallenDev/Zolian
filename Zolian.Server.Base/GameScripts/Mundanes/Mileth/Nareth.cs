@@ -100,7 +100,9 @@ public class Nareth : MundaneScript
                 break;
             case 0x999:
                 {
-                    if (responseId != client.Aisling.Serial) return;
+                    var succeeded = uint.TryParse(args, out var serial);
+                    if (!succeeded) return;
+                    if (serial != client.Aisling.Serial) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Shaolin Monk"));
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(116, false));

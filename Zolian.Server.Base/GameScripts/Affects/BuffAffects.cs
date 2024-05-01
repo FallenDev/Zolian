@@ -1980,3 +1980,77 @@ public class BuffFasSpiorad : Buff
     }
 }
 #endregion
+
+#region Experience
+
+public class BuffDoubleExperience : Buff
+{
+    public override byte Icon => 203;
+    public override int Length => 7200;
+    public override string Name => "Double XP";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        Task.Delay(2000).ContinueWith(ct =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been doubled for two hours.");
+        });
+
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining double experience.");
+        DeleteBuff(aisling, buff);
+    }
+}
+
+public class BuffTripleExperience : Buff
+{
+    public override byte Icon => 203;
+    public override int Length => 7200;
+    public override string Name => "Triple XP";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        Task.Delay(2000).ContinueWith(ct =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been triple for two hours.");
+        });
+
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining triple experience.");
+        DeleteBuff(aisling, buff);
+    }
+}
+
+#endregion

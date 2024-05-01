@@ -7,11 +7,6 @@ namespace Darkages.Object;
 
 public abstract class ObjectService
 {
-    public ObjectService()
-    {
-
-    }
-
     public static void AddGameObject<T>(T obj) where T : Sprite
     {
         if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue ||

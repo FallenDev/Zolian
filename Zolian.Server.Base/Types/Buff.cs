@@ -71,6 +71,8 @@ public class Buff : IBuff
             "Fas Spiorad" => new BuffFasSpiorad(),
             "Vampirisim" => new BuffVampirisim(),
             "Lycanisim" => new BuffLycanisim(),
+            "Double XP" => new BuffDoubleExperience(),
+            "Triple XP" => new BuffTripleExperience(),
             _ => BuffSpell
         };
 

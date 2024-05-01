@@ -34,48 +34,45 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             if (player.CurrentHp == player.MaximumHp &&
                 player.CurrentMp == player.MaximumMp) return;
 
-            lock (player.Client.SyncClient)
+            if (player.CurrentHp > player.MaximumHp)
             {
-                if (player.CurrentHp > player.MaximumHp)
-                {
-                    player.CurrentHp = player.MaximumHp;
-                    player.Client.SendAttributes(StatUpdateType.Vitality);
-                }
-
-                if (player.CurrentMp > player.MaximumMp)
-                {
-                    player.CurrentMp = player.MaximumMp;
-                    player.Client.SendAttributes(StatUpdateType.Vitality);
-                }
-
-                if (player.Path == Class.Peasant | player.GameMaster)
-                {
-                    player.Recover();
-                }
-
-                if (player.CurrentMp < 1) player.CurrentMp = 1;
-
-                var hpRegenSeed = HpRegenSoftCap(player.Client);
-                var mpRegenSeed = MpRegenSoftCap(player.Client);
-                var hpHardCap = Math.Abs(player.BaseHp / 3.00);
-                var mpHardCap = Math.Abs(player.BaseMp / 3.00);
-                var performedRegen = false;
-
-                if (player.CurrentHp < player.MaximumHp)
-                {
-                    RegenHpCalculator(player.Client, hpRegenSeed, hpHardCap);
-                    performedRegen = true;
-                }
-
-                if (player.CurrentMp < player.MaximumMp)
-                {
-                    RegenMpCalculator(player.Client, mpRegenSeed, mpHardCap);
-                    performedRegen = true;
-                }
-
-                if (performedRegen)
-                    player.Client.SendAttributes(StatUpdateType.Vitality);
+                player.CurrentHp = player.MaximumHp;
+                player.Client.SendAttributes(StatUpdateType.Vitality);
             }
+
+            if (player.CurrentMp > player.MaximumMp)
+            {
+                player.CurrentMp = player.MaximumMp;
+                player.Client.SendAttributes(StatUpdateType.Vitality);
+            }
+
+            if (player.Path == Class.Peasant | player.GameMaster)
+            {
+                player.Recover();
+            }
+
+            if (player.CurrentMp < 1) player.CurrentMp = 1;
+
+            var hpRegenSeed = HpRegenSoftCap(player.Client);
+            var mpRegenSeed = MpRegenSoftCap(player.Client);
+            var hpHardCap = Math.Abs(player.BaseHp / 3.00);
+            var mpHardCap = Math.Abs(player.BaseMp / 3.00);
+            var performedRegen = false;
+
+            if (player.CurrentHp < player.MaximumHp)
+            {
+                RegenHpCalculator(player.Client, hpRegenSeed, hpHardCap);
+                performedRegen = true;
+            }
+
+            if (player.CurrentMp < player.MaximumMp)
+            {
+                RegenMpCalculator(player.Client, mpRegenSeed, mpHardCap);
+                performedRegen = true;
+            }
+
+            if (performedRegen)
+                player.Client.SendAttributes(StatUpdateType.Vitality);
         });
     }
 

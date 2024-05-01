@@ -602,14 +602,14 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         {
             if (target is Aisling targetPlayer)
             {
-                if (!target.HasDebuff(buff.Name))
+                if (!target.HasBuff(buff.Name))
                 {
                     targetPlayer.Client.EnqueueBuffAppliedEvent(targetPlayer, buff, TimeSpan.FromSeconds(buff.Length));
                 }
             }
             else
             {
-                if (!target.HasDebuff(buff.Name))
+                if (!target.HasBuff(buff.Name))
                     buff.OnApplied(sprite, buff);
             }
 

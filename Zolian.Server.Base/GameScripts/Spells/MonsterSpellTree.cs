@@ -83,3 +83,45 @@ public class Heavensfall(Spell spell) : SpellScript(spell)
         }
     }
 }
+
+[Script("Double XP")]
+public class DoubleXp(Spell spell) : SpellScript(spell)
+{
+    private readonly Buff _buff = new BuffDoubleExperience();
+    private readonly GlobalSpellMethods _spellMethod = new();
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        foreach (var player in ServerSetup.Instance.Game.Aislings)
+        {
+            if (player == null) continue;
+            if (!player.LoggedIn) continue;
+            _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
+        }
+    }
+}
+
+[Script("Triple XP")]
+public class TripleXp(Spell spell) : SpellScript(spell)
+{
+    private readonly Buff _buff = new BuffTripleExperience();
+    private readonly GlobalSpellMethods _spellMethod = new();
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        foreach (var player in ServerSetup.Instance.Game.Aislings)
+        {
+            if (player == null) continue;
+            if (!player.LoggedIn) continue;
+            _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
+        }
+    }
+}

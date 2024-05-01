@@ -496,6 +496,10 @@ public sealed class Aisling : Player, IAisling
         trader.Client?.SendAttributes(StatUpdateType.Primary);
         Client?.SendAttributes(StatUpdateType.ExpGold);
         Client?.SendAttributes(StatUpdateType.Primary);
+
+        // Save
+        trader.Client?.Save();
+        Client?.Save();
     }
 
     public IEnumerable<Skill> GetAssails()

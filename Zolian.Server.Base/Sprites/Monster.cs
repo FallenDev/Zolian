@@ -147,6 +147,28 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         Rewarded = true;
         player.UpdateStats();
     }
+    
+    public void LoadAndCastSpellScriptOnDeath(string spellTemplate)
+    {
+        try
+        {
+            if (!ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue(spellTemplate, out var template)) return;
+            var script = ScriptManager.Load<SpellScript>(spellTemplate,
+                Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache[spellTemplate]));
+
+            if (script == null)
+            {
+                SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {spellTemplate}\n");
+                return;
+            }
+
+            script.FirstOrDefault().Value?.OnUse(this, this);
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+        }
+    }
 
     public static void UpdateKillCounters(Monster monster)
     {

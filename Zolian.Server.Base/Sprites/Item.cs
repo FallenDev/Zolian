@@ -10,7 +10,6 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using System.Collections.Concurrent;
@@ -738,29 +737,26 @@ public sealed class Item : Sprite, IItem
     /// <summary>
     /// Delete from database only happens on death, or item dropped
     /// Checks if item still exists on SQL List, if so remove
+    /// Utilizes a semaphore lock to prevent multiple saves and deletes at once
     /// </summary>
     public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await StorageManager.AislingBucket.ItemDeleteLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
         try
         {
-            var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
+            var sConn = ServerSetup.Instance.ServerSaveConnection;
             const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
-            sConn.Execute(cmd, new { itemId });
-            sConn.Close();
+            await sConn.ExecuteAsync(cmd, new { itemId });
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
-            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
         finally
         {
-            StorageManager.AislingBucket.ItemDeleteLock.Release();
+            StorageManager.AislingBucket.SaveLock.Release();
         }
     }
 
@@ -772,7 +768,7 @@ public sealed class Item : Sprite, IItem
         if (client?.Aisling == null) return;
         ItemPane = ItemPanes.Equip;
 
-        lock (client.SyncClient)
+        lock (client.SyncModifierRemovalLock)
         {
             try
             {
