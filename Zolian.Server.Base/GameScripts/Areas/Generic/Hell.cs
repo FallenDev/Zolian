@@ -54,6 +54,7 @@ public class Hell : AreaScript
     {
         var a = AnimTimer.Update(elapsedTime);
         if (!a) return;
+        if (_playersOnMap.IsEmpty) return;
 
         for (var i = 0; i < 6; i++)
         {

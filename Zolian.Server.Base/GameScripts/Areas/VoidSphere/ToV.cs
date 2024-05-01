@@ -68,6 +68,7 @@ public class ToV : AreaScript
     {
         var a = AnimTimer.Update(elapsedTime);
         var b = AnimTimer2.Update(elapsedTime);
+        if (_playersOnMap.IsEmpty) return;
 
         if (a)
         {
