@@ -742,7 +742,13 @@ public sealed class Item : Sprite, IItem
     public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for DeleteFromAislingDb", LogLevel.Error);
+            return;
+        }
 
         try
         {
@@ -753,10 +759,6 @@ public sealed class Item : Sprite, IItem
         catch (Exception e)
         {
             SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            StorageManager.AislingBucket.SaveLock.Release();
         }
     }
 

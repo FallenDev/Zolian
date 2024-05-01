@@ -9,6 +9,8 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Darkages.Models;
 using Darkages.Templates;
+using Chaos.Common.Synchronization;
+using Microsoft.Extensions.Logging;
 
 namespace Darkages.Database;
 
@@ -17,16 +19,22 @@ public record AislingStorage : Sql, IAislingStorage
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
-    public SemaphoreSlim SaveLock { get; } = new(1, 1);
-    private SemaphoreSlim DisconnectSaveLock { get; } = new(1, 1);
-    private SemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
-    private SemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
-    private SemaphoreSlim LoadLock { get; } = new(1, 1);
-    private SemaphoreSlim CreateLock { get; } = new(1, 1);
+    public FifoAutoReleasingSemaphoreSlim SaveLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim DisconnectSaveLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim CreateLock { get; } = new(1, 1);
 
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
-        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for LoadAisling", LogLevel.Error);
+            return null;
+        }
 
         var aisling = new Aisling();
 
@@ -44,10 +52,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            LoadLock.Release();
-        }
 
         return aisling;
     }
@@ -59,7 +63,13 @@ public record AislingStorage : Sql, IAislingStorage
         var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
 
-        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for PasswordSave", LogLevel.Error);
+            return false;
+        }
 
         try
         {
@@ -77,10 +87,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            PasswordSaveLock.Release();
-        }
 
         return true;
     }
@@ -90,7 +96,13 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return;
         if (obj.Loading) return;
 
-        await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for BuffDebuffSave", LogLevel.Error);
+            return;
+        }
 
         try
         {
@@ -103,10 +115,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            BuffDebuffSaveLock.Release();
-        }
     }
 
     /// <summary>
@@ -118,7 +126,14 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return false;
         if (obj.Loading) return false;
 
-        await DisconnectSaveLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await DisconnectSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for Disconnect Save", LogLevel.Error);
+            return false;
+        }
+
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
         var cDt = ComboScrollDataTable();
@@ -317,10 +332,6 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            DisconnectSaveLock.Release();
-        }
 
         return true;
     }
@@ -329,9 +340,16 @@ public record AislingStorage : Sql, IAislingStorage
     /// Saves all players states
     /// Utilizes an active connection that self-heals if closed
     /// </summary>
-    public bool ServerSave(List<Aisling> playerList)
+    public async Task<bool> ServerSave(List<Aisling> playerList)
     {
         if (playerList.Count == 0) return false;
+        await using var @lock = await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for ServerSave", LogLevel.Error);
+            return false;
+        }
 
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
@@ -679,6 +697,7 @@ public record AislingStorage : Sql, IAislingStorage
     public BoardTemplate ObtainMailboxId(long serial)
     {
         var board = new BoardTemplate();
+
         try
         {
             var sConn = ConnectToDatabase(ConnectionString);
@@ -768,7 +787,13 @@ public record AislingStorage : Sql, IAislingStorage
 
     public async Task Create(Aisling obj)
     {
-        await CreateLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await using var @lock = await CreateLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for Create", LogLevel.Error);
+            return;
+        }
 
         var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
 
@@ -926,10 +951,6 @@ public record AislingStorage : Sql, IAislingStorage
         catch (Exception e)
         {
             SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            CreateLock.Release();
         }
     }
 
