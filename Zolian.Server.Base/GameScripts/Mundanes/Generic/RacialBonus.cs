@@ -59,12 +59,20 @@ public static class RacialBonus
         client.Aisling._Dex += 4;
         client.Aisling._Luck += 3;
         client.Aisling.RaceSkill = "Appraise";
-        client.Aisling.RaceSpell = null;
-
-        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
-        if (raceBool) client.LoadSkillBook();
+        client.Aisling.RaceSpell = "Remote Bank";
 
         RacialLegend(client);
+
+        var raceSkillBool = false;
+        var raceSpellBool = false;
+
+        if (client.Aisling.RaceSkill != null)
+            raceSkillBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
+        if (client.Aisling.RaceSpell != null)
+            raceSpellBool = Spell.GiveTo(client.Aisling, client.Aisling.RaceSpell);
+
+        if (raceSkillBool) client.LoadSkillBook();
+        if (raceSpellBool) client.LoadSpellBook();
     }
 
     public static void HighElf(WorldClient client)
@@ -223,8 +231,12 @@ public static class RacialBonus
     public static void HalfBeast(WorldClient client)
     {
         client.Aisling.StatPoints += 30;
-        client.Aisling.RaceSkill = null;
+        client.Aisling.RaceSkill = "Dash";
         client.Aisling.RaceSpell = null;
+
+        var raceBool = Skill.GiveTo(client.Aisling, client.Aisling.RaceSkill);
+        if (raceBool) client.LoadSkillBook();
+
         RacialLegend(client);
     }
 

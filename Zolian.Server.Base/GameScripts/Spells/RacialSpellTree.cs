@@ -426,36 +426,22 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
 [Script("Remote Bank")]
 public class Remote_Bank(Spell spell) : SpellScript(spell)
 {
-    public override void OnActivated(Sprite sprite)
-    {
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
-    public override void OnSelectionToggle(Sprite sprite)
-    {
-    }
-
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-    }
-
-    public override void OnTriggeredBy(Sprite sprite, Sprite target)
-    {
-
-    }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (sprite.PlayerNearby?.Client != null)
+        if (sprite is not Aisling playerAction) return;
+        playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, playerAction.Position));
+
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
-        }
-        else
-        {
-            target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, sprite.Serial));
+            if (npc.Value.Scripts is null) continue;
+            if (!npc.Value.Scripts.TryGetValue("Banker", out var scriptObj)) continue;
+            scriptObj.OnClick(playerAction.Client, npc.Value.Serial);
+            break;
         }
     }
 }

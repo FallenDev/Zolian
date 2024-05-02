@@ -99,7 +99,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
             case 6:
                 _chosenRace = Race.Halfling;
                 client.SendOptionsDialog(Mundane, "{=aHalflings are the peace keepers, highly sociable, and nimble.\n" +
-                                                  "Racial bonuses: {=qINT +2, DEX +4, Luck +4, {=aSkill: {=cAppraise",
+                                                  "Racial bonuses: {=qINT +2, DEX +4, Luck +3, {=aSkill: {=cAppraise, {=aSpell: {=cRemote Bank",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
                     new Dialog.OptionsDataItem(0x10, "{=qLet's go"),
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
@@ -154,7 +154,15 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
             case 0x0D:
                 _chosenRace = Race.HalfBeast;
                 client.SendOptionsDialog(Mundane, "{=aHalf-Beasts are a mixed race. They have blood and dna from various races and thus have various proficiencies.\n" +
-                                                  "Racial bonuses: {=q+30 Stat Points",
+                                                  "Racial bonuses: {=q+30 Stat Points, {=aSkill: {=cDash",
+                    new Dialog.OptionsDataItem(0x01, "{=cBack"),
+                    new Dialog.OptionsDataItem(0x10, "{=qLet's go"),
+                    new Dialog.OptionsDataItem(0x02, "{=bEnd"));
+                break;
+            case 0x1F:
+                _chosenRace = Race.Merfolk;
+                client.SendOptionsDialog(Mundane, $"{{=aMerfolk, legendary race of the sea. They have a natural defense to water-based spells.\n" +
+                                                  $"Racial: {{=q+2 all stats, Splash, Tail Flip, Water Immunity",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
                     new Dialog.OptionsDataItem(0x10, "{=qLet's go"),
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
@@ -314,14 +322,6 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     $"{{=sCopper{{=a: Vicious Roar, and immunity to earth dmg.\n" +
                     $"{{=cGold{{=a: Golden Lair, and immunity to void dmg.\n" +
                     $"{{=gSilver{{=a: Heavenly Gaze, and immunity to holy dmg.\n");
-                break;
-            case 0x1F:
-                _chosenRace = Race.Merfolk;
-                client.SendOptionsDialog(Mundane, $"{{=aMerfolk, legendary race of the sea. They have a natural defense to water-based spells.\n" +
-                                                  $"Racial: {{=q+2 all stats, Splash, Tail Flip, Water Immunity",
-                    new Dialog.OptionsDataItem(0x01, "{=cBack"),
-                    new Dialog.OptionsDataItem(0x10, "{=qLet's go"),
-                    new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x20:
                 _dragonkin = SubClassDragonkin.Red;

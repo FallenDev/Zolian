@@ -4,13 +4,6 @@ using Darkages.Types;
 
 namespace Darkages;
 
-public class GameSetting
-{
-    public bool Enabled { get; set; }
-    public string SettingOff { get; set; }
-    public string SettingOn { get; set; }
-}
-
 public class ServerConstants : IServerConstants
 {
     public int RefreshRate { get; set; }
@@ -88,8 +81,7 @@ public class ServerConstants : IServerConstants
     public string ServerWelcomeMessage { get; set; }
     public IEnumerable<string> GameMasters { get; set; }
     public string[] DevModeExemptions { get; set; }
-    public List<GameSetting> Settings { get; set; }
-    public ReservedRedirectInfo[] ReservedRedirects { get; set; } = Array.Empty<ReservedRedirectInfo>();
+    public ReservedRedirectInfo[] ReservedRedirects { get; set; } = [];
 
     // Check Packet 00
     public int ClientVersion { get; set; }

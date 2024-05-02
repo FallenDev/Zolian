@@ -71,7 +71,6 @@ public interface IServerConstants
     int SERVER_PORT { get; }
     string SERVER_TITLE { get; }
     string ServerWelcomeMessage { get; }
-    List<GameSetting> Settings { get; }
     public ReservedRedirectInfo[] ReservedRedirects { get; }
     string SomethingWentWrong { get; }
     string SpellFailedMessage { get; }

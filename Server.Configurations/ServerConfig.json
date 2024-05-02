@@ -187,19 +187,6 @@
     "DevModeExemptions": [
       "learning_predicates"
     ],
-    // Allows custom settings within the F4 window. -- This is currently disabled within the codebase
-    "Settings": [
-      {
-        "SettingOn": "PVP  :ON",
-        "SettingOff": "PVP  :OFF",
-        "Enabled": false
-      },
-      {
-        "SettingOn": "Display Damage Overlay :ON",
-        "SettingOff": "Display Damage Overlay :OFF",
-        "Enabled": true
-      }
-    ],
 
     // Redirects
     "ReservedRedirects": [

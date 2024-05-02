@@ -2393,3 +2393,170 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
         }
     }
 }
+
+[Script("Dash")]
+public class Dash(Skill skill) : SkillScript(skill)
+{
+    private Sprite _target;
+    private bool _crit;
+    private IList<Sprite> _enemyList;
+    private bool _success;
+    private readonly GlobalSkillMethods _skillMethod = new();
+
+    public override void OnFailed(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingAisling) return;
+        var client = damageDealingAisling.Client;
+
+        client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
+        if (_target is not { Alive: true }) return;
+        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+    }
+
+    public override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        aisling.ActionUsed = "Dash";
+        
+        if (_target == null)
+        {
+            OnFailed(aisling);
+            return;
+        }
+        
+        var dmgCalc = DamageCalc(aisling);
+        var position = _target.Position;
+        var mapCheck = aisling.Map.ID;
+        var wallPosition = aisling.GetPendingChargePosition(3, aisling);
+        var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
+        var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+
+        if (mapCheck != aisling.Map.ID) return;
+
+        if (targetPos <= wallPos)
+        {
+            switch (aisling.Direction)
+            {
+                case 0:
+                    position.Y++;
+                    break;
+                case 1:
+                    position.X--;
+                    break;
+                case 2:
+                    position.Y--;
+                    break;
+                case 3:
+                    position.X++;
+                    break;
+            }
+
+            if (aisling.Position != position)
+            {
+                _skillMethod.Step(aisling, position.X, position.Y);
+            }
+
+            _target.ApplyDamage(aisling, dmgCalc, Skill);
+            _skillMethod.Train(client, Skill);
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
+
+            if (!_crit) return;
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+        }
+        else
+        {
+            _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+
+            var stunned = new DebuffBeagsuain();
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+        }
+    }
+
+    public override void OnUse(Sprite sprite)
+    {
+        if (!Skill.CanUse()) return;
+        if (sprite is not Aisling aisling) return;
+
+        var client = aisling.Client;
+
+        if (client.Aisling.CantAttack)
+        {
+            OnFailed(aisling);
+            return;
+        }
+
+        Target(aisling);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = Skill.Level * 2;
+            dmg = client.Aisling.Str * 2 + client.Aisling.Dex * 3;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 2 + damageMonster.Dex * 3;
+        }
+
+        var critCheck = _skillMethod.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+
+    private void Target(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
+        _enemyList = client.Aisling.DamageableGetInFront(3);
+        _target = _enemyList.FirstOrDefault();
+        _target = Skill.Reflect(_target, sprite, Skill);
+
+        if (_target == null)
+        {
+            var mapCheck = aisling.Map.ID;
+            var wallPosition = aisling.GetPendingChargePositionNoTarget(3, aisling);
+            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+
+            if (mapCheck != aisling.Map.ID) return;
+            if (!(wallPos > 0)) OnFailed(aisling);
+
+            if (aisling.Position != wallPosition)
+            {
+                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+            }
+
+            if (wallPos <= 2)
+            {
+                var stunned = new DebuffBeagsuain();
+                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+            }
+
+            aisling.UsedSkill(Skill);
+        }
+        else
+        {
+            _success = _skillMethod.OnUse(aisling, Skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
+    }
+}

@@ -3529,6 +3529,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling is not null && IsManualAction(packet.OpCode))
             client.Aisling.AislingTracker = DateTime.UtcNow;
 
+        // ToDo: Packet logging
+        //ServerSetup.PacketLogger($"{packet.OpCode}");
+
         try
         {
             if (handler is not null) return handler(client, in packet);

@@ -29,10 +29,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Guide", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("Guide", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -239,10 +238,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -251,10 +249,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Copper", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("Copper", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -263,10 +260,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -275,10 +271,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -287,10 +282,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }
@@ -299,10 +293,9 @@ public class Consumable(Item item) : ItemScript(item)
                     foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                     {
                         if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Talos", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
+                        if (!npc.Value.Scripts.TryGetValue("Talos", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
                     }
                     return;
                 }

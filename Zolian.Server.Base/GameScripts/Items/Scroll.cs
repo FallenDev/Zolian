@@ -67,10 +67,9 @@ public class Scroll(Item item) : ItemScript(item)
                                 foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
                                 {
                                     if (npc.Value.Scripts is null) continue;
-                                    if (npc.Value.Scripts.TryGetValue("Cthonic Portals", out var scriptObj))
-                                    {
-                                        scriptObj.OnClick(client, npc.Value.Serial);
-                                    }
+                                    if (!npc.Value.Scripts.TryGetValue("Cthonic Portals", out var scriptObj)) continue;
+                                    scriptObj.OnClick(client, npc.Value.Serial);
+                                    break;
                                 }
                             }
                             return;
