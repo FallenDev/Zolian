@@ -3832,10 +3832,7 @@ public class GeneralPirate : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -3901,8 +3898,6 @@ public class GeneralPirate : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -4433,10 +4428,7 @@ public class PirateOfficer : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -4502,8 +4494,6 @@ public class PirateOfficer : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -6166,10 +6156,7 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -6235,8 +6222,6 @@ public class AosdaRemnant : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -6765,10 +6750,7 @@ public class DraconicOmega : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -6834,8 +6816,6 @@ public class DraconicOmega : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -7364,11 +7344,8 @@ public class JackFrost : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
-
+        
         if (Monster.Target != null)
         {
             if (Monster.Target is Aisling aisling)
@@ -7433,8 +7410,6 @@ public class JackFrost : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -8024,10 +7999,7 @@ public class Yeti : MonsterScript
 
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -8093,8 +8065,6 @@ public class Yeti : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {
@@ -8644,10 +8614,7 @@ public class WorldBossBahamut : MonsterScript
     {
         if (Monster.CantMove) return;
         if (Monster.ThrownBack)
-        {
             Monster.ThrownBack = false;
-            return;
-        }
 
         if (Monster.Target != null)
         {
@@ -8715,8 +8682,6 @@ public class WorldBossBahamut : MonsterScript
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
                     Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
-
-                    if (Monster.ThrownBack) return;
 
                     if (_targetPos == Vector2.Zero)
                     {

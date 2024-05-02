@@ -171,11 +171,10 @@ public class Stone_Skin(Spell spell) : SpellScript(spell)
 }
 
 // High-Elf
-// Pushes all monsters back 2 tiles within 1 tiles around you.
+// Pushes all monsters back 3 tiles within 4 tiles around you.
 [Script("Destructive Force")]
 public class DestructiveForce(Spell spell) : SpellScript(spell)
 {
-    private Sprite _target;
     private IEnumerable<Sprite> _enemyList;
     private readonly GlobalSpellMethods _spellMethod = new();
 
@@ -204,12 +203,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         var mapCheck = damageDealingSprite.Map.ID;
         if (mapCheck != damageDealingSprite.Map.ID) return;
 
-        ThrowBack();
-
-        if (_target is Monster monster)
-            Task.Delay(1500).ContinueWith(ct =>
-                monster.ThrownBack = false
-            );
+        ThrowBack(target);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -250,54 +244,44 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
 
         foreach (var targetSprite in enemyList.Where(targetSprite => targetSprite is not null))
         {
-            _target = targetSprite;
-            if (_target.Position.DistanceFrom((ushort)damageDealingSprite.Pos.X, (ushort)damageDealingSprite.Pos.Y) >= 5) continue;
-            _target = Spell.SpellReflect(_target, sprite);
-            if (_target is Monster monster)
-            {
+            if (targetSprite.Position.DistanceFrom((ushort)damageDealingSprite.Pos.X, (ushort)damageDealingSprite.Pos.Y) >= 5) continue;
+            if (targetSprite is Monster monster)
                 if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
-                monster.ThrownBack = true;
-            }
 
             var success = _spellMethod.Execute(damageDealingSprite.Client, Spell);
 
             if (success)
             {
-                OnSuccess(damageDealingSprite, _target);
+                OnSuccess(damageDealingSprite, targetSprite);
             }
             else
             {
-                _spellMethod.SpellOnFailed(damageDealingSprite, _target, Spell);
+                _spellMethod.SpellOnFailed(damageDealingSprite, targetSprite, Spell);
             }
         }
     }
 
-    private void ThrowBack()
+    private static void ThrowBack(Sprite target)
     {
-        var targetPosition = _target.GetPendingThrowPosition(2, _target);
-        var hasHitOffWall = _target.GetPendingThrowIsWall(2, _target);
+        if (target is not Monster monster) return;
+        var targetPosition = monster.GetPendingThrowPosition(3, monster);
+        var hasHitOffWall = monster.GetPendingThrowIsWall(3, monster);
         var readyTime = DateTime.UtcNow;
 
         if (hasHitOffWall)
         {
             var stunned = new DebuffBeagsuain();
-            if (_target is Aisling targetAisling)
-            {
-                targetAisling.Client.EnqueueDebuffAppliedEvent(_target, stunned, TimeSpan.FromSeconds(stunned.Length));
-                targetAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
-            }
-            else
-            {
-                stunned.OnApplied(_target, stunned);
-                _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, _target.Serial));
-            }
+            stunned.OnApplied(monster, stunned);
+            monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, monster.Serial));
         }
 
-        _target.Pos = new Vector2(targetPosition.X, targetPosition.Y);
-        _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendCreatureWalk(_target.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)_target.Direction));
-        _target.LastMovementChanged = readyTime;
-        _target.LastPosition = new Position(targetPosition.X, targetPosition.Y);
-        _target.UpdateAddAndRemove();
+        monster.Pos = new Vector2(targetPosition.X, targetPosition.Y);
+        monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendCreatureWalk(monster.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)monster.Direction));
+        monster.LastMovementChanged = readyTime;
+        monster.LastPosition = new Position(targetPosition.X, targetPosition.Y);
+        monster.ThrownBack = true;
+        monster.UpdateAddAndRemove();
+        Task.Delay(1500).ContinueWith(ct => monster.ThrownBack = false);
     }
 }
 
