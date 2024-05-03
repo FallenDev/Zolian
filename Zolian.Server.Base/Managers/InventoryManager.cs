@@ -23,7 +23,7 @@ public class InventoryManager : ObjectManager, IInventory
     private readonly int[] _invalidSlots = [0, 60];
     public bool IsFull => TotalItems >= Length - 1;
 
-    public readonly ConcurrentDictionary<int, Item> Items = new();
+    public readonly ConcurrentDictionary<int, Item> Items = [];
 
     public InventoryManager()
     {
@@ -60,9 +60,9 @@ public class InventoryManager : ObjectManager, IInventory
         return Items.GetValueOrDefault(slot);
     }
 
-    public new IEnumerable<Item> Get(Predicate<Item> prediate)
+    public new IEnumerable<Item> Get(Predicate<Item> predicate)
     {
-        return Items.Values.Where(i => i != null && prediate(i)).ToArray();
+        return Items.Values.Where(i => i != null && predicate(i)).ToArray();
     }
 
     public List<Item> HasMany(Predicate<Item> predicate)

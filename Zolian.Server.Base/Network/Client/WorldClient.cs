@@ -35,6 +35,7 @@ using Microsoft.Extensions.Logging;
 using ServiceStack;
 
 using System.Collections.Concurrent;
+using System.Collections.Specialized;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
@@ -88,6 +89,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
     public DateTime BoardOpened { get; set; }
     public DialogSession DlgSession { get; set; }
+    private List<LegendMarkInfo> _legendMarksFiltered = [];
 
     public bool CanSendLocation
     {
@@ -471,11 +473,11 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (target != null)
             {
                 if (target is Aisling aisling)
-                    aisling.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
+                    aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has been killed by {aisling.Username}."));
             }
             else
             {
-                Aisling.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
+                Aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
             }
 
             return;
@@ -613,105 +615,6 @@ public class WorldClient : SocketClientBase, IWorldClient
             {
                 var applyDebuff = new BuffVampirisim();
                 EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Plagued))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Plagued");
-            if (!debuff)
-            {
-                var applyDebuff = new Plagued();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("The Shakes");
-            if (!debuff)
-            {
-                var applyDebuff = new TheShakes();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Stricken))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Stricken");
-            if (!debuff)
-            {
-                var applyDebuff = new Stricken();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Rabies))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Rabies");
-            if (!debuff)
-            {
-                var applyDebuff = new Rabies();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.LockJoint))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Lock Joint");
-            if (!debuff)
-            {
-                var applyDebuff = new LockJoint();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.NumbFall))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Numb Fall");
-            if (!debuff)
-            {
-                var applyDebuff = new NumbFall();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Diseased))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Diseased");
-            if (!debuff)
-            {
-                var applyDebuff = new Diseased();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Hallowed))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Hallowed");
-            if (!debuff)
-            {
-                var applyDebuff = new Hallowed();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Petrified))
-        {
-            hasAnAffliction = true;
-            var debuff = Aisling.HasDebuff("Petrified");
-            if (!debuff)
-            {
-                var applyDebuff = new Petrified();
-                EnqueueDebuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
             }
         }
 
@@ -1322,6 +1225,10 @@ public class WorldClient : SocketClientBase, IWorldClient
             SentrySdk.CaptureException(e);
         }
 
+        // Initial
+        ObtainProfileLegendMarks(null, null);
+        // Observable Collection
+        Aisling.LegendBook.LegendMarks.CollectionChanged += ObtainProfileLegendMarks;
         Aisling.Loading = false;
         return this;
     }
@@ -1601,7 +1508,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             Con = (byte)Math.Clamp(Aisling.Con, byte.MinValue, byte.MaxValue),
             CurrentHp = (uint)Aisling.CurrentHp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.CurrentHp,
             CurrentMp = (uint)Aisling.CurrentMp is >= uint.MaxValue or <= 0 ? 1 : (uint)Aisling.CurrentMp,
-            CurrentWeight = (short)Aisling.CurrentWeight,
+            CurrentWeight = Aisling.CurrentWeight,
             DefenseElement = (Element)Aisling.DefenseElement,
             Dex = (byte)Math.Clamp(Aisling.Dex, 0, 255),
             Dmg = (byte)Math.Clamp((sbyte)Aisling.Dmg, sbyte.MinValue, sbyte.MaxValue),
@@ -2262,7 +2169,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             var args = new MapDataArgs
             {
                 CurrentYIndex = y,
-                Width = (byte)mapTemplate.Width,
+                Width = mapTemplate.Width,
                 MapData = mapTemplate.GetRowData(y).ToArray()
             };
 
@@ -2279,10 +2186,10 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             CheckSum = Aisling.Map.Hash,
             Flags = (byte)Aisling.Map.Flags,
-            Height = (byte)Aisling.Map.Height,
+            Height = Aisling.Map.Height,
             MapId = (short)Aisling.Map.ID,
             Name = Aisling.Map.Name,
-            Width = (byte)Aisling.Map.Width
+            Width = Aisling.Map.Width
         };
 
         Send(args);
@@ -2791,8 +2698,6 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         #endregion
 
-        var legendMarks = ObtainProfileLegendMarks(aisling);
-
         var args = new ProfileArgs
         {
             JobClass = (JobClass)ClassStrings.JobDisplayFlag(aisling.JobClass.ToString()),
@@ -2802,7 +2707,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
             GuildRank = $"GearP.: {aisling.GamePoints}",
             Id = aisling.Serial,
-            LegendMarks = legendMarks,
+            LegendMarks = aisling.Client._legendMarksFiltered,
             Name = aisling.Username,
             Nation = (Nation)aisling.Nation,
             Portrait = aisling.PictureData,
@@ -2814,11 +2719,12 @@ public class WorldClient : SocketClientBase, IWorldClient
         Send(args);
     }
 
-    private static List<LegendMarkInfo> ObtainProfileLegendMarks(Aisling aisling)
+    private void ObtainProfileLegendMarks(object sender, NotifyCollectionChangedEventArgs args)
     {
-        var legends = aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
-        var legendCount = aisling.LegendBook.LegendMarks;
-        var legendMarks = legends
+        _legendMarksFiltered.Clear();
+        var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
+        var legendCount = Aisling.LegendBook.LegendMarks;
+        _legendMarksFiltered = legends
             .Where(legend => legend != null && legend.Color != LegendColor.Invisible)
             .Select(legend =>
             {
@@ -2837,14 +2743,13 @@ public class WorldClient : SocketClientBase, IWorldClient
             .Where(legend => legend is { Color: LegendColor.Invisible })
             .Select(legend => new LegendMarkInfo
             {
-                Color = (MarkColor)legend.Color,
-                Icon = (MarkIcon)legend.Icon,
+                Color = MarkColor.Invisible,
+                Icon = MarkIcon.Invisible,
                 Key = legend.Key,
-                Text = legend.Text
+                Text = legend.Text.IsNullOrEmpty() ? "Quest Completed" : legend.Text
             });
 
-        legendMarks.AddRange(invisibleLegends);
-        return legendMarks;
+        _legendMarksFiltered.AddRange(invisibleLegends);
     }
 
     /// <summary>
@@ -3345,8 +3250,6 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         #endregion
 
-        var legendMarks = ObtainSelfProfileLegendMarks();
-
         var args = new SelfProfileArgs
         {
             JobClass = (JobClass)ClassStrings.JobDisplayFlag(Aisling.JobClass.ToString()),
@@ -3357,7 +3260,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
             GuildRank = $"GearP.: {Aisling.GamePoints}",
             IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
-            LegendMarks = legendMarks,
+            LegendMarks = _legendMarksFiltered,
             Name = Aisling.Username,
             Nation = (Nation)Aisling.Nation,
             Portrait = Aisling.PictureData,
@@ -3367,39 +3270,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         };
 
         Send(args);
-    }
-
-    private List<LegendMarkInfo> ObtainSelfProfileLegendMarks()
-    {
-        var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
-        var legendCount = Aisling.LegendBook.LegendMarks;
-        var legendMarks = legends
-            .Where(legend => legend != null && legend.Color != LegendColor.Invisible)
-            .Select(legend =>
-            {
-                var markCount = legendCount.Count(item => item.Text == legend.Text);
-                var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
-                return new LegendMarkInfo
-                {
-                    Color = (MarkColor)legend.Color,
-                    Icon = (MarkIcon)legend.Icon,
-                    Key = legend.Key,
-                    Text = legendText
-                };
-            })
-            .ToList();
-        var invisibleLegends = legends
-            .Where(legend => legend is { Color: LegendColor.Invisible })
-            .Select(legend => new LegendMarkInfo
-            {
-                Color = (MarkColor)legend.Color,
-                Icon = (MarkIcon)legend.Icon,
-                Key = legend.Key,
-                Text = legend.Text
-            });
-
-        legendMarks.AddRange(invisibleLegends);
-        return legendMarks;
     }
 
     /// <summary>

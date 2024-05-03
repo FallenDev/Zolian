@@ -14,7 +14,7 @@ public class EquipmentManager
     public EquipmentManager(WorldClient client)
     {
         Client = client;
-        Equipment = new ConcurrentDictionary<int, EquipmentSlot>();
+        Equipment = [];
 
         for (byte i = 1; i < 19; i++)
             Equipment[i] = null;
@@ -250,7 +250,7 @@ public class EquipmentManager
         Client.UpdateDisplay();
     }
 
-    public void RemoveFromSlot(int displaySlot)
+    private void RemoveFromSlot(int displaySlot)
     {
         OnEquipmentRemoved((byte)displaySlot);
         Client.SendUnequip((Chaos.Common.Definitions.EquipmentSlot)displaySlot);

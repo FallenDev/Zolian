@@ -8,7 +8,7 @@ namespace Darkages.Managers;
 
 public class BankManager : IBank
 {
-    public ConcurrentDictionary<long, Item> Items { get; } = new();
+    public ConcurrentDictionary<long, Item> Items { get; } = [];
     public ulong TempGoldDeposit { get; set; }
     public ulong TempGoldWithdraw { get; set; }
 

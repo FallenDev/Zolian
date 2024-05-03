@@ -89,8 +89,9 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
     public IEnumerable<T> QueryAll(Predicate<T> predicate)
     {
         if (predicate is null) yield break;
+        var values = _values.ToList();
 
-        foreach (var item in _values.Where(item => predicate(item)))
+        foreach (var item in values.Where(item => predicate(item)))
         {
             yield return item.Abyss ? default : item;
         }

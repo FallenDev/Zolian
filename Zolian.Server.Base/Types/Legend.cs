@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Identity;
+﻿using System.Collections.ObjectModel;
+using Chaos.Common.Identity;
 
 using Dapper;
 
@@ -14,7 +15,7 @@ namespace Darkages.Types;
 
 public class Legend
 {
-    public readonly List<LegendItem> LegendMarks = new();
+    public readonly ObservableCollection<LegendItem> LegendMarks = [];
 
     public void AddLegend(LegendItem legend, WorldClient client)
     {
