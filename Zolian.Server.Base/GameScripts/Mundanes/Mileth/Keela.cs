@@ -370,10 +370,11 @@ public class Keela : MundaneScript
                                 var legend = new Legend.LegendItem
                                 {
                                     Key = "LKeela1",
+                                    IsPublic = false,
                                     Time = DateTime.UtcNow,
-                                    Color = LegendColor.Invisible,
-                                    Icon = (byte)LegendIcon.Invisible,
-                                    Text = "Completed LKeela1"
+                                    Color = LegendColor.LightBlueDarkBlueG1,
+                                    Icon = (byte)LegendIcon.Community,
+                                    Text = "- Killed for Keela"
                                 };
 
                                 client.Aisling.LegendBook.AddLegend(legend, client);
@@ -429,6 +430,7 @@ public class Keela : MundaneScript
                                     var legend = new Legend.LegendItem
                                     {
                                         Key = "LKeela2",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Rogue,
@@ -488,7 +490,8 @@ public class Keela : MundaneScript
                                 {
                                     var legend = new Legend.LegendItem
                                     {
-                                        Key = "Skill",
+                                        Key = "KeelaSkill",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Rogue,
@@ -510,6 +513,7 @@ public class Keela : MundaneScript
                         var item = new Legend.LegendItem
                         {
                             Key = "LKeela3",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Yellow,
                             Icon = (byte)LegendIcon.Victory,

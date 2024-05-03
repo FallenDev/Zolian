@@ -330,6 +330,7 @@ public class Lau : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LLau1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -360,6 +361,7 @@ public class Lau : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LLau1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -391,6 +393,7 @@ public class Lau : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LLau1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -421,6 +424,7 @@ public class Lau : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LLau1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -446,6 +450,7 @@ public class Lau : MundaneScript
                             var item = new Legend.LegendItem
                             {
                                 Key = "LLau1",
+                                IsPublic = true,
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.White,
                                 Icon = (byte)LegendIcon.Warrior,

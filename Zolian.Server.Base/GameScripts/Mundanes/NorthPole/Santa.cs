@@ -105,6 +105,7 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         var legend = new Legend.LegendItem
                         {
                             Key = "LSanta1",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,

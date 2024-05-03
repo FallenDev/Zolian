@@ -144,6 +144,7 @@ public class Corina(WorldServer server, Mundane mundane) : MundaneScript(server,
                     var legend = new Legend.LegendItem
                     {
                         Key = "LEternal2",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.PinkRedG13,
                         Icon = (byte)LegendIcon.Heart,

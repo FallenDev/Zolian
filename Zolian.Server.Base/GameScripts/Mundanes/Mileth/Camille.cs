@@ -99,10 +99,11 @@ public class Camille(WorldServer server, Mundane mundane) : MundaneScript(server
                     var legend = new Legend.LegendItem
                     {
                         Key = "LCamille1",
+                        IsPublic = false,
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.Invisible,
-                        Icon = (byte)LegendIcon.Invisible,
-                        Text = "Completed LCamille1"
+                        Color = LegendColor.LightBlueDarkBlueG1,
+                        Icon = (byte)LegendIcon.Heart,
+                        Text = "- Made Camille happy"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);

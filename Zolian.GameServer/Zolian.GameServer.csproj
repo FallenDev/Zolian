@@ -36,7 +36,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="1.2.0" />
+		<PackageReference Include="Chaos-Networking" Version="1.2.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0">
 		  <TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>

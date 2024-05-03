@@ -106,6 +106,7 @@ public class EthosPrime(WorldServer server, Mundane mundane) : MundaneScript(ser
                     var legend = new Legend.LegendItem
                     {
                         Key = "LEthos1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.YellowG4,
                         Icon = (byte)LegendIcon.Warrior,

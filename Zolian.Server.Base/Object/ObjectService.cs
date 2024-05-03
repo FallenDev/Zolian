@@ -89,7 +89,8 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
     public IEnumerable<T> QueryAll(Predicate<T> predicate)
     {
         if (predicate is null) yield break;
-        var values = _values.ToList();
+        // Temp variable to avoid changes to the collection while iterating.
+        var values = _values;
 
         foreach (var item in values.Where(item => predicate(item)))
         {

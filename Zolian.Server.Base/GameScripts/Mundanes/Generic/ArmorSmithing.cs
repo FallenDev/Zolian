@@ -976,6 +976,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmorS1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -993,6 +994,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmorS2",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -1010,6 +1012,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmorS3",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -1027,6 +1030,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmorS4",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -1044,6 +1048,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmorS5",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,

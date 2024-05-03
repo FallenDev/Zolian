@@ -242,6 +242,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                         var legend = new Legend.LegendItem
                         {
                             Key = "LAdvFSC",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.BlueG5,
                             Icon = (byte)LegendIcon.Heart,
@@ -281,6 +282,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                         var legend = new Legend.LegendItem
                         {
                             Key = "LAdvVC",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Cyan,
                             Icon = (byte)LegendIcon.Victory,
@@ -323,6 +325,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                         var legend = new Legend.LegendItem
                         {
                             Key = "LAdvLD",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Cyan,
                             Icon = (byte)LegendIcon.Victory,

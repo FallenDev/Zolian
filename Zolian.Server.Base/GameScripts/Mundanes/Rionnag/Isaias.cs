@@ -276,6 +276,7 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
         var legend = new Legend.LegendItem
         {
             Key = "LUnDepths1",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.GreenG2,
             Icon = (byte)LegendIcon.Community,
@@ -303,6 +304,7 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
         var legend = new Legend.LegendItem
         {
             Key = "LUnDepths2",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.GreenG2,
             Icon = (byte)LegendIcon.Community,
@@ -335,6 +337,7 @@ public class Isaias(WorldServer server, Mundane mundane) : MundaneScript(server,
         var legend = new Legend.LegendItem
         {
             Key = "LUnDepths3",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.GreenG2,
             Icon = (byte)LegendIcon.Community,

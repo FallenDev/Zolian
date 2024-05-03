@@ -152,7 +152,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Yellow Belt");
                     var yellowBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "YBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -193,7 +194,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Orange Belt");
                     var orangeBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "OBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -234,7 +236,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Green Belt");
                     var greenBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "GBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -275,7 +278,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Purple Belt");
                     var purpleBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "PBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -316,7 +320,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Blue Belt");
                     var blueBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "BluBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -357,7 +362,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Brown Belt");
                     var brownBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "BroTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -398,7 +404,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Red Belt");
                     var redBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "RBTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -440,7 +447,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.GiveItem("Black Belt");
                     var blackBelt = new Legend.LegendItem
                     {
-                        Key = "Training",
+                        Key = "BlaTraining",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.White,
                         Icon = (byte)LegendIcon.Monk,
@@ -473,7 +481,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 client.GiveItem("White Belt");
                 var item = new Legend.LegendItem
                 {
-                    Key = "Training",
+                    Key = "WBTraining",
+                    IsPublic = true,
                     Time = DateTime.UtcNow,
                     Color = LegendColor.White,
                     Icon = (byte)LegendIcon.Monk,

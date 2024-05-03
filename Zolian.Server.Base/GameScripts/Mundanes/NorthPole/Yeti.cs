@@ -143,6 +143,7 @@ public class Yeti(WorldServer server, Mundane mundane) : MundaneScript(server, m
                         var legend = new Legend.LegendItem
                         {
                             Key = "LYeti1",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,

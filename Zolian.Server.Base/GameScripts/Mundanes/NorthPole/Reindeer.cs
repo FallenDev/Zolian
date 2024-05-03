@@ -91,6 +91,7 @@ public class Reindeer(WorldServer server, Mundane mundane) : MundaneScript(serve
                         var legend = new Legend.LegendItem
                         {
                             Key = "LReindeer1",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.RedPurpleG2,
                             Icon = (byte)LegendIcon.Heart,

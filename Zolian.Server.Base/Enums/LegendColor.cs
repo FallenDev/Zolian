@@ -2,7 +2,6 @@
 
 public enum LegendColor : byte
 {
-    Invisible = 0,
     Cyan = 1,
     Red = 2,
     Red1 = 3,

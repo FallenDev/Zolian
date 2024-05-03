@@ -133,6 +133,7 @@ public class Rezti(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     var legend = new Legend.LegendItem
                     {
                         Key = "LArmCodex1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG4,
                         Icon = (byte)LegendIcon.Victory,

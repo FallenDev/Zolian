@@ -96,6 +96,7 @@ public class Pete(WorldServer server, Mundane mundane) : MundaneScript(server, m
                         var legend = new Legend.LegendItem
                         {
                             Key = "LPete1",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.PaleSkinToTanSkinG8,
                             Icon = (byte)LegendIcon.Heart,

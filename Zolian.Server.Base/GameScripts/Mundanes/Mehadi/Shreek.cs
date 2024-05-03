@@ -94,10 +94,11 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                         var legend = new Legend.LegendItem
                         {
                             Key = "LShreek1",
+                            IsPublic = false,
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.Invisible,
-                            Icon = (byte)LegendIcon.Invisible,
-                            Text = "Completed LShreek1"
+                            Color = LegendColor.LightBlueDarkBlueG1,
+                            Icon = (byte)LegendIcon.Community,
+                            Text = "- Gave Shreek Waffles! Hmmm Waffles"
                         };
 
                         client.Aisling.LegendBook.AddLegend(legend, client);
@@ -130,8 +131,9 @@ public class Shreek(WorldServer server, Mundane mundane) : MundaneScript(server,
                         var legend = new Legend.LegendItem
                         {
                             Key = "LShreek2",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
-                            Color = LegendColor.BlueG7,
+                            Color = LegendColor.GreenG4,
                             Icon = (byte)LegendIcon.Community,
                             Text = "Gained Shreek's friendship"
                         };

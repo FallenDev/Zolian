@@ -81,7 +81,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
     {
-        if (!AuthenticateUser(client)) return;
+        if (client.Aisling.ActionUsed != "Remote Bank")
+            if (!AuthenticateUser(client)) return;
 
         switch (responseId)
         {

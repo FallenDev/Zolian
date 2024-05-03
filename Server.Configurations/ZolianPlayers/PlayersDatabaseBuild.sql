@@ -231,6 +231,7 @@ CREATE TABLE PlayersLegend
 	[LegendId] INT NOT NULL PRIMARY KEY,
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
     [Key] VARCHAR (25) NOT NULL,
+    [IsPublic] BIT NOT NULL DEFAULT 1,
 	[Time] DATETIME DEFAULT CURRENT_TIMESTAMP,
 	[Color] VARCHAR(30) NOT NULL DEFAULT 'White',
 	[Icon] INT NOT NULL DEFAULT 0,
@@ -631,14 +632,14 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[AddLegendMark]
-@LegendId INT, @Serial BIGINT, @Key VARCHAR(20), @Time DATETIME,
+@LegendId INT, @Serial BIGINT, @Key VARCHAR(20), @IsPublic BIT, @Time DATETIME,
 @Color VARCHAR (25), @Icon INT, @Text VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersLegend]
-	([LegendId], [Serial], [Key], [Time], [Color], [Icon], [Text])
-    VALUES	(@LegendId, @Serial, @Key, @Time, @Color, @Icon, @Text);
+	([LegendId], [Serial], [Key], [IsPublic], [Time], [Color], [Icon], [Text])
+    VALUES	(@LegendId, @Serial, @Key, @IsPublic, @Time, @Color, @Icon, @Text);
 END
 GO
 

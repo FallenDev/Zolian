@@ -271,6 +271,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -320,6 +321,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -369,6 +371,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -418,6 +421,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal1",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -476,6 +480,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal2",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -509,6 +514,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal2",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -542,6 +548,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal2",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -575,6 +582,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal2",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -633,7 +641,8 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Key = "Skill",
+                                        Key = "NealSkill",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -648,6 +657,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal3",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -680,7 +690,8 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Key = "Spell",
+                                        Key = "NealSkill",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG7,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -695,6 +706,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal3",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -727,7 +739,8 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Key = "Skill",
+                                        Key = "NealSkill",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG5,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -742,6 +755,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal3",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,
@@ -774,7 +788,8 @@ public class Neal : MundaneScript
                                 {
                                     var item = new Legend.LegendItem
                                     {
-                                        Key = "Spell",
+                                        Key = "NealSkill",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.PinkRedG7,
                                         Icon = (byte)LegendIcon.Warrior,
@@ -789,6 +804,7 @@ public class Neal : MundaneScript
                                     var item = new Legend.LegendItem
                                     {
                                         Key = "LNeal3",
+                                        IsPublic = true,
                                         Time = DateTime.UtcNow,
                                         Color = LegendColor.Yellow,
                                         Icon = (byte)LegendIcon.Victory,

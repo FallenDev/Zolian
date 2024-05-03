@@ -30,11 +30,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
         _onClickCheck = Random.Shared.NextInt64();
 
         // Check if user is within the appropriate distance to the npc
-        if (!Mundane.WithinEarShotOf(client.Aisling))
-        {
-            client.CloseDialog();
-            return;
-        }
+        if (!Mundane.WithinEarShotOf(client.Aisling)) return;
 
         // Obtain serial from packet entry ClientFormat43
         client.EntryCheck = serial;

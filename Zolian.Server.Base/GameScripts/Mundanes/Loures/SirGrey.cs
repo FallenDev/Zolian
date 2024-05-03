@@ -115,6 +115,7 @@ public class SirGrey : MundaneScript
                     var legend = new Legend.LegendItem
                     {
                         Key = "LJob1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.TurquoiseG7,
                         Icon = (byte)LegendIcon.Victory,

@@ -89,7 +89,8 @@ public class WorldClient : SocketClientBase, IWorldClient
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
     public DateTime BoardOpened { get; set; }
     public DialogSession DlgSession { get; set; }
-    private List<LegendMarkInfo> _legendMarksFiltered = [];
+    private List<LegendMarkInfo> _legendMarksPublic = [];
+    private List<LegendMarkInfo> _legendMarksPrivate = [];
 
     public bool CanSendLocation
     {
@@ -1207,6 +1208,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 {
                     LegendId = legend.LegendId,
                     Key = legend.Key,
+                    IsPublic = legend.IsPublic,
                     Time = legend.Time,
                     Color = legend.Color,
                     Icon = legend.Icon,
@@ -2707,7 +2709,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
             GuildRank = $"GearP.: {aisling.GamePoints}",
             Id = aisling.Serial,
-            LegendMarks = aisling.Client._legendMarksFiltered,
+            LegendMarks = aisling.Client._legendMarksPublic,
             Name = aisling.Username,
             Nation = (Nation)aisling.Nation,
             Portrait = aisling.PictureData,
@@ -2721,35 +2723,48 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     private void ObtainProfileLegendMarks(object sender, NotifyCollectionChangedEventArgs args)
     {
-        _legendMarksFiltered.Clear();
-        var legends = Aisling.LegendBook.LegendMarks.DistinctBy(m => m.Text).ToList();
-        var legendCount = Aisling.LegendBook.LegendMarks;
-        _legendMarksFiltered = legends
-            .Where(legend => legend != null && legend.Color != LegendColor.Invisible)
-            .Select(legend =>
-            {
-                var markCount = legendCount.Count(item => item.Text == legend.Text);
-                var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
-                return new LegendMarkInfo
-                {
-                    Color = (MarkColor)legend.Color,
-                    Icon = (MarkIcon)legend.Icon,
-                    Key = legend.Key,
-                    Text = legendText
-                };
-            })
-            .ToList();
-        var invisibleLegends = legends
-            .Where(legend => legend is { Color: LegendColor.Invisible })
-            .Select(legend => new LegendMarkInfo
-            {
-                Color = MarkColor.Invisible,
-                Icon = MarkIcon.Invisible,
-                Key = legend.Key,
-                Text = legend.Text.IsNullOrEmpty() ? "Quest Completed" : legend.Text
-            });
+        _legendMarksPublic.Clear();
+        _legendMarksPrivate.Clear();
 
-        _legendMarksFiltered.AddRange(invisibleLegends);
+        try
+        {
+            var currentMarks = Aisling.LegendBook.LegendMarks.ToList();
+            var legends = currentMarks.DistinctBy(m => m.Text);
+
+            _legendMarksPublic.AddRange(legends
+                .Where(legend => legend is { IsPublic: true })
+                .Select(legend =>
+                {
+                    var markCount = currentMarks.Count(item => item.Text == legend.Text);
+                    var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
+                    return new LegendMarkInfo
+                    {
+                        Color = (MarkColor)legend.Color,
+                        Icon = (MarkIcon)legend.Icon,
+                        Key = legend.Key,
+                        Text = legendText
+                    };
+                }));
+
+            _legendMarksPrivate.AddRange(legends
+                .Where(legend => legend is not null)
+                .Select(legend =>
+                {
+                    var markCount = currentMarks.Count(item => item.Text == legend.Text);
+                    var legendText = $"{legend.Text} - {legend.Time.ToShortDateString()} ({markCount})";
+                    return new LegendMarkInfo
+                    {
+                        Color = (MarkColor)legend.Color,
+                        Icon = (MarkIcon)legend.Icon,
+                        Key = legend.Key,
+                        Text = legendText
+                    };
+                }));
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     /// <summary>
@@ -3260,7 +3275,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
             GuildRank = $"GearP.: {Aisling.GamePoints}",
             IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
-            LegendMarks = _legendMarksFiltered,
+            LegendMarks = _legendMarksPrivate,
             Name = Aisling.Username,
             Nation = (Nation)Aisling.Nation,
             Portrait = Aisling.PictureData,
@@ -4125,6 +4140,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         var item = new Legend.LegendItem
         {
             Key = $"Sp{EphemeralRandomIdGenerator<uint>.Shared.NextId}ark{EphemeralRandomIdGenerator<uint>.Shared.NextId}",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Warrior,

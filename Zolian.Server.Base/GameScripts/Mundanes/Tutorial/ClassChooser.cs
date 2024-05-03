@@ -140,7 +140,8 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
     {
         var legend = new Legend.LegendItem
         {
-            Key = "Class",
+            Key = "StartingClass",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.BlueG1,
             Icon = (byte)LegendIcon.Victory,
@@ -152,6 +153,7 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
         var legendItem = new Legend.LegendItem
         {
             Key = "Beta Aisling",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.TurquoiseG7,
             Icon = (byte)LegendIcon.Heart,

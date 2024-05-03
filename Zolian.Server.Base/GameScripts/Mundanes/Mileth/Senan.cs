@@ -175,6 +175,7 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             var item = new Legend.LegendItem
                             {
                                 Key = "LBeggar1",
+                                IsPublic = true,
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Yellow,
                                 Icon = (byte)LegendIcon.Warrior,
@@ -220,6 +221,7 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             var item = new Legend.LegendItem
                             {
                                 Key = "LBeggar2",
+                                IsPublic = true,
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Yellow,
                                 Icon = (byte)LegendIcon.Warrior,
@@ -265,6 +267,7 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             var item = new Legend.LegendItem
                             {
                                 Key = "LBeggar3",
+                                IsPublic = true,
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.Yellow,
                                 Icon = (byte)LegendIcon.Warrior,
@@ -321,6 +324,7 @@ public class Senan(WorldServer server, Mundane mundane) : MundaneScript(server, 
                             var item = new Legend.LegendItem
                             {
                                 Key = "LBeggar4",
+                                IsPublic = true,
                                 Time = DateTime.UtcNow,
                                 Color = LegendColor.TurquoiseG3,
                                 Icon = (byte)LegendIcon.Victory,

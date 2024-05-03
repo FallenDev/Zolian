@@ -399,10 +399,11 @@ public class Dar : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Key = "LDar1",
+                                IsPublic = false,
                                 Time = DateTime.UtcNow,
-                                Color = LegendColor.Invisible,
-                                Icon = (byte)LegendIcon.Invisible,
-                                Text = "Completed LDar1"
+                                Color = LegendColor.LightBlueDarkBlueG1,
+                                Icon = (byte)LegendIcon.Community,
+                                Text = "- Dark favors for Dar"
                             };
 
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -450,10 +451,11 @@ public class Dar : MundaneScript
                             var legend = new Legend.LegendItem
                             {
                                 Key = "LDar2",
+                                IsPublic = false,
                                 Time = DateTime.UtcNow,
-                                Color = LegendColor.Invisible,
-                                Icon = (byte)LegendIcon.Invisible,
-                                Text = "Completed LDar2"
+                                Color = LegendColor.LightBlueDarkBlueG1,
+                                Icon = (byte)LegendIcon.Community,
+                                Text = "- Darker favors for Dar"
                             };
 
                             client.Aisling.LegendBook.AddLegend(legend, client);
@@ -508,6 +510,7 @@ public class Dar : MundaneScript
                         var item = new Legend.LegendItem
                         {
                             Key = "LDar3",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.BlueG1,
                             Icon = (byte)LegendIcon.Wizard,

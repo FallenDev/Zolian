@@ -136,6 +136,7 @@ public class Edgar(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     var legend = new Legend.LegendItem
                     {
                         Key = "LEternal1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.PinkRedG13,
                         Icon = (byte)LegendIcon.Warrior,

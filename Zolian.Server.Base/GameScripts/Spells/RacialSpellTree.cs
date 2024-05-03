@@ -435,6 +435,7 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling playerAction) return;
         playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, playerAction.Position));
+        playerAction.ActionUsed = "Remote Bank";
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
         {

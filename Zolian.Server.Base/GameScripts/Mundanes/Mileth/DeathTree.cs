@@ -143,6 +143,7 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                     var legend = new Legend.LegendItem
                     {
                         Key = "LTodesbaum1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.Yellow,
                         Icon = (byte)LegendIcon.Victory,
@@ -223,6 +224,7 @@ public class DeathTree(WorldServer server, Mundane mundane) : MundaneScript(serv
                         var legend = new Legend.LegendItem
                         {
                             Key = "LTodesbaum2",
+                            IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.TurquoiseG7,
                             Icon = (byte)LegendIcon.Victory,

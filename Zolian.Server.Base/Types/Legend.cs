@@ -47,6 +47,7 @@ public class Legend
     public class LegendItem
     {
         public uint LegendId { get; init; }
+        public bool IsPublic { get; init; }
         public string Key { get; init; }
         public DateTime Time { get; init; }
         public LegendColor Color { get; init; }
@@ -68,6 +69,7 @@ public class Legend
             cmd.Parameters.Add("@LegendId", SqlDbType.Int).Value = legendId;
             cmd.Parameters.Add("@Serial", SqlDbType.Int).Value = aisling.Serial;
             cmd.Parameters.Add("@Key", SqlDbType.VarChar).Value = legend.Key;
+            cmd.Parameters.Add("@IsPublic", SqlDbType.Bit).Value = legend.IsPublic;
             cmd.Parameters.Add("@Time", SqlDbType.DateTime).Value = legend.Time;
             cmd.Parameters.Add("@Color", SqlDbType.VarChar).Value = legend.Color;
             cmd.Parameters.Add("@Icon", SqlDbType.Int).Value = legend.Icon;

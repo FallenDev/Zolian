@@ -276,6 +276,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Warrior,
@@ -296,6 +297,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Warrior,
@@ -316,6 +318,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Rogue,
@@ -336,6 +339,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Priest,
@@ -356,6 +360,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Wizard,
@@ -376,6 +381,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                                 var item = new Legend.LegendItem
                                 {
                                     Key = "LArtur1",
+                                    IsPublic = true,
                                     Time = DateTime.UtcNow,
                                     Color = LegendColor.TurquoiseG8,
                                     Icon = (byte)LegendIcon.Monk,

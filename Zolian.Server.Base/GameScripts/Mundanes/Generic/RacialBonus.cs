@@ -272,6 +272,7 @@ public static class RacialBonus
         var item = new Legend.LegendItem
         {
             Key = "Race",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,
@@ -289,6 +290,7 @@ public static class RacialBonus
         var item = new Legend.LegendItem
         {
             Key = "Race",
+            IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,
             Icon = (byte)LegendIcon.Community,

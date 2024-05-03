@@ -136,6 +136,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
                     var legend = new Legend.LegendItem
                     {
                         Key = "LMineS1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -153,6 +154,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
                     var legend = new Legend.LegendItem
                     {
                         Key = "LMineS2",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -170,6 +172,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
                     var legend = new Legend.LegendItem
                     {
                         Key = "LMineS3",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -187,6 +190,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
                     var legend = new Legend.LegendItem
                     {
                         Key = "LMineS4",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,
@@ -204,6 +208,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
                     var legend = new Legend.LegendItem
                     {
                         Key = "LMineS5",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.BlueG1,
                         Icon = (byte)LegendIcon.Victory,

@@ -107,6 +107,7 @@ public class Dennis : MundaneScript
                     var legend = new Legend.LegendItem
                     {
                         Key = "LJob1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.TurquoiseG7,
                         Icon = (byte)LegendIcon.Victory,
@@ -127,6 +128,7 @@ public class Dennis : MundaneScript
                     var legend = new Legend.LegendItem
                     {
                         Key = "LDennis1",
+                        IsPublic = true,
                         Time = DateTime.UtcNow,
                         Color = LegendColor.PinkRedG5,
                         Icon = (byte)LegendIcon.Priest,
