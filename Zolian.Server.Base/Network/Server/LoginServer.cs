@@ -607,7 +607,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 {
                     ServerSetup.ConnectionLogger("---------Login-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using tor, and IP type: {usageType}");
                     return true;
                 }
 
@@ -615,7 +615,15 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 {
                     ServerSetup.ConnectionLogger("---------Login-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using a Reserved Address");
+                    return true;
+                }
+
+                if (usageType == "Data Center/Web Hosting/Transit")
+                {
+                    ServerSetup.ConnectionLogger("---------Login-Server---------");
+                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a data center, web hosting, or transit address", LogLevel.Warning);
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and is a data center, web host, or transit service.");
                     return true;
                 }
 

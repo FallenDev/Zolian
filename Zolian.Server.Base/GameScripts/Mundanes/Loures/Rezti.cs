@@ -34,7 +34,7 @@ public class Rezti(WorldServer server, Mundane mundane) : MundaneScript(server, 
             options.Add(new(0x06, "Hello, I was told you could help with this?"));
 
         if (client.Aisling.HasItem("Aosda Transcriptions Volume: IV"))
-            options.Add(new(0x07, "Is this the book?"));
+            options.Add(new(0x07, "Is this the right transcriptions?"));
 
         client.SendOptionsDialog(Mundane,
             !client.Aisling.QuestManager.ArmorCraftingCodexLearned
@@ -102,11 +102,12 @@ public class Rezti(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 {
                     var options = new List<Dialog.OptionsDataItem>
                     {
-                        new (0x05, "On it!")
+                        new (0x05, "On it!"),
+                        new (0x05, "What do I look like, a librarian?")
                     };
 
-                    client.SendOptionsDialog(Mundane, $"Ancient Aosda Writing?! Please head to the library and obtain a book for me, hurry!" +
-                                                      $" Look in the back right, you'll see a stack of blue books. I need a decipher to help!", options.ToArray());
+                    client.SendOptionsDialog(Mundane, $"Ancient Aosda Writing?! Please head to the library and obtain a book for me" +
+                                                      $" Look in the back right, you'll see a stack of blue books. I need decipher text to help", options.ToArray());
                     break;
                 }
             case 0x07:
@@ -126,9 +127,9 @@ public class Rezti(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 {
                     client.Aisling.QuestManager.ArmorCodexDeciphered = true;
                     client.Aisling.QuestManager.LouresReputation++;
-                    var bottle = new Item();
-                    bottle = bottle.Create(client.Aisling, "Transcribed Armorsmithing Tablet");
-                    bottle.GiveTo(client.Aisling);
+                    var tablet = new Item();
+                    tablet = tablet.Create(client.Aisling, "Transcribed Armorsmithing Tablet");
+                    tablet.GiveTo(client.Aisling);
                     client.Aisling.Inventory.RemoveFromInventory(client, client.Aisling.HasItemReturnItem("Ancient Smithing Codex"));
                     var legend = new Legend.LegendItem
                     {

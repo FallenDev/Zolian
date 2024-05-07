@@ -1376,20 +1376,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             // Mileth Altar
             case 500:
-            {
-                if ((item.X != 31 || item.Y != 52) && (item.X != 31 || item.Y != 53)) return;
-                ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
-                item.Remove();
-                return;
-            }
+                {
+                    if ((item.X != 31 || item.Y != 52) && (item.X != 31 || item.Y != 53)) return;
+                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
+                    item.Remove();
+                    return;
+                }
             // Undine Altar
             case 504:
-            {
-                if ((item.X != 62 || item.Y != 47) && (item.X != 62 || item.Y != 48)) return;
-                ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
-                item.Remove();
-                return;
-            }
+                {
+                    if ((item.X != 62 || item.Y != 47) && (item.X != 62 || item.Y != 48)) return;
+                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
+                    item.Remove();
+                    return;
+                }
         }
     }
 
@@ -1440,7 +1440,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var aisling = localClient.Aisling;
             var mapInstance = aisling.Map;
             var sprite = ObjectManager.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
-            
+
             if (sprite is null) return default;
             if (aisling.CanSeeSprite(sprite)) return default;
             if (sprite is not Monster monster) return default;
@@ -1778,7 +1778,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                if (!GameMastersIPs.Any(ip => client.RemoteIp.Equals(IPAddress.Parse(ip))) 
+                if (!GameMastersIPs.Any(ip => client.RemoteIp.Equals(IPAddress.Parse(ip)))
                     && !client.IsLoopback() && !client.RemoteIp.Equals(ipLocal))
                 {
                     ServerSetup.ConnectionLogger($"Failed to login GM from {client.RemoteIp}.");
@@ -2134,7 +2134,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Slow down");
                 return default;
             }
-            
+
             var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
             if (item?.Template == null) return default;
 
@@ -3045,7 +3045,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return default;
         }
     }
-    
+
     /// <summary>
     /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
@@ -3762,16 +3762,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     ServerSetup.ConnectionLogger("---------World-Server---------");
                     ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
+                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using tor");
                     return true;
                 }
 
-                if (usageType == "Reserved")
+                switch (usageType)
                 {
-                    ServerSetup.ConnectionLogger("---------World-Server---------");
-                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
-                    return true;
+                    case "Commercial":
+                    case "Organization":
+                    case "Government":
+                    case "Military":
+                    case "Content Delivery Network":
+                    case "Data Center/Web Hosting/Transit":
+                    case "Search Engine Spider":
+                    case "Reserved":
+                        {
+                            ServerSetup.ConnectionLogger("---------World-Server---------");
+                            ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a {usageType} address", LogLevel.Warning);
+                            SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using a {usageType} address");
+                            return true;
+                        }
+                    case "University/College/School":
+                    case "Library":
+                    case "Fixed Line ISP":
+                    case "Mobile ISP":
+                        break;
                 }
 
                 switch (abuseConfidenceScore)

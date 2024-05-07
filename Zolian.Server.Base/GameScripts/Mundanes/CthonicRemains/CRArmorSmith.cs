@@ -8,10 +8,10 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Generic;
+namespace Darkages.GameScripts.Mundanes.CthonicRemains;
 
-[Script("ArmorSmithing")]
-public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
+[Script("CRArmorSmith")]
+public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private Item _itemDetail;
     private string _forgeNeededStoneOne;
@@ -41,16 +41,11 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 options.Add(new(0x05, "Improve Armor"));
                 break;
             case "Journeyman": // 180
-            case "Expert":
-            case "Artisan":
                 options.Add(new(0x06, "Advance Armor"));
-
-                // Questing to Expert
-                if (!client.Aisling.QuestManager.ArmorCraftingCodexLearned && !client.Aisling.QuestManager.ArmorCodexDeciphered)
-                    options.Add(new(0x83, "Ancient Smithing Codex"));
-
-                if (client.Aisling.HasItem("Transcribed Armorsmithing Tablet"))
-                    options.Add(new(0x87, "Here's that tablet"));
+                break;
+            case "Expert" when client.Aisling.QuestManager.ArmorCraftingCodexLearned: // 250
+            case "Artisan" when client.Aisling.QuestManager.ArmorCraftingCodexLearned:
+                options.Add(new(0x07, "Enhance Armor"));
 
                 // Questing to Artisan
                 if (!client.Aisling.QuestManager.ArmorCraftingAdvancedCodexLearned)
@@ -619,13 +614,241 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             }
                             break;
                         case Item.ItemMaterials.Hybrasyl:
+                            {
+                                _forgeNeededStoneOne = "Refined Cobalt Steel";
+                                _forgeNeededStoneTwo = "Refined Obsidian";
+                                _forgeNeededStoneThree = "Ancient Bones";
+                                _forgeNeededStoneFour = "Fairy Wing";
+                                var opts = new List<Dialog.OptionsDataItem>();
+
+                                if (client.Aisling.HasInInventory("Refined Cobalt Steel", 5))
+                                {
+                                    if (client.Aisling.HasInInventory("Refined Obsidian", 4))
+                                    {
+                                        if (client.Aisling.HasInInventory("Ancient Bones", 10))
+                                        {
+                                            if (client.Aisling.HasInInventory("Fairy Wing", 7))
+                                            {
+                                                opts.Add(new(0x82, "Reforge"));
+                                            }
+                                            else
+                                            {
+                                                client.SendOptionsDialog(Mundane,
+                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    "Need: 7");
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            client.SendOptionsDialog(Mundane,
+                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                "Need: 10");
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            "Need: 4");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                                                      "Need: 5");
+                                    return;
+                                }
+
+                                opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
+
+                                client.SendOptionsDialog(Mundane, $"It will also take:\n" +
+                                                                  $"{_forgeNeededStoneOne} x5\n" +
+                                                                  $"{_forgeNeededStoneTwo} x4\n" +
+                                                                  $"{_forgeNeededStoneThree} x10\n" +
+                                                                  $"{_forgeNeededStoneFour} x7", opts.ToArray());
+                            }
+                            break;
                         case Item.ItemMaterials.MoonStone:
+                            {
+                                _forgeNeededStoneOne = "Refined Cobalt Steel";
+                                _forgeNeededStoneTwo = "Refined Obsidian";
+                                _forgeNeededStoneThree = "Flawless Ruby";
+                                _forgeNeededStoneFour = "Captured Golden Floppy";
+                                var opts = new List<Dialog.OptionsDataItem>();
+
+                                if (client.Aisling.HasInInventory("Refined Cobalt Steel", 10))
+                                {
+                                    if (client.Aisling.HasInInventory("Refined Obsidian", 8))
+                                    {
+                                        if (client.Aisling.HasInInventory("Flawless Ruby", 2))
+                                        {
+                                            if (client.Aisling.HasInInventory("Captured Golden Floppy", 3))
+                                            {
+                                                opts.Add(new(0x82, "Reforge"));
+                                            }
+                                            else
+                                            {
+                                                client.SendOptionsDialog(Mundane,
+                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    "Need: 3");
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            client.SendOptionsDialog(Mundane,
+                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                "Need: 2");
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            "Need: 8");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                                                      "Need: 10");
+                                    return;
+                                }
+
+                                opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
+
+                                client.SendOptionsDialog(Mundane, $"It will also take:\n" +
+                                                                  $"{_forgeNeededStoneOne} x10\n" +
+                                                                  $"{_forgeNeededStoneTwo} x8\n" +
+                                                                  $"{_forgeNeededStoneThree} x2\n" +
+                                                                  $"{_forgeNeededStoneFour} x3", opts.ToArray());
+                            }
+                            break;
                         case Item.ItemMaterials.SunStone:
-                        case Item.ItemMaterials.Ebony:
+                            {
+                                _forgeNeededStoneOne = "Refined Obsidian";
+                                _forgeNeededStoneTwo = "Refined Dark Iron";
+                                _forgeNeededStoneThree = "Flawless Ruby";
+                                _forgeNeededStoneFour = "Flawless Sapphire";
+                                var opts = new List<Dialog.OptionsDataItem>();
+
+                                if (client.Aisling.HasInInventory("Refined Obsidian", 15))
+                                {
+                                    if (client.Aisling.HasInInventory("Refined Dark Iron", 10))
+                                    {
+                                        if (client.Aisling.HasInInventory("Flawless Ruby", 2))
+                                        {
+                                            if (client.Aisling.HasInInventory("Flawless Sapphire", 2))
+                                            {
+                                                opts.Add(new(0x82, "Reforge"));
+                                            }
+                                            else
+                                            {
+                                                client.SendOptionsDialog(Mundane,
+                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    "Need: 2");
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            client.SendOptionsDialog(Mundane,
+                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                "Need: 2");
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            "Need: 10");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                                                      "Need: 15");
+                                    return;
+                                }
+
+                                opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
+
+                                client.SendOptionsDialog(Mundane, $"It will also take:\n" +
+                                                                  $"{_forgeNeededStoneOne} x15\n" +
+                                                                  $"{_forgeNeededStoneTwo} x10\n" +
+                                                                  $"{_forgeNeededStoneThree} x2\n" +
+                                                                  $"{_forgeNeededStoneFour} x2", opts.ToArray());
+                            }
+                            break;
+                        case Item.ItemMaterials.Ebony: // up to here for expert
+                            {
+                                _forgeNeededStoneOne = "Refined Obsidian";
+                                _forgeNeededStoneTwo = "Omega Module";
+                                _forgeNeededStoneThree = "Flawless Ruby";
+                                _forgeNeededStoneFour = "Flawless Sapphire";
+                                var opts = new List<Dialog.OptionsDataItem>();
+
+                                if (client.Aisling.HasInInventory("Refined Obsidian", 20))
+                                {
+                                    if (client.Aisling.HasInInventory("Omega Module", 1))
+                                    {
+                                        if (client.Aisling.HasInInventory("Flawless Ruby", 5))
+                                        {
+                                            if (client.Aisling.HasInInventory("Flawless Sapphire", 5))
+                                            {
+                                                opts.Add(new(0x82, "Reforge"));
+                                            }
+                                            else
+                                            {
+                                                client.SendOptionsDialog(Mundane,
+                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    "Need: 5");
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            client.SendOptionsDialog(Mundane,
+                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                "Need: 5");
+                                            return;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            "Need: 1");
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                                                      "Need: 20");
+                                    return;
+                                }
+
+                                opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
+
+                                client.SendOptionsDialog(Mundane, $"It will also take:\n" +
+                                                                  $"{_forgeNeededStoneOne} x20\n" +
+                                                                  $"{_forgeNeededStoneTwo} x1\n" +
+                                                                  $"{_forgeNeededStoneThree} x5\n" +
+                                                                  $"{_forgeNeededStoneFour} x5", opts.ToArray());
+                            }
+                            break;
                         case Item.ItemMaterials.Runic:
                         case Item.ItemMaterials.Chaos:
                             {
-                                client.SendOptionsDialog(Mundane, "That armor is quite beautiful, we can't do anything further with it. At least not here.");
+                                client.SendOptionsDialog(Mundane, "That armor is quite beautiful, we can't do anything further with it.");
                                 return;
                             }
                     }
@@ -900,64 +1123,6 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
             #region Questing
 
-            case 0x83:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x84, "Sure, is there anything important on it?")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"Ohhh, what ye have here {client.Aisling.Username}?\n" +
-                                                      $"An ancient tablet.. Let me examine this further!", options.ToArray());
-                    break;
-                }
-            case 0x84:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x85, "What? Surely you're joking?")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"Is there?! Aisling, you just found schematics I don't even understand.", options.ToArray());
-                    break;
-                }
-            case 0x85:
-                {
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x86, "Expect my return")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"I would speak with the Loures Apothecary about this, perhaps they can help me at least read it. " +
-                                                      $"If they can transcribe what's written here. Bring me back the transcription, and we'll see what we can " +
-                                                      $"make with it!", options.ToArray());
-                    break;
-                }
-            case 0x86:
-                {
-                    client.CloseDialog();
-                    client.Aisling.QuestManager.ArmorApothecaryAccepted = true;
-                    break;
-                }
-            case 0x87:
-                {
-                    client.Aisling.QuestManager.ArmorCraftingCodexLearned = true;
-
-                    var options = new List<Dialog.OptionsDataItem>
-                    {
-                        new (0x88, "Really?")
-                    };
-
-                    client.SendOptionsDialog(Mundane, $"Ah Ha!! Sooo, we can use those as a catalyst... ah and these! {client.Aisling.Username}, looks like you can enhance further. " +
-                                                      $"Have you ever been to {{=bCthonic Remains{{=a? There's a coalition deep within the cavern. I have a brother there who is a finer armor smith " +
-                                                      $"than I am. His forge is quite hotter than mine, so forging there is easier! At current we cannot craft what's transcribed here.", options.ToArray());
-                    break;
-                }
-            case 0x88:
-                {
-                    client.CloseDialog();
-                    break;
-                }
             case 0x89:
                 {
                     client.SendOptionsDialog(Mundane, $"Unfortunately, our forge isn't hot enough to go further into the craft. Looks like if you haven't already, you'll have to visit " +
