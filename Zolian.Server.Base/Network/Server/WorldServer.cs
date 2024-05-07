@@ -1440,7 +1440,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var aisling = localClient.Aisling;
             var mapInstance = aisling.Map;
             var sprite = ObjectManager.GetObjects(mapInstance, s => s.WithinRangeOf(aisling), ObjectManager.Get.All).ToList().FirstOrDefault(t => t.Serial == localArgs.TargetId);
-
+            
+            if (sprite is null) return default;
             if (aisling.CanSeeSprite(sprite)) return default;
             if (sprite is not Monster monster) return default;
             var script = monster.Scripts.First().Value;

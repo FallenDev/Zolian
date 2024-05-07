@@ -1730,7 +1730,8 @@ public class aura_BriarThorn : Buff
         affected.Buffs.TryRemove(buff.Name, out _);
 
         if (affected is not Aisling aisling) return;
-        aisling.Spikes -= 10;
+        var item = new Item();
+        item.ReapplyItemModifiers(aisling.Client);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Briarthorn ended");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);

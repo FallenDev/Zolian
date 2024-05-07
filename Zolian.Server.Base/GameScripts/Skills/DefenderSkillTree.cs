@@ -898,6 +898,12 @@ public class Briarthorn(Skill skill) : SkillScript(skill)
     {
         if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
+        if (aisling.HasBuff("Briarthorn Aura"))
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Already active");
+            return;
+        }
+
         OnSuccess(aisling);
     }
 }
