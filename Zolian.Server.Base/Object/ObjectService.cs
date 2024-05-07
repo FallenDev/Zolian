@@ -2,6 +2,8 @@
 using Darkages.Types;
 
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 namespace Darkages.Object;
 
@@ -12,7 +14,7 @@ public abstract class ObjectService
         if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue ||
             !ServerSetup.Instance.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
             !mapCollections.TryGetValue(typeof(T), out var objCollection)) return;
-        
+
         ((SpriteCollection<T>)objCollection).Add(obj);
     }
 
@@ -59,45 +61,40 @@ public abstract class ObjectService
 
 public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
 {
-    private readonly List<T> _values = [];
+    private readonly ConcurrentDictionary<uint, T> _values = [];
 
     public void Add(T obj)
     {
         if (obj is null) return;
 
-        lock (_values)
+        var existingIndex = _values.TryGetValue(obj.Serial, out var inDict);
+        if (existingIndex)
         {
-            var existingIndex = _values.FindIndex(i => i.Serial == obj.Serial);
-            if (existingIndex >= 0)
-            {
-                _values[existingIndex] = obj;
-                return;
-            }
-
-            _values.Add(obj);
+            _values.TryUpdate(obj.Serial, obj, inDict);
+            return;
         }
+
+        _values.TryAdd(obj.Serial, obj);
     }
 
     public void Delete(T obj)
     {
         if (obj is null) return;
-        _values.RemoveAll(item => item == obj);
+        _values.TryRemove(obj.Serial, out _);
     }
 
-    public T Query(Predicate<T> predicate) => predicate is null ? default : (from item in _values where predicate(item) select item.Abyss ? default : item).FirstOrDefault();
+    public T Query(Predicate<T> predicate) => predicate is null ? default : (from item in _values.Values where predicate(item) select item.Abyss ? default : item).FirstOrDefault();
 
     public IEnumerable<T> QueryAll(Predicate<T> predicate)
     {
         if (predicate is null) yield break;
-        // Temp variable to avoid changes to the collection while iterating.
-        var values = _values;
 
-        foreach (var item in values.Where(item => predicate(item)))
+        foreach (var item in _values.Values.Where(item => predicate(item)))
         {
             yield return item.Abyss ? default : item;
         }
     }
 
-    public IEnumerator<T> GetEnumerator() => _values.GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => _values.Values.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

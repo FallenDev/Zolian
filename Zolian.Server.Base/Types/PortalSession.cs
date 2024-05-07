@@ -12,11 +12,9 @@ public class PortalSession : IPortalSession
         client.LeaveArea(destinationMap, true, true);
         client.ResetLocation(client);
 
-        if (destinationMap == 0)
-        {
-            ShowFieldMap(client);
-            client.SendSound(42, true);
-        }
+        if (destinationMap != 0) return;
+        ShowFieldMap(client);
+        client.SendSound(42, true);
     }
 
     public void ShowFieldMap(WorldClient client)
