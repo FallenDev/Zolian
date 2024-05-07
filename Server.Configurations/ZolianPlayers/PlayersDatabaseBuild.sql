@@ -361,8 +361,8 @@ CREATE TABLE PlayersQuests
     [ArmorCodexDeciphered] BIT NULL,
     [ArmorCraftingCodexLearned] BIT NULL,
     [ArmorCraftingAdvancedCodexLearned] BIT NULL,
-    [CthonicKillTarget] VARCHAR(20) NULL,
-    [CthonicFindTarget] VARCHAR(20) NULL,
+    [CthonicKillTarget] VARCHAR(30) NULL,
+    [CthonicFindTarget] VARCHAR(30) NULL,
     [CthonicKillCompletions] INT NULL,
     [CthonicCleansingOne] BIT NULL,
     [CthonicCleansingTwo] BIT NULL,
@@ -572,8 +572,8 @@ CREATE TYPE dbo.QuestType AS TABLE
 	ArmorCodexDeciphered BIT,
 	ArmorCraftingCodexLearned BIT,
 	ArmorCraftingAdvancedCodexLearned BIT,
-    CthonicKillTarget VARCHAR (20),
-    CthonicFindTarget VARCHAR (20),
+    CthonicKillTarget VARCHAR (30),
+    CthonicFindTarget VARCHAR (30),
     CthonicKillCompletions INT,
     CthonicCleansingOne BIT,
     CthonicCleansingTwo BIT,
@@ -797,7 +797,7 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 	@ScubaSchematics BIT, @ScubaMaterialsQuest BIT, @ScubaGearCrafted BIT, @EternalLove BIT, @EternalLoveStarted BIT, @UnhappyEnding BIT,
 	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
 	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT,
-    @CthonicKillTarget VARCHAR(20), @CthonicFindTarget VARCHAR(20), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
+    @CthonicKillTarget VARCHAR(30), @CthonicFindTarget VARCHAR(30), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
 	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT
 AS
 BEGIN

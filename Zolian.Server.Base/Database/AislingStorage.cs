@@ -20,7 +20,6 @@ public record AislingStorage : Sql, IAislingStorage
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
     public FifoAutoReleasingSemaphoreSlim SaveLock { get; } = new(1, 1);
-    private FifoAutoReleasingSemaphoreSlim DisconnectSaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
@@ -28,14 +27,7 @@ public record AislingStorage : Sql, IAislingStorage
 
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
-        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        if (@lock == null)
-        {
-            ServerSetup.EventsLogger("Failed to acquire lock for LoadAisling", LogLevel.Error);
-            return null;
-        }
-
+        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
         var aisling = new Aisling();
 
         try
@@ -52,6 +44,10 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
+        finally
+        {
+            LoadLock.Release();
+        }
 
         return aisling;
     }
@@ -63,13 +59,7 @@ public record AislingStorage : Sql, IAislingStorage
         var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
 
-        await using var @lock = await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        if (@lock == null)
-        {
-            ServerSetup.EventsLogger("Failed to acquire lock for PasswordSave", LogLevel.Error);
-            return false;
-        }
+        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
 
         try
         {
@@ -87,6 +77,10 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
+        finally
+        {
+            PasswordSaveLock.Release();
+        }
 
         return true;
     }
@@ -96,13 +90,7 @@ public record AislingStorage : Sql, IAislingStorage
         if (obj == null) return;
         if (obj.Loading) return;
 
-        await using var @lock = await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        if (@lock == null)
-        {
-            ServerSetup.EventsLogger("Failed to acquire lock for BuffDebuffSave", LogLevel.Error);
-            return;
-        }
+        await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
 
         try
         {
@@ -115,6 +103,10 @@ public record AislingStorage : Sql, IAislingStorage
         {
             SentrySdk.CaptureException(e);
         }
+        finally
+        {
+            BuffDebuffSaveLock.Release();
+        }
     }
 
     /// <summary>
@@ -125,14 +117,6 @@ public record AislingStorage : Sql, IAislingStorage
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-
-        await using var @lock = await DisconnectSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        if (@lock == null)
-        {
-            ServerSetup.EventsLogger("Failed to acquire lock for Disconnect Save", LogLevel.Error);
-            return false;
-        }
 
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
@@ -246,30 +230,30 @@ public record AislingStorage : Sql, IAislingStorage
                         itemMaterial
                     );
                 }
+            }
 
-                foreach (var skill in skillList)
-                {
-                    skillDt.Rows.Add(
-                        (long)obj.Serial,
-                        skill.Level,
-                        skill.Slot,
-                        skill.SkillName,
-                        skill.Uses,
-                        skill.CurrentCooldown
-                    );
-                }
+            foreach (var skill in skillList)
+            {
+                skillDt.Rows.Add(
+                    (long)obj.Serial,
+                    skill.Level,
+                    skill.Slot,
+                    skill.SkillName,
+                    skill.Uses,
+                    skill.CurrentCooldown
+                );
+            }
 
-                foreach (var spell in spellList)
-                {
-                    spellDt.Rows.Add(
-                        (long)obj.Serial,
-                        spell.Level,
-                        spell.Slot,
-                        spell.SpellName,
-                        spell.Casts,
-                        spell.CurrentCooldown
-                    );
-                }
+            foreach (var spell in spellList)
+            {
+                spellDt.Rows.Add(
+                    (long)obj.Serial,
+                    spell.Level,
+                    spell.Slot,
+                    spell.SpellName,
+                    spell.Casts,
+                    spell.CurrentCooldown
+                );
             }
 
             using (var cmd = new SqlCommand("PlayerSave", connection))
@@ -343,13 +327,7 @@ public record AislingStorage : Sql, IAislingStorage
     public async Task<bool> ServerSave(List<Aisling> playerList)
     {
         if (playerList.Count == 0) return false;
-        await using var @lock = await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        if (@lock == null)
-        {
-            ServerSetup.EventsLogger("Failed to acquire lock for ServerSave", LogLevel.Error);
-            return false;
-        }
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
 
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
@@ -364,7 +342,6 @@ public record AislingStorage : Sql, IAislingStorage
             foreach (var player in playerList.Where(player => !player.Loading))
             {
                 if (player?.Client == null) continue;
-                if (!player.LoggedIn) continue;
                 player.Client.LastSave = DateTime.UtcNow;
                 var itemList = player.Inventory.Items.Values.Where(i => i is not null).ToList();
                 itemList.AddRange(from item in player.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
@@ -560,6 +537,8 @@ public record AislingStorage : Sql, IAislingStorage
                 ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
                 ServerSetup.Instance.ServerSaveConnection.Open();
             }
+
+            SaveLock.Release();
         }
 
         return true;

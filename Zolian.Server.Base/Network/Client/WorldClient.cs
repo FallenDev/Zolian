@@ -4403,8 +4403,9 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         var seed = player.ExpLevel * 0.1 + 0.5;
         {
-            if (player.ExpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
+            if (player.ExpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
         }
+
         player.ExpNext = (int)(player.ExpLevel * seed * 5000);
 
         if (player.ExpNext <= 0)
@@ -4520,7 +4521,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         var seed = player.AbpLevel * 0.5 + 0.8;
         {
-            if (player.AbpLevel >= ServerSetup.Instance.Config.PlayerLevelCap) return;
+            if (player.AbpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
         }
         player.AbpNext = (int)(player.AbpLevel * seed * 5000);
 

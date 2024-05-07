@@ -145,6 +145,7 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         client.Aisling._Wis = 5;
                         client.Aisling._Con = 5;
                         client.Aisling._Dex = 5;
+                        client.Aisling.StatPoints = 0;
 
                         if (levelAbove250)
                         {
