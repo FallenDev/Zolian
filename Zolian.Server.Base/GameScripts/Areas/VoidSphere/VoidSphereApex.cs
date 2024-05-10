@@ -31,7 +31,7 @@ public class VoidSphereApex : AreaScript
             {
                 if (client.Aisling.GroupId != 0)
                 {
-                    foreach (var player in client.Aisling.PartyMembers.Where(player => player.Map.ID == 1504))
+                    foreach (var player in client.Aisling.PartyMembers.Values.Where(player => player.Map.ID == 1504))
                     {
                         player.Client.TransitionToMap(1505, new Position(11, 21));
                     }

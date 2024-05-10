@@ -2257,13 +2257,13 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 
         _skillMethod.Train(aisling.Client, Skill);
 
-        if (party == null || party.Count == 0)
+        if (party == null || party.IsEmpty)
         {
             aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff, TimeSpan.FromSeconds(_buff.Length));
             return;
         }
 
-        foreach (var entity in party.Where(entity => entity is not null))
+        foreach (var entity in party.Values.Where(entity => entity is not null))
         {
             if (entity.Map.ID != aisling.Map.ID) continue;
             _target = entity;

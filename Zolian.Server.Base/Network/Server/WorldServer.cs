@@ -2517,7 +2517,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (Party.AddPartyMember(localClient.Aisling, player))
             {
                 localClient.Aisling.PartyStatus = GroupStatus.AcceptingRequests;
-                if (localClient.Aisling.GroupParty.PartyMembers.Any(other => other.IsInvisible))
+                if (localClient.Aisling.GroupParty.PartyMembers.Values.Any(other => other.IsInvisible))
                     localClient.UpdateDisplay();
                 return default;
             }

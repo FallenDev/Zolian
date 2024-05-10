@@ -102,7 +102,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.IsEmpty()) return;
         if (aisling.GroupParty == null) return;
 
-        foreach (var member in aisling.GroupParty.PartyMembers.Where(member => member != null))
+        foreach (var member in aisling.GroupParty.PartyMembers.Values.Where(member => member != null))
         {
             var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
             var playersNearby = AislingsEarShotNearby().Contains(member);
@@ -182,7 +182,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
 
         if (aisling.GroupParty is not null)
         {
-            foreach (var player in aisling.GroupParty.PartyMembers.Where(player => player.Map.ID == aisling.Map.ID))
+            foreach (var player in aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == aisling.Map.ID))
             {
                 if (!player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value))
                 {

@@ -508,7 +508,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 : new WorldServerTimer(TimeSpan.FromSeconds(60));
             var color = "a";
             var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
-            var group = Aisling.GroupParty?.PartyMembers;
+            var group = Aisling.GroupParty?.PartyMembers.Values;
 
             if (group?.Count > 0)
             {
@@ -4060,7 +4060,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     public WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps)
     {
         if (targetAisling.GroupParty?.PartyMembers == null) return this;
-        foreach (var member in targetAisling.GroupParty.PartyMembers.Where(member => member.Serial != Aisling.Serial).Where(member => allowedMaps.ListContains(member.Map.Name)))
+        foreach (var member in targetAisling.GroupParty.PartyMembers.Values.Where(member => member.Serial != Aisling.Serial).Where(member => allowedMaps.ListContains(member.Map.Name)))
         {
             member.Client.SendAnimation(67);
             member.Client.TransitionToMap(targetAisling.Map, targetAisling.Position);

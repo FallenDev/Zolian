@@ -52,7 +52,7 @@ public sealed class Aisling : Player, IAisling
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
     public Party GroupParty => ServerSetup.Instance.GlobalGroupCache.GetValueOrDefault(GroupId);
-    public List<Aisling> PartyMembers => GroupParty?.PartyMembers;
+    public ConcurrentDictionary<uint, Aisling> PartyMembers => GroupParty?.PartyMembers;
     public string SpellTrainOne;
     public string SpellTrainTwo;
     public string SpellTrainThree;

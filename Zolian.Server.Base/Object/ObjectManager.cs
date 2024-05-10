@@ -27,12 +27,10 @@ public class ObjectManager
     }
 
     public static void DelObject<T>(T obj) where T : Sprite => ObjectService.RemoveGameObject(obj);
-
     public static T GetObject<T>(Area map, Predicate<T> p) where T : Sprite => ObjectService.Query(map, p);
-
     public static Sprite GetObject(Area map, Predicate<Sprite> p, Get selections) => GetObjects(map, p, selections).FirstOrDefault();
-
-    public static IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => ObjectService.QueryAll(map, p);
+    public static IEnumerable<T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => map == null ? GetObjects(p) : ObjectService.QueryAll(map, p);
+    private static IEnumerable<T> GetObjects<T>(Predicate<T> p) where T : Sprite => ObjectService.QueryAll(p);
 
     public static IEnumerable<Sprite> GetObjects(Area map, Predicate<Sprite> p, Get selections)
     {

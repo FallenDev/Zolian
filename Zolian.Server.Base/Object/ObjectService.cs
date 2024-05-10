@@ -51,6 +51,14 @@ public abstract class ObjectService
         if (!map.SpriteCollections.TryGetValue(map.ID, out var mapCollections)) return null;
         return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
     }
+
+    public static IEnumerable<T> QueryAll<T>(Predicate<T> predicate) where T : Sprite
+    {
+        if (predicate is null) return default;
+        if (predicate is not Sprite sprite) return default;
+        if (!sprite.Map.SpriteCollections.TryGetValue(sprite.Map.ID, out var mapCollections)) return null;
+        return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
+    }
 }
 
 public class SpriteCollection<T> : IEnumerable<T> where T : Sprite

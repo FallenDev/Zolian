@@ -301,7 +301,7 @@ public class EnemyRewards : RewardScript
         if (player.PartyMembers == null) return;
 
         // Enqueue experience event for party members
-        foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
+        foreach (var party in player.PartyMembers.Values.Where(party => party.Serial != player.Serial))
         {
             if (party.Map != _monster.Map) continue;
             if (!party.WithinRangeOf(_monster, 16)) continue;
@@ -358,7 +358,7 @@ public class EnemyRewards : RewardScript
         if (player.PartyMembers == null) return;
 
         // Enqueue experience event for party members
-        foreach (var party in player.PartyMembers.Where(party => party.Serial != player.Serial))
+        foreach (var party in player.PartyMembers.Values.Where(party => party.Serial != player.Serial))
         {
             if (party.ExpLevel < 250 || party.Stage < ClassStage.Master)
             {
