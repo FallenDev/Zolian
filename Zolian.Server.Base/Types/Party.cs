@@ -114,6 +114,7 @@ public class Party : ObjectManager
         foreach (var player in group.PartyMembers.Values)
         {
             player.GroupId = 0;
+            player.PartyMembers.TryRemove(player.Serial, out _);
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The party has now been disbanded.");
         }
     }
@@ -121,14 +122,14 @@ public class Party : ObjectManager
     public static void RemovePartyMember(Aisling playerToRemove)
     {
         if (playerToRemove == null) return;
-        if (!ServerSetup.Instance.GlobalGroupCache.ContainsKey(playerToRemove.GroupId)) return;
-        var group = ServerSetup.Instance.GlobalGroupCache[playerToRemove.GroupId];
+        if (!ServerSetup.Instance.GlobalGroupCache.TryGetValue(playerToRemove.GroupId, out var group)) return;
         if (group == null) return;
 
         foreach (var player in group.PartyMembers.Values)
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{playerToRemove.Username} has left the party.");
 
         playerToRemove.GroupId = 0;
+        playerToRemove.PartyMembers.TryRemove(playerToRemove.Serial, out _);
 
         if (group.PartyMembers.Count <= 1)
         {
