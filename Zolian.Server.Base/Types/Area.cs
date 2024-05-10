@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using System.Collections.Concurrent;
+using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.ScriptingBase;
@@ -17,6 +18,7 @@ public class Area : Map, IArea
     public bool Ready;
     private readonly object _mapLoadLock = new();
 
+    public ConcurrentDictionary<int, ConcurrentDictionary<Type, object>> SpriteCollections { get; set; } = [];
     public int MiningNodesCount { get; set; }
     public int WildFlowersCount { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }

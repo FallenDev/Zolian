@@ -81,7 +81,6 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; } = [];
     public ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; } = [];
     public ConcurrentDictionary<long, Money> GlobalGroundMoneyCache { get; set; } = [];
-    public ConcurrentDictionary<int, ConcurrentDictionary<Type, object>> SpriteCollections { get; set; } = [];
     public ConcurrentDictionary<uint, Trap> Traps { get; set; } = [];
     public ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; } = [];
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = [];

@@ -3,6 +3,7 @@ using Darkages.Types;
 
 using System.Collections;
 using System.Collections.Concurrent;
+using JetBrains.Annotations;
 
 namespace Darkages.Object;
 
@@ -10,16 +11,29 @@ public abstract class ObjectService
 {
     public static void AddGameObject<T>(T obj) where T : Sprite
     {
-        if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue ||
-            !ServerSetup.Instance.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
+        if (obj is null) return;
+        if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue) return;
+        if (!obj.Map.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
             !mapCollections.TryGetValue(typeof(T), out var objCollection)) return;
 
-        ((SpriteCollection<T>)objCollection).Add(obj);
+        var spriteCollection = (SpriteCollection<T>)objCollection;
+        spriteCollection.Add(obj);
+    }
+
+    public static void RemoveGameObject<T>(T obj) where T : Sprite
+    {
+        if (obj is null) return;
+        if (!obj.Map.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
+            !mapCollections.TryGetValue(typeof(T), out var objCollection)) return;
+
+        var spriteCollection = (SpriteCollection<T>)objCollection;
+        spriteCollection.Delete(obj);
     }
 
     public static T Query<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
-        var collections = map is null ? ServerSetup.Instance.SpriteCollections.Values : new[] { ServerSetup.Instance.SpriteCollections[map.ID] };
+        if (map is null) return default;
+        var collections = map.SpriteCollections.Values;
 
         foreach (var mapCollections in collections)
         {
@@ -28,33 +42,14 @@ public abstract class ObjectService
             if (queriedObject is not null) return queriedObject;
         }
 
-        return null;
+        return default;
     }
 
     public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
-        if (map is null)
-        {
-            var collections = ServerSetup.Instance.SpriteCollections.Values
-                .Select(mapDict => mapDict.TryGetValue(typeof(T), out var collection) ? (SpriteCollection<T>)collection : null)
-                .Where(collection => collection is not null && collection.Any());
-            var stack = new List<T>();
-
-            foreach (var obj in collections)
-                stack.AddRange(obj.QueryAll(predicate));
-
-            return stack;
-        }
-
-        if (!ServerSetup.Instance.SpriteCollections.TryGetValue(map.ID, out var mapCollections)) return null;
+        if (map is null) return default;
+        if (!map.SpriteCollections.TryGetValue(map.ID, out var mapCollections)) return null;
         return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
-    }
-
-    public static void RemoveGameObject<T>(T obj) where T : Sprite
-    {
-        if (obj is null || !ServerSetup.Instance.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections)) return;
-        if (mapCollections.TryGetValue(typeof(T), out var objCollection))
-            ((SpriteCollection<T>)objCollection).Delete(obj);
     }
 }
 
@@ -65,15 +60,7 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
     public void Add(T obj)
     {
         if (obj is null) return;
-
-        var existingIndex = _values.TryGetValue(obj.Serial, out var inDict);
-        if (existingIndex)
-        {
-            _values.TryUpdate(obj.Serial, obj, inDict);
-            return;
-        }
-
-        _values.TryAdd(obj.Serial, obj);
+        _values.AddOrUpdate(obj.Serial, obj, (key, existingVal) => obj);
     }
 
     public void Delete(T obj)
@@ -82,17 +69,9 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
         _values.TryRemove(obj.Serial, out _);
     }
 
-    public T Query(Predicate<T> predicate) => predicate is null ? default : (from item in _values.Values where predicate(item) select item.Abyss ? default : item).FirstOrDefault();
+    [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item) && !item.Abyss);
 
-    public IEnumerable<T> QueryAll(Predicate<T> predicate)
-    {
-        if (predicate is null) yield break;
-
-        foreach (var item in _values.Values.Where(item => predicate(item)))
-        {
-            yield return item.Abyss ? default : item;
-        }
-    }
+    public IEnumerable<T> QueryAll(Predicate<T> predicate) => _values.Values.Where(item => predicate(item) && !item.Abyss);
 
     public IEnumerator<T> GetEnumerator() => _values.Values.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

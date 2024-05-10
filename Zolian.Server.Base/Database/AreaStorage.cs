@@ -115,7 +115,7 @@ public record AreaStorage : IAreaStorage
             spriteCollectionDict.TryAdd(typeof(Mundane), new SpriteCollection<Mundane>());
             spriteCollectionDict.TryAdd(typeof(Item), new SpriteCollection<Item>());
             spriteCollectionDict.TryAdd(typeof(Money), new SpriteCollection<Money>());
-            ServerSetup.Instance.SpriteCollections.TryAdd(map.ID, spriteCollectionDict);
+            map.SpriteCollections.TryAdd(map.ID, spriteCollectionDict);
         }
     }
 }

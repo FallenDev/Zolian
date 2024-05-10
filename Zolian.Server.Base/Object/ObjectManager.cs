@@ -22,9 +22,7 @@ public class ObjectManager
 
     public static void AddObject<T>(T obj, Predicate<T> p = null) where T : Sprite
     {
-        if (p != null && p(obj))
-            ObjectService.AddGameObject(obj);
-        else if (p == null)
+        if (p == null || p(obj))
             ObjectService.AddGameObject(obj);
     }
 
