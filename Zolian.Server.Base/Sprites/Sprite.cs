@@ -63,6 +63,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private bool IsCharmed => HasDebuff("Entice");
     private bool IsBleeding => HasDebuff("Bleeding");
     public bool IsVulnerable => IsFrozen || IsStopped || IsBlind || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
+    public bool IsBlocked => IsFrozen || IsStopped || IsSleeping;
 
     public bool ClawFistEmpowerment { get; set; }
     public bool CanSeeInvisible
@@ -81,10 +82,10 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #endregion
 
-    public bool CantCast => (IsFrozen || IsStopped || IsSleeping || IsSilenced);
-    public bool CantAttack => (IsFrozen || IsStopped || IsSleeping || IsCharmed);
-    public bool CantMove => (IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed);
-    public bool HasDoT => (IsBleeding || IsPoisoned);
+    public bool CantCast => IsFrozen || IsStopped || IsSleeping || IsSilenced;
+    public bool CantAttack => IsFrozen || IsStopped || IsSleeping || IsCharmed;
+    public bool CantMove => IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed;
+    public bool HasDoT => IsBleeding || IsPoisoned;
     private long CheckHp => Math.Clamp(BaseHp + BonusHp, 0, long.MaxValue);
     public long MaximumHp => Math.Clamp(CheckHp, 0, long.MaxValue);
     private long CheckMp => Math.Clamp(BaseMp + BonusMp, 0, long.MaxValue);

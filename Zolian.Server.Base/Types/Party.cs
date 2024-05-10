@@ -10,8 +10,8 @@ namespace Darkages.Types;
 public class Party : ObjectManager
 {
     private int Id { get; set; }
-    public string LeaderName { get; set; }
-    public ConcurrentDictionary<uint, Aisling> PartyMembers = [];
+    public string LeaderName { get; private set; }
+    public readonly ConcurrentDictionary<uint, Aisling> PartyMembers = [];
 
     public string PartyMemberString
     {

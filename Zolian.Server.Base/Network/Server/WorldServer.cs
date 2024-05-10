@@ -2138,7 +2138,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var item = localClient.Aisling.Inventory.Get(i => i != null && i.InventorySlot == localArgs.SourceSlot).FirstOrDefault();
             if (item?.Template == null) return default;
 
-            if ((localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsFrozen || localClient.Aisling.IsStopped) && item.Template.Name != "Betrayal Blossom")
+            if ((localClient.Aisling.HasDebuff("Skulled") || localClient.Aisling.IsBlocked) && item.Template.Name != "Betrayal Blossom")
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot do that.");
                 return default;
