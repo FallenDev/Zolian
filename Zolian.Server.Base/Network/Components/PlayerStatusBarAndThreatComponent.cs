@@ -17,19 +17,15 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         {
             Parallel.ForEach(Server.Aislings, (player) =>
             {
-                if (player?.Client == null) return;
-                if (!player.LoggedIn) return;
-
                 if (!player.Client.StatusControl.IsRunning)
-                {
                     player.Client.StatusControl.Start();
-                }
 
-                if (player.Client.StatusControl.Elapsed.TotalMilliseconds < player.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
+                if (player.Client.StatusControl.Elapsed.TotalMilliseconds < 1000) return;
 
-                player.UpdateBuffs(player.Client.StatusControl.Elapsed);
-                player.UpdateDebuffs(player.Client.StatusControl.Elapsed);
+                player.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
+                player.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
                 player.ThreatGeneratedSubsided(player);
+
                 player.Client.StatusControl.Restart();
             });
         }

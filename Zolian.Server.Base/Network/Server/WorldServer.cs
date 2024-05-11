@@ -625,7 +625,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         playerSkillSpellWatch.Restart();
                         break;
                     case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
-                        if (playerStatusElapsed.TotalMilliseconds < 500) break;
+                        if (playerStatusElapsed.TotalMilliseconds < 100) break;
                         statusBarAndThreatComponent.Update(playerStatusElapsed);
                         playerStatusWatch.Restart();
                         break;
@@ -907,11 +907,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
                     monster.MonsterBuffAndDebuffStopWatch.Start();
 
-                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds <
-                    monster.BuffAndDebuffTimer.Delay.TotalMilliseconds) return;
+                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
 
-                monster.UpdateBuffs(elapsedTime);
-                monster.UpdateDebuffs(elapsedTime);
+                monster.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
+                monster.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
                 monster.MonsterBuffAndDebuffStopWatch.Restart();
             });
         }

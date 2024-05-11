@@ -2675,6 +2675,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         aisling.Client.SendEffect((EffectColor)colorInt, debuff.Icon);
     }
 
+    /// <summary>
+    /// Reduces threat to player over time. Also resets the persistent message.
+    /// </summary>
     public void ThreatGeneratedSubsided(Aisling aisling)
     {
         var time = false;
