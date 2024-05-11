@@ -13,9 +13,12 @@ public abstract class ObjectService
     {
         if (obj is null) return;
         if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue) return;
-        if (!obj.Map.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
-            !mapCollections.TryGetValue(typeof(T), out var objCollection)) return;
+        var mapId = obj.CurrentMapId;
+        var spriteType = typeof(T);
+        var key = Tuple.Create(mapId, spriteType);
 
+        if (!obj.Map.SpriteCollections.TryGetValue(key, out var objCollection)) return;
+        
         var spriteCollection = (SpriteCollection<T>)objCollection;
         spriteCollection.Add(obj);
     }
@@ -23,8 +26,11 @@ public abstract class ObjectService
     public static void RemoveGameObject<T>(T obj) where T : Sprite
     {
         if (obj is null) return;
-        if (!obj.Map.SpriteCollections.TryGetValue(obj.CurrentMapId, out var mapCollections) ||
-            !mapCollections.TryGetValue(typeof(T), out var objCollection)) return;
+        var mapId = obj.CurrentMapId;
+        var spriteType = typeof(T);
+        var key = Tuple.Create(mapId, spriteType);
+
+        if (!obj.Map.SpriteCollections.TryGetValue(key, out var objCollection)) return;
 
         var spriteCollection = (SpriteCollection<T>)objCollection;
         spriteCollection.Delete(obj);
@@ -33,11 +39,12 @@ public abstract class ObjectService
     public static T Query<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
-        var collections = map.SpriteCollections.Values;
 
-        foreach (var mapCollections in collections)
+        foreach (var mapCollection in map.SpriteCollections.Values)
         {
-            if (!mapCollections.TryGetValue(typeof(T), out var spriteCollection)) continue;
+            if (mapCollection is not ConcurrentDictionary<Type, object> collections) continue;
+            if (!collections.TryGetValue(typeof(T), out var spriteCollection)) continue;
+
             var queriedObject = ((SpriteCollection<T>)spriteCollection).Query(predicate);
             if (queriedObject is not null) return queriedObject;
         }
@@ -48,16 +55,29 @@ public abstract class ObjectService
     public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
-        if (!map.SpriteCollections.TryGetValue(map.ID, out var mapCollections)) return null;
-        return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
+        var mapId = map.ID;
+        var spriteType = typeof(T);
+        var key = Tuple.Create(mapId, spriteType);
+
+        if (!map.SpriteCollections.TryGetValue(key, out var objCollection) ||
+            objCollection is not SpriteCollection<T> spriteCollection) return default;
+
+        return spriteCollection.QueryAll(predicate);
     }
 
     public static IEnumerable<T> QueryAll<T>(Predicate<T> predicate) where T : Sprite
     {
-        if (predicate is null) return default;
         if (predicate is not Sprite sprite) return default;
-        if (!sprite.Map.SpriteCollections.TryGetValue(sprite.Map.ID, out var mapCollections)) return null;
-        return mapCollections.TryGetValue(typeof(T), out var sprites) ? ((SpriteCollection<T>)sprites).QueryAll(predicate) : null;
+        var map = sprite.Map;
+        if (map is null) return default;
+        var mapId = map.ID;
+        var spriteType = typeof(T);
+        var key = Tuple.Create(mapId, spriteType);
+
+        if (!map.SpriteCollections.TryGetValue(key, out var objCollection) ||
+            objCollection is not SpriteCollection<T> spriteCollection) return default;
+
+        return spriteCollection.QueryAll(predicate);
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿using Chaos.Common.Definitions;
-
+using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -166,7 +166,7 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
 
                         var legend = new Legend.LegendItem
                         {
-                            Key = "Reallocation",
+                            Key = $"Re{EphemeralRandomIdGenerator<uint>.Shared.NextId}allo{EphemeralRandomIdGenerator<uint>.Shared.NextId}",
                             IsPublic = true,
                             Time = DateTime.UtcNow,
                             Color = LegendColor.Red,

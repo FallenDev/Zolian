@@ -18,7 +18,7 @@ public class Area : Map, IArea
     public bool Ready;
     private readonly object _mapLoadLock = new();
 
-    public ConcurrentDictionary<int, ConcurrentDictionary<Type, object>> SpriteCollections { get; set; } = [];
+    public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = [];
     public int MiningNodesCount { get; set; }
     public int WildFlowersCount { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }

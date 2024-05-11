@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 
 using Chaos.Cryptography;
 
@@ -109,13 +108,11 @@ public record AreaStorage : IAreaStorage
     {
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
-            var spriteCollectionDict = new ConcurrentDictionary<Type, object>();
-            spriteCollectionDict.TryAdd(typeof(Monster), new SpriteCollection<Monster>());
-            spriteCollectionDict.TryAdd(typeof(Aisling), new SpriteCollection<Aisling>());
-            spriteCollectionDict.TryAdd(typeof(Mundane), new SpriteCollection<Mundane>());
-            spriteCollectionDict.TryAdd(typeof(Item), new SpriteCollection<Item>());
-            spriteCollectionDict.TryAdd(typeof(Money), new SpriteCollection<Money>());
-            map.SpriteCollections.TryAdd(map.ID, spriteCollectionDict);
+            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Monster)), new SpriteCollection<Monster>());
+            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Aisling)), new SpriteCollection<Aisling>());
+            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Mundane)), new SpriteCollection<Mundane>());
+            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Item)), new SpriteCollection<Item>());
+            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Money)), new SpriteCollection<Money>());
         }
     }
 }
