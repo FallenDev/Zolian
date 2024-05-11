@@ -1294,8 +1294,10 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
+            var distance = damageDealingAisling.Position.DistanceFrom(_target.Position);
+            if (distance == 0) distance = 1;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 3 + client.Aisling.Wis * 4 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 3 + client.Aisling.Wis * 4 / distance;
             dmg += dmg * imp / 100;
         }
         else
