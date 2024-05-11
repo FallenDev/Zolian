@@ -141,13 +141,14 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Affliction) continue;
-                if (debuff.Name == "Skulled") continue;
+                if (debuff.Name is "Skulled") continue;
                 debuff.OnEnded(targetObj, debuff);
             }
 
             foreach (var buff in targetObj.Buffs.Values)
             {
                 if (buff.Affliction) continue;
+                if (buff.Name is "Double XP" or "Triple XP") continue;
                 buff.OnEnded(targetObj, buff);
             }
         }
@@ -155,13 +156,14 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         foreach (var debuff in aisling.Debuffs.Values)
         {
             if (debuff.Affliction) continue;
-            if (debuff.Name == "Skulled") continue;
+            if (debuff.Name is "Skulled") continue;
             debuff.OnEnded(aisling, debuff);
         }
 
         foreach (var buff in aisling.Buffs.Values)
         {
             if (buff.Affliction) continue;
+            if (buff.Name is "Double XP" or "Triple XP") continue;
             buff.OnEnded(aisling, buff);
         }
     }

@@ -39,17 +39,10 @@ public abstract class ObjectService
     public static T Query<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
+        var spriteType = typeof(T);
+        var key = Tuple.Create(map.ID, spriteType);
 
-        foreach (var mapCollection in map.SpriteCollections.Values)
-        {
-            if (mapCollection is not ConcurrentDictionary<Type, object> collections) continue;
-            if (!collections.TryGetValue(typeof(T), out var spriteCollection)) continue;
-
-            var queriedObject = ((SpriteCollection<T>)spriteCollection).Query(predicate);
-            if (queriedObject is not null) return queriedObject;
-        }
-
-        return default;
+        return !map.SpriteCollections.TryGetValue(key, out var objCollection) ? default : ((SpriteCollection<T>)objCollection).Query(predicate);
     }
 
     public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
@@ -88,7 +81,7 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
     public void Add(T obj)
     {
         if (obj is null) return;
-        _values.AddOrUpdate(obj.Serial, obj, (key, existingVal) => obj);
+        _values.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
     }
 
     public void Delete(T obj)

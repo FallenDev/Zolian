@@ -1986,7 +1986,7 @@ public class BuffFasSpiorad : Buff
 
 public class BuffDoubleExperience : Buff
 {
-    public override byte Icon => 203;
+    public override byte Icon => 144;
     public override int Length => 7200;
     public override string Name => "Double XP";
 
@@ -2021,7 +2021,7 @@ public class BuffDoubleExperience : Buff
 
 public class BuffTripleExperience : Buff
 {
-    public override byte Icon => 203;
+    public override byte Icon => 145;
     public override int Length => 7200;
     public override string Name => "Triple XP";
 
@@ -2036,7 +2036,7 @@ public class BuffTripleExperience : Buff
         if (affected is not Aisling aisling) return;
         Task.Delay(2000).ContinueWith(ct =>
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been triple for two hours.");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been tripled for two hours.");
         });
 
         InsertBuff(aisling, buff);
@@ -2049,7 +2049,7 @@ public class BuffTripleExperience : Buff
         affected.Buffs.TryRemove(buff.Name, out _);
 
         if (affected is not Aisling aisling) return;
-        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining triple experience.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining tripled experience.");
         DeleteBuff(aisling, buff);
     }
 }

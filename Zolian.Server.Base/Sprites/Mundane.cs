@@ -42,7 +42,7 @@ public sealed class Mundane : Sprite, IDialogSourceEntity
         if (template == null) return;
 
         var map = ServerSetup.Instance.GlobalMapCache[template.AreaID];
-        var existing = GetObject<Mundane>(map, p => p?.Template != null && p.Template.Name == template.Name);
+        var existing = GetObject<Mundane>(map, p => p.Template.Name == template.Name);
 
         if (existing != null) return;
 
