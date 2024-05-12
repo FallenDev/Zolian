@@ -79,12 +79,6 @@ public class Shield(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
-
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
         {
             client.Aisling.WeaponImg = 0;
@@ -127,13 +121,7 @@ public class Shield(Item item) : ItemScript(item)
                     return;
                 }
         }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
-
+        
         CalculateGearPoints(client);
     }
 }

@@ -1044,6 +1044,7 @@ public sealed class Item : Sprite, IItem
     {
         client.SendRemoveSpellFromPane(spell.Slot);
         client.SendAddSpellToPane(spell);
+        client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
     }
 }
 

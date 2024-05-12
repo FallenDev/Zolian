@@ -128,12 +128,6 @@ public class Weapon(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
-
         var templateImage = aisling.EquipmentManager.Equipment[1]?.Item.Template.Image;
         var offHandImage = aisling.EquipmentManager.Equipment[3]?.Item.Template.OffHandImage;
 
@@ -176,13 +170,6 @@ public class Weapon(Item item) : ItemScript(item)
         }
 
         client.Aisling.UsingTwoHanded = false;
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
-
         CalculateGearPoints(client);
     }
 }

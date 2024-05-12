@@ -161,7 +161,7 @@ public class EquipmentManager
                 Client.Aisling.CurrentWeight = 0;
         }
 
-        Client.SendAttributes(StatUpdateType.Full);
+        Client.SendAttributes(StatUpdateType.WeightGold);
     }
 
     private bool HandleUnreturnedItem(Item itemObj)
@@ -174,7 +174,7 @@ public class EquipmentManager
             Client.Aisling.CurrentWeight = 0;
 
         ObjectManager.DelObject(itemObj);
-        Client.SendAttributes(StatUpdateType.Full);
+        Client.SendAttributes(StatUpdateType.WeightGold);
         return true;
     }
 
@@ -227,7 +227,6 @@ public class EquipmentManager
             item.ReapplyItemModifiers(Client);
         }
 
-        Client.SendAttributes(StatUpdateType.Full);
         Client.UpdateDisplay();
     }
 
@@ -246,7 +245,6 @@ public class EquipmentManager
         var item = Equipment[displaySlot].Item;
         if (item != null) item.ItemPane = Item.ItemPanes.Inventory;
 
-        Client.SendAttributes(StatUpdateType.Full);
         Client.UpdateDisplay();
     }
 
