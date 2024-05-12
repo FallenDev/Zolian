@@ -18,7 +18,7 @@ public class Player : Sprite
     public int AbpNext { get; set; }
     public long AbpTotal { get; set; }
     public ushort ExpLevel { get; set; }
-    public int ExpNext { get; set; }
+    public long ExpNext { get; set; }
     public long ExpTotal { get; set; }
     public ClassStage Stage { get; set; }
     public Job JobClass { get; set; }

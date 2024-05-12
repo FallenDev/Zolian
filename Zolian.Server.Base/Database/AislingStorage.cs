@@ -964,7 +964,7 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("AbpNext", typeof(int));
         dt.Columns.Add("AbpTotal", typeof(long));
         dt.Columns.Add("ExpLevel", typeof(int));
-        dt.Columns.Add("ExpNext", typeof(int));
+        dt.Columns.Add("ExpNext", typeof(long));
         dt.Columns.Add("ExpTotal", typeof(long));
         dt.Columns.Add("Stage", typeof(string));
         dt.Columns.Add("JobClass", typeof(string));

@@ -296,7 +296,7 @@ public class EnemyRewards : RewardScript
 
         // Enqueue experience event
         if (player.WithinRangeOf(_monster, 16))
-            player.Client.EnqueueExperienceEvent(player, soloExp, true, false);
+            player.Client.EnqueueExperienceEvent(player, soloExp, true);
 
         if (player.PartyMembers == null) return;
 
@@ -322,7 +322,7 @@ public class EnemyRewards : RewardScript
                 _ => exp
             };
 
-            party.Client.EnqueueExperienceEvent(party, partyExp, true, false);
+            party.Client.EnqueueExperienceEvent(party, partyExp, true);
         }
     }
 
@@ -353,7 +353,7 @@ public class EnemyRewards : RewardScript
         };
 
         // Enqueue experience event
-        player.Client.EnqueueAbilityEvent(player, ap, true, false);
+        player.Client.EnqueueAbilityEvent(player, ap, true);
 
         if (player.PartyMembers == null) return;
 
@@ -368,7 +368,7 @@ public class EnemyRewards : RewardScript
 
             if (party.Map != player.Map) continue;
             if (party.WithinRangeOf(player, 13))
-                party.Client.EnqueueAbilityEvent(party, ap, true, false);
+                party.Client.EnqueueAbilityEvent(party, ap, true);
         }
     }
 

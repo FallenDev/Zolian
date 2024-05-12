@@ -255,7 +255,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
             if (expEvent.HasValue)
             {
-                HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting, expEvent.Value.Overflow);
+                HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting);
             }
             else
             {
@@ -280,7 +280,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
             if (apEvent.HasValue)
             {
-                HandleAp(apEvent.Value.Player, apEvent.Value.Exp, apEvent.Value.Hunting, apEvent.Value.Overflow);
+                HandleAp(apEvent.Value.Player, apEvent.Value.Exp, apEvent.Value.Hunting);
             }
             else
             {
@@ -1532,7 +1532,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             ToNextAbility = (uint)Aisling.AbpNext,
             ToNextLevel = (uint)Aisling.ExpNext,
             TotalAbility = (uint)Aisling.AbpTotal,
-            TotalExp = (uint)Aisling.ExpTotal,
+            TotalExp = (uint)Math.Clamp(Aisling.ExpTotal, 0, uint.MaxValue),
             UnspentPoints = (byte)Aisling.StatPoints,
             Wis = (byte)Math.Clamp(Aisling.Wis, byte.MinValue, byte.MaxValue)
         };
@@ -4264,19 +4264,19 @@ public class WorldClient : SocketClientBase, IWorldClient
         SendAttributes(StatUpdateType.Primary);
     }
 
-    public void EnqueueExperienceEvent(Aisling player, int exp, bool hunting, bool overflow)
+    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting)
     {
         lock (_expQueueLock)
         {
-            _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting, overflow));
+            _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting));
         }
     }
 
-    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting, bool overflow)
+    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting)
     {
         lock (_apQueueLock)
         {
-            _apQueue.Enqueue(new AbilityEvent(player, exp, hunting, overflow));
+            _apQueue.Enqueue(new AbilityEvent(player, exp, hunting));
         }
     }
 
@@ -4312,26 +4312,26 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
     }
 
-    public void GiveExp(int exp, bool overflow = false)
+    public void GiveExp(long exp)
     {
         if (exp <= 0) exp = 1;
 
         // Enqueue experience event
-        EnqueueExperienceEvent(Aisling, exp, false, overflow);
+        EnqueueExperienceEvent(Aisling, exp, false);
     }
 
-    private static void HandleExp(Aisling player, int exp, bool hunting, bool overflow)
+    private static void HandleExp(Aisling player, long exp, bool hunting)
     {
         if (exp <= 0) exp = 1;
 
-        if (player.HasBuff("Double XP"))
-            exp *= 2;
-
-        if (player.HasBuff("Triple XP"))
-            exp *= 3;
-
         if (hunting)
         {
+            if (player.HasBuff("Double XP"))
+                exp *= 2;
+
+            if (player.HasBuff("Triple XP"))
+                exp *= 3;
+
             if (player.GroupParty != null)
             {
                 var groupSize = player.GroupParty.PartyMembers.Count;
@@ -4352,18 +4352,15 @@ public class WorldClient : SocketClientBase, IWorldClient
             }
         }
 
-        if (uint.MaxValue - player.ExpTotal < exp)
+        if (long.MaxValue - player.ExpTotal < exp)
         {
-            if (!overflow)
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
+            player.ExpTotal = long.MaxValue;
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
         }
         else
         {
-            if (!overflow)
-            {
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-                player.ExpTotal += (uint)exp;
-            }
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+            player.ExpTotal += exp;
         }
 
         try
@@ -4375,19 +4372,15 @@ public class WorldClient : SocketClientBase, IWorldClient
                 return;
             }
 
-            var expNext = player.ExpNext;
-            expNext -= exp;
+            player.ExpNext -= exp;
 
-            if (expNext <= 0)
+            if (player.ExpNext <= 0)
             {
-                var extraExp = Math.Abs(expNext);
+                var extraExp = Math.Abs(player.ExpNext);
                 player.Client.LevelUp(player, extraExp);
             }
             else
-            {
-                player.ExpNext = expNext;
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
-            }
         }
         catch (Exception e)
         {
@@ -4396,7 +4389,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
     }
 
-    public void LevelUp(Aisling player, int extraExp)
+    public void LevelUp(Aisling player, long extraExp)
     {
         // Set next level
         player.ExpLevel++;
@@ -4406,7 +4399,14 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (player.ExpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
         }
 
-        player.ExpNext = (int)(player.ExpLevel * seed * 5000);
+        if (player.ExpLevel >= 99)
+            player.ExpNext = (long)(player.ExpLevel * seed * 25000 * 2.5);
+        else if (player.ExpLevel >= 250)
+            player.ExpNext = (long)(player.ExpLevel * seed * 50000 * 5);
+        else if (player.ExpLevel >= 400)
+            player.ExpNext = (long)(player.ExpLevel * seed * 75000 * 10);
+        else
+            player.ExpNext = (long)(player.ExpLevel * seed * 5000);
 
         if (player.ExpNext <= 0)
         {
@@ -4414,45 +4414,45 @@ public class WorldClient : SocketClientBase, IWorldClient
             return;
         }
 
-        if (extraExp > 0)
-            GiveExp(extraExp, true);
-
         if (player.ExpLevel >= 250)
             player.StatPoints += 1;
         else
             player.StatPoints += (short)ServerSetup.Instance.Config.StatsPerLevel;
 
         // Set vitality
-        player.BaseHp += (long)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65);
-        player.BaseMp += (long)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45);
+        player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65)).IntClamp(0, 300);
+        player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45)).IntClamp(0, 300);
         player.CurrentHp = player.MaximumHp;
         player.CurrentMp = player.MaximumMp;
         player.Client.SendAttributes(StatUpdateType.Full);
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
         player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(79, null, player.Serial, 64));
+
+        if (extraExp > 0)
+            GiveExp(extraExp);
     }
 
-    public void GiveAp(int exp, bool overflow = false)
+    public void GiveAp(int exp)
     {
         if (exp <= 0) exp = 1;
 
         // Enqueue ap event
-        EnqueueAbilityEvent(Aisling, exp, false, overflow);
+        EnqueueAbilityEvent(Aisling, exp, false);
     }
 
-    private static void HandleAp(Aisling player, int exp, bool hunting, bool overflow)
+    private static void HandleAp(Aisling player, int exp, bool hunting)
     {
         if (exp <= 0) exp = 1;
 
-        if (player.HasBuff("Double XP"))
-            exp *= 2;
-
-        if (player.HasBuff("Triple XP"))
-            exp *= 3;
-
         if (hunting)
         {
+            if (player.HasBuff("Double XP"))
+                exp *= 2;
+
+            if (player.HasBuff("Triple XP"))
+                exp *= 3;
+
             if (player.GroupParty != null)
             {
                 var groupSize = player.GroupParty.PartyMembers.Count;
@@ -4475,13 +4475,11 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         if (uint.MaxValue - player.AbpTotal < exp)
         {
-            if (!overflow)
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your ability box is full, ascend to carry more");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your ability box is full, ascend to carry more");
         }
         else
         {
-            if (!overflow)
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
             player.AbpTotal += (uint)exp;
         }
 
@@ -4494,19 +4492,15 @@ public class WorldClient : SocketClientBase, IWorldClient
                 return;
             }
 
-            var expNext = player.AbpNext;
-            expNext -= exp;
+            player.AbpNext -= exp;
 
-            if (expNext <= 0)
+            if (player.AbpNext <= 0)
             {
-                var extraExp = Math.Abs(expNext);
+                var extraExp = Math.Abs(player.AbpNext);
                 player.Client.DarkRankUp(player, extraExp);
             }
             else
-            {
-                player.AbpNext = expNext;
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
-            }
         }
         catch (Exception e)
         {
@@ -4531,21 +4525,21 @@ public class WorldClient : SocketClientBase, IWorldClient
             return;
         }
 
-        if (extraExp > 0)
-            GiveAp(extraExp, true);
-
         // Set next level
         player.StatPoints += 1;
 
         // Set vitality
-        player.BaseHp += (long)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23);
-        player.BaseMp += (long)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90);
+        player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23)).IntClamp(0, 1000);
+        player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90)).IntClamp(0, 1000);
         player.CurrentHp = player.MaximumHp;
         player.CurrentMp = player.MaximumMp;
         player.Client.SendAttributes(StatUpdateType.Full);
 
-        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Dark Rank:{player.AbpLevel}");
+        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Job Level:{player.AbpLevel}");
         player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(385, null, player.Serial, 75));
+
+        if (extraExp > 0)
+            GiveAp(extraExp);
     }
 
     #endregion

@@ -84,6 +84,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var latencyMs = $"{client.Latency.Elapsed.Milliseconds} ms";
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
+        var playerBoxed = client.Aisling.ExpTotal;
 
         client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gInsight: {{=b{level} {{=gRank: {{=b{ability} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
                                                                  $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +
@@ -91,6 +92,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
                                                                  $"{{=gFull Stats| {{=cS:{{=a{playerStr}{{=c, I:{{=a{playerInt}{{=c, W:{{=a{playerWis}{{=c, C:{{=a{playerCon}{{=c, D:{{=a{playerDex}\n" +
                                                                  $"   {{=gOffense| {{=cDMG{{=c:{{=a{playerDmg}{{=c, {{=sAmp{{=c:{{=a{amplified}%{{=c, {{=sSecondary{{=c:{{=a{playerOffElement}\n" +
                                                                  $"   {{=gDefense| {{=sAC{{=c:{{=a{playerAc}{{=c, {{=gRegen{{=c:{{=a{playerRegen}{{=c, {{=sSecondary{{=c:{{=a{playerDefElement}\n" +
+                                                                 $"{{=cExp Boxed: {{=a{playerBoxed}\n\n" +
                                                                  $"{{=eSaving Throws{{=c: {{=sFort{{=c:{{=a{playerFort}%{{=c, {{=sReflex{{=c:{{=a{playerReflex}%{{=c, {{=sWill{{=c:{{=a{playerWill}%\n" +
                                                                  $"{{=bBleeding{{=c: {{=a{playerBleeding}{{=c, {{=rRending{{=c: {{=a{playerRending}{{=c, {{=sAegis{{=c: {{=a{playerAegis}{{=c, {{=nReaping{{=c: {{=a{playerReaping}\n" +
                                                                  $"{{=bVamp{{=c: {{=a{playerVamp}{{=c, {{=uGhost{{=c: {{=a{playerGhost}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +

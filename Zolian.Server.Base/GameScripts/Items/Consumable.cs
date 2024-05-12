@@ -198,7 +198,7 @@ public class Consumable(Item item) : ItemScript(item)
                             client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Ahh, Gold!!");
                             client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
                             client.Aisling.GiveGold((uint)Random.Shared.Next(50000000, 100000000));
-                            client.EnqueueExperienceEvent(client.Aisling, Random.Shared.Next(150000000, 250000000), false, false);
+                            client.EnqueueExperienceEvent(client.Aisling, Random.Shared.Next(150000000, 250000000), false);
                             var codex = new Item();
                             codex = codex.Create(client.Aisling, "Ancient Smithing Codex");
                             codex.GiveTo(client.Aisling);
