@@ -203,7 +203,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         }
     }
     public TileContent TileType { get; set; }
-    public int GroupId { get; set; }
     public byte Direction { get; set; }
     public int PendingX { get; set; }
     public int PendingY { get; set; }

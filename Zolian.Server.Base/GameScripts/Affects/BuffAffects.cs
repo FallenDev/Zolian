@@ -1781,9 +1781,9 @@ public class aura_LawsOfAosda : Buff
             return;
         }
 
-        if (aisling.PartyMembers != null)
+        if (aisling.GroupParty.PartyMembers != null)
         {
-            foreach (var player in aisling.PartyMembers.Values)
+            foreach (var player in aisling.GroupParty.PartyMembers.Values)
             {
                 if (player == null) continue;
                 if (player == aisling) continue;

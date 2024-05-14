@@ -1011,7 +1011,7 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
 
         if (aisling.GroupId != 0)
         {
-            foreach (var deadPartyMember in aisling.PartyMembers.Values.Where(m => m is { Dead: true }))
+            foreach (var deadPartyMember in aisling.GroupParty.PartyMembers.Values.Where(m => m is { Dead: true }))
             {
                 deadPartyMember.Client.Revive();
                 deadPartyMember.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I live again.");

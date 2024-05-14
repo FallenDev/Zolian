@@ -23,7 +23,6 @@ public interface ISprite
     int X { get; set; }
     int Y { get; set; }
     TileContent TileType { get; set; }
-    int GroupId { get; set; }
     byte Direction { get; set; }
     int PendingX { get; set; }
     int PendingY { get; set; }

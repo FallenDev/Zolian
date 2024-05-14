@@ -51,8 +51,8 @@ public sealed class Aisling : Player, IAisling
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
+    public int GroupId { get; set; }
     public Party GroupParty => ServerSetup.Instance.GlobalGroupCache.GetValueOrDefault(GroupId);
-    public ConcurrentDictionary<uint, Aisling> PartyMembers => GroupParty?.PartyMembers;
     public string SpellTrainOne;
     public string SpellTrainTwo;
     public string SpellTrainThree;

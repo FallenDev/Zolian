@@ -101,7 +101,7 @@ public static class Extensions
         if (source is not Aisling self) return false;
         if (otherAisling.Dead) return self.CanSeeGhosts();
         if (!otherAisling.IsInvisible) return false;
-        if (self.GroupId != 0 && otherAisling.GroupId != 0 && otherAisling.GroupId == source.GroupId) return true;
+        if (self.GroupId != 0 && otherAisling.GroupId != 0 && otherAisling.GroupId == self.GroupId) return true;
         if (self.GameMaster || self.CanSeeInvisible || self.Path is Class.Assassin || self.PastClass is Class.Assassin
             || self.Race is Race.DarkElf or Race.WoodElf or Race.Dwarf) return true;
         return otherAisling.GameMaster || otherAisling.CanSeeInvisible || self.Path is Class.Assassin || self.PastClass is Class.Assassin

@@ -68,7 +68,7 @@ public class ShadowGames : AreaScript
 
                     if (client.Aisling.GroupId != 0)
                     {
-                        foreach (var player in client.Aisling.PartyMembers.Values.Where(player => player.Map.ID == 1510))
+                        foreach (var player in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 1510))
                         {
                             player.Client.TransitionToMap(1513, new Position(23, 23));
                         }

@@ -2248,7 +2248,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var party = client.Aisling.PartyMembers;
+        var party = client.Aisling.GroupParty.PartyMembers;
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 30,

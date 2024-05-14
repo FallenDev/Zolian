@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 
@@ -40,96 +41,85 @@ public class Party : ObjectManager
     public static bool AddPartyMember(Aisling partyMember, Aisling playerToAdd)
     {
         if (playerToAdd == null) return false;
+        if (partyMember.GroupId == 0)
+            CreateParty(partyMember);
 
-        if (partyMember.GroupId != 0)
+        if (!ServerSetup.Instance.GlobalGroupCache.TryGetValue(partyMember.GroupId, out var party)) return false;
+
+        if (playerToAdd.GroupId == party.Id)
         {
-            if (partyMember.PartyMembers.Count >= 13)
-            {
-                partyMember.Client.SystemMessage($"Unable to add {playerToAdd.Username}. Your party is full.");
-                playerToAdd.Client.SystemMessage($"{partyMember.Username}'s party is full.");
-                return false;
-            }
-
-            if (playerToAdd.GroupId != 0 && playerToAdd.GroupId != partyMember.GroupId)
-            {
-                partyMember.Client.SystemMessage($"{playerToAdd.Username} belongs to another party, and was not able to join your party.");
-                playerToAdd.Client.SystemMessage($"{partyMember.Username}'s requested you to join his party. However you belong to another party.");
-                return false;
-            }
-
-            if (playerToAdd.GroupId != 0 || partyMember.GroupId == 0) return false;
-
-            playerToAdd.GroupId = partyMember.GroupId;
-            partyMember.PartyMembers.TryAdd(playerToAdd.Serial, playerToAdd);
-            partyMember.Client.SystemMessage($"{playerToAdd.Username} has joined your party.");
-            playerToAdd.Client.SystemMessage($"You have joined {partyMember.Username}'s party.");
-
-            return true;
-        }
-
-        if (playerToAdd.GroupId != 0 && partyMember.GroupId == 0)
-        {
-            playerToAdd.Client.SystemMessage($"{partyMember.Username} belongs to another party, and was not able to join your party.");
-            partyMember.Client.SystemMessage($"{playerToAdd}'s requested you to join his party. However you belong to another party.");
+            RemovePartyMember(playerToAdd);
             return false;
         }
 
-        if (playerToAdd.GroupId != 0 || partyMember.GroupId != 0) return false;
+        if (party.PartyMembers.Count >= 13)
+        {
+            partyMember.Client.SystemMessage($"Unable to add {playerToAdd.Username}. Your party is full.");
+            playerToAdd.Client.SystemMessage($"{partyMember.Username}'s party is full.");
+            return false;
+        }
 
-        var party = CreateParty(partyMember);
+        if (playerToAdd.GroupId != 0 && playerToAdd.GroupId != partyMember.GroupId)
+        {
+            partyMember.Client.SystemMessage($"{playerToAdd.Username} belongs to another party.");
+            playerToAdd.Client.SystemMessage($"{partyMember.Username}'s requested you to join his party. However you belong to another.");
+            return false;
+        }
+
         playerToAdd.GroupId = party.Id;
-
-        foreach (var player in party.PartyMembers.Values)
-            player.Client.SystemMessage($"{playerToAdd.Username} has joined the party.");
-
-        playerToAdd.Client.SystemMessage($"You have joined {partyMember.Username}'s party.");
-        playerToAdd.GroupId = party.Id;
-        partyMember.PartyMembers.TryAdd(partyMember.Serial, partyMember);
         party.PartyMembers.TryAdd(playerToAdd.Serial, playerToAdd);
+        partyMember.Client.SystemMessage($"{playerToAdd.Username} has joined your party.");
+        playerToAdd.Client.SystemMessage($"You have joined {party.LeaderName}'s party.");
 
         return true;
     }
 
-    private static Party CreateParty(Aisling partyLeader)
+    private static void CreateParty(Aisling partyLeader)
     {
-        if (partyLeader.GroupId != 0) return null;
-
         var party = new Party { LeaderName = partyLeader.Username };
         var pendingId = EphemeralRandomIdGenerator<int>.Shared.NextId;
         party.Id = pendingId;
         party.LeaderName = partyLeader.Username;
         partyLeader.GroupId = party.Id;
+        party.PartyMembers.TryAdd(partyLeader.Serial, partyLeader);
 
         if (!ServerSetup.Instance.GlobalGroupCache.ContainsKey(party.Id))
+        {
             ServerSetup.Instance.GlobalGroupCache.TryAdd(party.Id, party);
+        }
+        else
+        {
+            var pendingId2 = EphemeralRandomIdGenerator<int>.Shared.NextId;
+            party.Id = pendingId2;
+            partyLeader.GroupId = party.Id;
+            ServerSetup.Instance.GlobalGroupCache.TryAdd(party.Id, party);
+        }
 
-        return party;
+        partyLeader.Client.SystemMessage("You have formed a party.");
     }
 
     public static void DisbandParty(Party group)
     {
-        if (!ServerSetup.Instance.GlobalGroupCache.ContainsKey(group.Id)) return;
-        if (!ServerSetup.Instance.GlobalGroupCache.TryRemove(group.Id, out _)) return;
-
         foreach (var player in group.PartyMembers.Values)
         {
             player.GroupId = 0;
-            player.PartyMembers.TryRemove(player.Serial, out _);
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The party has now been disbanded.");
         }
+
+        if (!ServerSetup.Instance.GlobalGroupCache.ContainsKey(group.Id)) return;
+        if (!ServerSetup.Instance.GlobalGroupCache.TryRemove(group.Id, out _)) return;
     }
 
     public static void RemovePartyMember(Aisling playerToRemove)
     {
         if (playerToRemove == null) return;
         if (!ServerSetup.Instance.GlobalGroupCache.TryGetValue(playerToRemove.GroupId, out var group)) return;
-        if (group == null) return;
 
         foreach (var player in group.PartyMembers.Values)
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{playerToRemove.Username} has left the party.");
 
         playerToRemove.GroupId = 0;
-        playerToRemove.PartyMembers.TryRemove(playerToRemove.Serial, out _);
+        group.PartyMembers.TryRemove(playerToRemove.Serial, out _);
 
         if (group.PartyMembers.Count <= 1)
         {
@@ -137,6 +127,8 @@ public class Party : ObjectManager
         }
         else
         {
+            if (playerToRemove.Username != group.LeaderName) return;
+
             var nextPlayer = group.PartyMembers.Values.FirstOrDefault();
             if (nextPlayer == null) return;
 
