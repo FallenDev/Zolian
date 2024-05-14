@@ -298,7 +298,7 @@ public class EnemyRewards : RewardScript
         if (player.WithinRangeOf(_monster, 16))
             player.Client.EnqueueExperienceEvent(player, soloExp, true);
 
-        if (player.GroupParty.PartyMembers == null) return;
+        if (player.GroupParty?.PartyMembers == null) return;
 
         // Enqueue experience event for party members
         foreach (var party in player.GroupParty.PartyMembers.Values.Where(party => party.Serial != player.Serial))
@@ -355,7 +355,7 @@ public class EnemyRewards : RewardScript
         // Enqueue experience event
         player.Client.EnqueueAbilityEvent(player, ap, true);
 
-        if (player.GroupParty.PartyMembers == null) return;
+        if (player.GroupParty?.PartyMembers == null) return;
 
         // Enqueue experience event for party members
         foreach (var party in player.GroupParty.PartyMembers.Values.Where(party => party.Serial != player.Serial))
