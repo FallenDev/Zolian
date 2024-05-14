@@ -8,6 +8,8 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
 
+using static ServiceStack.Diagnostics.Events;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
@@ -1009,7 +1011,7 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
-        if (aisling.GroupId != 0)
+        if (aisling.GroupId != 0 && aisling.GroupParty != null)
         {
             foreach (var deadPartyMember in aisling.GroupParty.PartyMembers.Values.Where(m => m is { Dead: true }))
             {

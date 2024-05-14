@@ -2025,7 +2025,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {message}");
                     }
                     return default;
-                case "!!" when client.Aisling.GroupParty.PartyMembers != null:
+                case "!!" when client.Aisling.GroupParty?.PartyMembers != null:
                     foreach (var player in Aislings)
                     {
                         if (player.Client is null) continue;
@@ -2036,7 +2036,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
                     }
                     return default;
-                case "!!" when client.Aisling.GroupParty.PartyMembers == null:
+                case "!!" when client.Aisling.GroupParty?.PartyMembers == null:
                     client.SystemMessage("{=eYou're not in a group or party.");
                     return default;
             }
@@ -2516,7 +2516,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (Party.AddPartyMember(localClient.Aisling, player))
             {
                 localClient.Aisling.PartyStatus = GroupStatus.AcceptingRequests;
-                if (localClient.Aisling.GroupParty.PartyMembers.Values.Any(other => other.IsInvisible))
+                if (localClient.Aisling.GroupParty != null && localClient.Aisling.GroupParty.PartyMembers.Values.Any(other => other.IsInvisible))
                     localClient.UpdateDisplay();
                 return default;
             }

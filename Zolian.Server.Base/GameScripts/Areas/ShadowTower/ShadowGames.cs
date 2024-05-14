@@ -66,7 +66,7 @@ public class ShadowGames : AreaScript
                     var item2 = client.Aisling.HasItemReturnItem("Arc Processing Core");
                     client.Aisling.Inventory.RemoveFromInventory(client, item2);
 
-                    if (client.Aisling.GroupId != 0)
+                    if (client.Aisling.GroupId != 0 && client.Aisling.GroupParty != null)
                     {
                         foreach (var player in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 1510))
                         {
