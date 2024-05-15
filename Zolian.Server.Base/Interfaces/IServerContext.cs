@@ -50,9 +50,7 @@ public interface IServerContext
     ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; }
     ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; }
     ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; }
-    ConcurrentDictionary<uint, Monster> GlobalMonsterCache { get; set; }
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
-    ConcurrentDictionary<long, Item> GlobalGroundItemCache { get; set; }
     ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; }
     ConcurrentDictionary<long, Money> GlobalGroundMoneyCache { get; set; }
     ConcurrentDictionary<uint, Trap> Traps { get; set; }

@@ -16,7 +16,6 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         var newObj = Monster.Create(template, map);
 
         if (newObj == null) return;
-        ServerSetup.Instance.GlobalMonsterCache[newObj.Serial] = newObj;
         ObjectManager.AddObject(newObj);
     }
 
@@ -36,13 +35,14 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             PlaceNode(map);
             PlaceFlower(map);
 
-            var monstersOnMap = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Map == map);
+            var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Count();
+
             if (monstersOnMap >= map.Height * map.Width / 100) continue;
             var temps = templates.Where(i => i.Value.AreaID == map.ID);
 
             foreach (var (_, monster) in temps)
             {
-                var count = ServerSetup.Instance.GlobalMonsterCache.Count(i => i.Value.Template.Name == monster.Name);
+                var count = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Count(i => i.Template.Name == monster.Name);
 
                 if (count >= monster.SpawnMax) continue;
                 if (!monster.ReadyToSpawn()) continue;

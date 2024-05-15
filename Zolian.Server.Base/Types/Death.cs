@@ -118,8 +118,6 @@ public class Death
         item.DeleteFromAislingDb();
         item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         item.ItemPane = Item.ItemPanes.Ground;
-        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
-
         ObjectManager.AddObject(item);
 
         foreach (var aisling in item.AislingsNearby())

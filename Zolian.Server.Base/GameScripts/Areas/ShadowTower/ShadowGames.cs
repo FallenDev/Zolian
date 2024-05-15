@@ -40,7 +40,6 @@ public class ShadowGames : AreaScript
                     var bossCreate1 = Monster.Create(boss1, client.Aisling.Map);
                     if (bossCreate1 == null) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Arc unit, now online!"));
-                    ServerSetup.Instance.GlobalMonsterCache[bossCreate1.Serial] = bossCreate1;
                     ObjectManager.AddObject(bossCreate1);
                 }
                 break;
@@ -53,7 +52,6 @@ public class ShadowGames : AreaScript
                     var bossCreate2 = Monster.Create(boss2, client.Aisling.Map);
                     if (bossCreate2 == null) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, "Neo unit, now online!"));
-                    ServerSetup.Instance.GlobalMonsterCache[bossCreate2.Serial] = bossCreate2;
                     ObjectManager.AddObject(bossCreate2);
                 }
                 break;

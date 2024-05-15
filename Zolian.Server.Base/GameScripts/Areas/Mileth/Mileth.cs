@@ -8,6 +8,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Collections.Concurrent;
+using Darkages.Object;
 
 namespace Darkages.GameScripts.Areas.Mileth;
 
@@ -77,9 +78,8 @@ public class Mileth : AreaScript
         if (itemDropped.Template.Group is "Scrolls" or "Health" or "Cures" or "Mana" or "Food" or "Spirits" or "Paper")
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, $"{{=bThe item(s), fumble, and vanished into the altar..");
-            var foodRemoved = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(itemDropped.ItemId, out _);
-            if (!foodRemoved) return;
-            itemDropped.Remove();
+            var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
+            itemToRemove.Remove();
             return;
         }
 
@@ -96,9 +96,8 @@ public class Mileth : AreaScript
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
                     }
-                    var succubusHairRemoved = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(itemDropped.ItemId, out _);
-                    if (!succubusHairRemoved) return;
-                    itemDropped.Remove();
+                    var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
+                    itemToRemove.Remove();
                     return;
                 }
             case "Succibi Hair":
@@ -111,9 +110,8 @@ public class Mileth : AreaScript
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
                     }
-                    var succubusHairRemoved = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(itemDropped.ItemId, out _);
-                    if (!succubusHairRemoved) return;
-                    itemDropped.Remove();
+                    var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
+                    itemToRemove.Remove();
                     return;
                 }
         }
@@ -176,9 +174,8 @@ public class Mileth : AreaScript
         }
 
         client.SendAttributes(StatUpdateType.Full);
-        var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(itemDropped.ItemId, out _);
-        if (!removed) return;
-        itemDropped.Remove();
+        var removeItem = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
+        removeItem.Remove();
     }
 
     private Item CreateItem(WorldClient client)

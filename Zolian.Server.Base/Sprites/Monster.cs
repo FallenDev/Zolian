@@ -288,7 +288,6 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         var newObj = Create(template, map);
 
         if (newObj == null) return;
-        ServerSetup.Instance.GlobalMonsterCache[newObj.Serial] = newObj;
         AddObject(newObj);
     }
 

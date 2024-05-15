@@ -832,20 +832,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var item in ServerSetup.Instance.GlobalGroundItemCache.Values)
-            {
-                if (item == null) continue;
-                if (item.ItemPane != Item.ItemPanes.Ground)
-                {
-                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
-                    continue;
-                }
-                var abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate);
-                if (abandonedDiff.TotalMinutes <= 30) continue;
-                var removed = ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out var itemToBeRemoved);
-                if (!removed) return;
-                itemToBeRemoved.Remove();
-            }
+            foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values 
+                     select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground) 
+                     into items 
+                     from item in items let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate) 
+                     where !(abandonedDiff.TotalMinutes <= 30) select item)
+                item.Remove();
         }
         catch (Exception ex)
         {
@@ -877,42 +869,44 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMonsterCache.Values, monster =>
+            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
             {
-                if (monster.Scripts == null)
+                var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).ToList();
+                if (monsters.Count <= 0) return;
+
+                Parallel.ForEach(monsters, monster =>
                 {
-                    ServerSetup.Instance.GlobalMonsterCache.TryRemove(monster.Serial, out _);
-                    return;
-                }
+                    if (monster.Scripts == null) return;
 
-                if (monster.CurrentHp <= 0)
-                {
-                    monster.Skulled = true;
-
-                    if (monster.Target is Aisling aisling)
+                    if (monster.CurrentHp <= 0)
                     {
-                        monster.Scripts.Values.First().OnDeath(aisling.Client);
+                        monster.Skulled = true;
+
+                        if (monster.Target is Aisling aisling)
+                        {
+                            monster.Scripts.Values.First().OnDeath(aisling.Client);
+                        }
+                        else
+                        {
+                            monster.Scripts.Values.First().OnDeath();
+                        }
+
+                        return;
                     }
-                    else
-                    {
-                        monster.Scripts.Values.First().OnDeath();
-                    }
 
-                    return;
-                }
+                    monster.Scripts.Values.First().Update(elapsedTime);
+                    monster.LastUpdated = DateTime.UtcNow;
 
-                monster.Scripts.Values.First().Update(elapsedTime);
-                monster.LastUpdated = DateTime.UtcNow;
+                    if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
+                        monster.MonsterBuffAndDebuffStopWatch.Start();
 
-                if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
-                    monster.MonsterBuffAndDebuffStopWatch.Start();
+                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
 
-                if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
-
-                monster.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
-                monster.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
-                monster.MonsterBuffAndDebuffStopWatch.Restart();
-            });
+                    monster.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
+                    monster.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
+                    monster.MonsterBuffAndDebuffStopWatch.Restart();
+                });
+            }); 
         }
         catch (Exception ex)
         {
@@ -965,13 +959,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             // Wipe Caches
             ServerSetup.Instance.TempGlobalMapCache = [];
             ServerSetup.Instance.TempGlobalWarpTemplateCache = [];
-
-            foreach (var mon in ServerSetup.Instance.GlobalMonsterCache.Values)
-            {
-                ObjectManager.DelObject(mon);
-            }
-
-            ServerSetup.Instance.GlobalMonsterCache = [];
 
             foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
             {
@@ -1172,7 +1159,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (item.Template.Flags.FlagIsSet(ItemFlags.Unique) && item.Template.Name == "Necra Scribblings")
                     if (localClient.Aisling.Stage >= ClassStage.Master) return default;
 
-
                 foreach (var invItem in localClient.Aisling.Inventory.Items.Values)
                 {
                     if (invItem == null) continue;
@@ -1200,7 +1186,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (item.GiveTo(localClient.Aisling))
                 {
-                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
                     item.Remove();
                     if (item.Scripts is null) return default;
                     foreach (var itemScript in item.Scripts.Values)
@@ -1377,7 +1362,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             case 500:
                 {
                     if ((item.X != 31 || item.Y != 52) && (item.X != 31 || item.Y != 53)) return;
-                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
                     item.Remove();
                     return;
                 }
@@ -1385,7 +1369,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             case 504:
                 {
                     if ((item.X != 62 || item.Y != 47) && (item.X != 62 || item.Y != 48)) return;
-                    ServerSetup.Instance.GlobalGroundItemCache.TryRemove(item.ItemId, out _);
                     item.Remove();
                     return;
                 }
@@ -3076,34 +3059,28 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            var isMonster = false;
-            var isNpc = false;
-            var monsterCheck = ServerSetup.Instance.GlobalMonsterCache.Where(i => i.Key == targetId);
+            var monsterCheck = ObjectManager.GetObject<Monster>(localClient.Aisling.Map, i => i.Serial == targetId);
             var npcCheck = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == targetId);
 
-            foreach (var (_, monster) in monsterCheck)
+            if (monsterCheck != null)
             {
-                if (monster?.Template?.ScriptName == null) continue;
-                var scripts = monster.Scripts?.Values;
-                if (scripts != null)
-                    foreach (var script in scripts)
-                        script.OnClick(localClient.Aisling.Client);
-                isMonster = true;
+                if (monsterCheck.Template?.ScriptName == null) return default;
+                var scripts = monsterCheck.Scripts?.Values;
+                if (scripts == null) return default;
+                foreach (var script in scripts)
+                    script.OnClick(localClient.Aisling.Client);
+                return default;
             }
-
-            if (isMonster) return default;
 
             foreach (var (_, npc) in npcCheck)
             {
                 if (npc?.Template?.ScriptKey == null) continue;
                 var scripts = npc.Scripts?.Values;
-                if (scripts != null && targetId != null)
-                    foreach (var script in scripts)
-                        script.OnClick(localClient.Aisling.Client, (uint)targetId);
-                isNpc = true;
+                if (scripts == null || targetId == null) return default;
+                foreach (var script in scripts)
+                    script.OnClick(localClient.Aisling.Client, (uint)targetId);
+                return default;
             }
-
-            if (isNpc) return default;
 
             var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == targetId, ObjectManager.Get.Aislings);
             switch (obj)

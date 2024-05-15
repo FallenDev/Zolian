@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.GameScripts.Formulas;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -345,9 +346,10 @@ public sealed class Item : Sprite, IItem
     /// Used to amend an ItemId if it exists during item creation
     /// </summary>
     /// <returns>ItemId</returns>
-    private static long CheckAndAmendItemIdIfItExists(IItem item)
+    private static long CheckAndAmendItemIdIfItExists(Item item)
     {
-        var updateIfExists = ServerSetup.Instance.GlobalGroundItemCache.TryGetValue(item.ItemId, out _);
+        var obj = GetObject<Item>(item.Map, i => i.Serial == item.Serial);
+        var updateIfExists = obj != null;
         return updateIfExists ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
     }
 
@@ -568,7 +570,6 @@ public sealed class Item : Sprite, IItem
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
             obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
 
-        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(obj.ItemId, obj);
         return obj;
     }
 
@@ -727,7 +728,6 @@ public sealed class Item : Sprite, IItem
         AbandonedDate = DateTime.UtcNow;
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         ItemPane = ItemPanes.Ground;
-        ServerSetup.Instance.GlobalGroundItemCache.TryAdd(ItemId, this);
         AddObject(this);
 
         if (owner is Aisling player)

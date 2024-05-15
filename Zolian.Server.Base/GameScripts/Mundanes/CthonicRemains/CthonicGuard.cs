@@ -41,7 +41,6 @@ public class CthonicGuard(WorldServer server, Mundane mundane) : MundaneScript(s
                 Mundane.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(72, target.Position));
                 Mundane.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: Kahflooshka!"));
                 target.Remove();
-                ServerSetup.Instance.GlobalMonsterCache.TryRemove(target.Serial, out _);
                 DelObject(target);
             }
         }

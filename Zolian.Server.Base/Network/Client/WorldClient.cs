@@ -543,7 +543,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         if (_itemAnimationControl.Elapsed.TotalMilliseconds < _itemAnimationTimer.Delay.TotalMilliseconds) return;
 
-        var items = ServerSetup.Instance.GlobalGroundItemCache.Where(i => i.Value != null && i.Value.Template.Enchantable && i.Value.Map == Aisling.Map);
+        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
 
         try
         {
@@ -551,21 +551,21 @@ public class WorldClient : SocketClientBase, IWorldClient
             {
                 Parallel.ForEach(items, (entry) =>
                 {
-                    switch (entry.Value.ItemQuality)
+                    switch (entry.ItemQuality)
                     {
                         case Item.Quality.Epic:
-                            Aisling.Client.SendAnimation(397, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                            Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
                             break;
                         case Item.Quality.Legendary:
-                            Aisling.Client.SendAnimation(398, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                            Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
                             break;
                         case Item.Quality.Forsaken:
-                            Aisling.Client.SendAnimation(399, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                            Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
                             break;
                         case Item.Quality.Mythic:
                         case Item.Quality.Primordial:
                         case Item.Quality.Transcendent:
-                            Aisling.Client.SendAnimation(400, new Position(entry.Value.Position.X, entry.Value.Position.Y));
+                            Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
                             break;
                         case Item.Quality.Damaged:
                         case Item.Quality.Common:

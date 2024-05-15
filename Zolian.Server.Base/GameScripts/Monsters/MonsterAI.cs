@@ -152,7 +152,6 @@ public class BaseMonsterIntelligence : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -720,7 +719,6 @@ public class WeakCommon : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -1201,7 +1199,6 @@ public class Inanimate : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -1371,7 +1368,6 @@ public class ShapeShifter : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -1882,7 +1878,6 @@ public class LootGoblin : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -2023,7 +2018,6 @@ public class SelfDestruct : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -2533,7 +2527,6 @@ public class AlertSummon : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -3112,7 +3105,6 @@ public class Turret : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -3518,7 +3510,6 @@ public class GeneralPirate : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -4105,7 +4096,6 @@ public class PirateOfficer : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -4690,7 +4680,6 @@ public class ShadowSight : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -5257,7 +5246,6 @@ public class WeakShadowSight : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -5843,7 +5831,6 @@ public class AosdaRemnant : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -6437,7 +6424,6 @@ public class DraconicOmega : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -7031,7 +7017,6 @@ public class JackFrost : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -7686,7 +7671,6 @@ public class Yeti : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 
@@ -8281,7 +8265,6 @@ public class WorldBossBahamut : MonsterScript
         }
 
         Monster.Remove();
-        ServerSetup.Instance.GlobalMonsterCache.TryRemove(Monster.Serial, out _);
         DelObject(Monster);
     }
 

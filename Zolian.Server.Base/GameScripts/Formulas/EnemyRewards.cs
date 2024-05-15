@@ -89,7 +89,6 @@ public class EnemyRewards : RewardScript
         foreach (var item in maxTwoOrThreeItemsList)
         {
             item.Release(_monster, _monster.Position);
-            ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
 
             if (item.Enchantable && item.ItemQuality is Quality.Epic or Quality.Legendary or Quality.Forsaken)
             {
@@ -158,7 +157,6 @@ public class EnemyRewards : RewardScript
         foreach (var item in monsterDefinedDrop)
         {
             item.Release(_monster, _monster.Position);
-            ServerSetup.Instance.GlobalGroundItemCache.TryAdd(item.ItemId, item);
 
             if (item.Enchantable && item.ItemQuality is Quality.Epic or Quality.Legendary or Quality.Forsaken)
             {
