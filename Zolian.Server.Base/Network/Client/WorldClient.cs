@@ -4357,17 +4357,14 @@ public class WorldClient : SocketClientBase, IWorldClient
             player.ExpTotal = long.MaxValue;
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
         }
-        else
-        {
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-            player.ExpTotal += exp;
-        }
 
         try
         {
             if (player.ExpLevel >= 500)
             {
                 player.ExpNext = 0;
+                player.ExpTotal += exp;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
                 return;
             }
@@ -4377,10 +4374,17 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (player.ExpNext <= 0)
             {
                 var extraExp = Math.Abs(player.ExpNext);
+                var expToTotal = exp - extraExp;
+                player.ExpTotal += expToTotal;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {expToTotal:n0} experience points!");
                 player.Client.LevelUp(player, extraExp);
             }
             else
+            {
+                player.ExpTotal += exp;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
+            }
         }
         catch (Exception e)
         {
@@ -4473,14 +4477,10 @@ public class WorldClient : SocketClientBase, IWorldClient
             }
         }
 
-        if (uint.MaxValue - player.AbpTotal < exp)
+        if (long.MaxValue - player.AbpTotal < exp)
         {
+            player.AbpTotal = long.MaxValue;
             player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your ability box is full, ascend to carry more");
-        }
-        else
-        {
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
-            player.AbpTotal += (uint)exp;
         }
 
         try
@@ -4488,6 +4488,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (player.AbpLevel >= 500)
             {
                 player.AbpNext = 0;
+                player.AbpTotal += exp;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
                 return;
             }
@@ -4497,10 +4499,17 @@ public class WorldClient : SocketClientBase, IWorldClient
             if (player.AbpNext <= 0)
             {
                 var extraExp = Math.Abs(player.AbpNext);
+                var expToTotal = exp - extraExp;
+                player.AbpTotal += expToTotal;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {expToTotal:n0} ability points!");
                 player.Client.DarkRankUp(player, extraExp);
             }
             else
+            {
+                player.AbpTotal += exp;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
+            }
         }
         catch (Exception e)
         {

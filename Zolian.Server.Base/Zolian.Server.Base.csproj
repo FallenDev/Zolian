@@ -42,9 +42,9 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
-		<PackageReference Include="Sentry" Version="4.4.0" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="4.4.0" />
-		<PackageReference Include="Sentry.Profiling" Version="4.4.0" />
+		<PackageReference Include="Sentry" Version="4.6.2" />
+		<PackageReference Include="Sentry.Extensions.Logging" Version="4.6.2" />
+		<PackageReference Include="Sentry.Profiling" Version="4.6.2" />
 		<PackageReference Include="ServiceStack" Version="8.2.2" />
 		<PackageReference Include="ServiceStack.Text" Version="8.2.2" />
 		<PackageReference Include="SunCalcNet" Version="1.2.2" />
