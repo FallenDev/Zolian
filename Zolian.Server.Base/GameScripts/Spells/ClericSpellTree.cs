@@ -7,9 +7,6 @@ using Darkages.Network.Client.Abstractions;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-
-using static ServiceStack.Diagnostics.Events;
-
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;

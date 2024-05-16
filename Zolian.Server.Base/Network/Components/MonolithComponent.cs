@@ -26,8 +26,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
     private static void ManageSpawns()
     {
-        var templates = ServerSetup.Instance.GlobalMonsterTemplateCache;
-        if (templates.Count == 0) return;
+        if (ServerSetup.Instance.GlobalMonsterTemplateCache.Count == 0) return;
 
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
@@ -35,18 +34,20 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             PlaceNode(map);
             PlaceFlower(map);
 
+            // Ensure the map isn't overloaded with monsters
             var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Count();
-
             if (monstersOnMap >= map.Height * map.Width / 100) continue;
-            var temps = templates.Where(i => i.Value.AreaID == map.ID);
 
-            foreach (var (_, monster) in temps)
+            // Check each map for monster SpawnMax, and whether it's ready to spawn
+            foreach (var (_, monster) in ServerSetup.Instance.GlobalMonsterTemplateCache.Where(i => i.Value.AreaID == map.ID))
             {
-                var count = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Count(i => i.Template.Name == monster.Name);
+                var count = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive || m.Template.MonsterRace == MonsterRace.Dummy)
+                    .Count(i => i.Template.Name == monster.Name);
 
                 if (count >= monster.SpawnMax) continue;
                 if (!monster.ReadyToSpawn()) continue;
 
+                // Spawn from template
                 CreateFromTemplate(monster, map);
             }
         }

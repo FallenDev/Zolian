@@ -1,7 +1,10 @@
-﻿using Darkages.Common;
+﻿using System.Linq;
+using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
+using Darkages.Types;
 using NUnit.Framework;
 
 namespace ZolianTest.Sprites;
@@ -46,9 +49,47 @@ public class ItemTest
     }
 
     [Test]
-    public void ShouldGetDisplayName()
+    public void AddItemToGameWorld()
     {
+        ObjectService.AddGameObject(variantItem);
+        var item = ObjectService.Query<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
+        Assert.Equals(variantItem, item);
+    }
 
+    [Test]
+    public void RemoveItemFromGameWorld()
+    {
+        ObjectService.RemoveGameObject(variantItem);
+        var item = ObjectService.Query<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
+        if (item is null)
+            Assert.Charlie();
+        else
+            Assert.Fail();
+    }
 
+    [Test]
+    public void QueryItemFromGameWorld()
+    {
+        ObjectService.AddGameObject(variantItem);
+        var item = ObjectService.Query<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
+        Assert.Equals(variantItem, item);
+    }
+
+    [Test]
+    public void QueryAllItemsFromGameWorld()
+    {
+        ObjectService.AddGameObject(variantItem);
+        ObjectService.AddGameObject(nonVariantItem);
+        var items = ObjectService.QueryAll<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
+        Assert.Equals(variantItem, items.First());
+    }
+
+    [Test]
+    public void QueryAllItemsFromGameWorldWithPredicate()
+    {
+        ObjectService.AddGameObject(variantItem);
+        ObjectService.AddGameObject(nonVariantItem);
+        var items = ObjectService.QueryAll<Item>(i => i.Serial == variantItem.Serial);
+        Assert.Equals(variantItem, items.First());
     }
 }

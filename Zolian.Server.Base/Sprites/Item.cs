@@ -15,7 +15,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.GameScripts.Formulas;
-using Darkages.Object;
 
 namespace Darkages.Sprites;
 

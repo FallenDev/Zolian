@@ -16,7 +16,7 @@ internal class GeneratorTest
         {
             var result = Generator.GenerateDeterminedNumberRange(15, 28);
             var inRange = result is >= 15 and <= 28;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -27,7 +27,7 @@ internal class GeneratorTest
         {
             var result = Generator.GenerateMapLocation(50);
             var inRange = result is >= 0 and <= 50;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -38,7 +38,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandNumGen3();
             var inRange = result is >= 0 and <= 3;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -49,7 +49,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandNumGen10();
             var inRange = result is >= 0 and <= 10;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -60,7 +60,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandNumGen20();
             var inRange = result is >= 0 and <= 20;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -71,7 +71,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandNumGen100();
             var inRange = result is >= 0 and <= 100;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -82,7 +82,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandomNumPercentGen();
             var inRange = result is >= 0.00 and <= 1.0;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 
@@ -93,7 +93,7 @@ internal class GeneratorTest
         {
             var result = Generator.RandomMonsterStatVariance(300);
             var inRange = result is > 300 and <= 354;
-            Assert.Equals(inRange, true);
+            Assert.That(inRange);
         }
     }
 }

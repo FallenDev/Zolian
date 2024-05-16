@@ -24,14 +24,20 @@ public class Beggar(WorldServer server, Mundane mundane) : MundaneScript(server,
     {
         if (client.Aisling.GoldPoints >= gold)
         {
-            if (uint.MaxValue - client.Aisling.ExpTotal < gold)
+            if (long.MaxValue - client.Aisling.ExpTotal < gold)
             {
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
                 return;
             }
 
+            if (uint.MaxValue - client.Aisling.ExpTotal < gold)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{Mundane.Name}: Woah, are you trying to make me rich?");
+                return;
+            }
+
             client.Aisling.GoldPoints -= gold;
-            client.GiveExp((int)gold);
+            client.GiveExp(gold);
             client.SendAttributes(StatUpdateType.ExpGold);
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"Gained {gold} experience!");
             client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, "Beggar: Blessed the stars!!!"));
