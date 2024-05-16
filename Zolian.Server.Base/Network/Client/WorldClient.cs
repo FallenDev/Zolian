@@ -3785,7 +3785,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         // Game Master check
         if (client.Aisling.GameMaster)
         {
-            if (item.Durability > 1)
+            if (item.Durability >= 1)
             {
                 return true;
             }

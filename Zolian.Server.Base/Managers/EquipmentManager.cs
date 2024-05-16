@@ -90,17 +90,9 @@ public class EquipmentManager
 
         foreach (var item in broken.Where(item => item?.Template != null))
         {
-            if (item.ItemQuality != Item.Quality.Damaged)
-            {
-                item.ItemQuality = Item.Quality.Damaged;
-                RemoveFromExisting(item.Slot);
-                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} has been damaged.");
-            }
-            else
-            {
-                RemoveFromExisting(item.Slot, false);
-                Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} was so damaged it fell apart.");
-            }
+            item.ItemQuality = Item.Quality.Damaged;
+            RemoveFromExisting(item.Slot);
+            Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} has been damaged.");
         }
     }
 
@@ -110,22 +102,17 @@ public class EquipmentManager
             Client.SendEquipment(displaySlot, item);
     }
 
-    public bool RemoveFromExisting(int displaySlot, bool returnIt = true)
+    public bool RemoveFromExisting(int displaySlot)
     {
         if (Equipment[displaySlot] == null || displaySlot == 0) return true;
-
         var itemObj = Equipment[displaySlot].Item;
-
         if (itemObj == null) return false;
 
         RemoveFromSlot(displaySlot);
-
-        if (!returnIt) return HandleUnreturnedItem(itemObj);
-
         return itemObj.GiveTo(Client.Aisling, false) || HandleUnreturnedItem(itemObj);
     }
 
-    private void HandleEquipmentSwap(int displaySlot, Item item, bool returnIt = true)
+    private void HandleEquipmentSwap(int displaySlot, Item item)
     {
         Item itemObj = null;
 
@@ -139,7 +126,6 @@ public class EquipmentManager
         RemoveFromSlot(displaySlot);
         AddEquipment(displaySlot, item);
 
-        if (!returnIt) HandleUnreturnedItem(itemObj);
         if (itemObj == null) return;
         var givenBack = itemObj.GiveTo(Client.Aisling, false);
         if (givenBack) return;
@@ -173,7 +159,7 @@ public class EquipmentManager
         if (Client.Aisling.CurrentWeight < 0)
             Client.Aisling.CurrentWeight = 0;
 
-        ObjectManager.DelObject(itemObj);
+        Client.Aisling.BankManager.Items.TryAdd(itemObj.ItemId, itemObj);
         Client.SendAttributes(StatUpdateType.WeightGold);
         return true;
     }

@@ -61,8 +61,6 @@ public class Plagued : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -131,8 +129,6 @@ public class TheShakes : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -193,8 +189,6 @@ public class Stricken : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -243,6 +237,8 @@ public class Rabies : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is not Aisling aisling) return;
 
         if (aisling.GameMaster)
@@ -303,6 +299,7 @@ public class LockJoint : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         if (affected is not Aisling aisling) return;
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.02) return;
@@ -363,8 +360,6 @@ public class NumbFall : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -415,8 +410,6 @@ public class Diseased : Debuff
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -471,8 +464,6 @@ public class Hallowed : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -516,6 +507,7 @@ public class Petrified : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         if (affected is not Aisling aisling) return;
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.05) return;
@@ -562,6 +554,8 @@ public class DebuffWrathConsequences : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your magical resistance has been tampered");
@@ -614,8 +608,6 @@ public class DebuffSunSeal : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -654,8 +646,6 @@ public class DebuffPentaSeal : Debuff
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -696,8 +686,6 @@ public class DebuffMoonSeal : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -736,8 +724,6 @@ public class DebuffDarkSeal : Debuff
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -778,8 +764,6 @@ public class DebuffCriochArdCradh : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -819,8 +803,6 @@ public class DebuffCriochMorCradh : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -854,8 +836,6 @@ public class DebuffCriochCradh : Debuff
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -896,8 +876,6 @@ public class DebuffCriochBeagCradh : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -937,8 +915,6 @@ public class DebuffArdcradh : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -977,8 +953,6 @@ public class DebuffMorcradh : Debuff
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -1023,6 +997,7 @@ public class DebuffDecay : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYour body is decaying..");
@@ -1068,8 +1043,6 @@ public class DebuffCradh : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
-
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
         affected.Debuffs.TryRemove(debuff.Name, out _);
@@ -1108,8 +1081,6 @@ public class DebuffBeagcradh : Debuff
         InsertDebuff(aisling, debuff);
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Debuff debuff) { }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
@@ -1163,6 +1134,8 @@ public class DebuffRending : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your armor's integrity has weakened");
@@ -1229,6 +1202,8 @@ public class DebuffCorrosiveTouch : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(65, null, affected.Serial));
@@ -1293,6 +1268,8 @@ public class DebuffShieldBash : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Straps to your armor have loosened");
@@ -1358,6 +1335,8 @@ public class DebuffTitansCleave : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're suffering from a concussion");
@@ -1423,6 +1402,8 @@ public class DebuffRetribution : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Retribution is at hand!");
@@ -1488,6 +1469,8 @@ public class DebuffStabnTwist : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're now vulnerable");
@@ -1554,6 +1537,8 @@ public class DebuffHurricane : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(58, null, affected.Serial));
@@ -1618,6 +1603,8 @@ public class DebuffBeagsuain : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
@@ -1672,6 +1659,8 @@ public class DebuffDarkChain : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
@@ -1726,6 +1715,8 @@ public class DebuffSilence : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "...");
@@ -1779,6 +1770,8 @@ public class DebuffHalt : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Time is at a still");
@@ -1833,6 +1826,8 @@ public class DebuffBeagsuaingar : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been incapacitated");
@@ -1887,6 +1882,8 @@ public class DebuffCharmed : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Wow.. I can't harm you");
@@ -1941,6 +1938,8 @@ public class DebuffFrozen : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body is frozen. Brrrrr...");
@@ -1997,6 +1996,8 @@ public class DebuffAdvFrozen : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your body is semi-perm frozen. Brrrrr...");
@@ -2054,6 +2055,8 @@ public class DebuffSleep : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been placed in a dream like state");
@@ -2130,6 +2133,8 @@ public class DebuffReaping : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected.CurrentMapId == ServerSetup.Instance.Config.DeathMap)
         {
             debuff.OnEnded(affected, debuff);
@@ -2259,6 +2264,7 @@ public class DebuffBleeding : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         ApplyBleeding(affected);
 
         if (affected is Aisling aisling)
@@ -2336,6 +2342,7 @@ public class DebuffArdPoison : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         ApplyPoison(affected, debuff);
 
         if (affected is Aisling aisling)
@@ -2424,6 +2431,7 @@ public class DebuffMorPoison : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         ApplyPoison(affected, debuff);
 
         if (affected is Aisling aisling)
@@ -2512,6 +2520,7 @@ public class DebuffPoison : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         ApplyPoison(affected, debuff);
 
         if (affected is Aisling aisling)
@@ -2600,6 +2609,7 @@ public class DebuffBeagPoison : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
         ApplyPoison(affected, debuff);
 
         if (affected is Aisling aisling)
@@ -2679,6 +2689,8 @@ public class DebuffBlind : Debuff
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
+        base.OnDurationUpdate(affected, debuff);
+
         if (affected is Aisling aisling)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(42, null, affected.Serial));

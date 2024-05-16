@@ -25,7 +25,7 @@ public class Buff : IBuff
     public Buff BuffSpell { get; set; }
 
     public virtual void OnApplied(Sprite affected, Buff buff) { }
-    public virtual void OnDurationUpdate(Sprite affected, Buff buff) { }
+    public virtual void OnDurationUpdate(Sprite affected, Buff buff) => buff.TimeLeft--;
     public virtual void OnEnded(Sprite affected, Buff buff) { }
     public virtual void OnItemChange(Aisling affected, Buff buff) { }
 
@@ -82,10 +82,7 @@ public class Buff : IBuff
     public void Update(Sprite affected, TimeSpan elapsedTime)
     {
         if (TimeLeft > 0)
-        {
-            TimeLeft--;
             OnDurationUpdate(affected, this);
-        }
         else
             OnEnded(affected, this);
     }

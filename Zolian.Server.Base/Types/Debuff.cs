@@ -26,7 +26,7 @@ public class Debuff : IDebuff
     public Debuff DebuffSpell { get; set; }
 
     public virtual void OnApplied(Sprite affected, Debuff debuff) { }
-    public virtual void OnDurationUpdate(Sprite affected, Debuff debuff) { }
+    public virtual void OnDurationUpdate(Sprite affected, Debuff debuff) => debuff.TimeLeft--;
     public virtual void OnEnded(Sprite affected, Debuff debuff) { }
     public virtual void OnItemChange(Aisling affected, Debuff debuff) { }
 
@@ -90,10 +90,7 @@ public class Debuff : IDebuff
     public void Update(Sprite affected, TimeSpan elapsedTime)
     {
         if (TimeLeft > 0)
-        {
-            TimeLeft--;
             OnDurationUpdate(affected, this);
-        }
         else
             OnEnded(affected, this);
     }

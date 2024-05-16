@@ -48,8 +48,6 @@ public class BuffLycanisim : Buff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff affliction) { }
-
     public override void OnEnded(Sprite affected, Buff affliction)
     {
         if (affected is not Aisling aisling) return;
@@ -108,8 +106,6 @@ public class BuffVampirisim : Buff
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff affliction) { }
-
     public override void OnEnded(Sprite affected, Buff affliction)
     {
         if (affected is not Aisling aisling) return;
@@ -166,8 +162,6 @@ public class buff_DiaAite : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -208,8 +202,6 @@ public class buff_aite : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -254,8 +246,6 @@ public class buff_SpectralShield : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -307,8 +297,6 @@ public class buff_DefenseUp : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(83, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -374,8 +362,6 @@ public class buff_Hastenga : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -453,8 +439,6 @@ public class buff_Hasten : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -531,8 +515,6 @@ public class buff_Haste : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -597,8 +579,6 @@ public class buff_clawfist : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -632,6 +612,7 @@ public class buff_drunkenFist : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
     }
@@ -669,6 +650,7 @@ public class buff_ninthGate : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(305, null, aisling.Serial));
     }
@@ -718,6 +700,7 @@ public class buff_berserk : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation((ushort)Random.Shared.Next(367, 369), null, aisling.Serial));
     }
@@ -782,6 +765,7 @@ public class buff_wingsOfProtect : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -840,6 +824,7 @@ public class buff_ArdDion : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -898,6 +883,7 @@ public class buff_MorDion : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -956,6 +942,7 @@ public class buff_dion : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1014,6 +1001,7 @@ public class buff_IronSkin : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1072,6 +1060,7 @@ public class buff_StoneSkin : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1130,6 +1119,7 @@ public class buff_hide : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1190,6 +1180,7 @@ public class buff_ShadowFade : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1242,8 +1233,6 @@ public class buff_DexUp : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -1291,8 +1280,6 @@ public class buff_GryphonsGrace : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(139, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -1342,8 +1329,6 @@ public class buff_OrcishStrength : Buff
         }
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -1392,8 +1377,6 @@ public class buff_FeywildNectar : Buff
             playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(165, false));
         }
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -1449,6 +1432,7 @@ public class buff_randWeaponElement : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is Aisling aisling)
             aisling.SecondaryOffensiveElement = aisling.TempOffensiveHold;
     }
@@ -1505,8 +1489,6 @@ public class buff_ElementalBane : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Resistance to damage increased by 33%");
         InsertBuff(aisling, buff);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
@@ -1568,6 +1550,7 @@ public class buff_skill_reflect : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1624,6 +1607,7 @@ public class buff_spell_reflect : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1680,6 +1664,7 @@ public class buff_PerfectDefense : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling berserkDebuff) return;
         if (!affected.HasBuff("Berserker Rage")) return;
         berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
@@ -1723,8 +1708,6 @@ public class aura_BriarThorn : Buff
         InsertBuff(aisling, buff);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -1766,6 +1749,7 @@ public class aura_LawsOfAosda : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         if (aisling.Skulled)
         {
@@ -1843,6 +1827,7 @@ public class BuffArdFasNadur : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.Amplified = 2.5;
     }
@@ -1881,6 +1866,7 @@ public class BuffMorFasNadur : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.Amplified = 2;
     }
@@ -1919,6 +1905,7 @@ public class BuffFasNadur : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
         if (affected is not Aisling aisling) return;
         aisling.Amplified = 1.5;
     }
@@ -1967,8 +1954,6 @@ public class BuffFasSpiorad : Buff
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(26, false));
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -2007,8 +1992,6 @@ public class BuffDoubleExperience : Buff
         InsertBuff(aisling, buff);
     }
 
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
-
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -2041,8 +2024,6 @@ public class BuffTripleExperience : Buff
 
         InsertBuff(aisling, buff);
     }
-
-    public override void OnDurationUpdate(Sprite affected, Buff buff) { }
 
     public override void OnEnded(Sprite affected, Buff buff)
     {
