@@ -6,6 +6,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
+
 using System.Numerics;
 
 namespace Darkages.GameScripts.Creations;
@@ -1054,6 +1055,19 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusInt += monster._Int * 19;
                 monster.BonusWis += monster._Wis * 19;
                 monster.BonusMr += monster._Mr * 19;
+            },
+            [MonsterType.Above500P] = monster =>
+            {
+                monster.BonusStr += monster._Str * 21;
+                monster.BonusDex += monster._Dex * 21;
+                monster.BonusDmg += monster._Dmg * 21;
+                monster.BonusHp += (long)(monster.MaximumHp * 0.20);
+            },
+            [MonsterType.Above500M] = monster =>
+            {
+                monster.BonusInt += monster._Int * 21;
+                monster.BonusWis += monster._Wis * 21;
+                monster.BonusMr += monster._Mr * 21;
             },
             [MonsterType.DivineStr] = monster =>
             {

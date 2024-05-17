@@ -39,6 +39,8 @@ public enum MonsterType
     Above400M,
     Above450P,
     Above450M,
+    Above500P,
+    Above500M,
     DivineStr,
     DivineInt,
     DivineWis,
