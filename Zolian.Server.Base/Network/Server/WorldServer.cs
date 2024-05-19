@@ -1177,13 +1177,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return default;
                 }
 
-                if (item.Cursed)
-                {
-                    item.Pos = localClient.Aisling.Pos;
-                    var objToList = new List<Sprite> { obj };
-                    localClient.SendVisibleEntities(objToList);
-                }
-
                 if (item.GiveTo(localClient.Aisling))
                 {
                     item.Remove();
@@ -1192,10 +1185,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         itemScript?.OnPickedUp(localClient.Aisling, new Position(sourcePoint.X, sourcePoint.Y), map);
                     return default;
                 }
-
-                item.Pos = localClient.Aisling.Pos;
-                var objToList2 = new List<Sprite> { obj };
-                localClient.SendVisibleEntities(objToList2);
             }
 
             foreach (var obj in moneyObjs)
@@ -1245,14 +1234,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             var (sourceSlot, destinationPoint, count) = localArgs;
             if (sourceSlot is 0) return default;
             if (count is > 1000 or < 0) return default;
-            Item item = null;
-            if (localClient.Aisling.Inventory.Items.TryGetValue(sourceSlot, out var value))
-            {
-                if (value is null) return default;
-                item = value;
-                item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-            }
-
+            if (!localClient.Aisling.Inventory.Items.TryGetValue(sourceSlot, out var item)) return default;
             if (item == null) return default;
 
             if (item.Stacks > 1)
@@ -1324,7 +1306,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                     item.Stacks = (ushort)remaining;
                     localClient.SendRemoveItemFromPane(item.InventorySlot);
-                    localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, value);
+                    localClient.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, item);
                     localClient.Aisling.Inventory.UpdateSlot(localClient.Aisling.Client, item);
                 }
             }

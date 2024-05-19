@@ -1,7 +1,5 @@
 ﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
 using Darkages.Enums;
-using Darkages.Object;
 using Darkages.Sprites;
 
 namespace Darkages.Types;
@@ -49,10 +47,11 @@ public class Death
                 obj.Tarnished = true;
             }
 
-            player.Inventory.Items.TryUpdate(obj.InventorySlot, null, obj);
-            player.Client.SendRemoveItemFromPane(obj.InventorySlot);
-            ReleaseItem(player, obj);
+            player.Inventory.RemoveFromInventory(player.Client, obj);
+            obj.Release(player, new Position(player.DeathLocation.X, player.DeathLocation.Y));
         }
+
+        player.Inventory.UpdatePlayersWeight(player.Client);
     }
 
     private static void ReapEquipment(Aisling player)
@@ -104,23 +103,5 @@ public class Death
         if (gold <= 0) return;
         Money.Create(player, (uint)gold, new Position(player.DeathLocation));
         player.GoldPoints = 0;
-    }
-
-    private static void ReleaseItem(Aisling player, Item item)
-    {
-        item.Pos = player.DeathLocation;
-        item.CurrentMapId = player.DeathMapId;
-
-        var readyTime = DateTime.UtcNow;
-        item.AbandonedDate = readyTime;
-        item.Cursed = false;
-
-        item.DeleteFromAislingDb();
-        item.Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        item.ItemPane = Item.ItemPanes.Ground;
-        ObjectManager.AddObject(item);
-
-        foreach (var aisling in item.AislingsNearby())
-            item.ShowTo(aisling);
     }
 }

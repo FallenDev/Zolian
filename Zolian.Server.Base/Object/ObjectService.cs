@@ -76,17 +76,29 @@ public abstract class ObjectService
 
 public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
 {
-    private readonly ConcurrentDictionary<uint, T> _values = [];
+    private readonly ConcurrentDictionary<long, T> _values = [];
 
     public void Add(T obj)
     {
         if (obj is null) return;
+        if (obj is Item item)
+        {
+            _values.AddOrUpdate(item.ItemId, obj, (_, _) => obj);
+            return;
+        }
+
         _values.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
     }
 
     public void Delete(T obj)
     {
         if (obj is null) return;
+        if (obj is Item item)
+        {
+            _values.TryRemove(item.ItemId, out _);
+            return;
+        }
+
         _values.TryRemove(obj.Serial, out _);
     }
 

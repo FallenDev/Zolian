@@ -25,7 +25,7 @@ public class CthonicPortals(WorldServer server, Mundane mundane) : MundaneScript
             options.Add(new Dialog.OptionsDataItem(0x02, "Advanced Camp"));
         }
 
-        if (client.Aisling.QuestManager.CthonicRemainsExplorationLevel >= 2)
+        if (client.Aisling.QuestManager.CthonicRemainsExplorationLevel == 3)
         {
             options.Add(new Dialog.OptionsDataItem(0x03, "Forward Camp"));
         }

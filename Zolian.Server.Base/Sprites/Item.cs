@@ -653,13 +653,14 @@ public sealed class Item : Sprite, IItem
     public bool GiveTo(Sprite sprite, bool checkWeight = true)
     {
         if (sprite is not Aisling aisling) return false;
-        ItemPane = ItemPanes.Inventory;
 
         if (aisling.Inventory.IsFull)
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
             return false;
         }
+
+        ItemPane = ItemPanes.Inventory;
 
         // Stack
         if (Template.Flags.FlagIsSet(ItemFlags.Stackable))
@@ -726,11 +727,7 @@ public sealed class Item : Sprite, IItem
         CurrentMapId = owner.CurrentMapId;
         AbandonedDate = DateTime.UtcNow;
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-        ItemPane = ItemPanes.Ground;
         AddObject(this);
-
-        if (owner is Aisling player)
-            ShowTo(player);
     }
 
     /// <summary>
