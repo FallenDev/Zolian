@@ -727,6 +727,8 @@ public sealed class Item : Sprite, IItem
         CurrentMapId = owner.CurrentMapId;
         AbandonedDate = DateTime.UtcNow;
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+        if (Template.CanStack)
+            ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         AddObject(this);
     }
 

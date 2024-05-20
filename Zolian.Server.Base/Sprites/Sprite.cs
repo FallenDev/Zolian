@@ -10,6 +10,7 @@ using Darkages.Interfaces;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Types;
+
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1835,11 +1836,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg *= 2;
 
-        // Sleep gets removed on hit
-        if (HasDebuff("Sleep")) RemoveDebuff("Sleep");
+        // Unbreakable Frozen returns damage
+        if (HasDebuff("Adv Frozen")) return dmg;
 
-        // Frozen status gets removed after five successful hits
+        // Sleep gets removed on hit
+        if (IsSleeping) RemoveDebuff("Sleep");
+
+        // Weak Frozen status gets removed after five successful hits
         if (!IsFrozen) return dmg;
+
         _frozenStack += 1;
         if (_frozenStack <= 4) return dmg;
 
@@ -2772,8 +2777,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         lock (Buffs)
         {
-            var buffObj = Buffs[buff];
-            buffObj?.OnEnded(this, buffObj);
+            try
+            {
+                var buffObj = Buffs[buff];
+                buffObj?.OnEnded(this, buffObj);
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         return true;
@@ -2788,15 +2800,23 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool RemoveDebuff(string debuff, bool cancelled = false)
     {
         if (!cancelled && debuff == "Skulled") return true;
+        if (!HasDebuff(debuff)) return false;
 
         lock (Debuffs)
         {
-            if (!HasDebuff(debuff)) return false;
-            var debuffObj = Debuffs[debuff];
-
-            if (debuffObj == null) return false;
-            debuffObj.Cancelled = cancelled;
-            debuffObj.OnEnded(this, debuffObj);
+            try
+            {
+                var debuffObj = Debuffs[debuff];
+                if (debuffObj != null)
+                {
+                    debuffObj.Cancelled = cancelled;
+                    debuffObj.OnEnded(this, debuffObj);
+                }
+            }
+            catch
+            {
+                // ignored
+            }
         }
 
         return true;

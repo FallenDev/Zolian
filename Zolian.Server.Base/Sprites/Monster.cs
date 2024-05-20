@@ -317,6 +317,12 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             return;
         }
 
+        if (pathList[0].X < 0 || pathList[0].Y < 0 || pathList[0].X >= Map.Width || pathList[0].Y >= Map.Height)
+        {
+            Wander();
+            return;
+        }
+
         var nodeX = pathList[0].X;
         var nodeY = pathList[0].Y;
 
