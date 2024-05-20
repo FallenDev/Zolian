@@ -83,7 +83,7 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
         if (obj is null) return;
         if (obj is Item item)
         {
-            _values.AddOrUpdate(item.ItemId, obj, (_, _) => obj);
+            _values.AddOrUpdate(item.ItemVisibilityId, obj, (_, _) => obj);
             return;
         }
 
@@ -95,7 +95,7 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
         if (obj is null) return;
         if (obj is Item item)
         {
-            _values.TryRemove(item.ItemId, out _);
+            _values.TryRemove(item.ItemVisibilityId, out _);
             return;
         }
 

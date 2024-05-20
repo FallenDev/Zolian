@@ -188,7 +188,7 @@ public class SirDolvet : MundaneScript
     private static Item CheckForForsakenDragonSlayer(WorldClient client)
     {
         var item = client.Aisling.HasItemReturnItem("Dragon Slayer");
-        return item.OriginalQuality == Item.Quality.Forsaken ? item : null;
+        return item?.OriginalQuality == Item.Quality.Forsaken ? item : null;
     }
 
     #region Skills & Spells

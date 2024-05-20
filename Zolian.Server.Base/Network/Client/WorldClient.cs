@@ -3368,7 +3368,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     case Item groundItem:
                         var groundItemInfo = new GroundItemInfo
                         {
-                            Id = groundItem.Serial,
+                            Id = groundItem.ItemVisibilityId,
                             Sprite = groundItem.DisplayImage,
                             X = groundItem.X,
                             Y = groundItem.Y,

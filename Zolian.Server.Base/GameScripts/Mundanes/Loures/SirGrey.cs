@@ -191,11 +191,11 @@ public class SirGrey : MundaneScript
         if (client.Aisling.Gender == Gender.Male)
         {
             var warPlate = client.Aisling.HasItemReturnItem("Ancient War Plate");
-            return warPlate.ItemMaterial == Item.ItemMaterials.MoonStone ? warPlate : null;
+            return warPlate?.ItemMaterial == Item.ItemMaterials.MoonStone ? warPlate : null;
         }
 
         var warSheath = client.Aisling.HasItemReturnItem("Ancient War Sheath");
-        return warSheath.ItemMaterial == Item.ItemMaterials.MoonStone ? warSheath : null;
+        return warSheath?.ItemMaterial == Item.ItemMaterials.MoonStone ? warSheath : null;
     }
 
     #region Skills & Spells

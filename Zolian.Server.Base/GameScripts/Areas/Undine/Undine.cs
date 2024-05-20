@@ -63,16 +63,8 @@ public class Undine : AreaScript
         if (itemDropped.Template.Group is "Scrolls" or "Health" or "Cures" or "Mana" or "Food" or "Spirits" or "Paper")
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, $"{{=bThe item(s), fumble, and vanished into the altar..");
-            var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-            itemToRemove.Remove();
             return;
         }
-
-        // Item drop logic
-        //switch (itemDropped.DisplayName)
-        //{
-
-        //}
 
         for (var i = 0; i < loop; i++)
         {
@@ -140,8 +132,6 @@ public class Undine : AreaScript
         }
 
         client.SendAttributes(StatUpdateType.Full);
-        var itemRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-        itemRemove.Remove();
     }
 
     private static Item CreateItem(WorldClient client)

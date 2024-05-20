@@ -118,6 +118,7 @@ public sealed class Item : Sprite, IItem
     }
 
     public long ItemId { get; set; }
+    public uint ItemVisibilityId => (uint)ItemId;
     public ItemTemplate Template { get; set; }
     public string Name { get; set; }
     public string DisplayName => GetDisplayName();

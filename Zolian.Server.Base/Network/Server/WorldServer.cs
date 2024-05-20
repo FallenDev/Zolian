@@ -1282,6 +1282,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                    CheckAltar(localClient, item);
                 }
                 else
                 {
@@ -1301,7 +1302,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     };
 
                     temp.Release(localClient.Aisling, itemPosition);
-
                     CheckAltar(localClient, temp);
 
                     item.Stacks = (ushort)remaining;
@@ -1316,6 +1316,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
                     item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                    CheckAltar(localClient, item);
                 }
             }
 
@@ -2612,11 +2613,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
         {
-            ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
-            if (npc == null) return default;
+            try
+            {
+                ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
+                if (npc == null) return default;
 
-            var script = npc.Scripts.FirstOrDefault();
-            script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
+                var script = npc.Scripts.FirstOrDefault();
+                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
+            }
+            catch (Exception e)
+            {
+                SentrySdk.CaptureException(new Exception($"NPC Issue: {localClient.RemoteIp} sending:\n {e}"));
+            }
 
             return default;
         }

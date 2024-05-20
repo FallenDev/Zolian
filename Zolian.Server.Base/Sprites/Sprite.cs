@@ -2830,7 +2830,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         foreach (var playerNearby in AislingsEarShotNearby())
         {
-            playerNearby.Client.SendRemoveObject(Serial);
+            uint objectId;
+
+            if (this is Item item)
+                objectId = item.ItemVisibilityId;
+            else
+                objectId = Serial;
+
+            playerNearby.Client.SendRemoveObject(objectId);
             var obj = new List<Sprite> { this };
             playerNearby.Client.SendVisibleEntities(obj);
         }
@@ -2839,16 +2846,29 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public void Remove()
     {
         var nearby = AislingsEarShotNearby();
+        uint objectId;
 
+        if (this is Item item)
+            objectId = item.ItemVisibilityId;
+        else
+            objectId = Serial;
+        
         foreach (var o in nearby)
-            o?.Client?.SendRemoveObject(Serial);
+            o?.Client?.SendRemoveObject(objectId);
 
         DeleteObject();
     }
 
     public void HideFrom(Aisling nearbyAisling)
     {
-        nearbyAisling.Client.SendRemoveObject(Serial);
+        uint objectId;
+
+        if (this is Item item)
+            objectId = item.ItemVisibilityId;
+        else
+            objectId = Serial;
+
+        nearbyAisling.Client.SendRemoveObject(objectId);
     }
 
     private void DeleteObject()

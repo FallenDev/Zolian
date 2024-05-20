@@ -78,8 +78,6 @@ public class Mileth : AreaScript
         if (itemDropped.Template.Group is "Scrolls" or "Health" or "Cures" or "Mana" or "Food" or "Spirits" or "Paper")
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, $"{{=bThe item(s), fumble, and vanished into the altar..");
-            var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-            itemToRemove.Remove();
             return;
         }
 
@@ -96,8 +94,7 @@ public class Mileth : AreaScript
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
                     }
-                    var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-                    itemToRemove.Remove();
+
                     return;
                 }
             case "Succibi Hair":
@@ -110,8 +107,7 @@ public class Mileth : AreaScript
                             scriptObj.OnClick(client, npc.Value.Serial);
                         }
                     }
-                    var itemToRemove = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-                    itemToRemove.Remove();
+
                     return;
                 }
         }
@@ -174,8 +170,6 @@ public class Mileth : AreaScript
         }
 
         client.SendAttributes(StatUpdateType.Full);
-        var removeItem = ObjectManager.GetObject<Item>(client.Aisling.Map, i => i.ItemId == itemDropped.ItemId );
-        removeItem.Remove();
     }
 
     private Item CreateItem(WorldClient client)
