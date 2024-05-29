@@ -44,7 +44,7 @@ public class Shield(Item item) : ItemScript(item)
             }
 
             var l = aisling.EquipmentManager.Equipment[3]?.Slot;
-            if (l != null && !aisling.EquipmentManager.RemoveFromExisting((int)l))
+            if (l != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)l))
             {
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
@@ -60,7 +60,7 @@ public class Shield(Item item) : ItemScript(item)
             }
 
             var k = aisling.EquipmentManager.Equipment[3]?.Slot;
-            if (k != null && !aisling.EquipmentManager.RemoveFromExisting((int)k))
+            if (k != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)k))
             {
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;

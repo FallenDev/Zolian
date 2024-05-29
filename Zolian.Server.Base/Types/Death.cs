@@ -1,6 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Sprites;
+using Microsoft.Extensions.Logging;
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Types;
@@ -17,6 +18,7 @@ public class Death
             return;
         }
 
+        ServerSetup.EventsLogger($"{player.Username} has died, {player.Map.ID} - {player.Pos} from {player.Client.RemoteIp}", LogLevel.Error);
         player.DeathLocation = player.Pos;
         player.DeathMapId = player.CurrentMapId;
 
@@ -57,6 +59,7 @@ public class Death
 
             player.Inventory.RemoveFromInventory(player.Client, obj);
             obj.Release(player, new Position(player.DeathLocation.X, player.DeathLocation.Y));
+            ServerSetup.EventsLogger($"{player.Username} - {obj.ItemId} with {obj.ItemQuality} and {obj.OriginalQuality}");
         }
 
         player.Inventory.UpdatePlayersWeight(player.Client);
@@ -90,7 +93,7 @@ public class Death
                 obj.Item.Tarnished = true;
             }
 
-            player.EquipmentManager.RemoveFromExisting(obj.Slot);
+            player.EquipmentManager.RemoveFromExistingSlot(obj.Slot);
         }
 
         player.ArmorImg = 0;

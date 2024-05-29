@@ -3104,7 +3104,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
 
             if (localClient.Aisling.EquipmentManager.Equipment.ContainsKey((int)localArgs.EquipmentSlot))
-                localClient.Aisling.EquipmentManager?.RemoveFromExisting((int)localArgs.EquipmentSlot);
+                localClient.Aisling.EquipmentManager?.RemoveFromExistingSlot((int)localArgs.EquipmentSlot);
 
             return default;
         }

@@ -25,7 +25,7 @@ public class Weapon(Item item) : ItemScript(item)
             if (checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) ||
                 checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
             {
-                aisling.EquipmentManager.RemoveFromExisting(1);
+                aisling.EquipmentManager.RemoveFromExistingSlot(1);
             }
         }
 
@@ -49,7 +49,7 @@ public class Weapon(Item item) : ItemScript(item)
             }
 
             var i = aisling.EquipmentManager.Equipment[3]?.Slot;
-            if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
+            if (i != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)i))
             {
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;
@@ -66,7 +66,7 @@ public class Weapon(Item item) : ItemScript(item)
             }
 
             var i = aisling.EquipmentManager.Equipment[3]?.Slot;
-            if (i != null && !aisling.EquipmentManager.RemoveFromExisting((int)i))
+            if (i != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)i))
             {
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
                 return;

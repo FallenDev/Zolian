@@ -91,7 +91,7 @@ public class EquipmentManager
         foreach (var item in broken.Where(item => item?.Template != null))
         {
             item.ItemQuality = Item.Quality.Damaged;
-            RemoveFromExisting(item.Slot);
+            RemoveFromExistingSlot(item.Slot);
             Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{item.Template.Name} has been damaged.");
         }
     }
@@ -102,7 +102,7 @@ public class EquipmentManager
             Client.SendEquipment(displaySlot, item);
     }
 
-    public bool RemoveFromExisting(int displaySlot)
+    public bool RemoveFromExistingSlot(int displaySlot)
     {
         if (Equipment[displaySlot] == null || displaySlot == 0) return true;
         var itemObj = Equipment[displaySlot].Item;
