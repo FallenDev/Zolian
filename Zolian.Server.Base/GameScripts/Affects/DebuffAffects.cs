@@ -6,6 +6,7 @@ using Darkages.Models;
 using Darkages.Sprites;
 using Darkages.Types;
 using System.Security.Cryptography;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Affects;
 
@@ -2151,7 +2152,7 @@ public class DebuffReaping : Debuff
             }
 
             // Prevent Dojo / Training deaths
-            if (aisling.Map.ID is 7000 or 717 or 721 or 5257 or 192 or 290 or 14758)
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
             {
                 debuff.Cancelled = true;
                 debuff.OnEnded(aisling, debuff);

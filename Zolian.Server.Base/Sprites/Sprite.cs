@@ -1641,15 +1641,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
-        if (this is Aisling aislingTarget)
-        {
-            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
-            {
-                aislingTarget.Client.SendHealthBar(this, sound);
-                return false;
-            }
-        }
-
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
@@ -1727,15 +1718,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
-        if (this is Aisling aislingTarget)
-        {
-            if (aislingTarget.Path == Class.Peasant && aislingTarget.Map.ID == 3029)
-            {
-                aislingTarget.Client.SendHealthBar(this, sound);
-                return false;
-            }
-        }
-
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)

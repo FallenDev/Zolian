@@ -1,6 +1,7 @@
 ﻿using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.Sprites;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Types;
 
@@ -9,9 +10,16 @@ public class Death
     public static void Reap(Aisling player)
     {
         if (player == null) return;
+
+        if (player.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+        {
+            player.Client.TransitionToMap(10281, new Position(8, 9));
+            return;
+        }
+
         player.DeathLocation = player.Pos;
         player.DeathMapId = player.CurrentMapId;
-        
+
         ReapInventory(player);
         ReapGold(player);
         ReapEquipment(player);

@@ -8,6 +8,7 @@ public enum MapFlags : byte
     Rain = 2, // Actual Map Flag
     Darkness = Snow | Rain, // Actual Map Flag
     ArenaTeam = 4,
+    SafeMap = 5,
     CantUseItems = 6,
     CantDropItems = 7,
     PlayerKill = 8,

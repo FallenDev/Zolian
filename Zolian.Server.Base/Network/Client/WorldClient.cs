@@ -484,7 +484,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             return;
         }
 
-        if (Aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap) return;
+        if (Aisling.CurrentMapId == ServerSetup.Instance.Config.DeathMap || Aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap)) return;
         if (Aisling.Skulled) return;
 
         var debuff = new DebuffReaping();
@@ -507,7 +507,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 ? new WorldServerTimer(TimeSpan.FromSeconds(30))
                 : new WorldServerTimer(TimeSpan.FromSeconds(60));
             var color = "a";
-            var aggro = (long)(Aisling.ThreatMeter >= 1 ? 100 : 0);
+            long aggro;
             var group = Aisling.GroupParty?.PartyMembers.Values;
 
             if (group?.Count > 0)
