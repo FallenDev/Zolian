@@ -120,12 +120,12 @@ public class ServerSetup : IServerContext
         var optionsCheck = new RestClientOptions("https://api.abuseipdb.com/api/v2/check")
         {
             ThrowOnAnyError = true,
-            MaxTimeout = 5000
+            Timeout = new TimeSpan(0, 0, 0, 5)
         };
         var optionsReport = new RestClientOptions("https://api.abuseipdb.com/api/v2/report")
         {
             ThrowOnAnyError = true,
-            MaxTimeout = 5000
+            Timeout = new TimeSpan(0, 0, 0, 5)
         };
 
         return (optionsCheck, optionsReport);
