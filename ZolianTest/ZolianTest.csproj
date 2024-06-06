@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Authors>Zolian Contributors</Authors>
 		<Copyright>(C) TheBuckNetwork</Copyright>
 		<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
