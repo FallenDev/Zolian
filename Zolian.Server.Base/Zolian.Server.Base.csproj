@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
+		<EnableWindowsTargeting>True</EnableWindowsTargeting>
 		<Authors>Zolian Contributors</Authors>
 		<Copyright>(C) TheBuckNetwork</Copyright>
 		<PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
