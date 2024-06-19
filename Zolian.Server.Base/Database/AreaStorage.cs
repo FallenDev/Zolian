@@ -46,7 +46,7 @@ public record AreaStorage : IAreaStorage
                 var width = (int)reader["Width"];
                 var temp = new Area
                 {
-                    ID = (int)reader["MapId"],
+                    ID = (int)reader["Id"],
                     Flags = flags,
                     Music = (int)reader["Music"],
                     Height = (byte)height,
