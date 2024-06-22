@@ -64,7 +64,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                     options.Add(new Dialog.OptionsDataItem(0x17, "Depths 12 Exploration"));
                     break;
                 case 2:
-                    //options.Add(new Dialog.OptionsDataItem(0x19, "Visit Forward SpecOp Camp"));
+                    options.Add(new Dialog.OptionsDataItem(0x19, "Visit Forward SpecOp Camp"));
                     break;
             }
 

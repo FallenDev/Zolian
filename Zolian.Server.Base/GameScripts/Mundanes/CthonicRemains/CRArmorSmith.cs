@@ -1241,6 +1241,7 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
         }
 
         armor.GiveTo(client.Aisling);
+        client.SendOptionsDialog(Mundane, $"Well now.. that came out better than I expected. Try it on!");
     }
 
     private void CheckRank(WorldClient client)
