@@ -7,6 +7,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.CthonicRemains;
 
@@ -31,6 +32,12 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
     {
         base.TopMenu(client);
         var options = new List<Dialog.OptionsDataItem>();
+
+        if (client.Aisling.QuestManager.HonoringTheFallen &&
+            client.Aisling.HasItem("Rouel's Tarnished Armor") &&
+            client.Aisling.HasItem("Teardrop Ruby") &&
+            client.Aisling.HasItem("Silver Ingot"))
+            options.Add(new(0x300, "Reforging Rouel's Armor"));
 
         switch (client.Aisling.QuestManager.ArmorSmithingTier)
         {
@@ -1134,9 +1141,106 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
                     client.SendOptionsDialog(Mundane, "Once again, you are astounding! Look for my brother in the lower levels of {=bChaos {=aand he'll see about reforging your armor with this gem.");
                     break;
                 }
+            case 0x300:
+                {
+                    var opts2 = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x301, "Can it be done?")
+                    };
 
+                    client.SendOptionsDialog(Mundane, $"Oh.. that lad who gave his life during The Great War?", opts2.ToArray());
+                }
+                break;
+            case 0x301:
+                {
+                    var opts2 = new List<Dialog.OptionsDataItem>();
+
+                    if (client.Aisling.HasItem("Rouel's Tarnished Armor") &&
+                        client.Aisling.HasItem("Teardrop Ruby") &&
+                        client.Aisling.HasItem("Silver Ingot"))
+                    {
+                        opts2.Add(new(0x302, "I have them right here."));
+                    }
+                    else
+                        opts2.Add(new(0x303, "I'll be back"));
+
+                    client.SendOptionsDialog(Mundane, $"Of course, I'll need a few items.\nRouel's Tarnished Armor, Teardrop Ruby, and a Silver Ingot", opts2.ToArray());
+                }
+                break;
+            case 0x302:
+                {
+                    var item1 = client.Aisling.HasItemReturnItem("Rouel's Tarnished Armor");
+                    var item2 = client.Aisling.HasItemReturnItem("Teardrop Ruby");
+                    var item3 = client.Aisling.HasItemReturnItem("Silver Ingot");
+
+                    if (item1 != null && item2 != null && item3 != null)
+                    {
+                        client.Aisling.QuestManager.LouresReputation++;
+                        client.Aisling.Inventory.RemoveFromInventory(client, item1);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item2);
+                        client.Aisling.Inventory.RemoveFromInventory(client, item3);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light happens!");
+                        var legend = new Legend.LegendItem
+                        {
+                            Key = "LRouelArm",
+                            IsPublic = true,
+                            Time = DateTime.UtcNow,
+                            Color = LegendColor.RedPurpleG3,
+                            Icon = (byte)LegendIcon.Warrior,
+                            Text = "Reforged Rouel's Armor"
+                        };
+
+                        client.Aisling.LegendBook.AddLegend(legend, client);
+                        CraftRouelsArmor(client);
+                        client.SendAttributes(StatUpdateType.WeightGold);
+                    }
+                    else
+                        client.CloseDialog();
+                }
+                break;
+            case 0x303:
+                {
+                    client.CloseDialog();
+                }
+                break;
                 #endregion
         }
+    }
+
+    private void CraftRouelsArmor(WorldClient client)
+    {
+        var armor = new Item();
+
+        switch (client.Aisling.Path)
+        {
+            case Class.Berserker:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Jupe" : "Rouel's Lagertha");
+                break;
+            case Class.Defender:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Donet" : "Rouel's Bliaut");
+                break;
+            case Class.Assassin:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Kit" : "Rouel's Kagume");
+                break;
+            case Class.Cleric:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Vestments" : "Rouel's Stoller");
+                break;
+            case Class.Arcanus:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Robes" : "Rouel's Cloak");
+                break;
+            case Class.Monk:
+                armor = armor.Create(client.Aisling, client.Aisling.Gender == Gender.Male ? "Rouel's Gi" : "Rouel's Lotus");
+                break;
+            case Class.Peasant:
+            case Class.DualBash:
+            case Class.DualCast:
+            case Class.Racial:
+            case Class.Monster:
+            case Class.Quest:
+                break;
+        }
+
+        armor.GiveTo(client.Aisling);
     }
 
     private void CheckRank(WorldClient client)
