@@ -25,7 +25,7 @@ public class Anna(WorldServer server, Mundane mundane) : MundaneScript(server, m
         var options = new List<Dialog.OptionsDataItem>();
 
         if (client.Aisling.QuestManager.AdventuresGuildReputation >= 5)
-            options.Add(new Dialog.OptionsDataItem(0x02, "Special Ops Supply Run"));
+            options.Add(new Dialog.OptionsDataItem(0x00, "Special Ops Supply Run"));
 
         client.SendOptionsDialog(Mundane, "Welcome, have you seen my dear ------?", options.ToArray());
     }
