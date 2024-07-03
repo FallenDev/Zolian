@@ -85,7 +85,6 @@ public sealed class Aisling : Player, IAisling
     public bool Loading { get; set; }
     public long DamageCounter { get; set; }
     public long ThreatMeter { get; set; }
-    public DialogSequence ActiveSequence { get; set; }
     public ExchangeSession Exchange { get; set; }
     public NameDisplayStyle NameStyle { get; set; }
     public ElementManager.Element TempOffensiveHold { get; set; }
