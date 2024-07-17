@@ -192,7 +192,11 @@
     "ReservedRedirects": [
       {
         "Id": 1,
-        "Name": "Zolian Alpha"
+        "Name": "Zolian Beta"
+      },
+      {
+        "Id": 2,
+        "Name": "Legends"
       }
     ],
 
