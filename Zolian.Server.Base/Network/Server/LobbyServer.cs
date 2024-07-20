@@ -10,17 +10,18 @@ using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
+using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
 
 namespace Darkages.Network.Server;
 
@@ -56,7 +57,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
     #region OnHandlers
 
-    public ValueTask OnVersion(ILobbyClient client, in ClientPacket packet)
+    public ValueTask OnVersion(ILobbyClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<VersionArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnVersion);
@@ -75,22 +76,22 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         }
     }
 
-    public ValueTask OnServerTableRequest(ILobbyClient client, in ClientPacket packet)
+    public ValueTask OnServerTableRequest(ILobbyClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<ServerTableRequestArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnServerTableRequest);
 
         ValueTask InnerOnServerTableRequest(ILobbyClient localClient, ServerTableRequestArgs localArgs)
         {
-            var (serverTableRequestType, serverId) = localArgs;
-            switch (serverTableRequestType)
+            switch (localArgs.ServerTableRequestType)
             {
                 case ServerTableRequestType.ServerId:
                     var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
-                    var redirect = new Chaos.Networking.Entities.Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
+                    var redirect = new Chaos.Networking.Entities.Redirect(
+                        EphemeralRandomIdGenerator<uint>.Shared.NextId,
                         new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                         ServerType.Login,
-                        localClient.Crypto.Key,
+                        Encoding.ASCII.GetString(client.Crypto.Key),
                         localClient.Crypto.Seed);
 
                     RedirectManager.Add(redirect);
@@ -98,7 +99,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                     localClient.SendRedirect(redirect);
                     break;
                 case ServerTableRequestType.RequestTable:
-                    localClient.SendServerTable(_serverTable.Data);
+                    localClient.SendServerTableResponse(_serverTable.Data);
                     break;
                 default:
                     localClient.SendLoginMessage(LoginMessageType.Confirm, "You're not authorized.");
@@ -114,10 +115,10 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
     #region Connection / Handler
 
-    public override ValueTask HandlePacketAsync(ILobbyClient client, in ClientPacket packet)
+    public override ValueTask HandlePacketAsync(ILobbyClient client, in Packet packet)
     {
         var opCode = packet.OpCode;
-        var handler = ClientHandlers[(byte)opCode];
+        var handler = ClientHandlers[opCode];
 
         try
         {
@@ -192,7 +193,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
         // 0x7E - Handshake
-        client.SendAcceptConnection();
+        client.SendAcceptConnection("CONNECTED SERVER");
     }
 
     private void OnDisconnect(object sender, EventArgs e)

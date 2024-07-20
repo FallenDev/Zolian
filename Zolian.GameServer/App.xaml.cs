@@ -8,7 +8,6 @@ using Darkages;
 using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +29,9 @@ using System.Windows;
 using System.Windows.Threading;
 using Sentry;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
+using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
+using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 
 namespace Zolian.GameServer;
 

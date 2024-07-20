@@ -14,7 +14,6 @@ using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using Darkages.Types;
 using Microsoft.Extensions.Logging;
@@ -30,6 +29,10 @@ using Newtonsoft.Json;
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
+using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
+using StringExtensions = ServiceStack.StringExtensions;
+using System.Text;
+using Darkages.Common;
 
 namespace Darkages.Network.Server;
 
@@ -40,7 +43,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private readonly Notification _notification;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
-    private ConcurrentDictionary<uint, CreateCharRequestArgs> CreateCharRequests { get; }
+    private ConcurrentDictionary<uint, CreateCharInitialArgs> CreateCharRequests { get; }
 
     public LoginServer(
         IClientRegistry<ILoginClient> clientRegistry,
@@ -58,7 +61,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ServerSetup.Instance.LoginServer = this;
         _clientProvider = clientProvider;
         _notification = Notification.FromFile("Notification.txt");
-        CreateCharRequests = new ConcurrentDictionary<uint, CreateCharRequestArgs>();
+        CreateCharRequests = [];
         IndexHandlers();
     }
 
@@ -67,7 +70,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x57 - Server Table & Redirect
     /// </summary>
-    public ValueTask OnClientRedirected(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnClientRedirected(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnClientRedirect);
@@ -101,7 +104,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x04 - Create New Player from Template
     /// </summary>
-    public ValueTask OnCreateCharFinalize(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnCreateCharFinalize(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<CreateCharFinalizeArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnCreateCharFinalize);
@@ -110,7 +113,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             if (CreateCharRequests.TryGetValue(localClient.Id, out var requestArgs))
             {
-                var (hairStyle, gender, hairColor) = localArgs;
                 var readyTime = DateTime.UtcNow;
                 var maximumHp = Random.Shared.Next(128, 165);
                 var maximumMp = Random.Shared.Next(30, 45);
@@ -124,9 +126,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     BaseHp = maximumHp,
                     CurrentMp = maximumMp,
                     BaseMp = maximumMp,
-                    Gender = (Gender)gender,
-                    HairColor = (byte)hairColor,
-                    HairStyle = hairStyle,
+                    Gender = (Gender)localArgs.Gender,
+                    HairColor = (byte)localArgs.HairColor,
+                    HairStyle = localArgs.HairStyle,
                     BodyColor = 0,
                     SkillBook = new SkillBook(),
                     SpellBook = new SpellBook(),
@@ -145,12 +147,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x02 - Character Creation Checks
     /// </summary>
-    public ValueTask OnCreateCharRequest(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnCreateCharInitial(ILoginClient client, in Packet packet)
     {
-        var args = PacketSerializer.Deserialize<CreateCharRequestArgs>(in packet);
+        var args = PacketSerializer.Deserialize<CreateCharInitialArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnCreateCharRequest);
 
-        async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharRequestArgs localArgs)
+        async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharInitialArgs localArgs)
         {
             ServerSetup.Instance.GlobalCreationCount.TryGetValue(localClient.RemoteIp, out var created);
             var result = await ValidateUsernameAndPassword(localClient, localArgs.Name, localArgs.Password);
@@ -168,13 +170,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
     }
 
-    public ValueTask OnHomepageRequest(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnHomepageRequest(ILoginClient client, in Packet packet)
     {
         return ExecuteHandler(client, InnerOnHomepageRequest);
 
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
-            localClient.SendLoginControls(LoginControlsType.Homepage, "https://classicrpgcharacter.nexon.com/service/ConfirmGameUser.aspx?id=%s&pw=%s&mainCode=2&subCode=0");
+            localClient.SendLoginControl(LoginControlsType.Homepage, "https://www.darkages.com");
             return default;
         }
     }
@@ -182,7 +184,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x03 - Player Login and Redirect
     /// </summary>
-    public ValueTask OnLogin(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnLogin(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
 
@@ -193,17 +195,16 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
-            var (name, password) = localArgs;
-            if (name.IsNullOrEmpty() || password.IsNullOrEmpty()) return;
-            var result = await StorageManager.AislingBucket.CheckPassword(name);
+            if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.Password)) return;
+            var result = await StorageManager.AislingBucket.CheckPassword(localArgs.Name);
 
             if (result == null)
             {
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{localArgs.Name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
                 return;
             }
 
-            if (result.Password != password)
+            if (result.Password != localArgs.Password)
             {
                 if (result.PasswordAttempts <= 9)
                 {
@@ -226,7 +227,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 return;
             }
 
-            var maintCheck = name.ToLowerInvariant();
+            var maintCheck = localArgs.Name.ToLowerInvariant();
             var connInfo = new ConnectionInfo
             {
                 Address = IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp),
@@ -238,9 +239,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 EphemeralRandomIdGenerator<uint>.Shared.NextId,
                 connInfo,
                 ServerType.World,
-                localClient.Crypto.Key,
+                Encoding.ASCII.GetString(localClient.Crypto.Key),
                 localClient.Crypto.Seed,
-                name);
+                localArgs.Name);
 
             switch (maintCheck)
             {
@@ -251,7 +252,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     {
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                        if (localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                        if (IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();
@@ -275,7 +276,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
                         if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip))) 
-                            || localClient.IsLoopback() || localClient.RemoteIp.Equals(ipLocal))
+                            || IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
                             result.LastAttemptIP = localClient.RemoteIp.ToString();
                             result.LastIP = localClient.RemoteIp.ToString();
@@ -323,15 +324,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x7B - Metadata Load
     /// </summary>
-    public ValueTask OnMetaDataRequest(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnMetaDataRequest(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<MetaDataRequestArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnMetaDataRequest);
 
         static ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
-            var (metadataRequestType, name) = localArgs;
-            localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
+            localClient.SendMetaData(localArgs.MetaDataRequestType, new MetafileManager(), localArgs.Name);
             return default;
         }
     }
@@ -339,7 +339,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x4B - Notification Load
     /// </summary>
-    public ValueTask OnNoticeRequest(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnNoticeRequest(ILoginClient client, in Packet packet)
     {
         return ExecuteHandler(client, InnerOnNoticeRequest);
 
@@ -353,16 +353,15 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x26 - Change Password
     /// </summary>
-    public ValueTask OnPasswordChange(ILoginClient client, in ClientPacket packet)
+    public ValueTask OnPasswordChange(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
         return ExecuteHandler(client, args, InnerOnPasswordChange);
 
         static async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
-            var (name, currentPassword, newPassword) = localArgs;
-            if (name.IsNullOrEmpty() || currentPassword.IsNullOrEmpty() || newPassword.IsNullOrEmpty()) return;
-            var aisling = StorageManager.AislingBucket.CheckPassword(name);
+            if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
+            var aisling = StorageManager.AislingBucket.CheckPassword(localArgs.Name);
 
             if (aisling.Result == null)
             {
@@ -376,7 +375,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 return;
             }
 
-            if (aisling.Result.Password != currentPassword)
+            if (aisling.Result.Password != localArgs.CurrentPassword)
             {
                 if (aisling.Result.PasswordAttempts <= 9)
                 {
@@ -398,13 +397,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 return;
             }
 
-            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
+            if (localArgs.NewPassword.Length < 6)
             {
                 localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
                 return;
             }
 
-            aisling.Result.Password = newPassword;
+            aisling.Result.Password = localArgs.NewPassword;
             aisling.Result.LastIP = localClient.RemoteIp.ToString();
             aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
             await SavePassword(aisling.Result).ConfigureAwait(false);
@@ -414,7 +413,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// <summary>
     /// 0x0B - Exit Request
     /// </summary>
-    public ValueTask OnExitRequest(ILoginClient client, in ClientPacket clientPacket)
+    public ValueTask OnExitRequest(ILoginClient client, in Packet clientPacket)
     {
         return ExecuteHandler(client, InnerOnExitRequest);
 
@@ -426,29 +425,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
     }
 
-    /// <summary>
-    /// 0x2D - Request Player Profile & Load Character Meta Data (Skills/Spells)
-    /// OnProfileRequest is handled in WorldServer and is disabled here, the client
-    /// still requests it from the LoginServer and so it is handled and returned null
-    /// </summary>
-    public ValueTask OnProfileRequest(ILoginClient client, in ClientPacket clientPacket)
-    {
-        static ValueTask InnerOnProfileRequest(ILoginClient localClient)
-        {
-            return default;
-        }
-
-        return ExecuteHandler(client, InnerOnProfileRequest);
-    }
-
     #endregion
 
     #region Connection / Handler
 
-    public override ValueTask HandlePacketAsync(ILoginClient client, in ClientPacket packet)
+    public override ValueTask HandlePacketAsync(ILoginClient client, in Packet packet)
     {
         var opCode = packet.OpCode;
-        var handler = ClientHandlers[(byte)opCode];
+        var handler = ClientHandlers[opCode];
 
         try
         {
@@ -467,10 +451,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     protected override void IndexHandlers()
     {
         base.IndexHandlers();
-        ClientHandlers[(byte)ClientOpCode.CreateCharRequest] = OnCreateCharRequest;
+        ClientHandlers[(byte)ClientOpCode.CreateCharInitial] = OnCreateCharInitial;
         ClientHandlers[(byte)ClientOpCode.CreateCharFinalize] = OnCreateCharFinalize;
         ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
-        ClientHandlers[(byte)ClientOpCode.RequestProfile] = OnProfileRequest;
         ClientHandlers[(byte)ClientOpCode.HomepageRequest] = OnHomepageRequest;
         ClientHandlers[(byte)ClientOpCode.Login] = OnLogin;
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest;
@@ -550,7 +533,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
         // 0x7E - Handshake
-        client.SendAcceptConnection();
+        client.SendAcceptConnection("CONNECTED SERVER");
     }
 
     private void OnDisconnect(object sender, EventArgs e)
@@ -561,8 +544,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
     private bool ClientOnBlackList(string remoteIp)
     {
-        if (remoteIp.IsNullOrEmpty()) return true;
-
         switch (remoteIp)
         {
             case "127.0.0.1":
@@ -712,7 +693,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     private static async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)
     {
         var aisling = await StorageManager.AislingBucket.CheckIfPlayerExists(name);
-        var regex = PasswordRegex();
+        var regex = Extensions.PasswordRegex;
 
         if (aisling == false)
         {
@@ -738,7 +719,5 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         return false;
     }
 
-    [GeneratedRegex("(?:[^a-z]|(?<=['\"])s)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant)]
-    private static partial Regex PasswordRegex();
     #endregion
 }

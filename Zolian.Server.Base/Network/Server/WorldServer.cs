@@ -17,7 +17,6 @@ using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
 using Darkages.Object;
 using Darkages.ScriptingBase;
@@ -35,19 +34,14 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Text;
 using Darkages.Managers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
-using ExchangeArgs = Chaos.Networking.Entities.Client.ExchangeArgs;
-using GroupRequestArgs = Chaos.Networking.Entities.Client.GroupRequestArgs;
-using MapFlags = Darkages.Enums.MapFlags;
-using ProfileArgs = Chaos.Networking.Entities.Client.ProfileArgs;
-using PublicMessageArgs = Chaos.Networking.Entities.Client.PublicMessageArgs;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
-using Stat = Chaos.Common.Definitions.Stat;
-using UnequipArgs = Chaos.Networking.Entities.Client.UnequipArgs;
+using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Network.Server;
 
@@ -832,11 +826,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values 
-                     select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground) 
-                     into items 
-                     from item in items let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate) 
-                     where !(abandonedDiff.TotalMinutes <= 30) select item)
+            foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values
+                                 select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground)
+                     into items
+                                 from item in items
+                                 let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
+                                 where !(abandonedDiff.TotalMinutes <= 30)
+                                 select item)
                 item.Remove();
         }
         catch (Exception ex)
@@ -906,7 +902,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     monster.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
                     monster.MonsterBuffAndDebuffStopWatch.Restart();
                 });
-            }); 
+            });
         }
         catch (Exception ex)
         {
@@ -1012,7 +1008,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x05 - Request Map Data
     /// </summary>
-    public ValueTask OnMapDataRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnMapDataRequest(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling?.Map == null) return default;
         if (client.MapUpdating && client.Aisling.CurrentMapId != ServerSetup.Instance.Config.TransitionZone) return default;
@@ -1037,7 +1033,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x06 - Client Movement
     /// </summary>
-    public ValueTask OnClientWalk(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnClientWalk(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling?.Map is not { Ready: true }) return default;
         var readyTime = DateTime.UtcNow;
@@ -1117,7 +1113,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x07 - Object Pickup
     /// </summary>
-    public ValueTask OnPickup(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnPickup(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling is null || client.Aisling.LoggedIn == false) return default;
         if (client.Aisling.IsDead())
@@ -1137,10 +1133,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
-            var (destinationSlot, sourcePoint) = localArgs;
             var map = localClient.Aisling.Map;
-            var itemObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Items).ToList();
-            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == sourcePoint.X && (int)i.Pos.Y == sourcePoint.Y, ObjectManager.Get.Money);
+            var itemObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Items).ToList();
+            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money);
 
             if (!itemObjs.IsEmpty())
             {
@@ -1182,7 +1177,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     item.Remove();
                     if (item.Scripts is null) return default;
                     foreach (var itemScript in item.Scripts.Values)
-                        itemScript?.OnPickedUp(localClient.Aisling, new Position(sourcePoint.X, sourcePoint.Y), map);
+                        itemScript?.OnPickedUp(localClient.Aisling, new Position(localArgs.SourcePoint.X, localArgs.SourcePoint.Y), map);
                     return default;
                 }
             }
@@ -1204,7 +1199,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x08 - Drop Item
     /// </summary>
-    public ValueTask OnItemDropped(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnItemDrop(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling is null || client.Aisling.LoggedIn == false) return default;
         if (client.Aisling.Map is not { Ready: true }) return default;
@@ -1231,15 +1226,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnItemDropped(IWorldClient localClient, ItemDropArgs localArgs)
         {
-            var (sourceSlot, destinationPoint, count) = localArgs;
-            if (sourceSlot is 0) return default;
-            if (count is > 1000 or < 0) return default;
-            if (!localClient.Aisling.Inventory.Items.TryGetValue(sourceSlot, out var item)) return default;
+            if (localArgs.SourceSlot is 0) return default;
+            if (localArgs.Count is > 1000 or < 0) return default;
+            if (!localClient.Aisling.Inventory.Items.TryGetValue(localArgs.SourceSlot, out var item)) return default;
             if (item == null) return default;
 
             if (item.Stacks > 1)
             {
-                if (count > item.Stacks)
+                if (localArgs.Count > item.Stacks)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Wait.. how many did I have again?");
                     return default;
@@ -1252,7 +1246,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            var itemPosition = new Position(destinationPoint.X, destinationPoint.Y);
+            var itemPosition = new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y);
 
             if (localClient.Aisling.Position.DistanceFrom(itemPosition.X, itemPosition.Y) > 11)
             {
@@ -1260,8 +1254,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            if (localClient.Aisling.Map.IsWall(destinationPoint.X, destinationPoint.Y))
-                if ((int)localClient.Aisling.Pos.X != destinationPoint.X || (int)localClient.Aisling.Pos.Y != destinationPoint.Y)
+            if (localClient.Aisling.Map.IsWall(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y))
+                if ((int)localClient.Aisling.Pos.X != localArgs.DestinationPoint.X || (int)localClient.Aisling.Pos.Y != localArgs.DestinationPoint.Y)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Something is in the way.");
                     return default;
@@ -1269,26 +1263,26 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (item.Template.Flags.FlagIsSet(ItemFlags.Stackable))
             {
-                if (count > item.Stacks)
+                if (localArgs.Count > item.Stacks)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Wait.. how many did I have again?");
                     return default;
                 }
 
-                var remaining = item.Stacks - (ushort)count;
-                item.Dropping = count;
+                var remaining = item.Stacks - (ushort)localArgs.Count;
+                item.Dropping = localArgs.Count;
 
                 if (remaining == 0)
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                    item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                    item.Release(localClient.Aisling, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y));
                     CheckAltar(localClient, item);
                 }
                 else
                 {
                     var temp = new Item
                     {
-                        Slot = sourceSlot,
+                        Slot = localArgs.SourceSlot,
                         Image = item.Image,
                         DisplayImage = item.DisplayImage,
                         Durability = item.Durability,
@@ -1296,7 +1290,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         WeapVariance = item.WeapVariance,
                         ItemQuality = item.ItemQuality,
                         OriginalQuality = item.OriginalQuality,
-                        Stacks = (ushort)count,
+                        Stacks = (ushort)localArgs.Count,
                         Template = item.Template,
                         AbandonedDate = DateTime.UtcNow
                     };
@@ -1315,7 +1309,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (!item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                 {
                     localClient.Aisling.Inventory.RemoveFromInventory(localClient.Aisling.Client, item);
-                    item.Release(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y));
+                    item.Release(localClient.Aisling, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y));
                     CheckAltar(localClient, item);
                 }
             }
@@ -1330,7 +1324,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (item.Scripts == null) return default;
             foreach (var itemScript in item.Scripts.Values)
             {
-                itemScript?.OnDropped(localClient.Aisling, new Position(destinationPoint.X, destinationPoint.Y), localClient.Aisling.Map);
+                itemScript?.OnDropped(localClient.Aisling, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y), localClient.Aisling.Map);
             }
 
             return default;
@@ -1361,7 +1355,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x0B - Exit Request
     /// </summary>
-    public ValueTask OnExitRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnExitRequest(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<ExitRequestArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnExitRequest);
@@ -1379,9 +1373,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
                 var redirect = new Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                    new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
+                    new Chaos.Networking.Options.ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                     ServerType.Login,
-                    localClient.Crypto.Key,
+                    Encoding.ASCII.GetString(localClient.Crypto.Key),
                     localClient.Crypto.Seed);
 
                 RedirectManager.Add(redirect);
@@ -1395,7 +1389,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x0C - Display Object Request
     /// </summary>
-    public ValueTask OnDisplayEntityRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnDisplayEntityRequest(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<DisplayEntityRequestArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnDisplayEntityRequest);
@@ -1418,7 +1412,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x0D - Ignore Player
     /// </summary>
-    public ValueTask OnIgnore(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnIgnore(IWorldClient client, in Packet clientPacket)
     {
         if (client != null && !client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<IgnoreArgs>(in clientPacket);
@@ -1426,25 +1420,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnIgnore(IWorldClient localClient, IgnoreArgs localArgs)
         {
-            var (ignoreType, targetName) = localArgs;
-
-            switch (ignoreType)
+            switch (localArgs.IgnoreType)
             {
                 case IgnoreType.Request:
                     var ignored = string.Join(", ", localClient.Aisling.IgnoredList);
                     localClient.SendServerMessage(ServerMessageType.NonScrollWindow, ignored);
                     break;
                 case IgnoreType.AddUser:
-                    if (targetName == null) break;
-                    if (targetName.EqualsIgnoreCase("Death")) break;
-                    if (localClient.Aisling.IgnoredList.ListContains(targetName)) break;
-                    localClient.AddToIgnoreListDb(targetName);
+                    if (localArgs.TargetName == null) break;
+                    if (localArgs.TargetName.EqualsIgnoreCase("Death")) break;
+                    if (localClient.Aisling.IgnoredList.ListContains(localArgs.TargetName)) break;
+                    localClient.AddToIgnoreListDb(localArgs.TargetName);
                     break;
                 case IgnoreType.RemoveUser:
-                    if (targetName == null) break;
-                    if (targetName.EqualsIgnoreCase("Death")) break;
-                    if (!localClient.Aisling.IgnoredList.ListContains(targetName)) break;
-                    localClient.RemoveFromIgnoreListDb(targetName);
+                    if (localArgs.TargetName == null) break;
+                    if (localArgs.TargetName.EqualsIgnoreCase("Death")) break;
+                    if (!localClient.Aisling.IgnoredList.ListContains(localArgs.TargetName)) break;
+                    localClient.RemoveFromIgnoreListDb(localArgs.TargetName);
                     break;
             }
 
@@ -1455,7 +1447,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x0E - Public Chat (Limited to 3 times a second)
     /// </summary>
-    public ValueTask OnPublicMessage(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnPublicMessage(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -1466,15 +1458,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnPublicMessage(IWorldClient localClient, PublicMessageArgs localArgs)
         {
-            var (publicMessageType, message) = localArgs;
             if (localClient.Aisling.DrunkenFist)
             {
                 var slurred = Generator.RandomNumPercentGen();
                 if (slurred >= .50)
                 {
                     const string drunk = "..   .hic!  ";
-                    var drunkSpot = Random.Shared.Next(0, message.Length);
-                    message = message.Remove(drunkSpot).Insert(drunkSpot, drunk);
+                    var drunkSpot = Random.Shared.Next(0, localArgs.Message.Length);
+                    localArgs.Message = localArgs.Message.Remove(drunkSpot).Insert(drunkSpot, drunk);
                 }
             }
             localClient.LastMessageSent = readyTime;
@@ -1483,18 +1474,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (ParseCommand()) return default;
 
-            switch (publicMessageType)
+            switch (localArgs.PublicMessageType)
             {
                 case PublicMessageType.Normal:
-                    response = $"{localClient.Aisling.Username}: {message}";
+                    response = $"{localClient.Aisling.Username}: {localArgs.Message}";
                     audience = localClient.Aisling.AislingsEarShotNearby();
                     break;
                 case PublicMessageType.Shout:
-                    response = $"{localClient.Aisling.Username}! {message}";
+                    response = $"{localClient.Aisling.Username}! {localArgs.Message}";
                     audience = localClient.Aisling.AislingsOnMap();
                     break;
                 case PublicMessageType.Chant:
-                    response = message;
+                    response = localArgs.Message;
                     audience = localClient.Aisling.AislingsNearby();
                     break;
                 default:
@@ -1504,7 +1495,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             var playersToShowList = audience.Where(player => !player.IgnoredList.ListContains(localClient.Aisling.Username));
             var toShowList = playersToShowList as Aisling[] ?? playersToShowList.ToArray();
-            localClient.Aisling.SendTargetedClientMethod(PlayerScope.DefinedAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, publicMessageType, response), toShowList);
+            localClient.Aisling.SendTargetedClientMethod(PlayerScope.DefinedAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, localArgs.PublicMessageType, response), toShowList);
 
             var nearbyMundanes = localClient.Aisling.MundanesNearby();
 
@@ -1513,18 +1504,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (npc?.Scripts is null) continue;
 
                 foreach (var script in npc.Scripts.Values)
-                    script?.OnGossip(localClient.Aisling.Client, message);
+                    script?.OnGossip(localClient.Aisling.Client, localArgs.Message);
             }
 
-            localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, message);
+            localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, localArgs.Message);
 
             return default;
 
             bool ParseCommand()
             {
                 if (!localClient.Aisling.GameMaster) return false;
-                if (!message.StartsWith("/")) return false;
-                Commander.ParseChatMessage(localClient.Aisling.Client, message);
+                if (!localArgs.Message.StartsWith("/")) return false;
+                Commander.ParseChatMessage(localClient.Aisling.Client, localArgs.Message);
                 return true;
             }
         }
@@ -1533,7 +1524,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x0F - Spell Use
     /// </summary>
-    public ValueTask OnUseSpell(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSpellUse(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -1558,8 +1549,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnUseSpell(IWorldClient localClient, SpellUseArgs localArgs)
         {
-            var (sourceSlot, argsData) = localArgs;
-            var spell = localClient.Aisling.SpellBook.TryGetSpells(i => i != null && i.Slot == sourceSlot).FirstOrDefault();
+            var spell = localClient.Aisling.SpellBook.TryGetSpells(i => i != null && i.Slot == localArgs.SourceSlot).FirstOrDefault();
             if (spell == null)
             {
                 localClient.SendCancelCasting();
@@ -1589,11 +1579,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (localClient.SpellCastInfo is null)
             {
-                if (argsData.IsEmpty())
+                if (localArgs.ArgsData.IsEmpty())
                 {
                     info = new CastInfo
                     {
-                        Slot = sourceSlot,
+                        Slot = localArgs.SourceSlot,
                         Target = 0,
                         Position = new Position()
                     };
@@ -1602,10 +1592,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     info = new CastInfo
                     {
-                        Slot = sourceSlot,
+                        Slot = localArgs.SourceSlot,
                         Target = 0,
                         Position = new Position(),
-                        Data = argsData.ToString()
+                        Data = localArgs.ArgsData.ToString()
                     };
                 }
             }
@@ -1614,8 +1604,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 info.Slot = localClient.SpellCastInfo.Slot;
                 info.Target = localClient.SpellCastInfo.Target;
                 info.Position = localClient.SpellCastInfo.Position;
-                if (!argsData.IsEmpty())
-                    info.Data = argsData.ToString();
+                if (!localArgs.ArgsData.IsEmpty())
+                    info.Data = localArgs.ArgsData.ToString();
             }
 
             var source = localClient.Aisling;
@@ -1630,14 +1620,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 case SpellTemplate.SpellUseType.None:
                     return default;
                 case SpellTemplate.SpellUseType.Prompt:
-                    if (!argsData.IsEmpty())
-                        info.Data = PacketSerializer.Encoding.GetString(argsData);
+                    if (!localArgs.ArgsData.IsEmpty())
+                        info.Data = PacketSerializer.Encoding.GetString(localArgs.ArgsData);
                     break;
                 case SpellTemplate.SpellUseType.ChooseTarget:
-                    if (!argsData.IsEmpty())
+                    if (!localArgs.ArgsData.IsEmpty())
                     {
-                        var targetIdSegment = new ArraySegment<byte>(argsData, 0, 4);
-                        var targetPointSegment = new ArraySegment<byte>(argsData, 4, 4);
+                        var targetIdSegment = new ArraySegment<byte>(localArgs.ArgsData, 0, 4);
+                        var targetPointSegment = new ArraySegment<byte>(localArgs.ArgsData, 4, 4);
                         var targetId = (uint)((targetIdSegment[0] << 24)
                                               | (targetIdSegment[1] << 16)
                                               | (targetIdSegment[2] << 8)
@@ -1666,7 +1656,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x10 - On Redirect
     /// </summary>
-    public ValueTask OnClientRedirected(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnClientRedirected(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnClientRedirected);
@@ -1744,7 +1734,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
                 if (!GameMastersIPs.Any(ip => client.RemoteIp.Equals(IPAddress.Parse(ip)))
-                    && !client.IsLoopback() && !client.RemoteIp.Equals(ipLocal))
+                    && !IPAddress.IsLoopback(client.RemoteIp) && !client.RemoteIp.Equals(ipLocal))
                 {
                     ServerSetup.ConnectionLogger($"Failed to login GM from {client.RemoteIp}.");
                     SentrySdk.CaptureMessage($"Failed to login GM from {client.RemoteIp}.");
@@ -1815,7 +1805,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x11 - Change Direction
     /// </summary>
-    public ValueTask OnTurn(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnTurn(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<TurnArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnTurn);
@@ -1839,7 +1829,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x13 - On Spacebar (Limited to 2 times a second)
     /// </summary>
-    public ValueTask OnSpacebar(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSpacebar(IWorldClient client, in Packet clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
@@ -1926,7 +1916,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x18 - Request World List (Limited to 2 times a second)
     /// </summary>
-    public ValueTask OnWorldListRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnWorldListRequest(IWorldClient client, in Packet clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
@@ -1945,7 +1935,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x19 - Private Message (Limited to 3 times a second)
     /// </summary>
-    public ValueTask OnWhisper(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnWhisper(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<WhisperArgs>(in clientPacket);
         var readyTime = DateTime.UtcNow;
@@ -1953,31 +1943,30 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnWhisper(IWorldClient localClient, WhisperArgs localArgs)
         {
-            var (targetName, message) = localArgs;
             var fromAisling = localClient.Aisling;
-            if (targetName.Length > 12) return default;
-            if (message.Length > 100) return default;
+            if (localArgs.TargetName.Length > 12) return default;
+            if (localArgs.Message.Length > 100) return default;
             if (localClient.Aisling.DrunkenFist)
             {
                 var slurred = Generator.RandomNumPercentGen();
                 if (slurred >= .50)
                 {
                     const string drunk = "..   .hic!  ";
-                    var drunkSpot = Random.Shared.Next(0, message.Length);
-                    message = message.Remove(drunkSpot).Insert(drunkSpot, drunk);
+                    var drunkSpot = Random.Shared.Next(0, localArgs.Message.Length);
+                    localArgs.Message = localArgs.Message.Remove(drunkSpot).Insert(drunkSpot, drunk);
                 }
             }
             client.LastWhisperMessageSent = readyTime;
-            var maxLength = CONSTANTS.MAX_SERVER_MESSAGE_LENGTH - targetName.Length - 4;
-            if (message.Length > maxLength)
-                message = message[..maxLength];
+            var maxLength = CONSTANTS.MAX_MESSAGE_LINE_LENGTH - localArgs.TargetName.Length - 4;
+            if (localArgs.Message.Length > maxLength)
+                localArgs.Message = localArgs.Message[..maxLength];
 
-            switch (targetName)
+            switch (localArgs.TargetName)
             {
                 case "#" when client.Aisling.GameMaster:
                     foreach (var player in Aislings)
                     {
-                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=b{client.Aisling.Username}{{=q: {message}");
+                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=b{client.Aisling.Username}{{=q: {localArgs.Message}");
                     }
                     return default;
                 case "#" when client.Aisling.GameMaster != true:
@@ -1988,7 +1977,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     {
                         if (player.Client is null) continue;
                         if (!player.GameSettings.GroupChat) continue;
-                        player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {message}");
+                        player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {localArgs.Message}");
                     }
                     return default;
                 case "!!" when client.Aisling.GroupParty?.PartyMembers != null:
@@ -1998,7 +1987,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         if (!player.GameSettings.GroupChat) continue;
                         if (player.GroupParty == client.Aisling.GroupParty)
                         {
-                            player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {message}");
+                            player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {localArgs.Message}");
                         }
                     }
                     return default;
@@ -2007,11 +1996,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return default;
             }
 
-            var targetAisling = Aislings.FirstOrDefault(player => player.Username.EqualsI(targetName));
+            var targetAisling = Aislings.FirstOrDefault(player => player.Username.EqualsI(localArgs.TargetName));
 
             if (targetAisling == null)
             {
-                fromAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{targetName} is not online");
+                fromAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{localArgs.TargetName} is not online");
                 return default;
             }
 
@@ -2033,8 +2022,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            localClient.SendServerMessage(ServerMessageType.Whisper, $"[{targetAisling.Username}]> {message}");
-            targetAisling.Client.SendServerMessage(ServerMessageType.Whisper, $"[{fromAisling.Username}]: {message}");
+            localClient.SendServerMessage(ServerMessageType.Whisper, $"[{targetAisling.Username}]> {localArgs.Message}");
+            targetAisling.Client.SendServerMessage(ServerMessageType.Whisper, $"[{fromAisling.Username}]: {localArgs.Message}");
 
             return default;
         }
@@ -2043,13 +2032,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x1B - User Option Toggle
     /// </summary>
-    public ValueTask OnUserOptionToggle(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnOptionToggle(IWorldClient client, in Packet clientPacket)
     {
         if (client.Aisling.GameSettings == null) return default;
-        var args = PacketSerializer.Deserialize<UserOptionToggleArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<OptionToggleArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnUsrOptionToggle);
 
-        static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, UserOptionToggleArgs localArgs)
+        static ValueTask InnerOnUsrOptionToggle(IWorldClient localClient, OptionToggleArgs localArgs)
         {
             if (localArgs.UserOption == UserOption.Request)
             {
@@ -2068,7 +2057,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x1C - Item Usage (Limited to 3 times a second)
     /// </summary>
-    public ValueTask OnUseItem(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnItemUse(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling?.Map is not { Ready: true }) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2141,7 +2130,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x1D - Emote Usage
     /// </summary>
-    public ValueTask OnEmote(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnEmote(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2169,7 +2158,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x24 - Drop Gold
     /// </summary>
-    public ValueTask OnGoldDropped(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnGoldDrop(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2187,19 +2176,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnGoldDropped(IWorldClient localClient, GoldDropArgs localArgs)
         {
-            var (amount, destinationPoint) = localArgs;
-            if (amount <= 0) return default;
+            if (localArgs.Amount <= 0) return default;
 
-            if (client.Aisling.GoldPoints >= (uint)amount)
+            if (client.Aisling.GoldPoints >= (uint)localArgs.Amount)
             {
-                client.Aisling.GoldPoints -= (uint)amount;
+                client.Aisling.GoldPoints -= (uint)localArgs.Amount;
                 if (client.Aisling.GoldPoints <= 0)
                     client.Aisling.GoldPoints = 0;
 
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.YouDroppedGoldMsg}");
                 client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislingsExludingSelf, c => c.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.UserDroppedGoldMsg.Replace("noname", client.Aisling.Username)}"));
 
-                Money.Create(client.Aisling, (uint)amount, new Position(destinationPoint.X, destinationPoint.Y));
+                Money.Create(client.Aisling, (uint)localArgs.Amount, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y));
                 client.SendAttributes(StatUpdateType.ExpGold);
             }
             else
@@ -2214,7 +2202,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x29 - Drop Item on Sprite
     /// </summary>
-    public ValueTask OnItemDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnItemDroppedOnCreature(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2226,7 +2214,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
         {
-            var (sourceSlot, targetId, count) = localArgs;
             var result = new List<Sprite>();
             var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
             var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
@@ -2235,14 +2222,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             result.AddRange(listB);
             result.AddRange(listC);
 
-            foreach (var sprite in result.Where(sprite => sprite.Serial == targetId))
+            foreach (var sprite in result.Where(sprite => sprite.Serial == localArgs.TargetId))
             {
                 switch (sprite)
                 {
                     case Monster monster:
                         {
                             var script = monster.Scripts.Values.First();
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = monster.Serial;
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
                                 script?.OnItemDropped(localClient.Aisling.Client, item);
@@ -2253,7 +2240,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     case Mundane mundane:
                         {
                             var script = mundane.Scripts.Values.First();
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = mundane.Serial;
                             localClient.EntryCheck = mundane.Serial;
                             mundane.Bypass = true;
@@ -2262,15 +2249,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
                     case Aisling aisling:
                         {
-                            if (sourceSlot == 0) return default;
-                            var item = localClient.Aisling.Inventory.FindInSlot(sourceSlot);
+                            if (localArgs.SourceSlot == 0) return default;
+                            var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
 
                             if (item.DisplayName.StringContains("deum"))
                             {
                                 var script = item.Scripts.Values.First();
                                 localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
                                 localClient.Aisling.ThrewHealingPot = true;
-                                script?.OnUse(aisling, sourceSlot);
+                                script?.OnUse(aisling, localArgs.SourceSlot);
                                 localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
                                 return default;
                             }
@@ -2337,7 +2324,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x2A - Drop Gold on Sprite
     /// </summary>
-    public ValueTask OnGoldDroppedOnCreature(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnGoldDroppedOnCreature(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2349,7 +2336,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
         {
-            var (amount, targetId) = localArgs;
             var result = new List<Sprite>();
             var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
             var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
@@ -2359,22 +2345,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             result.AddRange(listB);
             result.AddRange(listC);
 
-            foreach (var sprite in result.Where(sprite => sprite.Serial == targetId))
+            foreach (var sprite in result.Where(sprite => sprite.Serial == localArgs.TargetId))
             {
                 switch (sprite)
                 {
                     case Monster monster:
                         {
                             var script = monster.Scripts.Values.First();
-                            if (amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                            if (localArgs.Amount <= 0) return default;
+                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
                         }
                     case Mundane mundane:
                         {
                             var script = mundane.Scripts.Values.First();
-                            if (amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)amount);
+                            if (localArgs.Amount <= 0) return default;
+                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
                         }
                     case Aisling aisling:
@@ -2398,23 +2384,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             localClient.SendExchangeStart(aisling);
                             aisling.Client.SendExchangeStart(localClient.Aisling);
 
-                            if ((uint)amount > localClient.Aisling.GoldPoints)
+                            if ((uint)localArgs.Amount > localClient.Aisling.GoldPoints)
                             {
                                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You don't have that much to give");
                                 break;
                             }
 
-                            if (aisling.GoldPoints + (uint)amount > ServerSetup.Instance.Config.MaxCarryGold)
+                            if (aisling.GoldPoints + (uint)localArgs.Amount > ServerSetup.Instance.Config.MaxCarryGold)
                             {
                                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Player cannot hold that amount");
                                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You cannot hold that much");
                                 break;
                             }
 
-                            if (amount > 0)
+                            if (localArgs.Amount > 0)
                             {
-                                localClient.Aisling.GoldPoints -= (uint)amount;
-                                localClient.Aisling.Exchange.Gold = (uint)amount;
+                                localClient.Aisling.GoldPoints -= (uint)localArgs.Amount;
+                                localClient.Aisling.Exchange.Gold = (uint)localArgs.Amount;
                                 localClient.SendAttributes(StatUpdateType.ExpGold);
                                 localClient.Aisling.Client.SendExchangeSetGold(false, localClient.Aisling.Exchange.Gold);
                                 aisling.Client.SendExchangeSetGold(true, localClient.Aisling.Exchange.Gold);
@@ -2432,7 +2418,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x2D - Request Player Profile & Load Character Meta Data (Skills/Spells)
     /// </summary>
-    public ValueTask OnProfileRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSelfProfileRequest(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2452,23 +2438,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x2E - Request Party Join
     /// </summary>
-    public ValueTask OnGroupRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnGroupInvite(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
 
-        var args = PacketSerializer.Deserialize<GroupRequestArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<GroupInviteArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnGroupRequest);
 
-        ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupRequestArgs localArgs)
+        ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupInviteArgs localArgs)
         {
-            var (groupRequestType, targetName) = localArgs;
-            var player = ObjectManager.GetObject<Aisling>(localClient.Aisling.Map, i => string.Equals(i.Username, targetName, StringComparison.CurrentCultureIgnoreCase)
+            var player = ObjectManager.GetObject<Aisling>(localClient.Aisling.Map, i => string.Equals(i.Username, localArgs.TargetName, StringComparison.CurrentCultureIgnoreCase)
                                                                             && i.WithinRangeOf(localClient.Aisling));
 
             if (player == null)
             {
-                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{targetName} is nowhere to be found");
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{localArgs.TargetName} is nowhere to be found");
                 return default;
             }
 
@@ -2497,7 +2482,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x2F - Toggle Group
     /// </summary>
-    public ValueTask OnToggleGroup(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnToggleGroup(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         return !client.Aisling.LoggedIn ? default : ExecuteHandler(client, InnerOnToggleGroup);
@@ -2536,7 +2521,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x30 - Swap Slot
     /// </summary>
-    public ValueTask OnSwapSlot(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSwapSlot(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2556,22 +2541,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         static ValueTask InnerOnSwapSlot(IWorldClient localClient, SwapSlotArgs localArgs)
         {
-            var (panelType, slot1, slot2) = localArgs;
-
-            switch (panelType)
+            switch (localArgs.PanelType)
             {
                 case PanelType.Inventory:
-                    var itemSwap = localClient.Aisling.Inventory.TrySwap(localClient.Aisling.Client, slot1, slot2);
+                    var itemSwap = localClient.Aisling.Inventory.TrySwap(localClient.Aisling.Client, localArgs.Slot1, localArgs.Slot2);
                     if (itemSwap is { Item1: false, Item2: 0 })
                         ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.SpellBook:
-                    var spellSwap = localClient.Aisling.SpellBook.AttemptSwap(localClient.Aisling.Client, slot1, slot2);
+                    var spellSwap = localClient.Aisling.SpellBook.AttemptSwap(localClient.Aisling.Client, localArgs.Slot1, localArgs.Slot2);
                     if (!spellSwap)
                         ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
                 case PanelType.SkillBook:
-                    var skillSwap = localClient.Aisling.SkillBook.AttemptSwap(localClient.Aisling.Client, slot1, slot2);
+                    var skillSwap = localClient.Aisling.SkillBook.AttemptSwap(localClient.Aisling.Client, localArgs.Slot1, localArgs.Slot2);
                     if (!skillSwap)
                         ServerSetup.EventsLogger($"{localClient.Aisling.Username} - Swap item issue");
                     break;
@@ -2586,7 +2569,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x38 - Request Refresh
     /// </summary>
-    public ValueTask OnRefreshRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnRefreshRequest(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2604,14 +2587,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x39 - Request Pursuit
     /// </summary>
-    public ValueTask OnPursuitRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnMenuInteraction(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
-        var args = PacketSerializer.Deserialize<PursuitRequestArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<MenuInteractionArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnPursuitRequest);
 
-        static ValueTask InnerOnPursuitRequest(IWorldClient localClient, PursuitRequestArgs localArgs)
+        static ValueTask InnerOnPursuitRequest(IWorldClient localClient, MenuInteractionArgs localArgs)
         {
             try
             {
@@ -2633,14 +2616,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x3A - Mundane Input Response
     /// </summary>
-    public ValueTask OnDialogResponse(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnDialogInteraction(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
-        var args = PacketSerializer.Deserialize<DialogResponseArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<DialogInteractionArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnDialogResponse);
 
-        static ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogResponseArgs localArgs)
+        static ValueTask InnerOnDialogResponse(IWorldClient localClient, DialogInteractionArgs localArgs)
         {
             if (localArgs.DialogId == 0 && localArgs.PursuitId == ushort.MaxValue)
             {
@@ -2690,12 +2673,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x3B - Request Boards & Mailboxes
     /// </summary>
-    public ValueTask OnBoardRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnBoardInteraction(IWorldClient client, in Packet clientPacket)
     {
-        var args = PacketSerializer.Deserialize<BoardRequestArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<BoardInteractionArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnBoardRequest);
 
-        ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardRequestArgs localArgs)
+        ValueTask InnerOnBoardRequest(IWorldClient localClient, BoardInteractionArgs localArgs)
         {
             switch (localArgs.BoardRequestType)
             {
@@ -2933,7 +2916,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x3E - Skill Use
     /// </summary>
-    public ValueTask OnUseSkill(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSkillUse(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -2985,7 +2968,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x3F - World Map Click
     /// </summary>
-    public ValueTask OnWorldMapClick(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnWorldMapClick(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<WorldMapClickArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnWorldMapClick);
@@ -3021,7 +3004,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
-    public ValueTask OnClick(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnClick(IWorldClient client, in Packet clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<ClickArgs>(in clientPacket);
@@ -3029,11 +3012,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnClick(IWorldClient localClient, ClickArgs localArgs)
         {
-            var (targetId, targetPoint) = localArgs;
-            if (targetPoint != null)
-                localClient.Aisling.Map.Script.Item2.OnMapClick(localClient.Aisling.Client, targetPoint.X, targetPoint.Y);
+            if (localArgs.TargetPoint != null)
+                localClient.Aisling.Map.Script.Item2.OnMapClick(localClient.Aisling.Client, localArgs.TargetPoint.X, localArgs.TargetPoint.Y);
 
-            if (targetId == uint.MaxValue &&
+            if (localArgs.TargetId == uint.MaxValue &&
                 ServerSetup.Instance.GlobalMundaneTemplateCache.TryGetValue(ServerSetup.Instance.Config
                     .HelperMenuTemplateKey, out var value))
             {
@@ -3045,12 +3027,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     Template = value
                 });
 
-                helper.OnClick(localClient.Aisling.Client, (uint)targetId);
+                helper.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
                 return default;
             }
 
-            var monsterCheck = ObjectManager.GetObject<Monster>(localClient.Aisling.Map, i => i.Serial == targetId);
-            var npcCheck = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == targetId);
+            var monsterCheck = ObjectManager.GetObject<Monster>(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId);
+            var npcCheck = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == localArgs.TargetId);
 
             if (monsterCheck != null)
             {
@@ -3066,13 +3048,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 if (npc?.Template?.ScriptKey == null) continue;
                 var scripts = npc.Scripts?.Values;
-                if (scripts == null || targetId == null) return default;
+                if (scripts == null || localArgs.TargetId == null) return default;
                 foreach (var script in scripts)
-                    script.OnClick(localClient.Aisling.Client, (uint)targetId);
+                    script.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
                 return default;
             }
 
-            var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == targetId, ObjectManager.Get.Aislings);
+            var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId, ObjectManager.Get.Aislings);
             switch (obj)
             {
                 case null:
@@ -3089,7 +3071,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x44 - Unequip Item
     /// </summary>
-    public ValueTask OnUnequip(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnUnequip(IWorldClient client, in Packet clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         var args = PacketSerializer.Deserialize<UnequipArgs>(in clientPacket);
@@ -3113,16 +3095,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x45 - Client Ping (Heartbeat)
     /// </summary>
-    public override ValueTask OnHeartBeatAsync(IWorldClient client, in ClientPacket clientPacket)
+    public override ValueTask OnHeartBeatAsync(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<HeartBeatArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnHeartBeat);
 
         static ValueTask InnerOnHeartBeat(IWorldClient localClient, HeartBeatArgs localArgs)
         {
-            var (first, second) = localArgs;
-
-            if (first != 20 || second != 32) return default;
+            if (localArgs.First != 20 || localArgs.Second != 32) return default;
             localClient.Latency.Stop();
 
             return default;
@@ -3132,7 +3112,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x47 - Stat Raised
     /// </summary>
-    public ValueTask OnRaiseStat(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnRaiseStat(IWorldClient client, in Packet clientPacket)
     {
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
@@ -3218,15 +3198,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x4A - Client Exchange
     /// </summary>
-    public ValueTask OnExchange(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnExchangeInteraction(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
-        var args = PacketSerializer.Deserialize<ExchangeArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<ExchangeInteractionArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnExchange);
 
-        ValueTask InnerOnExchange(IWorldClient localClient, ExchangeArgs localArgs)
+        ValueTask InnerOnExchange(IWorldClient localClient, ExchangeInteractionArgs localArgs)
         {
             var otherPlayer = ObjectManager.GetObject<Aisling>(client.Aisling.Map, i => i.Serial.Equals(localArgs.OtherPlayerId));
             var localPlayer = localClient.Aisling;
@@ -3349,7 +3329,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x4D - Begin Casting
     /// </summary>
-    public ValueTask OnBeginChant(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnBeginChant(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -3382,15 +3362,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x4E - Casting
     /// </summary>
-    public ValueTask OnChant(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnChant(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
         if (client.Aisling.IsDead()) return default;
-        var args = PacketSerializer.Deserialize<DisplayChantArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<ChantArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnChant);
 
-        static ValueTask InnerOnChant(IWorldClient localClient, DisplayChantArgs localArgs)
+        static ValueTask InnerOnChant(IWorldClient localClient, ChantArgs localArgs)
         {
             localClient.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(localClient.Aisling.Serial, PublicMessageType.Chant, localArgs.ChantMessage));
             return default;
@@ -3400,18 +3380,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x4F - Player Portrait & Profile Message
     /// </summary>
-    public ValueTask OnProfile(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnEditableProfile(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
-        var args = PacketSerializer.Deserialize<ProfileArgs>(in clientPacket);
+        var args = PacketSerializer.Deserialize<EditableProfileArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnProfile);
 
-        static ValueTask InnerOnProfile(IWorldClient localClient, ProfileArgs localArgs)
+        static ValueTask InnerOnProfile(IWorldClient localClient, EditableProfileArgs localArgs)
         {
-            var (portraitData, profileMessage) = localArgs;
-            localClient.Aisling.PictureData = portraitData;
-            localClient.Aisling.ProfileMessage = profileMessage;
+            localClient.Aisling.PictureData = localArgs.PortraitData;
+            localClient.Aisling.ProfileMessage = localArgs.ProfileMessage;
 
             return default;
         }
@@ -3420,7 +3399,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x79 - Player Social Status
     /// </summary>
-    public ValueTask OnSocialStatus(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnSocialStatus(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -3438,7 +3417,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x7B - Request Metafile
     /// </summary>
-    public ValueTask OnMetaDataRequest(IWorldClient client, in ClientPacket clientPacket)
+    public ValueTask OnMetaDataRequest(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
         if (!client.Aisling.LoggedIn) return default;
@@ -3447,17 +3426,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnMetaDataRequest(IWorldClient localClient, MetaDataRequestArgs localArgs)
         {
-            var (metadataRequestType, name) = localArgs;
-
             try
             {
-                switch (metadataRequestType)
+                switch (localArgs.MetaDataRequestType)
                 {
                     case MetaDataRequestType.DataByName:
-                        if (name is null) return default;
-                        if (!name.Contains("Class"))
+                        if (localArgs.Name is null) return default;
+                        if (!localArgs.Name.Contains("Class"))
                         {
-                            localClient.SendMetaData(metadataRequestType, new MetafileManager(), name);
+                            localClient.SendMetaData(localArgs.MetaDataRequestType, new MetafileManager(), localArgs.Name);
                             break;
                         }
 
@@ -3488,12 +3465,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Connection / Handler
 
-    public override ValueTask HandlePacketAsync(IWorldClient client, in ClientPacket packet)
+    public override ValueTask HandlePacketAsync(IWorldClient client, in Packet packet)
     {
         var opCode = packet.OpCode;
-        var handler = ClientHandlers[(byte)packet.OpCode];
+        var handler = ClientHandlers[packet.OpCode];
 
-        if (client.Aisling is not null && IsManualAction(packet.OpCode))
+        if (client.Aisling is not null && IsManualAction((ClientOpCode)opCode))
             client.Aisling.AislingTracker = DateTime.UtcNow;
 
         // ToDo: Packet logging
@@ -3517,44 +3494,44 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         base.IndexHandlers();
 
-        ClientHandlers[(byte)ClientOpCode.RequestMapData] = OnMapDataRequest; // 0x05
+        ClientHandlers[(byte)ClientOpCode.MapDataRequest] = OnMapDataRequest; // 0x05
         ClientHandlers[(byte)ClientOpCode.ClientWalk] = OnClientWalk; // 0x06
         ClientHandlers[(byte)ClientOpCode.Pickup] = OnPickup; // 0x07
-        ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDropped; // 0x08
+        ClientHandlers[(byte)ClientOpCode.ItemDrop] = OnItemDrop; // 0x08
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest; // 0x0B
         ClientHandlers[(byte)ClientOpCode.DisplayEntityRequest] = OnDisplayEntityRequest; // 0x0C
         ClientHandlers[(byte)ClientOpCode.Ignore] = OnIgnore; // 0x0D
         ClientHandlers[(byte)ClientOpCode.PublicMessage] = OnPublicMessage; // 0x0E
-        ClientHandlers[(byte)ClientOpCode.UseSpell] = OnUseSpell; // 0x0F
+        ClientHandlers[(byte)ClientOpCode.SpellUse] = OnSpellUse; // 0x0F
         ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected; // 0x10
         ClientHandlers[(byte)ClientOpCode.Turn] = OnTurn; // 0x11
-        ClientHandlers[(byte)ClientOpCode.SpaceBar] = OnSpacebar; // 0x13
+        ClientHandlers[(byte)ClientOpCode.Spacebar] = OnSpacebar; // 0x13
         ClientHandlers[(byte)ClientOpCode.WorldListRequest] = OnWorldListRequest; // 0x18
         ClientHandlers[(byte)ClientOpCode.Whisper] = OnWhisper; // 0x19
-        ClientHandlers[(byte)ClientOpCode.UserOptionToggle] = OnUserOptionToggle; // 0x1B
-        ClientHandlers[(byte)ClientOpCode.UseItem] = OnUseItem; // 0x1C
+        ClientHandlers[(byte)ClientOpCode.OptionToggle] = OnOptionToggle; // 0x1B
+        ClientHandlers[(byte)ClientOpCode.ItemUse] = OnItemUse; // 0x1C
         ClientHandlers[(byte)ClientOpCode.Emote] = OnEmote; // 0x1D
-        ClientHandlers[(byte)ClientOpCode.GoldDrop] = OnGoldDropped; // 0x24
+        ClientHandlers[(byte)ClientOpCode.GoldDrop] = OnGoldDrop; // 0x24
         ClientHandlers[(byte)ClientOpCode.ItemDroppedOnCreature] = OnItemDroppedOnCreature; // 0x29
         ClientHandlers[(byte)ClientOpCode.GoldDroppedOnCreature] = OnGoldDroppedOnCreature; // 0x2A
-        ClientHandlers[(byte)ClientOpCode.RequestProfile] = OnProfileRequest; // 0x2D
-        ClientHandlers[(byte)ClientOpCode.GroupRequest] = OnGroupRequest; // 0x2E
+        ClientHandlers[(byte)ClientOpCode.SelfProfileRequest] = OnSelfProfileRequest; // 0x2D
+        ClientHandlers[(byte)ClientOpCode.GroupInvite] = OnGroupInvite; // 0x2E
         ClientHandlers[(byte)ClientOpCode.ToggleGroup] = OnToggleGroup; // 0x2F
         ClientHandlers[(byte)ClientOpCode.SwapSlot] = OnSwapSlot; // 0x30
-        ClientHandlers[(byte)ClientOpCode.RequestRefresh] = OnRefreshRequest; // 0x38
-        ClientHandlers[(byte)ClientOpCode.PursuitRequest] = OnPursuitRequest; // 0x39
-        ClientHandlers[(byte)ClientOpCode.DialogResponse] = OnDialogResponse; // 0x3A
-        ClientHandlers[(byte)ClientOpCode.BoardRequest] = OnBoardRequest; // 0x3B
-        ClientHandlers[(byte)ClientOpCode.UseSkill] = OnUseSkill; // 0x3E
+        ClientHandlers[(byte)ClientOpCode.RefreshRequest] = OnRefreshRequest; // 0x38
+        ClientHandlers[(byte)ClientOpCode.MenuInteraction] = OnMenuInteraction; // 0x39
+        ClientHandlers[(byte)ClientOpCode.DialogInteraction] = OnDialogInteraction; // 0x3A
+        ClientHandlers[(byte)ClientOpCode.BoardInteraction] = OnBoardInteraction; // 0x3B
+        ClientHandlers[(byte)ClientOpCode.SkillUse] = OnSkillUse; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
         ClientHandlers[(byte)ClientOpCode.RaiseStat] = OnRaiseStat; // 0x47
-        ClientHandlers[(byte)ClientOpCode.Exchange] = OnExchange; // 0x4A
+        ClientHandlers[(byte)ClientOpCode.ExchangeInteraction] = OnExchangeInteraction; // 0x4A
         ClientHandlers[(byte)ClientOpCode.BeginChant] = OnBeginChant; // 0x4D
         ClientHandlers[(byte)ClientOpCode.Chant] = OnChant; // 0x4E
-        ClientHandlers[(byte)ClientOpCode.Profile] = OnProfile; // 0x4F
+        ClientHandlers[(byte)ClientOpCode.EditableProfile] = OnEditableProfile; // 0x4F
         ClientHandlers[(byte)ClientOpCode.SocialStatus] = OnSocialStatus; // 0x79
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest; // 0x7B
     }
@@ -3827,36 +3804,36 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientOpCode.ExitRequest => true,
         ClientOpCode.Ignore => true,
         ClientOpCode.PublicMessage => true,
-        ClientOpCode.UseSpell => true,
+        ClientOpCode.SpellUse => true,
         ClientOpCode.ClientRedirected => true,
         ClientOpCode.Turn => true,
-        ClientOpCode.SpaceBar => true,
+        ClientOpCode.Spacebar => true,
         ClientOpCode.WorldListRequest => true,
         ClientOpCode.Whisper => true,
-        ClientOpCode.UserOptionToggle => true,
-        ClientOpCode.UseItem => true,
+        ClientOpCode.OptionToggle => true,
+        ClientOpCode.ItemUse => true,
         ClientOpCode.Emote => true,
         ClientOpCode.SetNotepad => true,
         ClientOpCode.GoldDrop => true,
         ClientOpCode.ItemDroppedOnCreature => true,
         ClientOpCode.GoldDroppedOnCreature => true,
-        ClientOpCode.RequestProfile => true,
-        ClientOpCode.GroupRequest => true,
+        ClientOpCode.SelfProfileRequest => true,
+        ClientOpCode.GroupInvite => true,
         ClientOpCode.ToggleGroup => true,
         ClientOpCode.SwapSlot => true,
-        ClientOpCode.RequestRefresh => true,
-        ClientOpCode.PursuitRequest => true,
-        ClientOpCode.DialogResponse => true,
-        ClientOpCode.BoardRequest => true,
-        ClientOpCode.UseSkill => true,
+        ClientOpCode.RefreshRequest => true,
+        ClientOpCode.MenuInteraction => true,
+        ClientOpCode.DialogInteraction => true,
+        ClientOpCode.BoardInteraction => true,
+        ClientOpCode.SkillUse => true,
         ClientOpCode.WorldMapClick => true,
         ClientOpCode.Click => true,
         ClientOpCode.Unequip => true,
         ClientOpCode.RaiseStat => true,
-        ClientOpCode.Exchange => true,
+        ClientOpCode.ExchangeInteraction => true,
         ClientOpCode.BeginChant => true,
         ClientOpCode.Chant => true,
-        ClientOpCode.Profile => true,
+        ClientOpCode.EditableProfile => true,
         ClientOpCode.SocialStatus => true,
         _ => false
     };

@@ -3,6 +3,8 @@ using Darkages.Sprites;
 
 using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
+using ServiceStack;
 
 namespace Darkages.Common;
 
@@ -10,6 +12,9 @@ public static class Extensions
 {
     // Korean Encoding
     private static readonly Encoding Encoding = Encoding.GetEncoding(949);
+
+    public static readonly Regex PasswordRegex = new(pattern: "(?:[^a-z]|(?<=['\"])s)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Prevents an integer from going below or above a set value

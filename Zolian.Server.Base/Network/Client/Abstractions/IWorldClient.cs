@@ -2,8 +2,6 @@ using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
-using Chaos.Packets;
-
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Sprites;
@@ -11,12 +9,13 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using System.Diagnostics;
+using Chaos.Packets;
 using Microsoft.Data.SqlClient;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 
 namespace Darkages.Network.Client.Abstractions;
 
-public interface IWorldClient : ISocketClient
+public interface IWorldClient : IConnectedClient
 {
     bool MapUpdating { get; set; }
     bool MapOpen { get; set; }
@@ -90,7 +89,7 @@ public interface IWorldClient : ISocketClient
     void SendExchangeRequestAmount(byte slot);
     void SendExchangeSetGold(bool rightSide, uint amount);
     void SendExchangeStart(Aisling fromAisling);
-    void SendForcedClientPacket(ref ClientPacket clientPacket);
+    void SendForcedClientPacket(ref Packet clientPacket);
     void SendGroupRequest(GroupRequestType groupRequestType, string fromName);
     void SendHealthBar(Sprite creature, byte? sound = null);
     void SendLightLevel(LightLevel lightLevel);
@@ -103,7 +102,7 @@ public interface IWorldClient : ISocketClient
     void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string name = null);
     void SendNotepad(byte identifier, NotepadType type, byte height, byte width, string message);
     void SendProfile(Aisling aisling);
-    void SendProfileRequest();
+    void SendEditableProfileRequest();
     void SendPublicMessage(uint id, PublicMessageType publicMessageType, string message);
     void SendRefreshResponse();
     void SendRemoveItemFromPane(byte slot);

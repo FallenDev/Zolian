@@ -46,6 +46,7 @@ using BodyColor = Chaos.Common.Definitions.BodyColor;
 using BodySprite = Chaos.Common.Definitions.BodySprite;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
 using Gender = Chaos.Common.Definitions.Gender;
+using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using LanternSize = Chaos.Common.Definitions.LanternSize;
 using MapFlags = Darkages.Enums.MapFlags;
 using Nation = Chaos.Common.Definitions.Nation;
@@ -54,7 +55,7 @@ using RestPosition = Chaos.Common.Definitions.RestPosition;
 namespace Darkages.Network.Client;
 
 [UsedImplicitly]
-public class WorldClient : SocketClientBase, IWorldClient
+public class WorldClient : WorldClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
@@ -210,9 +211,9 @@ public class WorldClient : SocketClientBase, IWorldClient
     private readonly Task _updateBuffTask;
     private readonly Task _updateDebuffTask;
 
-    public WorldClient([NotNull] IWorldServer<WorldClient> server, [NotNull] Socket socket,
+    public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-        [NotNull] ILogger<SocketClientBase> logger) : base(socket, crypto, packetSerializer, logger)
+        [NotNull] ILogger<WorldClient> logger) : base(socket, crypto, packetSerializer, logger)
     {
         _server = server;
 
@@ -628,8 +629,9 @@ public class WorldClient : SocketClientBase, IWorldClient
     public async Task<WorldClient> Load()
     {
         if (Aisling == null || Aisling.AreaId == 0) return null;
-        if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(Aisling.AreaId)) return null;
         Aisling.Client = this;
+
+        if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(Aisling.AreaId)) return null;
         await using var loadConnection = new SqlConnection(AislingStorage.ConnectionString);
         await LoadLock.WaitAsync().ConfigureAwait(false);
 
@@ -638,7 +640,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             loadConnection.Open();
             SetAislingStartupVariables();
             SendUserId();
-            SendProfileRequest();
+            SendEditableProfileRequest();
             InitCombos();
             InitQuests();
             LoadEquipment(loadConnection).LoadInventory(loadConnection).LoadBank(loadConnection).InitSpellBar().InitDiscoveredMaps().InitIgnoreList().InitLegend();
@@ -997,7 +999,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                     spell.Template = template;
                 }
 
-                var newSpell = new Spell()
+                var newSpell = new Spell
                 {
                     Icon = spell.Template.Icon,
                     Level = spell.Level,
@@ -1136,7 +1138,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
             foreach (var map in discovered.Where(s => s is not null))
             {
-                var temp = new DiscoveredMap()
+                var temp = new DiscoveredMap
                 {
                     Serial = map.Serial,
                     MapId = map.MapId
@@ -1171,7 +1173,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             {
                 if (ignored.PlayerIgnored is null) continue;
 
-                var temp = new IgnoredRecord()
+                var temp = new IgnoredRecord
                 {
                     Serial = ignored.Serial,
                     PlayerIgnored = ignored.PlayerIgnored
@@ -1204,7 +1206,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
             foreach (var legend in legends.Where(s => s is not null).OrderBy(s => s.Time))
             {
-                var newLegend = new Legend.LegendItem()
+                var newLegend = new Legend.LegendItem
                 {
                     LegendId = legend.LegendId,
                     Key = legend.Key,
@@ -1360,10 +1362,9 @@ public class WorldClient : SocketClientBase, IWorldClient
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
         var opCode = span[3];
-        var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
-        var packet = new ClientPacket(ref span, isEncrypted);
+        var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));
 
-        if (isEncrypted)
+        if (packet.IsEncrypted)
             Crypto.Decrypt(ref packet);
 
         return _server.HandlePacketAsync(this, in packet);
@@ -1398,7 +1399,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)item.Durability,
                 MaxDurability = (int)item.MaxDurability,
                 Name = item.DisplayName,
-                Group = item.Template.Group,
                 Slot = item.InventorySlot,
                 Sprite = item.DisplayImage,
                 Stackable = item.Template.CanStack
@@ -1519,7 +1519,7 @@ public class WorldClient : SocketClientBase, IWorldClient
             Hit = (byte)Math.Clamp((sbyte)Aisling.Hit, sbyte.MinValue, sbyte.MaxValue),
             Int = (byte)Math.Clamp(Aisling.Int, 0, 255),
             IsAdmin = Aisling.GameMaster,
-            CanSwim = true,
+            IsSwimming = true,
             Level = levelCap,
             MagicResistance = (byte)(Aisling.Regen / 10),
             HasUnreadMail = hasUnreadMail,
@@ -1550,7 +1550,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             var postsCollection = board.Posts.Values.Select(postFormat => new PostInfo
             {
                 Author = postFormat.Sender,
-                CreationDate = postFormat.DatePosted,
+                DayOfMonth = postFormat.DatePosted.Day,
+                MonthOfYear = postFormat.DatePosted.Month,
                 IsHighlighted = postFormat.Highlighted,
                 Message = postFormat.Message,
                 PostId = postFormat.PostId,
@@ -1564,7 +1565,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 Posts = postsCollection
             };
 
-            var args = new BoardArgs
+            var args = new DisplayBoardArgs
             {
                 Type = BoardOrResponseType.PublicBoard,
                 Board = boardInfo,
@@ -1592,7 +1593,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             var postsCollection = Aisling.PersonalLetters.Values.Select(postFormat => new PostInfo
             {
                 Author = postFormat.Sender,
-                CreationDate = postFormat.DatePosted,
+                DayOfMonth = postFormat.DatePosted.Day,
+                MonthOfYear = postFormat.DatePosted.Month,
                 IsHighlighted = postFormat.Highlighted,
                 Message = postFormat.Message,
                 PostId = postFormat.PostId,
@@ -1606,7 +1608,7 @@ public class WorldClient : SocketClientBase, IWorldClient
                 Posts = postsCollection!
             };
 
-            var args = new BoardArgs
+            var args = new DisplayBoardArgs
             {
                 Type = BoardOrResponseType.MailBoard,
                 Board = boardInfo,
@@ -1631,13 +1633,14 @@ public class WorldClient : SocketClientBase, IWorldClient
     {
         try
         {
-            var args = new BoardArgs
+            var args = new DisplayBoardArgs
             {
                 Type = isMail ? BoardOrResponseType.MailPost : BoardOrResponseType.PublicPost,
                 Post = new PostInfo
                 {
                     Author = post.Sender,
-                    CreationDate = post.DatePosted,
+                    DayOfMonth = post.DatePosted.Day,
+                    MonthOfYear = post.DatePosted.Month,
                     IsHighlighted = post.Highlighted,
                     Message = post.Message,
                     PostId = post.PostId,
@@ -1659,7 +1662,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
     public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
     {
-        var args = new BoardArgs
+        var args = new DisplayBoardArgs
         {
             Type = responseType,
             ResponseMessage = message,
@@ -1705,22 +1708,13 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         return true;
     }
-
-    /// <summary>
-    /// 0x48 - Cancel Casting
-    /// </summary>
-    public void SendCancelCasting()
-    {
-        var packet = ServerPacketEx.FromData(ServerOpCode.CancelCasting, PacketSerializer.Encoding);
-        Send(ref packet);
-    }
-
+    
     /// <summary>
     /// 0x0B - Player Move
     /// </summary>
     public void SendConfirmClientWalk(Position oldPoint, Direction direction)
     {
-        var args = new ConfirmClientWalkArgs
+        var args = new ClientWalkResponseArgs
         {
             Direction = direction,
             OldPoint = new Point(oldPoint.X, oldPoint.Y)
@@ -1753,7 +1747,7 @@ public class WorldClient : SocketClientBase, IWorldClient
         // Cleanup
         Aisling.Remove(true);
 
-        var args = new ConfirmExitArgs
+        var args = new ExitResponseArgs
         {
             ExitConfirmed = ExitConfirmed
         };
@@ -1950,7 +1944,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)item.Durability,
                 MaxDurability = (int)item.MaxDurability,
                 Name = item.NoColorDisplayName,
-                Group = item.Template.Group,
                 Slot = displaySlot,
                 Sprite = item.DisplayImage,
                 Stackable = item.Template.CanStack
@@ -1965,7 +1958,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeStart(Aisling fromAisling)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.StartExchange,
             OtherUserId = fromAisling.Serial,
@@ -1980,7 +1973,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeAddItem(bool rightSide, byte index, Item item)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.AddItem,
             RightSide = rightSide,
@@ -2001,7 +1994,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeSetGold(bool rightSide, uint amount)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.SetGold,
             RightSide = rightSide,
@@ -2016,7 +2009,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeRequestAmount(byte slot)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.RequestAmount,
             FromSlot = slot
@@ -2030,7 +2023,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeAccepted(bool persistExchange)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.Accept,
             PersistExchange = persistExchange
@@ -2044,7 +2037,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendExchangeCancel(bool rightSide)
     {
-        var args = new ExchangeArgs
+        var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.Cancel,
             RightSide = rightSide
@@ -2056,11 +2049,11 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <summary>
     /// Forced Client Packet
     /// </summary>
-    public void SendForcedClientPacket(ref ClientPacket clientPacket)
+    public void SendForcedClientPacket(ref Packet clientPacket)
     {
         var args = new ForceClientPacketArgs
         {
-            ClientOpCode = clientPacket.OpCode,
+            ClientOpCode = (ClientOpCode)clientPacket.OpCode,
             Data = clientPacket.Buffer.ToArray()
         };
 
@@ -2072,7 +2065,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// </summary>
     public void SendGroupRequest(GroupRequestType groupRequestType, string fromName)
     {
-        var args = new GroupRequestArgs
+        var args = new DisplayGroupInviteArgs
         {
             GroupRequestType = groupRequestType,
             SourceName = fromName
@@ -2132,34 +2125,6 @@ public class WorldClient : SocketClientBase, IWorldClient
     }
 
     /// <summary>
-    /// 0x1F - Map Change Complete
-    /// </summary>
-    public void SendMapChangeComplete()
-    {
-        var packet = ServerPacketEx.FromData(ServerOpCode.MapChangeComplete, PacketSerializer.Encoding, new byte[2]);
-
-        Send(ref packet);
-    }
-
-    /// <summary>
-    /// 0x67 - Map Change Pending
-    /// </summary>
-    public void SendMapChangePending()
-    {
-        var packet = ServerPacketEx.FromData(
-            ServerOpCode.MapChangePending,
-            PacketSerializer.Encoding,
-            3,
-            0,
-            0,
-            0,
-            0,
-            0);
-
-        Send(ref packet);
-    }
-
-    /// <summary>
     /// 0x3C - Map Data
     /// </summary>
     public void SendMapData()
@@ -2195,16 +2160,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         };
 
         Send(args);
-    }
-
-    /// <summary>
-    /// 0x58 - Map Load Complete
-    /// </summary>
-    public void SendMapLoadComplete()
-    {
-        var packet = ServerPacketEx.FromData(ServerOpCode.MapLoadComplete, PacketSerializer.Encoding, 0);
-
-        Send(ref packet);
     }
 
     /// <summary>
@@ -2332,7 +2287,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2353,7 +2307,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2374,7 +2327,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2395,7 +2347,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2416,7 +2367,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2437,7 +2387,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2458,7 +2407,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2479,7 +2427,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2500,7 +2447,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2521,7 +2467,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2542,7 +2487,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2563,7 +2507,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2584,7 +2527,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2605,7 +2547,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2626,7 +2567,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2647,7 +2587,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2668,7 +2607,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2689,7 +2627,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2700,7 +2637,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         #endregion
 
-        var args = new ProfileArgs
+        var args = new OtherProfileArgs
         {
             JobClass = (JobClass)ClassStrings.JobDisplayFlag(aisling.JobClass.ToString()),
             BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(aisling.Path.ToString()),
@@ -2767,16 +2704,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         }
     }
 
-    /// <summary>
-    /// 0x49 - Request Portrait
-    /// </summary>
-    public void SendProfileRequest()
-    {
-        var packet = ServerPacketEx.FromData(ServerOpCode.ProfileRequest, PacketSerializer.Encoding);
-
-        Send(ref packet);
-    }
-
     public override void SendHeartBeat(byte first, byte second)
     {
         var args = new HeartBeatResponseArgs
@@ -2797,7 +2724,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <param name="message">Message</param>
     public void SendPublicMessage(uint sourceId, PublicMessageType publicMessageType, string message)
     {
-        var args = new PublicMessageArgs
+        var args = new DisplayPublicMessageArgs
         {
             SourceId = sourceId,
             PublicMessageType = publicMessageType,
@@ -2805,16 +2732,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         };
 
         Send(args);
-    }
-
-    /// <summary>
-    /// 0x22 - Client Refresh
-    /// </summary>
-    public void SendRefreshResponse()
-    {
-        var packet = ServerPacketEx.FromData(ServerOpCode.RefreshResponse, PacketSerializer.Encoding);
-
-        Send(ref packet);
     }
 
     /// <summary>
@@ -2837,7 +2754,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <param name="id"></param>
     public void SendRemoveObject(uint id)
     {
-        var args = new RemoveObjectArgs
+        var args = new RemoveEntityArgs
         {
             SourceId = id
         };
@@ -2897,7 +2814,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2918,7 +2834,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2939,7 +2854,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2960,7 +2874,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -2981,7 +2894,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3002,7 +2914,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3023,7 +2934,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3044,7 +2954,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3065,7 +2974,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3086,7 +2994,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3107,7 +3014,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3128,7 +3034,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3149,7 +3054,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3170,7 +3074,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3191,7 +3094,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3212,7 +3114,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3233,7 +3134,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3254,7 +3154,6 @@ public class WorldClient : SocketClientBase, IWorldClient
                 CurrentDurability = (int)equip.Item.Durability,
                 MaxDurability = (int)equip.Item.MaxDurability,
                 Name = equip.Item.NoColorDisplayName,
-                Group = equip.Item.Template.Group,
                 Slot = (byte)equip.Slot,
                 Sprite = equip.Item.DisplayImage,
                 Stackable = equip.Item.Template.CanStack
@@ -3274,7 +3173,8 @@ public class WorldClient : SocketClientBase, IWorldClient
             GroupString = Aisling.GroupParty?.PartyMemberString ?? "",
             GuildName = $"{Aisling.Clan} - {Aisling.ClanRank}",
             GuildRank = $"GearP.: {Aisling.GamePoints}",
-            IsMaster = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
+            EnableMasterQuestMetaData = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
+            EnableMasterAbilityMetaData = Aisling.Stage.StageFlagIsSet(ClassStage.Master),
             LegendMarks = _legendMarksPrivate,
             Name = Aisling.Username,
             Nation = (Nation)Aisling.Nation,
@@ -3323,7 +3223,7 @@ public class WorldClient : SocketClientBase, IWorldClient
     /// <param name="equipmentSlot"></param>
     public void SendUnequip(EquipmentSlot equipmentSlot)
     {
-        var args = new UnequipArgs
+        var args = new DisplayUnequipArgs
         {
             EquipmentSlot = equipmentSlot
         };
@@ -3340,7 +3240,6 @@ public class WorldClient : SocketClientBase, IWorldClient
         {
             BaseClass = (BaseClass)2,
             Direction = (Direction)Aisling.Direction,
-            Gender = (Gender)Aisling.Gender,
             Id = Aisling.Serial
         };
 
@@ -3449,7 +3348,7 @@ public class WorldClient : SocketClientBase, IWorldClient
 
         var args = new WorldListArgs
         {
-            WorldList = worldList
+            CountryList = worldList
         };
 
         foreach (var aisling in orderedAislings)

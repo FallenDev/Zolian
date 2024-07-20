@@ -7,35 +7,33 @@ using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 
 using Darkages.Meta;
-using Darkages.Network.Client.Abstractions;
-
 using JetBrains.Annotations;
 
 using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
+using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 
 namespace Darkages.Network.Client;
 
 [UsedImplicitly]
-public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] Socket socket,
+public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-        [NotNull] ILogger<SocketClientBase> logger)
-    : SocketClientBase(socket, crypto, packetSerializer, logger), ILoginClient
+        [NotNull] ILogger<LoginClient> logger)
+    : LoginClientBase(socket, crypto, packetSerializer, logger), ILoginClient
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
         var opCode = span[3];
-        var isEncrypted = Crypto.ShouldBeEncrypted(opCode);
-        var packet = new ClientPacket(ref span, isEncrypted);
+        var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));
 
-        if (isEncrypted)
+        if (packet.IsEncrypted)
             Crypto.Decrypt(ref packet);
 
         return server.HandlePacketAsync(this, in packet);
     }
 
-    public void SendLoginControls(LoginControlsType loginControlsType, string message)
+    public void SendLoginControl(LoginControlsType loginControlsType, string message)
     {
         var args = new LoginControlArgs
         {
@@ -72,7 +70,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
         Send(args);
     }
 
-    public void SendMetaData(MetaDataRequestType metaDataRequestType, [NotNull] MetafileManager metaDataStore, [CanBeNull] string name = null)
+    public void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, [CanBeNull] string name = null)
     {
         var args = new MetaDataArgs
         {
@@ -106,7 +104,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
             {
                 try
                 {
-                    args.MetaDataCollection = new List<MetaDataInfo>();
+                    args.MetaDataCollection = [];
                     var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
 
                     foreach (var file in metaFiles)
@@ -118,7 +116,7 @@ public class LoginClient([NotNull] ILoginServer<LoginClient> server, [NotNull] S
                             Name = file.Name
                         };
 
-                        args.MetaDataCollection.Add(metafileInfo);
+                        args.MetaDataCollection?.Add(metafileInfo);
                     }
                 }
                 catch (Exception ex)

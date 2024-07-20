@@ -29,25 +29,25 @@ public sealed class UserOptions
     {
         switch (opt)
         {
-            case UserOption.Setting1:
+            case UserOption.Option1:
                 Whisper = !Whisper;
                 break;
-            case UserOption.Setting2:
+            case UserOption.Option2:
                 GroupChat = !GroupChat;
                 break;
-            case UserOption.Setting3:
+            case UserOption.Option3:
                 GMPort = !GMPort;
                 break;
-            case UserOption.Setting4:
+            case UserOption.Option4:
                 Animations = !Animations;
                 break;
-            case UserOption.Setting5:
+            case UserOption.Option5:
                 DmgNumbers = !DmgNumbers;
                 break;
-            case UserOption.Setting6:
+            case UserOption.Option6:
                 Exchange = !Exchange;
                 break;
-            case UserOption.Setting8:
+            case UserOption.Option8:
                 GroundQualities = !GroundQualities;
                 break;
         }
@@ -60,26 +60,19 @@ public sealed class UserOptions
         return opt switch
         {
             UserOption.Request => ToString(),
-            UserOption.Setting1 => string.Format(optionsFormat, "1Listen to whisper", Whisper ? "ON" : "OFF"),
-            UserOption.Setting2 => string.Format(optionsFormat, "2World Chat", GroupChat ? "ON" : "OFF"),
-            UserOption.Setting3 => string.Format(optionsFormat, "3Can GM Port", GMPort ? "ON" : "OFF"),
-            UserOption.Setting4 => string.Format(optionsFormat, "4Belief in Magic", Animations ? "ON" : "OFF"),
-            UserOption.Setting5 => string.Format(optionsFormat, "5Damage Numbers", DmgNumbers ? "ON" : "OFF"),
-            UserOption.Setting6 => string.Format(optionsFormat, "6Exchange", Exchange ? "ON" : "OFF"),
-            UserOption.Setting7 => string.Format(optionsFormat, "7", GroupWindow ? "ON" : "OFF"),
-            UserOption.Setting8 => string.Format(optionsFormat, "8Ground Qualities", GroundQualities ? "ON" : "OFF"),
-            UserOption.Setting9 => string.Format(optionsFormat, "9", GraphicsType ? "ON" : "OFF"),
-            UserOption.Setting10 => string.Format(optionsFormat, "10", UseAbilitiesType ? "ON" : "OFF"),
-            UserOption.Setting11 => string.Format(optionsFormat, "11", ClickOpenProfile ? "ON" : "OFF"),
-            UserOption.Setting12 => string.Format(optionsFormat, "12", NpcChatListen ? "ON" : "OFF"),
-            UserOption.Setting13 => string.Format(optionsFormat, "13", PartyRequest ? "ON" : "OFF"),
-            UserOption.Setting14 => "",
-            UserOption.Setting15 => "",
-            UserOption.Setting16 => "",
-            UserOption.Setting17 => "",
-            UserOption.Setting18 => "",
-            UserOption.Setting19 => "",
-            UserOption.Setting20 => "",
+            UserOption.Option1 => string.Format(optionsFormat, "1Listen to whisper", Whisper ? "ON" : "OFF"),
+            UserOption.Option2 => string.Format(optionsFormat, "2World Chat", GroupChat ? "ON" : "OFF"),
+            UserOption.Option3 => string.Format(optionsFormat, "3Can GM Port", GMPort ? "ON" : "OFF"),
+            UserOption.Option4 => string.Format(optionsFormat, "4Belief in Magic", Animations ? "ON" : "OFF"),
+            UserOption.Option5 => string.Format(optionsFormat, "5Damage Numbers", DmgNumbers ? "ON" : "OFF"),
+            UserOption.Option6 => string.Format(optionsFormat, "6Exchange", Exchange ? "ON" : "OFF"),
+            UserOption.Option7 => string.Format(optionsFormat, "7", GroupWindow ? "ON" : "OFF"),
+            UserOption.Option8 => string.Format(optionsFormat, "8Ground Qualities", GroundQualities ? "ON" : "OFF"),
+            UserOption.Option9 => string.Format(optionsFormat, "9", GraphicsType ? "ON" : "OFF"),
+            UserOption.Option10 => string.Format(optionsFormat, "10", UseAbilitiesType ? "ON" : "OFF"),
+            UserOption.Option11 => string.Format(optionsFormat, "11", ClickOpenProfile ? "ON" : "OFF"),
+            UserOption.Option12 => string.Format(optionsFormat, "12", NpcChatListen ? "ON" : "OFF"),
+            UserOption.Option13 => string.Format(optionsFormat, "13", PartyRequest ? "ON" : "OFF"),
             _ => ""
         };
     }

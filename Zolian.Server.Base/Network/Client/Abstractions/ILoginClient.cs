@@ -2,13 +2,14 @@ using Chaos.Common.Definitions;
 using Chaos.Networking.Abstractions;
 
 using Darkages.Meta;
+using JetBrains.Annotations;
 
 namespace Darkages.Network.Client.Abstractions;
 
-public interface ILoginClient : ISocketClient
+public interface ILoginClient : IConnectedClient
 {
-    void SendLoginControls(LoginControlsType loginControlsType, string message);
-    void SendLoginMessage(LoginMessageType loginMessageType, string message = null);
+    void SendLoginControl(LoginControlsType loginControlsType, string message);
+    void SendLoginMessage(LoginMessageType loginMessageType, [CanBeNull] string message = null);
     void SendLoginNotice(bool full, Notification notice);
     void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string name = null);
 }

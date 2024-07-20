@@ -14,7 +14,7 @@ public static class WorldExtensions
 
     public static void SendOptionsDialog(this IWorldClient worldClient, Mundane npc, string message, params Dialog.OptionsDataItem[] options)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -37,7 +37,7 @@ public static class WorldExtensions
 
     public static void SendOptionsDialog(this IWorldClient worldClient, Mundane npc, string message, string arg, params Dialog.OptionsDataItem[] options)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = arg,
             Color = DisplayColor.Default,
@@ -67,7 +67,7 @@ public static class WorldExtensions
     /// </summary>
     public static void SendItemShopDialog(this IWorldClient worldClient, Mundane npc, string message, ushort dialogId, IEnumerable<ItemTemplate> item)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -80,7 +80,6 @@ public static class WorldExtensions
                 CurrentDurability = 0,
                 MaxDurability = 0,
                 Name = i.Name,
-                Group = i.Group,
                 Slot = 0,
                 Sprite = i.DisplayImage,
                 Stackable = i.CanStack
@@ -102,7 +101,7 @@ public static class WorldExtensions
 
     public static void SendItemShopDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<ItemTemplate> item)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -115,7 +114,6 @@ public static class WorldExtensions
                 CurrentDurability = 0,
                 MaxDurability = 0,
                 Name = i.Name,
-                Group = i.Group,
                 Slot = 0,
                 Sprite = i.DisplayImage,
                 Stackable = i.CanStack
@@ -137,7 +135,7 @@ public static class WorldExtensions
 
     public static void SendItemSellDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<byte> slot)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -164,7 +162,7 @@ public static class WorldExtensions
 
     public static void SendSkillLearnDialog(this IWorldClient worldClient, Mundane npc, string message, ushort pursuit, IEnumerable<SkillTemplate> skillTemplates)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -193,7 +191,7 @@ public static class WorldExtensions
 
     public static void SendSpellLearnDialog(this IWorldClient worldClient, Mundane npc, string message, ushort pursuit, IEnumerable<SpellTemplate> spellTemplates)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -225,7 +223,7 @@ public static class WorldExtensions
 
     public static void SendForgetSkills(this IWorldClient worldClient, Mundane npc, string message, ushort pursuitId)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -248,7 +246,7 @@ public static class WorldExtensions
 
     public static void SendForgetSpells(this IWorldClient worldClient, Mundane npc, string message, ushort pursuitId)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -275,7 +273,7 @@ public static class WorldExtensions
 
     public static void SendWithdrawBankDialog(this IWorldClient worldClient, Mundane npc, string message, IEnumerable<Item> items)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -288,7 +286,6 @@ public static class WorldExtensions
                 CurrentDurability = (int)i.Durability,
                 MaxDurability = (int)i.MaxDurability,
                 Name = i.NoColorDisplayName,
-                Group = i.Template.Group,
                 Slot = 0,
                 Sprite = i.DisplayImage,
                 Stackable = i.Template.CanStack
@@ -314,7 +311,7 @@ public static class WorldExtensions
 
     public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message)
     {
-        var args = new MenuArgs
+        var args = new DisplayMenuArgs
         {
             Args = null,
             Color = DisplayColor.Default,
@@ -345,7 +342,7 @@ public static class WorldExtensions
     /// <param name="textBoxLength">Length of input box</param>
     public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message, string textBoxMessage, ushort textBoxLength = 2)
     {
-        var args = new DialogArgs
+        var args = new DisplayDialogArgs
         {
             Color = DisplayColor.Default,
             DialogId = 0,
@@ -374,7 +371,7 @@ public static class WorldExtensions
     /// </summary>
     public static void SendTextInput(this IWorldClient worldClient, Mundane npc, string message, ushort dialogId, string textBoxMessage, ushort textBoxLength = 2)
     {
-        var args = new DialogArgs
+        var args = new DisplayDialogArgs
         {
             Color = DisplayColor.Default,
             DialogId = dialogId,
@@ -399,7 +396,7 @@ public static class WorldExtensions
 
     public static void CloseDialog(this IWorldClient worldClient)
     {
-        var dialog = new DialogArgs
+        var dialog = new DisplayDialogArgs
         {
             Color = DisplayColor.Default,
             DialogId = 0,
