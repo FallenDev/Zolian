@@ -2600,8 +2600,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
                 if (npc == null) return default;
-
+                    
                 var script = npc.Scripts.FirstOrDefault();
+
+                if (localArgs.Slot is not null && localArgs.Slot != 0)
+                {
+                    var slotToString = localArgs.Slot.ToString();
+                    script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, slotToString);
+                    return default;
+                }
+
                 script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
             }
             catch (Exception e)

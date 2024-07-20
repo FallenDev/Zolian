@@ -2641,6 +2641,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         {
             JobClass = (JobClass)ClassStrings.JobDisplayFlag(aisling.JobClass.ToString()),
             BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(aisling.Path.ToString()),
+            DisplayClass = aisling.Path.ToString(),
             Equipment = equipment,
             GroupOpen = partyOpen,
             GuildName = $"{aisling.Clan} - {aisling.ClanRank}",
@@ -3168,6 +3169,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         {
             JobClass = (JobClass)ClassStrings.JobDisplayFlag(Aisling.JobClass.ToString()),
             BaseClass = (BaseClass)ClassStrings.ClassDisplayInt(Aisling.Path.ToString()),
+            DisplayClass = Aisling.Path.ToString(),
             Equipment = equipment,
             GroupOpen = partyOpen,
             GroupString = Aisling.GroupParty?.PartyMemberString ?? "",

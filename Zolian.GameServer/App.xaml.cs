@@ -107,17 +107,17 @@ public partial class App
 
             // Lobby
             serviceCollection.AddSingleton<IClientFactory<LobbyClient>, ClientFactory<LobbyClient>>();
-            serviceCollection.AddSingleton<ILobbyServer<LobbyClient>, IHostedService, LobbyServer>();
+            serviceCollection.AddSingleton<ILobbyServer<ILobbyClient>, IHostedService, LobbyServer>();
             serviceCollection.AddSingleton<IClientRegistry<ILobbyClient>, ClientRegistry<ILobbyClient>>();
 
             // Login
             serviceCollection.AddSingleton<IClientFactory<LoginClient>, ClientFactory<LoginClient>>();
-            serviceCollection.AddSingleton<ILoginServer<LoginClient>, IHostedService, LoginServer>();
+            serviceCollection.AddSingleton<ILoginServer<ILoginClient>, IHostedService, LoginServer>();
             serviceCollection.AddSingleton<IClientRegistry<ILoginClient>, ClientRegistry<ILoginClient>>();
 
             // World
             serviceCollection.AddSingleton<IClientFactory<WorldClient>, ClientFactory<WorldClient>>();
-            serviceCollection.AddSingleton<IWorldServer<WorldClient>, IHostedService, WorldServer>();
+            serviceCollection.AddSingleton<IWorldServer<IWorldClient>, IHostedService, WorldServer>();
             serviceCollection.AddSingleton<IClientRegistry<IWorldClient>, ClientRegistry<IWorldClient>>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
