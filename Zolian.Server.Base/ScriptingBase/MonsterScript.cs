@@ -17,11 +17,42 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager, 
 
     public virtual void MonsterState(TimeSpan elapsedTime) { }
     public virtual void OnApproach(WorldClient client) { }
-    public virtual void OnLeave(WorldClient client) { }
     public virtual bool OnGossip(WorldClient client) => false;
     public virtual bool OnDispelled(WorldClient client) => false;
     public virtual void OnSkulled(WorldClient client) { }
-    public virtual void OnDamaged(WorldClient client, long dmg, Sprite source) { }
     public virtual void OnItemDropped(WorldClient client, Item item) { }
     public virtual void OnGoldDropped(WorldClient client, uint gold) { }
+
+    public virtual void OnLeave(WorldClient client)
+    {
+        try
+        {
+            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false, false), player);
+            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) Monster.ClearTarget();
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger(ex.ToString());
+            SentrySdk.CaptureException(ex);
+        }
+    }
+
+    public virtual void OnDamaged(WorldClient client, long dmg, Sprite source)
+    {
+        try
+        {
+            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+            if (!tagged)
+                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true, false));
+            else
+                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true, player.blocked), player);
+            Monster.Aggressive = true;
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger(ex.ToString());
+            SentrySdk.CaptureException(ex);
+        }
+    }
 }

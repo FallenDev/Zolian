@@ -23,6 +23,10 @@ public class Piet : AreaScript
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, "Door seems to be locked.");
         }
+        else
+        {
+            base.OnMapClick(client, x, y);
+        }
     }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);

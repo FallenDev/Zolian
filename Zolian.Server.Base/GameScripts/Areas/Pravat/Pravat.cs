@@ -15,6 +15,8 @@ public class Pravat : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         var updateBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(1, out var updateBoard);
 
         if (x == 24 && y == 15 || x == 25 && y == 16)

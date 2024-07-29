@@ -4,6 +4,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Numerics;
+using Chaos.Networking.Entities.Server;
 
 namespace Darkages.Interfaces;
 
@@ -13,6 +14,7 @@ public interface IArea
     int WildFlowersCount { get; set; }
     TileGrid[,] ObjectGrid { get; set; }
     TileContent[,] TileContent { get; set; }
+    ICollection<DoorInfo> Doors { get; set; }
     Tuple<string, AreaScript> Script { get; set; }
     string FilePath { get; set; }
 

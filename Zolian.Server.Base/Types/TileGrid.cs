@@ -15,6 +15,7 @@ public class TileGrid : ObjectManager
     public readonly float Cost;
     public float CurrentDist;
     public Vector2 Parent, Pos;
+    public DateTime LastDoorClicked { get; set; } = DateTime.UtcNow;
 
     public TileGrid(Area map, int x, int y)
     {
@@ -77,5 +78,14 @@ public class TileGrid : ObjectManager
         if (sprites != null) return sprites;
         SentrySdk.CaptureException(lastException);
         return Enumerable.Empty<Sprite>();
+    }
+
+    public bool ShouldRegisterClick
+    {
+        get
+        {
+            var readyTime = DateTime.UtcNow;
+            return readyTime - LastDoorClicked > new TimeSpan(0, 0, 0, 1, 500);
+        }
     }
 }

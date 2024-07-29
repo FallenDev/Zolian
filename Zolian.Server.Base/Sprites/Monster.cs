@@ -20,12 +20,13 @@ public record TargetRecord
     /// <summary>
     /// Serial, Damage, Player, Nearby
     /// </summary>
-    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)> TaggedAislings { get; set; }
+    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; set; }
 }
 
 public sealed class Monster : Sprite, IDialogSourceEntity
 {
     public Task<IList<Vector2>> Path;
+    public Vector2 TargetPos = Vector2.Zero;
 
     public Monster()
     {
@@ -38,7 +39,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         TileType = TileContent.Monster;
         TargetRecord = new TargetRecord
         {
-            TaggedAislings = new ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby)>()
+            TaggedAislings = []
         };
     }
 
@@ -97,7 +98,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             return;
         }
 
-        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true));
+        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
 
         if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.IsEmpty()) return;
         if (aisling.GroupParty == null) return;
@@ -108,7 +109,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
             var playersNearby = AislingsEarShotNearby().Contains(member);
 
             if (!memberTagged)
-                TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby));
+                TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby, false));
         }
     }
 
@@ -118,7 +119,7 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         var checkGroup = TargetRecord.TaggedAislings.FirstOrDefault().Value;
 
         if (checkGroup.player.GroupId != aisling.GroupId) return false;
-        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true));
+        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
         return true;
     }
 
@@ -334,6 +335,40 @@ public sealed class Monster : Sprite, IDialogSourceEntity
         }
 
         WalkTo((int)nodeX, (int)nodeY);
+    }
+
+    public void CheckTarget()
+    {
+        if (Target is not Aisling aisling) return;
+        if (!aisling.Skulled && aisling.LoggedIn) return;
+        if (!aisling.IsInvisible) return;
+        TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
+        Target = null;
+    }
+
+    public void ClearTarget()
+    {
+        CastEnabled = false;
+        BashEnabled = false;
+        WalkEnabled = true;
+
+        if (Target is Aisling)
+        {
+            TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
+        }
+
+        Target = null;
+        TargetPos = Vector2.Zero;
+
+        try
+        {
+            Path?.Result?.Clear();
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger(ex.ToString());
+            SentrySdk.CaptureException(ex);
+        }
     }
 
     public DisplayColor Color => DisplayColor.Default;

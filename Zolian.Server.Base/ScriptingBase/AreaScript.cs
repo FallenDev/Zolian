@@ -1,4 +1,5 @@
 ﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Sprites;
@@ -15,7 +16,20 @@ public abstract class AreaScript(Area area) : IScriptBase
 
     public virtual void OnMapEnter(WorldClient client) { }
     public virtual void OnMapExit(WorldClient client) { }
-    public virtual void OnMapClick(WorldClient client, int x, int y) { }
+
+    public virtual void OnMapClick(WorldClient client, int x, int y)
+    {
+        if (!client.Aisling.Map.ObjectGrid[x, y].ShouldRegisterClick || client.Aisling.Map.TileContent[x, y] != TileContent.Door) return;
+
+        //foreach (var door in client.Aisling.Map.Doors)
+        //{
+        //    if (door.X != x && door.Y != y) continue;
+        //    door.Closed = !door.Closed;
+        //    client.Aisling.Map.ObjectGrid[x, y].LastDoorClicked = DateTime.UtcNow;
+        //}
+
+        //client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendDoorsOnMap(client.Aisling.Map.Doors));
+    }
     public virtual void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
     public virtual void OnItemDropped(WorldClient client, Item item, Position location) { }
     public virtual void OnGossip(WorldClient client, string message) { }

@@ -48,8 +48,6 @@ public class MilethDreamSword : AreaScript
             _animate = false;
     }
 
-    public override void OnMapClick(WorldClient client, int x, int y) { }
-
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);

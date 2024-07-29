@@ -16,6 +16,8 @@ public class MilethCottage : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         if ((x != 1 || y != 1) && (x != 1 || y != 2) && (x != 2 || y != 1) && (x != 2 || y != 2)) return;
         client.Aisling.CurrentHp = client.Aisling.MaximumHp;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;

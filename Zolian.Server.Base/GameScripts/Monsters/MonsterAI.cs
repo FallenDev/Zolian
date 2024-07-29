@@ -19,7 +19,6 @@ namespace Darkages.GameScripts.Monsters;
 [Script("Common")]
 public class BaseMonsterIntelligence : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public BaseMonsterIntelligence(Monster monster, Area map) : base(monster, map)
@@ -173,7 +172,7 @@ public class BaseMonsterIntelligence : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -183,7 +182,7 @@ public class BaseMonsterIntelligence : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -221,41 +220,6 @@ public class BaseMonsterIntelligence : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -279,42 +243,6 @@ public class BaseMonsterIntelligence : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -322,11 +250,11 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -338,10 +266,9 @@ public class BaseMonsterIntelligence : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -359,7 +286,6 @@ public class BaseMonsterIntelligence : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -369,15 +295,13 @@ public class BaseMonsterIntelligence : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -391,7 +315,7 @@ public class BaseMonsterIntelligence : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -421,7 +345,7 @@ public class BaseMonsterIntelligence : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -446,7 +370,7 @@ public class BaseMonsterIntelligence : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -504,6 +428,10 @@ public class BaseMonsterIntelligence : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -519,14 +447,14 @@ public class BaseMonsterIntelligence : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -547,9 +475,14 @@ public class BaseMonsterIntelligence : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -586,7 +519,6 @@ public class BaseMonsterIntelligence : MonsterScript
 [Script("Weak Common")]
 public class WeakCommon : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public WeakCommon(Monster monster, Area map) : base(monster, map)
@@ -740,7 +672,7 @@ public class WeakCommon : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -750,7 +682,7 @@ public class WeakCommon : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -788,41 +720,6 @@ public class WeakCommon : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -846,42 +743,6 @@ public class WeakCommon : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -889,11 +750,11 @@ public class WeakCommon : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -905,10 +766,9 @@ public class WeakCommon : MonsterScript
                 // Sort group based on lowest threat
                 var groupAttacking = tagged.OrderBy(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Lowest dps player targeted, exit
@@ -926,7 +786,6 @@ public class WeakCommon : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -936,15 +795,13 @@ public class WeakCommon : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -958,7 +815,7 @@ public class WeakCommon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -988,7 +845,7 @@ public class WeakCommon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -1013,7 +870,7 @@ public class WeakCommon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -1071,6 +928,10 @@ public class WeakCommon : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -1086,14 +947,14 @@ public class WeakCommon : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -1114,9 +975,14 @@ public class WeakCommon : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -1153,7 +1019,6 @@ public class WeakCommon : MonsterScript
 [Script("Inanimate")]
 public class Inanimate : MonsterScript
 {
-
     public Inanimate(Monster monster, Area map) : base(monster, map)
     {
         Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
@@ -1212,9 +1077,9 @@ public class Inanimate : MonsterScript
         {
             var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
             if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
+                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true, false));
             else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true, false), player);
         }
         catch (Exception ex)
         {
@@ -1235,7 +1100,6 @@ public class Inanimate : MonsterScript
 [Script("Shape Shifter")]
 public class ShapeShifter : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public ShapeShifter(Monster monster, Area map) : base(monster, map)
@@ -1389,7 +1253,7 @@ public class ShapeShifter : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -1399,7 +1263,7 @@ public class ShapeShifter : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -1437,23 +1301,6 @@ public class ShapeShifter : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
         try
@@ -1476,19 +1323,14 @@ public class ShapeShifter : MonsterScript
                     }
                 }
             }
-
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
         }
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
             SentrySdk.CaptureException(ex);
         }
+
+        base.OnDamaged(client, dmg, source);
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -1514,42 +1356,6 @@ public class ShapeShifter : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -1557,11 +1363,11 @@ public class ShapeShifter : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -1573,10 +1379,9 @@ public class ShapeShifter : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -1594,7 +1399,6 @@ public class ShapeShifter : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -1604,15 +1408,13 @@ public class ShapeShifter : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -1626,7 +1428,7 @@ public class ShapeShifter : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -1656,7 +1458,7 @@ public class ShapeShifter : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -1681,7 +1483,7 @@ public class ShapeShifter : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -1741,6 +1543,10 @@ public class ShapeShifter : MonsterScript
                         Monster.Direction = (byte)direction;
                         Monster.Turn();
                     }
+
+                    if (Monster.Target is not Aisling player) return;
+                    Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                    Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
                 }
                 else
                 {
@@ -1756,14 +1562,14 @@ public class ShapeShifter : MonsterScript
                     {
                         Monster.AStar = true;
                         _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                        _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                        Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                        Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                        Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                         if (Monster.ThrownBack) return;
 
-                        if (_targetPos == Vector2.Zero)
+                        if (Monster.TargetPos == Vector2.Zero)
                         {
-                            ClearTarget();
+                            Monster.ClearTarget();
                             Monster.Wander();
                             return;
                         }
@@ -1784,9 +1590,14 @@ public class ShapeShifter : MonsterScript
                             return;
                         }
 
-                        if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                        if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                        {
+                            if (Monster.Target is not Aisling player) return;
+                            Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                            Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                            return;
+                        }
 
-                        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                         Monster.Wander();
                     }
                 }
@@ -1834,7 +1645,6 @@ public class ShapeShifter : MonsterScript
 [Script("Loot Goblin")]
 public class LootGoblin : MonsterScript
 {
-
     public LootGoblin(Monster monster, Area map) : base(monster, map)
     {
         Monster.MonsterBank = [];
@@ -1881,6 +1691,10 @@ public class LootGoblin : MonsterScript
         DelObject(Monster);
     }
 
+    public override void OnLeave(WorldClient client) { }
+
+    public override void OnDamaged(WorldClient client, long dmg, Sprite source) { }
+
     public override void MonsterState(TimeSpan elapsedTime)
     {
         var walk = Monster.WalkTimer.Update(elapsedTime);
@@ -1906,7 +1720,6 @@ public class LootGoblin : MonsterScript
 [Script("Self Destruct")]
 public class SelfDestruct : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public SelfDestruct(Monster monster, Area map) : base(monster, map)
@@ -2037,7 +1850,7 @@ public class SelfDestruct : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -2047,7 +1860,7 @@ public class SelfDestruct : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -2073,41 +1886,6 @@ public class SelfDestruct : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -2131,42 +1909,6 @@ public class SelfDestruct : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -2174,11 +1916,11 @@ public class SelfDestruct : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -2190,10 +1932,9 @@ public class SelfDestruct : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -2211,7 +1952,6 @@ public class SelfDestruct : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -2221,15 +1961,13 @@ public class SelfDestruct : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -2248,7 +1986,7 @@ public class SelfDestruct : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -2312,6 +2050,10 @@ public class SelfDestruct : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -2327,14 +2069,14 @@ public class SelfDestruct : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -2355,9 +2097,14 @@ public class SelfDestruct : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -2394,7 +2141,6 @@ public class SelfDestruct : MonsterScript
 [Script("Alert Summon")]
 public class AlertSummon : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public AlertSummon(Monster monster, Area map) : base(monster, map)
@@ -2548,7 +2294,7 @@ public class AlertSummon : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -2558,7 +2304,7 @@ public class AlertSummon : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -2599,41 +2345,6 @@ public class AlertSummon : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -2657,42 +2368,6 @@ public class AlertSummon : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -2700,11 +2375,11 @@ public class AlertSummon : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -2716,10 +2391,9 @@ public class AlertSummon : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -2737,7 +2411,6 @@ public class AlertSummon : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -2747,15 +2420,13 @@ public class AlertSummon : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -2769,7 +2440,7 @@ public class AlertSummon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -2799,7 +2470,7 @@ public class AlertSummon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -2820,7 +2491,7 @@ public class AlertSummon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -2893,6 +2564,10 @@ public class AlertSummon : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -2908,14 +2583,14 @@ public class AlertSummon : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -2936,9 +2611,14 @@ public class AlertSummon : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -3124,7 +2804,7 @@ public class Turret : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -3132,7 +2812,7 @@ public class Turret : MonsterScript
                 if (!Monster.WalkEnabled) return;
                 if (!Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral)) return;
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
 
                 return;
             }
@@ -3148,41 +2828,6 @@ public class Turret : MonsterScript
 
         if (Monster.Target != null) return;
         UpdateTarget();
-    }
-
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -3208,41 +2853,6 @@ public class Turret : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -3250,11 +2860,11 @@ public class Turret : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -3266,10 +2876,9 @@ public class Turret : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -3287,7 +2896,6 @@ public class Turret : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -3297,15 +2905,13 @@ public class Turret : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -3322,7 +2928,7 @@ public class Turret : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -3349,7 +2955,7 @@ public class Turret : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -3366,9 +2972,7 @@ public class Turret : MonsterScript
 [Script("Pirate")]
 public class GeneralPirate : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _pirateSayings = "Arrr!|Arr! Let's sing a sea shanty.|Out'a me way!|Aye, yer sister is real nice|Gimmie yar gold!|Bet yar can't take me Bucko|Look at me funny and I'll a slit yar throat!|Scallywag!|Shiver my timbers|A watery grave for anyone who make us angry!|Arrr! Out'a me way and gimme yar gold!";
     private readonly string _pirateChase = "Ya landlubber can't run from us!|Harhar!! Running away eh?|Time fer a plundering!";
     private string[] Arggh => _pirateSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -3572,41 +3176,6 @@ public class GeneralPirate : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -3630,42 +3199,6 @@ public class GeneralPirate : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -3673,11 +3206,11 @@ public class GeneralPirate : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -3689,10 +3222,9 @@ public class GeneralPirate : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -3710,7 +3242,6 @@ public class GeneralPirate : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -3720,15 +3251,13 @@ public class GeneralPirate : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -3742,7 +3271,7 @@ public class GeneralPirate : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -3772,7 +3301,7 @@ public class GeneralPirate : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -3799,7 +3328,7 @@ public class GeneralPirate : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -3867,6 +3396,10 @@ public class GeneralPirate : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -3887,12 +3420,12 @@ public class GeneralPirate : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -3913,9 +3446,14 @@ public class GeneralPirate : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -3952,9 +3490,7 @@ public class GeneralPirate : MonsterScript
 [Script("PirateOfficer")]
 public class PirateOfficer : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _pirateSayings = "Yo Ho|All Hands!|Hoist the colors high!|Ye, ho! All together!|Never shall we die!|Bet yar can't take me Bucko";
     private readonly string _pirateChase = "It will be the brig for ye!|All hands! We have a stowaway!|Haha!!";
     private string[] Arggh => _pirateSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -4158,41 +3694,6 @@ public class PirateOfficer : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -4216,42 +3717,6 @@ public class PirateOfficer : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -4259,11 +3724,11 @@ public class PirateOfficer : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -4275,10 +3740,9 @@ public class PirateOfficer : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is invisible, dying, not logged in or nearby; Ignore them
-                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.IsInvisible || player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -4296,7 +3760,6 @@ public class PirateOfficer : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is invisible, dying, or not logged in; Ignore them
                         if (target.IsInvisible || target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -4306,15 +3769,13 @@ public class PirateOfficer : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -4328,7 +3789,7 @@ public class PirateOfficer : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -4367,7 +3828,7 @@ public class PirateOfficer : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -4394,7 +3855,7 @@ public class PirateOfficer : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -4462,6 +3923,10 @@ public class PirateOfficer : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -4482,12 +3947,12 @@ public class PirateOfficer : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -4508,9 +3973,14 @@ public class PirateOfficer : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -4547,7 +4017,6 @@ public class PirateOfficer : MonsterScript
 [Script("ShadowSight")]
 public class ShadowSight : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public ShadowSight(Monster monster, Area map) : base(monster, map)
@@ -4701,7 +4170,7 @@ public class ShadowSight : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -4711,7 +4180,7 @@ public class ShadowSight : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -4749,41 +4218,6 @@ public class ShadowSight : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -4807,41 +4241,6 @@ public class ShadowSight : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -4849,11 +4248,11 @@ public class ShadowSight : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -4865,10 +4264,9 @@ public class ShadowSight : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -4886,7 +4284,6 @@ public class ShadowSight : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -4896,15 +4293,13 @@ public class ShadowSight : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -4918,7 +4313,7 @@ public class ShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -4948,7 +4343,7 @@ public class ShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -4973,7 +4368,7 @@ public class ShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -5031,6 +4426,10 @@ public class ShadowSight : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -5046,14 +4445,14 @@ public class ShadowSight : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -5074,9 +4473,14 @@ public class ShadowSight : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -5113,7 +4517,6 @@ public class ShadowSight : MonsterScript
 [Script("Weak ShadowSight")]
 public class WeakShadowSight : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     public WeakShadowSight(Monster monster, Area map) : base(monster, map)
@@ -5267,7 +4670,7 @@ public class WeakShadowSight : MonsterScript
             if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral) && Monster.Target.IsWeakened)
             {
                 Monster.Aggressive = false;
-                ClearTarget();
+                Monster.ClearTarget();
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -5277,7 +4680,7 @@ public class WeakShadowSight : MonsterScript
                 if (Monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
                 {
                     Monster.Aggressive = false;
-                    ClearTarget();
+                    Monster.ClearTarget();
                 }
 
                 if (Monster.CantMove || Monster.Blind) return;
@@ -5315,41 +4718,6 @@ public class WeakShadowSight : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -5373,41 +4741,6 @@ public class WeakShadowSight : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -5415,11 +4748,11 @@ public class WeakShadowSight : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -5431,10 +4764,9 @@ public class WeakShadowSight : MonsterScript
                 // Sort group based on lowest threat
                 var groupAttacking = tagged.OrderBy(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Lowest dps player targeted, exit
@@ -5452,7 +4784,6 @@ public class WeakShadowSight : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -5462,15 +4793,13 @@ public class WeakShadowSight : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -5484,7 +4813,7 @@ public class WeakShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -5514,7 +4843,7 @@ public class WeakShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -5539,7 +4868,7 @@ public class WeakShadowSight : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -5597,6 +4926,10 @@ public class WeakShadowSight : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -5612,14 +4945,14 @@ public class WeakShadowSight : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -5640,9 +4973,14 @@ public class WeakShadowSight : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -5679,7 +5017,6 @@ public class WeakShadowSight : MonsterScript
 [Script("Aosda Remnant")]
 public class AosdaRemnant : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
 
     private readonly string _aosdaSayings = "Why are you here?|Do you understand, that for which you walk?|Many years, have I walked this path";
@@ -5893,41 +5230,6 @@ public class AosdaRemnant : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -5951,41 +5253,6 @@ public class AosdaRemnant : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -5993,11 +5260,11 @@ public class AosdaRemnant : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -6009,10 +5276,9 @@ public class AosdaRemnant : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -6030,7 +5296,6 @@ public class AosdaRemnant : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -6040,15 +5305,13 @@ public class AosdaRemnant : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -6062,7 +5325,7 @@ public class AosdaRemnant : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6092,7 +5355,7 @@ public class AosdaRemnant : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6119,7 +5382,7 @@ public class AosdaRemnant : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6187,6 +5450,10 @@ public class AosdaRemnant : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -6207,12 +5474,12 @@ public class AosdaRemnant : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -6233,9 +5500,14 @@ public class AosdaRemnant : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -6272,9 +5544,7 @@ public class AosdaRemnant : MonsterScript
 [Script("AncientDragon")]
 public class AncientDragon : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _aosdaSayings = "Young one, do you where you are?|These are hallowed grounds, leave.";
     private readonly string _aosdaChase = "I have lived a long time, I will catch you.|You dare flee like a coward?";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -6486,41 +5756,6 @@ public class AncientDragon : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -6544,41 +5779,6 @@ public class AncientDragon : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -6586,11 +5786,11 @@ public class AncientDragon : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -6602,10 +5802,9 @@ public class AncientDragon : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -6623,7 +5822,6 @@ public class AncientDragon : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -6633,15 +5831,13 @@ public class AncientDragon : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -6655,7 +5851,7 @@ public class AncientDragon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6685,7 +5881,7 @@ public class AncientDragon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6712,7 +5908,7 @@ public class AncientDragon : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -6780,6 +5976,10 @@ public class AncientDragon : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -6800,12 +6000,12 @@ public class AncientDragon : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -6826,9 +6026,14 @@ public class AncientDragon : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -6865,9 +6070,7 @@ public class AncientDragon : MonsterScript
 [Script("Draconic Omega")]
 public class DraconicOmega : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
     private readonly string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -7079,41 +6282,6 @@ public class DraconicOmega : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -7137,41 +6305,6 @@ public class DraconicOmega : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -7179,11 +6312,11 @@ public class DraconicOmega : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -7195,10 +6328,9 @@ public class DraconicOmega : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -7216,7 +6348,6 @@ public class DraconicOmega : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -7226,15 +6357,13 @@ public class DraconicOmega : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -7248,7 +6377,7 @@ public class DraconicOmega : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7278,7 +6407,7 @@ public class DraconicOmega : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7305,7 +6434,7 @@ public class DraconicOmega : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7373,6 +6502,10 @@ public class DraconicOmega : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -7393,12 +6526,12 @@ public class DraconicOmega : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -7419,9 +6552,14 @@ public class DraconicOmega : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -7458,9 +6596,7 @@ public class DraconicOmega : MonsterScript
 [Script("Jack Frost")]
 public class JackFrost : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _aosdaSayings = "How about this!|I do not know what I am doing... help me|I feel the light";
     private readonly string _aosdaChase = "Hey, hey. Slow down, slow down|Don't run, I will turn you to Ice!|But you've came all this way!";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -7672,41 +6808,6 @@ public class JackFrost : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -7730,41 +6831,6 @@ public class JackFrost : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -7772,11 +6838,11 @@ public class JackFrost : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -7788,10 +6854,9 @@ public class JackFrost : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -7809,7 +6874,6 @@ public class JackFrost : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -7819,15 +6883,13 @@ public class JackFrost : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -7841,7 +6903,7 @@ public class JackFrost : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7871,7 +6933,7 @@ public class JackFrost : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7898,7 +6960,7 @@ public class JackFrost : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -7966,6 +7028,10 @@ public class JackFrost : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -7986,12 +7052,12 @@ public class JackFrost : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -8012,9 +7078,14 @@ public class JackFrost : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -8051,9 +7122,7 @@ public class JackFrost : MonsterScript
 [Script("Yeti")]
 public class Yeti : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone";
     private readonly string _aosdaChase = "Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -8326,41 +7395,6 @@ public class Yeti : MonsterScript
         UpdateTarget();
     }
 
-    public override void OnApproach(WorldClient client) { }
-
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    public override void OnDamaged(WorldClient client, long dmg, Sprite source)
-    {
-        try
-        {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnItemDropped(WorldClient client, Item item)
     {
         if (item == null) return;
@@ -8384,41 +7418,6 @@ public class Yeti : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -8426,11 +7425,11 @@ public class Yeti : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -8442,10 +7441,9 @@ public class Yeti : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -8463,7 +7461,6 @@ public class Yeti : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -8473,15 +7470,13 @@ public class Yeti : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -8495,7 +7490,7 @@ public class Yeti : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -8525,7 +7520,7 @@ public class Yeti : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -8552,7 +7547,7 @@ public class Yeti : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -8620,6 +7615,10 @@ public class Yeti : MonsterScript
                     Monster.Direction = (byte)direction;
                     Monster.Turn();
                 }
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -8640,12 +7639,12 @@ public class Yeti : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -8666,9 +7665,14 @@ public class Yeti : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }
@@ -8705,9 +7709,7 @@ public class Yeti : MonsterScript
 [Script("World Boss Astrid")]
 public class WorldBossBahamut : MonsterScript
 {
-    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
-
     private readonly string _aosdaSayings = "I've met hatchlings fiercer than you|I'm going to enjoy this|Asra Leckto Moltuv, esta drakto|Don't die on me now|Endure!";
     private readonly string _aosdaChase = "Hahahaha, scared? You should be.|Come back, I just have a question|Such haste! Did you leave your courage behind?|Flee now.. live to cower another day hahaha, mortal";
     private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
@@ -8929,21 +7931,6 @@ public class WorldBossBahamut : MonsterScript
         Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
     }
 
-    public override void OnLeave(WorldClient client)
-    {
-        try
-        {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) ClearTarget();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
         try
@@ -8963,18 +7950,14 @@ public class WorldBossBahamut : MonsterScript
                     aisling.Client.SendVisibleEntities(objects);
                 }
             }
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true), player);
-            Monster.Aggressive = true;
         }
         catch (Exception ex)
         {
             ServerSetup.EventsLogger(ex.ToString());
             SentrySdk.CaptureException(ex);
         }
+
+        base.OnDamaged(client, dmg, source);
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -9000,42 +7983,6 @@ public class WorldBossBahamut : MonsterScript
         return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
-    #region Targeting
-
-    private void CheckTarget()
-    {
-        if (Monster.Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        Monster.Target = null;
-    }
-
-    private void ClearTarget()
-    {
-        Monster.CastEnabled = false;
-        Monster.BashEnabled = false;
-        Monster.AbilityEnabled = false;
-        Monster.WalkEnabled = true;
-
-        if (Monster.Target is Aisling)
-        {
-            Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
-        }
-
-        Monster.Target = null;
-        _targetPos = Vector2.Zero;
-
-        try
-        {
-            Monster.Path?.Result?.Clear();
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.EventsLogger(ex.ToString());
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateTarget()
     {
         if (!Monster.ObjectUpdateEnabled) return;
@@ -9043,11 +7990,11 @@ public class WorldBossBahamut : MonsterScript
 
         if (nearbyPlayers.Count == 0)
         {
-            ClearTarget();
+            Monster.ClearTarget();
             Monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        CheckTarget();
+        Monster.CheckTarget();
 
         if (Monster.Aggressive)
         {
@@ -9059,10 +8006,9 @@ public class WorldBossBahamut : MonsterScript
                 // Sort group based on highest threat
                 var groupAttacking = tagged.OrderByDescending(c => c.player.ThreatMeter);
 
-                foreach (var (_, player, nearby) in groupAttacking)
+                foreach (var (_, player, nearby, blocked) in groupAttacking)
                 {
-                    // If a player is dying, not logged in or nearby; Ignore them
-                    if (player.Skulled || !player.LoggedIn || !nearby) continue;
+                    if (player.Skulled || !player.LoggedIn || !nearby || blocked) continue;
                     if (player.Map != Monster.Map) continue;
                     Monster.Target = player;
                     // Highest dps player targeted, exit
@@ -9080,7 +8026,6 @@ public class WorldBossBahamut : MonsterScript
 
                     foreach (var target in topDps)
                     {
-                        // If a player is dying, or not logged in; Ignore them
                         if (target.Skulled || !target.LoggedIn) continue;
                         if (target.Map != Monster.Map) continue;
                         Monster.Target = target;
@@ -9090,15 +8035,13 @@ public class WorldBossBahamut : MonsterScript
                 }
             }
 
-            CheckTarget();
+            Monster.CheckTarget();
         }
         else
         {
-            ClearTarget();
+            Monster.ClearTarget();
         }
     }
-
-    #endregion
 
     #region Actions
 
@@ -9121,7 +8064,7 @@ public class WorldBossBahamut : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -9151,7 +8094,7 @@ public class WorldBossBahamut : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -9175,7 +8118,7 @@ public class WorldBossBahamut : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, playerTuple.blocked), playerTuple);
             return;
         }
 
@@ -9235,6 +8178,10 @@ public class WorldBossBahamut : MonsterScript
                 if (Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction)) return;
                 Monster.Direction = (byte)direction;
                 Monster.Turn();
+
+                if (Monster.Target is not Aisling player) return;
+                Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (playerTuple.dmg, player, true, false), playerTuple);
             }
             else
             {
@@ -9256,12 +8203,12 @@ public class WorldBossBahamut : MonsterScript
                 {
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
-                    _targetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, _targetPos);
+                    Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
+                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
 
-                    if (_targetPos == Vector2.Zero)
+                    if (Monster.TargetPos == Vector2.Zero)
                     {
-                        ClearTarget();
+                        Monster.ClearTarget();
                         Monster.Wander();
                         return;
                     }
@@ -9282,9 +8229,14 @@ public class WorldBossBahamut : MonsterScript
                         return;
                     }
 
-                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y)) return;
+                    if (Monster.WalkTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+                    {
+                        if (Monster.Target is not Aisling player) return;
+                        Monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerTuple);
+                        Monster.TargetRecord.TaggedAislings.TryUpdate(player.Serial, (0, player, true, true), playerTuple);
+                        return;
+                    }
 
-                    Monster.TargetRecord.TaggedAislings.TryRemove(Monster.Target.Serial, out _);
                     Monster.Wander();
                 }
             }

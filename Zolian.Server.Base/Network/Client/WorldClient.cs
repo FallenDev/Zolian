@@ -20,7 +20,6 @@ using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Formulas;
 using Darkages.Meta;
 using Darkages.Models;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
@@ -1898,17 +1897,15 @@ public class WorldClient : WorldClientBase, IWorldClient
         Send(args);
     }
 
-    // ToDo: Create Doors Class, and Implement a Dictionary with the values 
-    //public void SendDoors(IEnumerable<Door> doors)
-    //{
-    //    var args = new DoorArgs
-    //    {
-    //        Doors = Mapper.MapMany<DoorInfo>(doors).ToList()
-    //    };
+    public void SendDoorsOnMap(ICollection<DoorInfo> doors)
+    {
+        var doorArgs = new DoorArgs
+        {
+            Doors = doors
+        };
 
-    //    if (args.Doors.Any())
-    //        Send(args);
-    //}
+        if (doorArgs.Doors.Any()) Send(doorArgs);
+    }
 
     /// <summary>
     /// 0x3A - Effect Duration
@@ -2026,7 +2023,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.Accept,
-            PersistExchange = persistExchange
+            PersistExchange = persistExchange,
+            Message = "Exchange completed."
         };
 
         Send(args);
@@ -2040,7 +2038,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         var args = new DisplayExchangeArgs
         {
             ExchangeResponseType = ExchangeResponseType.Cancel,
-            RightSide = rightSide
+            RightSide = rightSide,
+            Message = "Exchange cancelled."
         };
 
         Send(args);

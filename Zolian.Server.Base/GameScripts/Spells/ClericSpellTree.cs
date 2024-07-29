@@ -837,13 +837,12 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
-        var healBase = aisling.MaximumHp * 0.25;
-
         if (aisling.GroupId != 0)
         {
             foreach (var partyMember in aisling.AislingsNearby().Where(i => i.GroupId == aisling.GroupId))
             {
                 if (partyMember.Dead) continue;
+                var healBase = partyMember.MaximumHp * 0.25;
                 aisling.ThreatMeter += (long)healBase;
                 partyMember.CurrentHp += (long)healBase;
 
@@ -857,6 +856,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
         }
         else
         {
+            var healBase = aisling.MaximumHp * 0.25;
             aisling.CurrentHp += (long)healBase;
             if (aisling.CurrentHp > aisling.MaximumHp)
                 aisling.CurrentHp = aisling.MaximumHp;

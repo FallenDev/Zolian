@@ -18,6 +18,8 @@ public class MilethAdvTrainingCenter : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         switch (x)
         {
             case 20 when y == 1:

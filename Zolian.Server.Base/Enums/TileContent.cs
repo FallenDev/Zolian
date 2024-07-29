@@ -8,6 +8,8 @@ public enum TileContent
     Mundane,
     Wall,
     Warp,
+    Door,
+    Chest,
     Item,
     Money
 }

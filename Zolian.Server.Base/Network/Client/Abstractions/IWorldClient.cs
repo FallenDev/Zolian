@@ -9,6 +9,7 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using System.Diagnostics;
+using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Microsoft.Data.SqlClient;
 using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
@@ -80,7 +81,7 @@ public interface IWorldClient : IConnectedClient
     void SendCreatureTurn(uint id, Direction direction);
     void SendCreatureWalk(uint id, Point startPoint, Direction direction);
     void SendDisplayAisling(Aisling aisling);
-    //void SendDoors(IEnumerable<Door> doors);
+    void SendDoorsOnMap(ICollection<DoorInfo> doors);
     void SendEffect(EffectColor effectColor, byte effectIcon);
     void SendEquipment(byte displaySlot, Item item);
     void SendExchangeAccepted(bool persistExchange);

@@ -848,7 +848,7 @@ public class Taunt(Skill skill) : SkillScript(skill)
         {
             if (target is not Monster monster) continue;
             monster.TargetRecord.TaggedAislings.Clear();
-            monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (450000, aisling, true));
+            monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (450000, aisling, true, false));
             monster.Target = aisling;
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
         }

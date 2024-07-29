@@ -7,6 +7,8 @@ using Darkages.Sprites;
 using Microsoft.IdentityModel.Tokens;
 using ServiceStack;
 using System.Numerics;
+using Chaos.Networking.Entities.Server;
+using Darkages.Common;
 
 namespace Darkages.Types;
 
@@ -23,6 +25,7 @@ public class Area : Map, IArea
     public int WildFlowersCount { get; set; }
     public TileGrid[,] ObjectGrid { get; set; }
     public TileContent[,] TileContent { get; set; }
+    public ICollection<DoorInfo> Doors { get; set; } = [];
     public Tuple<string, AreaScript> Script { get; set; }
     public string FilePath { get; set; }
 
@@ -137,6 +140,7 @@ public class Area : Map, IArea
 
             using var stream = new MemoryStream(Data);
             using var reader = new BinaryReader(stream);
+            //var index = 0;
 
             try
             {
@@ -147,6 +151,8 @@ public class Area : Map, IArea
                     for (byte x = 0; x < Width; x++)
                     {
                         ObjectGrid[x, y] = new TileGrid(this, x, y);
+                        //var leftForeground = ((ushort)(Data[index++] | Data[index++] << 8));
+                        //var rightForeground = ((ushort)(Data[index++] | Data[index++] << 8));
 
                         reader.BaseStream.Seek(2, SeekOrigin.Current);
 
@@ -156,7 +162,23 @@ public class Area : Map, IArea
                             var b = reader.ReadInt16();
 
                             if (ParseMapWalls(a, b))
-                                TileContent[x, y] = Enums.TileContent.Wall;
+                            {
+                                //if (ForegroundMapSprites.DoorSpriteSet.Contains(leftForeground) ||
+                                //    ForegroundMapSprites.DoorSpriteSet.Contains(rightForeground))
+                                //{
+                                //    TileContent[x, y] = Enums.TileContent.Door;
+                                //    Doors.Add(new DoorInfo
+                                //        {
+                                //            Closed = true,
+                                //            OpenRight = false, // ToDo: Need to define this
+                                //            X = x,
+                                //            Y = y
+                                //        }
+                                //    );
+                                //}
+                                //else
+                                    TileContent[x, y] = Enums.TileContent.Wall;
+                            }
                             else
                                 TileContent[x, y] = Enums.TileContent.None;
                         }

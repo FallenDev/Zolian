@@ -18,6 +18,8 @@ public class MilethTrainingCenter : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         if ((x != 4 || y != 0) && (x != 5 || y != 1)) return;
         client.Aisling.CurrentMp = client.Aisling.MaximumMp;
         client.SendAttributes(StatUpdateType.FullVitality);

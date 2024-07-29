@@ -4,7 +4,6 @@ using Darkages.Enums;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Templates;
-using Darkages.Types;
 using NUnit.Framework;
 
 namespace ZolianTest.Sprites;

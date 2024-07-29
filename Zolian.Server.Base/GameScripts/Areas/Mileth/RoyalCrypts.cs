@@ -22,6 +22,8 @@ public class RoyalCrypts : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         if (x == 13 && y == 0 || x == 14 && y == 0 || x == 15 && y == 1)
         {
             client.SendServerMessage(ServerMessageType.ScrollWindow, "~ Deep down in the crypt, there is a tree ~\n\n" +

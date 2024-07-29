@@ -22,7 +22,6 @@ public class AbelBarber : AreaScript
         client.UpdateDisplay();
     }
 
-    public override void OnMapClick(WorldClient client, int x, int y) { }
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
 

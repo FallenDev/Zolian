@@ -10,7 +10,7 @@ public class MServerTable : CompressableObject
 {
     [XmlIgnore] public byte[] Data => DeflatedData;
     [XmlIgnore] public uint Hash { get; set; }
-    public List<MServer> Servers { get; set; } = new();
+    public List<MServer> Servers { get; set; } = [];
 
     public static MServerTable FromFile(string filename)
     {

@@ -69,7 +69,6 @@ public class Intro : AreaScript
     }
 
     public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
-    public override void OnMapClick(WorldClient client, int x, int y) { }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {

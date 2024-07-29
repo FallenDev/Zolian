@@ -51,6 +51,8 @@ public class ToV : AreaScript
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
+        base.OnMapClick(client, x, y);
+
         var huntingBoardFound = ServerSetup.Instance.GlobalBoardPostCache.TryGetValue(2, out var huntingBoard);
 
         if (x == 15 && y == 52 || x == 14 && y == 51 || x == 14 && y == 50)

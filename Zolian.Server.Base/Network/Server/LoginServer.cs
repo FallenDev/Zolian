@@ -22,7 +22,6 @@ using RestSharp;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using Darkages.Managers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;

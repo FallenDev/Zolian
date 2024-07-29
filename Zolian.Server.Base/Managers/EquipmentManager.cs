@@ -4,7 +4,6 @@ using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 using System.Collections.Concurrent;
-using Darkages.Object;
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Managers;
