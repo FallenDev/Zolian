@@ -1,4 +1,6 @@
-﻿using Darkages.Network.Server;
+﻿using Darkages.Enums;
+using Darkages.Network.Server;
+using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
@@ -21,11 +23,11 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
                     player.Client.StatusControl.Start();
 
                 if (player.Client.StatusControl.Elapsed.TotalMilliseconds < 1000) return;
-
-                player.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
-                player.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
+                
+                PlayerSecondaryOffenseReset(player);
+                player.UpdateBuffs();
+                player.UpdateDebuffs();
                 player.ThreatGeneratedSubsided(player);
-
                 player.Client.StatusControl.Restart();
             });
         }
@@ -33,5 +35,11 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private static void PlayerSecondaryOffenseReset(Aisling player)
+    {
+        if (player.EquipmentManager.Shield == null && player.SecondaryOffensiveElement != ElementManager.Element.None)
+            player.SecondaryOffensiveElement = ElementManager.Element.None;
     }
 }

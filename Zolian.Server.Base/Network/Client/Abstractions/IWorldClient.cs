@@ -168,10 +168,10 @@ public interface IWorldClient : IConnectedClient
     void GiveDex(byte v = 1);
     void EnqueueExperienceEvent(Aisling player, long exp, bool hunting);
     void EnqueueAbilityEvent(Aisling player, int exp, bool hunting);
-    void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft);
-    void EnqueueBuffAppliedEvent(Sprite affected, Buff buff, TimeSpan timeLeft);
-    void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft);
-    void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff, TimeSpan timeLeft);
+    void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff);
+    void EnqueueBuffAppliedEvent(Sprite affected, Buff buff);
+    void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff);
+    void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff);
     void GiveExp(long exp);
     void LevelUp(Aisling player, long extraExp);
     void GiveAp(int a);

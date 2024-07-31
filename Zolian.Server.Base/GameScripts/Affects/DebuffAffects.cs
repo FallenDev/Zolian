@@ -47,7 +47,7 @@ public class Plagued : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
             var diseasedDebuff = new Diseased();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
         }
 
         var hallowed = aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Stricken);
@@ -55,7 +55,7 @@ public class Plagued : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
             var hallowedDebuff = new Hallowed();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff, TimeSpan.FromSeconds(hallowedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff);
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -123,7 +123,7 @@ public class TheShakes : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*cough* *cough*... *falls to knees*");
             var diseasedDebuff = new Diseased();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -183,7 +183,7 @@ public class Stricken : Debuff
         {
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=b*wheezing*");
             var hallowedDebuff = new Hallowed();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff, TimeSpan.FromSeconds(hallowedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, hallowedDebuff);
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(49, null, affected.Serial));
@@ -260,7 +260,7 @@ public class Rabies : Debuff
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
         var death = new DebuffReaping();
-        aisling.Client.EnqueueDebuffAppliedEvent(aisling, death, TimeSpan.FromSeconds(death.Length));
+        aisling.Client.EnqueueDebuffAppliedEvent(aisling, death);
         DeleteDebuff(aisling, debuff);
     }
 }
@@ -288,7 +288,7 @@ public class LockJoint : Debuff
         if (petrified)
         {
             var diseasedDebuff = new Petrified();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
         }
 
         aisling.BonusDmg -= DmgModifier;
@@ -305,7 +305,7 @@ public class LockJoint : Debuff
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.02) return;
         var diseasedDebuff = new DebuffBeagsuain();
-        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)
@@ -350,7 +350,7 @@ public class NumbFall : Debuff
         if (petrified)
         {
             var diseasedDebuff = new Petrified();
-            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
         }
 
         aisling.BonusHit -= HitModifier;
@@ -513,7 +513,7 @@ public class Petrified : Debuff
         var rand = Generator.RandomNumPercentGen();
         if (rand >= 0.05) return;
         var diseasedDebuff = new DebuffHalt();
-        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff, TimeSpan.FromSeconds(diseasedDebuff.Length));
+        aisling.Client.EnqueueDebuffAppliedEvent(affected, diseasedDebuff);
     }
 
     public override void OnEnded(Sprite affected, Debuff debuff)

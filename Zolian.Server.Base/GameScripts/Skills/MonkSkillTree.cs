@@ -701,7 +701,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
             var debuff = new DebuffHurricane();
 
             if (!_target.HasDebuff(debuff.Name))
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff);
 
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
@@ -755,7 +755,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
             {
                 if (!_target.HasDebuff(debuff.Name) || !_target.HasDebuff("Rend"))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
                     targetPlayer.Client.SendAttributes(StatUpdateType.Vitality);
                 }
             }

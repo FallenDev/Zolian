@@ -175,7 +175,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             }
         }
         else
@@ -246,7 +246,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
             }
         }
@@ -602,7 +602,7 @@ public class RollOver(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             }
         }
         else
@@ -673,7 +673,7 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             }
         }
         else
@@ -744,7 +744,7 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             }
         }
         else
@@ -993,7 +993,7 @@ public class Tentacle(Skill skill) : SkillScript(skill)
         {
             if (!_target.HasDebuff(debuff.Name))
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             }
         }
         else

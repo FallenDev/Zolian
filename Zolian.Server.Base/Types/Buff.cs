@@ -79,7 +79,7 @@ public class Buff : IBuff
         return BuffSpell;
     }
 
-    public void Update(Sprite affected, TimeSpan elapsedTime)
+    public void Update(Sprite affected)
     {
         if (TimeLeft > 0)
             OnDurationUpdate(affected, this);

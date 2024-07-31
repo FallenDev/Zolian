@@ -60,8 +60,8 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
                     var buffDion = new buff_ArdDion();
                     var buffAite = new buff_DiaAite();
-                    client.EnqueueBuffAppliedEvent(client.Aisling, buffDion, TimeSpan.FromSeconds(buffDion.Length));
-                    client.EnqueueBuffAppliedEvent(client.Aisling, buffAite, TimeSpan.FromSeconds(buffAite.Length));
+                    client.EnqueueBuffAppliedEvent(client.Aisling, buffDion);
+                    client.EnqueueBuffAppliedEvent(client.Aisling, buffAite);
                     client.SendOptionsDialog(Mundane, "And a Good Tidings to you! Hoo Hoo Hoo!!!", options.ToArray());
                     break;
                 }
@@ -99,8 +99,8 @@ public class Santa(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         client.SendAttributes(StatUpdateType.WeightGold);
                         var buffDion = new buff_ArdDion();
                         var buffAite = new buff_DiaAite();
-                        client.EnqueueBuffAppliedEvent(client.Aisling, buffDion, TimeSpan.FromSeconds(buffDion.Length));
-                        client.EnqueueBuffAppliedEvent(client.Aisling, buffAite, TimeSpan.FromSeconds(buffAite.Length));
+                        client.EnqueueBuffAppliedEvent(client.Aisling, buffDion);
+                        client.EnqueueBuffAppliedEvent(client.Aisling, buffAite);
 
                         var legend = new Legend.LegendItem
                         {

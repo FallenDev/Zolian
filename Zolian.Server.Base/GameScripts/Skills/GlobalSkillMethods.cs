@@ -68,9 +68,9 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         }
 
         if (client != null)
-            client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            client.EnqueueDebuffAppliedEvent(target, debuff);
         else if (target is Aisling targetPlayer)
-            targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff);
         else
             debuff.OnApplied(target, debuff);
 
@@ -94,7 +94,7 @@ public class GlobalSkillMethods : IGlobalSkillMethods
                     : BodyAnimation.TwoHandAtk
                 : BodyAnimation.Assail;
 
-            aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+            aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
             return;
         }

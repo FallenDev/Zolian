@@ -87,7 +87,7 @@ public class Debuff : IDebuff
         return DebuffSpell;
     }
 
-    public void Update(Sprite affected, TimeSpan elapsedTime)
+    public void Update(Sprite affected)
     {
         if (TimeLeft > 0)
             OnDurationUpdate(affected, this);
