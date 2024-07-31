@@ -134,10 +134,10 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                         return;
                     }
 
-                    // Deposit
+                    // Deposit Stacked Item
                     if (client.PendingBuySessions != null)
                     {
-                        CompleteDepositItem(client, amount);
+                        CompleteStackedDepositItem(client, amount);
                         return;
                     }
 
@@ -310,7 +310,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
         TopMenu(client);
     }
 
-    private void CompleteDepositItem(WorldClient client, ushort amount)
+    private void CompleteStackedDepositItem(WorldClient client, ushort amount)
     {
         client.PendingBuySessions.Quantity = amount;
         client.Aisling.Inventory.Items.TryGetValue(client.PendingBuySessions.Offer, out var itemInInv);
@@ -341,6 +341,16 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         if (itemInInv.Stacks == client.PendingBuySessions.Quantity)
         {
+            var stacked = FindExistingStackAndAdd(client);
+
+            if (stacked)
+            {
+                client.Aisling.Inventory.Items.TryUpdate(itemInInv.InventorySlot, null, itemInInv);
+                client.SendRemoveItemFromPane(itemInInv.InventorySlot);
+                StackedDepositCleanup(client, itemInInv);
+                return;
+            }
+
             if (!client.Aisling.Inventory.Items.TryUpdate(itemInInv.InventorySlot, null, itemInInv))
             {
                 client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, where is it?");
@@ -353,10 +363,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             if (client.Aisling.BankManager.Items.TryAdd(itemInInv.ItemId, itemInInv))
                 client.SendRemoveItemFromPane(itemInInv.InventorySlot);
 
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{itemInInv.DisplayName}");
-            client.Aisling.Inventory.UpdatePlayersWeight(client);
-            client.PendingBuySessions = null;
-            TopMenu(client);
+            StackedDepositCleanup(client, itemInInv);
             return;
         }
 
@@ -364,6 +371,13 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
         {
             // Modify Existing
             client.Aisling.Inventory.RemoveRange(client, itemInInv, client.PendingBuySessions.Quantity);
+            var stacked = FindExistingStackAndAdd(client);
+
+            if (stacked)
+            {
+                StackedDepositCleanup(client, itemInInv);
+                return;
+            }
 
             // Create
             var itemCreateFromTemplate = new Item();
@@ -373,11 +387,37 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
             // Deposit
             client.Aisling.BankManager.Items.TryAdd(itemCreated.ItemId, itemCreated);
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{itemCreated.DisplayName}, x{client.PendingBuySessions.Quantity}");
-            client.Aisling.Inventory.UpdatePlayersWeight(client);
-            client.PendingBuySessions = null;
-            TopMenu(client);
+            StackedDepositCleanup(client, itemCreated);
         }
+    }
+
+    private static bool FindExistingStackAndAdd(WorldClient client)
+    {
+        client.Aisling.Inventory.Items.TryGetValue(client.PendingBuySessions.Offer, out var itemInInv);
+        if (itemInInv == null) return false;
+
+        var bankManager = client.Aisling.BankManager.Items.Values;
+
+        foreach (var itemStored in bankManager)
+        {
+            if (itemStored.Template.Name != itemInInv.Template.Name) continue;
+            var overStacked = itemStored.Stacks + client.PendingBuySessions.Quantity > itemStored.Template.MaxStack;
+            if (overStacked) continue;
+            itemStored.Stacks += client.PendingBuySessions.Quantity;
+            client.Aisling.BankManager.Items.TryUpdate(itemStored.ItemId, itemStored, itemStored);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void StackedDepositCleanup(WorldClient client, Item bankedItem)
+    {
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{bankedItem.DisplayName}, x{client.PendingBuySessions.Quantity}");
+        client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, thank you for trusting {bankedItem.DisplayName} with us!");
+        client.Aisling.Inventory.UpdatePlayersWeight(client);
+        client.PendingBuySessions = null;
+        TopMenu(client);
     }
 
     private void StartWithdrawItem(WorldClient client, string args)
@@ -434,6 +474,14 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         // Pick the smallest stack capable of fulfilling the request
         var bestFit = matchingItems.MinBy(i => i.Stacks);
+
+        if (bestFit == null)
+        {
+            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{client.Aisling.Username}, I'm sorry it seems you don't have that.");
+            TopMenu(client);
+            return;
+        }
+
         client.PendingItemSessions.ID = bestFit.ItemId;
 
         // Grab the item
