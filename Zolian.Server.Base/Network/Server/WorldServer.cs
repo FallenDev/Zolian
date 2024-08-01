@@ -3565,6 +3565,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!safe)
         {
             var badActor = ClientOnBlackList(ipAddress.ToString());
+
             if (badActor)
             {
                 try
@@ -3575,6 +3576,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     // ignored
                 }
+
                 return;
             }
         }
@@ -3582,6 +3584,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!ClientRegistry.TryAdd(client))
         {
             ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
+
             try
             {
                 client.Disconnect();
@@ -3590,6 +3593,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 // ignored
             }
+
             return;
         }
 
@@ -3606,6 +3610,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 // ignored
             }
+
             ServerSetup.ConnectionLogger("---------World-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
@@ -3665,7 +3670,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private bool ClientOnBlackList(string remoteIp)
+    private static bool ClientOnBlackList(string remoteIp)
     {
         if (remoteIp.IsNullOrEmpty()) return true;
 
@@ -3775,7 +3780,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         return true;
     }
 
-    private void ReportEndpoint(string remoteIp, string comment)
+    private static void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)

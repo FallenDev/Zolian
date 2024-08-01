@@ -17,6 +17,7 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         {
             Parallel.ForEach(Server.Aislings, (player) =>
             {
+                if (player?.Client == null) return;
                 if (!player.Client.StatusControl.IsRunning)
                     player.Client.StatusControl.Start();
 

@@ -172,6 +172,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 {
                     // ignored
                 }
+
                 return;
             }
         }
@@ -187,6 +188,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             {
                 // ignored
             }
+
             return;
         }
 
@@ -318,7 +320,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         return true;
     }
 
-    private void ReportEndpoint(string remoteIp, string comment)
+    private static void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
@@ -347,7 +349,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         }
     }
 
-    private readonly HashSet<string> _bannedIPs = new();
+    private readonly HashSet<string> _bannedIPs = [];
 
     private bool BannedIpCheck(string ip)
     {

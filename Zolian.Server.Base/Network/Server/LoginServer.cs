@@ -492,6 +492,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 {
                     // ignored
                 }
+
                 return;
             }
         }
@@ -507,6 +508,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 // ignored
             }
+
             return;
         }
 
@@ -522,6 +524,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 // ignored
             }
+
             ServerSetup.ConnectionLogger("---------Login-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
@@ -541,7 +544,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientRegistry.TryRemove(client.Id, out _);
     }
 
-    private bool ClientOnBlackList(string remoteIp)
+    private static bool ClientOnBlackList(string remoteIp)
     {
         switch (remoteIp)
         {
@@ -642,7 +645,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         return true;
     }
 
-    private void ReportEndpoint(string remoteIp, string comment)
+    private static void ReportEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
