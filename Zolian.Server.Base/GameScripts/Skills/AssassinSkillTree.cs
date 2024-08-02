@@ -282,7 +282,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
             var debuff = new DebuffStabnTwist();
 
             if (!_target.HasDebuff(debuff.Name))
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff);
 
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
@@ -336,7 +336,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
             {
                 if (!_target.HasDebuff(debuff.Name))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }
@@ -410,7 +410,7 @@ public class Sneak(Skill skill) : SkillScript(skill)
                     }
 
                     var buff = new buff_hide();
-                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+                    aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
                     _skillMethod.Train(aisling.Client, Skill);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
                     break;

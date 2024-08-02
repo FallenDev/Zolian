@@ -241,11 +241,12 @@ public class WorldClient : WorldClientBase, IWorldClient
         DisplayQualityPillar(elapsed);
         ApplyAffliction(elapsed);
         HandleBadTrades();
+        HandleSecOffenseEle();
     }
 
     #region Events
 
-    private void ProcessExperienceEvents()
+    private async Task ProcessExperienceEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -265,12 +266,12 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
 
-    private void ProcessAbilityEvents()
+    private async Task ProcessAbilityEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -290,12 +291,12 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
 
-    private void ProcessApplyingDebuffsEvents()
+    private async Task ProcessApplyingDebuffsEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -315,12 +316,12 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
 
-    private void ProcessApplyingBuffsEvents()
+    private async Task ProcessApplyingBuffsEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -340,12 +341,12 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
 
-    private void ProcessUpdatingDebuffsEvents()
+    private async Task ProcessUpdatingDebuffsEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -361,16 +362,16 @@ public class WorldClient : WorldClientBase, IWorldClient
 
             if (debuffEvent.HasValue)
             {
-                debuffEvent.Value.Debuff.Update(debuffEvent.Value.Affected, debuffEvent.Value.TimeLeft);
+                debuffEvent.Value.Debuff.Update(debuffEvent.Value.Affected);
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
 
-    private void ProcessUpdatingBuffsEvents()
+    private async Task ProcessUpdatingBuffsEvents()
     {
         while (ServerSetup.Instance.Running)
         {
@@ -386,11 +387,12 @@ public class WorldClient : WorldClientBase, IWorldClient
 
             if (buffEvent.HasValue)
             {
-                buffEvent.Value.Buff.Update(buffEvent.Value.Affected, buffEvent.Value.TimeLeft);
+                buffEvent.Value.Buff.Update(buffEvent.Value.Affected);
+                //Console.Write($"{Aisling}: {buffEvent?.Buff.Name} - {buffEvent?.Buff.TimeLeft}\n");
             }
             else
             {
-                Task.Delay(50).Wait(); // Delay to avoid busy-waiting
+                await Task.Delay(50);
             }
         }
     }
@@ -457,7 +459,6 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         var hasUnreadMail = false;
 
-        // ToDo: Disabling until logic is worked to turn off read letters
         foreach (var letter in Aisling.PersonalLetters.Values)
         {
             if (letter.ReadPost) continue;
@@ -565,7 +566,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (!buff)
             {
                 var applyDebuff = new BuffLycanisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff);
             }
         }
 
@@ -576,7 +577,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (!buff)
             {
                 var applyDebuff = new BuffVampirisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff);
             }
         }
 
@@ -589,6 +590,13 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (Aisling.Exchange?.Trader == null) return;
         if (Aisling.Exchange.Trader.LoggedIn && Aisling.WithinRangeOf(Aisling.Exchange.Trader)) return;
         Aisling.CancelExchange();
+    }
+
+    public void HandleSecOffenseEle()
+    {
+        if (Aisling.IsEnhancingSecondaryOffense) return;
+        if (Aisling.EquipmentManager.Shield == null && Aisling.SecondaryOffensiveElement != ElementManager.Element.None)
+            Aisling.SecondaryOffensiveElement = ElementManager.Element.None;
     }
 
     public void DeathStatusCheck()
@@ -629,7 +637,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (Aisling.Skulled) return;
 
         var debuff = new DebuffReaping();
-        EnqueueDebuffAppliedEvent(Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
+        EnqueueDebuffAppliedEvent(Aisling, debuff);
     }
 
     #region Player Load
@@ -4181,35 +4189,35 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft)
+    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff)
     {
         lock (_debuffQueueLockApply)
         {
-            _debuffApplyQueue.Enqueue(new DebuffEvent(affected, debuff, timeLeft));
+            _debuffApplyQueue.Enqueue(new DebuffEvent(affected, debuff));
         }
     }
 
-    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff, TimeSpan timeLeft)
+    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff)
     {
         lock (_buffQueueLockApply)
         {
-            _buffApplyQueue.Enqueue(new BuffEvent(affected, buff, timeLeft));
+            _buffApplyQueue.Enqueue(new BuffEvent(affected, buff));
         }
     }
 
-    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff, TimeSpan timeLeft)
+    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff)
     {
         lock (_debuffQueueLockUpdate)
         {
-            _debuffUpdateQueue.Enqueue(new DebuffEvent(affected, debuff, timeLeft));
+            _debuffUpdateQueue.Enqueue(new DebuffEvent(affected, debuff));
         }
     }
 
-    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff, TimeSpan timeLeft)
+    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff)
     {
         lock (_buffQueueLockUpdate)
         {
-            _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff, timeLeft));
+            _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff));
         }
     }
 

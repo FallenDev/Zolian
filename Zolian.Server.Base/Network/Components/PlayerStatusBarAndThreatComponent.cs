@@ -23,10 +23,9 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
 
                 if (player.Client.StatusControl.Elapsed.TotalMilliseconds < 1000) return;
 
-                player.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
-                player.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
+                player.UpdateBuffs();
+                player.UpdateDebuffs();
                 player.ThreatGeneratedSubsided(player);
-
                 player.Client.StatusControl.Restart();
             });
         }

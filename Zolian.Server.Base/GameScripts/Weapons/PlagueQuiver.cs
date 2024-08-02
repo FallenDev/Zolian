@@ -44,7 +44,7 @@ public class PlagueQuiver(Item item) : WeaponScript(item)
             damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10000, null, enemy.Serial, 100, 10000, damageDealingSprite.Serial));
         });
         var debuff = new DebuffMorPoison();
-        damageDealingSprite.Client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+        damageDealingSprite.Client.EnqueueDebuffAppliedEvent(enemy, debuff);
         enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Earth, null);
     }
 }

@@ -156,8 +156,8 @@ public interface ISprite
     void RemoveBuffsAndDebuffs();
     bool RemoveDebuff(string debuff, bool cancelled = false);
     void UpdateAddAndRemove();
-    void UpdateBuffs(TimeSpan elapsedTime);
-    void UpdateDebuffs(TimeSpan elapsedTime);
+    void UpdateBuffs();
+    void UpdateDebuffs();
     void StatusBarDisplayUpdateBuff(Buff buff);
     void StatusBarDisplayUpdateDebuff(Debuff debuff);
     void Remove();

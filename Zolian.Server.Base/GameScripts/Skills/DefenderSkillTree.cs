@@ -515,7 +515,7 @@ public class Charge(Skill skill) : SkillScript(skill)
             _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
             var stunned = new DebuffBeagsuain();
-            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
         }
     }
@@ -584,7 +584,7 @@ public class Charge(Skill skill) : SkillScript(skill)
             if (wallPos <= 6)
             {
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -890,7 +890,7 @@ public class Briarthorn(Skill skill) : SkillScript(skill)
             laws.OnEnded(aisling, laws);
 
         var buff = new aura_BriarThorn();
-        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+        client.EnqueueBuffAppliedEvent(aisling, buff);
         _skillMethod.Train(client, Skill);
     }
 
@@ -933,7 +933,7 @@ public class LawsOfAosda(Skill skill) : SkillScript(skill)
             briar.OnEnded(aisling, briar);
 
         var buff = new aura_LawsOfAosda();
-        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+        client.EnqueueBuffAppliedEvent(aisling, buff);
         _skillMethod.Train(client, Skill);
     }
 

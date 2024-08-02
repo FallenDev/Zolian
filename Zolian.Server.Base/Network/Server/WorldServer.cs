@@ -888,8 +888,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                     if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
 
-                    monster.UpdateBuffs(TimeSpan.FromMilliseconds(1000));
-                    monster.UpdateDebuffs(TimeSpan.FromMilliseconds(1000));
+                    monster.UpdateBuffs();
+                    monster.UpdateDebuffs();
                     monster.MonsterBuffAndDebuffStopWatch.Restart();
                 });
             });

@@ -19,7 +19,7 @@ public interface IDebuff
     void OnEnded(Sprite affected, Debuff debuff);
     void OnItemChange(Aisling affected, Debuff debuff);
     Debuff ObtainDebuffName(Sprite affected, Debuff debuff);
-    void Update(Sprite affected, TimeSpan elapsedTime);
+    void Update(Sprite affected);
     void InsertDebuff(Aisling aisling, Debuff debuff);
     void DeleteDebuff(Aisling aisling, Debuff debuff);
     Task<bool> CheckOnDebuffAsync(IWorldClient client, string name);

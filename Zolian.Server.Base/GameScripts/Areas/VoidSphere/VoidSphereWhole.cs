@@ -28,7 +28,7 @@ public class VoidSphereWhole : AreaScript
 
         if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();
-        client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
+        client.EnqueueDebuffAppliedEvent(client.Aisling, debuff);
         client.TransitionToMap(14757, new Position(13, 34));
         client.SendSound(0x9B, false);
     }

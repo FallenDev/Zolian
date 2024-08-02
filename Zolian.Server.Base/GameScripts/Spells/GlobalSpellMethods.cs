@@ -356,14 +356,14 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
 
-            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff);
         }
         else
         {
             if (target is Aisling targetAisling)
             {
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Unknown"} afflicts you with {spell.Template.Name}");
-                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff);
             }
             else
                 debuff.OnApplied(target, debuff);
@@ -395,14 +395,14 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.Animation, target.Position));
             }
 
-            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff);
         }
         else
         {
             if (target is Aisling targetAisling)
             {
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Unknown"} poisoned you with {spell.Template.Name}");
-                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                targetAisling.Client.EnqueueDebuffAppliedEvent(target, debuff);
             }
             else
                 debuff.OnApplied(target, debuff);
@@ -596,7 +596,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, target.Position));
             }
 
-            aisling.Client.EnqueueBuffAppliedEvent(target, buff, TimeSpan.FromSeconds(buff.Length));
+            aisling.Client.EnqueueBuffAppliedEvent(target, buff);
         }
         else
         {
@@ -604,7 +604,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             {
                 if (!target.HasBuff(buff.Name))
                 {
-                    targetPlayer.Client.EnqueueBuffAppliedEvent(targetPlayer, buff, TimeSpan.FromSeconds(buff.Length));
+                    targetPlayer.Client.EnqueueBuffAppliedEvent(targetPlayer, buff);
                 }
             }
             else

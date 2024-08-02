@@ -345,7 +345,7 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(259, enemy.Position));
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(27, false));
                     var debuff = new DebuffBeagcradh();
-                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff);
                     return;
                 }
             case "Betrayal Blossom":
@@ -398,7 +398,7 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(106, enemy.Position));
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(26, false));
                     var debuff = new DebuffDarkChain();
-                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff);
                     return;
                 }
             case "Cactus Lilium":
@@ -431,7 +431,7 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(95, enemy.Position));
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(28, false));
                     var debuff = new DebuffBeagsuain();
-                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff);
                     return;
                 }
             case "Prahed Bellis":
@@ -464,7 +464,7 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(107, enemy.Position));
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(32, false));
                     var debuff = new DebuffSleep();
-                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff);
                     return;
                 }
             case "Aiten Bloom":
@@ -481,13 +481,13 @@ public class Consumable(Item item) : ItemScript(item)
                     {
                         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(122, aisling.Position));
                         var buff = new buff_DiaAite();
-                        client.EnqueueBuffAppliedEvent(aisling, buff, TimeSpan.FromSeconds(buff.Length));
+                        client.EnqueueBuffAppliedEvent(aisling, buff);
                         return;
                     }
 
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(193, aisling.Position));
                     var debuff = new DebuffSunSeal();
-                    client.EnqueueDebuffAppliedEvent(aisling, debuff, TimeSpan.FromSeconds(60));
+                    client.EnqueueDebuffAppliedEvent(aisling, debuff);
                     return;
                 }
             case "Reict Weed":
@@ -520,7 +520,7 @@ public class Consumable(Item item) : ItemScript(item)
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(196, enemy.Position));
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(137, false));
                     var debuff = new DebuffArdPoison();
-                    client.EnqueueDebuffAppliedEvent(enemy, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(enemy, debuff);
                     return;
                 }
 

@@ -19,7 +19,7 @@ public interface IBuff
     void OnEnded(Sprite affected, Buff buff);
     void OnItemChange(Aisling affected, Buff buff);
     Buff ObtainBuffName(Sprite affected, Buff buff);
-    void Update(Sprite affected, TimeSpan elapsedTime);
+    void Update(Sprite affected);
     void InsertBuff(Aisling aisling, Buff buff);
     void DeleteBuff(Aisling aisling, Buff buff);
     Task<bool> CheckOnBuffAsync(IWorldClient client, string name);

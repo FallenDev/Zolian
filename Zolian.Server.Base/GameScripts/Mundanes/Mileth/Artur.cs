@@ -105,17 +105,17 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     client.Aisling.QuestManager.ArtursGift = 1;
                     client.SendOptionsDialog(Mundane, "You will want to travel to Tagor, there you'll meet Tout. I have granted you access. After you enter, you'll need to fight your way until the Lexicon reveals itself ~Dia Aite~!");
                     var buff = new buff_DiaAite();
-                    client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
+                    client.EnqueueBuffAppliedEvent(client.Aisling, buff);
                     break;
                 }
             case 5:
                 {
                     var debuff = new DebuffArdcradh();
-                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff);
                     var debuff2 = new DebuffDecay();
-                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff2, TimeSpan.FromSeconds(debuff2.Length));
+                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff2);
                     var debuff3 = new DebuffHalt();
-                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff3, TimeSpan.FromSeconds(debuff3.Length));
+                    client.EnqueueDebuffAppliedEvent(client.Aisling, debuff3);
                     client.SendOptionsDialog(Mundane, "Scram or there will be nothing left of you");
                     break;
                 }
@@ -255,7 +255,7 @@ public class Artur(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     if (!client.Aisling.HasBuff("Dia Aite"))
                     {
                         var buff = new buff_DiaAite();
-                        client.EnqueueBuffAppliedEvent(client.Aisling, buff, TimeSpan.FromSeconds(buff.Length));
+                        client.EnqueueBuffAppliedEvent(client.Aisling, buff);
                     }
 
                     client.SendOptionsDialog(Mundane, "Come back when you have, they're located in {=bTagor{=a'{=bs Shrouded Necropolis{=a. ~Dia Aite~");

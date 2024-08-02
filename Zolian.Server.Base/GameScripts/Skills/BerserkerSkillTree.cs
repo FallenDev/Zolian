@@ -943,7 +943,7 @@ public class Rush(Skill skill) : SkillScript(skill)
             _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
 
             var stunned = new DebuffBeagsuain();
-            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
         }
     }
@@ -1012,7 +1012,7 @@ public class Rush(Skill skill) : SkillScript(skill)
             if (wallPos <= 2)
             {
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned, TimeSpan.FromSeconds(stunned.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
             }
 
@@ -1078,7 +1078,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
             var debuff = new DebuffTitansCleave();
 
             if (!_target.HasDebuff(debuff.Name))
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1131,7 +1131,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
             {
                 if (!_target.HasDebuff(debuff.Name))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }
@@ -1216,7 +1216,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
             var debuff = new DebuffRetribution();
 
             if (!_target.HasDebuff(debuff.Name))
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                aisling.Client.EnqueueDebuffAppliedEvent(_target, debuff);
             if (_target is Aisling targetPlayer)
                 targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
 
@@ -1269,7 +1269,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
             {
                 if (!_target.HasDebuff(debuff.Name))
                 {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff, TimeSpan.FromSeconds(debuff.Length));
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
                     targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
                 }
             }
