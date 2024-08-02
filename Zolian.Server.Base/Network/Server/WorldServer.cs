@@ -55,7 +55,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     public static FrozenDictionary<(Race race, Class path, Class pastClass), string> SkillMap;
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
-    private const int GameSpeed = 30;
+    private const int GameSpeed = 50;
     private Task _componentRunTask;
     private Task _updateMundanessTask;
     private Task _updateMonstersTask;
@@ -64,6 +64,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private Task _updateMapsTask;
     private Task _updateTrapsTasks;
     private Task _updateClientsTask;
+    private readonly Dictionary<string, Stopwatch> _componentStopwatches = new()
+    {
+        { "DayLight", new Stopwatch() },
+        { "BankInterest", new Stopwatch() },
+        { "MessageClear", new Stopwatch() },
+        { "Monolith", new Stopwatch() },
+        { "Mundane", new Stopwatch() },
+        { "Object", new Stopwatch() },
+        { "Ping", new Stopwatch() },
+        { "PlayerRegen", new Stopwatch() },
+        { "PlayerSave", new Stopwatch() },
+        { "PlayerStatus", new Stopwatch() },
+        { "PlayerSkillSpell", new Stopwatch() },
+        { "MoonPhase", new Stopwatch() },
+        { "Creation", new Stopwatch() }
+    };
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -556,132 +572,99 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private void UpdateComponentsRoutine()
+    private async Task UpdateComponentsRoutine()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var dayLightWatch = new Stopwatch();
-        dayLightWatch.Start();
-        var bankInterestWatch = new Stopwatch();
-        bankInterestWatch.Start();
-        var messageClearWatch = new Stopwatch();
-        messageClearWatch.Start();
-        var monolithWatch = new Stopwatch();
-        monolithWatch.Start();
-        var mundaneWatch = new Stopwatch();
-        mundaneWatch.Start();
-        var objectWatch = new Stopwatch();
-        objectWatch.Start();
-        var pingWatch = new Stopwatch();
-        pingWatch.Start();
-        var playerRegenWatch = new Stopwatch();
-        playerRegenWatch.Start();
-        var playerSaveWatch = new Stopwatch();
-        playerSaveWatch.Start();
-        var playerStatusWatch = new Stopwatch();
-        playerStatusWatch.Start();
-        var playerSkillSpellWatch = new Stopwatch();
-        playerSkillSpellWatch.Start();
-        var moonPhaseWatch = new Stopwatch();
-        moonPhaseWatch.Start();
-        var creationWatch = new Stopwatch();
-        creationWatch.Start();
+        foreach (var stopwatch in _componentStopwatches.Values)
+        {
+            stopwatch.Start();
+        }
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < 10) continue;
-            var dayLightElapsed = dayLightWatch.Elapsed;
-            var bankInterestElapsed = bankInterestWatch.Elapsed;
-            var messageClearElapsed = messageClearWatch.Elapsed;
-            var monolithElapsed = monolithWatch.Elapsed;
-            var mundaneElapsed = mundaneWatch.Elapsed;
-            var objectElapsed = objectWatch.Elapsed;
-            var pingElapsed = pingWatch.Elapsed;
-            var playerRegenElapsed = playerRegenWatch.Elapsed;
-            var playerSaveElapsed = playerSaveWatch.Elapsed;
-            var playerStatusElapsed = playerStatusWatch.Elapsed;
-            var playerSkillSpellElapsed = playerSkillSpellWatch.Elapsed;
-            var moonPhaseElapsed = moonPhaseWatch.Elapsed;
-            var creationElapsed = creationWatch.Elapsed;
+            var elapsed = new Dictionary<string, TimeSpan>();
+            foreach (var kvp in _componentStopwatches)
+            {
+                elapsed[kvp.Key] = kvp.Value.Elapsed;
+            }
 
             Parallel.ForEach(_serverComponents.Values, component =>
             {
                 switch (component)
                 {
                     case ObjectComponent objectComponent:
-                        if (objectElapsed.TotalMilliseconds < 50) break;
-                        objectComponent.Update(objectElapsed);
-                        objectWatch.Restart();
+                        if (elapsed["Object"].TotalMilliseconds < 50) break;
+                        objectComponent.Update(elapsed["Object"]);
+                        _componentStopwatches["Object"].Restart();
                         break;
                     case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
-                        if (playerSkillSpellElapsed.TotalMilliseconds < 250) break;
-                        skillSpellCooldownComponent.Update(playerSkillSpellElapsed);
-                        playerSkillSpellWatch.Restart();
+                        if (elapsed["PlayerSkillSpell"].TotalMilliseconds < 250) break;
+                        skillSpellCooldownComponent.Update(elapsed["PlayerSkillSpell"]);
+                        _componentStopwatches["PlayerSkillSpell"].Restart();
                         break;
                     case PlayerStatusBarAndThreatComponent statusBarAndThreatComponent:
-                        if (playerStatusElapsed.TotalMilliseconds < 100) break;
-                        statusBarAndThreatComponent.Update(playerStatusElapsed);
-                        playerStatusWatch.Restart();
+                        if (elapsed["PlayerStatus"].TotalMilliseconds < 100) break;
+                        statusBarAndThreatComponent.Update(elapsed["PlayerStatus"]);
+                        _componentStopwatches["PlayerStatus"].Restart();
                         break;
                     case PlayerRegenerationComponent playerRegenerationComponent:
-                        if (playerRegenElapsed.TotalSeconds < 1) break;
-                        playerRegenerationComponent.Update(playerRegenElapsed);
-                        playerRegenWatch.Restart();
+                        if (elapsed["PlayerRegen"].TotalSeconds < 1) break;
+                        playerRegenerationComponent.Update(elapsed["PlayerRegen"]);
+                        _componentStopwatches["PlayerRegen"].Restart();
                         break;
                     case MonolithComponent monolithComponent:
-                        if (monolithElapsed.TotalSeconds < 3) break;
-                        monolithComponent.Update(monolithElapsed);
-                        monolithWatch.Restart();
+                        if (elapsed["Monolith"].TotalSeconds < 3) break;
+                        monolithComponent.Update(elapsed["Monolith"]);
+                        _componentStopwatches["Monolith"].Restart();
                         break;
                     case PingComponent pingComponent:
-                        if (pingElapsed.TotalSeconds < 7) break;
-                        pingComponent.Update(pingElapsed);
-                        pingWatch.Restart();
+                        if (elapsed["Ping"].TotalSeconds < 7) break;
+                        pingComponent.Update(elapsed["Ping"]);
+                        _componentStopwatches["Ping"].Restart();
                         break;
                     case PlayerSaveComponent playerSaveComponent:
-                        if (playerSaveElapsed.TotalSeconds < 5) break;
-                        playerSaveComponent.Update(playerSaveElapsed);
-                        playerSaveWatch.Restart();
+                        if (elapsed["PlayerSave"].TotalSeconds < 5) break;
+                        playerSaveComponent.Update(elapsed["PlayerSave"]);
+                        _componentStopwatches["PlayerSave"].Restart();
                         break;
                     case MundaneComponent mundaneComponent:
-                        if (mundaneElapsed.TotalSeconds < 10) break;
-                        mundaneComponent.Update(mundaneElapsed);
-                        mundaneWatch.Restart();
+                        if (elapsed["Mundane"].TotalSeconds < 10) break;
+                        mundaneComponent.Update(elapsed["Mundane"]);
+                        _componentStopwatches["Mundane"].Restart();
                         break;
                     case DayLightComponent dayLightComponent:
-                        if (dayLightElapsed.TotalSeconds < 15) break;
-                        dayLightComponent.Update(dayLightElapsed);
-                        dayLightWatch.Restart();
+                        if (elapsed["DayLight"].TotalSeconds < 15) break;
+                        dayLightComponent.Update(elapsed["DayLight"]);
+                        _componentStopwatches["DayLight"].Restart();
                         break;
                     case MessageClearComponent messageClearComponent:
-                        if (messageClearElapsed.TotalSeconds < 60) break;
-                        messageClearComponent.Update(messageClearElapsed);
+                        if (elapsed["MessageClear"].TotalSeconds < 60) break;
+                        messageClearComponent.Update(elapsed["MessageClear"]);
                         UpdateBoards();
-                        messageClearWatch.Restart();
+                        _componentStopwatches["MessageClear"].Restart();
                         break;
                     case BankInterestComponent bankInterestComponent:
-                        if (bankInterestElapsed.TotalMinutes < 30) break;
-                        bankInterestComponent.Update(bankInterestElapsed);
-                        bankInterestWatch.Restart();
+                        if (elapsed["BankInterest"].TotalMinutes < 30) break;
+                        bankInterestComponent.Update(elapsed["BankInterest"]);
+                        _componentStopwatches["BankInterest"].Restart();
                         break;
                     case MoonPhaseComponent moonPhaseComponent:
-                        if (moonPhaseElapsed.TotalMinutes < 30) break;
-                        moonPhaseComponent.Update(moonPhaseElapsed);
-                        moonPhaseWatch.Restart();
+                        if (elapsed["MoonPhase"].TotalMinutes < 30) break;
+                        moonPhaseComponent.Update(elapsed["MoonPhase"]);
+                        _componentStopwatches["MoonPhase"].Restart();
                         break;
                     case ClientCreationLimit clientCreationLimitComponent:
-                        if (creationElapsed.TotalMinutes < 60) break;
-                        clientCreationLimitComponent.Update(creationElapsed);
-                        creationWatch.Restart();
+                        if (elapsed["Creation"].TotalMinutes < 60) break;
+                        clientCreationLimitComponent.Update(elapsed["Creation"]);
+                        _componentStopwatches["Creation"].Restart();
                         break;
                 }
             });
 
-            componentStopWatch.Restart();
+            await Task.Delay(GameSpeed);
         }
     }
 
-    private static void UpdateGroundItemsRoutine()
+    private static async Task UpdateGroundItemsRoutine()
     {
         var groundWatch = new Stopwatch();
         groundWatch.Start();
@@ -692,10 +675,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (groundElapsed.TotalMinutes < 1) continue;
             UpdateGroundItems();
             groundWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMinutes(1));
         }
     }
 
-    private static void UpdateGroundMoneyRoutine()
+    private static async Task UpdateGroundMoneyRoutine()
     {
         var groundWatch = new Stopwatch();
         groundWatch.Start();
@@ -706,10 +691,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (groundElapsed.TotalMinutes < 1) continue;
             UpdateGroundMoney();
             groundWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMinutes(1));
         }
     }
 
-    private static void UpdateMundanesRoutine()
+    private static async Task UpdateMundanesRoutine()
     {
         var mundanesWatch = new Stopwatch();
         mundanesWatch.Start();
@@ -720,10 +707,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (mundanesElapsed.TotalMilliseconds < 1500) continue;
             UpdateMundanes(mundanesElapsed);
             mundanesWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(1500));
         }
     }
 
-    private static void UpdateMonstersRoutine()
+    private static async Task UpdateMonstersRoutine()
     {
         var monstersWatch = new Stopwatch();
         monstersWatch.Start();
@@ -734,10 +723,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (monstersElapsed.TotalMilliseconds < 300) continue;
             UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(300));
         }
     }
 
-    private static void UpdateMapsRoutine()
+    private static async Task UpdateMapsRoutine()
     {
         var gameWatch = new Stopwatch();
         gameWatch.Start();
@@ -745,14 +736,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var gameTimeElapsed = gameWatch.Elapsed;
-
             if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
             UpdateMaps(gameTimeElapsed);
             gameWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(GameSpeed));
         }
     }
 
-    private void UpdateTrapsRoutine()
+    private async Task UpdateTrapsRoutine()
     {
         var gameWatch = new Stopwatch();
         gameWatch.Start();
@@ -760,14 +752,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var gameTimeElapsed = gameWatch.Elapsed;
-
             if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
             CheckTraps(gameTimeElapsed);
             gameWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(GameSpeed));
         }
     }
 
-    private void UpdateClients()
+    private async Task UpdateClients()
     {
         var gameWatch = new Stopwatch();
         gameWatch.Start();
@@ -776,7 +769,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var gameTimeElapsed = gameWatch.Elapsed;
-
             if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
 
             Parallel.ForEach(Aislings, player =>
@@ -818,6 +810,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             clientsToRemove.Clear();
             gameWatch.Restart();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(GameSpeed));
         }
     }
 
@@ -2600,7 +2594,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
                 if (npc == null) return default;
-                    
+
                 var script = npc.Scripts.FirstOrDefault();
 
                 if (localArgs.Slot is not null && localArgs.Slot != 0)
