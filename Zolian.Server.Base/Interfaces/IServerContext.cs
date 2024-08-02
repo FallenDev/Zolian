@@ -48,7 +48,7 @@ public interface IServerContext
     Dictionary<int, Area> TempGlobalMapCache { get; set; }
     ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; }
     ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; }
-    ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; }
+    ConcurrentDictionary<int, BoardTemplate> GlobalBoardPostCache { get; set; }
     ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; }
     ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; }
     ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; }

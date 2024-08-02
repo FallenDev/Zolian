@@ -32,8 +32,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using ServiceStack;
-
-using System.Collections.Concurrent;
 using System.Collections.Specialized;
 using System.Data;
 using System.Diagnostics;
@@ -58,23 +56,23 @@ public class WorldClient : WorldClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
-    public readonly Stopwatch SkillControl = new();
+    public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
-    private readonly Stopwatch _afflictionControl = new();
-    public Spell LastSpell = new();
     public readonly Stopwatch StatusControl = new();
-    private readonly Stopwatch _aggroMessageControl = new();
-    private readonly Stopwatch _lanternControl = new();
-    private readonly Stopwatch _dayDreamingControl = new();
-    private readonly Stopwatch _mailManControl = new();
-    private readonly Stopwatch _itemAnimationControl = new();
-    private readonly WorldServerTimer _lanternCheckTimer = new(TimeSpan.FromSeconds(2));
-    private readonly WorldServerTimer _aggroTimer = new(TimeSpan.FromSeconds(20));
-    private readonly WorldServerTimer _dayDreamingTimer = new(TimeSpan.FromSeconds(5));
-    private readonly WorldServerTimer _itemAnimationTimer = new(TimeSpan.FromMilliseconds(100));
-    private readonly WorldServerTimer _mailManTimer = new(TimeSpan.FromMilliseconds(30000));
     public readonly object SyncModifierRemovalLock = new();
+    public Spell LastSpell = new();
     public bool ExitConfirmed;
+
+    private readonly Dictionary<string, Stopwatch> _clientStopwatches = new()
+    {
+        { "Affliction", new Stopwatch() },
+        { "AggroMessage", new Stopwatch() },
+        { "Lantern", new Stopwatch() },
+        { "DayDreaming", new Stopwatch() },
+        { "MailMan", new Stopwatch() },
+        { "ItemAnimation", new Stopwatch() }
+    };
+
     private static readonly SortedDictionary<long, string> AggroColors = new()
     {
         {100, "b"},
@@ -89,8 +87,8 @@ public class WorldClient : WorldClientBase, IWorldClient
     private SemaphoreSlim LoadLock { get; } = new(1, 1);
     public DateTime BoardOpened { get; set; }
     public DialogSession DlgSession { get; set; }
-    private List<LegendMarkInfo> _legendMarksPublic = [];
-    private List<LegendMarkInfo> _legendMarksPrivate = [];
+    private readonly List<LegendMarkInfo> _legendMarksPublic = [];
+    private readonly List<LegendMarkInfo> _legendMarksPrivate = [];
 
     public bool CanSendLocation
     {
@@ -223,18 +221,26 @@ public class WorldClient : WorldClientBase, IWorldClient
         _applyDebuffTask = Task.Run(ProcessApplyingDebuffsEvents);
         _updateBuffTask = Task.Run(ProcessUpdatingBuffsEvents);
         _updateDebuffTask = Task.Run(ProcessUpdatingDebuffsEvents);
+
+        foreach (var stopwatch in _clientStopwatches.Values)
+            stopwatch.Start();
     }
 
     public void Update()
     {
         if (Aisling is not { LoggedIn: true }) return;
-        EquipLantern();
-        CheckDayDreaming();
-        CheckForMail();
+
+        var elapsed = new Dictionary<string, TimeSpan>();
+        foreach (var kvp in _clientStopwatches)
+            elapsed[kvp.Key] = kvp.Value.Elapsed;
+
+        EquipLantern(elapsed);
+        CheckDayDreaming(elapsed);
+        CheckForMail(elapsed);
+        ShowAggro(elapsed);
+        DisplayQualityPillar(elapsed);
+        ApplyAffliction(elapsed);
         HandleBadTrades();
-        ShowAggro();
-        DisplayQualityPillar();
-        ApplyAffliction();
     }
 
     #region Events
@@ -391,13 +397,10 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #endregion
 
-    public void EquipLantern()
+    public void EquipLantern(Dictionary<string, TimeSpan> elapsed)
     {
-        if (!_lanternControl.IsRunning)
-            _lanternControl.Start();
-
-        if (_lanternControl.Elapsed.TotalMilliseconds < _lanternCheckTimer.Delay.TotalMilliseconds) return;
-        _lanternControl.Restart();
+        if (elapsed["Lantern"].TotalMilliseconds < 2000) return;
+        _clientStopwatches["Lantern"].Restart();
         if (Aisling.Map == null) return;
         if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
         {
@@ -412,9 +415,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         SendDisplayAisling(Aisling);
     }
 
-    public void CheckDayDreaming()
+    public void CheckDayDreaming(Dictionary<string, TimeSpan> elapsed)
     {
-        // Logic based on player's set ActiveStatus
         switch (Aisling.ActiveStatus)
         {
             case ActivityStatus.Awake:
@@ -426,21 +428,159 @@ public class WorldClient : WorldClientBase, IWorldClient
                 break;
             case ActivityStatus.DayDreaming:
             case ActivityStatus.NeedHelp:
-                DaydreamingRoutine();
+                DaydreamingRoutine(elapsed);
                 break;
         }
     }
 
-    public void CheckForMail()
+    private void DaydreamingRoutine(Dictionary<string, TimeSpan> elapsed)
     {
-        if (!_mailManControl.IsRunning)
-            _mailManControl.Start();
+        if (elapsed["DayDreaming"].TotalMilliseconds < 5000) return;
+        _clientStopwatches["DayDreaming"].Restart();
+        if (Aisling.Direction is not (1 or 2)) return;
+        if (!((DateTime.UtcNow - Aisling.AislingTracker).TotalMinutes > 2)) return;
+        if (!Socket.Connected || !IsDayDreaming) return;
 
-        if (_mailManControl.Elapsed.TotalMilliseconds < _mailManTimer.Delay.TotalMilliseconds) return;
-        _mailManControl.Restart();
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
+        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
+        if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
+        Aisling.Resting = Enums.RestPosition.RestPosition1;
+        Aisling.Client.UpdateDisplay();
+        Aisling.Client.SendDisplayAisling(Aisling);
+    }
 
+    public void CheckForMail(Dictionary<string, TimeSpan> elapsed)
+    {
+        if (elapsed["MailMan"].TotalMilliseconds < 15000) return;
+        _clientStopwatches["MailMan"].Restart();
         BoardPostStorage.MailFromDatabase(this);
-        SendAttributes(StatUpdateType.Secondary);
+
+        var hasUnreadMail = false;
+
+        // ToDo: Disabling until logic is worked to turn off read letters
+        foreach (var letter in Aisling.PersonalLetters.Values)
+        {
+            if (letter.ReadPost) continue;
+            hasUnreadMail = true;
+            break;
+        }
+
+        SendAttributes(hasUnreadMail ? StatUpdateType.UnreadMail : StatUpdateType.Secondary);
+    }
+
+    public void ShowAggro(Dictionary<string, TimeSpan> elapsed)
+    {
+        if (elapsed["AggroMessage"].TotalMilliseconds < 20000) return;
+        _clientStopwatches["AggroMessage"].Restart();
+
+        try
+        {
+            Aisling.ThreatTimer = Aisling.Camouflage
+                ? new WorldServerTimer(TimeSpan.FromSeconds(30))
+                : new WorldServerTimer(TimeSpan.FromSeconds(60));
+            var color = "a";
+            long aggro;
+            var group = Aisling.GroupParty?.PartyMembers.Values;
+
+            if (group?.Count > 0)
+            {
+                var target = group.MaxBy(dmg => dmg.ThreatMeter);
+                if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
+                var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
+                aggro = (long)Math.Clamp(percent, 0, 100);
+            }
+            else return;
+
+            foreach (var key in AggroColors.Keys.Reverse())
+            {
+                if (aggro < key) continue;
+                color = AggroColors[key];
+                break;
+            }
+
+            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
+    public void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed)
+    {
+        if (elapsed["ItemAnimation"].TotalMilliseconds < 100) return;
+        _clientStopwatches["ItemAnimation"].Restart();
+        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
+
+        try
+        {
+            if (Aisling.GameSettings.GroundQualities)
+            {
+                Parallel.ForEach(items, (entry) =>
+                {
+                    switch (entry.ItemQuality)
+                    {
+                        case Item.Quality.Epic:
+                            Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
+                            break;
+                        case Item.Quality.Legendary:
+                            Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
+                            break;
+                        case Item.Quality.Forsaken:
+                            Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
+                            break;
+                        case Item.Quality.Mythic:
+                        case Item.Quality.Primordial:
+                        case Item.Quality.Transcendent:
+                            Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
+                            break;
+                        case Item.Quality.Damaged:
+                        case Item.Quality.Common:
+                        case Item.Quality.Uncommon:
+                        case Item.Quality.Rare:
+                            break;
+                    }
+                });
+            }
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+
+    public void ApplyAffliction(Dictionary<string, TimeSpan> elapsed)
+    {
+        if (elapsed["Affliction"].TotalMilliseconds < 5000) return;
+        _clientStopwatches["Affliction"].Restart();
+
+        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal)) return;
+        var hasAnAffliction = false;
+
+        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim))
+        {
+            hasAnAffliction = true;
+            var buff = Aisling.HasBuff("Lycanisim");
+            if (!buff)
+            {
+                var applyDebuff = new BuffLycanisim();
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+            }
+        }
+
+        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim))
+        {
+            hasAnAffliction = true;
+            var buff = Aisling.HasBuff("Vampirisim");
+            if (!buff)
+            {
+                var applyDebuff = new BuffVampirisim();
+                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
+            }
+        }
+
+        if (hasAnAffliction) return;
+        Aisling.Afflictions |= Afflictions.Normal;
     }
 
     public void HandleBadTrades()
@@ -491,138 +631,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         EnqueueDebuffAppliedEvent(Aisling, debuff, TimeSpan.FromSeconds(debuff.Length));
     }
 
-    private void ShowAggro()
-    {
-        if (!_aggroMessageControl.IsRunning)
-        {
-            _aggroMessageControl.Start();
-        }
-
-        if (_aggroMessageControl.Elapsed.TotalMilliseconds < _aggroTimer.Delay.TotalMilliseconds) return;
-
-        try
-        {
-            _aggroMessageControl.Restart();
-            Aisling.ThreatTimer = Aisling.Camouflage
-                ? new WorldServerTimer(TimeSpan.FromSeconds(30))
-                : new WorldServerTimer(TimeSpan.FromSeconds(60));
-            var color = "a";
-            long aggro;
-            var group = Aisling.GroupParty?.PartyMembers.Values;
-
-            if (group?.Count > 0)
-            {
-                var target = group.MaxBy(dmg => dmg.ThreatMeter);
-                if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
-                var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
-                aggro = (long)Math.Clamp(percent, 0, 100);
-            }
-            else return;
-
-            foreach (var key in AggroColors.Keys.Reverse())
-            {
-                if (aggro < key) continue;
-                color = AggroColors[key];
-                break;
-            }
-
-            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
-        }
-        catch
-        {
-            // Ignore
-        }
-    }
-
-    private void DisplayQualityPillar()
-    {
-        if (!_itemAnimationControl.IsRunning)
-        {
-            _itemAnimationControl.Start();
-        }
-
-        if (_itemAnimationControl.Elapsed.TotalMilliseconds < _itemAnimationTimer.Delay.TotalMilliseconds) return;
-
-        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
-
-        try
-        {
-            if (Aisling.GameSettings.GroundQualities)
-            {
-                Parallel.ForEach(items, (entry) =>
-                {
-                    switch (entry.ItemQuality)
-                    {
-                        case Item.Quality.Epic:
-                            Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Legendary:
-                            Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Forsaken:
-                            Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Mythic:
-                        case Item.Quality.Primordial:
-                        case Item.Quality.Transcendent:
-                            Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Damaged:
-                        case Item.Quality.Common:
-                        case Item.Quality.Uncommon:
-                        case Item.Quality.Rare:
-                            break;
-                    }
-                });
-            }
-        }
-        catch
-        {
-            // Ignore
-        }
-
-        _itemAnimationControl.Restart();
-    }
-
-    private void ApplyAffliction()
-    {
-        if (!_afflictionControl.IsRunning)
-        {
-            _afflictionControl.Start();
-        }
-
-        if (_afflictionControl.Elapsed.TotalSeconds < 5) return;
-        _afflictionControl.Restart();
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal)) return;
-        var hasAnAffliction = false;
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim))
-        {
-            hasAnAffliction = true;
-            var buff = Aisling.HasBuff("Lycanisim");
-            if (!buff)
-            {
-                var applyDebuff = new BuffLycanisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim))
-        {
-            hasAnAffliction = true;
-            var buff = Aisling.HasBuff("Vampirisim");
-            if (!buff)
-            {
-                var applyDebuff = new BuffVampirisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff, TimeSpan.FromSeconds(applyDebuff.Length));
-            }
-        }
-
-        if (hasAnAffliction) return;
-        Aisling.Afflictions |= Afflictions.Normal;
-    }
-
     #region Player Load
 
     public async Task<WorldClient> Load()
@@ -647,6 +655,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Enter();
             if (Aisling.Username == "Death")
                 Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(391, Aisling.Position));
+            BoardPostStorage.MailFromDatabase(this);
         }
         catch (Exception ex)
         {
@@ -698,7 +707,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.Dawn = 0;
         Aisling.Hacked = false;
         Aisling.PasswordAttempts = 0;
-        Aisling.MonsterKillCounters = new ConcurrentDictionary<string, KillRecord>();
+        Aisling.MonsterKillCounters = [];
         ReapplyKillCount();
         Aisling.Loading = true;
     }
@@ -1493,13 +1502,12 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         var hasUnreadMail = false;
 
-        // ToDo: Disabling until logic is worked to turn off read letters
-        //foreach (var letter in Aisling.PersonalLetters.Values)
-        //{
-        //    if (letter.ReadPost) continue;
-        //    hasUnreadMail = true;
-        //    break;
-        //}
+        foreach (var letter in Aisling.PersonalLetters.Values)
+        {
+            if (letter.ReadPost) continue;
+            hasUnreadMail = true;
+            break;
+        }
 
         var args = new AttributesArgs
         {
@@ -1553,13 +1561,13 @@ public class WorldClient : WorldClientBase, IWorldClient
                 MonthOfYear = postFormat.DatePosted.Month,
                 IsHighlighted = postFormat.Highlighted,
                 Message = postFormat.Message,
-                PostId = postFormat.PostId,
+                PostId = (short)postFormat.PostId,
                 Subject = postFormat.SubjectLine
             }).ToList();
 
             var boardInfo = new BoardInfo
             {
-                BoardId = board.BoardId,
+                BoardId = (ushort)board.BoardId,
                 Name = board.Name,
                 Posts = postsCollection
             };
@@ -1596,7 +1604,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 MonthOfYear = postFormat.DatePosted.Month,
                 IsHighlighted = postFormat.Highlighted,
                 Message = postFormat.Message,
-                PostId = postFormat.PostId,
+                PostId = (short)postFormat.PostId,
                 Subject = postFormat.SubjectLine
             }).ToList();
 
@@ -1642,11 +1650,14 @@ public class WorldClient : WorldClientBase, IWorldClient
                     MonthOfYear = post.DatePosted.Month,
                     IsHighlighted = post.Highlighted,
                     Message = post.Message,
-                    PostId = post.PostId,
+                    PostId = (short)post.PostId,
                     Subject = post.SubjectLine
                 },
                 EnablePrevBtn = enablePrevBtn
             };
+
+            if (isMail)
+                UpdateMailAsRead(args);
 
             Send(args);
             return true;
@@ -1657,6 +1668,16 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
 
         return false;
+    }
+
+    private void UpdateMailAsRead(DisplayBoardArgs args)
+    {
+        if (args?.Post is null) return;
+        var letter = Aisling.PersonalLetters.Values.FirstOrDefault(c => c.PostId == args.Post.PostId);
+        if (letter == null) return;
+        letter.ReadPost = true;
+        StorageManager.AislingBucket.UpdatePost(letter, Aisling.QuestManager.MailBoxNumber);
+        SendAttributes(StatUpdateType.UnreadMail);
     }
 
     public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
@@ -1707,7 +1728,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         return true;
     }
-    
+
     /// <summary>
     /// 0x0B - Player Move
     /// </summary>
@@ -3561,27 +3582,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.Client.LastMapUpdated = DateTime.UtcNow;
         Aisling.Client.LastLocationSent = DateTime.UtcNow;
         Aisling.Client.LastClientRefresh = DateTime.UtcNow;
-    }
-
-    public void DaydreamingRoutine()
-    {
-        if (!_dayDreamingControl.IsRunning)
-        {
-            _dayDreamingControl.Start();
-        }
-
-        if (_dayDreamingControl.Elapsed.TotalMilliseconds < _dayDreamingTimer.Delay.TotalMilliseconds) return;
-        _dayDreamingControl.Restart();
-        if (Aisling.Direction is not (1 or 2)) return;
-        if (!((DateTime.UtcNow - Aisling.AislingTracker).TotalMinutes > 2)) return;
-        if (!Socket.Connected || !IsDayDreaming) return;
-
-        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
-        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
-        if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
-        Aisling.Resting = Enums.RestPosition.RestPosition1;
-        Aisling.Client.UpdateDisplay();
-        Aisling.Client.SendDisplayAisling(Aisling);
     }
 
     public WorldClient SystemMessage(string message)

@@ -37,7 +37,7 @@ public sealed class Aisling : Player, IAisling
     public bool GameMasterChaosCancel { get; set; }
     public int EquipmentDamageTaken = 0;
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = [];
-    public readonly ConcurrentDictionary<short, PostTemplate> PersonalLetters = [];
+    public readonly ConcurrentDictionary<int, PostTemplate> PersonalLetters = [];
     public DateTime AislingTracker { get; set; }
     public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;

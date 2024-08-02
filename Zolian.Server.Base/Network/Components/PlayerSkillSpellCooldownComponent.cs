@@ -17,12 +17,12 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
         {
             if (player?.Client == null) return;
             if (!player.LoggedIn) return;
-            if (!player.Client.SkillControl.IsRunning)
+            if (!player.Client.CooldownControl.IsRunning)
             {
-                player.Client.SkillControl.Start();
+                player.Client.CooldownControl.Start();
             }
 
-            if (player.Client.SkillControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
+            if (player.Client.CooldownControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
 
             Parallel.ForEach(player.SkillBook.Skills.Values, (skill) =>
             {
@@ -46,7 +46,7 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
                     spell.CurrentCooldown = 0;
             });
 
-            player.Client.SkillControl.Restart();
+            player.Client.CooldownControl.Restart();
         });
     }
 }

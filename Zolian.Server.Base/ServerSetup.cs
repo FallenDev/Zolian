@@ -74,7 +74,7 @@ public class ServerSetup : IServerContext
     // Live
     public ConcurrentDictionary<string, Buff> GlobalBuffCache { get; set; } = [];
     public ConcurrentDictionary<string, Debuff> GlobalDeBuffCache { get; set; } = [];
-    public ConcurrentDictionary<ushort, BoardTemplate> GlobalBoardPostCache { get; set; } = [];
+    public ConcurrentDictionary<int, BoardTemplate> GlobalBoardPostCache { get; set; } = [];
     public ConcurrentDictionary<int, Party> GlobalGroupCache { get; set; } = [];
     public ConcurrentDictionary<uint, Mundane> GlobalMundaneCache { get; set; } = [];
     public ConcurrentDictionary<long, Item> GlobalSqlItemCache { get; set; } = [];

@@ -14,7 +14,6 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager, 
     public abstract void Update(TimeSpan elapsedTime);
     public abstract void OnClick(WorldClient client);
     public abstract void OnDeath(WorldClient client = null);
-
     public virtual void MonsterState(TimeSpan elapsedTime) { }
     public virtual void OnApproach(WorldClient client) { }
     public virtual bool OnGossip(WorldClient client) => false;

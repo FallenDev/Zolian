@@ -22,6 +22,20 @@ public class TrainingDummy : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    public override void Update(TimeSpan elapsedTime)
+    {
+        if (!_stopwatch.IsRunning)
+        {
+            _stopwatch.Start();
+        }
+
+        if (_stopwatch.Elapsed.TotalMilliseconds < 1000) return;
+        _stopwatch.Restart();
+        if (_damage <= 0) return;
+        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
+        _damage = 0;
+    }
+
     public override void OnClick(WorldClient client)
     {
         var level = Monster.Template.Level.ToString();
@@ -68,26 +82,8 @@ public class TrainingDummy : MonsterScript
                 Monster.Buffs.TryRemove(debuff.Name, out _);
         }
 
+        Monster.Skulled = false;
         Monster.BonusAc = 0;
-    }
-
-    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
-
-    public override void Update(TimeSpan elapsedTime)
-    {
-        if (Monster.CurrentHp < Monster.MaximumHp)
-            Monster.CurrentHp = Monster.MaximumHp;
-
-        if (!_stopwatch.IsRunning)
-        {
-            _stopwatch.Start();
-        }
-
-        if (_stopwatch.Elapsed.TotalMilliseconds < 1000) return;
-        _stopwatch.Restart();
-        if (_damage <= 0) return;
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
-        _damage = 0;
     }
 }
 
@@ -102,6 +98,8 @@ public class TrainingDummy2 : MonsterScript
         Monster.BonusMr = 0;
         Monster.MonsterBank = [];
     }
+
+    public override void Update(TimeSpan elapsedTime) { }
 
     public override void OnClick(WorldClient client)
     {
@@ -151,15 +149,8 @@ public class TrainingDummy2 : MonsterScript
                 Monster.Buffs.TryRemove(debuff.Name, out _);
         }
 
+        Monster.Skulled = false;
         Monster.BonusAc = 0;
-    }
-
-    public override void OnSkulled(WorldClient client) => client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(49, null, Monster.Serial));
-
-    public override void Update(TimeSpan elapsedTime)
-    {
-        if (Monster.CurrentHp < Monster.MaximumHp)
-            Monster.CurrentHp = Monster.MaximumHp;
     }
 
     private struct DmgTable

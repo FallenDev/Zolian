@@ -30,7 +30,8 @@ public interface IAislingStorage
     Task<bool> CheckIfPlayerExists(string name, long serial);
     Task<Aisling> CheckPassword(string name);
     BoardTemplate ObtainMailboxId(long serial);
-    List<PostTemplate> ObtainPosts(ushort boardId);
-    void SendPost(PostTemplate postInfo, ushort boardId);
+    List<PostTemplate> ObtainPosts(int boardId);
+    void SendPost(PostTemplate postInfo, int boardId);
+    void UpdatePost(PostTemplate postInfo, int boardId);
     Task Create(Aisling obj);
 }

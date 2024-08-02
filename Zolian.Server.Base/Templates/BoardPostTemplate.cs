@@ -10,16 +10,16 @@ namespace Darkages.Templates;
 
 public class BoardTemplate : Template
 {
-    public ushort BoardId { get; set; }
+    public int BoardId { get; set; }
     public long Serial { get; set; }
     public bool Private { get; set; }
     public bool IsMail { get; set; }
-    public ConcurrentDictionary<short, PostTemplate> Posts { get; set; } = new();
+    public ConcurrentDictionary<int, PostTemplate> Posts { get; set; } = new();
 }
 
 public class PostTemplate
 {
-    public short PostId { get; set; }
+    public int PostId { get; set; }
     public bool Highlighted { get; set; }
     public DateTime DatePosted { get; set; }
     public string Owner { get; set; }
@@ -98,11 +98,8 @@ public static class BoardPostStorage
 
     public static void MailFromDatabase(WorldClient client)
     {
-        // ToDo: Do not need this logic once everyone has a defined mailbox
         if (client.Aisling.QuestManager.MailBoxNumber == 0)
-        {
             client.Aisling.QuestManager.MailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
-        }
 
         try
         {
@@ -148,7 +145,7 @@ public static class BoardPostStorage
         }
     }
 
-    public static void DeletePost(PostTemplate post, ushort id)
+    public static void DeletePost(PostTemplate post, int id)
     {
         var postId = post.PostId;
         var boardId = (int)id;

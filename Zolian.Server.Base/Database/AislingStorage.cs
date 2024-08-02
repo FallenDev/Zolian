@@ -696,7 +696,7 @@ public record AislingStorage : Sql, IAislingStorage
         return board;
     }
 
-    public List<PostTemplate> ObtainPosts(ushort boardId)
+    public List<PostTemplate> ObtainPosts(int boardId)
     {
         var posts = new List<PostTemplate>();
 
@@ -741,13 +741,13 @@ public record AislingStorage : Sql, IAislingStorage
         return posts;
     }
 
-    public void SendPost(PostTemplate postInfo, ushort boardId)
+    public void SendPost(PostTemplate postInfo, int boardId)
     {
         try
         {
             var connection = ConnectToDatabase(PersonalMailString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("InsertPost", connection);
-            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = (int)boardId;
+            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = boardId;
             cmd.Parameters.Add("@PostId", SqlDbType.Int).Value = postInfo.PostId;
             cmd.Parameters.Add("@Highlighted", SqlDbType.Bit).Value = postInfo.Highlighted;
             cmd.Parameters.Add("@DatePosted", SqlDbType.DateTime).Value = postInfo.DatePosted;
@@ -756,6 +756,27 @@ public record AislingStorage : Sql, IAislingStorage
             cmd.Parameters.Add("@ReadPost", SqlDbType.Bit).Value = postInfo.ReadPost;
             cmd.Parameters.Add("@SubjectLine", SqlDbType.VarChar).Value = postInfo.SubjectLine;
             cmd.Parameters.Add("@Message", SqlDbType.VarChar).Value = postInfo.Message;
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    public void UpdatePost(PostTemplate postInfo, int boardId)
+    {
+        var dt = PostDataTable();
+        dt.Rows.Add(boardId, postInfo.PostId, postInfo.Highlighted, postInfo.DatePosted, postInfo.Owner, postInfo.Sender, postInfo.ReadPost, postInfo.SubjectLine, postInfo.Message);
+        
+        try
+        {
+            var connection = ConnectToDatabase(PersonalMailString);
+            using var cmd = new SqlCommand("UpdatePost", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param4 = cmd.Parameters.AddWithValue("@Posts", dt);
+            param4.SqlDbType = SqlDbType.Structured;
+            param4.TypeName = "dbo.PostType";
             cmd.ExecuteNonQuery();
         }
         catch (Exception e)
@@ -1051,6 +1072,21 @@ public record AislingStorage : Sql, IAislingStorage
         dt.Columns.Add("Tarnished", typeof(bool));
         dt.Columns.Add("GearEnhancement", typeof(string));
         dt.Columns.Add("ItemMaterial", typeof(string));
+        return dt;
+    }
+
+    private static DataTable PostDataTable()
+    {
+        var dt = new DataTable();
+        dt.Columns.Add("BoardId", typeof(int));
+        dt.Columns.Add("PostId", typeof(int));
+        dt.Columns.Add("Highlighted", typeof(bool));
+        dt.Columns.Add("DatePosted", typeof(DateTime));
+        dt.Columns.Add("Owner", typeof(string));
+        dt.Columns.Add("Sender", typeof(string));
+        dt.Columns.Add("ReadPost", typeof(bool));
+        dt.Columns.Add("SubjectLine", typeof(string));
+        dt.Columns.Add("Message", typeof(string));
         return dt;
     }
 

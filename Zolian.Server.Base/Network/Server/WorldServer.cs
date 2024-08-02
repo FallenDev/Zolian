@@ -575,17 +575,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private async Task UpdateComponentsRoutine()
     {
         foreach (var stopwatch in _componentStopwatches.Values)
-        {
             stopwatch.Start();
-        }
 
         while (ServerSetup.Instance.Running)
         {
             var elapsed = new Dictionary<string, TimeSpan>();
             foreach (var kvp in _componentStopwatches)
-            {
                 elapsed[kvp.Key] = kvp.Value.Elapsed;
-            }
 
             Parallel.ForEach(_serverComponents.Values, component =>
             {

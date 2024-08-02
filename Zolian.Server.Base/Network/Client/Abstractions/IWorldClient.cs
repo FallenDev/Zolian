@@ -123,7 +123,6 @@ public interface IWorldClient : IConnectedClient
     void LearnSkill(Mundane source, SkillTemplate subject, string message);
     void LearnSpell(Mundane source, SpellTemplate subject, string message);
     void ClientRefreshed();
-    void DaydreamingRoutine();
     WorldClient SystemMessage(string message);
     Task<bool> Save();
     void DeathStatusCheck();
@@ -131,9 +130,12 @@ public interface IWorldClient : IConnectedClient
     WorldClient PayItemPrerequisites(LearningPredicate prerequisites);
     bool PayPrerequisites(LearningPredicate prerequisites);
     bool CheckReqs(WorldClient client, Item item);
-    void EquipLantern();
-    void CheckDayDreaming();
-    void CheckForMail();
+    void EquipLantern(Dictionary<string, TimeSpan> elapsed);
+    void CheckDayDreaming(Dictionary<string, TimeSpan> elapsed);
+    void CheckForMail(Dictionary<string, TimeSpan> elapsed);
+    void ShowAggro(Dictionary<string, TimeSpan> elapsed);
+    void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed);
+    void ApplyAffliction(Dictionary<string, TimeSpan> elapsed);
     void HandleBadTrades();
     WorldClient Insert(bool update, bool delete);
     void Interrupt();
