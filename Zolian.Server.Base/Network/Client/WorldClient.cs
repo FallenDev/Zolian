@@ -465,7 +465,8 @@ public class WorldClient : WorldClientBase, IWorldClient
             break;
         }
 
-        SendAttributes(hasUnreadMail ? StatUpdateType.UnreadMail : StatUpdateType.Secondary);
+        if (hasUnreadMail)
+            SendAttributes(StatUpdateType.Secondary);
     }
 
     public void ShowAggro(Dictionary<string, TimeSpan> elapsed)
@@ -1677,7 +1678,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (letter == null) return;
         letter.ReadPost = true;
         StorageManager.AislingBucket.UpdatePost(letter, Aisling.QuestManager.MailBoxNumber);
-        SendAttributes(StatUpdateType.UnreadMail);
+        SendAttributes(StatUpdateType.Secondary);
     }
 
     public void SendBoardResponse(BoardOrResponseType responseType, string message, bool success)
