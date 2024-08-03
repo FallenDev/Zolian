@@ -1,9 +1,14 @@
-﻿using Darkages.Network.Server;
+﻿using System.Diagnostics;
+
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServerComponent(server)
 {
+    private static readonly object StatusControlLock = new();
+    private static readonly Stopwatch StatusControl = new();
+
     protected internal override void Update(TimeSpan elapsedTime)
     {
         ZolianUpdateDelegate.Update(UpdatePlayerStatusBarAndThreat);
@@ -15,19 +20,23 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
 
         try
         {
-            Parallel.ForEach(Server.Aislings, (player) =>
+            lock (StatusControlLock)
             {
-                if (player?.Client == null) return;
-                if (!player.Client.StatusControl.IsRunning)
-                    player.Client.StatusControl.Start();
+                if (!StatusControl.IsRunning)
+                    StatusControl.Start();
 
-                if (player.Client.StatusControl.Elapsed.TotalMilliseconds < 1000) return;
+                if (StatusControl.Elapsed.TotalMilliseconds < 1000) return;
 
-                player.UpdateBuffs();
-                player.UpdateDebuffs();
-                player.ThreatGeneratedSubsided(player);
-                player.Client.StatusControl.Restart();
-            });
+                Parallel.ForEach(Server.Aislings, (player) =>
+                {
+                    if (player?.Client == null) return;
+                    player.UpdateBuffs(player);
+                    player.UpdateDebuffs(player);
+                    player.ThreatGeneratedSubsided(player);
+                });
+
+                StatusControl.Restart();
+            }
         }
         catch (Exception ex)
         {

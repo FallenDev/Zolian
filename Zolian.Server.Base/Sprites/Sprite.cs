@@ -2570,40 +2570,40 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     #region Status
 
-    public void UpdateBuffs()
+    public void UpdateBuffs(Sprite sprite)
     {
         var buffs = Buffs.Values;
 
         Parallel.ForEach(buffs, (b) =>
         {
-            if (this is Aisling aisling)
+            if (sprite is Aisling aisling)
             {
-                aisling.Client.EnqueueBuffUpdatedEvent(this, b);
+                aisling.Client.EnqueueBuffUpdatedEvent(sprite, b);
                 StatusBarDisplayUpdateBuff(b);
             }
             else
             {
                 if (Alive)
-                    b.Update(this);
+                    b.Update(sprite);
             }
         });
     }
 
-    public void UpdateDebuffs()
+    public void UpdateDebuffs(Sprite sprite)
     {
         var debuffs = Debuffs.Values;
 
         Parallel.ForEach(debuffs, (d) =>
         {
-            if (this is Aisling aisling)
+            if (sprite is Aisling aisling)
             {
-                aisling.Client.EnqueueDebuffUpdatedEvent(this, d);
+                aisling.Client.EnqueueDebuffUpdatedEvent(sprite, d);
                 StatusBarDisplayUpdateDebuff(d);
             }
             else
             {
                 if (Alive)
-                    d.Update(this);
+                    d.Update(sprite);
             }
         });
     }

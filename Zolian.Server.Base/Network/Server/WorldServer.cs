@@ -593,7 +593,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         _componentStopwatches["Object"].Restart();
                         break;
                     case PlayerSkillSpellCooldownComponent skillSpellCooldownComponent:
-                        if (elapsed["PlayerSkillSpell"].TotalMilliseconds < 250) break;
+                        if (elapsed["PlayerSkillSpell"].TotalMilliseconds < 100) break;
                         skillSpellCooldownComponent.Update(elapsed["PlayerSkillSpell"]);
                         _componentStopwatches["PlayerSkillSpell"].Restart();
                         break;
@@ -888,8 +888,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                     if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
 
-                    monster.UpdateBuffs();
-                    monster.UpdateDebuffs();
+                    monster.UpdateBuffs(monster);
+                    monster.UpdateDebuffs(monster);
                     monster.MonsterBuffAndDebuffStopWatch.Restart();
                 });
             });

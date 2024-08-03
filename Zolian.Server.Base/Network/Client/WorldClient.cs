@@ -58,7 +58,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
-    public readonly Stopwatch StatusControl = new();
     public readonly object SyncModifierRemovalLock = new();
     public Spell LastSpell = new();
     public bool ExitConfirmed;
@@ -388,7 +387,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (buffEvent.HasValue)
             {
                 buffEvent.Value.Buff.Update(buffEvent.Value.Affected);
-                //Console.Write($"{Aisling}: {buffEvent?.Buff.Name} - {buffEvent?.Buff.TimeLeft}\n");
             }
             else
             {

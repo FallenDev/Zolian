@@ -156,8 +156,8 @@ public interface ISprite
     void RemoveBuffsAndDebuffs();
     bool RemoveDebuff(string debuff, bool cancelled = false);
     void UpdateAddAndRemove();
-    void UpdateBuffs();
-    void UpdateDebuffs();
+    void UpdateBuffs(Sprite sprite);
+    void UpdateDebuffs(Sprite sprite);
     void StatusBarDisplayUpdateBuff(Buff buff);
     void StatusBarDisplayUpdateDebuff(Debuff debuff);
     void Remove();
