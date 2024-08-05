@@ -1,1 +1,1 @@
-﻿new Zolian.AlwaysOn.ZolianDaemon();
+﻿_ = new Zolian.AlwaysOn.ZolianDaemon();

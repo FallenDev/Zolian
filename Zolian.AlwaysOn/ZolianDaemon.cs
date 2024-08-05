@@ -14,8 +14,8 @@ internal class ZolianDaemon
     {
         StartProcess();
         ObtainProcess();
-        var WorldServerCheckThread = new Thread(CheckWorldServer) { IsBackground = false };
-        WorldServerCheckThread.Start();
+        var worldServerCheckThread = new Thread(CheckWorldServer) { IsBackground = false };
+        worldServerCheckThread.Start();
         Thread.CurrentThread.Join();
     }
 
