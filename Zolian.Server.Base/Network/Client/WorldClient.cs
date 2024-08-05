@@ -1,4 +1,5 @@
-﻿using Chaos.Common.Definitions;
+﻿using System.Collections.Concurrent;
+using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
@@ -188,18 +189,12 @@ public class WorldClient : WorldClientBase, IWorldClient
     public int MapClicks { get; set; }
     public uint EntryCheck { get; set; }
     private readonly object _warpCheckLock = new();
-    private readonly Queue<ExperienceEvent> _expQueue = [];
-    private readonly Queue<AbilityEvent> _apQueue = [];
-    private readonly Queue<DebuffEvent> _debuffApplyQueue = [];
-    private readonly Queue<BuffEvent> _buffApplyQueue = [];
-    private readonly Queue<DebuffEvent> _debuffUpdateQueue = [];
-    private readonly Queue<BuffEvent> _buffUpdateQueue = [];
-    private readonly object _expQueueLock = new();
-    private readonly object _apQueueLock = new();
-    private readonly object _buffQueueLockApply = new();
-    private readonly object _debuffQueueLockApply = new();
-    private readonly object _buffQueueLockUpdate = new();
-    private readonly object _debuffQueueLockUpdate = new();
+    private readonly ConcurrentDictionary<uint, ExperienceEvent> _expQueue = [];
+    private readonly ConcurrentDictionary<uint, AbilityEvent> _apQueue = [];
+    private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffApplyQueue = [];
+    private readonly ConcurrentDictionary<uint, BuffEvent> _buffApplyQueue = [];
+    private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffUpdateQueue = [];
+    private readonly ConcurrentDictionary<uint, BuffEvent> _buffUpdateQueue = [];
     private readonly Task _experienceTask;
     private readonly Task _apTask;
     private readonly Task _applyBuffTask;
@@ -249,19 +244,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            ExperienceEvent? expEvent = null;
-
-            lock (_expQueueLock)
+            if (_expQueue.HasNonDefaultValues())
             {
-                if (_expQueue.Count > 0)
+                foreach (var kvp in _expQueue)
                 {
-                    expEvent = _expQueue.Dequeue();
+                    if (_expQueue.TryRemove(kvp.Key, out var expEvent))
+                    {
+                        HandleExp(expEvent.Player, expEvent.Exp, expEvent.Hunting);
+                    }
                 }
-            }
-
-            if (expEvent.HasValue)
-            {
-                HandleExp(expEvent.Value.Player, expEvent.Value.Exp, expEvent.Value.Hunting);
             }
             else
             {
@@ -274,19 +265,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            AbilityEvent? apEvent = null;
-
-            lock (_apQueueLock)
+            if (_apQueue.HasNonDefaultValues())
             {
-                if (_apQueue.Count > 0)
+                foreach (var kvp in _apQueue)
                 {
-                    apEvent = _apQueue.Dequeue();
+                    if (_apQueue.TryRemove(kvp.Key, out var apEvent))
+                    {
+                        HandleAp(apEvent.Player, apEvent.Exp, apEvent.Hunting);
+                    }
                 }
-            }
-
-            if (apEvent.HasValue)
-            {
-                HandleAp(apEvent.Value.Player, apEvent.Value.Exp, apEvent.Value.Hunting);
             }
             else
             {
@@ -299,19 +286,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            DebuffEvent? debuffEvent = null;
-
-            lock (_debuffQueueLockApply)
+            if (_debuffApplyQueue.HasNonDefaultValues())
             {
-                if (_debuffApplyQueue.Count > 0)
+                foreach (var kvp in _debuffApplyQueue)
                 {
-                    debuffEvent = _debuffApplyQueue.Dequeue();
+                    if (_debuffApplyQueue.TryRemove(kvp.Key, out var debuffEvent))
+                    {
+                        debuffEvent.Debuff.OnApplied(debuffEvent.Affected, debuffEvent.Debuff);
+                    }
                 }
-            }
-
-            if (debuffEvent.HasValue)
-            {
-                debuffEvent.Value.Debuff.OnApplied(debuffEvent.Value.Affected, debuffEvent.Value.Debuff);
             }
             else
             {
@@ -324,19 +307,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            BuffEvent? buffEvent = null;
-
-            lock (_buffQueueLockApply)
+            if (_buffApplyQueue.HasNonDefaultValues())
             {
-                if (_buffApplyQueue.Count > 0)
+                foreach (var kvp in _buffApplyQueue)
                 {
-                    buffEvent = _buffApplyQueue.Dequeue();
+                    if (_buffApplyQueue.TryRemove(kvp.Key, out var buffEvent))
+                    {
+                        buffEvent.Buff.OnApplied(buffEvent.Affected, buffEvent.Buff);
+                    }
                 }
-            }
-
-            if (buffEvent.HasValue)
-            {
-                buffEvent.Value.Buff.OnApplied(buffEvent.Value.Affected, buffEvent.Value.Buff);
             }
             else
             {
@@ -349,19 +328,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            DebuffEvent? debuffEvent = null;
-
-            lock (_debuffQueueLockUpdate)
+            if (_debuffUpdateQueue.HasNonDefaultValues())
             {
-                if (_debuffUpdateQueue.Count > 0)
+                foreach (var kvp in _debuffUpdateQueue)
                 {
-                    debuffEvent = _debuffUpdateQueue.Dequeue();
+                    if (_debuffUpdateQueue.TryRemove(kvp.Key, out var debuffEvent))
+                    {
+                        debuffEvent.Debuff.Update(debuffEvent.Affected);
+                    }
                 }
-            }
-
-            if (debuffEvent.HasValue)
-            {
-                debuffEvent.Value.Debuff.Update(debuffEvent.Value.Affected);
             }
             else
             {
@@ -374,19 +349,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            BuffEvent? buffEvent = null;
-
-            lock (_buffQueueLockUpdate)
+            if (_buffUpdateQueue.HasNonDefaultValues())
             {
-                if (_buffUpdateQueue.Count > 0)
+                foreach (var kvp in _buffUpdateQueue)
                 {
-                    buffEvent = _buffUpdateQueue.Dequeue();
+                    if (_buffUpdateQueue.TryRemove(kvp.Key, out var buffEvent))
+                    {
+                        buffEvent.Buff.Update(buffEvent.Affected);
+                    }
                 }
-            }
-
-            if (buffEvent.HasValue)
-            {
-                buffEvent.Value.Buff.Update(buffEvent.Value.Affected);
             }
             else
             {
@@ -4171,53 +4142,12 @@ public class WorldClient : WorldClientBase, IWorldClient
         SendAttributes(StatUpdateType.Primary);
     }
 
-    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting)
-    {
-        lock (_expQueueLock)
-        {
-            _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting));
-        }
-    }
-
-    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting)
-    {
-        lock (_apQueueLock)
-        {
-            _apQueue.Enqueue(new AbilityEvent(player, exp, hunting));
-        }
-    }
-
-    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff)
-    {
-        lock (_debuffQueueLockApply)
-        {
-            _debuffApplyQueue.Enqueue(new DebuffEvent(affected, debuff));
-        }
-    }
-
-    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff)
-    {
-        lock (_buffQueueLockApply)
-        {
-            _buffApplyQueue.Enqueue(new BuffEvent(affected, buff));
-        }
-    }
-
-    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff)
-    {
-        lock (_debuffQueueLockUpdate)
-        {
-            _debuffUpdateQueue.Enqueue(new DebuffEvent(affected, debuff));
-        }
-    }
-
-    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff)
-    {
-        lock (_buffQueueLockUpdate)
-        {
-            _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff));
-        }
-    }
+    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ExperienceEvent(player, exp, hunting));
+    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new AbilityEvent(player, exp, hunting));
+    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));
+    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff) => _buffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new BuffEvent(affected, buff));
+    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff) => _debuffUpdateQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));
+    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff) => _buffUpdateQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new BuffEvent(affected, buff));
 
     public void GiveExp(long exp)
     {

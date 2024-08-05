@@ -2574,7 +2574,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         var buffs = Buffs.Values;
 
-        Parallel.ForEach(buffs, (b) =>
+        foreach(var b in buffs)
         {
             if (sprite is Aisling aisling)
             {
@@ -2586,14 +2586,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (Alive)
                     b.Update(sprite);
             }
-        });
+        }
     }
 
     public void UpdateDebuffs(Sprite sprite)
     {
         var debuffs = Debuffs.Values;
 
-        Parallel.ForEach(debuffs, (d) =>
+        foreach(var d in debuffs)
         {
             if (sprite is Aisling aisling)
             {
@@ -2605,7 +2605,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (Alive)
                     d.Update(sprite);
             }
-        });
+        }
     }
 
     public void StatusBarDisplayUpdateBuff(Buff buff)
