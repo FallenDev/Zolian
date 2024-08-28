@@ -35,7 +35,6 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
                     player.ThreatGeneratedSubsided(player);
                 });
 
-                Console.Write($"------------------ Routine\n");
                 StatusControl.Restart();
             }
         }

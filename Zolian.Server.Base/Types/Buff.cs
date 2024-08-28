@@ -25,13 +25,7 @@ public class Buff : IBuff
     public Buff BuffSpell { get; set; }
 
     public virtual void OnApplied(Sprite affected, Buff buff) { }
-
-    public virtual void OnDurationUpdate(Sprite affected, Buff buff)
-    {
-        buff.TimeLeft--;
-        if (affected is Aisling aisling)
-            Console.Write($"{aisling.Username}: {buff.Name}-{buff.TimeLeft} (Reference:){BuffSpell.TimeLeft}\n");
-    }
+    public virtual void OnDurationUpdate(Sprite affected, Buff buff) => buff.TimeLeft--;
     public virtual void OnEnded(Sprite affected, Buff buff) { }
     public virtual void OnItemChange(Aisling affected, Buff buff) { }
 
