@@ -43,7 +43,7 @@
 		<PackageReference Include="Dapper.StrongName" Version="2.1.35" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="RestSharp" Version="111.4.1" />
+		<PackageReference Include="RestSharp" Version="112.0.0" />
 		<PackageReference Include="Sentry" Version="4.10.2" />
 		<PackageReference Include="Sentry.Extensions.Logging" Version="4.10.2" />
 		<PackageReference Include="Sentry.Profiling" Version="4.10.2" />
