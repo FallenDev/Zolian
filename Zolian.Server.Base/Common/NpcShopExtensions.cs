@@ -326,7 +326,16 @@ public static class NpcShopExtensions
     /// <returns>List of ItemTemplates</returns>
     public static IEnumerable<Item> WithdrawFromBank(WorldClient client)
     {
-        return client.Aisling.BankManager.Items.Values;
+        return client.Aisling.BankManager.Items.Values.Where(i => i != null && !i.Template.CanStack);
+    }
+
+    /// <summary>
+    /// Looks through player's bankmanager for items and returns them
+    /// </summary>
+    /// <returns>List of ItemTemplates</returns>
+    public static IEnumerable<Item> WithdrawStackedFromBank(WorldClient client)
+    {
+        return client.Aisling.BankManager.Items.Values.Where(i => i != null && i.Template.CanStack);
     }
 
     /// <summary>

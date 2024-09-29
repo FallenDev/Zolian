@@ -39,7 +39,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         if (!client.Aisling.BankManager.Items.IsEmpty)
         {
-            options.Add(new Dialog.OptionsDataItem(0x02, "Withdraw Item"));
+            options.Add(new Dialog.OptionsDataItem(0x02, "Withdraw Items"));
+            options.Add(new Dialog.OptionsDataItem(0x04, "Withdraw Bundled Items"));
         }
 
         if (client.Aisling.GoldPoints > 0)
@@ -161,6 +162,11 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             case 0x03:
                 {
                     client.SendItemSellDialog(Mundane, "We deploy and guard all vaults with the strongest guards", NpcShopExtensions.GetCharacterBankInventoryByteList(client));
+                }
+                break;
+            case 0x04:
+                {
+                    client.SendWithdrawBankDialog(Mundane, "Which item bundles do you wish to pull?", NpcShopExtensions.WithdrawStackedFromBank(client));
                 }
                 break;
             case 0x07:
