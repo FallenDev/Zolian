@@ -1132,7 +1132,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new DebuffFrozen();
+    private Debuff _debuff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -1202,6 +1202,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
+            _debuff = new DebuffFrozen();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
@@ -1263,6 +1264,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
+                _debuff = new DebuffFrozen();
 
                 if (_target is Aisling affected)
                 {
@@ -1647,7 +1649,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new DebuffSilence();
+    private Debuff _debuff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -1716,6 +1718,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
+            _debuff = new DebuffSilence();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
@@ -1777,6 +1780,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
+                _debuff = new DebuffSilence();
 
                 if (_target is Aisling affected)
                 {
@@ -1833,7 +1837,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new DebuffPoison();
+    private Debuff _debuff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -1902,6 +1906,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
+            _debuff = new DebuffPoison();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
@@ -1963,6 +1968,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
+                _debuff = new DebuffPoison();
 
                 if (_target is Aisling affected)
                 {
@@ -2019,7 +2025,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly Debuff _debuff = new DebuffPoison();
+    private Debuff _debuff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -2089,6 +2095,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
+            _debuff = new DebuffPoison();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
@@ -2150,6 +2157,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
                 var dmgCalc = DamageCalc(sprite);
                 _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
+                _debuff = new DebuffPoison();
 
                 if (_target is Aisling affected)
                 {
@@ -2205,7 +2213,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _success;
-    private readonly Buff _buff = new buff_Hasten();
+    private Buff _buff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -2258,6 +2266,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
         };
 
         _skillMethod.Train(aisling.Client, Skill);
+        _buff = new buff_Hasten();
 
         if (party == null || party.IsEmpty)
         {
@@ -2308,7 +2317,7 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _success;
-    private readonly Buff _buff = new buff_clawfist();
+    private Buff _buff;
     private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
@@ -2337,6 +2346,8 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
 
     public override void OnSuccess(Sprite sprite)
     {
+        _buff = new buff_clawfist();
+
         if (sprite is not Aisling aisling)
         {
             _buff.OnApplied(sprite, _buff);

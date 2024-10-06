@@ -1083,7 +1083,7 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
 [Script("Turn Undead")]
 public class Turn_Undead(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffRending();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -1106,6 +1106,7 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 101) continue;
+            _debuff = new DebuffRending();
             _spellMethod.ElementalOnUse(sprite, target, Spell, 30);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
@@ -1154,7 +1155,7 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
 [Script("Turn Critter")]
 public class Turn_Critter(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffRending();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -1177,6 +1178,7 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 101) continue;
+            _debuff = new DebuffRending();
             _spellMethod.ElementalOnUse(sprite, target, Spell, 30);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
@@ -1225,7 +1227,7 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
 [Script("Turn Greater Undead")]
 public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffRending();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -1248,6 +1250,7 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 251) continue;
+            _debuff = new DebuffRending();
             _spellMethod.ElementalOnUse(sprite, target, Spell, 50);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
@@ -1296,7 +1299,7 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
 [Script("Turn Greater Critter")]
 public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffRending();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -1319,6 +1322,7 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
         {
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 251) continue;
+            _debuff = new DebuffRending();
             _spellMethod.ElementalOnUse(sprite, target, Spell, 50);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;

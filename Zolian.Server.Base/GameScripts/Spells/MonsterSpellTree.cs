@@ -21,7 +21,7 @@ public class Decay(Spell spell) : SpellScript(spell)
 [Script("Omega Rising")]
 public class OmegaRising(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffCriochCradh();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -33,6 +33,7 @@ public class OmegaRising(Spell spell) : SpellScript(spell)
         var playersNearby = sprite.AislingsNearby();
         foreach (var player in playersNearby)
         {
+            _debuff = new DebuffCriochCradh();
             if (player == null) continue;
             _spellMethod.AfflictionOnUse(sprite, player, Spell, _debuff);
             _spellMethod.ElementalOnUse(sprite, player, Spell, 700);
@@ -43,7 +44,7 @@ public class OmegaRising(Spell spell) : SpellScript(spell)
 [Script("Liquid Hell")]
 public class LiquidHell(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffCriochArdCradh();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -55,6 +56,7 @@ public class LiquidHell(Spell spell) : SpellScript(spell)
         var playersNearby = sprite.AislingsNearby();
         foreach (var player in playersNearby)
         {
+            _debuff = new DebuffCriochArdCradh();
             if (player == null) continue;
             _spellMethod.AfflictionOnUse(sprite, player, Spell, _debuff);
             _spellMethod.ElementalOnUse(sprite, player, Spell, 1500);
@@ -65,7 +67,7 @@ public class LiquidHell(Spell spell) : SpellScript(spell)
 [Script("Heavens Fall")]
 public class Heavensfall(Spell spell) : SpellScript(spell)
 {
-    private readonly Debuff _debuff = new DebuffSunSeal();
+    private Debuff _debuff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -77,6 +79,7 @@ public class Heavensfall(Spell spell) : SpellScript(spell)
         var playersNearby = sprite.AislingsNearby();
         foreach (var player in playersNearby)
         {
+            _debuff = new DebuffSunSeal();
             if (player == null) continue;
             _spellMethod.AfflictionOnUse(sprite, player, Spell, _debuff);
             _spellMethod.ElementalOnUse(sprite, player, Spell, 2000);
@@ -87,7 +90,7 @@ public class Heavensfall(Spell spell) : SpellScript(spell)
 [Script("Double XP")]
 public class DoubleXp(Spell spell) : SpellScript(spell)
 {
-    private readonly Buff _buff = new BuffDoubleExperience();
+    private Buff _buff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -98,6 +101,7 @@ public class DoubleXp(Spell spell) : SpellScript(spell)
     {
         foreach (var player in ServerSetup.Instance.Game.Aislings)
         {
+            _buff = new BuffDoubleExperience();
             if (player == null) continue;
             if (!player.LoggedIn) continue;
             _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
@@ -108,7 +112,7 @@ public class DoubleXp(Spell spell) : SpellScript(spell)
 [Script("Triple XP")]
 public class TripleXp(Spell spell) : SpellScript(spell)
 {
-    private readonly Buff _buff = new BuffTripleExperience();
+    private Buff _buff;
     private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -119,6 +123,7 @@ public class TripleXp(Spell spell) : SpellScript(spell)
     {
         foreach (var player in ServerSetup.Instance.Game.Aislings)
         {
+            _buff = new BuffTripleExperience();
             if (player == null) continue;
             if (!player.LoggedIn) continue;
             _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
