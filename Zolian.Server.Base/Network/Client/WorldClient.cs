@@ -4240,12 +4240,14 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (player.ExpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
         }
 
-        if (player.ExpLevel >= 99)
-            player.ExpNext = (long)(player.ExpLevel * seed * 25000 * 2.5);
-        else if (player.ExpLevel >= 250)
-            player.ExpNext = (long)(player.ExpLevel * seed * 50000 * 5);
-        else if (player.ExpLevel >= 400)
-            player.ExpNext = (long)(player.ExpLevel * seed * 75000 * 10);
+        // 237 is a rounded up calculation of 500 - 99 = 401 
+        // Then that by 95000 / 401 = 236.9
+        if (player.ExpLevel > 99)
+        {
+            var levelsAboveMaster = player.ExpLevel - 120;
+            var scalingFactor = Math.Min(5000 + levelsAboveMaster * 237, 100000);
+            player.ExpNext = (long)(player.ExpLevel * seed * scalingFactor);
+        }
         else
             player.ExpNext = (long)(player.ExpLevel * seed * 5000);
 
