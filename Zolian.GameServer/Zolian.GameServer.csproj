@@ -40,7 +40,7 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Chaos-Networking" Version="2.2.1" />
+		<PackageReference Include="Chaos-Networking" Version="2.2.2" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.2.24473.5">
 		  <TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
