@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Sprites;
 using Microsoft.Extensions.Logging;
 using MapFlags = Darkages.Enums.MapFlags;

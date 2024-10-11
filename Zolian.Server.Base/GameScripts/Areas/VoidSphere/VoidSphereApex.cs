@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Darkages.GameScripts.Affects;
+﻿using Darkages.GameScripts.Affects;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;

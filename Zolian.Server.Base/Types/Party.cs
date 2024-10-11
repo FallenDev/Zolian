@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-
-using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 
 using Darkages.Object;

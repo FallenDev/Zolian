@@ -1,4 +1,3 @@
-using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
@@ -7,7 +6,6 @@ using Chaos.Networking.Entities.Client;
 using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Chaos.Packets.Abstractions.Definitions;
 
 using Darkages.Database;
 using Darkages.Interfaces;
@@ -31,6 +29,7 @@ using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 using StringExtensions = ServiceStack.StringExtensions;
 using System.Text;
+using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Common;
 
 namespace Darkages.Network.Server;
@@ -487,6 +486,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 try
                 {
                     client.Disconnect();
+                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {

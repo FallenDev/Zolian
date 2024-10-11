@@ -3,6 +3,7 @@ using Darkages.Enums;
 using Darkages.Models;
 using Newtonsoft.Json;
 using ServiceStack;
+using Nation = Darkages.Enums.Nation;
 
 namespace Darkages.Meta;
 

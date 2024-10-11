@@ -1,10 +1,8 @@
-using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Chaos.Packets.Abstractions.Definitions;
 
 using Darkages.Interfaces;
 using Darkages.Meta;
@@ -16,6 +14,7 @@ using RestSharp;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using ServiceStack;
@@ -167,6 +166,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 try
                 {
                     client.Disconnect();
+                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {

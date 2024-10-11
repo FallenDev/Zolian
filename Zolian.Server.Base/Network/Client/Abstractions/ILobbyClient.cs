@@ -1,4 +1,3 @@
-using Chaos.Common.Definitions;
 using Chaos.Networking.Abstractions;
 
 namespace Darkages.Network.Client.Abstractions;

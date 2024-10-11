@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 
 namespace Darkages.Dialogs.Abstractions;
 

@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.Network.Server;
+﻿using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 

@@ -10,6 +10,7 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using Microsoft.Data.SqlClient;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Database;
 

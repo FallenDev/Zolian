@@ -1,4 +1,3 @@
-using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
@@ -12,7 +11,7 @@ using System.Diagnostics;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Microsoft.Data.SqlClient;
-using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
+using EquipmentSlot = Chaos.DarkAges.Definitions.EquipmentSlot;
 
 namespace Darkages.Network.Client.Abstractions;
 
@@ -91,7 +90,7 @@ public interface IWorldClient : IConnectedClient
     void SendExchangeSetGold(bool rightSide, uint amount);
     void SendExchangeStart(Aisling fromAisling);
     void SendForcedClientPacket(ref Packet clientPacket);
-    void SendGroupRequest(GroupRequestType groupRequestType, string fromName);
+    void SendDisplayGroupInvite(ServerGroupSwitch serverGroupSwitch, string fromName, DisplayGroupBoxInfo groupBoxInfo = null);
     void SendHealthBar(Sprite creature, byte? sound = null);
     void SendLightLevel(LightLevel lightLevel);
     void SendLocation();

@@ -1,7 +1,4 @@
 ﻿using System.Diagnostics;
-
-using Chaos.Common.Definitions;
-
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;

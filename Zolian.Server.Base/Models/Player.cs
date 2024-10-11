@@ -1,5 +1,8 @@
 ﻿using Darkages.Enums;
 using Darkages.Sprites;
+using Gender = Darkages.Enums.Gender;
+using Nation = Darkages.Enums.Nation;
+using RestPosition = Darkages.Enums.RestPosition;
 
 namespace Darkages.Models;
 

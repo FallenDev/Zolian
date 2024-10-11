@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Chaos.Common.Definitions;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;

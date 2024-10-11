@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Networking.Entities.Server;
+﻿using Chaos.Networking.Entities.Server;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;

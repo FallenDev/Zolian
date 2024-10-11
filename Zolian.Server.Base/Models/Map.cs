@@ -1,5 +1,6 @@
 ﻿using Darkages.Enums;
 using Darkages.Object;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Models;
 

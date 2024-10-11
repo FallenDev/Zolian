@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-
-namespace Darkages.Types;
+﻿namespace Darkages.Types;
 
 public sealed class UserOptions
 {

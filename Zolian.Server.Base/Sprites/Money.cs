@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
-
+﻿using Chaos.Common.Identity;
 using Darkages.Enums;
 using Darkages.Types;
 

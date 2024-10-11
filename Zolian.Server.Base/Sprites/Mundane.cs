@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
-
+﻿using Chaos.Common.Identity;
 using Darkages.Common;
 using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;

@@ -1,4 +1,3 @@
-using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography;
 using Chaos.Extensions.Common;
@@ -6,7 +5,6 @@ using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Chaos.Packets.Abstractions.Definitions;
 
 using Darkages.CommandSystem;
 using Darkages.Common;
@@ -35,6 +33,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Managers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -2438,6 +2437,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnGroupRequest(IWorldClient localClient, GroupInviteArgs localArgs)
         {
+            if (localArgs.ClientGroupSwitch == ClientGroupSwitch.CreateGroupbox)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "This feature is not yet implemented!");
+                return default;
+            }
+
             var player = ObjectManager.GetObject<Aisling>(localClient.Aisling.Map, i => string.Equals(i.Username, localArgs.TargetName, StringComparison.CurrentCultureIgnoreCase)
                                                                             && i.WithinRangeOf(localClient.Aisling));
 
@@ -3561,6 +3566,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 try
                 {
                     client.Disconnect();
+                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {

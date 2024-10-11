@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Extensions.Common;
+﻿using Chaos.Extensions.Common;
 
 using Darkages.Enums;
 using Darkages.Interfaces;

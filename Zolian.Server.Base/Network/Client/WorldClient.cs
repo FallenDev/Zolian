@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Chaos.Common.Definitions;
 using Chaos.Common.Identity;
 using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
@@ -9,7 +8,6 @@ using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Chaos.Packets.Abstractions.Definitions;
 
 using Dapper;
 
@@ -39,16 +37,17 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.Sockets;
 using System.Numerics;
+using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Managers;
-using BodyColor = Chaos.Common.Definitions.BodyColor;
-using BodySprite = Chaos.Common.Definitions.BodySprite;
-using EquipmentSlot = Chaos.Common.Definitions.EquipmentSlot;
-using Gender = Chaos.Common.Definitions.Gender;
+using BodyColor = Chaos.DarkAges.Definitions.BodyColor;
+using BodySprite = Chaos.DarkAges.Definitions.BodySprite;
+using EquipmentSlot = Chaos.DarkAges.Definitions.EquipmentSlot;
+using Gender = Chaos.DarkAges.Definitions.Gender;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
-using LanternSize = Chaos.Common.Definitions.LanternSize;
+using LanternSize = Chaos.DarkAges.Definitions.LanternSize;
 using MapFlags = Darkages.Enums.MapFlags;
-using Nation = Chaos.Common.Definitions.Nation;
-using RestPosition = Chaos.Common.Definitions.RestPosition;
+using Nation = Chaos.DarkAges.Definitions.Nation;
+using RestPosition = Chaos.DarkAges.Definitions.RestPosition;
 
 namespace Darkages.Network.Client;
 
@@ -2061,13 +2060,16 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// <summary>
     /// 0x63 - Group Request
     /// </summary>
-    public void SendGroupRequest(GroupRequestType groupRequestType, string fromName)
+    public void SendDisplayGroupInvite(ServerGroupSwitch serverGroupSwitch, string fromName, DisplayGroupBoxInfo groupBoxInfo = null)
     {
         var args = new DisplayGroupInviteArgs
         {
-            GroupRequestType = groupRequestType,
+            ServerGroupSwitch = serverGroupSwitch,
             SourceName = fromName
         };
+
+        if (serverGroupSwitch == ServerGroupSwitch.ShowGroupBox)
+            args.GroupBoxInfo = groupBoxInfo;
 
         Send(args);
     }

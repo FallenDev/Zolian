@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Geometry;
+﻿using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
 using Darkages.Common;

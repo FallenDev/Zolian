@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Cryptography.Abstractions;
+﻿using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Server;

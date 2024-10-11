@@ -7,7 +7,8 @@ using Microsoft.Data.SqlClient;
 
 using System.Data;
 using Darkages.Types;
-using static Darkages.Enums.ElementManager;
+using Element = Darkages.Enums.ElementManager.Element;
+using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.Templates;
 

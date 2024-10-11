@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Chaos.Common.Identity;
-
+﻿using Chaos.Common.Identity;
 using Dapper;
 
 using Darkages.Database;

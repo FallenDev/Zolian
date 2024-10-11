@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;

@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Definitions;
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -236,7 +235,7 @@ public class EquipmentManager
     private void RemoveFromSlot(int displaySlot)
     {
         OnEquipmentRemoved((byte)displaySlot);
-        Client.SendUnequip((Chaos.Common.Definitions.EquipmentSlot)displaySlot);
+        Client.SendUnequip((Chaos.DarkAges.Definitions.EquipmentSlot)displaySlot);
         Equipment.TryUpdate(displaySlot, null, FindInSlot(displaySlot));
         var item = new Item();
         item.ReapplyItemModifiers(Client);

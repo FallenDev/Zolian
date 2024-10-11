@@ -5,7 +5,6 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
-using Chaos.Common.Definitions;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
 

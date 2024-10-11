@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Chaos.Common.Definitions;
-
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;

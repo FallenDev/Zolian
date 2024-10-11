@@ -5,7 +5,6 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
-using Chaos.Common.Definitions;
 using Darkages.Enums;
 
 namespace Darkages.GameScripts.Areas.Lynith;

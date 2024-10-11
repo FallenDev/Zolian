@@ -1,6 +1,4 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.CommandSystem.CLI;
+﻿using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
