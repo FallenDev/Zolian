@@ -11,7 +11,6 @@ using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -41,6 +40,7 @@ using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using MapFlags = Darkages.Enums.MapFlags;
+using Darkages.Network.Client.Abstractions;
 
 namespace Darkages.Network.Server;
 
@@ -1066,7 +1066,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (localClient.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
                 {
                     var portal = new PortalSession();
-                    portal.TransitionToMap(localClient.Aisling.Client);
+                    PortalSession.TransitionToMap(localClient.Aisling.Client);
                     return default;
                 }
 
@@ -1320,7 +1320,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static void CheckAltar(IWorldClient client, IItem item)
+    private static void CheckAltar(IWorldClient client, Item item)
     {
         switch (client.Aisling.Map.ID)
         {
@@ -1758,7 +1758,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (client.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
                 {
                     var portal = new PortalSession();
-                    portal.TransitionToMap(client.Aisling.Client);
+                    PortalSession.TransitionToMap(client.Aisling.Client);
                 }
             }
             catch (Exception e)

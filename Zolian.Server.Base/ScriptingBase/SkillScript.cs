@@ -1,11 +1,10 @@
-﻿using Darkages.Interfaces;
-using Darkages.Object;
+﻿using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class SkillScript(Skill skill) : ObjectManager, IScriptBase, IUseable
+public abstract class SkillScript(Skill skill) : ObjectManager
 {
     public Skill Skill { get; set; } = skill;
 

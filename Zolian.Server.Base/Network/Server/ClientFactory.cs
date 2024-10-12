@@ -1,7 +1,5 @@
 ﻿using Chaos.Networking.Abstractions;
-
-using Darkages.Interfaces;
-
+using Darkages.Network.Client.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Net.Sockets;

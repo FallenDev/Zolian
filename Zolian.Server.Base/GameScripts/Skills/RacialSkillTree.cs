@@ -2,6 +2,7 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;

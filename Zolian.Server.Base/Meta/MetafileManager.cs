@@ -1,6 +1,7 @@
 ﻿using Darkages.Compression;
 using Darkages.Enums;
 using Darkages.Models;
+using Darkages.Network.Server;
 using Newtonsoft.Json;
 using ServiceStack;
 using Nation = Darkages.Enums.Nation;

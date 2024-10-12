@@ -3,9 +3,6 @@ using Chaos.Extensions.DependencyInjection;
 using Chaos.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
-
-using Darkages;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -32,6 +29,8 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
 using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
+using Darkages.Network.Client.Abstractions;
+using Darkages.Network.Server.Abstractions;
 
 namespace Zolian.GameServer;
 

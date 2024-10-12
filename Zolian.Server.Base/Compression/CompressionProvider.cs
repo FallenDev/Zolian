@@ -1,4 +1,5 @@
 ﻿using ComponentAce.Compression.Libs.zlib;
+using Darkages.Network.Server;
 
 namespace Darkages.Compression;
 

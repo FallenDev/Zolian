@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Darkages.Network.Server;
+using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Components;
 

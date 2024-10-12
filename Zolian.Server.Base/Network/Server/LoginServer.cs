@@ -8,7 +8,6 @@ using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 
 using Darkages.Database;
-using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -31,6 +30,7 @@ using StringExtensions = ServiceStack.StringExtensions;
 using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Common;
+using Darkages.Network.Client.Abstractions;
 
 namespace Darkages.Network.Server;
 

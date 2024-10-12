@@ -1,12 +1,12 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class MonsterScript(Monster monster, Area map) : ObjectManager, IScriptBase
+public abstract class MonsterScript(Monster monster, Area map) : ObjectManager
 {
     protected readonly Area Map = map;
     protected readonly Monster Monster = monster;

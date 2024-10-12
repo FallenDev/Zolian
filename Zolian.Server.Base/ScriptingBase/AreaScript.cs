@@ -1,13 +1,12 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class AreaScript(Area area) : IScriptBase
+public abstract class AreaScript(Area area)
 {
     protected Area Area = area;
     public WorldServerTimer Timer { get; set; }

@@ -1,21 +1,19 @@
-﻿using Darkages.Interfaces;
-
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 
 using System.Data;
 
 namespace Darkages.Database;
 
-public abstract record Sql : ISql
+public abstract record Sql
 {
-    public SqlConnection ConnectToDatabase(string conn)
+    protected static SqlConnection ConnectToDatabase(string conn)
     {
         var sConn = new SqlConnection(conn);
         sConn.Open();
         return sConn;
     }
 
-    public SqlCommand ConnectToDatabaseSqlCommandWithProcedure(string command, SqlConnection conn)
+    protected static SqlCommand ConnectToDatabaseSqlCommandWithProcedure(string command, SqlConnection conn)
     {
         return new SqlCommand(command, conn)
         {
@@ -24,7 +22,7 @@ public abstract record Sql : ISql
         };
     }
 
-    public void ExecuteAndCloseConnection(SqlCommand command, SqlConnection conn)
+    protected static void ExecuteAndCloseConnection(SqlCommand command, SqlConnection conn)
     {
         command.ExecuteNonQuery();
         conn.Close();

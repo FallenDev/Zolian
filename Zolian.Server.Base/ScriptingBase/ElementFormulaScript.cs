@@ -1,10 +1,9 @@
 ﻿using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Sprites;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class ElementFormulaScript : IScriptBase
+public abstract class ElementFormulaScript
 {
     public abstract double Calculate(Sprite defender, Sprite attacker, ElementManager.Element offenseElement);
     public abstract double FasNadur(ElementManager.Element offenseElement, ElementManager.Element defenseElement);

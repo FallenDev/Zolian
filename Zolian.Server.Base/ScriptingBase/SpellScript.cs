@@ -1,11 +1,10 @@
-﻿using Darkages.Interfaces;
-using Darkages.Object;
+﻿using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class SpellScript(Spell spell) : ObjectManager, IScriptBase, IUseableTarget
+public abstract class SpellScript(Spell spell) : ObjectManager
 {
     public string Arguments { get; set; }
     public bool IsScriptDefault { get; set; }

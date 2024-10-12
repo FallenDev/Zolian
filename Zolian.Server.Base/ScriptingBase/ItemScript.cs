@@ -1,12 +1,11 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client.Abstractions;
+﻿using Darkages.Network.Client.Abstractions;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class ItemScript(Item item) : ObjectManager, IScriptBase
+public abstract class ItemScript(Item item) : ObjectManager
 {
     protected Item Item { get; } = item;
     public abstract void OnUse(Sprite sprite, byte slot);

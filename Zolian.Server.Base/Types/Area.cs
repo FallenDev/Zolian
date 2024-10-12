@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -8,10 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 using ServiceStack;
 using System.Numerics;
 using Chaos.Networking.Entities.Server;
+using Darkages.Network.Server;
 
 namespace Darkages.Types;
 
-public class Area : Map, IArea
+public class Area : Map
 {
     private readonly byte[] _sotp = File.ReadAllBytes("sotp.dat");
     public byte[] Data;

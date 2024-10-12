@@ -1,6 +1,5 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -11,7 +10,7 @@ using System.Security.Cryptography;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class MundaneScript(WorldServer server, Mundane mundane) : ObjectManager, IScriptBase
+public abstract class MundaneScript(WorldServer server, Mundane mundane) : ObjectManager
 {
     private long _onClickCheck;
     private static string[] Messages => ServerSetup.Instance.Config.NpcInteraction.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);

@@ -1,8 +1,8 @@
 ﻿using Chaos.Extensions.Common;
 
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -16,7 +16,7 @@ namespace Darkages.Managers;
 /// Controls Slot movement within the inventory, checks for items in slots, permanently removes items,
 /// controls stacks adding and removing. 
 /// </summary>
-public class InventoryManager : ObjectManager, IInventory
+public class InventoryManager : ObjectManager
 {
     private const int Length = 59;
     private readonly int[] _invalidSlots = [0, 60];

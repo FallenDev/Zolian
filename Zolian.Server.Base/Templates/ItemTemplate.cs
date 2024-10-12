@@ -9,6 +9,7 @@ using System.Data;
 using Darkages.Types;
 using Element = Darkages.Enums.ElementManager.Element;
 using Gender = Darkages.Enums.Gender;
+using Darkages.Network.Server;
 
 namespace Darkages.Templates;
 

@@ -1,10 +1,9 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
 using Darkages.Sprites;
 
 namespace Darkages.GameScripts.Creations;
 
-public abstract class RewardScript : IScriptBase
+public abstract class RewardScript
 {
     public abstract void GenerateRewards(Monster monster, Aisling player);
     public abstract void GenerateInanimateRewards(Monster monster, Aisling player);

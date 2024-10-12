@@ -1,8 +1,7 @@
-﻿using Chaos.Common.Definitions;
-
-using Darkages.Enums;
+﻿using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;

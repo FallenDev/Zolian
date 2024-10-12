@@ -1,8 +1,6 @@
 ﻿using Darkages.Common;
-using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
-using Darkages.Interfaces;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -10,6 +8,8 @@ using ServiceStack;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.Sprites.Abstractions;
+using Darkages.Network.Server;
 
 namespace Darkages.Sprites;
 
@@ -21,7 +21,7 @@ public record TargetRecord
     public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; set; }
 }
 
-public sealed class Monster : Sprite, IDialogSourceEntity
+public sealed class Monster : Sprite
 {
     public Task<IList<Vector2>> Path;
     public Vector2 TargetPos = Vector2.Zero;

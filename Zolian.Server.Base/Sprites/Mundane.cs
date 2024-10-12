@@ -1,7 +1,7 @@
 ﻿using Chaos.Common.Identity;
 using Darkages.Common;
-using Darkages.Dialogs.Abstractions;
 using Darkages.Enums;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -14,7 +14,7 @@ using System.Security.Cryptography;
 
 namespace Darkages.Sprites;
 
-public sealed class Mundane : Sprite, IDialogSourceEntity
+public sealed class Mundane : Sprite
 {
     private readonly List<SkillScript> _skillScripts = [];
     private readonly List<SpellScript> _spellScripts = [];

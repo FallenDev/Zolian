@@ -1,9 +1,8 @@
-﻿using Darkages.Interfaces;
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 
 namespace Darkages.ScriptingBase;
 
-public abstract class MonsterCreateScript : IScriptBase
+public abstract class MonsterCreateScript
 {
     public abstract Monster Create();
 }

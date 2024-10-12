@@ -3,7 +3,7 @@
 using Chaos.Cryptography;
 
 using Darkages.Enums;
-using Darkages.Interfaces;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -14,7 +14,7 @@ using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Database;
 
-public record AreaStorage : IAreaStorage
+public record AreaStorage
 {
     private AreaStorage() { }
 

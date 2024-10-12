@@ -1,8 +1,8 @@
-﻿using Darkages.Interfaces;
-using Darkages.Models;
+﻿using Darkages.Models;
+using Darkages.Network.Server.Abstractions;
 using Darkages.Types;
 
-namespace Darkages;
+namespace Darkages.Network.Server;
 
 public class ServerConstants : IServerConstants
 {

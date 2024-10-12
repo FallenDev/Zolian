@@ -3,8 +3,8 @@ using Dapper;
 
 using Darkages.Database;
 using Darkages.GameScripts.Affects;
-using Darkages.Interfaces;
 using Darkages.Network.Client.Abstractions;
+using Darkages.Network.Server;
 using Darkages.Sprites;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ using System.Data;
 
 namespace Darkages.Types;
 
-public class Debuff : IDebuff
+public class Debuff
 {
     public bool Cancelled { get; set; }
     public virtual byte Icon { get; set; }

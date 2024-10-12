@@ -3,7 +3,6 @@
 using Dapper;
 
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Sprites;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -11,10 +10,11 @@ using Darkages.Models;
 using Darkages.Templates;
 using Chaos.Common.Synchronization;
 using Microsoft.Extensions.Logging;
+using Darkages.Network.Server;
 
 namespace Darkages.Database;
 
-public record AislingStorage : Sql, IAislingStorage
+public record AislingStorage : Sql
 {
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";

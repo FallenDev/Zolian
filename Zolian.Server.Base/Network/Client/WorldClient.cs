@@ -4546,7 +4546,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
 
                     var portal = new PortalSession();
-                    portal.TransitionToMap(client);
+                    PortalSession.TransitionToMap(client);
                     breakOuterLoop = true;
                     client.WorldMapInterrupt();
                     break;
@@ -4582,7 +4582,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
 
                     var portal = new PortalSession();
-                    portal.TransitionToMap(client);
+                    PortalSession.TransitionToMap(client);
                     breakOuterLoop = true;
                     client.WorldMapInterrupt();
                     break;

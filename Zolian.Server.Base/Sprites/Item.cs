@@ -3,7 +3,6 @@ using Dapper;
 
 using Darkages.Database;
 using Darkages.Enums;
-using Darkages.Interfaces;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
@@ -13,10 +12,11 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.GameScripts.Formulas;
+using Darkages.Network.Server;
 
 namespace Darkages.Sprites;
 
-public sealed class Item : Sprite, IItem
+public sealed class Item : Sprite
 {
     public enum ItemPanes
     {

@@ -1,11 +1,11 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client;
+﻿using Darkages.Network.Client;
+using Darkages.Network.Server;
 
 namespace Darkages.Types;
 
-public class PortalSession : IPortalSession
+public class PortalSession
 {
-    public void TransitionToMap(WorldClient client, int destinationMap = 0)
+    public static void TransitionToMap(WorldClient client, int destinationMap = 0)
     {
         var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
@@ -17,7 +17,7 @@ public class PortalSession : IPortalSession
         client.SendSound(42, true);
     }
 
-    public void ShowFieldMap(WorldClient client)
+    private static void ShowFieldMap(WorldClient client)
     {
         if (client.MapOpen) return;
 

@@ -3,8 +3,6 @@ using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-
-using Darkages.Interfaces;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Client;
@@ -21,6 +19,7 @@ using ServiceStack;
 using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
+using Darkages.Network.Client.Abstractions;
 
 namespace Darkages.Network.Server;
 

@@ -1,9 +1,7 @@
 ﻿using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
-using Darkages.Interfaces;
 using Darkages.Models;
-using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
@@ -17,10 +15,11 @@ using System.Data;
 using System.Net;
 using System.Reflection;
 using Chaos.Common.Identity;
+using Darkages.Network.Server.Abstractions;
 using Microsoft.Data.SqlClient;
 using RestSharp;
 
-namespace Darkages;
+namespace Darkages.Network.Server;
 
 public class ServerSetup : IServerContext
 {
@@ -111,10 +110,10 @@ public class ServerSetup : IServerContext
     }
 
     public static void EventsLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
-    { 
+    {
         _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
     }
-    
+
     private static (RestClientOptions, RestClientOptions) SetupRestClients()
     {
         var optionsCheck = new RestClientOptions("https://api.abuseipdb.com/api/v2/check")

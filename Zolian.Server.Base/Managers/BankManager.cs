@@ -1,11 +1,10 @@
-﻿using Darkages.Interfaces;
-using Darkages.Network.Client.Abstractions;
+﻿using Darkages.Network.Client.Abstractions;
 using Darkages.Sprites;
 using System.Collections.Concurrent;
 
 namespace Darkages.Managers;
 
-public class BankManager : IBank
+public class BankManager
 {
     public ConcurrentDictionary<long, Item> Items { get; } = [];
     public ulong TempGoldDeposit { get; set; }
