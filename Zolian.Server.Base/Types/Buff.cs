@@ -50,6 +50,7 @@ public class Buff
             "Adrenaline" => new buff_DexUp(),
             "Atlantean Weapon" => new buff_randWeaponElement(),
             "Elemental Bane" => new buff_ElementalBane(),
+            "Dia Haste" => new buff_Dia_Haste(),
             "Hastenga" => new buff_Hastenga(),
             "Hasten" => new buff_Hasten(),
             "Haste" => new buff_Haste(),

@@ -318,6 +318,89 @@ public class buff_DefenseUp : Buff
 
 #region Enhancement
 
+public class buff_Dia_Haste : Buff
+{
+    public override byte Icon => 148;
+    public override int Length => 7200;
+    public override string Name => "Dia Haste";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
+            InsertBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(189, affected.Position));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is Aisling aisling)
+            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+            aisling.Client.SendEffect(byte.MinValue, Icon);
+            DeleteBuff(aisling, buff);
+
+            foreach (var (_, skill) in aisling.SkillBook.Skills)
+            {
+                if (skill == null) continue;
+                aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+
+            foreach (var (_, spell) in aisling.SpellBook.Spells)
+            {
+                if (spell == null) continue;
+                aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            }
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(190, affected.Position));
+        }
+    }
+}
+
+
 public class buff_Hastenga : Buff
 {
     public override byte Icon => 148;

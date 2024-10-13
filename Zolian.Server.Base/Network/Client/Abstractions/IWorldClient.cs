@@ -66,7 +66,6 @@ public interface IWorldClient : IConnectedClient
     Task<bool> Save();
     WorldClient UpdateDisplay(bool excludeSelf = false);
     void Interrupt();
-    WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps);
     WorldClient LoggedIn(bool state);
     void CheckWarpTransitions(WorldClient client);
     void AddToIgnoreListDb(string ignored);
