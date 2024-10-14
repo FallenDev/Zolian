@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
+using Microsoft.Diagnostics.Tracing.Parsers.AspNet;
 
 namespace Darkages.Sprites;
 
@@ -90,18 +91,14 @@ public sealed class Monster : Sprite
 
     public void TryAddPlayerAndHisGroup(Sprite target)
     {
-        if (target is not Aisling aisling)
-        {
-            Target = target;
-            return;
-        }
+        if (target is not Aisling aisling) return;
 
+        Target = aisling;
         TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
 
-        if (aisling.GroupParty != null && aisling.GroupParty.PartyMembers.IsEmpty()) return;
-        if (aisling.GroupParty == null) return;
+        if (aisling.GroupId == 0 || aisling.GroupParty == null) return;
 
-        foreach (var member in aisling.GroupParty.PartyMembers.Values.Where(member => member != null))
+        foreach (var member in aisling.GroupParty.PartyMembers.Values.Where(member => member != null && aisling.CurrentMapId == member.CurrentMapId))
         {
             var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
             var playersNearby = AislingsEarShotNearby().Contains(member);

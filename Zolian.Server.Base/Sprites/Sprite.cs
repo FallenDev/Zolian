@@ -982,7 +982,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private bool CanAttack(Sprite attackingPlayer)
     {
         if (this is not Monster monster) return false;
-        if (monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _)) return true;
         if (monster.Template.MonsterRace == MonsterRace.Dummy) return true;
 
         // If the dictionary is empty, add the player
@@ -992,10 +991,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             return true;
         }
 
-        var playerTagged = monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _);
-        if (playerTagged) return true;
-
-        return monster.TryAddTagging(attackingPlayer);
+        return monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _) || monster.TryAddTagging(attackingPlayer);
     }
 
     #endregion
