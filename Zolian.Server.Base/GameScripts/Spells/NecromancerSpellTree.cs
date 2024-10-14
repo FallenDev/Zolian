@@ -1,6 +1,10 @@
-﻿using Darkages.ScriptingBase;
+﻿using Darkages.Enums;
+using Darkages.Network.Server;
+using Darkages.Object;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -148,18 +152,28 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 [Script("Macabre")]
 public class Macabre(Spell spell) : SpellScript(spell)
 {
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
+    private readonly GlobalSpellMethods _spellMethod = new();
 
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
+        if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+        {
+            _spellMethod.SpellOnFailed(aisling, aisling, spell);
+            return;
+        }
 
+        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("RaisedSkel", out var skel);
+
+        for (var i = 0; i < 3; i++)
+        {
+            var summoned = Monster.Summon(skel, aisling);
+            if (summoned == null) return;
+            AddObject(summoned);
+        }
     }
 } 

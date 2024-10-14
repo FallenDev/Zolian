@@ -894,7 +894,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     private IEnumerable<Sprite> GetSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.All);
     private IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.AislingDamage);
-    private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.MonsterDamage);
+    private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.Monsters | Get.Aislings);
     public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
     public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
     public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);

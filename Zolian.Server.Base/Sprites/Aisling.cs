@@ -91,7 +91,6 @@ public sealed class Aisling : Player, IAisling
     public ElementManager.Element TempDefensiveHold { get; set; }
     public bool IsCastingSpell { get; set; }
     public bool ProfileOpen { get; set; }
-    public Summon SummonObjects { get; set; }
     public bool UsingTwoHanded { get; set; }
     public int LastMapId { get; set; }
     public WorldServerTimer AttackDmgTrack { get; }

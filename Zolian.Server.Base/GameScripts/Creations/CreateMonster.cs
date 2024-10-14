@@ -180,6 +180,11 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 if (obj.Aggressive == false) return;
                 obj.Pos = new Vector2(template.DefinedX, template.DefinedY);
                 break;
+            case SpawnQualifer.Summoned:
+                if (obj.Summoner == null) return;
+                obj.Pos = new Vector2(obj.Summoner.X + Random.Shared.Next(-3, 3), obj.Summoner.Y + Random.Shared.Next(-3, 3));
+                obj.CurrentMapId = obj.Summoner.CurrentMapId;
+                break;
             default:
                 obj.Pos = new Vector2(template.DefinedX, template.DefinedY);
                 break;

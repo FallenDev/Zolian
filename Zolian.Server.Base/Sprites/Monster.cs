@@ -4,13 +4,10 @@ using Darkages.GameScripts.Creations;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
-using ServiceStack;
-
 using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
-using Microsoft.Diagnostics.Tracing.Parsers.AspNet;
 
 namespace Darkages.Sprites;
 
@@ -26,6 +23,7 @@ public sealed class Monster : Sprite
 {
     public Task<IList<Vector2>> Path;
     public Vector2 TargetPos = Vector2.Zero;
+    public bool Summoned;
 
     public Monster()
     {
@@ -40,6 +38,7 @@ public sealed class Monster : Sprite
         {
             TaggedAislings = []
         };
+        Summoned = false;
     }
 
     public TargetRecord TargetRecord { get; set; }
@@ -75,13 +74,24 @@ public sealed class Monster : Sprite
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
-    public long SummonerId { get; set; }
+    public static long SummonerId { get; set; }
 
     public static Monster Create(MonsterTemplate template, Area map)
     {
         var monsterCreateScript = ScriptManager.Load<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript,
                 template,
                 map)
+            .FirstOrDefault();
+
+        return monsterCreateScript.Value?.Create();
+    }
+
+    public static Monster Summon(MonsterTemplate template, Aisling summoner)
+    {
+        SummonerId = summoner.Serial;
+        var monsterCreateScript = ScriptManager.Load<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript,
+                template,
+                summoner.Map)
             .FirstOrDefault();
 
         return monsterCreateScript.Value?.Create();
@@ -352,6 +362,33 @@ public sealed class Monster : Sprite
             TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
         }
 
+        Target = null;
+        TargetPos = Vector2.Zero;
+
+        try
+        {
+            Path?.Result?.Clear();
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger(ex.ToString());
+            SentrySdk.CaptureException(ex);
+        }
+    }
+
+    public void SummonedCheckTarget()
+    {
+        if (Target is not Monster monster) return;
+        if (!monster.Skulled) return;
+        if (!monster.IsInvisible) return;
+        Target = null;
+    }
+
+    public void SummonedClearTarget()
+    {
+        CastEnabled = false;
+        BashEnabled = false;
+        WalkEnabled = true;
         Target = null;
         TargetPos = Vector2.Zero;
 
