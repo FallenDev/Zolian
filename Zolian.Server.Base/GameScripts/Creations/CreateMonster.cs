@@ -31,6 +31,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             CurrentMapId = map.ID
         };
 
+        SummonedLevel(obj);
+
         if (template.MonsterRace != MonsterRace.Dummy)
             LoadSkillScript("Assail", obj);
         if (template.Level > 10 && template.MonsterRace != MonsterRace.Dummy)
@@ -114,6 +116,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         Monster.InitScripting(template, map, obj);
 
         return obj;
+    }
+
+    private static void SummonedLevel(Monster obj)
+    {
+        if (obj.Template.SpawnType == SpawnQualifer.Summoned)
+            obj.SummonerAdjLevel = (ushort)(obj.Summoner.ExpLevel / 3 + obj.Summoner.AbpLevel / 2);
     }
 
     private static void SetElementalAlignment(Monster obj)

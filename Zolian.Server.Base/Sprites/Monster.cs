@@ -23,7 +23,6 @@ public sealed class Monster : Sprite
 {
     public Task<IList<Vector2>> Path;
     public Vector2 TargetPos = Vector2.Zero;
-    public bool Summoned;
 
     public Monster()
     {
@@ -63,9 +62,9 @@ public sealed class Monster : Sprite
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
     public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
-    public readonly List<SkillScript> SkillScripts = new();
-    public readonly List<SkillScript> AbilityScripts = new();
-    public readonly List<SpellScript> SpellScripts = new();
+    public readonly List<SkillScript> SkillScripts = [];
+    public readonly List<SkillScript> AbilityScripts = [];
+    public readonly List<SpellScript> SpellScripts = [];
 
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
@@ -75,6 +74,7 @@ public sealed class Monster : Sprite
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
     public static long SummonerId { get; set; }
+    public ushort SummonerAdjLevel { get; set; }
 
     public static Monster Create(MonsterTemplate template, Area map)
     {

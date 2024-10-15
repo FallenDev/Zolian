@@ -34,6 +34,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
+    public bool Summoned;
+
     public Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
 
     #region Buffs Debuffs
@@ -62,6 +64,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsEnhancingSecondaryOffense => HasBuff("Atlantean Weapon");
     private bool IsCharmed => HasDebuff("Entice");
     private bool IsBleeding => HasDebuff("Bleeding");
+    public bool IsCradhed => HasDebuff(i => i.Name.Contains("Cradh"));
     public bool IsVulnerable => IsFrozen || IsStopped || IsBlind || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
     public bool IsBlocked => IsFrozen || IsStopped || IsSleeping;
 
@@ -132,7 +135,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public ushort Level => TileType switch
     {
         TileContent.Aisling => ((Aisling)this).ExpLevel,
-        TileContent.Monster => ((Monster)this).Template.Level,
+        TileContent.Monster => (ushort)(((Monster)this).Template.Level + ((Monster)this).SummonerAdjLevel),
         TileContent.Item => ((Item)this).Template.LevelRequired,
         _ => 0
     };

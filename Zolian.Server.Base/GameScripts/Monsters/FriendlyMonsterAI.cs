@@ -44,14 +44,12 @@ public class BaseFriendlyMonster : MonsterScript
         {
             if (update)
             {
+                Monster.Summoner.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(171, null, Monster.Serial));
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -107,17 +105,10 @@ public class BaseFriendlyMonster : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
+        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aSummoner: {Monster.Summoner.Username}");
     }
 
     public override void OnDeath(WorldClient client = null)
@@ -211,16 +202,16 @@ public class BaseFriendlyMonster : MonsterScript
     private string LevelColor(IWorldClient client)
     {
         if (Monster.Template.Level >= client.Aisling.Level + 30)
-            return "{=n???{=s";
+            return $"{{=n{Monster.Level}{{=s";
         if (Monster.Template.Level >= client.Aisling.Level + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
+            return $"{{=b{Monster.Level}{{=s";
         if (Monster.Template.Level >= client.Aisling.Level + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
+            return $"{{=c{Monster.Level}{{=s";
         if (Monster.Template.Level <= client.Aisling.Level - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
+            return $"{{=k{Monster.Level}{{=s";
         if (Monster.Template.Level <= client.Aisling.Level - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
+            return $"{{=j{Monster.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Level}{{=s" : $"{{=q{Monster.Level}{{=s";
     }
 
     private void UpdateTarget()

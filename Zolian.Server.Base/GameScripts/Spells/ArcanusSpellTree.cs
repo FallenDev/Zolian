@@ -147,7 +147,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
             foreach (var buff in targetObj.Buffs.Values)
             {
                 if (buff.Affliction) continue;
-                if (buff.Name is "Double XP" or "Triple XP") continue;
+                if (buff.Name is "Double XP" or "Triple XP" or "Dia Haste") continue;
                 buff.OnEnded(targetObj, buff);
             }
         }
@@ -162,7 +162,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         foreach (var buff in aisling.Buffs.Values)
         {
             if (buff.Affliction) continue;
-            if (buff.Name is "Double XP" or "Triple XP") continue;
+            if (buff.Name is "Double XP" or "Triple XP" or "Dia Haste") continue;
             buff.OnEnded(aisling, buff);
         }
     }

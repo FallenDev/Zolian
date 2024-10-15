@@ -1,9 +1,12 @@
-﻿using Darkages.Enums;
+﻿using Darkages.Common;
+using Darkages.Enums;
+using Darkages.GameScripts.Affects;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
@@ -112,19 +115,25 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
 [Script("Animate Dead")]
 public class Animate_Dead(Spell spell) : SpellScript(spell)
 {
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
+    private readonly GlobalSpellMethods _spellMethod = new();
 
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
+        if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+        {
+            _spellMethod.SpellOnFailed(aisling, aisling, spell);
+            return;
+        }
 
+        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("RaisedBrut", out var skel);
+        var summoned = Monster.Summon(skel, aisling);
+        if (summoned == null) return;
+        AddObject(summoned);
     }
 }
 
@@ -132,19 +141,81 @@ public class Animate_Dead(Spell spell) : SpellScript(spell)
 [Script("Circle of Death")]
 public class Circle_of_Death(Spell spell) : SpellScript(spell)
 {
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
+    private readonly GlobalSpellMethods _spellMethod = new();
 
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+        aisling.ActionUsed = "Circle of Death";
 
+        var manaSap = (long)(aisling.MaximumMp * .50);
+
+        if (aisling.CurrentMp < manaSap)
+        {
+            OnFailed(aisling, target);
+            return;
+        }
+
+        aisling.CurrentMp -= manaSap;
+
+        foreach (var nearby in aisling.SpritesNearby())
+        {
+            if (nearby.Serial == aisling.Serial) continue;
+
+            if (nearby.SpellNegate)
+            {
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, nearby.Serial));
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+
+                if (nearby is Aisling player)
+                    player.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+
+                continue;
+            }
+
+            var mR = Generator.RandNumGen100();
+
+            if (mR > nearby.Will)
+            {
+                nearby.ApplyElementalSpellDamage(aisling, 500 * nearby.Level, ElementManager.Element.Terror, Spell);
+                
+                if (!nearby.IsCradhed)
+                {
+                    var debuff = new DebuffCriochArdCradh();
+                    debuff.OnApplied(nearby, debuff);
+                }
+
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, nearby.Serial));
+            }
+            else
+            {
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, nearby.Serial));
+            }
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (!Spell.CanUse()) return;
+        if (sprite is Aisling aisling)
+        {
+            var client = aisling.Client;
+            _spellMethod.Train(client, Spell);
+            OnSuccess(aisling, target);
+            client.SendAttributes(StatUpdateType.Vitality);
+            return;
+        }
 
+        foreach (var targetObj in sprite.AislingsNearby())
+        {
+            if (targetObj == null) continue;
+            targetObj.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
+            
+            // monster use of the spell
+        }
     }
 }
 
@@ -176,4 +247,4 @@ public class Macabre(Spell spell) : SpellScript(spell)
             AddObject(summoned);
         }
     }
-} 
+}
