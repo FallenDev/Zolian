@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
@@ -7,7 +6,6 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-using System.Numerics;
 using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
@@ -15,8 +13,6 @@ namespace Darkages.GameScripts.Monsters;
 [Script("BaseFriendly")]
 public class BaseFriendlyMonster : MonsterScript
 {
-    private readonly Stopwatch _timeTillDead = new();
-
     public BaseFriendlyMonster(Monster monster, Area map) : base(monster, map)
     {
         Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
@@ -24,7 +20,7 @@ public class BaseFriendlyMonster : MonsterScript
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = [];
         Monster.Summoned = true;
-        _timeTillDead.Start();
+        Monster.TimeTillDead.Start();
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -37,7 +33,7 @@ public class BaseFriendlyMonster : MonsterScript
             return;
         }
 
-        if (_timeTillDead.Elapsed.TotalMinutes > 3)
+        if (Monster.TimeTillDead.Elapsed.TotalMinutes > 3)
         {
             OnDeath();
             return;
@@ -131,6 +127,16 @@ public class BaseFriendlyMonster : MonsterScript
                 item.ShowTo(player);
             }
         }
+
+        var corpse = new Item();
+        corpse = corpse.Create(Monster.Summoner, "Corpse");
+        corpse.Release(Monster.Summoner, Monster.Position);
+
+        Task.Run(async () =>
+        {
+            await Task.Delay(120000);
+            corpse.Remove();
+        });
 
         Monster.Remove();
         DelObject(Monster);

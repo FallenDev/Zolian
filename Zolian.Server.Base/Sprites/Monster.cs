@@ -5,6 +5,7 @@ using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
@@ -16,7 +17,7 @@ public record TargetRecord
     /// <summary>
     /// Serial, Damage, Player, Nearby
     /// </summary>
-    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; set; }
+    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; init; }
 }
 
 public sealed class Monster : Sprite
@@ -61,7 +62,7 @@ public sealed class Monster : Sprite
     public WorldServerTimer ObjectUpdateTimer { get; init; }
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
-    public ConcurrentDictionary<string, MonsterScript> Scripts { get; set; }
+    public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
     public readonly List<SkillScript> SkillScripts = [];
     public readonly List<SkillScript> AbilityScripts = [];
     public readonly List<SpellScript> SpellScripts = [];
@@ -73,8 +74,9 @@ public sealed class Monster : Sprite
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
-    public static long SummonerId { get; set; }
+    private static long SummonerId { get; set; }
     public ushort SummonerAdjLevel { get; set; }
+    public readonly Stopwatch TimeTillDead = new();
 
     public static Monster Create(MonsterTemplate template, Area map)
     {

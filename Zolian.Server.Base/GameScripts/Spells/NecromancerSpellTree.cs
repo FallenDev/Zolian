@@ -1,12 +1,9 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.Models;
 using Darkages.Network.Server;
-using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
-using Darkages.Templates;
 using Darkages.Types;
 
 using MapFlags = Darkages.Enums.MapFlags;
@@ -166,20 +163,38 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
     }
 }
 
-// Over the next 3 minutes where enemies die a (trap) will be set on their corpse to explode after 3 seconds
+// Explode corpses of summons causing damage equal to your current mp * int
 [Script("Corpse Burst")]
 public class Corpse_Burst(Spell spell) : SpellScript(spell)
 {
     private readonly GlobalSpellMethods _spellMethod = new();
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
+        var corpsesNearby = GetObjects(aisling.Map, s => s.WithinRangeOf(aisling), Get.Items)
+            .Where(i => i is Item item && item.Template.Name == "Corpse").ToList();
 
+        if (corpsesNearby.Count == 0) return;
+        var manaSap = aisling.CurrentMp * .50;
+        aisling.CurrentMp -= (long)manaSap;
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+
+        foreach (var corpse in corpsesNearby)
+        {
+            var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(corpse, 4), Get.AislingDamage).ToList();
+            foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
+            {
+                var dmgCalc = DamageCalc(aisling);
+                enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Void, Spell);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(77, enemy.Position));
+            }
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, corpse.Position));
+            corpse.Remove();
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -199,7 +214,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         var success = _spellMethod.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
-        if (mR > target.Will)
+        if (mR <= target.Will)
         {
             if (success)
             {
@@ -214,6 +229,11 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         {
             playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
         }
+    }
+
+    private static long DamageCalc(Aisling summoner)
+    {
+        return (long)(summoner.CurrentMp * summoner.AbpLevel * 0.01) * summoner.Int;
     }
 }
 
@@ -371,7 +391,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
             if (mR > nearby.Will)
             {
-                nearby.ApplyElementalSpellDamage(aisling, 500 * nearby.Level, ElementManager.Element.Terror, Spell);
+                nearby.ApplyElementalSpellDamage(aisling, (aisling.Int + aisling.Wis) * (aisling.Level + aisling.AbpLevel), ElementManager.Element.Void, Spell);
 
                 if (!nearby.IsCradhed)
                 {
