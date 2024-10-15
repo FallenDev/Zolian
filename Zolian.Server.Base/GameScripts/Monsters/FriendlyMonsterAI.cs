@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using System.Diagnostics;
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
@@ -14,7 +15,7 @@ namespace Darkages.GameScripts.Monsters;
 [Script("BaseFriendly")]
 public class BaseFriendlyMonster : MonsterScript
 {
-    private Vector2 _location = Vector2.Zero;
+    private readonly Stopwatch _timeTillDead = new();
 
     public BaseFriendlyMonster(Monster monster, Area map) : base(monster, map)
     {
@@ -23,6 +24,7 @@ public class BaseFriendlyMonster : MonsterScript
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = [];
         Monster.Summoned = true;
+        _timeTillDead.Start();
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -30,6 +32,12 @@ public class BaseFriendlyMonster : MonsterScript
         if (Monster is null) return;
         if (!Monster.IsAlive) return;
         if (Monster.Summoner == null)
+        {
+            OnDeath();
+            return;
+        }
+
+        if (_timeTillDead.Elapsed.TotalMinutes > 3)
         {
             OnDeath();
             return;
