@@ -61,7 +61,7 @@ public sealed class Monster : Sprite
     public WorldServerTimer ObjectUpdateTimer { get; init; }
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
-    public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
+    public ConcurrentDictionary<string, MonsterScript> Scripts { get; set; }
     public readonly List<SkillScript> SkillScripts = [];
     public readonly List<SkillScript> AbilityScripts = [];
     public readonly List<SpellScript> SpellScripts = [];
@@ -102,6 +102,7 @@ public sealed class Monster : Sprite
     public void TryAddPlayerAndHisGroup(Sprite target)
     {
         if (target is not Aisling aisling) return;
+        if (Summoned) return;
 
         Target = aisling;
         TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
@@ -121,6 +122,8 @@ public sealed class Monster : Sprite
     public bool TryAddTagging(Sprite target)
     {
         if (target is not Aisling aisling) return true;
+        if (Summoned) return true;
+
         var checkGroup = TargetRecord.TaggedAislings.FirstOrDefault().Value;
 
         if (checkGroup.player.GroupId != aisling.GroupId) return false;

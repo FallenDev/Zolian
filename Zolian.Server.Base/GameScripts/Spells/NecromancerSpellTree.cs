@@ -1,10 +1,12 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Templates;
 using Darkages.Types;
 
 using MapFlags = Darkages.Enums.MapFlags;
@@ -15,6 +17,8 @@ namespace Darkages.GameScripts.Spells;
 [Script("Chill Touch")]
 public class Chill_Touch(Spell spell) : SpellScript(spell)
 {
+    private readonly GlobalSpellMethods _spellMethod = new();
+
     public override void OnFailed(Sprite sprite, Sprite target)
     {
 
@@ -27,7 +31,36 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
+        if (target == null) return;
+        if (!Spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        playerAction.ActionUsed = "Chill Touch";
+        var client = playerAction.Client;
+        _spellMethod.Train(client, Spell);
+        var success = _spellMethod.Execute(client, Spell);
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (success)
+            {
+                OnSuccess(sprite, target);
+            }
+            else
+            {
+                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            }
+        }
+        else
+        {
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+        }
     }
 }
 
@@ -35,6 +68,8 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
 [Script("Ray of Sickness")]
 public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 {
+    private readonly GlobalSpellMethods _spellMethod = new();
+
     public override void OnFailed(Sprite sprite, Sprite target)
     {
 
@@ -47,7 +82,36 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
+        if (target == null) return;
+        if (!Spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        playerAction.ActionUsed = "Ray of Sickness";
+        var client = playerAction.Client;
+        _spellMethod.Train(client, Spell);
+        var success = _spellMethod.Execute(client, Spell);
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (success)
+            {
+                OnSuccess(sprite, target);
+            }
+            else
+            {
+                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            }
+        }
+        else
+        {
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+        }
     }
 }
 
@@ -55,6 +119,8 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 [Script("Finger of Death")]
 public class Finger_of_Death(Spell spell) : SpellScript(spell)
 {
+    private readonly GlobalSpellMethods _spellMethod = new();
+
     public override void OnFailed(Sprite sprite, Sprite target)
     {
 
@@ -67,7 +133,36 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
+        if (target == null) return;
+        if (!Spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        playerAction.ActionUsed = "Finger of Death";
+        var client = playerAction.Client;
+        _spellMethod.Train(client, Spell);
+        var success = _spellMethod.Execute(client, Spell);
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (success)
+            {
+                OnSuccess(sprite, target);
+            }
+            else
+            {
+                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            }
+        }
+        else
+        {
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+        }
     }
 }
 
@@ -75,6 +170,8 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
 [Script("Corpse Burst")]
 public class Corpse_Burst(Spell spell) : SpellScript(spell)
 {
+    private readonly GlobalSpellMethods _spellMethod = new();
+
     public override void OnFailed(Sprite sprite, Sprite target)
     {
 
@@ -87,7 +184,36 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
+        if (target == null) return;
+        if (!Spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        playerAction.ActionUsed = "Corpse Burst";
+        var client = playerAction.Client;
+        _spellMethod.Train(client, Spell);
+        var success = _spellMethod.Execute(client, Spell);
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (success)
+            {
+                OnSuccess(sprite, target);
+            }
+            else
+            {
+                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            }
+        }
+        else
+        {
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+        }
     }
 }
 
@@ -95,19 +221,84 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 [Script("Command Undead")]
 public class Command_Undead(Spell spell) : SpellScript(spell)
 {
+    private readonly GlobalSpellMethods _spellMethod = new();
+
     public override void OnFailed(Sprite sprite, Sprite target)
     {
-
+        if (sprite is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Not a valid target!");
     }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
 
+        if (target.CurrentHp > 0)
+        {
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+        }
+        else
+        {
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+        }
+
+        if (target is not Monster monster)
+        {
+            _spellMethod.SpellOnFailed(sprite, target, spell);
+            return;
+        }
+
+        if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead) || monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration) && monster.CurrentHp <= monster.MaximumHp * .10)
+        {
+            ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("RaisedSkel", out var skel);
+            var summoned = Monster.Summon(skel, aisling);
+            if (summoned == null) return;
+            summoned.Image = monster.Image;
+            summoned.X = monster.X;
+            summoned.Y = monster.Y;
+            summoned.Direction = monster.Direction;
+            AddObject(summoned);
+            monster.Remove();
+        }
+        else
+        {
+            OnFailed(sprite, target);
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling playerAction) return;
+        if (target == null) return;
+        if (!Spell.CanUse())
+        {
+            if (sprite is Aisling aisling2)
+                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        playerAction.ActionUsed = "Command Undead";
+        var client = playerAction.Client;
+        _spellMethod.Train(client, Spell);
+        var success = _spellMethod.Execute(client, Spell);
+        var mR = Generator.RandNumGen100();
+
+        if (mR > target.Will)
+        {
+            if (success)
+            {
+                OnSuccess(sprite, target);
+            }
+            else
+            {
+                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            }
+        }
+        else
+        {
+            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+        }
     }
 }
 
@@ -181,7 +372,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
             if (mR > nearby.Will)
             {
                 nearby.ApplyElementalSpellDamage(aisling, 500 * nearby.Level, ElementManager.Element.Terror, Spell);
-                
+
                 if (!nearby.IsCradhed)
                 {
                     var debuff = new DebuffCriochArdCradh();
@@ -213,7 +404,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
         {
             if (targetObj == null) continue;
             targetObj.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
-            
+
             // monster use of the spell
         }
     }

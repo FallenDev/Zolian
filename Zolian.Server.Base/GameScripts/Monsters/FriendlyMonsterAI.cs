@@ -232,7 +232,8 @@ public class BaseFriendlyMonster : MonsterScript
             Monster.SummonedClearTarget();
         }
 
-        Monster.Target = nearbyPlayers.RandomIEnum();
+        if (Monster.Target is null || !Monster.Target.Alive)
+            Monster.Target = nearbyPlayers.RandomIEnum();
 
         if (Monster.Target != null) return;
         Monster.SummonedCheckTarget();
