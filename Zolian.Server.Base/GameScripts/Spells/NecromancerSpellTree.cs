@@ -16,48 +16,80 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
 {
     private readonly GlobalSpellMethods _spellMethod = new();
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    }
-
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling playerAction) return;
+        playerAction.ActionUsed = "Chill Touch";
         if (target == null) return;
+
         if (!Spell.CanUse())
         {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
-        playerAction.ActionUsed = "Chill Touch";
-        var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
-        var mR = Generator.RandNumGen100();
-
-        if (mR > target.Will)
+        if (target.SpellReflect)
         {
-            if (success)
+            if (sprite is Aisling caster)
             {
-                OnSuccess(sprite, target);
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
-            else
+
+            if (target is Aisling targetPlayer)
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
             }
+
+            sprite = Spell.SpellReflect(target, sprite);
+        }
+
+        if (target.SpellNegate)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            }
+
+            if (target is not Aisling targetPlayer) return;
+            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+            return;
+        }
+
+        if (playerAction.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            playerAction.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(playerAction.Client, Spell);
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
         }
+
+        var targets = GetObjects(playerAction.Map, i => i != null && i.WithinRangeOf(target, 4), Get.AislingDamage).ToList();
+        foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial && enemy.Attackable))
+        {
+            var dmgCalc = DamageCalc(playerAction);
+            enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Water, Spell);
+            enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Wind, Spell);
+            var debuff = new DebuffAdvFrozen();
+            debuff.OnApplied(enemy, debuff);
+            playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(377, enemy.Position));
+        }
+    }
+
+    private static long DamageCalc(Aisling summoner)
+    {
+        return (long)(summoner.ExpLevel * summoner.AbpLevel * 0.01) * summoner.Int;
     }
 }
 
@@ -67,14 +99,78 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 {
     private readonly GlobalSpellMethods _spellMethod = new();
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (sprite is not Aisling aisling) return;
+        if (target == null) return;
+        
+        if (!Spell.CanUse())
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            return;
+        }
 
+        if (target.SpellReflect)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
+            }
+
+            if (target is Aisling targetPlayer)
+            {
+                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
+            }
+
+            sprite = Spell.SpellReflect(target, sprite);
+        }
+
+        if (target.SpellNegate)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            }
+
+            if (target is not Aisling targetPlayer) return;
+            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+            return;
+        }
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+        
+        aisling.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+
+        if (!target.HasDebuff("Deadly Poison"))
+        {
+            var debuff = new DebuffDeadlyPoison();
+            debuff.OnApplied(target, debuff);
+        }
+
+        if (!target.HasDebuff("Silence"))
+        {
+            var debuffTwo = new DebuffSilence();
+            debuffTwo.OnApplied(target, debuffTwo);
+        }
+
+        if (target.HasDebuff("Dark Chain")) return;
+        var debuffThree = new DebuffDarkChain();
+        debuffThree.OnApplied(target, debuffThree);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -118,52 +214,77 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
 {
     private readonly GlobalSpellMethods _spellMethod = new();
 
-    public override void OnFailed(Sprite sprite, Sprite target)
-    {
+    public override void OnFailed(Sprite sprite, Sprite target) { }
 
-    }
-
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling playerAction) return;
+        playerAction.ActionUsed = "Finger of Death";
         if (target == null) return;
+
         if (!Spell.CanUse())
         {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
+            if (sprite is Aisling aisling)
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
             return;
         }
 
-        playerAction.ActionUsed = "Finger of Death";
-        var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
-        var mR = Generator.RandNumGen100();
-
-        if (mR > target.Will)
+        if (target.SpellReflect)
         {
-            if (success)
+            if (sprite is Aisling caster)
             {
-                OnSuccess(sprite, target);
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
-            else
+
+            if (target is Aisling targetPlayer)
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
             }
+
+            sprite = Spell.SpellReflect(target, sprite);
+        }
+
+        if (target.SpellNegate)
+        {
+            if (sprite is Aisling caster)
+            {
+                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+            }
+
+            if (target is not Aisling targetPlayer) return;
+            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+            return;
+        }
+
+        if (playerAction.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            playerAction.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(playerAction.Client, Spell);
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
         }
+
+        var enemies = target.DamageableGetBehind(4);
+
+        foreach (var enemy in enemies)
+        {
+            _spellMethod.ElementalOnSuccess(sprite, enemy, Spell, 2500);
+        }
+
+        _spellMethod.ElementalOnSuccess(sprite, target, Spell, 5000);
     }
 }
 
-// Explode corpses of summons causing damage equal to your current mp * int
+// Explode corpses of summons causing damage 
 [Script("Corpse Burst")]
 public class Corpse_Burst(Spell spell) : SpellScript(spell)
 {
@@ -174,6 +295,18 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         var corpsesNearby = GetObjects(aisling.Map, s => s.WithinRangeOf(aisling), Get.Items)
             .Where(i => i is Item item && item.Template.Name == "Corpse").ToList();
 
@@ -252,6 +385,17 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
 
         if (target.CurrentHp > 0)
         {
@@ -335,6 +479,18 @@ public class Animate_Dead(Spell spell) : SpellScript(spell)
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
             _spellMethod.SpellOnFailed(aisling, aisling, spell);
@@ -443,6 +599,18 @@ public class Macabre(Spell spell) : SpellScript(spell)
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
             _spellMethod.SpellOnFailed(aisling, aisling, spell);

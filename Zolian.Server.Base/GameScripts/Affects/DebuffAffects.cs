@@ -2302,6 +2302,95 @@ public class DebuffBleeding : Debuff
     }
 }
 
+public class DebuffDeadlyPoison : Debuff
+{
+    private static double Modifier => 0.12;
+    public override byte Icon => 153;
+    public override int Length => 300;
+    public override string Name => "Deadly Poison";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling { PoisonImmunity: true } immuneCheck)
+        {
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            return;
+        }
+
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.RegenTimerDisabled = true;
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(132, null, affected.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(34, false));
+            InsertDebuff(aisling, debuff);
+            aisling.Client.SendAttributes(StatUpdateType.Secondary);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(132, null, affected.Serial));
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(34, false));
+        }
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        base.OnDurationUpdate(affected, debuff);
+        ApplyPoison(affected, debuff);
+
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(132, null, affected.Serial));
+            aisling.Client.SendAttributes(StatUpdateType.Vitality);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(132, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = false;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+    }
+
+    private static void ApplyPoison(Sprite affected, Debuff debuff)
+    {
+        if (affected.CurrentHp <= affected.MaximumHp * 0.08)
+        {
+            debuff.OnEnded(affected, debuff);
+            return;
+        }
+
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 90000) cap = 90000;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
+    }
+}
+
 public class DebuffArdPoison : Debuff
 {
     private static double Modifier => 0.08;
@@ -2382,7 +2471,7 @@ public class DebuffArdPoison : Debuff
 
         if (affected is Monster monster)
         {
-            if (cap > 5000) cap = 5000;
+            if (cap > 25000) cap = 25000;
             monster.CurrentHp -= cap;
             return;
         }
@@ -2471,7 +2560,7 @@ public class DebuffMorPoison : Debuff
 
         if (affected is Monster monster)
         {
-            if (cap > 2500) cap = 2500;
+            if (cap > 15000) cap = 15000;
             monster.CurrentHp -= cap;
             return;
         }
@@ -2560,7 +2649,7 @@ public class DebuffPoison : Debuff
 
         if (affected is Monster monster)
         {
-            if (cap > 1000) cap = 1000;
+            if (cap > 5000) cap = 5000;
             monster.CurrentHp -= cap;
             return;
         }
@@ -2649,7 +2738,7 @@ public class DebuffBeagPoison : Debuff
 
         if (affected is Monster monster)
         {
-            if (cap > 500) cap = 500;
+            if (cap > 1000) cap = 1000;
             monster.CurrentHp -= cap;
             return;
         }

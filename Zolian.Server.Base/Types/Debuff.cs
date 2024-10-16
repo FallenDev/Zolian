@@ -79,6 +79,7 @@ public class Debuff
             "Hallowed" => new Hallowed(),
             "Petrified" => new Petrified(),
             "Wrath Consequences" => new DebuffWrathConsequences(),
+            "Deadly Poison" => new DebuffDeadlyPoison(),
             _ => DebuffSpell
         };
 
