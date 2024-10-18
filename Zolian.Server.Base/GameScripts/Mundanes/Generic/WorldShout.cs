@@ -28,7 +28,7 @@ public class WorldShout(WorldServer server, Mundane mundane) : MundaneScript(ser
 
         client.SendOptionsDialog(Mundane, "What do you wish to announce?", options.ToArray());
 
-        client.DlgSession ??= new DialogSession()
+        client.DlgSession ??= new DialogSession(client.Aisling, mundane.Serial)
         {
             Callback = OnResponse
         };

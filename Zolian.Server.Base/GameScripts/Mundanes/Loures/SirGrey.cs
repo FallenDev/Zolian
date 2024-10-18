@@ -294,7 +294,7 @@ public class SirGrey : MundaneScript
         {
             client.SendOptionsDialog(Mundane, "Do you have what is required?",
                 subject.Name,
-                new Dialog.OptionsDataItem(0x24, "Yes, Sensei"),
+                new Dialog.OptionsDataItem(0x34, "Yes, Sensei"),
                 new Dialog.OptionsDataItem(0x00, "I will return"));
         }
     }

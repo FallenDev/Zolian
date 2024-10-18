@@ -5,8 +5,10 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("AC Formula")]
-public class Ac() : FormulaScript
+public class Ac : FormulaScript
 {
+    public Ac(Sprite obj) { }
+
     public override long Calculate(Sprite obj, long value)
     {
         var armor = obj.SealedAc;

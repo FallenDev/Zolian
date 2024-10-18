@@ -5,8 +5,10 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("Will Saving Throw")]
-public class WillSavingThrow() : FormulaScript
+public class WillSavingThrow : FormulaScript
 {
+    public WillSavingThrow(Sprite obj) { }
+
     public override long Calculate(Sprite obj, long value)
     {
         var armor = obj.Will;

@@ -211,7 +211,7 @@ public class Dennis : MundaneScript
     {
         var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
         var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.StageRequired.StageFlagIsSet(ClassStage.Job)
-                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.Samurai)).ToList();
+                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.SharpShooter)).ToList();
 
         newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
@@ -271,7 +271,7 @@ public class Dennis : MundaneScript
     {
         var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
         var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.StageRequired.StageFlagIsSet(ClassStage.Job)
-                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.Samurai)).ToList();
+                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.SharpShooter)).ToList();
 
         newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
@@ -303,7 +303,7 @@ public class Dennis : MundaneScript
         {
             client.SendOptionsDialog(Mundane, "Do you have what is required?",
                 subject.Name,
-                new Dialog.OptionsDataItem(0x24, "Yes, Sir! *salutes*"),
+                new Dialog.OptionsDataItem(0x34, "Yes, Sir! *salutes*"),
                 new Dialog.OptionsDataItem(0x00, "I will return"));
         }
     }

@@ -7,15 +7,15 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Loures;
+namespace Darkages.GameScripts.Mundanes.Tagor;
 
-[Script("Sir Dolvet")]
-public class SirDolvet : MundaneScript
+[Script("Gigean")]
+public class Gigean : MundaneScript
 {
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
-    public SirDolvet(WorldServer server, Mundane mundane) : base(server, mundane)
+    public Gigean(WorldServer server, Mundane mundane) : base(server, mundane)
     {
         _skillList = ObtainSkillList();
         _spellList = ObtainSpellList();
@@ -33,29 +33,27 @@ public class SirDolvet : MundaneScript
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (_skillList.Count > 0 && client.Aisling.JobClass == Job.DarkKnight)
-            options.Add(new(0x20, "Learn Dark Knight Skills"));
-        if (_spellList.Count > 0 && client.Aisling.JobClass == Job.DarkKnight)
-            options.Add(new(0x30, "Learn Dark Knight Spells"));
+        if (_skillList.Count > 0 && client.Aisling.JobClass == Job.Necromancer)
+            options.Add(new(0x20, "Learn Necromancer Skills"));
+        if (_spellList.Count > 0 && client.Aisling.JobClass == Job.Necromancer)
+            options.Add(new(0x30, "Learn Necromancer Spells"));
 
         if (client.Aisling.Stage <= ClassStage.Master
             && client.Aisling.ExpLevel >= 250
-            && client.Aisling.QuestManager.AssassinsGuildReputation >= 4
-            && client.Aisling.QuestManager.UndineReputation >= 4
-            && (client.Aisling.Path == Class.Berserker 
-                || client.Aisling.PastClass == Class.Berserker 
-                || client.Aisling.Path == Class.Assassin 
-                || client.Aisling.PastClass == Class.Assassin))
+            && (client.Aisling.Path == Class.Cleric 
+                || client.Aisling.PastClass == Class.Cleric 
+                || client.Aisling.Path == Class.Arcanus 
+                || client.Aisling.PastClass == Class.Arcanus))
         {
-            options.Add(new(0x01, "I am but a canvas, teach me"));
-            client.SendOptionsDialog(Mundane, "Ya know, you'd make a fine Dark Knight", options.ToArray());
+            options.Add(new(0x01, "I am too far from the light now, show me."));
+            client.SendOptionsDialog(Mundane, "I can smell death on you.. Would you care to learn my secrets?", options.ToArray());
             return;
         }
 
         client.SendOptionsDialog(Mundane,
-            client.Aisling.ExpLevel >= 250
-                ? "Seasons change, but never should your character."
-                : "Hello there young one. Kneel before the king.", options.ToArray());
+            client.Aisling.ExpLevel >= 450
+                ? "Strong one, what is it you desire from me?"
+                : "Human, you should not be here.. This is a place for the dead.", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
@@ -72,30 +70,15 @@ public class SirDolvet : MundaneScript
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>();
-                    var qualifiedItem = CheckForForsakenDragonSlayer(client);
+                    options.Add(new(0x02, "I will walk the path of a Necromancer"));
 
-                    if (qualifiedItem != null)
-                    {
-                        options.Add(new(0x02, "Advance"));
-                        client.SendOptionsDialog(Mundane, "What a beautiful blade, are you ready to delve into the dark arts of swordplay?", options.ToArray());
-                        return;
-                    }
-
-                    options.Add(new(0x00, "On it"));
-                    client.SendOptionsDialog(Mundane, "Ah ha! *laughs loudly* Well then, bring me a worthy blade.\n" +
-                                                      $"{{=qEnhance or find a Dragon Slayer of Forsaken quality", options.ToArray());
+                    client.SendOptionsDialog(Mundane, "The dragons aren't the only ones who can harness magic. Would you care to learn?", options.ToArray());
                 }
                 break;
             case 0x02:
                 {
-                    var options = new List<Dialog.OptionsDataItem> { new(0x00, "Thank you Sir Dolvet") };
-                    var qualifiedItem = CheckForForsakenDragonSlayer(client);
-
-                    if (qualifiedItem != null)
-                        OnResponse(client, 0x999, $"{client.Aisling.Serial}");
-
-                    client.SendOptionsDialog(Mundane, "I will now perform the seal which binds. Congratulations Dark Knight, come back to me " +
-                                                      "whenever you're ready to advance your techniques.", options.ToArray());
+                    OnResponse(client, 0x999, $"{client.Aisling.Serial}");
+                    client.SendOptionsDialog(Mundane, "*Lifts up Necronomicon* Hahahahahahahahahaha *points his finger to you*");
                 }
                 break;
             case 0x999:
@@ -103,20 +86,20 @@ public class SirDolvet : MundaneScript
                     var succeeded = uint.TryParse(args, out var serial);
                     if (!succeeded) return;
                     if (serial != client.Aisling.Serial) return;
-                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Dark Knight"));
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Necromancer"));
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
-                    client.Aisling.JobClass = Job.DarkKnight;
+                    client.Aisling.JobClass = Job.Necromancer;
 
                     var legend = new Legend.LegendItem
                     {
                         Key = "LJob1",
                         IsPublic = true,
                         Time = DateTime.UtcNow,
-                        Color = LegendColor.TurquoiseG7,
+                        Color = LegendColor.Red,
                         Icon = (byte)LegendIcon.Victory,
-                        Text = "Advanced to Job - Dark Knight"
+                        Text = "Advanced to Job - Necromancer"
                     };
 
                     client.Aisling.LegendBook.AddLegend(legend, client);
@@ -183,19 +166,13 @@ public class SirDolvet : MundaneScript
 
     public override void OnGossip(WorldClient client, string message) { }
 
-    private static Item CheckForForsakenDragonSlayer(WorldClient client)
-    {
-        var item = client.Aisling.HasItemReturnItem("Dragon Slayer");
-        return item?.OriginalQuality == Item.Quality.Forsaken ? item : null;
-    }
-
     #region Skills & Spells
 
     private void ShowSkillList(WorldClient client)
     {
         var learnedSkills = client.Aisling.SkillBook.Skills.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
         var newSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.StageRequired.StageFlagIsSet(ClassStage.Job)
-                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.DarkKnight)).ToList();
+                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.Necromancer)).ToList();
 
         newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
@@ -255,13 +232,13 @@ public class SirDolvet : MundaneScript
     {
         var learnedSpells = client.Aisling.SpellBook.Spells.Where(i => i.Value != null).Select(i => i.Value.Template).ToList();
         var newSpells = _spellList.Except(learnedSpells).Where(i => i.Prerequisites.StageRequired.StageFlagIsSet(ClassStage.Job)
-                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.DarkKnight)).ToList();
+                                                                    && i.Prerequisites.JobRequired.JobFlagIsSet(Job.Necromancer)).ToList();
 
         newSpells = newSpells.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
         if (newSpells.Count > 0)
         {
-            client.SendSpellLearnDialog(Mundane, "Do you dare unravel the power of your mind? \nThese are the secrets available to you.", 0x31, newSpells);
+            client.SendSpellLearnDialog(Mundane, "*Lifts Necronomicon* \nIndeed, these are the secrets your mind can currently understand.", 0x31, newSpells);
         }
         else
         {
@@ -287,7 +264,7 @@ public class SirDolvet : MundaneScript
         {
             client.SendOptionsDialog(Mundane, "Do you have what is required?",
                 subject.Name,
-                new Dialog.OptionsDataItem(0x34, "Yes, Sensei"),
+                new Dialog.OptionsDataItem(0x34, "Yes, Lich"),
                 new Dialog.OptionsDataItem(0x00, "I will return"));
         }
     }
@@ -308,7 +285,7 @@ public class SirDolvet : MundaneScript
     {
         var subject = ServerSetup.Instance.GlobalSpellTemplateCache[args];
         if (subject == null) return;
-        client.LearnSpell(Mundane, subject, "Training your mind is just as important as sharpening your blade.");
+        client.LearnSpell(Mundane, subject, "Live long, die, live longer... hahahahaha");
     }
 
     #endregion
