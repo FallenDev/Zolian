@@ -128,15 +128,18 @@ public class BaseFriendlyMonster : MonsterScript
             }
         }
 
-        var corpse = new Item();
-        corpse = corpse.Create(Monster.Summoner, "Corpse");
-        corpse.Release(Monster.Summoner, Monster.Position);
-
-        Task.Run(async () =>
+        if (Monster.Summoner != null)
         {
-            await Task.Delay(120000);
-            corpse.Remove();
-        });
+            var corpse = new Item();
+            corpse = corpse.Create(Monster.Summoner, "Corpse");
+            corpse.Release(Monster.Summoner, Monster.Position);
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(120000);
+                corpse.Remove();
+            });
+        }
 
         Monster.Remove();
         DelObject(Monster);
