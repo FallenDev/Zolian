@@ -171,9 +171,11 @@ public class LearningPredicate
         result[n++] = new Tuple<bool, object>(player.Dex >= DexRequired, $"You must increase your dexterity. ({DexRequired} Dex Required)");
         result[n++] = new Tuple<bool, object>(player.GoldPoints >= GoldRequired, $"My services aren't free. ({GoldRequired} Gold Required)");
         result[n++] = new Tuple<bool, object>(player.Stage >= StageRequired, "You must transcend further before you can learn this.");
-        result[n++] = new Tuple<bool, object>(ClassRequired.ClassFlagIsSet(player.Path) || ClassRequired.ClassFlagIsSet(player.PastClass) || ClassRequired.ClassFlagIsSet(Class.Peasant)
-                                              || SecondaryClassRequired.ClassFlagIsSet(player.Path) || SecondaryClassRequired.ClassFlagIsSet(player.PastClass) || SecondaryClassRequired.ClassFlagIsSet(Class.Peasant), "I have nothing left to teach you, " + player.Path);
-        result[n++] = new Tuple<bool, object>(JobRequired.JobFlagIsSet(player.JobClass), "This is not your profession.");
+        if (JobRequired != Job.None)
+            result[n++] = new Tuple<bool, object>(JobRequired.JobFlagIsSet(player.JobClass), "This is not your profession.");
+        else
+            result[n++] = new Tuple<bool, object>(ClassRequired.ClassFlagIsSet(player.Path) || ClassRequired.ClassFlagIsSet(player.PastClass) || ClassRequired.ClassFlagIsSet(Class.Peasant)
+                                              || SecondaryClassRequired.ClassFlagIsSet(player.Path) || SecondaryClassRequired.ClassFlagIsSet(player.PastClass) || SecondaryClassRequired.ClassFlagIsSet(Class.Peasant), "This is not your profession, " + player.Username);
         return n;
     }
 
