@@ -409,7 +409,7 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
 
         if (target is not Monster monster)
         {
-            _spellMethod.SpellOnFailed(sprite, target, spell);
+            _spellMethod.SpellOnFailed(sprite, target, Spell);
             return;
         }
 
@@ -493,7 +493,7 @@ public class Animate_Dead(Spell spell) : SpellScript(spell)
 
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
-            _spellMethod.SpellOnFailed(aisling, aisling, spell);
+            _spellMethod.SpellOnFailed(aisling, aisling, Spell);
             return;
         }
 
@@ -613,7 +613,7 @@ public class Macabre(Spell spell) : SpellScript(spell)
 
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
-            _spellMethod.SpellOnFailed(aisling, aisling, spell);
+            _spellMethod.SpellOnFailed(aisling, aisling, Spell);
             return;
         }
 

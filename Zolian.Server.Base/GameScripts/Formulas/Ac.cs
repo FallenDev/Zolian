@@ -5,7 +5,7 @@ using Darkages.Sprites;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("AC Formula")]
-public class Ac(Sprite obj) : FormulaScript
+public class Ac() : FormulaScript
 {
     public override long Calculate(Sprite obj, long value)
     {

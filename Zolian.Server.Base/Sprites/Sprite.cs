@@ -55,7 +55,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsFrozen => HasDebuff("Frozen") || HasDebuff("Adv Frozen") || HasDebuff("Dark Chain");
     public bool IsStopped => HasDebuff("Halt");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
-    public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein"));
+    public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein") || HasDebuff("Deadly Poison"));
     public bool IsSleeping => HasDebuff("Sleep");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
     public bool DrunkenFist => HasBuff("Drunken Fist");

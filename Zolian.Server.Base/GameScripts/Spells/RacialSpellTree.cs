@@ -434,7 +434,7 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling playerAction) return;
-        playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, playerAction.Position));
+        playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, playerAction.Position));
         playerAction.ActionUsed = "Remote Bank";
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
@@ -458,10 +458,10 @@ public class Recall(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling playerAction) return;
 
-        if (!spell.CanUse())
+        if (!Spell.CanUse())
         {
             if (sprite is Aisling aisling)
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"That is on cooldown: {spell.CurrentCooldown}");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"That is on cooldown: {Spell.CurrentCooldown}");
             return;
         }
 

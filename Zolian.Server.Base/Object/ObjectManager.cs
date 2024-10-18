@@ -36,51 +36,58 @@ public class ObjectManager
     {
         List<Sprite> bucket = [];
 
-        switch (selections)
+        try
         {
-            case Get.Aislings:
-                bucket.AddRange(GetObjects<Aisling>(map, p));
-                break;
-            case Get.Monsters:
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                break;
-            case Get.AislingDamage:
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                bucket.AddRange(GetObjects<Aisling>(map, p));
-                break;
-            case Get.Mundanes:
-                bucket.AddRange(GetObjects<Mundane>(map, p));
-                break;
-            case Get.UpdateNonPlayerSprites:
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                bucket.AddRange(GetObjects<Mundane>(map, p));
-                break;
-            case Get.Items:
-                bucket.AddRange(GetObjects<Item>(map, p));
-                break;
-            case Get.Money:
-                bucket.AddRange(GetObjects<Money>(map, p));
-                break;
-            case Get.AllButAislings:
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                bucket.AddRange(GetObjects<Mundane>(map, p));
-                bucket.AddRange(GetObjects<Item>(map, p));
-                bucket.AddRange(GetObjects<Money>(map, p));
-                break;
-            case Get.All:
-                bucket.AddRange(GetObjects<Aisling>(map, p));
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                bucket.AddRange(GetObjects<Mundane>(map, p));
-                bucket.AddRange(GetObjects<Money>(map, p));
-                bucket.AddRange(GetObjects<Item>(map, p));
-                break;
-            default:
-                bucket.AddRange(GetObjects<Aisling>(map, p));
-                bucket.AddRange(GetObjects<Monster>(map, p));
-                bucket.AddRange(GetObjects<Mundane>(map, p));
-                bucket.AddRange(GetObjects<Money>(map, p));
-                bucket.AddRange(GetObjects<Item>(map, p));
-                break;
+            switch (selections)
+            {
+                case Get.Aislings:
+                    bucket.AddRange(GetObjects<Aisling>(map, p));
+                    break;
+                case Get.Monsters:
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    break;
+                case Get.AislingDamage:
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    bucket.AddRange(GetObjects<Aisling>(map, p));
+                    break;
+                case Get.Mundanes:
+                    bucket.AddRange(GetObjects<Mundane>(map, p));
+                    break;
+                case Get.UpdateNonPlayerSprites:
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    bucket.AddRange(GetObjects<Mundane>(map, p));
+                    break;
+                case Get.Items:
+                    bucket.AddRange(GetObjects<Item>(map, p));
+                    break;
+                case Get.Money:
+                    bucket.AddRange(GetObjects<Money>(map, p));
+                    break;
+                case Get.AllButAislings:
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    bucket.AddRange(GetObjects<Mundane>(map, p));
+                    bucket.AddRange(GetObjects<Item>(map, p));
+                    bucket.AddRange(GetObjects<Money>(map, p));
+                    break;
+                case Get.All:
+                    bucket.AddRange(GetObjects<Aisling>(map, p));
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    bucket.AddRange(GetObjects<Mundane>(map, p));
+                    bucket.AddRange(GetObjects<Money>(map, p));
+                    bucket.AddRange(GetObjects<Item>(map, p));
+                    break;
+                default:
+                    bucket.AddRange(GetObjects<Aisling>(map, p));
+                    bucket.AddRange(GetObjects<Monster>(map, p));
+                    bucket.AddRange(GetObjects<Mundane>(map, p));
+                    bucket.AddRange(GetObjects<Money>(map, p));
+                    bucket.AddRange(GetObjects<Item>(map, p));
+                    break;
+            }
+        }
+        catch
+        {
+            // ignored -- Can sometimes throw an error when testing new maps using /rm
         }
 
         return bucket;
