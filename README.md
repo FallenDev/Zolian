@@ -12,7 +12,7 @@ Darkages Server Emulator (Currently Emulating for 7.41 US Client)
 * Zolian runs as a fair-use project although the server is legal and released under GNU AGPL v3, the client for which it runs on is proprietary software and Licensed to Kru Interactive from Nexon. Running a modified client breaks TOS and end-users who are found at fault could face reprecusions such as loss of account.     
 
 ## Tech Stack
-C# .NET 8 & SQL Server 2022   
+C# .NET 9 & SQL Server 2022   
 
 ## Authors & Contributors   
 
