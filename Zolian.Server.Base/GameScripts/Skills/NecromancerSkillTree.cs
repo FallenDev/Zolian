@@ -187,7 +187,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
             var dist = damageDealingAisling.Position.DistanceFrom(_target.Position) == 0 ? 1 : damageDealingAisling.Position.DistanceFrom(_target.Position);
-            dmg = client.Aisling.Int * 15 + client.Aisling.Wis * 12 / dist;
+            dmg = client.Aisling.Int * 35 + client.Aisling.Wis * 25 / dist;
             dmg += dmg * imp / 100;
         }
         else

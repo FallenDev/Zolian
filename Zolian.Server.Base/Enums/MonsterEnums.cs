@@ -65,6 +65,7 @@ public enum MonsterArmorType
 [Flags]
 public enum MonsterRace
 {
+    None = 0,
     Aberration = 1,
     Animal = 1 << 1,
     Aquatic = 1 << 2,

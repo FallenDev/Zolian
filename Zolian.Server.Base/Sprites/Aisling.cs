@@ -39,6 +39,7 @@ public sealed class Aisling : Player, IAisling
     public ConcurrentDictionary<string, KillRecord> MonsterKillCounters = [];
     public readonly ConcurrentDictionary<int, PostTemplate> PersonalLetters = [];
     public DateTime AislingTracker { get; set; }
+    public MonsterRace FavoredEnemy = MonsterRace.None;
     public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;
     public uint MaximumWeight => GameMaster switch

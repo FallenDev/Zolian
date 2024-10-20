@@ -1303,12 +1303,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         // Apply modifiers for attacker
         dmg = ApplyPhysicalModifier();
 
-        if (damageDealingSprite is Aisling)
+        if (damageDealingSprite is Aisling aisling)
         {
             dmg = ApplyBehindTargetMod();
             dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
             if (damageDealingSprite.ClawFistEmpowerment)
                 dmg = (long)(dmg * 1.3);
+            if (this is Monster monster && monster.Template.MonsterRace == aisling.FavoredEnemy)
+                dmg *= 2;
         }
 
         // Check vulnerable and proc variances
@@ -1460,10 +1462,12 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         dmg = ApplyMagicalModifier();
 
-        if (damageDealingSprite is Aisling)
+        if (damageDealingSprite is Aisling aisling)
         {
             dmg = PainBane();
             dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
+            if (this is Monster monster && monster.Template.MonsterRace == aisling.FavoredEnemy)
+                dmg *= 2;
         }
 
         dmg = Vulnerable(dmg);
