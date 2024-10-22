@@ -4,6 +4,7 @@ using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using ServiceStack;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -74,14 +75,6 @@ public class Bang(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Bows"))
-            {
-                OnFailed(aisling);
-                return;
-            }
-
             _success = _skillMethod.OnUse(aisling, Skill);
 
             if (_success)
@@ -237,14 +230,6 @@ public class Snipe(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            var client = aisling.Client;
-
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Bows"))
-            {
-                OnFailed(aisling);
-                return;
-            }
-
             _success = _skillMethod.OnUse(aisling, Skill);
 
             if (_success)
@@ -335,6 +320,7 @@ public class Volley(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Volley";
 
         var action = new BodyAnimationArgs
         {
@@ -344,38 +330,47 @@ public class Volley(Skill skill) : SkillScript(skill)
             SourceId = aisling.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(9).First();
+        var enemy = aisling.DamageableGetInFront(9).FirstOrDefault();
+        List<Sprite> targets;
+        Position tile;
 
         if (enemy is null)
+        {
+            tile = aisling.GetTilesInFront(9).LastOrDefault();
+            targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOfTile(tile, 4), Get.AislingDamage).ToList();
+        }
+        else
+        {
+            targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(enemy, 4), Get.AislingDamage).ToList();
+            targets.Add(enemy);
+        }
+
+        if (targets.IsEmpty())
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);
             return;
         }
 
-        aisling.ActionUsed = "Volley";
-        var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(enemy, 4), Get.AislingDamage).ToList();
-        targets.Add(enemy);
-
         foreach (var i in targets.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             if (!i.Alive) return;
-            var thrown = _skillMethod.Thrown(aisling.Client, Skill, _crit);
-
-            var animation = new AnimationArgs
-            {
-                AnimationSpeed = 100,
-                SourceAnimation = (ushort)thrown,
-                SourceId = aisling.Serial,
-                TargetAnimation = (ushort)thrown,
-                TargetId = i.Serial
-            };
-
             var dmgCalc = DamageCalc(sprite, i);
             _skillMethod.OnSuccessWithoutAction(i, aisling, Skill, dmgCalc, _crit);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         }
 
+        var thrown = _skillMethod.Thrown(aisling.Client, Skill, _crit);
+
+        var animation = new AnimationArgs
+        {
+            AnimationSpeed = 100,
+            SourceAnimation = (ushort)thrown,
+            SourceId = aisling.Serial,
+            TargetAnimation = (ushort)thrown,
+            TargetId = targets.First().Serial
+        };
+
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -383,13 +378,6 @@ public class Volley(Skill skill) : SkillScript(skill)
     {
         if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Bows"))
-        {
-            OnFailed(aisling);
-            return;
-        }
 
         _success = _skillMethod.OnUse(aisling, Skill);
 

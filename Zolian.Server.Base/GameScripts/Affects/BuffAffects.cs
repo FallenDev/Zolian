@@ -1883,6 +1883,45 @@ public class aura_LawsOfAosda : Buff
     }
 }
 
+public class aura_SecuredPosition : Buff
+{
+    public override byte Icon => 49;
+    public override int Length => 32767;
+    public override string Name => "Secured Position";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        if (affected is not Aisling aisling) return;
+        if (aisling.HeldPosition == null || aisling.HeldPosition.X != aisling.Position.X && aisling.HeldPosition.Y != aisling.Position.Y)
+            OnEnded(affected, buff);
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        var item = new Item();
+        item.ReapplyItemModifiers(aisling.Client);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Position compromised");
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        DeleteBuff(aisling, buff);
+    }
+}
+
 #endregion
 
 #region Fas

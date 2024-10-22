@@ -179,8 +179,7 @@
     // Names of GMs, if a name is added here, it grants that player GM powers.
     "GameMasters": [
       "Death",
-      "Alvino",
-      "Shrek"
+      "Alvino"
     ],
     // If learning_predicates is contained within this array, it exempts GMs from learning predicates
     // Default: "learning_predicates"
@@ -193,16 +192,12 @@
       {
         "Id": 1,
         "Name": "Zolian Beta"
-      },
-      {
-        "Id": 2,
-        "Name": "Legends"
       }
     ],
 
     // Check Packet 00
     // This check sets the current client that should be used
-    "ClientVersion": 741,
+    "ClientVersion": 914,
 
     // Messages
     // Forces the client to send a clear message every set seconds

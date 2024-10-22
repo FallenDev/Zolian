@@ -173,7 +173,7 @@ public class BaseFriendlyMonster : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -200,7 +200,7 @@ public class BaseFriendlyMonster : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 

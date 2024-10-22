@@ -72,6 +72,7 @@ public class Buff
             "Lycanisim" => new BuffLycanisim(),
             "Double XP" => new BuffDoubleExperience(),
             "Triple XP" => new BuffTripleExperience(),
+            "Secured Position" => new aura_SecuredPosition(),
             _ => BuffSpell
         };
 

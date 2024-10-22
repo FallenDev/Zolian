@@ -46,7 +46,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
                             HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool Hastened => HasBuff("Hastenga") || HasBuff("Hasten") || HasBuff("Haste");
-    public bool SpellReflect => HasBuff("Deireas Faileas");
+    public bool SpellReflect => HasBuff("Deireas Faileas") || HasBuff("Secured Position");
     public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
     public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
     public bool IsBlind => HasDebuff("Blind");
@@ -65,7 +65,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private bool IsCharmed => HasDebuff("Entice");
     private bool IsBleeding => HasDebuff("Bleeding");
     public bool IsCradhed => HasDebuff(i => i.Name.Contains("Cradh"));
-    public bool IsVulnerable => IsFrozen || IsStopped || IsBlind || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
+    public bool IsVulnerable => IsFrozen || IsStopped || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
     public bool IsBlocked => IsFrozen || IsStopped || IsSleeping;
 
     public bool ClawFistEmpowerment { get; set; }
@@ -906,6 +906,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         if (other == null) return false;
         return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
+    public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
     public bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
     public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
@@ -1515,6 +1516,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
+        if (damageDealingSprite.IsBlind)
+        {
+            var negateAttack = Random.Shared.Next(0, 100);
+            if (negateAttack >= 75)
+                return false;
+        }
+
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
@@ -1592,6 +1600,13 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
+        if (damageDealingSprite.IsBlind)
+        {
+            var negateAttack = Random.Shared.Next(0, 100);
+            if (negateAttack >= 75)
+                return false;
+        }
+
         if (this is Monster monster)
         {
             if (damageDealingSprite is Aisling aisling)
@@ -2554,7 +2569,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
     private bool CanUpdate()
     {
-        if (CantMove || IsBlind) return false;
+        if (CantMove) return false;
 
         if (this is Monster || this is Mundane)
             if (CurrentHp == 0)

@@ -527,6 +527,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
         }
 
         aisling.CurrentMp -= manaSap;
+        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("RaisedSkel", out var skel);
 
         foreach (var nearby in aisling.SpritesNearby())
         {
@@ -555,12 +556,17 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
                     debuff.OnApplied(nearby, debuff);
                 }
 
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, nearby.Serial));
+                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, nearby.Position));
             }
             else
             {
                 client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, nearby.Serial));
             }
+
+            if (nearby.Alive) continue;
+            var summoned = Monster.Summon(skel, aisling);
+            if (summoned == null) return;
+            AddObject(summoned);
         }
     }
 

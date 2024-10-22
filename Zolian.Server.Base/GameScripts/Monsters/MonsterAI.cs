@@ -185,7 +185,7 @@ public class BaseMonsterIntelligence : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -212,7 +212,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -685,7 +685,7 @@ public class WeakCommon : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -712,7 +712,7 @@ public class WeakCommon : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -1266,7 +1266,7 @@ public class ShapeShifter : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -1293,7 +1293,7 @@ public class ShapeShifter : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -1863,7 +1863,7 @@ public class SelfDestruct : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -1878,7 +1878,7 @@ public class SelfDestruct : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -2307,7 +2307,7 @@ public class AlertSummon : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -2337,7 +2337,7 @@ public class AlertSummon : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -3141,7 +3141,7 @@ public class GeneralPirate : MonsterScript
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -3168,7 +3168,7 @@ public class GeneralPirate : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -3659,7 +3659,7 @@ public class PirateOfficer : MonsterScript
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -3686,7 +3686,7 @@ public class PirateOfficer : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -4183,7 +4183,7 @@ public class ShadowSight : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -4210,7 +4210,7 @@ public class ShadowSight : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -4683,7 +4683,7 @@ public class WeakShadowSight : MonsterScript
                     Monster.ClearTarget();
                 }
 
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -4710,7 +4710,7 @@ public class WeakShadowSight : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -5195,7 +5195,7 @@ public class AosdaRemnant : MonsterScript
             if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -5222,7 +5222,7 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -5721,7 +5721,7 @@ public class AncientDragon : MonsterScript
             if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -5748,7 +5748,7 @@ public class AncientDragon : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -6247,7 +6247,7 @@ public class DraconicOmega : MonsterScript
             if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -6274,7 +6274,7 @@ public class DraconicOmega : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -6773,7 +6773,7 @@ public class JackFrost : MonsterScript
             if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -6800,7 +6800,7 @@ public class JackFrost : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -7360,7 +7360,7 @@ public class Yeti : MonsterScript
             if (aisling.Skulled || aisling.Dead)
             {
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -7387,7 +7387,7 @@ public class Yeti : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
@@ -7888,7 +7888,7 @@ public class WorldBossBahamut : MonsterScript
             {
                 Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
                 if (!Monster.WalkEnabled) return;
-                if (Monster.CantMove || Monster.Blind) return;
+                if (Monster.CantMove) return;
                 if (walk) Walk();
 
                 return;
@@ -7918,7 +7918,7 @@ public class WorldBossBahamut : MonsterScript
 
         if (Monster.WalkEnabled)
         {
-            if (Monster.CantMove || Monster.Blind) return;
+            if (Monster.CantMove) return;
             if (walk) Walk();
         }
 
