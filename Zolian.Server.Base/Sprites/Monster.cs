@@ -69,7 +69,6 @@ public sealed class Monster : Sprite
 
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
-    public bool Blind => HasDebuff("Blind");
     public bool Camouflage => AbilityScripts.Any(script => script.Skill.Template.Name == "Camouflage");
     private int WaypointIndex;
     public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);

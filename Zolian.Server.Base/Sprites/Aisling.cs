@@ -225,6 +225,7 @@ public sealed class Aisling : Player, IAisling
             {
                 switch (skill?.SkillName)
                 {
+                    case "Bang":
                     case "Archery":
                     case "Aim":
                         bowWielder = true;

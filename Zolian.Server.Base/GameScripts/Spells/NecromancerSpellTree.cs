@@ -564,6 +564,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
             }
 
             if (nearby.Alive) continue;
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap)) continue;
             var summoned = Monster.Summon(skel, aisling);
             if (summoned == null) return;
             AddObject(summoned);
