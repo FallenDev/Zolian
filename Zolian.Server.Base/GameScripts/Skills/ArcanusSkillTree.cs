@@ -105,22 +105,23 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         {
             var client = aisling.Client;
 
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Wands"))
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
+                client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                OnFailed(aisling);
-                return;
+                _success = _skillMethod.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
+
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
         else
         {
@@ -299,22 +300,23 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
         {
             var client = aisling.Client;
 
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Wands"))
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
+                client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                OnFailed(aisling);
-                return;
+                _success = _skillMethod.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
+
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
         else
         {
@@ -493,22 +495,23 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         {
             var client = aisling.Client;
 
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Wands"))
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
+                client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                OnFailed(aisling);
-                return;
+                _success = _skillMethod.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
+
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
         else
         {
@@ -687,22 +690,23 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
         {
             var client = aisling.Client;
 
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Wands"))
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
+                client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                OnFailed(aisling);
-                return;
+                _success = _skillMethod.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
+
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
         else
         {

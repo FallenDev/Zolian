@@ -934,7 +934,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         return xDist + yDist == 1;
     }
 
-    private int DistanceFrom(int x, int y)
+    public int DistanceFrom(int x, int y)
     {
         // Manhattan Distance
         return Math.Abs(X - x) + Math.Abs(Y - y);

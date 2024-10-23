@@ -105,23 +105,23 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         {
             var client = aisling.Client;
 
-            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not "Wands" 
-                || client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not "Staves")
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
+                client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                OnFailed(aisling);
-                return;
+                _success = _skillMethod.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
+
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
+            OnFailed(aisling);
         }
         else
         {
