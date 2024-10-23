@@ -1123,7 +1123,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
             var map = localClient.Aisling.Map;
-            var itemObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Items).ToList();
+            var itemObjs = ObjectManager.GetObjects<Item>(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y).Where(i => !i.Template.Flags.FlagIsSet(ItemFlags.Trap)).ToList();
             var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money);
 
             if (!itemObjs.IsEmpty())
@@ -1134,14 +1134,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return default;
                 }
 
-                var obj = itemObjs.First();
-                if (obj?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
-                if (!(localClient.Aisling.Position.DistanceFrom(obj.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
+                var item = itemObjs.First();
+                if (item?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
+                if (!(localClient.Aisling.Position.DistanceFrom(item.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
+                var cantPickup = false;
 
-                if (obj is not Item item) return default;
-                if ((item.Template.Flags & ItemFlags.Trap) == ItemFlags.Trap) return default;
-                if (item.Template.Flags.FlagIsSet(ItemFlags.Unique) && item.Template.Name == "Necra Scribblings")
-                    if (localClient.Aisling.Stage >= ClassStage.Master) return default;
+                if (item.Template.Flags.FlagIsSet(ItemFlags.Unique) && item.Template.Name == "Necra Scribblings" && localClient.Aisling.Stage >= ClassStage.Master)
+                {
+                    if (itemObjs.Count >= 2)
+                    {
+                        cantPickup = true;
+                    }
+                    else
+                        return default;
+                }
 
                 foreach (var invItem in localClient.Aisling.Inventory.Items.Values)
                 {
@@ -1149,7 +1155,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
                     if (invItem.Template.Name != item.Template.Name) continue;
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
-                    return default;
+
+                    if (itemObjs.Count >= 2)
+                    {
+                        cantPickup = true;
+                    }
+                    else
+                        return default;
                 }
 
                 foreach (var invItem in localClient.Aisling.BankManager.Items.Values)
@@ -1158,7 +1170,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
                     if (invItem.Template.Name != item.Template.Name) continue;
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
-                    return default;
+
+                    if (itemObjs.Count >= 2)
+                    {
+                        cantPickup = true;
+                    }
+                    else
+                        return default;
+                }
+
+                if (cantPickup)
+                {
+                    item = itemObjs.Last();
                 }
 
                 if (item.GiveTo(localClient.Aisling))

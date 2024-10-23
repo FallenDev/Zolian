@@ -67,7 +67,10 @@ public class Zar : MundaneScript
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(client.Aisling.PastClass)
                         || i.Prerequisites.ClassRequired.ClassFlagIsSet(Class.Peasant)
                         || i.Prerequisites.SecondaryClassRequired.ClassFlagIsSet(Class.Peasant)).ToList();
+                    var jobSkills = _skillList.Except(learnedSkills).Where(i => i.Prerequisites.StageRequired.StageFlagIsSet(ClassStage.Job)
+                                                                              && i.Prerequisites.JobRequired.JobFlagIsSet(Job.Necromancer)).ToList();
 
+                    newSkills.AddRange(jobSkills);
                     newSkills = newSkills.OrderBy(i => Math.Abs(i.Prerequisites.ExpLevelRequired - client.Aisling.ExpLevel)).ToList();
 
                     if (newSkills.Count > 0)
