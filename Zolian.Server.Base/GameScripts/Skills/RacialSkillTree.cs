@@ -6,6 +6,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -1201,6 +1202,8 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
                 continue;
             }
 
+            if (_target is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffFrozen();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
@@ -1717,6 +1720,8 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
                 continue;
             }
 
+            if (_target is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffSilence();
             _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
@@ -1904,6 +1909,8 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
                 continue;
             }
+
+            if (_target is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffPoison();
@@ -2093,6 +2100,8 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
                 continue;
             }
+
+            if (_target is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffPoison();

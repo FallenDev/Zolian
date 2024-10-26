@@ -78,6 +78,7 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
         var targets = GetObjects(playerAction.Map, i => i != null && i.WithinRangeOf(target, 4), Get.AislingDamage).ToList();
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial && enemy.Attackable))
         {
+            if (enemy is Aisling aisling && !aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
             var dmgCalc = DamageCalc(playerAction);
             enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Water, Spell);
             enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Wind, Spell);
@@ -93,7 +94,7 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
     }
 }
 
-// Multiple status afflictions (Afflictions cannot be removed by dispelling)
+// Multiple status afflictions
 [Script("Ray of Sickness")]
 public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 {
@@ -151,6 +152,12 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
+        if (target is Aisling targetAisling && !targetAisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can't seem to get the spell off.");
             return;
         }
         

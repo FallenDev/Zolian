@@ -6,9 +6,9 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;
 
-// Thrust towards nearest enemy dealing concentrated damage, otherwise rush forward 4 steps
-[Script("Iron Thrust")]
-public class IronThrust(Skill skill) : SkillScript(skill)
+// Sprint towards nearest enemy dealing concentrated damage, otherwise rush forward 4 steps
+[Script("Iron Sprint")]
+public class IronSprint(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
@@ -28,7 +28,7 @@ public class IronThrust(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-        aisling.ActionUsed = "Iron Thrust";
+        aisling.ActionUsed = "Iron Sprint";
 
         if (_target == null)
         {

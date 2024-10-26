@@ -5,6 +5,7 @@ using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -25,6 +26,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
 
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
         {
+            if (enemy is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(53, enemy.Position));
             var debuff = new DebuffBlind();
             debuff.OnApplied(enemy, debuff);
@@ -94,7 +96,7 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
             await Task.Delay(300000);
             aisling.FavoredEnemy = MonsterRace.None;
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(80, null, aisling.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{{=qFavor has dissipated");
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qFavor has dissipated");
         });
     }
 
