@@ -2,6 +2,7 @@
 
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -24,9 +25,35 @@ public class FlashBang(Spell spell) : SpellScript(spell)
 
         var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(target, 6), Get.AislingDamage).ToList();
 
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
         {
             if (enemy is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+            
+            if (enemy.SpellNegate)
+            {
+                if (sprite is Aisling caster)
+                {
+                    caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, enemy.Serial));
+                    caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
+                }
+
+                if (enemy is not Aisling targetPlayer) continue;
+                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, enemy.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+                continue;
+            }
+
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(53, enemy.Position));
             var debuff = new DebuffBlind();
             debuff.OnApplied(enemy, debuff);
@@ -50,7 +77,6 @@ public class FlashBang(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Flash Bang";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
         var success = _spellMethod.Execute(client, Spell);
 
         if (success)
@@ -85,6 +111,17 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
             SourceId = aisling.Serial
         };
 
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         aisling.FavoredEnemy = monster.Template.MonsterRace;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qYou now favor {aisling.FavoredEnemy}s as an enemy");
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, monster.Serial));
@@ -112,8 +149,6 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
         }
 
         playerAction.ActionUsed = "Favored Enemy";
-        var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
         OnSuccess(sprite, target);
     }
 }
@@ -129,6 +164,18 @@ public class SecuredPosition(Spell spell) : SpellScript(spell)
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
+
+        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
+        {
+            aisling.CurrentMp -= Spell.Template.ManaCost;
+            _spellMethod.Train(aisling.Client, Spell);
+        }
+        else
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            return;
+        }
+
         aisling.HeldPosition = aisling.Position;
         var buff = new aura_SecuredPosition();
         buff.OnApplied(aisling, buff);
@@ -147,8 +194,6 @@ public class SecuredPosition(Spell spell) : SpellScript(spell)
         }
 
         playerAction.ActionUsed = "Secured Position";
-        var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
         OnSuccess(sprite, target);
     }
 }
