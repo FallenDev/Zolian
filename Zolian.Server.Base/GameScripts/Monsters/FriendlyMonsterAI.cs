@@ -20,7 +20,9 @@ public class BaseFriendlyMonster : MonsterScript
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = [];
         Monster.Summoned = true;
-        Monster.TimeTillDead.Start();
+
+        if (!Monster.TimeTillDead.IsRunning)
+            Monster.TimeTillDead.Start();
     }
 
     public override void Update(TimeSpan elapsedTime)
@@ -133,12 +135,6 @@ public class BaseFriendlyMonster : MonsterScript
             var corpse = new Item();
             corpse = corpse.Create(Monster.Summoner, "Corpse");
             corpse.Release(Monster.Summoner, Monster.Position);
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(120000);
-                corpse.Remove();
-            });
         }
 
         Monster.Remove();
