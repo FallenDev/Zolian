@@ -1299,8 +1299,6 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
         }
 
-        //ApplyAffliction(this, damageDealingSprite);
-
         // Apply modifiers for attacker
         dmg = ApplyPhysicalModifier();
 
@@ -1321,6 +1319,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
         // Apply modifiers for defender
         if (this is Aisling defender)
         {
+            dmg = CraneStance(defender);
             dmg = PainBane(defender);
             dmg = ApplyPvpMod();
         }
@@ -1363,16 +1362,23 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         long ApplyBehindTargetMod()
         {
-            if (damageDealingSprite is not Aisling aisling) return dmg;
-            if (aisling.Client.IsBehind(this))
+            if (damageDealingSprite is not Aisling aisling2) return dmg;
+            if (aisling2.Client.IsBehind(this))
                 dmg += (long)((dmg + ServerSetup.Instance.Config.BehindDamageMod) / 1.99);
             return dmg;
         }
 
-        long PainBane(Aisling aisling)
+        long PainBane(Aisling aisling2)
         {
-            if (aisling.PainBane)
+            if (aisling2.PainBane)
                 return (long)(dmg * 0.95);
+            return dmg;
+        }
+
+        long CraneStance(Aisling aisling2)
+        {
+            if (aisling2.CraneStance)
+                return (long)(dmg * 0.85);
             return dmg;
         }
     }
@@ -1389,6 +1395,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         if (this is Aisling)
         {
+            dmg = CraneStance();
             dmg = ApplyPvpMod();
             dmg = PainBane();
         }
@@ -1442,6 +1449,14 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (damageDealingSprite is not Aisling aisling2) return dmg;
             if (aisling2.PainBane)
                 return (long)(dmg * 0.95);
+            return dmg;
+        }
+
+        long CraneStance()
+        {
+            if (this is not Aisling aisling2) return dmg;
+            if (aisling2.CraneStance)
+                return (long)(dmg * 0.85);
             return dmg;
         }
     }
@@ -1503,8 +1518,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
 
         long PainBane()
         {
-            if (damageDealingSprite is not Aisling aisling) return dmg;
-            if (aisling.PainBane)
+            if (damageDealingSprite is not Aisling aisling2) return dmg;
+            if (aisling2.PainBane)
                 return (long)(dmg * 0.95);
             return dmg;
         }

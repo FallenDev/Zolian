@@ -56,11 +56,17 @@ public class FlashBang(Spell spell) : SpellScript(spell)
 
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(53, enemy.Position));
             var debuff = new DebuffBlind();
-            debuff.OnApplied(enemy, debuff);
+            if (enemy is Monster)
+                debuff.OnApplied(enemy, debuff);
+            else
+                aisling.Client.EnqueueDebuffAppliedEvent(enemy, debuff);
         }
 
         var debuffMain = new DebuffBlind();
-        debuffMain.OnApplied(target, debuffMain);
+        if (target is Monster)
+            debuffMain.OnApplied(target, debuffMain);
+        else
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuffMain);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
     }
 
@@ -178,7 +184,7 @@ public class SecuredPosition(Spell spell) : SpellScript(spell)
 
         aisling.HeldPosition = aisling.Position;
         var buff = new aura_SecuredPosition();
-        buff.OnApplied(aisling, buff);
+        aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qNow in position");
     }
 

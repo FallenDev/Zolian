@@ -83,7 +83,10 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
             enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Water, Spell);
             enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Wind, Spell);
             var debuff = new DebuffAdvFrozen();
-            debuff.OnApplied(enemy, debuff);
+            if (enemy is Monster)
+                debuff.OnApplied(enemy, debuff);
+            else
+                playerAction.Client.EnqueueDebuffAppliedEvent(enemy, debuff);
             playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(377, enemy.Position));
         }
     }
@@ -106,7 +109,7 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling aisling) return;
         if (target == null) return;
-        
+
         if (!Spell.CanUse())
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
@@ -160,24 +163,24 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can't seem to get the spell off.");
             return;
         }
-        
+
         aisling.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-
-        if (!target.HasDebuff("Deadly Poison"))
-        {
-            var debuff = new DebuffDeadlyPoison();
-            debuff.OnApplied(target, debuff);
-        }
-
-        if (!target.HasDebuff("Silence"))
-        {
-            var debuffTwo = new DebuffSilence();
-            debuffTwo.OnApplied(target, debuffTwo);
-        }
-
-        if (target.HasDebuff("Dark Chain")) return;
+        var debuff = new DebuffDeadlyPoison();
+        var debuffTwo = new DebuffSilence();
         var debuffThree = new DebuffDarkChain();
-        debuffThree.OnApplied(target, debuffThree);
+
+        if (target is Monster)
+        {
+            debuff.OnApplied(target, debuff);
+            debuffTwo.OnApplied(target, debuffTwo);
+            debuffThree.OnApplied(target, debuffThree);
+        }
+        else
+        {
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuff);
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuffTwo);
+            aisling.Client.EnqueueDebuffAppliedEvent(target, debuffThree);
+        }
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -560,7 +563,10 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
                 if (!nearby.IsCradhed)
                 {
                     var debuff = new DebuffCriochArdCradh();
-                    debuff.OnApplied(nearby, debuff);
+                    if (nearby is Monster)
+                        debuff.OnApplied(nearby, debuff);
+                    else
+                        aisling.Client.EnqueueDebuffAppliedEvent(nearby, debuff);
                 }
 
                 client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, nearby.Position));
@@ -592,10 +598,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
         foreach (var targetObj in sprite.AislingsNearby())
         {
-            if (targetObj == null) continue;
-            targetObj.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
-
-            // monster use of the spell
+            targetObj?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
         }
     }
 }

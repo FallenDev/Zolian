@@ -264,6 +264,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
     private static void ThrowBack(Sprite target)
     {
         if (target is not Monster monster) return;
+        if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) return;
         var targetPosition = monster.GetPendingThrowPosition(3, monster);
         var hasHitOffWall = monster.GetPendingThrowIsWall(3, monster);
         var readyTime = DateTime.UtcNow;

@@ -139,6 +139,7 @@ public sealed class Aisling : Player, IAisling
     public bool CantReact => CantAttack || CantCast || CantMove;
     public bool Camouflage => SkillBook.HasSkill("Camouflage");
     public bool PainBane => SkillBook.HasSkill("Pain Bane");
+    public bool CraneStance => SkillBook.HasSkill("Crane Stance");
     public bool Lycanisim => Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
     public bool Vampirisim => Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
     public bool Plagued => Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
