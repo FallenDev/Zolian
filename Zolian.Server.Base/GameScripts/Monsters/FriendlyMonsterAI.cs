@@ -6,6 +6,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
@@ -40,7 +41,7 @@ public class BaseFriendlyMonster : MonsterScript
             OnDeath();
             return;
         }
-        
+
         if (Monster.Summoner.CurrentMapId != Monster.CurrentMapId)
             OnDeath();
 
@@ -133,8 +134,8 @@ public class BaseFriendlyMonster : MonsterScript
         if (Monster.Summoner != null)
         {
             var corpse = new Item();
-            corpse = corpse.Create(Monster.Summoner, "Corpse");
-            corpse.Release(Monster.Summoner, Monster.Position);
+            corpse = corpse.Create(Monster, "Corpse");
+            corpse.Release(Monster, Monster.Position);
         }
 
         Monster.Remove();
@@ -233,7 +234,7 @@ public class BaseFriendlyMonster : MonsterScript
         if (!Monster.Aggressive) return;
 
         var nearbyPlayers = Monster.MonstersNearby().Where(m => m.Template.SpawnType != SpawnQualifer.Summoned).ToList();
-        
+
         if (Monster.Target is Monster target)
         {
             if (target.Template.SpawnType == SpawnQualifer.Summoned)

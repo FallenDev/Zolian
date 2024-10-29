@@ -22,18 +22,18 @@ public class Area : Map
     public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = [];
     public int MiningNodesCount { get; set; }
     public int WildFlowersCount { get; set; }
-    public TileGrid[,] ObjectGrid { get; set; }
-    public TileContent[,] TileContent { get; set; }
+    public TileGrid[,] ObjectGrid { get; private set; }
+    public TileContent[,] TileContent { get; private set; }
     public ICollection<DoorInfo> Doors { get; set; } = [];
     public Tuple<string, AreaScript> Script { get; set; }
     public string FilePath { get; set; }
 
-    public Vector2 GetPosFromLoc(Vector2 location)
+    private static Vector2 GetPosFromLoc(Vector2 location)
     {
         return Vector2.Zero + new Vector2((int)location.X * Vector2.One.X, (int)location.Y * Vector2.One.Y);
     }
 
-    public bool IsLocationOnMap(Sprite sprite)
+    public static bool IsLocationOnMap(Sprite sprite)
     {
         var xTrue = false;
         var yTrue = false;
@@ -92,7 +92,7 @@ public class Area : Map
         return isWall;
     }
 
-    public bool IsAStarWall(Sprite sprite, int x, int y)
+    public static bool IsAStarWall(Sprite sprite, int x, int y)
     {
         if (x < 0 || x >= sprite.Map.Width) return true;
         if (y < 0 || y >= sprite.Map.Height) return true;
@@ -105,7 +105,7 @@ public class Area : Map
     /// This method is called in real-time multiple times and calculates each grid square
     /// and sprite positioned within each
     /// </summary>
-    public bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
+    public static bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
     {
         if (sprite is not Mundane)
             if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
@@ -120,10 +120,22 @@ public class Area : Map
     }
 
     /// <summary>
+    /// This method is called for ghost walking to prevent OOB on maps
+    /// </summary>
+    public static bool IsSpriteWithinBoundsWhileGhostWalking(Sprite sprite, int x, int y)
+    {
+        if (sprite is not Mundane)
+            if (sprite is null || sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false;
+        if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
+        if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
+        return false;
+    }
+
+    /// <summary>
     /// Similar to the IsAStarSprite method, this method is called on Monster creation to ensure monsters aren't created
     /// on top of other sprites or walls
     /// </summary>
-    public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
+    public static bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
         if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
@@ -202,7 +214,7 @@ public class Area : Map
         return Ready;
     }
 
-    public bool ParseMapWalls(int lWall, int rWall)
+    private bool ParseMapWalls(int lWall, int rWall)
     {
         if (lWall == 0 && rWall == 0) return false;
         if (lWall == 0) return _sotp[rWall - 1] == 0x0F;
@@ -222,7 +234,7 @@ public class Area : Map
 
     #region A* (A Star)
 
-    public async Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end)
+    public static async Task<IList<Vector2>> GetPath(Monster sprite, Vector2 start, Vector2 end)
     {
         var path = new List<Vector2>();
 
@@ -284,13 +296,13 @@ public class Area : Map
         return SetPath(sprite, currentNode, path, start, viewable);
     }
 
-    private List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, List<Vector2> path, Vector2 start, List<TileGrid> viewable)
+    private static List<Vector2> SetPath(Sprite sprite, TileGrid currentNode, List<Vector2> path, Vector2 start, List<TileGrid> viewable)
     {
         var currentViewableStart = 0;
 
         while (true)
         {
-            var tempPos = sprite.Map.GetPosFromLoc(currentNode.Pos) + Vector2.One / 2;
+            var tempPos = GetPosFromLoc(currentNode.Pos) + Vector2.One / 2;
             path.Add(new Vector2((int)tempPos.X, (int)tempPos.Y));
 
             if (currentNode.Pos == start)
@@ -324,7 +336,7 @@ public class Area : Map
         return path;
     }
 
-    private Action CheckNode(Sprite sprite)
+    private static Action CheckNode(Sprite sprite)
     {
         sprite.MasterGrid = [];
 
@@ -336,8 +348,8 @@ public class Area : Map
 
                 for (var y = 0; y < sprite.Map.Height; y++)
                 {
-                    var impassable = sprite.Map.IsAStarWall(sprite, x, y);
-                    var filled = sprite.Map.IsSpriteInLocationOnWalk(sprite, x, y);
+                    var impassable = IsAStarWall(sprite, x, y);
+                    var filled = IsSpriteInLocationOnWalk(sprite, x, y);
                     var cost = 1;
 
                     if (filled)
@@ -356,7 +368,7 @@ public class Area : Map
         };
     }
 
-    public void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable, ICollection<TileGrid> used)
+    private static void CheckDirectionOfNode(IReadOnlyList<IList<TileGrid>> masterGrid, IList<TileGrid> viewable, ICollection<TileGrid> used)
     {
         TileGrid currentNode;
 
@@ -393,7 +405,7 @@ public class Area : Map
         viewable.RemoveAt(0);
     }
 
-    public void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
+    private static void SetAStarNode(IList<TileGrid> viewable, TileGrid nextNode, Vector2 nextParent, float d, float distanceMultiply)
     {
         var addedDist = nextNode.Cost * distanceMultiply;
 
@@ -417,7 +429,7 @@ public class Area : Map
         }
     }
 
-    public void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode)
+    private static void SetAStarNodeInsert(IList<TileGrid> list, TileGrid newNode)
     {
         var added = false;
         for (var i = 0; i < list.Count; i++)

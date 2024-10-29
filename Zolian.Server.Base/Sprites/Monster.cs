@@ -337,7 +337,7 @@ public sealed class Monster : Sprite
         var nodeY = pathList[0].Y;
 
         // Check if path became blocked, if so recalculate path
-        if (Map.IsWall((int)nodeX, (int)nodeY) || Map.IsSpriteInLocationOnWalk(this, (int)nodeX, (int)nodeY))
+        if (Map.IsWall((int)nodeX, (int)nodeY) || Area.IsSpriteInLocationOnWalk(this, (int)nodeX, (int)nodeY))
         {
             Wander();
             return;

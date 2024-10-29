@@ -4638,7 +4638,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             {
                 Aisling.CurrentMapId = newMap.ID;
 
-                var onMap = Aisling.Map.IsLocationOnMap(Aisling);
+                var onMap = Area.IsLocationOnMap(Aisling);
                 if (!onMap)
                 {
                     TransitionToMap(3052, new Position(27, 18));

@@ -448,7 +448,7 @@ public class BaseMonsterIntelligence : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -948,7 +948,7 @@ public class WeakCommon : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -1563,7 +1563,7 @@ public class ShapeShifter : MonsterScript
                         Monster.AStar = true;
                         _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                         Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                        Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                        Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                         if (Monster.ThrownBack) return;
 
@@ -2070,7 +2070,7 @@ public class SelfDestruct : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -2584,7 +2584,7 @@ public class AlertSummon : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -3421,7 +3421,7 @@ public class GeneralPirate : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -3948,7 +3948,7 @@ public class PirateOfficer : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -4446,7 +4446,7 @@ public class ShadowSight : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -4946,7 +4946,7 @@ public class WeakShadowSight : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.ThrownBack) return;
 
@@ -5475,7 +5475,7 @@ public class AosdaRemnant : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -6001,7 +6001,7 @@ public class AncientDragon : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -6527,7 +6527,7 @@ public class DraconicOmega : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -7053,7 +7053,7 @@ public class JackFrost : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -7640,7 +7640,7 @@ public class Yeti : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {
@@ -8204,7 +8204,7 @@ public class WorldBossBahamut : MonsterScript
                     Monster.AStar = true;
                     _location = new Vector2(Monster.Pos.X, Monster.Pos.Y);
                     Monster.TargetPos = new Vector2(Monster.Target.Pos.X, Monster.Target.Pos.Y);
-                    Monster.Path = Monster.Map.GetPath(Monster, _location, Monster.TargetPos);
+                    Monster.Path = Area.GetPath(Monster, _location, Monster.TargetPos);
 
                     if (Monster.TargetPos == Vector2.Zero)
                     {

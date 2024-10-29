@@ -1039,8 +1039,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!allowGhostWalk)
             {
                 if (Map.IsWall(currentPosX, currentPosY)) return false;
-                if (Map.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
+                if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
             }
+            else if (Area.IsSpriteWithinBoundsWhileGhostWalking(this, PendingX, PendingY)) return false;
 
             switch (Direction)
             {
@@ -1061,8 +1062,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             if (!allowGhostWalk)
             {
                 if (Map.IsWall(PendingX, PendingY)) return false;
-                if (Map.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
+                if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
             }
+            else if (Area.IsSpriteWithinBoundsWhileGhostWalking(this, PendingX, PendingY)) return false;
 
             // Commit Walk to other Player Clients
             Step0C(currentPosX, currentPosY);
@@ -1099,7 +1101,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             try
             {
                 if (Map.IsWall((int)pos.X, (int)pos.Y)) continue;
-                if (Map.IsSpriteInLocationOnWalk(this, (int)pos.X, (int)pos.Y)) continue;
+                if (Area.IsSpriteInLocationOnWalk(this, (int)pos.X, (int)pos.Y)) continue;
             }
             catch (Exception ex)
             {
