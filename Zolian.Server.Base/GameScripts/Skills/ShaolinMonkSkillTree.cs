@@ -103,7 +103,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
 
-        _enemyList = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(aisling, 8), Get.AislingDamage).Where(i => i.Serial != aisling.Serial);
+        _enemyList = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(aisling, 8), Get.Monsters);
         _enemyList = _enemyList.OrderBy(i => i.DistanceFrom(aisling.X, aisling.Y)).ToList();
         _target = _enemyList.FirstOrDefault();
         _target = Skill.Reflect(_target, sprite, Skill);
@@ -314,7 +314,7 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
         {
             _success = _skillMethod.OnUse(aisling, Skill);
             var buff = new buff_clawfist();
-            aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
+            _skillMethod.ApplyPhysicalBuff(aisling, buff);
 
             if (_success)
             {
@@ -520,7 +520,7 @@ public class CraneStance(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite) { }
 }
 
-// Slash enemies in front and to the side of you twice with a powerful force
+// Slash enemies in front and to the side of you four times with a powerful force using rage
 [Script("Tiger Swipe")]
 public class TigerSwipe(Skill skill) : SkillScript(skill)
 {
@@ -529,12 +529,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -543,41 +538,38 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 30,
-            BodyAnimation = BodyAnimation.BowShot,
+            BodyAnimation = BodyAnimation.Punch,
             Sound = null,
             SourceId = aisling.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(9);
+        var enemy = aisling.GetInFrontToSide();
+        enemy.AddRange(aisling.GetInFrontToSide(2));
+        enemy.AddRange(aisling.GetHorizontalInFront(2));
 
-        if (enemy.Count == 0)
+        var distinctEnemies = enemy.Distinct().ToList();
+
+        if (distinctEnemies.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);
             return;
         }
 
-        aisling.ActionUsed = "Bang";
+        aisling.ActionUsed = "Tiger Swipe";
 
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+        foreach (var i in distinctEnemies.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {
             _target = i;
-            var thrown = _skillMethod.Thrown(aisling.Client, Skill, _crit);
-
-            var animation = new AnimationArgs
-            {
-                AnimationSpeed = 100,
-                SourceAnimation = (ushort)thrown,
-                SourceId = aisling.Serial,
-                TargetAnimation = (ushort)thrown,
-                TargetId = i.Serial
-            };
-
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
-            aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, i.Serial));
         }
 
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(73, aisling.Position));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -608,7 +600,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(5).FirstOrDefault();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -618,20 +610,6 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var animation = new AnimationArgs
-            {
-                AnimationSpeed = 100,
-                SourceAnimation = (ushort)(_crit
-                    ? 10002
-                    : 10000),
-                SourceId = sprite.Serial,
-                TargetAnimation = (ushort)(_crit
-                    ? 10002
-                    : 10000),
-                TargetId = _target.Serial
-            };
-
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -644,14 +622,14 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 16 + client.Aisling.Dex * 20 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 9);
+            var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
+            dmg = client.Aisling.Str * 40 + client.Aisling.Dex * 40 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 3);
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 12 + damageMonster.Dex * 15 * Math.Max(damageMonster.Position.DistanceFrom(_target.Position), 9);
+            dmg = damageMonster.Str * 30 + damageMonster.Con * 20 * Math.Max(damageMonster.Position.DistanceFrom(_target.Position), 3);
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);
@@ -660,7 +638,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
     }
 }
 
-// Devastating punch that increases your damage by 200% for a duration afterwards
+// Devastating punch that deals frontal and rear dmg, increases your damage by 200% for 10 seconds
 [Script("Hardened Hands")]
 public class HardenedHands(Skill skill) : SkillScript(skill)
 {
@@ -669,12 +647,7 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
     private bool _success;
     private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -683,41 +656,34 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
         var action = new BodyAnimationArgs
         {
             AnimationSpeed = 30,
-            BodyAnimation = BodyAnimation.BowShot,
+            BodyAnimation = BodyAnimation.Punch,
             Sound = null,
             SourceId = aisling.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(9);
+        var enemy = aisling.DamageableGetBehind(2);
+        enemy.AddRange(aisling.DamageableGetInFront(2));
 
-        if (enemy.Count == 0)
+        var distinctEnemies = enemy.Distinct().ToList();
+
+        if (distinctEnemies.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);
             return;
         }
 
-        aisling.ActionUsed = "Bang";
+        aisling.ActionUsed = "Hardened Hands";
 
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+        foreach (var i in distinctEnemies.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {
             _target = i;
-            var thrown = _skillMethod.Thrown(aisling.Client, Skill, _crit);
-
-            var animation = new AnimationArgs
-            {
-                AnimationSpeed = 100,
-                SourceAnimation = (ushort)thrown,
-                SourceId = aisling.Serial,
-                TargetAnimation = (ushort)thrown,
-                TargetId = i.Serial
-            };
-
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
-            aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            _skillMethod.OnSuccessWithoutAction(i, aisling, Skill, dmgCalc, _crit);
         }
 
+        var buff = new BuffHardenedHands();
+        _skillMethod.ApplyPhysicalBuff(aisling, buff);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -748,7 +714,7 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(5).FirstOrDefault();
+            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -758,20 +724,6 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            var animation = new AnimationArgs
-            {
-                AnimationSpeed = 100,
-                SourceAnimation = (ushort)(_crit
-                    ? 10002
-                    : 10000),
-                SourceId = sprite.Serial,
-                TargetAnimation = (ushort)(_crit
-                    ? 10002
-                    : 10000),
-                TargetId = _target.Serial
-            };
-
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -784,14 +736,14 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 16 + client.Aisling.Dex * 20 * Math.Max(damageDealingAisling.Position.DistanceFrom(_target.Position), 9);
+            var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
+            dmg = client.Aisling.Str * 120 + client.Aisling.Con * 60;
             dmg += dmg * imp / 100;
         }
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 12 + damageMonster.Dex * 15 * Math.Max(damageMonster.Position.DistanceFrom(_target.Position), 9);
+            dmg = damageMonster.Str * 80 + damageMonster.Con * 60;
         }
 
         var critCheck = _skillMethod.OnCrit(dmg);

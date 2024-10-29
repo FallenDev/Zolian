@@ -829,7 +829,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                      into items
                      from item in items
                      let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
-                     where !(abandonedDiff.TotalMinutes <= 3 && item.Template.Name is "Corpse")
+                     where (!(abandonedDiff.TotalMinutes <= 3) && (item.Template.Name is "Corpse"))
                      select item)
                 item.Remove();
         }

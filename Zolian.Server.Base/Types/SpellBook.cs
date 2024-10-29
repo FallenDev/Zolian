@@ -12,7 +12,7 @@ public class SpellBook : ObjectManager
 {
     private const int SpellLength = 88;
     private readonly int[] _invalidSlots = [0, 36, 72, 89];
-    public readonly ConcurrentDictionary<int, Spell> Spells = new();
+    public readonly ConcurrentDictionary<int, Spell> Spells = [];
 
     public SpellBook()
     {

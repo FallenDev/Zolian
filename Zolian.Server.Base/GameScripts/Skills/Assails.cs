@@ -2276,6 +2276,13 @@ public class TigerPalm(Skill skill) : SkillScript(skill)
         aisling.ActionUsed = "Tiger Palm";
         var dmgCalc = DamageCalc(sprite);
         _skillMethod.OnSuccess(_target, aisling, Skill, dmgCalc, _crit, action);
+        var hp = aisling.MaximumHp * 0.005;
+        aisling.CurrentHp += (long)hp;
+
+        if (aisling.CurrentHp >= aisling.MaximumHp)
+            aisling.CurrentHp = aisling.MaximumHp;
+
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
     public override void OnUse(Sprite sprite)

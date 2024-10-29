@@ -69,6 +69,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool IsBlocked => IsFrozen || IsStopped || IsSleeping;
 
     public bool ClawFistEmpowerment { get; set; }
+    public bool HardenedHands => HasBuff("Hardened Hands");
     public bool CanSeeInvisible
     {
         get
@@ -1308,6 +1309,8 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
             dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
             if (damageDealingSprite.ClawFistEmpowerment)
                 dmg = (long)(dmg * 1.3);
+            if (damageDealingSprite.HardenedHands)
+                dmg *= 2;
             if (this is Monster monster && monster.Template.MonsterRace == aisling.FavoredEnemy)
                 dmg *= 2;
         }

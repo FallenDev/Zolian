@@ -12,7 +12,7 @@ public class SkillBook : ObjectManager
 {
     private const int SkillLength = 88;
     private readonly int[] _invalidSlots = [0, 36, 72, 89];
-    public readonly ConcurrentDictionary<int, Skill> Skills = new();
+    public readonly ConcurrentDictionary<int, Skill> Skills = [];
 
     public SkillBook()
     {

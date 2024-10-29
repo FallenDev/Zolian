@@ -73,6 +73,7 @@ public class Buff
             "Double XP" => new BuffDoubleExperience(),
             "Triple XP" => new BuffTripleExperience(),
             "Secured Position" => new aura_SecuredPosition(),
+            "Hardened Hands" => new BuffHardenedHands(),
             _ => BuffSpell
         };
 

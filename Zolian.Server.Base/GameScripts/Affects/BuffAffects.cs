@@ -672,6 +672,45 @@ public class buff_clawfist : Buff
     }
 }
 
+public class BuffHardenedHands : Buff
+{
+    public override byte Icon => 97;
+    public override int Length => 10;
+    public override string Name => "Hardened Hands";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is Aisling aisling)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands are hardened!");
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(34, null, affected.Serial));
+            InsertBuff(aisling, buff);
+        }
+        else
+        {
+            var playerNearby = affected.PlayerNearby;
+            if (playerNearby == null) return;
+            playerNearby.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(34, null, affected.Serial));
+        }
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands return to normal.");
+        DeleteBuff(aisling, buff);
+    }
+}
+
 public class buff_drunkenFist : Buff
 {
     public override byte Icon => 203;
