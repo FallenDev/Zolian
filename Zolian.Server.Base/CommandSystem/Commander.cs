@@ -150,7 +150,11 @@ public static class Commander
 
             Task.Delay(58000).ContinueWith(ct =>
             {
-                if (client.Aisling.GameMasterChaosCancel) return;
+                if (client.Aisling.GameMasterChaosCancel)
+                {
+                    client.Aisling.GameMasterChaosCancel = false;
+                    return;
+                }
                 ServerSetup.Instance.Running = false;
                 connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
                 connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
@@ -181,7 +185,7 @@ public static class Commander
         }
 
         ServerSetup.EventsLogger("Chaos Cancelled", LogLevel.Warning);
-        client.Aisling.GameMasterChaosCancel = !client.Aisling.GameMasterChaosCancel;
+        client.Aisling.GameMasterChaosCancel = true;
     }
 
 
