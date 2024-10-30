@@ -1035,6 +1035,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
                 if (monster.ThrownBack) return false;
             }
 
+            if (this is Mundane)
+                allowGhostWalk = false;
+
             // Check position before we add direction, add direction, check position to see if we can commit
             if (!allowGhostWalk)
             {
@@ -2591,7 +2594,7 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     {
         if (CantMove) return false;
 
-        if (this is Monster || this is Mundane)
+        if (this is Monster)
             if (CurrentHp == 0)
                 return false;
 
