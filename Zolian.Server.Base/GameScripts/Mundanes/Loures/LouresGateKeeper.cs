@@ -25,7 +25,8 @@ public class LouresGateKeeper(WorldServer server, Mundane mundane) : MundaneScri
         {
             new(0x01, "To the Castle"),
             new(0x02, "To the Citadel"),
-            new(0x03, "To the Goblin Gacha")
+            new(0x03, "To the Goblin Gacha"),
+            new(0x04, "To the Harbor")
         };
 
         client.SendOptionsDialog(Mundane, "Hail Citizen! How can I assist you? Perhaps an escort?", options.ToArray());
@@ -50,6 +51,11 @@ public class LouresGateKeeper(WorldServer server, Mundane mundane) : MundaneScri
             case 0x03:
                 {
                     client.TransitionToMap(3925, new Position(2, 95));
+                    break;
+                }
+            case 0x04:
+                {
+                    client.TransitionToMap(6925, new Position(20, 32));
                     break;
                 }
         }
