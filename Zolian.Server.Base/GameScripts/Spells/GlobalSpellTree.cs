@@ -1,4 +1,5 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using Darkages.Enums;
+using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
@@ -60,6 +61,7 @@ public class Mine(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling aisling) return;
         if (aisling.Map.ID is not (624 or 625)) return;
+        if (aisling.EquipmentManager.Equipment[1]?.Item?.Template.Name is not "Pickaxe") return;
 
         var miningExperience = aisling.QuestManager.StoneSmithingTier switch
         {
@@ -117,6 +119,6 @@ public class Mine(Spell spell) : SpellScript(spell)
                 break;
         }
 
-        aisling.Client.SendAnimation(Spell.Template.TargetAnimation, null, aisling.Serial);
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, aisling.Serial));
     }
 }
