@@ -67,6 +67,7 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                 client.SendOptionsDialog(Mundane, "Advanced one, what is it you wish to learn?", options.ToArray());
                 break;
             case ClassStage.Master:
+            case ClassStage.Job:
                 options.Add(client.Aisling.ExpLevel >= 400
                     ? new Dialog.OptionsDataItem(0x03, "Stat Reallocation")
                     : new Dialog.OptionsDataItem(0x06, "Attempt Stat Reallocation"));
