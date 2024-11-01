@@ -24,780 +24,11 @@ public record AislingStorage : Sql
     private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim CreateLock { get; } = new(1, 1);
 
-    public async Task<Aisling> LoadAisling(string name, long serial)
-    {
-        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
-        var aisling = new Aisling();
-
-        try
-        {
-            var continueLoad = await CheckIfPlayerExists(name, serial);
-            if (!continueLoad) return null;
-
-            var sConn = ConnectToDatabase(ConnectionString);
-            var values = new { Name = name };
-            aisling = await sConn.QueryFirstAsync<Aisling>("[SelectPlayer]", values, commandType: CommandType.StoredProcedure);
-            sConn.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            LoadLock.Release();
-        }
-
-        return aisling;
-    }
-
-    public async Task<bool> PasswordSave(Aisling obj)
-    {
-        if (obj == null) return false;
-        if (obj.Loading) return false;
-        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
-        if (!continueLoad) return false;
-
-        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        try
-        {
-            var connection = ConnectToDatabase(EncryptedConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PasswordSave", connection);
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
-            cmd.Parameters.Add("@Pass", SqlDbType.VarChar).Value = obj.Password;
-            cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
-            cmd.Parameters.Add("@Hacked", SqlDbType.Bit).Value = obj.Hacked;
-            cmd.Parameters.Add("@LastIP", SqlDbType.VarChar).Value = obj.LastIP;
-            cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
-            ExecuteAndCloseConnection(cmd, connection);
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            PasswordSaveLock.Release();
-        }
-
-        return true;
-    }
+    #region LoginServer Operations
 
     /// <summary>
-    /// Saves a player's state on disconnect or error
-    /// Creates a new DB connection on event
+    /// Creation of a new player from the LoginServer
     /// </summary>
-    public static async Task<bool> Save(Aisling obj)
-    {
-        if (obj == null) return false;
-        if (obj.Loading) return false;
-
-        var dt = PlayerDataTable();
-        var qDt = QuestDataTable();
-        var cDt = ComboScrollDataTable();
-        var iDt = ItemsDataTable();
-        var skillDt = SkillDataTable();
-        var spellDt = SpellDataTable();
-        var buffDt = BuffsDataTable();
-        var debuffDt = DeBuffsDataTable();
-        var connection = ConnectToDatabase(ConnectionString);
-
-        try
-        {
-            var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
-            itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
-            itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
-            var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
-            var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
-            var buffList = obj.Buffs.Values.Where(i => i is { Name: not null }).ToList();
-            var debuffList = obj.Debuffs.Values.Where(i => i is { Name: not null }).ToList();
-
-            dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
-                obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
-                obj._Regen, obj._Dmg, obj._Hit, obj._Mr, obj._Str, obj._Int, obj._Wis, obj._Con, obj._Dex, obj._Luck, obj.AbpLevel,
-                obj.AbpNext, obj.AbpTotal, obj.ExpLevel, obj.ExpNext, obj.ExpTotal, obj.Stage.ToString(), obj.JobClass.ToString(),
-                obj.Path.ToString(), obj.PastClass.ToString(), obj.Race.ToString(), obj.Afflictions.ToString(), obj.Gender.ToString(),
-                obj.HairColor, obj.HairStyle, obj.NameColor, obj.ProfileMessage, obj.Nation, obj.Clan, obj.ClanRank, obj.ClanTitle,
-                obj.MonsterForm, obj.ActiveStatus.ToString(), obj.Flags.ToString(), obj.CurrentWeight, obj.World,
-                obj.Lantern, obj.IsInvisible, obj.Resting.ToString(), obj.FireImmunity, obj.WaterImmunity, obj.WindImmunity, obj.EarthImmunity,
-                obj.LightImmunity, obj.DarkImmunity, obj.PoisonImmunity, obj.EnticeImmunity, obj.PartyStatus.ToString(), obj.RaceSkill,
-                obj.RaceSpell, obj.GameMaster, obj.ArenaHost, obj.Knight, obj.GoldPoints, obj.StatPoints, obj.GamePoints,
-                obj.BankedGold, obj.ArmorImg, obj.HelmetImg, obj.ShieldImg, obj.WeaponImg, obj.BootsImg, obj.HeadAccessoryImg, obj.Accessory1Img,
-                obj.Accessory2Img, obj.Accessory3Img, obj.Accessory1Color, obj.Accessory2Color, obj.Accessory3Color, obj.BodyColor, obj.BodySprite,
-                obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants);
-
-            if (obj.QuestManager == null) return false;
-            qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
-            obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.CryptTerrorContinued, obj.QuestManager.CryptTerrorContSlayed,
-            obj.QuestManager.NightTerror, obj.QuestManager.NightTerrorSlayed, obj.QuestManager.DreamWalking, obj.QuestManager.DreamWalkingSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem, obj.QuestManager.ReleasedTodesbaum,
-            obj.QuestManager.DrunkenHabit, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount, obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting,
-            obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount, obj.QuestManager.NealKill, obj.QuestManager.AbelShopAccess, obj.QuestManager.PeteKill, obj.QuestManager.PeteComplete,
-            obj.QuestManager.SwampAccess, obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
-            obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
-            obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
-            obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
-            obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
-            obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
-            obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted, obj.QuestManager.EternalLove, obj.QuestManager.EternalLoveStarted, obj.QuestManager.UnhappyEnding,
-            obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
-            obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
-            obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
-            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein);
-
-            if (obj.ComboManager == null) return false;
-            cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
-            obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
-            obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
-
-            foreach (var item in itemList)
-            {
-                var pane = ItemEnumConverters.PaneToString(item.ItemPane);
-                var color = ItemColors.ItemColorsToInt(item.Template.Color);
-                var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
-                var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
-                var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
-                var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-                var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
-                var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
-                var existingRow = iDt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
-
-                // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
-                if (existingRow != null)
-                {
-                    existingRow["Name"] = item.Template.Name;
-                    existingRow["Serial"] = (long)obj.Serial;
-                    existingRow["ItemPane"] = pane;
-                    existingRow["Slot"] = item.Slot;
-                    existingRow["InventorySlot"] = item.InventorySlot;
-                    existingRow["Color"] = color;
-                    existingRow["Cursed"] = item.Cursed;
-                    existingRow["Durability"] = item.Durability;
-                    existingRow["Identified"] = item.Identified;
-                    existingRow["ItemVariance"] = itemVariance;
-                    existingRow["WeapVariance"] = weapVariance;
-                    existingRow["ItemQuality"] = quality;
-                    existingRow["OriginalQuality"] = orgQuality;
-                    existingRow["Stacks"] = item.Stacks;
-                    existingRow["Enchantable"] = item.Enchantable;
-                    existingRow["Tarnished"] = item.Tarnished;
-                    existingRow["GearEnhancement"] = gearEnhanced;
-                    existingRow["ItemMaterial"] = itemMaterial;
-                }
-                else
-                {
-                    // If the item hasn't already been added to the data table, add it
-                    iDt.Rows.Add(
-                        item.ItemId,
-                        item.Template.Name,
-                        (long)obj.Serial,
-                        pane,
-                        item.Slot,
-                        item.InventorySlot,
-                        color,
-                        item.Cursed,
-                        item.Durability,
-                        item.Identified,
-                        itemVariance,
-                        weapVariance,
-                        quality,
-                        orgQuality,
-                        item.Stacks,
-                        item.Enchantable,
-                        item.Tarnished,
-                        gearEnhanced,
-                        itemMaterial
-                    );
-                }
-            }
-
-            foreach (var skill in skillList)
-            {
-                skillDt.Rows.Add(
-                    (long)obj.Serial,
-                    skill.Level,
-                    skill.Slot,
-                    skill.SkillName,
-                    skill.Uses,
-                    skill.CurrentCooldown
-                );
-            }
-
-            foreach (var spell in spellList)
-            {
-                spellDt.Rows.Add(
-                    (long)obj.Serial,
-                    spell.Level,
-                    spell.Slot,
-                    spell.SpellName,
-                    spell.Casts,
-                    spell.CurrentCooldown
-                );
-            }
-
-            foreach (var buff in buffList)
-            {
-                buffDt.Rows.Add(
-                    (long)obj.Serial,
-                    buff.Name,
-                    buff.TimeLeft
-                );
-            }
-
-            foreach (var debuff in debuffList)
-            {
-                debuffDt.Rows.Add(
-                    (long)obj.Serial,
-                    debuff.Name,
-                    debuff.TimeLeft
-                );
-            }
-
-            await using (var cmd = new SqlCommand("PlayerSave", connection))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                var param = cmd.Parameters.AddWithValue("@Players", dt);
-                param.SqlDbType = SqlDbType.Structured;
-                param.TypeName = "dbo.PlayerType";
-                cmd.ExecuteNonQuery();
-            }
-
-            await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
-            {
-                cmd2.CommandType = CommandType.StoredProcedure;
-                var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
-                param2.SqlDbType = SqlDbType.Structured;
-                param2.TypeName = "dbo.QuestType";
-                cmd2.ExecuteNonQuery();
-            }
-
-            await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
-            {
-                cmd3.CommandType = CommandType.StoredProcedure;
-                var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
-                param3.SqlDbType = SqlDbType.Structured;
-                param3.TypeName = "dbo.ComboType";
-                cmd3.ExecuteNonQuery();
-            }
-
-            await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
-            {
-                cmd4.CommandType = CommandType.StoredProcedure;
-                var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-                param4.SqlDbType = SqlDbType.Structured;
-                param4.TypeName = "dbo.ItemType";
-                cmd4.ExecuteNonQuery();
-            }
-
-            await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
-            {
-                cmd5.CommandType = CommandType.StoredProcedure;
-                var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
-                param5.SqlDbType = SqlDbType.Structured;
-                param5.TypeName = "dbo.SkillType";
-                cmd5.ExecuteNonQuery();
-            }
-
-            await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
-            {
-                cmd6.CommandType = CommandType.StoredProcedure;
-                var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
-                param6.SqlDbType = SqlDbType.Structured;
-                param6.TypeName = "dbo.SpellType";
-                cmd6.ExecuteNonQuery();
-            }
-
-            await using (var cmd7 = new SqlCommand("BuffSave", connection))
-            {
-                cmd7.CommandType = CommandType.StoredProcedure;
-                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
-                param7.SqlDbType = SqlDbType.Structured;
-                param7.TypeName = "dbo.BuffType";
-                cmd7.ExecuteNonQuery();
-            }
-
-            await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
-            {
-                cmd8.CommandType = CommandType.StoredProcedure;
-                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
-                param8.SqlDbType = SqlDbType.Structured;
-                param8.TypeName = "dbo.DebuffType";
-                cmd8.ExecuteNonQuery();
-            }
-
-            connection.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Saves all players states
-    /// Utilizes an active connection that self-heals if closed
-    /// </summary>
-    public async Task<bool> ServerSave(List<Aisling> playerList)
-    {
-        if (playerList.Count == 0) return false;
-        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        var dt = PlayerDataTable();
-        var qDt = QuestDataTable();
-        var cDt = ComboScrollDataTable();
-        var iDt = ItemsDataTable();
-        var skillDt = SkillDataTable();
-        var spellDt = SpellDataTable();
-        var buffDt = BuffsDataTable();
-        var debuffDt = DeBuffsDataTable();
-        var connection = ServerSetup.Instance.ServerSaveConnection;
-
-        try
-        {
-            foreach (var player in playerList.Where(player => !player.Loading))
-            {
-                if (player?.Client == null) continue;
-                player.Client.LastSave = DateTime.UtcNow;
-                var itemList = player.Inventory.Items.Values.Where(i => i is not null).ToList();
-                itemList.AddRange(from item in player.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
-                itemList.AddRange(player.BankManager.Items.Values.Where(i => i is not null));
-                var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
-                var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
-                var buffList = player.Buffs.Values.Where(i => i is { Name: not null }).ToList();
-                var debuffList = player.Debuffs.Values.Where(i => i is { Name: not null }).ToList();
-
-                dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
-                    player.Direction, player.CurrentHp, player.BaseHp, player.CurrentMp, player.BaseMp, player._ac,
-                    player._Regen, player._Dmg, player._Hit, player._Mr, player._Str, player._Int, player._Wis, player._Con, player._Dex, player._Luck, player.AbpLevel,
-                    player.AbpNext, player.AbpTotal, player.ExpLevel, player.ExpNext, player.ExpTotal, player.Stage.ToString(), player.JobClass.ToString(),
-                    player.Path.ToString(), player.PastClass.ToString(), player.Race.ToString(), player.Afflictions.ToString(), player.Gender.ToString(),
-                    player.HairColor, player.HairStyle, player.NameColor, player.ProfileMessage, player.Nation, player.Clan, player.ClanRank, player.ClanTitle,
-                    player.MonsterForm, player.ActiveStatus.ToString(), player.Flags.ToString(), player.CurrentWeight, player.World,
-                    player.Lantern, player.IsInvisible, player.Resting.ToString(), player.FireImmunity, player.WaterImmunity, player.WindImmunity, player.EarthImmunity,
-                    player.LightImmunity, player.DarkImmunity, player.PoisonImmunity, player.EnticeImmunity, player.PartyStatus.ToString(), player.RaceSkill,
-                    player.RaceSpell, player.GameMaster, player.ArenaHost, player.Knight, player.GoldPoints, player.StatPoints, player.GamePoints,
-                    player.BankedGold, player.ArmorImg, player.HelmetImg, player.ShieldImg, player.WeaponImg, player.BootsImg, player.HeadAccessoryImg, player.Accessory1Img,
-                    player.Accessory2Img, player.Accessory3Img, player.Accessory1Color, player.Accessory2Color, player.Accessory3Color, player.BodyColor, player.BodySprite,
-                    player.FaceSprite, player.OverCoatImg, player.BootColor, player.OverCoatColor, player.Pants);
-
-                qDt.Rows.Add(player.Serial, player.QuestManager.MailBoxNumber, player.QuestManager.TutorialCompleted, player.QuestManager.BetaReset, player.QuestManager.ArtursGift, player.QuestManager.CamilleGreetingComplete,
-                    player.QuestManager.ConnPotions, player.QuestManager.CryptTerror, player.QuestManager.CryptTerrorSlayed, player.QuestManager.CryptTerrorContinued, player.QuestManager.CryptTerrorContSlayed,
-                    player.QuestManager.NightTerror, player.QuestManager.NightTerrorSlayed, player.QuestManager.DreamWalking, player.QuestManager.DreamWalkingSlayed, player.QuestManager.Dar, player.QuestManager.DarItem, player.QuestManager.ReleasedTodesbaum,
-                    player.QuestManager.DrunkenHabit, player.QuestManager.FionaDance, player.QuestManager.Keela, player.QuestManager.KeelaCount, player.QuestManager.KeelaKill, player.QuestManager.KeelaQuesting,
-                    player.QuestManager.KillerBee, player.QuestManager.Neal, player.QuestManager.NealCount, player.QuestManager.NealKill, player.QuestManager.AbelShopAccess, player.QuestManager.PeteKill, player.QuestManager.PeteComplete,
-                    player.QuestManager.SwampAccess, player.QuestManager.SwampCount, player.QuestManager.TagorDungeonAccess, player.QuestManager.Lau, player.QuestManager.BeltDegree, player.QuestManager.MilethReputation,
-                    player.QuestManager.AbelReputation, player.QuestManager.RucesionReputation, player.QuestManager.SuomiReputation, player.QuestManager.RionnagReputation, player.QuestManager.OrenReputation,
-                    player.QuestManager.PietReputation, player.QuestManager.LouresReputation, player.QuestManager.UndineReputation, player.QuestManager.TagorReputation, player.QuestManager.BlackSmithing,
-                    player.QuestManager.BlackSmithingTier, player.QuestManager.ArmorSmithing, player.QuestManager.ArmorSmithingTier, player.QuestManager.JewelCrafting, player.QuestManager.JewelCraftingTier,
-                    player.QuestManager.StoneSmithing, player.QuestManager.StoneSmithingTier, player.QuestManager.ThievesGuildReputation, player.QuestManager.AssassinsGuildReputation,
-                    player.QuestManager.AdventuresGuildReputation, player.QuestManager.BeltQuest, player.QuestManager.SavedChristmas, player.QuestManager.RescuedReindeer, player.QuestManager.YetiKilled, player.QuestManager.UnknownStart, player.QuestManager.PirateShipAccess,
-                    player.QuestManager.ScubaSchematics, player.QuestManager.ScubaMaterialsQuest, player.QuestManager.ScubaGearCrafted, player.QuestManager.EternalLove, player.QuestManager.EternalLoveStarted, player.QuestManager.UnhappyEnding,
-                    player.QuestManager.HonoringTheFallen, player.QuestManager.ReadTheFallenNotes, player.QuestManager.GivenTarnishedBreastplate, player.QuestManager.EternalBond, player.QuestManager.ArmorCraftingCodex,
-                    player.QuestManager.ArmorApothecaryAccepted, player.QuestManager.ArmorCodexDeciphered, player.QuestManager.ArmorCraftingCodexLearned, player.QuestManager.ArmorCraftingAdvancedCodexLearned,
-                    player.QuestManager.CthonicKillTarget, player.QuestManager.CthonicFindTarget, player.QuestManager.CthonicKillCompletions, player.QuestManager.CthonicCleansingOne, player.QuestManager.CthonicCleansingTwo,
-                    player.QuestManager.CthonicDepthsCleansing, player.QuestManager.CthonicRuinsAccess, player.QuestManager.CthonicRemainsExplorationLevel, player.QuestManager.EndedOmegasRein);
-
-                cDt.Rows.Add(player.Serial, player.ComboManager.Combo1, player.ComboManager.Combo2, player.ComboManager.Combo3, player.ComboManager.Combo4, player.ComboManager.Combo5,
-                    player.ComboManager.Combo6, player.ComboManager.Combo7, player.ComboManager.Combo8, player.ComboManager.Combo9, player.ComboManager.Combo10, player.ComboManager.Combo11,
-                    player.ComboManager.Combo12, player.ComboManager.Combo13, player.ComboManager.Combo14, player.ComboManager.Combo15);
-
-                foreach (var item in itemList)
-                {
-                    var pane = ItemEnumConverters.PaneToString(item.ItemPane);
-                    var color = ItemColors.ItemColorsToInt(item.Template.Color);
-                    var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
-                    var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
-                    var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
-                    var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
-                    var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
-                    var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
-                    var existingRow = iDt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
-
-                    // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
-                    if (existingRow != null)
-                    {
-                        existingRow["Name"] = item.Template.Name;
-                        existingRow["Serial"] = (long)player.Serial;
-                        existingRow["ItemPane"] = pane;
-                        existingRow["Slot"] = item.Slot;
-                        existingRow["InventorySlot"] = item.InventorySlot;
-                        existingRow["Color"] = color;
-                        existingRow["Cursed"] = item.Cursed;
-                        existingRow["Durability"] = item.Durability;
-                        existingRow["Identified"] = item.Identified;
-                        existingRow["ItemVariance"] = itemVariance;
-                        existingRow["WeapVariance"] = weapVariance;
-                        existingRow["ItemQuality"] = quality;
-                        existingRow["OriginalQuality"] = orgQuality;
-                        existingRow["Stacks"] = item.Stacks;
-                        existingRow["Enchantable"] = item.Enchantable;
-                        existingRow["Tarnished"] = item.Tarnished;
-                        existingRow["GearEnhancement"] = gearEnhanced;
-                        existingRow["ItemMaterial"] = itemMaterial;
-                    }
-                    else
-                    {
-                        // If the item hasn't already been added to the data table, add it
-                        iDt.Rows.Add(
-                            item.ItemId,
-                            item.Template.Name,
-                            (long)player.Serial,
-                            pane,
-                            item.Slot,
-                            item.InventorySlot,
-                            color,
-                            item.Cursed,
-                            item.Durability,
-                            item.Identified,
-                            itemVariance,
-                            weapVariance,
-                            quality,
-                            orgQuality,
-                            item.Stacks,
-                            item.Enchantable,
-                            item.Tarnished,
-                            gearEnhanced,
-                            itemMaterial
-                        );
-                    }
-                }
-
-                foreach (var skill in skillList)
-                {
-                    skillDt.Rows.Add(
-                        (long)player.Serial,
-                        skill.Level,
-                        skill.Slot,
-                        skill.SkillName,
-                        skill.Uses,
-                        skill.CurrentCooldown
-                    );
-                }
-
-                foreach (var spell in spellList)
-                {
-                    spellDt.Rows.Add(
-                        (long)player.Serial,
-                        spell.Level,
-                        spell.Slot,
-                        spell.SpellName,
-                        spell.Casts,
-                        spell.CurrentCooldown
-                    );
-                }
-
-                foreach (var buff in buffList)
-                {
-                    buffDt.Rows.Add(
-                        (long)player.Serial,
-                        buff.Name,
-                        buff.TimeLeft
-                    );
-                }
-
-                foreach (var debuff in debuffList)
-                {
-                    debuffDt.Rows.Add(
-                        (long)player.Serial,
-                        debuff.Name,
-                        debuff.TimeLeft
-                    );
-                }
-            }
-
-            await using (var cmd = new SqlCommand("PlayerSave", connection))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                var param = cmd.Parameters.AddWithValue("@Players", dt);
-                param.SqlDbType = SqlDbType.Structured;
-                param.TypeName = "dbo.PlayerType";
-                cmd.ExecuteNonQuery();
-            }
-
-            await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
-            {
-                cmd2.CommandType = CommandType.StoredProcedure;
-                var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
-                param2.SqlDbType = SqlDbType.Structured;
-                param2.TypeName = "dbo.QuestType";
-                cmd2.ExecuteNonQuery();
-            }
-
-            await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
-            {
-                cmd3.CommandType = CommandType.StoredProcedure;
-                var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
-                param3.SqlDbType = SqlDbType.Structured;
-                param3.TypeName = "dbo.ComboType";
-                cmd3.ExecuteNonQuery();
-            }
-
-            await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
-            {
-                cmd4.CommandType = CommandType.StoredProcedure;
-                var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-                param4.SqlDbType = SqlDbType.Structured;
-                param4.TypeName = "dbo.ItemType";
-                cmd4.ExecuteNonQuery();
-            }
-
-            await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
-            {
-                cmd5.CommandType = CommandType.StoredProcedure;
-                var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
-                param5.SqlDbType = SqlDbType.Structured;
-                param5.TypeName = "dbo.SkillType";
-                cmd5.ExecuteNonQuery();
-            }
-
-            await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
-            {
-                cmd6.CommandType = CommandType.StoredProcedure;
-                var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
-                param6.SqlDbType = SqlDbType.Structured;
-                param6.TypeName = "dbo.SpellType";
-                cmd6.ExecuteNonQuery();
-            }
-
-            await using (var cmd7 = new SqlCommand("BuffSave", connection))
-            {
-                cmd7.CommandType = CommandType.StoredProcedure;
-                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
-                param7.SqlDbType = SqlDbType.Structured;
-                param7.TypeName = "dbo.BuffType";
-                cmd7.ExecuteNonQuery();
-            }
-
-            await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
-            {
-                cmd8.CommandType = CommandType.StoredProcedure;
-                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
-                param8.SqlDbType = SqlDbType.Structured;
-                param8.TypeName = "dbo.DebuffType";
-                cmd8.ExecuteNonQuery();
-            }
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            if (connection.State != ConnectionState.Open)
-            {
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine("Reconnecting Player Save-State");
-                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
-                ServerSetup.Instance.ServerSaveConnection.Open();
-            }
-
-            SaveLock.Release();
-        }
-
-        return true;
-    }
-
-    public static async Task<bool> CheckIfPlayerExists(string name)
-    {
-        try
-        {
-            var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerExists", sConn);
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
-            var reader = await cmd.ExecuteReaderAsync();
-            var userFound = false;
-
-            while (reader.Read())
-            {
-                var userName = reader["Username"].ToString();
-                if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
-                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    userFound = true;
-                }
-            }
-
-            reader.Close();
-            sConn.Close();
-            return userFound;
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return false;
-    }
-
-    private static async Task<bool> CheckIfPlayerExists(string name, long serial)
-    {
-        try
-        {
-            var sConn = ConnectToDatabase(ConnectionString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerHashExists", sConn);
-            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
-            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
-            var reader = await cmd.ExecuteReaderAsync();
-            var userFound = false;
-
-            while (reader.Read())
-            {
-                var userName = reader["Username"].ToString();
-                if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
-                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    userFound = true;
-                }
-            }
-
-            reader.Close();
-            sConn.Close();
-            return userFound;
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return false;
-    }
-
-    public static async Task<Aisling> CheckPassword(string name)
-    {
-        var aisling = new Aisling();
-
-        try
-        {
-            var continueLoad = await CheckIfPlayerExists(name);
-            if (!continueLoad) return null;
-
-            var sConn = ConnectToDatabase(EncryptedConnectionString);
-            var values = new { Name = name };
-            aisling = await sConn.QueryFirstAsync<Aisling>("[PlayerSecurity]", values, commandType: CommandType.StoredProcedure);
-            sConn.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return aisling;
-    }
-
-    public static BoardTemplate ObtainMailboxId(long serial)
-    {
-        var board = new BoardTemplate();
-
-        try
-        {
-            var sConn = ConnectToDatabase(ConnectionString);
-            var values = new { Serial = serial };
-            var quests = sConn.QueryFirst<Quests>("[ObtainMailBoxNumber]", values, commandType: CommandType.StoredProcedure);
-            board.BoardId = (ushort)quests.MailBoxNumber;
-            board.IsMail = true;
-            board.Private = true;
-            board.Serial = serial;
-            sConn.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return board;
-    }
-
-    public static List<PostTemplate> ObtainPosts(int boardId)
-    {
-        var posts = new List<PostTemplate>();
-
-        try
-        {
-            var sConn = new SqlConnection(PersonalMailString);
-            sConn.Open();
-            const string sql = "SELECT * FROM ZolianBoardsMail.dbo.Posts";
-            var cmd = new SqlCommand(sql, sConn);
-            cmd.CommandTimeout = 5;
-            var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var readBoardId = (int)reader["BoardId"];
-                if (boardId != readBoardId) continue;
-                var postId = (int)reader["PostId"];
-
-                var post = new PostTemplate()
-                {
-                    PostId = (short)postId,
-                    Highlighted = (bool)reader["Highlighted"],
-                    DatePosted = (DateTime)reader["DatePosted"],
-                    Owner = reader["Owner"].ToString(),
-                    Sender = reader["Sender"].ToString(),
-                    ReadPost = (bool)reader["ReadPost"],
-                    SubjectLine = reader["SubjectLine"].ToString(),
-                    Message = reader["Message"].ToString()
-                };
-
-                posts.Add(post);
-            }
-
-            reader.Close();
-            sConn.Close();
-        }
-        catch (SqlException e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return posts;
-    }
-
-    public static void SendPost(PostTemplate postInfo, int boardId)
-    {
-        try
-        {
-            var connection = ConnectToDatabase(PersonalMailString);
-            var cmd = ConnectToDatabaseSqlCommandWithProcedure("InsertPost", connection);
-            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = boardId;
-            cmd.Parameters.Add("@PostId", SqlDbType.Int).Value = postInfo.PostId;
-            cmd.Parameters.Add("@Highlighted", SqlDbType.Bit).Value = postInfo.Highlighted;
-            cmd.Parameters.Add("@DatePosted", SqlDbType.DateTime).Value = postInfo.DatePosted;
-            cmd.Parameters.Add("@Owner", SqlDbType.VarChar).Value = postInfo.Owner;
-            cmd.Parameters.Add("@Sender", SqlDbType.VarChar).Value = postInfo.Sender;
-            cmd.Parameters.Add("@ReadPost", SqlDbType.Bit).Value = postInfo.ReadPost;
-            cmd.Parameters.Add("@SubjectLine", SqlDbType.VarChar).Value = postInfo.SubjectLine;
-            cmd.Parameters.Add("@Message", SqlDbType.VarChar).Value = postInfo.Message;
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-    }
-
-    public static void UpdatePost(PostTemplate postInfo, int boardId)
-    {
-        var dt = PostDataTable();
-        dt.Rows.Add(boardId, postInfo.PostId, postInfo.Highlighted, postInfo.DatePosted, postInfo.Owner, postInfo.Sender, postInfo.ReadPost, postInfo.SubjectLine, postInfo.Message);
-
-        try
-        {
-            var connection = ConnectToDatabase(PersonalMailString);
-            using var cmd = new SqlCommand("UpdatePost", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            var param4 = cmd.Parameters.AddWithValue("@Posts", dt);
-            param4.SqlDbType = SqlDbType.Structured;
-            param4.TypeName = "dbo.PostType";
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-    }
-
     public async Task Create(Aisling obj)
     {
         await using var @lock = await CreateLock.WaitAsync(TimeSpan.FromSeconds(5));
@@ -967,6 +198,720 @@ public record AislingStorage : Sql
         }
     }
 
+    /// <summary>
+    /// Loads a player's data from the LoginServer
+    /// </summary>
+    public async Task<Aisling> LoadAisling(string name, long serial)
+    {
+        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
+        var aisling = new Aisling();
+
+        try
+        {
+            var continueLoad = await CheckIfPlayerExists(name, serial);
+            if (!continueLoad) return null;
+
+            var sConn = ConnectToDatabase(ConnectionString);
+            var values = new { Name = name };
+            aisling = await sConn.QueryFirstAsync<Aisling>("[SelectPlayer]", values, commandType: CommandType.StoredProcedure);
+            sConn.Close();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            LoadLock.Release();
+        }
+
+        return aisling;
+    }
+
+    /// <summary>
+    /// Saves a new password from the LoginServer
+    /// </summary>
+    public async Task<bool> PasswordSave(Aisling obj)
+    {
+        if (obj == null) return false;
+        if (obj.Loading) return false;
+        var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
+        if (!continueLoad) return false;
+
+        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            var connection = ConnectToDatabase(EncryptedConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("PasswordSave", connection);
+            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
+            cmd.Parameters.Add("@Pass", SqlDbType.VarChar).Value = obj.Password;
+            cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
+            cmd.Parameters.Add("@Hacked", SqlDbType.Bit).Value = obj.Hacked;
+            cmd.Parameters.Add("@LastIP", SqlDbType.VarChar).Value = obj.LastIP;
+            cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
+            ExecuteAndCloseConnection(cmd, connection);
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            PasswordSaveLock.Release();
+        }
+
+        return true;
+    }
+
+    #endregion
+
+    #region Player Save Methods
+
+    /// <summary>
+    /// Saves a player's state on disconnect or error
+    /// Creates a new DB connection on event
+    /// </summary>
+    public static async Task<bool> Save(Aisling obj)
+    {
+        if (obj == null) return false;
+        if (obj.Loading) return false;
+
+        var dt = PlayerDataTable();
+        var qDt = QuestDataTable();
+        var cDt = ComboScrollDataTable();
+        var iDt = ItemsDataTable();
+        var skillDt = SkillDataTable();
+        var spellDt = SpellDataTable();
+        var buffDt = BuffsDataTable();
+        var debuffDt = DeBuffsDataTable();
+        var connection = ConnectToDatabase(ConnectionString);
+
+        try
+        {
+            dt = PlayerStatSave(obj, dt);
+            if (obj.QuestManager == null) return false;
+            qDt = PlayerQuestSave(obj, qDt);
+            if (obj.ComboManager == null) return false;
+            cDt = PlayerComboSave(obj, cDt);
+            iDt = PlayerItemSave(obj, iDt);
+            skillDt = PlayerSkillSave(obj, skillDt);
+            spellDt = PlayerSpellSave(obj, spellDt);
+            buffDt = PlayerBuffSave(obj, buffDt);
+            debuffDt = PlayerDebuffSave(obj, debuffDt);
+
+            await using (var cmd = new SqlCommand("PlayerSave", connection))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                var param = cmd.Parameters.AddWithValue("@Players", dt);
+                param.SqlDbType = SqlDbType.Structured;
+                param.TypeName = "dbo.PlayerType";
+                cmd.ExecuteNonQuery();
+            }
+
+            await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
+            {
+                cmd2.CommandType = CommandType.StoredProcedure;
+                var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
+                param2.SqlDbType = SqlDbType.Structured;
+                param2.TypeName = "dbo.QuestType";
+                cmd2.ExecuteNonQuery();
+            }
+
+            await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
+            {
+                cmd3.CommandType = CommandType.StoredProcedure;
+                var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
+                param3.SqlDbType = SqlDbType.Structured;
+                param3.TypeName = "dbo.ComboType";
+                cmd3.ExecuteNonQuery();
+            }
+
+            await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
+            {
+                cmd4.CommandType = CommandType.StoredProcedure;
+                var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
+                param4.SqlDbType = SqlDbType.Structured;
+                param4.TypeName = "dbo.ItemType";
+                cmd4.ExecuteNonQuery();
+            }
+
+            await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
+            {
+                cmd5.CommandType = CommandType.StoredProcedure;
+                var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
+                param5.SqlDbType = SqlDbType.Structured;
+                param5.TypeName = "dbo.SkillType";
+                cmd5.ExecuteNonQuery();
+            }
+
+            await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
+            {
+                cmd6.CommandType = CommandType.StoredProcedure;
+                var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
+                param6.SqlDbType = SqlDbType.Structured;
+                param6.TypeName = "dbo.SpellType";
+                cmd6.ExecuteNonQuery();
+            }
+
+            await using (var cmd7 = new SqlCommand("BuffSave", connection))
+            {
+                cmd7.CommandType = CommandType.StoredProcedure;
+                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
+                param7.SqlDbType = SqlDbType.Structured;
+                param7.TypeName = "dbo.BuffType";
+                cmd7.ExecuteNonQuery();
+            }
+
+            await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+            {
+                cmd8.CommandType = CommandType.StoredProcedure;
+                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
+                param8.SqlDbType = SqlDbType.Structured;
+                param8.TypeName = "dbo.DebuffType";
+                cmd8.ExecuteNonQuery();
+            }
+
+            connection.Close();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Saves all players states
+    /// Utilizes an active connection that self-heals if closed
+    /// </summary>
+    public async Task<bool> ServerSave(List<Aisling> playerList)
+    {
+        if (playerList.Count == 0) return false;
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        var dt = PlayerDataTable();
+        var qDt = QuestDataTable();
+        var cDt = ComboScrollDataTable();
+        var iDt = ItemsDataTable();
+        var skillDt = SkillDataTable();
+        var spellDt = SpellDataTable();
+        var buffDt = BuffsDataTable();
+        var debuffDt = DeBuffsDataTable();
+        var connection = ServerSetup.Instance.ServerSaveConnection;
+
+        try
+        {
+            foreach (var player in playerList.Where(player => !player.Loading))
+            {
+                if (player.Client == null) continue;
+                player.Client.LastSave = DateTime.UtcNow;
+                dt = PlayerStatSave(player, dt);
+                if (player.QuestManager == null) continue;
+                qDt = PlayerQuestSave(player, qDt);
+                if (player.ComboManager == null) continue;
+                cDt = PlayerComboSave(player, cDt);
+                iDt = PlayerItemSave(player, iDt);
+                skillDt = PlayerSkillSave(player, skillDt);
+                spellDt = PlayerSpellSave(player, spellDt);
+                buffDt = PlayerBuffSave(player, buffDt);
+                debuffDt = PlayerDebuffSave(player, debuffDt);
+
+                await using (var cmd = new SqlCommand("PlayerSave", connection))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    var param = cmd.Parameters.AddWithValue("@Players", dt);
+                    param.SqlDbType = SqlDbType.Structured;
+                    param.TypeName = "dbo.PlayerType";
+                    cmd.ExecuteNonQuery();
+                }
+
+                await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
+                {
+                    cmd2.CommandType = CommandType.StoredProcedure;
+                    var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
+                    param2.SqlDbType = SqlDbType.Structured;
+                    param2.TypeName = "dbo.QuestType";
+                    cmd2.ExecuteNonQuery();
+                }
+
+                await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
+                {
+                    cmd3.CommandType = CommandType.StoredProcedure;
+                    var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
+                    param3.SqlDbType = SqlDbType.Structured;
+                    param3.TypeName = "dbo.ComboType";
+                    cmd3.ExecuteNonQuery();
+                }
+
+                await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
+                {
+                    cmd4.CommandType = CommandType.StoredProcedure;
+                    var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
+                    param4.SqlDbType = SqlDbType.Structured;
+                    param4.TypeName = "dbo.ItemType";
+                    cmd4.ExecuteNonQuery();
+                }
+
+                await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
+                {
+                    cmd5.CommandType = CommandType.StoredProcedure;
+                    var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
+                    param5.SqlDbType = SqlDbType.Structured;
+                    param5.TypeName = "dbo.SkillType";
+                    cmd5.ExecuteNonQuery();
+                }
+
+                await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
+                {
+                    cmd6.CommandType = CommandType.StoredProcedure;
+                    var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
+                    param6.SqlDbType = SqlDbType.Structured;
+                    param6.TypeName = "dbo.SpellType";
+                    cmd6.ExecuteNonQuery();
+                }
+
+                await using (var cmd7 = new SqlCommand("BuffSave", connection))
+                {
+                    cmd7.CommandType = CommandType.StoredProcedure;
+                    var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
+                    param7.SqlDbType = SqlDbType.Structured;
+                    param7.TypeName = "dbo.BuffType";
+                    cmd7.ExecuteNonQuery();
+                }
+
+                await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+                {
+                    cmd8.CommandType = CommandType.StoredProcedure;
+                    var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
+                    param8.SqlDbType = SqlDbType.Structured;
+                    param8.TypeName = "dbo.DebuffType";
+                    cmd8.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("Reconnecting Player Save-State");
+                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
+                ServerSetup.Instance.ServerSaveConnection.Open();
+            }
+
+            SaveLock.Release();
+        }
+
+        return true;
+    }
+
+    private static DataTable PlayerStatSave(Aisling obj, DataTable dt)
+    {
+        dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
+            obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
+            obj._Regen, obj._Dmg, obj._Hit, obj._Mr, obj._Str, obj._Int, obj._Wis, obj._Con, obj._Dex, obj._Luck, obj.AbpLevel,
+            obj.AbpNext, obj.AbpTotal, obj.ExpLevel, obj.ExpNext, obj.ExpTotal, obj.Stage.ToString(), obj.JobClass.ToString(),
+            obj.Path.ToString(), obj.PastClass.ToString(), obj.Race.ToString(), obj.Afflictions.ToString(), obj.Gender.ToString(),
+            obj.HairColor, obj.HairStyle, obj.NameColor, obj.Nation, obj.Clan, obj.ClanRank, obj.ClanTitle,
+            obj.MonsterForm, obj.ActiveStatus.ToString(), obj.Flags.ToString(), obj.CurrentWeight, obj.World,
+            obj.Lantern, obj.IsInvisible, obj.Resting.ToString(), obj.FireImmunity, obj.WaterImmunity, obj.WindImmunity, obj.EarthImmunity,
+            obj.LightImmunity, obj.DarkImmunity, obj.PoisonImmunity, obj.EnticeImmunity, obj.PartyStatus.ToString(), obj.RaceSkill,
+            obj.RaceSpell, obj.GameMaster, obj.ArenaHost, obj.Knight, obj.GoldPoints, obj.StatPoints, obj.GamePoints,
+            obj.BankedGold, obj.ArmorImg, obj.HelmetImg, obj.ShieldImg, obj.WeaponImg, obj.BootsImg, obj.HeadAccessoryImg, obj.Accessory1Img,
+            obj.Accessory2Img, obj.Accessory3Img, obj.Accessory1Color, obj.Accessory2Color, obj.Accessory3Color, obj.BodyColor, obj.BodySprite,
+            obj.FaceSprite, obj.OverCoatImg, obj.BootColor, obj.OverCoatColor, obj.Pants);
+
+        return dt;
+    }
+
+    private static DataTable PlayerQuestSave(Aisling obj, DataTable qDt)
+    {
+        qDt.Rows.Add(obj.Serial, obj.QuestManager.MailBoxNumber, obj.QuestManager.TutorialCompleted, obj.QuestManager.BetaReset, obj.QuestManager.ArtursGift, obj.QuestManager.CamilleGreetingComplete,
+            obj.QuestManager.ConnPotions, obj.QuestManager.CryptTerror, obj.QuestManager.CryptTerrorSlayed, obj.QuestManager.CryptTerrorContinued, obj.QuestManager.CryptTerrorContSlayed,
+            obj.QuestManager.NightTerror, obj.QuestManager.NightTerrorSlayed, obj.QuestManager.DreamWalking, obj.QuestManager.DreamWalkingSlayed, obj.QuestManager.Dar, obj.QuestManager.DarItem, obj.QuestManager.ReleasedTodesbaum,
+            obj.QuestManager.DrunkenHabit, obj.QuestManager.FionaDance, obj.QuestManager.Keela, obj.QuestManager.KeelaCount, obj.QuestManager.KeelaKill, obj.QuestManager.KeelaQuesting,
+            obj.QuestManager.KillerBee, obj.QuestManager.Neal, obj.QuestManager.NealCount, obj.QuestManager.NealKill, obj.QuestManager.AbelShopAccess, obj.QuestManager.PeteKill, obj.QuestManager.PeteComplete,
+            obj.QuestManager.SwampAccess, obj.QuestManager.SwampCount, obj.QuestManager.TagorDungeonAccess, obj.QuestManager.Lau, obj.QuestManager.BeltDegree, obj.QuestManager.MilethReputation,
+            obj.QuestManager.AbelReputation, obj.QuestManager.RucesionReputation, obj.QuestManager.SuomiReputation, obj.QuestManager.RionnagReputation, obj.QuestManager.OrenReputation,
+            obj.QuestManager.PietReputation, obj.QuestManager.LouresReputation, obj.QuestManager.UndineReputation, obj.QuestManager.TagorReputation, obj.QuestManager.BlackSmithing,
+            obj.QuestManager.BlackSmithingTier, obj.QuestManager.ArmorSmithing, obj.QuestManager.ArmorSmithingTier, obj.QuestManager.JewelCrafting, obj.QuestManager.JewelCraftingTier,
+            obj.QuestManager.StoneSmithing, obj.QuestManager.StoneSmithingTier, obj.QuestManager.ThievesGuildReputation, obj.QuestManager.AssassinsGuildReputation,
+            obj.QuestManager.AdventuresGuildReputation, obj.QuestManager.BeltQuest, obj.QuestManager.SavedChristmas, obj.QuestManager.RescuedReindeer, obj.QuestManager.YetiKilled, obj.QuestManager.UnknownStart, obj.QuestManager.PirateShipAccess,
+            obj.QuestManager.ScubaSchematics, obj.QuestManager.ScubaMaterialsQuest, obj.QuestManager.ScubaGearCrafted, obj.QuestManager.EternalLove, obj.QuestManager.EternalLoveStarted, obj.QuestManager.UnhappyEnding,
+            obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
+            obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
+            obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
+            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein);
+
+        return qDt;
+    }
+
+    private static DataTable PlayerComboSave(Aisling obj, DataTable cDt)
+    {
+        cDt.Rows.Add(obj.Serial, obj.ComboManager.Combo1, obj.ComboManager.Combo2, obj.ComboManager.Combo3, obj.ComboManager.Combo4, obj.ComboManager.Combo5,
+            obj.ComboManager.Combo6, obj.ComboManager.Combo7, obj.ComboManager.Combo8, obj.ComboManager.Combo9, obj.ComboManager.Combo10, obj.ComboManager.Combo11,
+            obj.ComboManager.Combo12, obj.ComboManager.Combo13, obj.ComboManager.Combo14, obj.ComboManager.Combo15);
+
+        return cDt;
+    }
+
+    private static DataTable PlayerItemSave(Aisling obj, DataTable iDt)
+    {
+        var itemList = obj.Inventory.Items.Values.Where(i => i is not null).ToList();
+        itemList.AddRange(from item in obj.EquipmentManager.Equipment.Values.Where(i => i is not null) where item.Item != null select item.Item);
+        itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
+
+        foreach (var item in itemList)
+        {
+            var pane = ItemEnumConverters.PaneToString(item.ItemPane);
+            var color = ItemColors.ItemColorsToInt(item.Template.Color);
+            var quality = ItemEnumConverters.QualityToString(item.ItemQuality);
+            var orgQuality = ItemEnumConverters.QualityToString(item.OriginalQuality);
+            var itemVariance = ItemEnumConverters.ArmorVarianceToString(item.ItemVariance);
+            var weapVariance = ItemEnumConverters.WeaponVarianceToString(item.WeapVariance);
+            var gearEnhanced = ItemEnumConverters.GearEnhancementToString(item.GearEnhancement);
+            var itemMaterial = ItemEnumConverters.ItemMaterialToString(item.ItemMaterial);
+            var existingRow = iDt.AsEnumerable().FirstOrDefault(row => row.Field<long>("ItemId") == item.ItemId);
+
+            // Check for duplicated ItemIds -- If an ID exists, this will overwrite it
+            if (existingRow != null)
+            {
+                existingRow["Name"] = item.Template.Name;
+                existingRow["Serial"] = (long)obj.Serial;
+                existingRow["ItemPane"] = pane;
+                existingRow["Slot"] = item.Slot;
+                existingRow["InventorySlot"] = item.InventorySlot;
+                existingRow["Color"] = color;
+                existingRow["Cursed"] = item.Cursed;
+                existingRow["Durability"] = item.Durability;
+                existingRow["Identified"] = item.Identified;
+                existingRow["ItemVariance"] = itemVariance;
+                existingRow["WeapVariance"] = weapVariance;
+                existingRow["ItemQuality"] = quality;
+                existingRow["OriginalQuality"] = orgQuality;
+                existingRow["Stacks"] = item.Stacks;
+                existingRow["Enchantable"] = item.Enchantable;
+                existingRow["Tarnished"] = item.Tarnished;
+                existingRow["GearEnhancement"] = gearEnhanced;
+                existingRow["ItemMaterial"] = itemMaterial;
+            }
+            else
+            {
+                // If the item hasn't already been added to the data table, add it
+                iDt.Rows.Add(
+                    item.ItemId,
+                    item.Template.Name,
+                    (long)obj.Serial,
+                    pane,
+                    item.Slot,
+                    item.InventorySlot,
+                    color,
+                    item.Cursed,
+                    item.Durability,
+                    item.Identified,
+                    itemVariance,
+                    weapVariance,
+                    quality,
+                    orgQuality,
+                    item.Stacks,
+                    item.Enchantable,
+                    item.Tarnished,
+                    gearEnhanced,
+                    itemMaterial
+                );
+            }
+        }
+
+        return iDt;
+    }
+
+    private static DataTable PlayerSkillSave(Aisling obj, DataTable skillDt)
+    {
+        var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
+
+        foreach (var skill in skillList)
+        {
+            skillDt.Rows.Add(
+                (long)obj.Serial,
+                skill.Level,
+                skill.Slot,
+                skill.SkillName,
+                skill.Uses,
+                skill.CurrentCooldown
+            );
+        }
+
+        return skillDt;
+    }
+
+    private static DataTable PlayerSpellSave(Aisling obj, DataTable spellDt)
+    {
+        var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
+
+        foreach (var spell in spellList)
+        {
+            spellDt.Rows.Add(
+                (long)obj.Serial,
+                spell.Level,
+                spell.Slot,
+                spell.SpellName,
+                spell.Casts,
+                spell.CurrentCooldown
+            );
+        }
+
+        return spellDt;
+    }
+
+    private static DataTable PlayerBuffSave(Aisling obj, DataTable buffDt)
+    {
+        var buffList = obj.Buffs.Values.Where(i => i is { Name: not null }).ToList();
+
+        foreach (var buff in buffList)
+        {
+            buffDt.Rows.Add(
+                (long)obj.Serial,
+                buff.Name,
+                buff.TimeLeft
+            );
+        }
+
+        return buffDt;
+    }
+
+    private static DataTable PlayerDebuffSave(Aisling obj, DataTable debuffDt)
+    {
+        var debuffList = obj.Debuffs.Values.Where(i => i is { Name: not null }).ToList();
+
+        foreach (var debuff in debuffList)
+        {
+            debuffDt.Rows.Add(
+                (long)obj.Serial,
+                debuff.Name,
+                debuff.TimeLeft
+            );
+        }
+
+        return debuffDt;
+    }
+
+    #endregion
+
+    #region DB Checks
+
+    public static async Task<bool> CheckIfPlayerExists(string name)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerExists", sConn);
+            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
+            var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
+
+            while (reader.Read())
+            {
+                var userName = reader["Username"].ToString();
+                if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
+                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    userFound = true;
+                }
+            }
+
+            reader.Close();
+            sConn.Close();
+            return userFound;
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return false;
+    }
+
+    private static async Task<bool> CheckIfPlayerExists(string name, long serial)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerHashExists", sConn);
+            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = name;
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
+            var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
+
+            while (reader.Read())
+            {
+                var userName = reader["Username"].ToString();
+                if (!string.Equals(userName, name, StringComparison.CurrentCultureIgnoreCase)) continue;
+                if (string.Equals(name, userName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    userFound = true;
+                }
+            }
+
+            reader.Close();
+            sConn.Close();
+            return userFound;
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return false;
+    }
+
+    public static async Task<Aisling> CheckPassword(string name)
+    {
+        var aisling = new Aisling();
+
+        try
+        {
+            var continueLoad = await CheckIfPlayerExists(name);
+            if (!continueLoad) return null;
+
+            var sConn = ConnectToDatabase(EncryptedConnectionString);
+            var values = new { Name = name };
+            aisling = await sConn.QueryFirstAsync<Aisling>("[PlayerSecurity]", values, commandType: CommandType.StoredProcedure);
+            sConn.Close();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return aisling;
+    }
+
+    #endregion
+
+    #region Posts and Mail
+
+    public static BoardTemplate ObtainMailboxId(long serial)
+    {
+        var board = new BoardTemplate();
+
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var values = new { Serial = serial };
+            var quests = sConn.QueryFirst<Quests>("[ObtainMailBoxNumber]", values, commandType: CommandType.StoredProcedure);
+            board.BoardId = (ushort)quests.MailBoxNumber;
+            board.IsMail = true;
+            board.Private = true;
+            board.Serial = serial;
+            sConn.Close();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return board;
+    }
+
+    public static List<PostTemplate> ObtainPosts(int boardId)
+    {
+        var posts = new List<PostTemplate>();
+
+        try
+        {
+            var sConn = new SqlConnection(PersonalMailString);
+            sConn.Open();
+            const string sql = "SELECT * FROM ZolianBoardsMail.dbo.Posts";
+            var cmd = new SqlCommand(sql, sConn);
+            cmd.CommandTimeout = 5;
+            var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var readBoardId = (int)reader["BoardId"];
+                if (boardId != readBoardId) continue;
+                var postId = (int)reader["PostId"];
+
+                var post = new PostTemplate()
+                {
+                    PostId = (short)postId,
+                    Highlighted = (bool)reader["Highlighted"],
+                    DatePosted = (DateTime)reader["DatePosted"],
+                    Owner = reader["Owner"].ToString(),
+                    Sender = reader["Sender"].ToString(),
+                    ReadPost = (bool)reader["ReadPost"],
+                    SubjectLine = reader["SubjectLine"].ToString(),
+                    Message = reader["Message"].ToString()
+                };
+
+                posts.Add(post);
+            }
+
+            reader.Close();
+            sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return posts;
+    }
+
+    public static void SendPost(PostTemplate postInfo, int boardId)
+    {
+        try
+        {
+            var connection = ConnectToDatabase(PersonalMailString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("InsertPost", connection);
+            cmd.Parameters.Add("@BoardId", SqlDbType.Int).Value = boardId;
+            cmd.Parameters.Add("@PostId", SqlDbType.Int).Value = postInfo.PostId;
+            cmd.Parameters.Add("@Highlighted", SqlDbType.Bit).Value = postInfo.Highlighted;
+            cmd.Parameters.Add("@DatePosted", SqlDbType.DateTime).Value = postInfo.DatePosted;
+            cmd.Parameters.Add("@Owner", SqlDbType.VarChar).Value = postInfo.Owner;
+            cmd.Parameters.Add("@Sender", SqlDbType.VarChar).Value = postInfo.Sender;
+            cmd.Parameters.Add("@ReadPost", SqlDbType.Bit).Value = postInfo.ReadPost;
+            cmd.Parameters.Add("@SubjectLine", SqlDbType.VarChar).Value = postInfo.SubjectLine;
+            cmd.Parameters.Add("@Message", SqlDbType.VarChar).Value = postInfo.Message;
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    public static void UpdatePost(PostTemplate postInfo, int boardId)
+    {
+        var dt = PostDataTable();
+        dt.Rows.Add(boardId, postInfo.PostId, postInfo.Highlighted, postInfo.DatePosted, postInfo.Owner, postInfo.Sender, postInfo.ReadPost, postInfo.SubjectLine, postInfo.Message);
+
+        try
+        {
+            var connection = ConnectToDatabase(PersonalMailString);
+            using var cmd = new SqlCommand("UpdatePost", connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param4 = cmd.Parameters.AddWithValue("@Posts", dt);
+            param4.SqlDbType = SqlDbType.Structured;
+            param4.TypeName = "dbo.PostType";
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    #endregion
+
+    #region Data Tables
+
     private static DataTable PlayerDataTable()
     {
         var dt = new DataTable();
@@ -1010,7 +955,6 @@ public record AislingStorage : Sql
         dt.Columns.Add("HairColor", typeof(byte));
         dt.Columns.Add("HairStyle", typeof(byte));
         dt.Columns.Add("NameColor", typeof(byte));
-        dt.Columns.Add("ProfileMessage", typeof(string));
         dt.Columns.Add("Nation", typeof(string));
         dt.Columns.Add("Clan", typeof(string));
         dt.Columns.Add("ClanRank", typeof(string));
@@ -1259,4 +1203,6 @@ public record AislingStorage : Sql
         dbDt.Columns.Add("TimeLeft", typeof(int));
         return dbDt;
     }
+
+    #endregion
 }
