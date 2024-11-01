@@ -1653,7 +1653,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         var letter = Aisling.PersonalLetters.Values.FirstOrDefault(c => c.PostId == args.Post.PostId);
         if (letter == null) return;
         letter.ReadPost = true;
-        StorageManager.AislingBucket.UpdatePost(letter, Aisling.QuestManager.MailBoxNumber);
+        AislingStorage.UpdatePost(letter, Aisling.QuestManager.MailBoxNumber);
         SendAttributes(StatUpdateType.Secondary);
     }
 

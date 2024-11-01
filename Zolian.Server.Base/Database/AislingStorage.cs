@@ -253,7 +253,7 @@ public record AislingStorage : Sql
                 );
             }
 
-            using (var cmd = new SqlCommand("PlayerSave", connection))
+            await using (var cmd = new SqlCommand("PlayerSave", connection))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 var param = cmd.Parameters.AddWithValue("@Players", dt);
@@ -262,7 +262,7 @@ public record AislingStorage : Sql
                 cmd.ExecuteNonQuery();
             }
 
-            using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
+            await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
             {
                 cmd2.CommandType = CommandType.StoredProcedure;
                 var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
@@ -271,7 +271,7 @@ public record AislingStorage : Sql
                 cmd2.ExecuteNonQuery();
             }
 
-            using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
+            await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
             {
                 cmd3.CommandType = CommandType.StoredProcedure;
                 var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
@@ -280,7 +280,7 @@ public record AislingStorage : Sql
                 cmd3.ExecuteNonQuery();
             }
 
-            using (var cmd4 = new SqlCommand("ItemUpsert", connection))
+            await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
             {
                 cmd4.CommandType = CommandType.StoredProcedure;
                 var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
@@ -289,7 +289,7 @@ public record AislingStorage : Sql
                 cmd4.ExecuteNonQuery();
             }
 
-            using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
+            await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
             {
                 cmd5.CommandType = CommandType.StoredProcedure;
                 var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
@@ -298,7 +298,7 @@ public record AislingStorage : Sql
                 cmd5.ExecuteNonQuery();
             }
 
-            using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
+            await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
             {
                 cmd6.CommandType = CommandType.StoredProcedure;
                 var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
@@ -307,7 +307,7 @@ public record AislingStorage : Sql
                 cmd6.ExecuteNonQuery();
             }
 
-            using (var cmd7 = new SqlCommand("BuffSave", connection))
+            await using (var cmd7 = new SqlCommand("BuffSave", connection))
             {
                 cmd7.CommandType = CommandType.StoredProcedure;
                 var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
@@ -316,7 +316,7 @@ public record AislingStorage : Sql
                 cmd7.ExecuteNonQuery();
             }
 
-            using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+            await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
             {
                 cmd8.CommandType = CommandType.StoredProcedure;
                 var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
@@ -507,7 +507,7 @@ public record AislingStorage : Sql
                 }
             }
 
-            using (var cmd = new SqlCommand("PlayerSave", connection))
+            await using (var cmd = new SqlCommand("PlayerSave", connection))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 var param = cmd.Parameters.AddWithValue("@Players", dt);
@@ -516,7 +516,7 @@ public record AislingStorage : Sql
                 cmd.ExecuteNonQuery();
             }
 
-            using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
+            await using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
             {
                 cmd2.CommandType = CommandType.StoredProcedure;
                 var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
@@ -525,7 +525,7 @@ public record AislingStorage : Sql
                 cmd2.ExecuteNonQuery();
             }
 
-            using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
+            await using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
             {
                 cmd3.CommandType = CommandType.StoredProcedure;
                 var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
@@ -534,7 +534,7 @@ public record AislingStorage : Sql
                 cmd3.ExecuteNonQuery();
             }
 
-            using (var cmd4 = new SqlCommand("ItemUpsert", connection))
+            await using (var cmd4 = new SqlCommand("ItemUpsert", connection))
             {
                 cmd4.CommandType = CommandType.StoredProcedure;
                 var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
@@ -543,7 +543,7 @@ public record AislingStorage : Sql
                 cmd4.ExecuteNonQuery();
             }
 
-            using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
+            await using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
             {
                 cmd5.CommandType = CommandType.StoredProcedure;
                 var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
@@ -552,7 +552,7 @@ public record AislingStorage : Sql
                 cmd5.ExecuteNonQuery();
             }
 
-            using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
+            await using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
             {
                 cmd6.CommandType = CommandType.StoredProcedure;
                 var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
@@ -561,7 +561,7 @@ public record AislingStorage : Sql
                 cmd6.ExecuteNonQuery();
             }
 
-            using (var cmd7 = new SqlCommand("BuffSave", connection))
+            await using (var cmd7 = new SqlCommand("BuffSave", connection))
             {
                 cmd7.CommandType = CommandType.StoredProcedure;
                 var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
@@ -570,7 +570,7 @@ public record AislingStorage : Sql
                 cmd7.ExecuteNonQuery();
             }
 
-            using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+            await using (var cmd8 = new SqlCommand("DeBuffSave", connection))
             {
                 cmd8.CommandType = CommandType.StoredProcedure;
                 var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
@@ -599,7 +599,7 @@ public record AislingStorage : Sql
         return true;
     }
 
-    public async Task<bool> CheckIfPlayerExists(string name)
+    public static async Task<bool> CheckIfPlayerExists(string name)
     {
         try
         {
@@ -631,7 +631,7 @@ public record AislingStorage : Sql
         return false;
     }
 
-    public async Task<bool> CheckIfPlayerExists(string name, long serial)
+    private static async Task<bool> CheckIfPlayerExists(string name, long serial)
     {
         try
         {
@@ -664,7 +664,7 @@ public record AislingStorage : Sql
         return false;
     }
 
-    public async Task<Aisling> CheckPassword(string name)
+    public static async Task<Aisling> CheckPassword(string name)
     {
         var aisling = new Aisling();
 
@@ -686,7 +686,7 @@ public record AislingStorage : Sql
         return aisling;
     }
 
-    public BoardTemplate ObtainMailboxId(long serial)
+    public static BoardTemplate ObtainMailboxId(long serial)
     {
         var board = new BoardTemplate();
 
@@ -709,7 +709,7 @@ public record AislingStorage : Sql
         return board;
     }
 
-    public List<PostTemplate> ObtainPosts(int boardId)
+    public static List<PostTemplate> ObtainPosts(int boardId)
     {
         var posts = new List<PostTemplate>();
 
@@ -754,7 +754,7 @@ public record AislingStorage : Sql
         return posts;
     }
 
-    public void SendPost(PostTemplate postInfo, int boardId)
+    public static void SendPost(PostTemplate postInfo, int boardId)
     {
         try
         {
@@ -777,7 +777,7 @@ public record AislingStorage : Sql
         }
     }
 
-    public void UpdatePost(PostTemplate postInfo, int boardId)
+    public static void UpdatePost(PostTemplate postInfo, int boardId)
     {
         var dt = PostDataTable();
         dt.Rows.Add(boardId, postInfo.PostId, postInfo.Highlighted, postInfo.DatePosted, postInfo.Owner, postInfo.Sender, postInfo.ReadPost, postInfo.SubjectLine, postInfo.Message);

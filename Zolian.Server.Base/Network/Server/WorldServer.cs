@@ -1718,7 +1718,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            var exists = await StorageManager.AislingBucket.CheckPassword(redirect.Name);
+            var exists = await AislingStorage.CheckPassword(redirect.Name);
             var aisling = await StorageManager.AislingBucket.LoadAisling(redirect.Name, exists.Serial);
             if (aisling == null)
             {
@@ -2784,14 +2784,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     }
                 case BoardRequestType.SendMail:
                     {
-                        var receiver = StorageManager.AislingBucket.CheckPassword(localArgs.To);
+                        var receiver = AislingStorage.CheckPassword(localArgs.To);
                         if (receiver.Result == null)
                         {
                             localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "User does not exist.", false);
                             break;
                         }
-                        var board = StorageManager.AislingBucket.ObtainMailboxId(receiver.Result.Serial);
-                        var posts = StorageManager.AislingBucket.ObtainPosts(board.BoardId);
+                        var board = AislingStorage.ObtainMailboxId(receiver.Result.Serial);
+                        var posts = AislingStorage.ObtainPosts(board.BoardId);
                         var postIdList = posts.Select(post => (int)post.PostId).ToList();
                         var postId = Enumerable.Range(1, 128).Except(postIdList).First();
                         var np = new PostTemplate
@@ -2806,7 +2806,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             Message = localArgs.Message
                         };
 
-                        StorageManager.AislingBucket.SendPost(np, board.BoardId);
+                        AislingStorage.SendPost(np, board.BoardId);
                         localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
                         break;
                     }
@@ -2831,7 +2831,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             };
 
                             board.Posts.TryAdd((short)postId, np);
-                            StorageManager.AislingBucket.SendPost(np, board.BoardId);
+                            AislingStorage.SendPost(np, board.BoardId);
                             localClient.SendBoardResponse(BoardOrResponseType.SubmitPostResponse, "Message Sent!", true);
                         }
 

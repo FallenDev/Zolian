@@ -194,7 +194,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
             if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.Password)) return;
-            var result = await StorageManager.AislingBucket.CheckPassword(localArgs.Name);
+            var result = await AislingStorage.CheckPassword(localArgs.Name);
 
             if (result == null)
             {
@@ -359,7 +359,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         static async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
             if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
-            var aisling = StorageManager.AislingBucket.CheckPassword(localArgs.Name);
+            var aisling = AislingStorage.CheckPassword(localArgs.Name);
 
             if (aisling.Result == null)
             {
@@ -694,7 +694,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
     private static async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)
     {
-        var aisling = await StorageManager.AislingBucket.CheckIfPlayerExists(name);
+        var aisling = await AislingStorage.CheckIfPlayerExists(name);
         var regex = Extensions.PasswordRegex;
 
         if (aisling == false)
