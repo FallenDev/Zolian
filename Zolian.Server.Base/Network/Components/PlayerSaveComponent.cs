@@ -16,10 +16,5 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
 
         var playersList = Server.Aislings.ToList();
         _ = StorageManager.AislingBucket.ServerSave(playersList);
-
-        foreach (var player in playersList.Where(player => player?.Client != null).Where(player => player.LoggedIn))
-        {
-            _ = StorageManager.AislingBucket.AuxiliarySave(player);
-        }
     }
 }

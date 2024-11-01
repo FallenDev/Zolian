@@ -3574,7 +3574,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (Aisling == null) return false;
         LastSave = DateTime.UtcNow;
-        var saved = await StorageManager.AislingBucket.Save(Aisling);
+        var saved = await AislingStorage.Save(Aisling);
         return saved;
     }
 

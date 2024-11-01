@@ -20,7 +20,6 @@ public record AislingStorage : Sql
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
     public FifoAutoReleasingSemaphoreSlim SaveLock { get; } = new(1, 1);
-    private FifoAutoReleasingSemaphoreSlim BuffDebuffSaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim CreateLock { get; } = new(1, 1);
@@ -85,35 +84,11 @@ public record AislingStorage : Sql
         return true;
     }
 
-    public async Task AuxiliarySave(Aisling obj)
-    {
-        if (obj == null) return;
-        if (obj.Loading) return;
-
-        await BuffDebuffSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
-
-        try
-        {
-            var connection = ConnectToDatabase(ConnectionString);
-            SaveBuffs(obj, connection);
-            SaveDebuffs(obj, connection);
-            connection.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            BuffDebuffSaveLock.Release();
-        }
-    }
-
     /// <summary>
     /// Saves a player's state on disconnect or error
     /// Creates a new DB connection on event
     /// </summary>
-    public async Task<bool> Save(Aisling obj)
+    public static async Task<bool> Save(Aisling obj)
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
@@ -124,6 +99,8 @@ public record AislingStorage : Sql
         var iDt = ItemsDataTable();
         var skillDt = SkillDataTable();
         var spellDt = SpellDataTable();
+        var buffDt = BuffsDataTable();
+        var debuffDt = DeBuffsDataTable();
         var connection = ConnectToDatabase(ConnectionString);
 
         try
@@ -133,6 +110,8 @@ public record AislingStorage : Sql
             itemList.AddRange(obj.BankManager.Items.Values.Where(i => i is not null));
             var skillList = obj.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
             var spellList = obj.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
+            var buffList = obj.Buffs.Values.Where(i => i is { Name: not null }).ToList();
+            var debuffList = obj.Debuffs.Values.Where(i => i is { Name: not null }).ToList();
 
             dt.Rows.Add(obj.Serial, obj.Created, obj.Username, obj.LoggedIn, obj.LastLogged, obj.X, obj.Y, obj.CurrentMapId,
                 obj.Direction, obj.CurrentHp, obj.BaseHp, obj.CurrentMp, obj.BaseMp, obj._ac,
@@ -256,6 +235,24 @@ public record AislingStorage : Sql
                 );
             }
 
+            foreach (var buff in buffList)
+            {
+                buffDt.Rows.Add(
+                    (long)obj.Serial,
+                    buff.Name,
+                    buff.TimeLeft
+                );
+            }
+
+            foreach (var debuff in debuffList)
+            {
+                debuffDt.Rows.Add(
+                    (long)obj.Serial,
+                    debuff.Name,
+                    debuff.TimeLeft
+                );
+            }
+
             using (var cmd = new SqlCommand("PlayerSave", connection))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -310,6 +307,24 @@ public record AislingStorage : Sql
                 cmd6.ExecuteNonQuery();
             }
 
+            using (var cmd7 = new SqlCommand("BuffSave", connection))
+            {
+                cmd7.CommandType = CommandType.StoredProcedure;
+                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
+                param7.SqlDbType = SqlDbType.Structured;
+                param7.TypeName = "dbo.BuffType";
+                cmd7.ExecuteNonQuery();
+            }
+
+            using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+            {
+                cmd8.CommandType = CommandType.StoredProcedure;
+                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
+                param8.SqlDbType = SqlDbType.Structured;
+                param8.TypeName = "dbo.DebuffType";
+                cmd8.ExecuteNonQuery();
+            }
+
             connection.Close();
         }
         catch (Exception e)
@@ -335,6 +350,8 @@ public record AislingStorage : Sql
         var iDt = ItemsDataTable();
         var skillDt = SkillDataTable();
         var spellDt = SpellDataTable();
+        var buffDt = BuffsDataTable();
+        var debuffDt = DeBuffsDataTable();
         var connection = ServerSetup.Instance.ServerSaveConnection;
 
         try
@@ -348,6 +365,8 @@ public record AislingStorage : Sql
                 itemList.AddRange(player.BankManager.Items.Values.Where(i => i is not null));
                 var skillList = player.SkillBook.Skills.Values.Where(i => i is { SkillName: not null }).ToList();
                 var spellList = player.SpellBook.Spells.Values.Where(i => i is { SpellName: not null }).ToList();
+                var buffList = player.Buffs.Values.Where(i => i is { Name: not null }).ToList();
+                var debuffList = player.Debuffs.Values.Where(i => i is { Name: not null }).ToList();
 
                 dt.Rows.Add(player.Serial, player.Created, player.Username, player.LoggedIn, player.LastLogged, player.X, player.Y, player.CurrentMapId,
                     player.Direction, player.CurrentHp, player.BaseHp, player.CurrentMp, player.BaseMp, player._ac,
@@ -468,6 +487,24 @@ public record AislingStorage : Sql
                         spell.CurrentCooldown
                     );
                 }
+
+                foreach (var buff in buffList)
+                {
+                    buffDt.Rows.Add(
+                        (long)player.Serial,
+                        buff.Name,
+                        buff.TimeLeft
+                    );
+                }
+
+                foreach (var debuff in debuffList)
+                {
+                    debuffDt.Rows.Add(
+                        (long)player.Serial,
+                        debuff.Name,
+                        debuff.TimeLeft
+                    );
+                }
             }
 
             using (var cmd = new SqlCommand("PlayerSave", connection))
@@ -523,6 +560,24 @@ public record AislingStorage : Sql
                 param6.TypeName = "dbo.SpellType";
                 cmd6.ExecuteNonQuery();
             }
+
+            using (var cmd7 = new SqlCommand("BuffSave", connection))
+            {
+                cmd7.CommandType = CommandType.StoredProcedure;
+                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
+                param7.SqlDbType = SqlDbType.Structured;
+                param7.TypeName = "dbo.BuffType";
+                cmd7.ExecuteNonQuery();
+            }
+
+            using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+            {
+                cmd8.CommandType = CommandType.StoredProcedure;
+                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
+                param8.SqlDbType = SqlDbType.Structured;
+                param8.TypeName = "dbo.DebuffType";
+                cmd8.ExecuteNonQuery();
+            }
         }
         catch (Exception e)
         {
@@ -542,48 +597,6 @@ public record AislingStorage : Sql
         }
 
         return true;
-    }
-
-    public void SaveBuffs(Aisling aisling, SqlConnection connection)
-    {
-        if (aisling.Buffs.IsEmpty) return;
-
-        try
-        {
-            foreach (var buff in aisling.Buffs.Values.Where(i => i is { Name: not null }))
-            {
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure("BuffSave", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
-                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = buff.Name;
-                cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = buff.TimeLeft;
-                cmd.ExecuteNonQuery();
-            }
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-    }
-
-    public void SaveDebuffs(Aisling aisling, SqlConnection connection)
-    {
-        if (aisling.Debuffs.IsEmpty) return;
-
-        try
-        {
-            foreach (var deBuff in aisling.Debuffs.Values.Where(i => i is { Name: not null }))
-            {
-                var cmd = ConnectToDatabaseSqlCommandWithProcedure("DeBuffSave", connection);
-                cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)aisling.Serial;
-                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = deBuff.Name;
-                cmd.Parameters.Add("@TimeLeft", SqlDbType.Int).Value = deBuff.TimeLeft;
-                cmd.ExecuteNonQuery();
-            }
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
     }
 
     public async Task<bool> CheckIfPlayerExists(string name)
@@ -1227,5 +1240,23 @@ public record AislingStorage : Sql
         cDt.Columns.Add("Combo14", typeof(string));
         cDt.Columns.Add("Combo15", typeof(string));
         return cDt;
+    }
+
+    private static DataTable BuffsDataTable()
+    {
+        var bDt = new DataTable();
+        bDt.Columns.Add("Serial", typeof(long));
+        bDt.Columns.Add("Name", typeof(string));
+        bDt.Columns.Add("TimeLeft", typeof(int));
+        return bDt;
+    }
+
+    private static DataTable DeBuffsDataTable()
+    {
+        var dbDt = new DataTable();
+        dbDt.Columns.Add("Serial", typeof(long));
+        dbDt.Columns.Add("Name", typeof(string));
+        dbDt.Columns.Add("TimeLeft", typeof(int));
+        return dbDt;
     }
 }

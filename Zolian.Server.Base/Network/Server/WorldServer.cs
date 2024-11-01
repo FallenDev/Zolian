@@ -3663,7 +3663,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling.Client.ExitConfirmed)
         {
-            await StorageManager.AislingBucket.AuxiliarySave(aisling);
             ServerSetup.ConnectionLogger($"{aisling.Username} either logged out or was removed from the server.");
             return;
         }
@@ -3685,7 +3684,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             // Save
             await client.Save();
-            await StorageManager.AislingBucket.AuxiliarySave(aisling);
 
             // Cleanup
             aisling.Remove(true);

@@ -65,6 +65,8 @@ DROP TYPE dbo.QuestType
 DROP TYPE dbo.ItemType
 DROP TYPE dbo.SkillType
 DROP TYPE dbo.SpellType
+DROP TYPE dbo.BuffType
+DROP TYPE dbo.DebuffType
 GO
 
 DROP TABLE PlayersItems;
@@ -626,6 +628,20 @@ CREATE TYPE dbo.SpellType AS TABLE
     Cooldown INT
 );
 
+CREATE TYPE dbo.BuffType AS TABLE
+(
+    Serial BIGINT,
+    Name VARCHAR (30),
+    TimeLeft INT
+);
+
+CREATE TYPE dbo.DebuffType AS TABLE
+(
+    Serial BIGINT,
+    Name VARCHAR (30),
+    TimeLeft INT
+);
+
 -- AddLegendMark
 SET ANSI_NULLS ON
 GO
@@ -649,14 +665,17 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[BuffSave]
-@Serial BIGINT, @Name VARCHAR(30), @TimeLeft INT
+    @Buffs dbo.BuffType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersBuffs]
-    SET
-	[TimeLeft] = @TimeLeft
-    WHERE  Serial = @Serial AND [Name] = @Name;
+
+    UPDATE target
+    SET    target.[Name] = source.[Name],
+           target.[TimeLeft] = source.[TimeLeft]
+    FROM [ZolianPlayers].[dbo].[PlayersBuffs] AS target
+    INNER JOIN @Buffs AS source
+    ON target.Serial = source.Serial AND target.Name = source.Name;
 END
 GO
 
@@ -706,14 +725,17 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[DeBuffSave]
-@Serial BIGINT, @Name VARCHAR(30), @TimeLeft INT
+    @Debuffs dbo.DebuffType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[PlayersDebuffs]
-    SET
-	[TimeLeft] = @TimeLeft
-    WHERE  Serial = @Serial AND [Name] = @Name;
+
+    UPDATE target
+    SET    target.[Name] = source.[Name],
+           target.[TimeLeft] = source.[TimeLeft]
+    FROM [ZolianPlayers].[dbo].[PlayersDebuffs] AS target
+    INNER JOIN @Debuffs AS source
+    ON target.Serial = source.Serial AND target.Name = source.Name;
 END
 GO
 
