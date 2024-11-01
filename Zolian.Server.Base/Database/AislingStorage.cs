@@ -210,7 +210,7 @@ public record AislingStorage : Sql
                     // If the item hasn't already been added to the data table, add it
                     iDt.Rows.Add(
                         item.ItemId,
-                    item.Template.Name,
+                        item.Template.Name,
                         (long)obj.Serial,
                         pane,
                         item.Slot,
@@ -768,7 +768,7 @@ public record AislingStorage : Sql
     {
         var dt = PostDataTable();
         dt.Rows.Add(boardId, postInfo.PostId, postInfo.Highlighted, postInfo.DatePosted, postInfo.Owner, postInfo.Sender, postInfo.ReadPost, postInfo.SubjectLine, postInfo.Message);
-        
+
         try
         {
             var connection = ConnectToDatabase(PersonalMailString);

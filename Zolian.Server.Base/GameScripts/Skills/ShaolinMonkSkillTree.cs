@@ -293,6 +293,7 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
         }
 
         aisling.ActionUsed = "Golden Dragon Palm";
+        _skillMethod.Train(aisling.Client, Skill);
 
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {
@@ -557,6 +558,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         }
 
         aisling.ActionUsed = "Tiger Swipe";
+        _skillMethod.Train(aisling.Client, Skill);
 
         foreach (var i in distinctEnemies.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {

@@ -43,7 +43,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Chaos-Networking" Version="2.2.2" />
 		<PackageReference Include="Dapper.StrongName" Version="2.1.35" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0-preview1.24240.8" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0-preview2.24304.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="RestSharp" Version="112.1.0" />
 		<PackageReference Include="Sentry" Version="4.12.1" />
