@@ -2249,7 +2249,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     case Monster monster:
                         {
-                            var script = monster.Scripts.Values.First();
+                            var script = monster.Scripts?.Values.FirstOrDefault();
+                            if (script is null) return default;
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = monster.Serial;
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
@@ -2260,7 +2261,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         }
                     case Mundane mundane:
                         {
-                            var script = mundane.Scripts.Values.First();
+                            var script = mundane.Scripts?.Values.FirstOrDefault();
+                            if (script is null) return default;
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = mundane.Serial;
                             localClient.EntryCheck = mundane.Serial;
@@ -2275,7 +2277,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                             if (item.DisplayName.StringContains("deum"))
                             {
-                                var script = item.Scripts.Values.First();
+                                var script = item.Scripts?.Values.FirstOrDefault();
+                                if (script is null) return default;
                                 localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
                                 localClient.Aisling.ThrewHealingPot = true;
                                 script?.OnUse(aisling, localArgs.SourceSlot);
