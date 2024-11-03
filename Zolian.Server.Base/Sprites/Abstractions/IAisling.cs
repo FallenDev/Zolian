@@ -2,7 +2,7 @@
 
 namespace Darkages.Sprites.Abstractions;
 
-public interface IAisling : ISprite
+public interface IAisling
 {
     WorldClient Client { get; set; }
 }

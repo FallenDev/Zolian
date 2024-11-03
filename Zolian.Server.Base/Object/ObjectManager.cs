@@ -9,7 +9,6 @@ public class ObjectManager
     public enum Get
     {
         Aislings = 1,
-        MonsterDamage = Aislings,
         Monsters = 2,
         AislingDamage = Monsters | Aislings,
         Mundanes = 4,

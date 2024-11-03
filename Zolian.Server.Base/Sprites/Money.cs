@@ -4,6 +4,7 @@ using Darkages.Network.Server;
 using Darkages.Types;
 
 using System.Numerics;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -35,7 +36,7 @@ public sealed class Money : Sprite
 
         if (mt > 0) money.Image = (ushort)mt;
 
-        AddObject(money);
+        ObjectManager.AddObject(money);
         ServerSetup.Instance.GlobalGroundMoneyCache.TryAdd(money.MoneyId, money);
     }
 

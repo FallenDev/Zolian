@@ -11,6 +11,7 @@ using ServiceStack;
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Security.Cryptography;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -40,7 +41,7 @@ public sealed class Mundane : Sprite
         if (template == null) return;
 
         var map = ServerSetup.Instance.GlobalMapCache[template.AreaID];
-        var existing = GetObject<Mundane>(map, p => p.Template.Name == template.Name);
+        var existing = ObjectManager.GetObject<Mundane>(map, p => p.Template.Name == template.Name);
 
         if (existing != null) return;
 
@@ -80,7 +81,7 @@ public sealed class Mundane : Sprite
 
         npc.InitMundane();
         ServerSetup.Instance.GlobalMundaneCache.TryAdd(npc.Serial, npc);
-        AddObject(npc);
+        ObjectManager.AddObject(npc);
     }
 
     private void InitMundane()
@@ -151,7 +152,7 @@ public sealed class Mundane : Sprite
 
                     if (!msg.IsNullOrEmpty())
                     {
-                        var nearby = GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this));
+                        var nearby = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this));
 
                         foreach (var aisling in nearby)
                         {

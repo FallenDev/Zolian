@@ -15,6 +15,7 @@ using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using ServiceStack;
 using Darkages.Network.Server;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -251,28 +252,28 @@ public sealed class Aisling : Player, IAisling
         switch (op)
         {
             case PlayerScope.NearbyAislingsExludingSelf:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
                 break;
             case PlayerScope.NearbyAislings:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)));
                 break;
             case PlayerScope.Clan:
-                selectedPlayers.AddRange(GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, Clan, StringComparison.CurrentCultureIgnoreCase)));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, Clan, StringComparison.CurrentCultureIgnoreCase)));
                 break;
             case PlayerScope.VeryNearbyAislings:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)));
                 break;
             case PlayerScope.AislingsOnSameMap:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId));
                 break;
             case PlayerScope.GroupMembers:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && GroupParty.Has(otherPlayers)));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && GroupParty.Has(otherPlayers)));
                 break;
             case PlayerScope.NearbyGroupMembersExcludingSelf:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial));
                 break;
             case PlayerScope.NearbyGroupMembers:
-                selectedPlayers.AddRange(GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)));
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)));
                 break;
             case PlayerScope.DefinedAislings when definer == null:
                 return;
@@ -415,7 +416,7 @@ public sealed class Aisling : Player, IAisling
 
                         spell.InUse = true;
 
-                        var target = GetObject(Map, i => i.Serial == info.Target, Get.Monsters | Get.Aislings);
+                        var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
                         CastAnimation(spell);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
@@ -641,9 +642,9 @@ public sealed class Aisling : Player, IAisling
         try
         {
             if (!delete) return;
-            var objs = GetObjects(Map,
+            var objs = ObjectManager.GetObjects(Map,
                 i => i.WithinRangeOf(this) && i.Target != null && i.Target.Serial == Serial,
-                Get.Monsters).ToArray();
+                ObjectManager.Get.Monsters).ToArray();
 
             if (objs.Length == 0) return;
             foreach (var obj in objs)
@@ -652,7 +653,7 @@ public sealed class Aisling : Player, IAisling
         finally
         {
             if (delete)
-                DelObject(this);
+                ObjectManager.DelObject(this);
         }
     }
 

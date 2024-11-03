@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -71,7 +72,7 @@ public sealed class Monster : Sprite
     public bool Skulled { get; set; }
     public bool Camouflage => AbilityScripts.Any(script => script.Skill.Template.Name == "Camouflage");
     private int WaypointIndex;
-    public Aisling Summoner => GetObject<Aisling>(Map, b => b.Serial == SummonerId);
+    public Aisling Summoner => ObjectManager.GetObject<Aisling>(Map, b => b.Serial == SummonerId);
     private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
     private static long SummonerId { get; set; }
     public ushort SummonerAdjLevel { get; set; }
@@ -298,7 +299,7 @@ public sealed class Monster : Sprite
         var newObj = Create(template, map);
 
         if (newObj == null) return;
-        AddObject(newObj);
+        ObjectManager.AddObject(newObj);
     }
 
     public void Patrol()

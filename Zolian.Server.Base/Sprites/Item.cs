@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Server;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -346,7 +347,7 @@ public sealed class Item : Sprite
     /// <returns>ItemId</returns>
     private static long CheckAndAmendItemIdIfItExists(Item item)
     {
-        var obj = GetObject<Item>(item.Map, i => i.Serial == item.Serial);
+        var obj = ObjectManager.GetObject<Item>(item.Map, i => i.Serial == item.Serial);
         var updateIfExists = obj != null;
         return updateIfExists ? EphemeralRandomIdGenerator<long>.Shared.NextId : item.ItemId;
     }
@@ -728,7 +729,7 @@ public sealed class Item : Sprite
         Serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
         if (Template.CanStack)
             ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
-        AddObject(this);
+        ObjectManager.AddObject(this);
     }
 
     /// <summary>

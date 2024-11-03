@@ -21,7 +21,7 @@ using Darkages.Network.Server;
 
 namespace Darkages.Sprites;
 
-public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
+public abstract class Sprite : INotifyPropertyChanged
 {
     public bool Abyss;
     public Position LastPosition;
@@ -896,9 +896,9 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     }
 
 
-    private IEnumerable<Sprite> GetSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.All);
-    private IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.AislingDamage);
-    private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, Get.Monsters | Get.Aislings);
+    private IEnumerable<Sprite> GetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
+    private IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.AislingDamage);
+    private IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
     public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
     public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
     public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
@@ -910,18 +910,18 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
     public bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
-    public Aisling[] AislingsNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
-    public Aisling[] AislingsEarShotNearby() => GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14)).ToArray();
-    public Aisling[] AislingsOnMap() => GetObjects<Aisling>(Map, i => i != null && Map == i.Map).ToArray();
-    public IEnumerable<Monster> MonstersNearby() => GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
-    public IEnumerable<Monster> MonstersOnMap() => GetObjects<Monster>(Map, i => i != null);
-    public IEnumerable<Mundane> MundanesNearby() => GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    public Aisling[] AislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
+    public Aisling[] AislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14)).ToArray();
+    public Aisling[] AislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map).ToArray();
+    public IEnumerable<Monster> MonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    public IEnumerable<Monster> MonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null);
+    public IEnumerable<Mundane> MundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
     public IEnumerable<Sprite> SpritesNearby()
     {
         var result = new List<Sprite>();
-        var listA = GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
-        var listB = GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
         result.AddRange(listA);
         result.AddRange(listB);
         return result;
@@ -2761,15 +2761,15 @@ public abstract class Sprite : ObjectManager, INotifyPropertyChanged, ISprite
     private void DeleteObject()
     {
         if (this is Monster)
-            DelObject(this as Monster);
+            ObjectManager.DelObject(this as Monster);
         if (this is Aisling)
-            DelObject(this as Aisling);
+            ObjectManager.DelObject(this as Aisling);
         if (this is Money)
-            DelObject(this as Money);
+            ObjectManager.DelObject(this as Money);
         if (this is Item)
-            DelObject(this as Item);
+            ObjectManager.DelObject(this as Item);
         if (this is Mundane)
-            DelObject(this as Mundane);
+            ObjectManager.DelObject(this as Mundane);
     }
 
     #endregion
