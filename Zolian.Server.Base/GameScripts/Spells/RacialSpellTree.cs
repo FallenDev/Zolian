@@ -52,7 +52,8 @@ public class Caltrops(Spell spell) : SpellScript(spell)
         var seed = Spell.Level / 100d;
         var damageImp = 15000 * seed;
         var dam = (int)(15000 + damageImp);
-        target.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
         if (target.CurrentHp > 1)
             target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
         else
@@ -298,7 +299,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
-        if (target == null) return;
+        if (target is not Damageable damageable) return;
         var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
         dmg = _spellMethod.AislingSpellDamageCalc(sprite, dmg, Spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
@@ -313,7 +314,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
         }
 
-        target.ApplyElementalSpellDamage(aisling, dmg, randomEle, Spell);
+        damageable.ApplyElementalSpellDamage(aisling, dmg, randomEle, Spell);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)

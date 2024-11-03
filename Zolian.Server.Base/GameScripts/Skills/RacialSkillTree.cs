@@ -1,4 +1,5 @@
 ﻿using Chaos.Networking.Entities.Server;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
@@ -6,6 +7,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Skills;
@@ -53,7 +55,6 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
                 }
             case Monster monster:
                 {
-                    // ToDo: Add logic so monsters can hide here
                     break;
                 }
         }
@@ -96,8 +97,10 @@ public class Archery(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -178,7 +181,8 @@ public class Archery(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(7).FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront(7).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -320,8 +324,10 @@ public class Slash(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -382,7 +388,8 @@ public class Slash(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -790,8 +797,10 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -832,6 +841,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -854,7 +864,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
             _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
@@ -878,7 +888,8 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -893,6 +904,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -913,7 +925,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -964,8 +976,10 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1006,6 +1020,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -1028,7 +1043,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
             _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
@@ -1052,7 +1067,8 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1067,6 +1083,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -1087,7 +1104,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -1139,8 +1156,10 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1181,6 +1200,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -1206,7 +1226,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffFrozen();
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
@@ -1231,7 +1251,8 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1246,6 +1267,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -1266,7 +1288,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
                 _debuff = new DebuffFrozen();
 
                 if (_target is Aisling affected)
@@ -1331,8 +1353,10 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1406,7 +1430,8 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1478,8 +1503,10 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1569,7 +1596,8 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1658,8 +1686,10 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1698,6 +1728,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -1724,7 +1755,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffSilence();
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -1749,7 +1780,8 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1764,6 +1796,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -1784,7 +1817,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
                 _debuff = new DebuffSilence();
 
                 if (_target is Aisling affected)
@@ -1848,8 +1881,10 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -1888,6 +1923,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -1914,7 +1950,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffPoison();
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -1939,7 +1975,8 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -1954,6 +1991,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -1974,7 +2012,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
                 _debuff = new DebuffPoison();
 
                 if (_target is Aisling affected)
@@ -2038,8 +2076,10 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2079,6 +2119,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         foreach (var entity in enemy.Where(entity => entity is not null))
         {
             _target = entity;
+            if (_target is not Damageable damageable) continue;
 
             if (_target.SpellReflect)
             {
@@ -2105,7 +2146,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             _debuff = new DebuffPoison();
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
             _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -2130,7 +2171,8 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -2145,6 +2187,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -2165,7 +2208,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
                 _debuff = new DebuffPoison();
 
                 if (_target is Aisling affected)
@@ -2236,7 +2279,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
-                    if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
+                    if (damageDealingAisling.NextTo((int)_target.Pos.X, (int)_target.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
 
                     break;
@@ -2340,7 +2383,7 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
 
                     client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
                     if (_target == null) return;
-                    if (_target.NextTo((int)damageDealingAisling.Pos.X, (int)damageDealingAisling.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
+                    if (damageDealingAisling.NextTo((int)_target.Pos.X, (int)_target.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
                         damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
 
                     break;
@@ -2432,8 +2475,8 @@ public class Dash(Skill skill) : SkillScript(skill)
 
         client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (damageDealingAisling.NextTo(_target.Position.X, _target.Position.Y) && damageDealingAisling.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageDealingAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2441,13 +2484,13 @@ public class Dash(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         aisling.ActionUsed = "Dash";
-        
+
         if (_target == null)
         {
             OnFailed(aisling);
             return;
         }
-        
+
         var dmgCalc = DamageCalc(aisling);
         var position = _target.Position;
         var mapCheck = aisling.Map.ID;
@@ -2480,7 +2523,8 @@ public class Dash(Skill skill) : SkillScript(skill)
                 _skillMethod.Step(aisling, position.X, position.Y);
             }
 
-            _target.ApplyDamage(aisling, dmgCalc, Skill);
+            if (_target is not Damageable damageable) return;
+            damageable.ApplyDamage(aisling, dmgCalc, Skill);
             _skillMethod.Train(client, Skill);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
 

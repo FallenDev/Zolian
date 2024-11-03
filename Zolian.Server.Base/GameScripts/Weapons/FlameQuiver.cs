@@ -25,12 +25,7 @@ public class FlameQuiver(Item item) : WeaponScript(item)
         var enemy = damageDealingSprite.DamageableGetAwayInFront(6).FirstOrDefault();
         damageDealingSprite.ActionUsed = "Flame Quiver";
 
-        switch (enemy)
-        {
-            case null:
-            case not Monster:
-                return;
-        }
+        if (enemy is not Monster damageable) return;
 
         var dmg = damageDealingSprite.Dex * 3 * Math.Max(damageDealingSprite.Position.DistanceFrom(enemy.Position), 5);
         // Rotten debuff
@@ -48,7 +43,7 @@ public class FlameQuiver(Item item) : WeaponScript(item)
             damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10003, null, enemy.Serial, 100, 10003, damageDealingSprite.Serial));
         });
 
-        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Fire, null);
-        enemy.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Earth, null);
+        damageable.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Fire, null);
+        damageable.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Earth, null);
     }
 }

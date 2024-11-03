@@ -6,7 +6,7 @@ using RestPosition = Darkages.Enums.RestPosition;
 
 namespace Darkages.Models;
 
-public class Player : Sprite
+public class Player : Damageable
 {
     public DateTime Created { get; set; }
     public string Username { get; set; }

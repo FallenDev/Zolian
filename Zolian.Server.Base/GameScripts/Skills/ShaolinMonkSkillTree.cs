@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
@@ -53,7 +54,8 @@ public class IronSprint(Skill skill) : SkillScript(skill)
         aisling.Facing(_target.X, _target.Y, out var direction);
         aisling.Direction = (byte)direction;
         aisling.Turn();
-        _target.ApplyDamage(aisling, dmgCalc, Skill);
+        if (_target is not Damageable damageable) return;
+        damageable.ApplyDamage(aisling, dmgCalc, Skill);
         _skillMethod.Train(client, Skill);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
 
@@ -221,7 +223,8 @@ public class IronFang(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -298,9 +301,10 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, i.Serial));
         }
 
@@ -336,7 +340,8 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -448,7 +453,8 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -510,17 +516,6 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
     }
 }
 
-// Passive reduction of all physical damage by 15%
-[Script("Crane Stance")]
-public class CraneStance(Skill skill) : SkillScript(skill)
-{
-    public override void OnFailed(Sprite sprite) { }
-
-    public override void OnSuccess(Sprite sprite) { }
-
-    public override void OnUse(Sprite sprite) { }
-}
-
 // Slash enemies in front and to the side of you four times with a powerful force using rage
 [Script("Tiger Swipe")]
 public class TigerSwipe(Skill skill) : SkillScript(skill)
@@ -563,11 +558,12 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         foreach (var i in distinctEnemies.Where(i => aisling.Serial != i.Serial && i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
-            i.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Rage, Skill);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, i.Serial));
         }
 
@@ -602,7 +598,8 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -716,7 +713,8 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)

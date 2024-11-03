@@ -509,7 +509,8 @@ public class Gust
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a gust of wind.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Gust);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Wind, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Wind, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(29, null, target.Serial));
     }
@@ -568,7 +569,8 @@ public class Quake
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a tremor.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Quake);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Earth, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Earth, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(77, null, target.Serial));
     }
@@ -627,7 +629,8 @@ public class Rain
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon releases a storm.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Rain);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Water, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Water, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(9, null, target.Serial));
     }
@@ -686,7 +689,8 @@ public class Flame
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon spews forth flames.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Flame);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Fire, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Fire, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(12, null, target.Serial));
     }
@@ -745,7 +749,8 @@ public class Dusk
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the night.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dusk);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Void, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Void, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(76, null, target.Serial));
     }
@@ -803,7 +808,8 @@ public class Dawn
             aislingTarget.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{client.Aisling.Username} weapon draws from the light.");
 
         var dmg = _spellMethod.WeaponDamageElementalProc(aisling, aisling.Dawn);
-        target.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Holy, null);
+        if (target is not Damageable damageable) return;
+        damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Holy, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
         aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(78, null, target.Serial));
     }

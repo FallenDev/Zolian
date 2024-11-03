@@ -6,6 +6,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
@@ -39,7 +40,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
         {
             if (enemy is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
-            
+
             if (enemy.SpellNegate)
             {
                 if (sprite is Aisling caster)

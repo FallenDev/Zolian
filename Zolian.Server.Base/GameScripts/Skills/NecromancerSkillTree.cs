@@ -19,9 +19,10 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override async void OnSuccess(Sprite sprite)
@@ -71,6 +72,8 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (_target is not Damageable damageable) return;
+
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
@@ -93,7 +96,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(aisling);
-        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
+        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
         _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
@@ -125,7 +128,8 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(6);
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront(6);
 
             if (enemy.Count == 0) return;
             await SendAnimations(sprite, enemy);
@@ -133,6 +137,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) continue;
 
                 if (_target.SpellReflect)
                 {
@@ -153,7 +158,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -168,7 +173,9 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
     {
-        foreach (var position in damageDealingSprite.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        if (damageDealingSprite is not Identifiable identifiable) return;
+
+        foreach (var position in identifiable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>

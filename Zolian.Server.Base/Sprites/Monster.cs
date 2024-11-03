@@ -21,7 +21,7 @@ public record TargetRecord
     public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; init; }
 }
 
-public sealed class Monster : Sprite
+public sealed class Monster : Damageable
 {
     public Task<IList<Vector2>> Path;
     public Vector2 TargetPos = Vector2.Zero;

@@ -20,9 +20,10 @@ public class Stab(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -82,7 +83,8 @@ public class Stab(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -132,8 +134,10 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -194,7 +198,8 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -245,8 +250,10 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -319,7 +326,8 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -458,8 +466,10 @@ public class Flurry(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -535,13 +545,13 @@ public class Flurry(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = Skill.Reflect(i, sprite, Skill);
-
+                if (_target is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(sprite);
 
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -699,8 +709,10 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -759,8 +771,9 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetInFrontToSide(2);
-            var enemyBehind = sprite.DamageableGetBehind(2);
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide(2);
+            var enemyBehind = identifiable.DamageableGetBehind(2);
             enemy.AddRange(enemyBehind);
 
             var action = new BodyAnimationArgs
@@ -776,10 +789,10 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = Skill.Reflect(i, sprite, Skill);
-
+                if (_target is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(sprite);
 
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -828,8 +841,10 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -888,8 +903,9 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.GetAllInFront(3);
-            var enemyBehind = sprite.DamageableGetBehind(3);
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetAllInFront(3);
+            var enemyBehind = identifiable.DamageableGetBehind(3);
             enemy.AddRange(enemyBehind);
 
             var action = new BodyAnimationArgs
@@ -905,10 +921,10 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = Skill.Reflect(i, sprite, Skill);
-
+                if (_target is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(sprite);
 
-                _target.ApplyDamage(sprite, dmgCalc, Skill);
+                damageable.ApplyDamage(sprite, dmgCalc, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -958,8 +974,10 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)

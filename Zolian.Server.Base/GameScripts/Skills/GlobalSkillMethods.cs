@@ -8,7 +8,7 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;
 
-public class GlobalSkillMethods : IGlobalSkillMethods
+public class GlobalSkillMethods
 {
     private static bool Attempt(WorldClient client, Skill skill)
     {
@@ -62,7 +62,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
                     dmg += knockOutDmg * client.Aisling.Str * 1;
                 }
 
-                target.ApplyDamage(client.Aisling, dmg, skill);
+                if (target is not Damageable damageable) return;
+                damageable.ApplyDamage(client.Aisling, dmg, skill);
             }
         }
 
@@ -104,11 +105,10 @@ public class GlobalSkillMethods : IGlobalSkillMethods
     public Sprite[] GetInCone(Sprite sprite)
     {
         var objs = new List<Sprite>();
-        var front = sprite.GetInFrontToSide();
-
-        if (!front.Any()) return objs.ToArray();
+        if (sprite is not Identifiable identified) return default;
+        var front = identified.GetInFrontToSide();
+        if (front.Count == 0) return default;
         objs.AddRange(front.Where(monster => monster.TileType == TileContent.Monster && monster.Alive));
-
         return objs.ToArray();
     }
 
@@ -157,7 +157,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         if (dmg > 0)
         {
             target = Skill.Reflect(target, attacker, skill);
-            target.ApplyDamage(attacker, dmg, skill);
+            if (target is not Damageable damageable) return;
+            damageable.ApplyDamage(attacker, dmg, skill);
         }
 
         // Training
@@ -180,7 +181,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         if (dmg > 0)
         {
             target = Skill.Reflect(target, attacker, skill);
-            target.ApplyDamage(attacker, dmg, skill);
+            if (target is not Damageable damageable) return;
+            damageable.ApplyDamage(attacker, dmg, skill);
         }
 
         // Training
@@ -202,7 +204,8 @@ public class GlobalSkillMethods : IGlobalSkillMethods
         if (dmg > 0)
         {
             target = Skill.Reflect(target, attacker, skill);
-            target.ApplyDamage(attacker, dmg, skill);
+            if (target is not Damageable damageable) return;
+            damageable.ApplyDamage(attacker, dmg, skill);
         }
 
         // Training

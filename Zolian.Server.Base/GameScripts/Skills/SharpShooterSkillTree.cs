@@ -4,6 +4,7 @@ using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
+
 using ServiceStack;
 
 namespace Darkages.GameScripts.Skills;
@@ -20,8 +21,10 @@ public class Bang(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -96,7 +99,8 @@ public class Bang(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(5).FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront(5).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -251,7 +255,8 @@ public class Snipe(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(5).FirstOrDefault();
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.MonsterGetInFront(5).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)

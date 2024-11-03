@@ -14,17 +14,12 @@ public class Apple(Item item) : WeaponScript(item)
 
         var enemy = damageDealingSprite.DamageableGetAwayInFront(4).FirstOrDefault();
 
-        switch (enemy)
-        {
-            case null:
-            case not Monster:
-                return;
-        }
+        if (enemy is not Monster damageable) return;
 
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
         // Rotten debuff
         dmg /= 2;
         damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10010, null, enemy.Serial, 100, 10010, damageDealingSprite.Serial));
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

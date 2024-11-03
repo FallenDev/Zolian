@@ -21,3 +21,14 @@ public class PainBane(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite) { }
     public override void OnUse(Sprite sprite) { }
 }
+
+// Passive reduction of all physical damage by 15%
+[Script("Crane Stance")]
+public class CraneStance(Skill skill) : SkillScript(skill)
+{
+    public override void OnFailed(Sprite sprite) { }
+
+    public override void OnSuccess(Sprite sprite) { }
+
+    public override void OnUse(Sprite sprite) { }
+}

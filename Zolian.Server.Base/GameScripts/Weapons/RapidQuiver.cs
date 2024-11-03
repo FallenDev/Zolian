@@ -25,12 +25,7 @@ public class RapidQuiver(Item item) : WeaponScript(item)
         var enemy = damageDealingSprite.DamageableGetAwayInFront(6).FirstOrDefault();
         damageDealingSprite.ActionUsed = "Rapid Quiver";
 
-        switch (enemy)
-        {
-            case null:
-            case not Monster:
-                return;
-        }
+        if (enemy is not Monster damageable) return;
 
         var dmg = damageDealingSprite.Dex * 3 * Math.Max(damageDealingSprite.Position.DistanceFrom(enemy.Position), 5);
         // Rotten debuff
@@ -60,9 +55,9 @@ public class RapidQuiver(Item item) : WeaponScript(item)
             damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial));
         });
 
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

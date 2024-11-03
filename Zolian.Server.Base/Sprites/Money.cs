@@ -8,7 +8,7 @@ using Darkages.Object;
 
 namespace Darkages.Sprites;
 
-public sealed class Money : Sprite
+public sealed class Money : Identifiable
 {
     public long MoneyId { get; private set; }
     private ulong Amount { get; set; }

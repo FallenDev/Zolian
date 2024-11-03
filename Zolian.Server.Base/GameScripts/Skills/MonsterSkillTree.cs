@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
@@ -21,8 +22,9 @@ public class Bite(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -43,7 +45,8 @@ public class Bite(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -136,8 +139,9 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -158,7 +162,8 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -207,8 +212,9 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -229,7 +235,8 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -279,8 +286,9 @@ public class Stomp(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -301,7 +309,8 @@ public class Stomp(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -335,8 +344,9 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -357,7 +367,8 @@ public class HeadButt(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -391,8 +402,9 @@ public class Claw(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -413,7 +425,8 @@ public class Claw(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -447,8 +460,9 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -469,7 +483,8 @@ public class MuleKick(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -503,8 +518,9 @@ public class TailSlap(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -525,7 +541,8 @@ public class TailSlap(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFrontToSide();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFrontToSide();
 
         if (enemy.Count == 0)
         {
@@ -563,8 +580,9 @@ public class RollOver(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -585,7 +603,8 @@ public class RollOver(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -634,8 +653,9 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -656,7 +676,8 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -705,8 +726,9 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -727,7 +749,8 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -776,8 +799,9 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -842,8 +866,9 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -864,7 +889,8 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront(3).FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront(3).FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -898,8 +924,9 @@ public class Pounce(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -920,7 +947,8 @@ public class Pounce(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront(6).FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront(6).FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -954,8 +982,9 @@ public class Tentacle(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -976,7 +1005,8 @@ public class Tentacle(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+        if (sprite is not Identifiable identified) return;
+        var enemy = identified.MonsterGetInFront().FirstOrDefault();
         _target = enemy;
 
         if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -1049,8 +1079,9 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -1071,7 +1102,8 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemyList = sprite.MonsterGetInFrontToSide();
+        if (sprite is not Identifiable identified) return;
+        var enemyList = identified.MonsterGetInFrontToSide();
         if (enemyList.Count == 0)
         {
             OnFailed(sprite);
@@ -1114,8 +1146,9 @@ public class FireWheel(Skill skill) : SkillScript(skill)
 
     public override void OnFailed(Sprite sprite)
     {
+        if (sprite is not Identifiable identified) return;
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
+        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
@@ -1136,7 +1169,8 @@ public class FireWheel(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemyList = sprite.MonsterGetFiveByFourRectInFront();
+        if (sprite is not Identifiable identified) return;
+        var enemyList = identified.MonsterGetFiveByFourRectInFront();
         if (enemyList.Count == 0)
         {
             OnFailed(sprite);

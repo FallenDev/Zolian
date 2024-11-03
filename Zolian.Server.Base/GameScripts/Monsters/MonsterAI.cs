@@ -1982,6 +1982,8 @@ public class SelfDestruct : MonsterScript
                 return;
             }
 
+        if (Monster.Target is not Damageable damageable) return;
+
         if (Monster.Target is not { CurrentHp: > 1 })
         {
             if (Monster.Target is not Aisling aisling) return;
@@ -1999,7 +2001,7 @@ public class SelfDestruct : MonsterScript
         skill.OnUse(Monster);
         if (Monster.Target == null) return;
         var suicide = Monster.CurrentHp / .5;
-        Monster.Target.ApplyDamage(Monster, (long)suicide, null, true);
+        damageable.ApplyDamage(Monster, (long)suicide, null, true);
         OnDeath();
     }
 

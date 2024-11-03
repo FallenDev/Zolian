@@ -78,10 +78,11 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
         var targets = GetObjects(playerAction.Map, i => i != null && i.WithinRangeOf(target, 4), Get.AislingDamage).ToList();
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial && enemy.Attackable))
         {
+            if (enemy is not Damageable damageable) continue;
             if (enemy is Aisling aisling && !aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
             var dmgCalc = DamageCalc(playerAction);
-            enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Water, Spell);
-            enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Wind, Spell);
+            damageable.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Water, Spell);
+            damageable.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Wind, Spell);
             var debuff = new DebuffAdvFrozen();
             if (enemy is Monster)
                 debuff.OnApplied(enemy, debuff);
@@ -232,7 +233,7 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling playerAction) return;
         playerAction.ActionUsed = "Finger of Death";
-        if (target == null) return;
+        if (target is not Damageable damageable) return;
 
         if (!Spell.CanUse())
         {
@@ -283,7 +284,7 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
             return;
         }
 
-        var enemies = target.DamageableGetBehind(4);
+        var enemies = damageable.DamageableGetBehind(4);
 
         foreach (var enemy in enemies)
         {
@@ -330,13 +331,15 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
             var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(corpse, 4), Get.AislingDamage).ToList();
             foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
             {
+                if (enemy is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(aisling);
-                enemy.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Void, Spell);
+                damageable.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Void, Spell);
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(77, enemy.Position));
             }
 
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, corpse.Position));
-            corpse.Remove();
+            if (corpse is not Identifiable identifiable) continue;
+            identifiable.Remove();
         }
     }
 
@@ -541,6 +544,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
         foreach (var nearby in aisling.SpritesNearby())
         {
+            if (nearby is not Damageable damageable) continue;
             if (nearby.Serial == aisling.Serial) continue;
 
             if (nearby.SpellNegate)
@@ -558,7 +562,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
             if (mR > nearby.Will)
             {
-                nearby.ApplyElementalSpellDamage(aisling, (aisling.Int + aisling.Wis) * (aisling.Level + aisling.AbpLevel), ElementManager.Element.Void, Spell);
+                damageable.ApplyElementalSpellDamage(aisling, (aisling.Int + aisling.Wis) * (aisling.Level + aisling.AbpLevel), ElementManager.Element.Void, Spell);
 
                 if (!nearby.IsCradhed)
                 {

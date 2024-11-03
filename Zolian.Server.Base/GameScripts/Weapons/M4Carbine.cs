@@ -25,12 +25,7 @@ public class M4Carbine(Item item) : WeaponScript(item)
         var enemy = damageDealingSprite.DamageableGetAwayInFront(9).FirstOrDefault();
         damageDealingSprite.ActionUsed = "pew pew pew!";
 
-        switch (enemy)
-        {
-            case null:
-            case not Monster:
-                return;
-        }
+        if (enemy is not Monster damageable) return;
 
         var dmg = damageDealingSprite.Dex * 2 / Math.Max(damageDealingSprite.Position.DistanceFrom(enemy.Position), 9);
         // Gravity debuff
@@ -60,9 +55,9 @@ public class M4Carbine(Item item) : WeaponScript(item)
             damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial));
         });
 
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

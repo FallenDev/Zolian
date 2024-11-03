@@ -15,7 +15,7 @@ using Darkages.Object;
 
 namespace Darkages.Sprites;
 
-public sealed class Mundane : Sprite
+public sealed class Mundane : Movable
 {
     private readonly List<SkillScript> _skillScripts = [];
     private readonly List<SpellScript> _spellScripts = [];
@@ -203,10 +203,6 @@ public sealed class Mundane : Sprite
         }
     }
 
-    public DisplayColor Color => DisplayColor.Default;
-    public EntityType EntityType => EntityType.Creature;
-    public uint Id => Serial;
     public string Name => Template.Name;
     public ushort Sprite => Template.Image;
-    public void Activate(Aisling source) => Scripts.First().Value.OnClick(source.Client, Id);
 }

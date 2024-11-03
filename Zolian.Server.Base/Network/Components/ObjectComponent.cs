@@ -68,7 +68,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         foreach (var obj in objectsToRemove)
         {
-            if (obj == null) continue;
+            if (obj is not Identifiable identifiable) continue;
             if (obj.Serial == self.Serial) continue;
 
             if (obj is Monster monster)
@@ -78,7 +78,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             }
 
             self.SpritesInView.TryRemove(obj.Serial, out _);
-            obj.HideFrom(self);
+            identifiable.HideFrom(self);
         }
     }
 

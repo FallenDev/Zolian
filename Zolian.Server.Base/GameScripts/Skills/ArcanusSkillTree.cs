@@ -19,9 +19,10 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override async void OnSuccess(Sprite sprite)
@@ -71,6 +72,8 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (_target is not Damageable damageable) return;
+
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
@@ -93,7 +96,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(aisling);
-        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
+        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
         _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
@@ -125,7 +128,8 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(6);
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront(6);
 
             if (enemy.Count == 0) return;
             await SendAnimations(sprite, enemy);
@@ -133,6 +137,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) return;
 
                 if (_target.SpellReflect)
                 {
@@ -153,7 +158,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -168,7 +173,9 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
     {
-        foreach (var position in damageDealingSprite.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        if (damageDealingSprite is not Damageable damageable) return;
+
+        foreach (var position in damageable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
@@ -214,9 +221,10 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override async void OnSuccess(Sprite sprite)
@@ -266,6 +274,8 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (_target is not Damageable damageable) return;
+
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
@@ -288,7 +298,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(aisling);
-        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
+        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
         _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
@@ -320,7 +330,8 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(6);
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront(6);
 
             if (enemy.Count == 0) return;
             await SendAnimations(sprite, enemy);
@@ -328,6 +339,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) return;
 
                 if (_target.SpellReflect)
                 {
@@ -348,7 +360,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -363,7 +375,9 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
     {
-        foreach (var position in damageDealingSprite.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        if (damageDealingSprite is not Damageable damageable) return;
+
+        foreach (var position in damageable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
@@ -409,9 +423,10 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override async void OnSuccess(Sprite sprite)
@@ -461,6 +476,8 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (_target is not Damageable damageable) return;
+
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
@@ -483,7 +500,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(aisling);
-        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
+        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
         _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
@@ -515,7 +532,8 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(6);
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront(6);
 
             if (enemy.Count == 0) return;
             await SendAnimations(sprite, enemy);
@@ -523,6 +541,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) return;
 
                 if (_target.SpellReflect)
                 {
@@ -543,7 +562,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -558,7 +577,9 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
     {
-        foreach (var position in damageDealingSprite.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        if (damageDealingSprite is not Damageable damageable) return;
+
+        foreach (var position in damageable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
@@ -604,9 +625,10 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) &&
-            sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override async void OnSuccess(Sprite sprite)
@@ -656,6 +678,8 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (_target is not Damageable damageable) return;
+
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
@@ -678,7 +702,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
         }
 
         var dmgCalc = DamageCalc(aisling);
-        _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
+        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
         _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
@@ -710,7 +734,8 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = sprite.MonsterGetInFront(6);
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront(6);
 
             if (enemy.Count == 0) return;
             await SendAnimations(sprite, enemy);
@@ -718,6 +743,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {
                 _target = i;
+                if (_target is not Damageable damageable) return;
 
                 if (_target.SpellReflect)
                 {
@@ -738,7 +764,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
                 }
 
                 var dmgCalc = DamageCalc(sprite);
-                _target.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
+                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
 
                 if (Skill.Template.TargetAnimation > 0)
                     if (_target is Monster or Mundane or Aisling)
@@ -753,7 +779,9 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
     private static async Task SendAnimations(Sprite damageDealingSprite, IEnumerable<Sprite> enemy)
     {
-        foreach (var position in damageDealingSprite.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        if (damageDealingSprite is not Damageable damageable) return;
+
+        foreach (var position in damageable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>

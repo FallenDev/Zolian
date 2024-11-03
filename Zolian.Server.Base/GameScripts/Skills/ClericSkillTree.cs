@@ -299,8 +299,10 @@ public class HolyLance(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -330,9 +332,10 @@ public class HolyLance(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
 
@@ -366,7 +369,8 @@ public class HolyLance(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront(4).FirstOrDefault();
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront(4).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -415,8 +419,10 @@ public class Recite(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -445,6 +451,7 @@ public class Recite(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
             var element = ElementManager.Element.None;
@@ -484,7 +491,7 @@ public class Recite(Skill skill) : SkillScript(skill)
                     break;
             }
 
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, element, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, element, Skill);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
 
@@ -518,7 +525,8 @@ public class Recite(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -567,8 +575,10 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -597,9 +607,10 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Void, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Void, Skill);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
 
@@ -633,7 +644,8 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -682,8 +694,10 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -712,9 +726,10 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
 
@@ -748,7 +763,8 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -797,8 +813,10 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (_target is not { Alive: true }) return;
-        if (sprite.NextTo(_target.Position.X, _target.Position.Y) && sprite.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        if (sprite is not Damageable damageable) return;
+        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
+            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
+            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -827,6 +845,7 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
+            if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
             dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
             var healthMultiplier = aisling.CurrentHp * 0.50;
@@ -844,7 +863,7 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _target.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
 
@@ -878,7 +897,8 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            var enemy = sprite.MonsterGetInFront().FirstOrDefault();
+            if (sprite is not Identifiable identified) return;
+            var enemy = identified.MonsterGetInFront().FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)

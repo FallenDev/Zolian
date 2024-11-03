@@ -36,6 +36,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         foreach (var targetObj in targets)
         {
             if (targetObj.Serial == aisling.Serial) continue;
+            if (targetObj is not Damageable damageable) continue;
 
             if (targetObj.SpellNegate)
             {
@@ -53,7 +54,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
             if (mR > targetObj.Will)
             {
                 client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position, targetObj.Serial));
-                targetObj.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, Spell);
+                damageable.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, Spell);
             }
             else
             {

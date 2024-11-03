@@ -9,7 +9,7 @@ using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Spells;
 
-public class GlobalSpellMethods : IGlobalSpellMethods
+public class GlobalSpellMethods
 {
     private const int CritDmg = 2;
 
@@ -103,6 +103,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
 
     public void ElementalOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp)
     {
+        if (sprite is not Damageable damageable) return;
         if (sprite is Aisling aisling)
         {
             if (target == null) return;
@@ -112,7 +113,7 @@ public class GlobalSpellMethods : IGlobalSpellMethods
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-                target.ApplyElementalSpellDamage(aisling, dmg, spell.Template.ElementalProperty, spell);
+                damageable.ApplyElementalSpellDamage(aisling, dmg, spell.Template.ElementalProperty, spell);
             }
             else
             {
@@ -121,9 +122,9 @@ public class GlobalSpellMethods : IGlobalSpellMethods
         }
         else
         {
-            var dmg = (long)sprite.GetBaseDamage(sprite, sprite.Target, MonsterEnums.Elemental);
+            var dmg = (long)damageable.GetBaseDamage(sprite, sprite.Target, MonsterEnums.Elemental);
             dmg = MonsterElementalDamageProc(sprite, dmg, spell, exp);
-            target.ApplyElementalSpellDamage(sprite, dmg, spell.Template.ElementalProperty, spell);
+            damageable.ApplyElementalSpellDamage(sprite, dmg, spell.Template.ElementalProperty, spell);
 
             if (target is Aisling targetAisling)
                 targetAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{(sprite is Monster monster ? monster.Template.BaseName : (sprite as Mundane)?.Template.Name) ?? "Unknown"} casts {spell.Template.Name} elemental on you");
@@ -240,15 +241,14 @@ public class GlobalSpellMethods : IGlobalSpellMethods
     public void ElementalNecklaceOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp)
     {
         if (sprite is not Aisling aisling) return;
-
-        if (target == null) return;
+        if (target is not Damageable damageable) return;
         var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
         var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
 
         if (target.CurrentHp > 0)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(spell.Template.TargetAnimation, null, target.Serial));
-            target.ApplyElementalSpellDamage(aisling, dmg, aisling.OffenseElement, spell);
+            damageable.ApplyElementalSpellDamage(aisling, dmg, aisling.OffenseElement, spell);
         }
         else
         {

@@ -17,7 +17,7 @@ using Darkages.Object;
 
 namespace Darkages.Sprites;
 
-public sealed class Item : Sprite
+public sealed class Item : Identifiable
 {
     public enum ItemPanes
     {

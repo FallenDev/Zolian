@@ -16,12 +16,7 @@ public class NinjaStar(Item item) : WeaponScript(item)
 
         var enemy = damageDealingSprite.DamageableGetInFront(5).FirstOrDefault();
 
-        switch (enemy)
-        {
-            case null:
-            case not Monster or Aisling:
-                return;
-        }
+        if (enemy is not Monster damageable) return;
 
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
 
@@ -46,6 +41,6 @@ public class NinjaStar(Item item) : WeaponScript(item)
         }
 
         damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10011, null, enemy.Serial, 100, 10011, damageDealingSprite.Serial));
-        enemy.ApplyDamage(damageDealingSprite, dmg, null);
+        damageable.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }
