@@ -48,6 +48,7 @@ using LanternSize = Chaos.DarkAges.Definitions.LanternSize;
 using MapFlags = Darkages.Enums.MapFlags;
 using Nation = Chaos.DarkAges.Definitions.Nation;
 using RestPosition = Chaos.DarkAges.Definitions.RestPosition;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Client;
 

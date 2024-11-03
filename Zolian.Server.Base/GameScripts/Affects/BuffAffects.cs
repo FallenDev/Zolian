@@ -2,6 +2,7 @@
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Affects;

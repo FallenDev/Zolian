@@ -16,6 +16,7 @@ using Darkages.Sprites.Abstractions;
 using ServiceStack;
 using Darkages.Network.Server;
 using Darkages.Object;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
@@ -416,7 +417,7 @@ public sealed class Aisling : Player, IAisling
 
                         spell.InUse = true;
 
-                        var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
+                        var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings) ?? this;
                         CastAnimation(spell);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);

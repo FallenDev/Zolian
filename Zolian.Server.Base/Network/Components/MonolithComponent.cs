@@ -1,11 +1,11 @@
 ﻿using Darkages.Common;
 using Darkages.Network.Server;
-using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 using System.Numerics;
 using Darkages.Enums;
 using Darkages.Object;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Components;
 

@@ -4,6 +4,7 @@ using Darkages.Types;
 using System.Numerics;
 using System.Security.Cryptography;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
@@ -11,7 +12,7 @@ public class Movable : Identifiable
 {
     private readonly object _walkLock = new();
 
-    public bool Walk()
+    private bool Walk()
     {
         void Step0C(int x, int y)
         {
@@ -169,7 +170,7 @@ public class Movable : Identifiable
         LastTurnUpdated = DateTime.UtcNow;
     }
 
-    public void CheckTraps(Monster monster)
+    private void CheckTraps(Monster monster)
     {
         foreach (var trap in ServerSetup.Instance.Traps.Values.Where(t => t.TrapItem.Map.ID == monster.Map.ID))
         {

@@ -15,7 +15,7 @@ using Darkages.GameScripts.Formulas;
 using Darkages.Network.Server;
 using Darkages.Object;
 
-namespace Darkages.Sprites;
+namespace Darkages.Sprites.Entity;
 
 public sealed class Item : Identifiable
 {

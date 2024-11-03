@@ -1,7 +1,7 @@
 ﻿using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.Pravat;

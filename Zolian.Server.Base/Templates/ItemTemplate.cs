@@ -2,7 +2,6 @@
 
 using Darkages.Database;
 using Darkages.Enums;
-using Darkages.Sprites;
 using Microsoft.Data.SqlClient;
 
 using System.Data;
@@ -10,6 +9,7 @@ using Darkages.Types;
 using Element = Darkages.Enums.ElementManager.Element;
 using Gender = Darkages.Enums.Gender;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Templates;
 

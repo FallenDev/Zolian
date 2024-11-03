@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.Network.Server;
 using Darkages.Object;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
@@ -20,7 +21,7 @@ public abstract class Sprite : INotifyPropertyChanged
     public List<List<TileGrid>> MasterGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
-    public readonly Stopwatch _threatControl = new();
+    private readonly Stopwatch _threatControl = new();
 
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
@@ -28,7 +29,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #region Buffs Debuffs
 
-    public int _frozenStack;
+    protected int _frozenStack;
     public bool IsWeakened => CurrentHp <= MaximumHp * .05;
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
@@ -78,9 +79,9 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool CantAttack => IsFrozen || IsStopped || IsSleeping || IsCharmed;
     public bool CantMove => IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed;
     public bool HasDoT => IsBleeding || IsPoisoned;
-    public long CheckHp => Math.Clamp(BaseHp + BonusHp, 0, long.MaxValue);
+    private long CheckHp => Math.Clamp(BaseHp + BonusHp, 0, long.MaxValue);
     public long MaximumHp => Math.Clamp(CheckHp, 0, long.MaxValue);
-    public long CheckMp => Math.Clamp(BaseMp + BonusMp, 0, long.MaxValue);
+    private long CheckMp => Math.Clamp(BaseMp + BonusMp, 0, long.MaxValue);
     public long MaximumMp => Math.Clamp(CheckMp, 0, long.MaxValue);
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
     public int Dmg => _Dmg + BonusDmg;
@@ -100,16 +101,17 @@ public abstract class Sprite : INotifyPropertyChanged
             }
         }
     }
-    public int AcFromDex => (Dex / 15).IntClamp(0, 500);
-    public int Ac => (_ac + BonusAc + AcFromDex).IntClamp(-200, 500);
-    public double _fortitude => (Con * 0.1).DoubleClamp(0, 90);
+
+    private int AcFromDex => (Dex / 15).IntClamp(0, 500);
+    private int Ac => (_ac + BonusAc + AcFromDex).IntClamp(-200, 500);
+    private double _fortitude => (Con * 0.1).DoubleClamp(0, 90);
     public double Fortitude => Math.Round(_fortitude + BonusFortitude, 2);
-    public double _reflex => (Hit * 0.1).DoubleClamp(0, 90);
+    private double _reflex => (Hit * 0.1).DoubleClamp(0, 90);
     public double Reflex => Math.Round(_reflex, 2);
-    public double _will => (Mr * 0.14).DoubleClamp(0, 80);
+    private double _will => (Mr * 0.14).DoubleClamp(0, 80);
     public double Will => Math.Round(_will, 2);
     public int Hit => _Hit + BonusHit;
-    public int Mr => _Mr + BonusMr;
+    private int Mr => _Mr + BonusMr;
     public int Str => (_Str + BonusStr).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Int => (_Int + BonusInt).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Wis => (_Wis + BonusWis).IntClamp(0, ServerSetup.Instance.Config.StatCap);
@@ -129,7 +131,7 @@ public abstract class Sprite : INotifyPropertyChanged
         _ => 0
     };
 
-    public static readonly int[][] Directions =
+    protected static readonly int[][] Directions =
     [
         [+0, -1],
         [+1, +0],
@@ -137,7 +139,7 @@ public abstract class Sprite : INotifyPropertyChanged
         [-1, +0]
     ];
 
-    public double TargetDistance { get; set; }
+    protected double TargetDistance { get; set; }
 
     protected Sprite()
     {
@@ -188,8 +190,8 @@ public abstract class Sprite : INotifyPropertyChanged
     }
     public TileContent TileType { get; set; }
     public byte Direction { get; set; }
-    public int PendingX { get; set; }
-    public int PendingY { get; set; }
+    protected int PendingX { get; set; }
+    protected int PendingY { get; set; }
     public DateTime LastMenuInvoked { get; set; }
     public DateTime LastMovementChanged { get; set; }
     public DateTime LastTargetAcquired { get; set; }
@@ -246,7 +248,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #endregion
 
-    public bool CanBeAttackedHere(Sprite source)
+    protected bool CanBeAttackedHere(Sprite source)
     {
         if (source is not Aisling || this is not Aisling) return true;
         if (CurrentMapId <= 0 || !ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var value)) return true;
@@ -254,12 +256,12 @@ public abstract class Sprite : INotifyPropertyChanged
         return value.Flags.MapFlagIsSet(MapFlags.PlayerKill);
     }
 
-    public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public bool CanAttack(Sprite attackingPlayer)
+    protected bool CanAttack(Sprite attackingPlayer)
     {
         if (this is not Monster monster) return false;
         if (monster.Template.MonsterRace == MonsterRace.Dummy) return true;
@@ -286,7 +288,7 @@ public abstract class Sprite : INotifyPropertyChanged
         return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
     public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
-    public bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
+    private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
     public Aisling[] AislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
     public Aisling[] AislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14)).ToArray();
@@ -351,7 +353,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    public void StatusBarDisplayUpdateBuff(Buff buff)
+    private void StatusBarDisplayUpdateBuff(Buff buff)
     {
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
@@ -374,7 +376,7 @@ public abstract class Sprite : INotifyPropertyChanged
         aisling.Client.SendEffect((EffectColor)colorInt, buff.Icon);
     }
 
-    public void StatusBarDisplayUpdateDebuff(Debuff debuff)
+    private void StatusBarDisplayUpdateDebuff(Debuff debuff)
     {
         if (this is not Aisling aisling) return;
         var colorInt = byte.MinValue;
@@ -421,7 +423,7 @@ public abstract class Sprite : INotifyPropertyChanged
         aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
     }
 
-    public bool CanUpdate()
+    protected bool CanUpdate()
     {
         if (CantMove) return false;
 
@@ -453,7 +455,7 @@ public abstract class Sprite : INotifyPropertyChanged
         return Debuffs.ContainsKey(debuff);
     }
 
-    public bool HasDebuff(Func<Debuff, bool> p)
+    protected bool HasDebuff(Func<Debuff, bool> p)
     {
         if (Debuffs == null || Debuffs.IsEmpty)
             return false;
@@ -471,7 +473,7 @@ public abstract class Sprite : INotifyPropertyChanged
             ?.Name;
     }
 
-    public void RemoveAllBuffs()
+    private void RemoveAllBuffs()
     {
         if (Buffs == null)
             return;
@@ -480,7 +482,7 @@ public abstract class Sprite : INotifyPropertyChanged
             RemoveBuff(buff.Key);
     }
 
-    public void RemoveAllDebuffs()
+    private void RemoveAllDebuffs()
     {
         if (Debuffs == null)
             return;
@@ -489,7 +491,7 @@ public abstract class Sprite : INotifyPropertyChanged
             RemoveDebuff(debuff.Key);
     }
 
-    public bool RemoveBuff(string buff)
+    private bool RemoveBuff(string buff)
     {
         if (!HasBuff(buff)) return false;
 

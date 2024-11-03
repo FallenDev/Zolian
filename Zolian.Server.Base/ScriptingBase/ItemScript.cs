@@ -1,6 +1,7 @@
 ﻿using Darkages.Network.Client.Abstractions;
 using Darkages.Object;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.ScriptingBase;

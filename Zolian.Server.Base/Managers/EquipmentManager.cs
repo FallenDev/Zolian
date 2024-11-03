@@ -1,6 +1,6 @@
 ﻿using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 using System.Collections.Concurrent;
 using EquipmentSlot = Darkages.Models.EquipmentSlot;

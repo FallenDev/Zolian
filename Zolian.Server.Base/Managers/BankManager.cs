@@ -1,5 +1,5 @@
 ﻿using Darkages.Network.Client.Abstractions;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using System.Collections.Concurrent;
 
 namespace Darkages.Managers;

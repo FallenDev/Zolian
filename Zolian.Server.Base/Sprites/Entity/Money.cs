@@ -6,7 +6,7 @@ using Darkages.Types;
 using System.Numerics;
 using Darkages.Object;
 
-namespace Darkages.Sprites;
+namespace Darkages.Sprites.Entity;
 
 public sealed class Money : Identifiable
 {
@@ -48,7 +48,7 @@ public sealed class Money : Identifiable
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Can't quite hold that much.");
             return;
         }
-        
+
         aisling.GoldPoints += amount;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
         aisling.Client.SendAttributes(StatUpdateType.ExpGold);

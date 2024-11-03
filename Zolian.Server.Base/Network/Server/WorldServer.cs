@@ -41,6 +41,7 @@ using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.Network.Client.Abstractions;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Server;
 

@@ -1,6 +1,7 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Object;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.Sprites;
@@ -719,7 +720,7 @@ public class Identifiable : Sprite
         nearbyAisling.Client.SendRemoveObject(objectId);
     }
 
-    public void DeleteObject()
+    private void DeleteObject()
     {
         if (this is Monster)
             ObjectManager.DelObject(this as Monster);

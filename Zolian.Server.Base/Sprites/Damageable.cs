@@ -6,6 +6,7 @@ using Darkages.ScriptingBase;
 using Darkages.Types;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
@@ -291,7 +292,7 @@ public class Damageable : Movable
         }
     }
 
-    public void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false)
+    private void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false)
     {
         if (!WithinRangeOf(damageDealingSprite)) return;
         if (!Attackable) return;
@@ -359,7 +360,7 @@ public class Damageable : Movable
 
     #region Physical Damage Application
 
-    public bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
+    private bool DamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
         if (damageDealingSprite.IsBlind)
         {
@@ -432,7 +433,7 @@ public class Damageable : Movable
         return true;
     }
 
-    public long ComputeDmgFromAc(long dmg)
+    private long ComputeDmgFromAc(long dmg)
     {
         var script = ScriptManager.Load<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, this);
 
@@ -443,7 +444,7 @@ public class Damageable : Movable
 
     #region Magical Damage Application
 
-    public bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
+    private bool MagicDamageTarget(Sprite damageDealingSprite, ref long dmg, byte sound, bool forced)
     {
         if (damageDealingSprite.IsBlind)
         {
@@ -510,7 +511,7 @@ public class Damageable : Movable
         return true;
     }
 
-    public long ComputeDmgFromWillSavingThrow(long dmg)
+    private long ComputeDmgFromWillSavingThrow(long dmg)
     {
         var script = ScriptManager.Load<FormulaScript>("Will Saving Throw", this);
 
@@ -528,7 +529,7 @@ public class Damageable : Movable
         return script?.Values.Sum(s => s.Calculate(damageDealingSprite, target, type)) ?? 1;
     }
 
-    public long Vulnerable(long dmg)
+    private long Vulnerable(long dmg)
     {
         if (!IsVulnerable)
         {
@@ -575,7 +576,7 @@ public class Damageable : Movable
         return dmg;
     }
 
-    public long ApplyWeaponBonuses(Sprite source, long dmg)
+    private long ApplyWeaponBonuses(Sprite source, long dmg)
     {
         if (source is not Aisling aisling) return dmg;
 
@@ -698,7 +699,7 @@ public class Damageable : Movable
         return dmg;
     }
 
-    public void VarianceProc(Sprite sprite, long dmg)
+    private void VarianceProc(Sprite sprite, long dmg)
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
@@ -1119,7 +1120,7 @@ public class Damageable : Movable
         }
     }
 
-    public double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false)
+    private double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false)
     {
         if (damageDealingSprite == null) return 1;
 
@@ -1158,7 +1159,7 @@ public class Damageable : Movable
         }
     }
 
-    public double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element)
+    private double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element)
     {
         var script = ScriptManager.Load<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, this);
         return script?.Values.Sum(s => s.Calculate(this, attacker, element)) ?? 0.0;
@@ -1218,7 +1219,7 @@ public class Damageable : Movable
         return dmg;
     }
 
-    public void Thorns(Sprite damageDealingSprite, long dmg)
+    private void Thorns(Sprite damageDealingSprite, long dmg)
     {
         if (damageDealingSprite is null) return;
         if (this is not Aisling aisling) return;
@@ -1242,7 +1243,7 @@ public class Damageable : Movable
 
     #region Complete Damage Application
 
-    public long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
+    private long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
     {
         if (dmg <= 0) dmg = 1;
 
@@ -1265,13 +1266,13 @@ public class Damageable : Movable
         return finalDmg;
     }
 
-    public void ApplyEquipmentDurability(long dmg)
+    private void ApplyEquipmentDurability(long dmg)
     {
         if (this is Aisling aisling && aisling.EquipmentDamageTaken++ % 2 == 0 && dmg > 100)
             aisling.EquipmentManager.DecreaseDurability();
     }
 
-    public void OnDamaged(Sprite source, long dmg)
+    private void OnDamaged(Sprite source, long dmg)
     {
         (this as Aisling)?.Client.SendAttributes(StatUpdateType.Vitality);
         if (source is not Aisling aisling) return;
@@ -1290,7 +1291,7 @@ public class Damageable : Movable
         monster.Scripts?.First().Value.OnDamaged(aisling.Client, dmg, source);
     }
 
-    public void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
+    private static void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
     {
         if (!aisling.AttackDmgTrack.Update(elapsedTime)) return;
         aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);

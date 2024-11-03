@@ -1,5 +1,5 @@
 ﻿using Darkages.Common;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Formulas;
 

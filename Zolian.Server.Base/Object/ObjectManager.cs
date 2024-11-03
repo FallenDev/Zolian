@@ -1,4 +1,5 @@
 ﻿using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.Object;

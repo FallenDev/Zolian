@@ -8,6 +8,7 @@ using ServiceStack;
 using System.Numerics;
 using Chaos.Networking.Entities.Server;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Types;
 

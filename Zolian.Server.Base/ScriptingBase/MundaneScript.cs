@@ -4,6 +4,7 @@ using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 
 using System.Security.Cryptography;

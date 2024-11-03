@@ -2,7 +2,6 @@
 using Darkages.Database;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
-using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,7 @@ using System.Collections.Concurrent;
 using Darkages.Object;
 using Gender = Darkages.Enums.Gender;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.CommandSystem;
 

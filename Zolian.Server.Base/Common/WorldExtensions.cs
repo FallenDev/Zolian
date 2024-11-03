@@ -1,7 +1,7 @@
 ﻿using Chaos.Networking.Entities.Server;
 
 using Darkages.Network.Client.Abstractions;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
 

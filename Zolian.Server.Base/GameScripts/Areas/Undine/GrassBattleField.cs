@@ -6,6 +6,7 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.Undine;
 

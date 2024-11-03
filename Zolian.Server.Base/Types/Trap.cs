@@ -1,6 +1,7 @@
 ﻿using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 
 namespace Darkages.Types;

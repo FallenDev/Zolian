@@ -1,5 +1,6 @@
 ﻿using Darkages.Network.Client;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Creations;
 

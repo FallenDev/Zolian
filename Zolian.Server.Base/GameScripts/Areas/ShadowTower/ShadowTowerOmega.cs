@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.Object;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.ShadowTower;
 

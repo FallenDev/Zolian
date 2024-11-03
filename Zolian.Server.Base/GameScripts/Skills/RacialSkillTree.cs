@@ -6,6 +6,7 @@ using Darkages.GameScripts.Affects;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 using MapFlags = Darkages.Enums.MapFlags;

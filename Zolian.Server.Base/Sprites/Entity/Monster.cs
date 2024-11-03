@@ -11,7 +11,7 @@ using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Object;
 
-namespace Darkages.Sprites;
+namespace Darkages.Sprites.Entity;
 
 public record TargetRecord
 {
@@ -158,7 +158,7 @@ public sealed class Monster : Damageable
         Rewarded = true;
         player.UpdateStats();
     }
-    
+
     public void LoadAndCastSpellScriptOnDeath(string spellTemplate)
     {
         try
@@ -250,7 +250,7 @@ public sealed class Monster : Damageable
     {
         var killRecordFound = player.MonsterKillCounters.TryGetValue(monster.Template.BaseName, out var value);
         if (!killRecordFound) return;
-        
+
         if (monster.Template.BaseName == player.QuestManager.KeelaKill)
         {
             var returnPlayer = player.QuestManager.KeelaCount <= value?.TotalKills;

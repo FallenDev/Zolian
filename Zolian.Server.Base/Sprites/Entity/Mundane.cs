@@ -13,7 +13,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using Darkages.Object;
 
-namespace Darkages.Sprites;
+namespace Darkages.Sprites.Entity;
 
 public sealed class Mundane : Movable
 {

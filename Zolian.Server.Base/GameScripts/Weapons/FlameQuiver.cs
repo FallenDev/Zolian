@@ -3,6 +3,7 @@
 using Darkages.Enums;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Weapons;
 

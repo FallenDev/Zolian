@@ -2,7 +2,7 @@
 using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
 

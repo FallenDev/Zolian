@@ -18,6 +18,7 @@ using Chaos.Common.Identity;
 using Darkages.Network.Server.Abstractions;
 using Microsoft.Data.SqlClient;
 using RestSharp;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Server;
 

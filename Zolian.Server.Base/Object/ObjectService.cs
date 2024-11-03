@@ -4,6 +4,7 @@ using Darkages.Types;
 using System.Collections;
 using System.Collections.Concurrent;
 using JetBrains.Annotations;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Object;
 

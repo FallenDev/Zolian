@@ -2,6 +2,7 @@
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 using System.Collections.Concurrent;

@@ -9,6 +9,7 @@ using Darkages.Types;
 using System.Collections.Concurrent;
 using Darkages.GameScripts.Creations;
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.Undine;
 

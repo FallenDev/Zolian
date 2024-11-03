@@ -2,7 +2,7 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Object;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using NUnit.Framework;
 

@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Numerics;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.Lynith;
 
