@@ -104,10 +104,9 @@ public class GlobalSpellMethods
 
     public void ElementalOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp)
     {
-        if (sprite is not Damageable damageable) return;
+        if (target is not Damageable damageable) return;
         if (sprite is Aisling aisling)
         {
-            if (target == null) return;
             var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
             var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
 

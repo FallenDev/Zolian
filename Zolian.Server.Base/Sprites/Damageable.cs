@@ -13,104 +13,69 @@ namespace Darkages.Sprites;
 public class Damageable : Movable
 {
     #region Initial Damage Application
-    // Entry methods to all damage to sprite
 
     public void ApplyElementalSpellDamage(Sprite source, long dmg, ElementManager.Element element, Spell spell)
     {
-        var saved = source.OffenseElement;
-        source.OffenseElement = element;
-
         if (this is Aisling aisling)
         {
-            if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
+            var immune = ElementalImmunity(aisling, element);
+            if (immune) return;
         }
 
+        var saved = source.OffenseElement;
+        source.OffenseElement = element;
         MagicApplyDamage(source, dmg, spell);
         source.OffenseElement = saved;
     }
 
     public void ApplyElementalSkillDamage(Sprite source, long dmg, ElementManager.Element element, Skill skill)
     {
-        var saved = source.OffenseElement;
-
-        source.OffenseElement = element;
         if (this is Aisling aisling)
         {
-            if (aisling.FireImmunity && source.OffenseElement == ElementManager.Element.Fire)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.WaterImmunity && source.OffenseElement == ElementManager.Element.Water)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.EarthImmunity && source.OffenseElement == ElementManager.Element.Earth)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.WindImmunity && source.OffenseElement == ElementManager.Element.Wind)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.DarkImmunity && source.OffenseElement == ElementManager.Element.Void)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
-            if (aisling.LightImmunity && source.OffenseElement == ElementManager.Element.Holy)
-            {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
-                source.OffenseElement = saved;
-                return;
-            }
+            var immune = ElementalImmunity(aisling, element);
+            if (immune) return;
         }
 
+        var saved = source.OffenseElement;
+        source.OffenseElement = element;
         ApplyDamage(source, dmg, skill);
         source.OffenseElement = saved;
+    }
+
+    private static bool ElementalImmunity(Aisling aisling, ElementManager.Element element)
+    {
+        if (aisling.FireImmunity && element == ElementManager.Element.Fire)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bFire damage negated");
+            return true;
+        }
+        if (aisling.WaterImmunity && element == ElementManager.Element.Water)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=eWater damage negated");
+            return true;
+        }
+        if (aisling.EarthImmunity && element == ElementManager.Element.Earth)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=rEarth damage negated");
+            return true;
+        }
+        if (aisling.WindImmunity && element == ElementManager.Element.Wind)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=hWind damage negated");
+            return true;
+        }
+        if (aisling.DarkImmunity && element == ElementManager.Element.Void)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=nDark damage negated");
+            return true;
+        }
+        if (aisling.LightImmunity && element == ElementManager.Element.Holy)
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=uLight damage negated");
+            return true;
+        }
+
+        return false;
     }
 
     public void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false)
@@ -119,16 +84,7 @@ public class Damageable : Movable
         if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
-        if (OffenseElement != ElementManager.Element.None)
-        {
-            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
-        }
-        else
-        {
-            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
-        }
-
-        // Apply modifiers for attacker
+        dmg = DamageTypeBasedOnElement(damageDealingSprite, dmg);
         dmg = ApplyPhysicalModifier();
 
         if (damageDealingSprite is Aisling aisling)
@@ -151,8 +107,9 @@ public class Damageable : Movable
         if (this is Aisling defender)
         {
             dmg = CraneStance(defender);
-            dmg = PainBane(defender);
-            dmg = ApplyPvpMod();
+            dmg = PainBane(dmg);
+            if (defender.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+                dmg = (long)(dmg * 0.75);
         }
 
         if (skill == null)
@@ -184,25 +141,11 @@ public class Damageable : Movable
             return dmg;
         }
 
-        long ApplyPvpMod()
-        {
-            if (Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
-                dmg = (long)(dmg * 0.75);
-            return dmg;
-        }
-
         long ApplyBehindTargetMod()
         {
             if (damageDealingSprite is not Aisling aisling2) return dmg;
             if (aisling2.Client.IsBehind(this))
                 dmg += (long)((dmg + ServerSetup.Instance.Config.BehindDamageMod) / 1.99);
-            return dmg;
-        }
-
-        long PainBane(Aisling aisling2)
-        {
-            if (aisling2.PainBane)
-                return (long)(dmg * 0.95);
             return dmg;
         }
 
@@ -298,20 +241,12 @@ public class Damageable : Movable
         if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
-        if (OffenseElement != ElementManager.Element.None)
-        {
-            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
-        }
-        else
-        {
-            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
-        }
-
+        dmg = DamageTypeBasedOnElement(damageDealingSprite, dmg);
         dmg = ApplyMagicalModifier();
 
         if (damageDealingSprite is Aisling aisling)
         {
-            dmg = PainBane();
+            dmg = PainBane(dmg);
             dmg = ApplyWeaponBonuses(damageDealingSprite, dmg);
             if (this is Monster monster && monster.Template.MonsterRace == aisling.FavoredEnemy)
                 dmg *= 2;
@@ -320,8 +255,8 @@ public class Damageable : Movable
         dmg = Vulnerable(dmg);
         VarianceProc(damageDealingSprite, dmg);
 
-        if (this is Aisling)
-            dmg = (long)(dmg * 0.50);
+        if (this is Aisling defense && defense.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+            dmg = (long)(dmg * 0.75);
 
         if (spell == null)
         {
@@ -340,18 +275,10 @@ public class Damageable : Movable
 
         long ApplyMagicalModifier()
         {
-            var dmgAboveAcModifier = damageDealingSprite.Int * 0.05;
+            var dmgAboveAcModifier = damageDealingSprite.Int * 0.25;
             dmgAboveAcModifier /= 100;
             var dmgAboveAcBoost = dmgAboveAcModifier * dmg;
             dmg += (long)dmgAboveAcBoost;
-            return dmg;
-        }
-
-        long PainBane()
-        {
-            if (damageDealingSprite is not Aisling aisling2) return dmg;
-            if (aisling2.PainBane)
-                return (long)(dmg * 0.95);
             return dmg;
         }
     }
@@ -521,7 +448,20 @@ public class Damageable : Movable
     #endregion
 
     #region Damage Application Helper Methods
-    // Methods below are in order as per execution
+
+    private long DamageTypeBasedOnElement(Sprite damageDealingSprite, long dmg)
+    {
+        if (OffenseElement != ElementManager.Element.None)
+        {
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Elemental);
+        }
+        else
+        {
+            dmg += (long)GetBaseDamage(damageDealingSprite, this, MonsterEnums.Physical);
+        }
+
+        return dmg;
+    }
 
     public double GetBaseDamage(Sprite damageDealingSprite, Sprite target, MonsterEnums type)
     {
@@ -1118,6 +1058,14 @@ public class Damageable : Movable
                 client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
                 break;
         }
+    }
+
+    private long PainBane(long dmg)
+    {
+        if (this is not Aisling aisling) return dmg;
+        if (aisling.PainBane)
+            return (long)(dmg * 0.95);
+        return dmg;
     }
 
     private double GetElementalModifier(Sprite damageDealingSprite, bool isSecondary = false)
