@@ -389,7 +389,7 @@ public record AislingStorage : Sql
     public async Task<bool> ServerSave(List<Aisling> playerList)
     {
         if (playerList.Count == 0) return false;
-        await SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
 
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();

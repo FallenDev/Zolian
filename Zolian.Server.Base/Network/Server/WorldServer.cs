@@ -618,7 +618,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         _componentStopwatches["Ping"].Restart();
                         break;
                     case PlayerSaveComponent playerSaveComponent:
-                        if (elapsed["PlayerSave"].TotalSeconds < 5) break;
+                        if (elapsed["PlayerSave"].TotalSeconds < 15) break;
                         playerSaveComponent.Update(elapsed["PlayerSave"]);
                         _componentStopwatches["PlayerSave"].Restart();
                         break;

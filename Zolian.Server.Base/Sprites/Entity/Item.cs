@@ -740,7 +740,7 @@ public sealed class Item : Identifiable
     public async void DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await using var @lock = await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(5));
+        await using var @lock = await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
 
         if (@lock == null)
         {
