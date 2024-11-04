@@ -13,7 +13,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         ZolianUpdateDelegate.Update(UpdateObjects);
     }
 
-    private static void UpdateObjects()
+    private static async void UpdateObjects()
     {
         var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
@@ -21,15 +21,18 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         try
         {
-            Parallel.ForEach(readyLoggedIn, (user) =>
+            foreach (var user in readyLoggedIn)
             {
+                if (user.ObjectsUpdating) continue;
+                user.ObjectsUpdating = true;
+
                 while (user.LoggedIn)
                 {
                     if (user.Client == null) return;
                     UpdateClientObjects(user);
-                    return;
+                    await Task.Delay(50);
                 }
-            });
+            }
         }
         catch
         {
@@ -39,73 +42,70 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void UpdateClientObjects(Aisling user)
     {
+        // Initialize payload
         var payload = new List<Sprite>();
-        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
-        var objectsInView = objects.Where(s => s is not null && s.WithinRangeOf(user)).ToList();
-        var objectsNotInView = objects.Where(s => s is not null && !s.WithinRangeOf(user)).ToList();
 
-        CheckIfSpritesStillInView(user, objectsInView);
-        RemoveObjects(user, objectsNotInView);
-        AddObjects(payload, user, objectsInView);
+        // Retrieve and categorize
+        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All);
 
-        if (payload.Count <= 0) return;
-        payload.Reverse();
-        user.Client.SendVisibleEntities(payload);
-    }
-
-    private static void CheckIfSpritesStillInView(Aisling self, List<Sprite> objectsInView)
-    {
-        foreach (var spritesPair in self.SpritesInView)
-        {
-            if (objectsInView.Contains(spritesPair.Value)) continue;
-            self.SpritesInView.TryRemove(spritesPair.Key, out _);
-        }
-    }
-
-    private static void RemoveObjects(Aisling self, IReadOnlyCollection<Sprite> objectsToRemove)
-    {
-        if (objectsToRemove == null) return;
-        if (self == null) return;
-
-        foreach (var obj in objectsToRemove)
-        {
-            if (obj is not Identifiable identifiable) continue;
-            if (obj.Serial == self.Serial) continue;
-
-            if (obj is Monster monster)
-            {
-                var script = monster.Scripts?.Values.First();
-                script?.OnLeave(self.Client);
-            }
-
-            self.SpritesInView.TryRemove(obj.Serial, out _);
-            identifiable.HideFrom(self);
-        }
-    }
-
-    private static void AddObjects(List<Sprite> payload, Aisling self, IReadOnlyCollection<Sprite> objectsToAdd)
-    {
-        payload ??= [];
-        if (self == null) return;
-        if (objectsToAdd == null) return;
-
-        foreach (var obj in objectsToAdd)
+        foreach (var obj in objects)
         {
             if (obj == null) continue;
-            // If value is in view, don't add it
-            if (self.SpritesInView.TryGetValue(obj.Serial, out _)) continue;
 
+            if (obj.WithinRangeOf(user))
+                payload.Add(obj);
+            else
+                RemoveObject(user, obj);
+        }
+
+        // Handle OnApproach visible objects
+        var toUpdate = AddObjects(payload, user);
+
+        // If within range, send visible entities
+        if (payload.Count <= 0) return;
+        user.Client.SendVisibleEntities(toUpdate);
+    }
+
+    private static void RemoveObject(Aisling self, Sprite objectToRemove)
+    {
+        // Validate
+        if (self == null || objectToRemove == null) return;
+        if (objectToRemove is not Identifiable identifiable || objectToRemove.Serial == self.Serial) return;
+
+        if (objectToRemove is Monster monster)
+        {
+            var script = monster.Scripts?.Values.FirstOrDefault();
+            script?.OnLeave(self.Client);
+        }
+
+        self.SpritesInView.TryRemove(objectToRemove.Serial, out _);
+        identifiable.HideFrom(self);
+    }
+
+    private static List<Sprite> AddObjects(List<Sprite> payload, Aisling self)
+    {
+        var toUpdate = new List<Sprite>();
+
+        // Validate
+        if (self == null || payload == null) return default;
+
+        // HashSet to avoid multiple lookups
+        var spritesInViewSet = new HashSet<uint>(self.SpritesInView.Keys);
+
+        foreach (var obj in payload.Where(obj => obj != null && !spritesInViewSet.Contains(obj.Serial)))
+        {
+            // Handle sprite types
             switch (obj)
             {
                 case Monster monster:
                     {
-                        var script = monster.Scripts?.Values.First();
+                        var script = monster.Scripts?.Values.FirstOrDefault();
                         script?.OnApproach(self.Client);
                         break;
                     }
                 case Mundane npc:
                     {
-                        var script = npc.Scripts?.Values.First();
+                        var script = npc.Scripts?.Values.FirstOrDefault();
                         script?.OnApproach(self.Client);
                         break;
                     }
@@ -120,15 +120,14 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
                         if (other.CanSeeSprite(self))
                             self.ShowTo(other);
-                        break;
-                    }
-                default:
-                    {
-                        payload.Add(obj);
-                        self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
-                        break;
+                        continue;
                     }
             }
+
+            toUpdate.Add(obj);
+            self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
         }
+
+        return toUpdate;
     }
 }

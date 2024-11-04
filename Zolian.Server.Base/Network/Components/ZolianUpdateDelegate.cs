@@ -15,7 +15,7 @@ public static class ZolianUpdateDelegate
         }
         catch (Exception ex)
         {
-            ServerSetup.EventsLogger(ex.Message, LogLevel.Error);
+            ServerSetup.EventsLogger($"{operation.Method.Name}: {ex.Message}", LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }

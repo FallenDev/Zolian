@@ -35,6 +35,7 @@ public record IgnoredRecord
 public sealed class Aisling : Player, IAisling
 {
     public WorldClient Client { get; set; }
+    public bool ObjectsUpdating { get; set; }
     public readonly ConcurrentDictionary<uint, Sprite> SpritesInView = [];
     public bool GameMasterChaosCancel { get; set; }
     public int EquipmentDamageTaken = 0;
