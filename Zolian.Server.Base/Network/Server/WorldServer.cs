@@ -588,7 +588,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 switch (component)
                 {
                     case ObjectComponent objectComponent:
-                        if (elapsed["Object"].TotalMilliseconds < 50) break;
+                        if (elapsed["Object"].TotalMilliseconds < 30) break;
                         objectComponent.Update(elapsed["Object"]);
                         _componentStopwatches["Object"].Restart();
                         break;

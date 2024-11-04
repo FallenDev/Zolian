@@ -95,34 +95,39 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             // If value is in view, don't add it
             if (self.SpritesInView.TryGetValue(obj.Serial, out _)) continue;
 
-            if (obj is Monster monster)
+            switch (obj)
             {
-                var script = monster.Scripts?.Values.First();
-                script?.OnApproach(self.Client);
-            }
+                case Monster monster:
+                    {
+                        var script = monster.Scripts?.Values.First();
+                        script?.OnApproach(self.Client);
+                        break;
+                    }
+                case Mundane npc:
+                    {
+                        var script = npc.Scripts?.Values.First();
+                        script?.OnApproach(self.Client);
+                        break;
+                    }
+                case Aisling other:
+                    {
+                        // Self Check
+                        if (self.Serial == other.Serial) continue;
 
-            if (obj is Mundane npc)
-            {
-                var script = npc.Scripts?.Values.First();
-                script?.OnApproach(self.Client);
-            }
+                        // Invisible Checks
+                        if (self.CanSeeSprite(other))
+                            other.ShowTo(self);
 
-            if (obj is Aisling other)
-            {
-                // Self Check
-                if (self.Serial == other.Serial) continue;
-
-                // Invisible Checks
-                if (self.CanSeeSprite(other))
-                    other.ShowTo(self);
-
-                if (other.CanSeeSprite(self))
-                    self.ShowTo(other);
-            }
-            else
-            {
-                payload.Add(obj);
-                self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
+                        if (other.CanSeeSprite(self))
+                            self.ShowTo(other);
+                        break;
+                    }
+                default:
+                    {
+                        payload.Add(obj);
+                        self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
+                        break;
+                    }
             }
         }
     }
