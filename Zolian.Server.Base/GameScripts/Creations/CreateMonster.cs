@@ -10,6 +10,8 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using System.Numerics;
+using Chaos.Extensions.Common;
+using Darkages.GameScripts.Spells;
 
 namespace Darkages.GameScripts.Creations;
 
@@ -283,30 +285,30 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             >= 1 and <= 11 => sizeRand switch
             {
                 <= 35 => obj.Size = "Lessor",
-                <= 60 and > 35 => obj.Size = "Small",
-                <= 85 and > 60 => obj.Size = "Medium",
-                <= 100 and > 85 => obj.Size = "Large",
+                <= 60 => obj.Size = "Small",
+                <= 85 => obj.Size = "Medium",
+                <= 100 => obj.Size = "Large",
                 _ => obj.Size = "Lessor"
             },
             <= 135 => sizeRand switch
             {
                 <= 10 => obj.Size = "Lessor",
-                <= 30 and > 10 => obj.Size = "Small",
-                <= 50 and > 30 => obj.Size = "Medium",
-                <= 70 and > 50 => obj.Size = "Large",
-                <= 90 and > 70 => obj.Size = "Great",
-                <= 100 and > 90 => obj.Size = "Colossal",
+                <= 30 => obj.Size = "Small",
+                <= 50 => obj.Size = "Medium",
+                <= 70 => obj.Size = "Large",
+                <= 90 => obj.Size = "Great",
+                <= 100 => obj.Size = "Colossal",
                 _ => obj.Size = "Lessor"
             },
             _ => sizeRand switch
             {
                 <= 10 => obj.Size = "Lessor",
-                <= 30 and > 10 => obj.Size = "Small",
-                <= 50 and > 30 => obj.Size = "Medium",
-                <= 70 and > 50 => obj.Size = "Large",
-                <= 90 and > 70 => obj.Size = "Great",
-                <= 95 and > 90 => obj.Size = "Colossal",
-                <= 100 and > 95 => obj.Size = "Deity",
+                <= 30 => obj.Size = "Small",
+                <= 50 => obj.Size = "Medium",
+                <= 70 => obj.Size = "Large",
+                <= 90 => obj.Size = "Great",
+                <= 95 => obj.Size = "Colossal",
+                <= 100 => obj.Size = "Deity",
                 _ => obj.Size = "Lessor"
             }
         };
@@ -489,69 +491,69 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var levelExperienceRange = new SortedDictionary<int, (int start, int end)>
         {
-            { 250, (1, 3) },
-            { 256, (1, 3) },
-            { 260, (1, 4) },
-            { 264, (1, 4) },
-            { 268, (2, 5) },
-            { 272, (2, 6) },
-            { 276, (2, 7) },
-            { 280, (3, 8) },
-            { 284, (3, 9) },
-            { 288, (4, 11) },
-            { 292, (4, 12) },
-            { 296, (5, 14) },
-            { 300, (5, 16) },
-            { 304, (6, 18) },
-            { 308, (7, 20) },
-            { 312, (8, 23) },
-            { 316, (8, 25) },
-            { 320, (9, 28) },
-            { 324, (10, 32) },
-            { 328, (11, 36) },
-            { 332, (12, 40) },
-            { 336, (13, 45) },
-            { 340, (14, 50) },
-            { 344, (16, 56) },
-            { 348, (17, 63) },
-            { 352, (19, 70) },
-            { 356, (21, 78) },
-            { 360, (23, 87) },
-            { 364, (25, 97) },
-            { 368, (27, 108) },
-            { 372, (29, 120) },
-            { 376, (32, 134) },
-            { 380, (34, 149) },
-            { 384, (37, 166) },
-            { 388, (40, 184) },
-            { 392, (43, 205) },
-            { 396, (47, 228) },
-            { 400, (50, 254) },
-            { 404, (54, 282) },
-            { 408, (58, 314) },
-            { 412, (63, 348) },
-            { 416, (67, 387) },
-            { 420, (73, 430) },
-            { 424, (78, 478) },
-            { 428, (84, 532) },
-            { 432, (91, 591) },
-            { 436, (97, 656) },
-            { 440, (104, 729) },
-            { 444, (112, 809) },
-            { 448, (120, 899) },
-            { 452, (128, 999) },
-            { 456, (138, 1110) },
-            { 460, (147, 1232) },
-            { 464, (158, 1370) },
-            { 468, (169, 1521) },
-            { 472, (182, 1689) },
-            { 476, (194, 1875) },
-            { 480, (209, 2082) },
-            { 484, (223, 2314) },
-            { 488, (239, 2571) },
-            { 492, (256, 2854) },
-            { 496, (275, 3170) },
-            { 500, (294, 3523) }
+            { 250, (20, 30) },
+            { 256, (20, 30) },
+            { 260, (25, 40) },
+            { 264, (25, 40) },
+            { 268, (35, 50) },
+            { 272, (40, 60) },
+            { 276, (45, 70) },
+            { 280, (55, 80) },
+            { 284, (60, 90) },
+            { 288, (75, 110) },
+            { 292, (80, 120) },
+            { 296, (95, 140) },
+            { 300, (105, 160) },
+            { 304, (120, 180) },
+            { 308, (135, 200) },
+            { 312, (155, 230) },
+            { 316, (165, 250) },
+            { 320, (185, 280) },
+            { 324, (210, 320) },
+            { 328, (235, 360) },
+            { 332, (260, 400) },
+            { 336, (290, 450) },
+            { 340, (320, 500) },
+            { 344, (360, 560) },
+            { 348, (400, 630) },
+            { 352, (445, 700) },
+            { 356, (495, 780) },
+            { 360, (550, 870) },
+            { 364, (610, 970) },
+            { 368, (675, 1080) },
+            { 372, (745, 1200) },
+            { 376, (830, 1340) },
+            { 380, (915, 1490) },
+            { 384, (1015, 1660) },
+            { 388, (1120, 1840) },
+            { 392, (1240, 2050) },
+            { 396, (1375, 2280) },
+            { 400, (1520, 2540) },
+            { 404, (1680, 2820) },
+            { 408, (1860, 3140) },
+            { 412, (2055, 3480) },
+            { 416, (2270, 3870) },
+            { 420, (2515, 4300) },
+            { 424, (2780, 4780) },
+            { 428, (3080, 5320) },
+            { 432, (3410, 5910) },
+            { 436, (3765, 6560) },
+            { 440, (4165, 7290) },
+            { 444, (4605, 8090) },
+            { 448, (5095, 8990) },
+            { 452, (5635, 9990) },
+            { 456, (6240, 11100) },
+            { 460, (6895, 12320) },
+            { 464, (7640, 13700) },
+            { 468, (8450, 15210) },
+            { 472, (9355, 16890) },
+            { 476, (10345, 18750) },
+            { 480, (11455, 20820) },
+            { 484, (12685, 23140) },
+            { 488, (14050, 25710) },
+            { 492, (15550, 28540) },
+            { 496, (17225, 31700) },
+            { 500, (19085, 35230) }
         };
 
         const int startLevel = 500;
@@ -585,23 +587,23 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 obj.OffenseElement = offRand switch
                 {
                     <= 18 => ElementManager.Element.None,
-                    <= 36 and > 18 => ElementManager.Element.Wind,
-                    <= 54 and > 36 => ElementManager.Element.Earth,
-                    <= 72 and > 54 => ElementManager.Element.Water,
-                    <= 90 and > 72 => ElementManager.Element.Fire,
-                    <= 95 and > 90 => ElementManager.Element.Void,
-                    <= 100 and > 95 => ElementManager.Element.Holy,
+                    <= 36 => ElementManager.Element.Wind,
+                    <= 54 => ElementManager.Element.Earth,
+                    <= 72 => ElementManager.Element.Water,
+                    <= 90 => ElementManager.Element.Fire,
+                    <= 95 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.OffenseElement
                 };
                 obj.DefenseElement = defRand switch
                 {
                     <= 18 => ElementManager.Element.None,
-                    <= 36 and > 18 => ElementManager.Element.Wind,
-                    <= 54 and > 36 => ElementManager.Element.Earth,
-                    <= 72 and > 54 => ElementManager.Element.Water,
-                    <= 90 and > 72 => ElementManager.Element.Fire,
-                    <= 95 and > 90 => ElementManager.Element.Void,
-                    <= 100 and > 95 => ElementManager.Element.Holy,
+                    <= 36 => ElementManager.Element.Wind,
+                    <= 54 => ElementManager.Element.Earth,
+                    <= 72 => ElementManager.Element.Water,
+                    <= 90 => ElementManager.Element.Fire,
+                    <= 95 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.DefenseElement
                 };
                 break;
@@ -609,21 +611,21 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 obj.OffenseElement = offRand switch
                 {
                     <= 20 => ElementManager.Element.Wind,
-                    <= 40 and > 20 => ElementManager.Element.Earth,
-                    <= 60 and > 40 => ElementManager.Element.Water,
-                    <= 80 and > 60 => ElementManager.Element.Fire,
-                    <= 90 and > 80 => ElementManager.Element.Void,
-                    <= 100 and > 90 => ElementManager.Element.Holy,
+                    <= 40 => ElementManager.Element.Earth,
+                    <= 60 => ElementManager.Element.Water,
+                    <= 80 => ElementManager.Element.Fire,
+                    <= 90 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.OffenseElement
                 };
                 obj.DefenseElement = defRand switch
                 {
                     <= 20 => ElementManager.Element.Wind,
-                    <= 40 and > 20 => ElementManager.Element.Earth,
-                    <= 60 and > 40 => ElementManager.Element.Water,
-                    <= 80 and > 60 => ElementManager.Element.Fire,
-                    <= 90 and > 80 => ElementManager.Element.Void,
-                    <= 100 and > 90 => ElementManager.Element.Holy,
+                    <= 40 => ElementManager.Element.Earth,
+                    <= 60 => ElementManager.Element.Water,
+                    <= 80 => ElementManager.Element.Fire,
+                    <= 90 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.DefenseElement
                 };
                 break;
@@ -631,21 +633,21 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 obj.OffenseElement = offRand switch
                 {
                     <= 10 => ElementManager.Element.Wind,
-                    <= 20 and > 10 => ElementManager.Element.Earth,
-                    <= 30 and > 20 => ElementManager.Element.Water,
-                    <= 40 and > 30 => ElementManager.Element.Fire,
-                    <= 75 and > 40 => ElementManager.Element.Void,
-                    <= 100 and > 75 => ElementManager.Element.Holy,
+                    <= 20 => ElementManager.Element.Earth,
+                    <= 30 => ElementManager.Element.Water,
+                    <= 40 => ElementManager.Element.Fire,
+                    <= 75 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.OffenseElement
                 };
                 obj.DefenseElement = defRand switch
                 {
                     <= 10 => ElementManager.Element.Wind,
-                    <= 20 and > 10 => ElementManager.Element.Earth,
-                    <= 30 and > 20 => ElementManager.Element.Water,
-                    <= 40 and > 30 => ElementManager.Element.Fire,
-                    <= 75 and > 40 => ElementManager.Element.Void,
-                    <= 100 and > 75 => ElementManager.Element.Holy,
+                    <= 20 => ElementManager.Element.Earth,
+                    <= 30 => ElementManager.Element.Water,
+                    <= 40 => ElementManager.Element.Fire,
+                    <= 75 => ElementManager.Element.Void,
+                    <= 100 => ElementManager.Element.Holy,
                     _ => obj.DefenseElement
                 };
                 break;
@@ -653,25 +655,25 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 obj.OffenseElement = offRand switch
                 {
                     <= 10 => ElementManager.Element.Wind,
-                    <= 20 and > 10 => ElementManager.Element.Earth,
-                    <= 30 and > 20 => ElementManager.Element.Water,
-                    <= 40 and > 30 => ElementManager.Element.Fire,
-                    <= 60 and > 40 => ElementManager.Element.Void,
-                    <= 80 and > 60 => ElementManager.Element.Holy,
-                    <= 90 and > 80 => ElementManager.Element.Rage,
-                    <= 100 and > 90 => ElementManager.Element.Sorrow,
+                    <= 20 => ElementManager.Element.Earth,
+                    <= 30 => ElementManager.Element.Water,
+                    <= 40 => ElementManager.Element.Fire,
+                    <= 60 => ElementManager.Element.Void,
+                    <= 80 => ElementManager.Element.Holy,
+                    <= 90 => ElementManager.Element.Rage,
+                    <= 100 => ElementManager.Element.Sorrow,
                     _ => obj.OffenseElement
                 };
                 obj.DefenseElement = defRand switch
                 {
                     <= 10 => ElementManager.Element.Wind,
-                    <= 20 and > 10 => ElementManager.Element.Earth,
-                    <= 30 and > 20 => ElementManager.Element.Water,
-                    <= 40 and > 30 => ElementManager.Element.Fire,
-                    <= 60 and > 40 => ElementManager.Element.Void,
-                    <= 80 and > 60 => ElementManager.Element.Holy,
-                    <= 90 and > 80 => ElementManager.Element.Rage,
-                    <= 100 and > 90 => ElementManager.Element.Sorrow,
+                    <= 20 => ElementManager.Element.Earth,
+                    <= 30 => ElementManager.Element.Water,
+                    <= 40 => ElementManager.Element.Fire,
+                    <= 60 => ElementManager.Element.Void,
+                    <= 80 => ElementManager.Element.Holy,
+                    <= 90 => ElementManager.Element.Rage,
+                    <= 100 => ElementManager.Element.Sorrow,
                     _ => obj.DefenseElement
                 };
                 break;
@@ -1229,7 +1231,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         var skillList = monster.Template.Level switch
         {
             <= 11 => ["Onslaught", "Assault", "Clobber", "Bite", "Claw"],
-            > 11 and <= 50 =>
+            <= 50 =>
             [
                 "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
                 "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
@@ -1278,7 +1280,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             [
                 "Stab", "Dual Slice", "Wind Slice", "Wind Blade"
             ],
-            > 25 and <= 60 =>
+            <= 60 =>
             [
                 "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
                 "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice",
@@ -1286,7 +1288,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 "Bite'n Shake", "Howl'n Call", "Death From Above",
                 "Pounce", "Roll Over", "Corrosive Touch"
             ],
-            > 60 and <= 75 =>
+            <= 75 =>
             [
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
                 "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
@@ -1296,7 +1298,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 "Death From Above", "Pounce", "Roll Over",
                 "Swallow Whole", "Tentacle", "Corrosive Touch"
             ],
-            > 75 and <= 120 =>
+            <= 120 =>
             [
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
                 "Krane Kick", "Palm Heel Strike",
@@ -1352,7 +1354,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh", "Ao Beag Cradh"
+            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh", 
+            "Ao Beag Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 20d) + 2;
@@ -1430,7 +1433,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh", "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
+            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh", 
+            "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 70d) + 2;
@@ -1469,7 +1473,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", 
+            "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
         };
 
         var spellCount = Math.Round(monster.Level / 100d) + 2;
@@ -1508,7 +1513,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", 
+            "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
         };
 
         var spellCount = Math.Round(monster.Level / 150d) + 2;
@@ -1540,14 +1546,22 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (monster.Template.Level <= 250) return;
 
-        var spellList = new[]
+        var spellList = new List<string>
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", 
+            "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", 
+            "Dark Chain", "Defensive Stance"
         };
+
+        if (monster.Template.Level >= 500)
+        {
+            spellList.AddRange(["Uas Athar", "Uas Creag", "Uas Sal", "Uas Srad", "Uas Dorcha", "Uas Eadrom", 
+                "Croich Mor Cradh", "Penta Seal", "Decay"]);
+        }
 
         var spellCount = Math.Round(monster.Level / 200d) + 2;
         spellCount = Math.Min(spellCount, 5); // Max 5 spells regardless of level
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var randomIndices = Enumerable.Range(0, spellList.Count).ToList();
 
         for (var i = 0; i < spellCount; i++)
         {

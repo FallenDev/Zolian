@@ -277,20 +277,7 @@ public class EnemyRewards : RewardScript
         }
 
         var difference = player.ExpLevel - _monster.Template.Level;
-        var soloExp = difference switch
-        {
-            // Monster is higher level than player
-            <= -80 => 1,
-            <= -50 => (int)(exp * 0.25),
-            <= -30 => (int)(exp * 0.5),
-            <= -15 => (int)(exp * 0.75),
-            // Monster is lower level than player
-            >= 80 => 1,
-            >= 50 => (int)(exp * 0.15),
-            >= 30 => (int)(exp * 0.33),
-            >= 15 => (int)(exp * 0.66),
-            _ => exp
-        };
+        var soloExp = LevelRestrictionsOnExpAp(exp, difference);
 
         // Enqueue experience event
         if (player.WithinRangeOf(_monster, 16))
@@ -305,20 +292,7 @@ public class EnemyRewards : RewardScript
             if (!party.WithinRangeOf(_monster, 16)) continue;
 
             var partyDiff = party.ExpLevel - _monster.Template.Level;
-            var partyExp = partyDiff switch
-            {
-                // Monster is higher level than player
-                <= -80 => 1,
-                <= -50 => (int)(exp * 0.25),
-                <= -30 => (int)(exp * 0.5),
-                <= -15 => (int)(exp * 0.75),
-                // Monster is lower level than player
-                >= 80 => 1,
-                >= 50 => (int)(exp * 0.15),
-                >= 30 => (int)(exp * 0.33),
-                >= 15 => (int)(exp * 0.66),
-                _ => exp
-            };
+            var partyExp = LevelRestrictionsOnExpAp(exp, partyDiff);
 
             party.Client.EnqueueExperienceEvent(party, partyExp, true);
         }
@@ -340,18 +314,11 @@ public class EnemyRewards : RewardScript
         }
 
         var difference = player.ExpLevel - _monster.Template.Level;
-        ap = difference switch
-        {
-            // Monster is lower level than player
-            >= 80 => 1,
-            >= 60 => (int)(ap * 0.05),
-            >= 40 => (int)(ap * 0.25),
-            >= 20 => (int)(ap * 0.5),
-            _ => ap
-        };
+        var soloAp = LevelRestrictionsOnExpAp(ap, difference);
 
         // Enqueue experience event
-        player.Client.EnqueueAbilityEvent(player, ap, true);
+        if (player.WithinRangeOf(_monster, 16))
+            player.Client.EnqueueAbilityEvent(player, (int)soloAp, true);
 
         if (player.GroupParty?.PartyMembers == null) return;
 
@@ -365,9 +332,33 @@ public class EnemyRewards : RewardScript
             }
 
             if (party.Map != player.Map) continue;
-            if (party.WithinRangeOf(player, 13))
-                party.Client.EnqueueAbilityEvent(party, ap, true);
+            if (!party.WithinRangeOf(_monster, 16)) continue;
+
+            var partyDiff = party.ExpLevel - _monster.Template.Level;
+            var partyExp = LevelRestrictionsOnExpAp(ap, partyDiff);
+            
+            party.Client.EnqueueAbilityEvent(party, (int)partyExp, true);
         }
+    }
+
+    private static long LevelRestrictionsOnExpAp(long exp, int difference)
+    {
+        var restrictedExp = difference switch
+        {
+            // Monster is higher level than player
+            <= -80 => 1,
+            <= -50 => (int)(exp * 0.25),
+            <= -30 => (int)(exp * 0.5),
+            <= -15 => (int)(exp * 0.75),
+            // Monster is lower level than player
+            >= 80 => 1,
+            >= 50 => (int)(exp * 0.15),
+            >= 30 => (int)(exp * 0.33),
+            >= 15 => (int)(exp * 0.66),
+            _ => exp
+        };
+
+        return restrictedExp;
     }
 
     private void GenerateGold()
