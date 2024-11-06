@@ -4482,9 +4482,10 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         if (!Aisling.GameMaster)
         {
-            if (warps.LevelRequired > 0 && Aisling.ExpLevel < warps.LevelRequired)
+            var totalLevel = Aisling.ExpLevel + Aisling.AbpLevel;
+            if (warps.LevelRequired > 0 && totalLevel < warps.LevelRequired)
             {
-                var msgTier = Math.Abs(Aisling.ExpLevel - warps.LevelRequired);
+                var msgTier = Math.Abs(totalLevel - warps.LevelRequired);
 
                 SendServerMessage(ServerMessageType.ActiveMessage, msgTier <= 15
                     ? $"You're too afraid to enter. {{=c{warps.LevelRequired} REQ"

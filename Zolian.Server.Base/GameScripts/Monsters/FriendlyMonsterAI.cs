@@ -16,7 +16,7 @@ public class BaseFriendlyMonster : MonsterScript
 {
     public BaseFriendlyMonster(Monster monster, Area map) : base(monster, map)
     {
-        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(1500);
+        Monster.ObjectUpdateTimer.Delay = TimeSpan.FromMilliseconds(500);
         Monster.CastTimer.RandomizedVariance = 60;
         Monster.AbilityTimer.RandomizedVariance = 50;
         Monster.MonsterBank = [];

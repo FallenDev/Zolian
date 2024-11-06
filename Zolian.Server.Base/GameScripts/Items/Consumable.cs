@@ -1257,6 +1257,57 @@ public class Consumable(Item item) : ItemScript(item)
                 client.Aisling.HairStyle = 0;
                 client.UpdateDisplay();
                 return;
+            #endregion
+
+            #region Bags & Chests
+
+            case "Strong Treasure Chest":
+                {
+                    if (aisling.HasItem("Diamite Lockpick"))
+                    {
+                        var chance = Generator.RandomNumPercentGen();
+
+                        if (chance <= .80)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
+                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
+                            client.Aisling.GiveGold((uint)Random.Shared.Next(5000000, 10000000));
+
+                            var rand = Generator.RandomNumPercentGen();
+                            var stockingItem = new Item();
+                            var quality = ItemQualityVariance.DetermineQuality();
+                            var variance = ItemQualityVariance.DetermineVariance();
+                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+
+                            stockingItem = rand switch
+                            {
+                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
+                                    wVariance),
+                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
+                                    wVariance),
+                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
+                                    wVariance),
+                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
+                                    wVariance),
+                                > 0.80 and <= 1 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
+                                    wVariance),
+                                _ => stockingItem
+                            };
+
+                            stockingItem.GiveTo(client.Aisling);
+                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                        }
+
+                        var lockpick = aisling.HasItemReturnItem("Diamite Lockpick");
+                        aisling.Inventory.RemoveRange(client, lockpick, 1);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
+                        return;
+                    }
+
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
+                    return;
+                }
+
                 #endregion
         }
     }

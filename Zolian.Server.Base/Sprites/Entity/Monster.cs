@@ -77,6 +77,7 @@ public sealed class Monster : Damageable
     private static long SummonerId { get; set; }
     public ushort SummonerAdjLevel { get; set; }
     public readonly Stopwatch TimeTillDead = new();
+    public bool SwarmOnApproach { get; set; }
 
     public static Monster Create(MonsterTemplate template, Area map)
     {

@@ -42,6 +42,29 @@ public class OmegaRising(Spell spell) : SpellScript(spell)
     }
 }
 
+[Script("Cataclysmic Hell")]
+public class CataclysmicHell(Spell spell) : SpellScript(spell)
+{
+    private Debuff _debuff;
+    private readonly GlobalSpellMethods _spellMethod = new();
+
+    public override void OnFailed(Sprite sprite, Sprite target) { }
+
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
+
+    public override void OnUse(Sprite sprite, Sprite target)
+    {
+        var playersNearby = sprite.AislingsNearby();
+        foreach (var player in playersNearby)
+        {
+            _debuff = new DebuffSunSeal();
+            if (player == null) continue;
+            _spellMethod.AfflictionOnUse(sprite, player, Spell, _debuff);
+            _spellMethod.ElementalOnUse(sprite, player, Spell, 5000);
+        }
+    }
+}
+
 [Script("Liquid Hell")]
 public class LiquidHell(Spell spell) : SpellScript(spell)
 {
