@@ -21,8 +21,8 @@ public class Weapon(Item item) : ItemScript(item)
         if (aisling.EquipmentManager.Equipment[1]?.Item != null)
         {
             var checkTwoHand = aisling.EquipmentManager.Equipment[1].Item;
-            if (checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) ||
-                checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
+            if ((checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) ||
+                checkTwoHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff)) && !client.Aisling.TitanGrip)
             {
                 aisling.EquipmentManager.RemoveFromExistingSlot(1);
             }
@@ -39,7 +39,7 @@ public class Weapon(Item item) : ItemScript(item)
         }
 
         // Remove off-hand item if exists & Two-hand skill check
-        if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded))
+        if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) && !client.Aisling.TitanGrip)
         {
             if (!client.Aisling.TwoHandedBasher)
             {
@@ -56,7 +56,7 @@ public class Weapon(Item item) : ItemScript(item)
         }
 
         // Remove off-hand item if exists & Two-hand skill check
-        if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
+        if (Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff) && !client.Aisling.TitanGrip)
         {
             if (!client.Aisling.TwoHandedCaster)
             {
@@ -73,7 +73,8 @@ public class Weapon(Item item) : ItemScript(item)
         }
 
         // Dual wield skill check
-        if (client.Aisling.DualWield && Item.Template.Flags.FlagIsSet(ItemFlags.DualWield))
+        if ((client.Aisling.DualWield && Item.Template.Flags.FlagIsSet(ItemFlags.DualWield)) || client.Aisling.TitanGrip 
+            && (Item.Template.Flags.FlagIsSet(ItemFlags.DualWield) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff)))
         {
             if (client.Aisling.EquipmentManager.Equipment.TryGetValue(1, out var weaponSlot))
                 if (weaponSlot?.Item != null)
@@ -81,7 +82,7 @@ public class Weapon(Item item) : ItemScript(item)
                     if (!weaponSlot.Item.Template.Flags.FlagIsSet(ItemFlags.LongRanged))
                     {
                         var mainHand = weaponSlot.Item;
-                        if (mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
+                        if ((mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || mainHand.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff)) && !client.Aisling.TitanGrip)
                         {
                             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou couldn't possibly grip anything else.");
                             return;

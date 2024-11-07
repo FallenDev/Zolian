@@ -172,13 +172,11 @@ public sealed class Aisling : Player, IAisling
 
             foreach (var (_, skill) in SkillBook.Skills)
             {
-                switch (skill?.SkillName)
+                twoHandedUser = skill?.SkillName switch
                 {
-                    case "Two-Handed Attack":
-                    case "Kobudo":
-                        twoHandedUser = true;
-                        break;
-                }
+                    "Two-Handed Attack" or "Kobudo" => true,
+                    _ => twoHandedUser
+                };
             }
 
             return twoHandedUser;
@@ -206,13 +204,11 @@ public sealed class Aisling : Player, IAisling
 
             foreach (var (_, skill) in SkillBook.Skills)
             {
-                switch (skill?.SkillName)
+                dualWielder = skill?.SkillName switch
                 {
-                    case "Dual Wield":
-                    case "Ambidextrous":
-                        dualWielder = true;
-                        break;
-                }
+                    "Dual Wield" or "Ambidextrous" => true,
+                    _ => dualWielder
+                };
             }
 
             return dualWielder;
@@ -227,17 +223,27 @@ public sealed class Aisling : Player, IAisling
 
             foreach (var (_, skill) in SkillBook.Skills)
             {
-                switch (skill?.SkillName)
+                bowWielder = skill?.SkillName switch
                 {
-                    case "Bang":
-                    case "Archery":
-                    case "Aim":
-                        bowWielder = true;
-                        break;
-                }
+                    "Bang" or "Archery" or "Aim" => true,
+                    _ => bowWielder
+                };
             }
 
             return bowWielder;
+        }
+    }
+
+    public bool TitanGrip
+    {
+        get
+        {
+            foreach (var (_, skill) in SkillBook.Skills)
+            {
+                if (skill?.SkillName is "Daisho") return true;
+            }
+
+            return false;
         }
     }
 

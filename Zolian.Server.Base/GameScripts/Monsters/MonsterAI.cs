@@ -43,12 +43,9 @@ public class BaseMonsterIntelligence : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -543,12 +540,9 @@ public class WeakCommon : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -1124,12 +1118,9 @@ public class ShapeShifter : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -1744,12 +1735,9 @@ public class SelfDestruct : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -2167,12 +2155,9 @@ public class AlertSummon : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -2679,12 +2664,9 @@ public class Turret : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -3005,12 +2987,9 @@ public class GeneralPirate : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -3523,12 +3502,9 @@ public class PirateOfficer : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -4043,12 +4019,9 @@ public class ShadowSight : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -4543,12 +4516,9 @@ public class WeakShadowSight : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -5051,12 +5021,9 @@ public class AosdaRemnant : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -5577,12 +5544,9 @@ public class AncientDragon : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -6103,12 +6067,9 @@ public class DraconicOmega : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -6629,12 +6590,9 @@ public class JackFrost : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -7159,12 +7117,9 @@ public class Yeti : MonsterScript
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
                 UpdatePhases();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -7742,12 +7697,9 @@ public class WorldBossBahamut : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
@@ -8300,12 +8252,9 @@ public class Swarm : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
@@ -8825,12 +8774,9 @@ public class BBShade : MonsterScript
             {
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
-                Monster.ObjectUpdateEnabled = false;
             }
-            else
-            {
-                Monster.ObjectUpdateEnabled = false;
-            }
+
+            Monster.ObjectUpdateEnabled = false;
 
             if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
 
