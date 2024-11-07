@@ -108,6 +108,8 @@ public class Damageable : Movable
         {
             dmg = CraneStance(defender);
             dmg = PainBane(dmg);
+
+            // Reduces damage by 75% in pvp
             if (defender.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
                 dmg = (long)(dmg * 0.75);
         }
@@ -255,9 +257,15 @@ public class Damageable : Movable
         dmg = Vulnerable(dmg);
         VarianceProc(damageDealingSprite, dmg);
 
-        if (this is Aisling defense && defense.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
-            dmg = (long)(dmg * 0.75);
-
+        // Re-balance -- reduces spell damage to players in half or 75% in pvp
+        if (this is Aisling defender)
+        {
+            if (defender.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+                dmg = (long)(dmg * 0.75);
+            else
+                dmg = (long)(dmg * 0.5);
+        }
+        
         if (spell == null)
         {
             if (!MagicDamageTarget(damageDealingSprite, ref dmg, 0, forceTarget)) return;

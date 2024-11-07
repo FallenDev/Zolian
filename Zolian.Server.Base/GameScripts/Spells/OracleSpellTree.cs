@@ -25,7 +25,7 @@ public class UasTornado(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
 
@@ -50,7 +50,7 @@ public class UasLandslide(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
 
@@ -75,7 +75,7 @@ public class UasMonsoon(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
 
@@ -100,7 +100,7 @@ public class UasEruption(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
 
@@ -125,7 +125,7 @@ public class UasTwilight(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
 
@@ -150,6 +150,6 @@ public class UasSanctified(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 6000);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 5500);
     }
 }
