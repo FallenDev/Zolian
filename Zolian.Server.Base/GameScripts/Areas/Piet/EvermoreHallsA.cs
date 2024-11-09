@@ -19,11 +19,22 @@ public class EvermoreHallsA : AreaScript
     private readonly Vector2 _poleTrap3;
     private readonly Vector2 _poleTrap4;
     private readonly Vector2 _poleTrap5;
+    private readonly Vector2 _poleTrap6;
+    private readonly Vector2 _poleTrap7;
+    private readonly Vector2 _poleTrap8;
+    private readonly Vector2 _poleTrap9;
+    private readonly Vector2 _poleTrap10;
     private readonly Vector2 _spikeTrap1;
     private readonly Vector2 _spikeTrap2;
     private readonly Vector2 _spikeTrap3;
     private readonly Vector2 _spikeTrap4;
     private readonly Vector2 _spikeTrap5;
+    private readonly Vector2 _spikeTrap6;
+    private readonly Vector2 _spikeTrap7;
+    private readonly Vector2 _spikeTrap8;
+    private readonly Vector2 _spikeTrap9;
+    private readonly Vector2 _spikeTrap10;
+
 
     public EvermoreHallsA(Area area) : base(area)
     {
@@ -33,11 +44,21 @@ public class EvermoreHallsA : AreaScript
         _poleTrap3 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _poleTrap4 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _poleTrap5 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _poleTrap6 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _poleTrap7 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _poleTrap8 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _poleTrap9 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _poleTrap10 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _spikeTrap1 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _spikeTrap2 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _spikeTrap3 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _spikeTrap4 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
         _spikeTrap5 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _spikeTrap6 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _spikeTrap7 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _spikeTrap8 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _spikeTrap9 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
+        _spikeTrap10 = new Vector2(Generator.RandNumGen10(), Generator.RandNumGen20());
     }
 
     public override void Update(TimeSpan elapsedTime) { }
@@ -51,13 +72,17 @@ public class EvermoreHallsA : AreaScript
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         if (vectorMap == _poleTrap1 || vectorMap == _poleTrap2 || vectorMap == _poleTrap3 ||
-            vectorMap == _poleTrap4 || vectorMap == _poleTrap5)
+            vectorMap == _poleTrap4 || vectorMap == _poleTrap5 || vectorMap == _poleTrap6 || 
+            vectorMap == _poleTrap7 || vectorMap == _poleTrap8 || vectorMap == _poleTrap9 || 
+            vectorMap == _poleTrap10)
         {
             OnPoleTrap(client);
         }
 
         if (vectorMap == _spikeTrap1 || vectorMap == _spikeTrap2 || vectorMap == _spikeTrap3 ||
-            vectorMap == _spikeTrap4 || vectorMap == _spikeTrap5)
+            vectorMap == _spikeTrap4 || vectorMap == _spikeTrap5 || vectorMap == _spikeTrap6 || 
+            vectorMap == _spikeTrap7 || vectorMap == _spikeTrap8 || vectorMap == _spikeTrap9 || 
+            vectorMap == _spikeTrap10)
         {
             OnSpikeTrap(client);
         }
@@ -69,12 +94,12 @@ public class EvermoreHallsA : AreaScript
     private static void OnPoleTrap(WorldClient client)
     {
         client.SendAnimation(140, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 50000, 59);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 150000, 59);
     }
 
     private static void OnSpikeTrap(WorldClient client)
     {
         client.SendAnimation(112, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 75000, 68);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 250000, 68);
     }
 }

@@ -22,6 +22,11 @@ public class Evermore : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
+        if (client.Aisling.Pos is not { X: 24, Y: 13 } || client.Aisling.QuestManager.AssassinsGuildReputation < 4) return;
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou've placed your hand on the bloodied writing.");
+        client.TransitionToMap(289, new Position(55, 21));
+        Task.Delay(2500).Wait();
+        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bWelcome Friend... You have earned our favor.");
     }
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }

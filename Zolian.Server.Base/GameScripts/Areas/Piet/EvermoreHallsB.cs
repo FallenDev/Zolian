@@ -147,13 +147,13 @@ public class EvermoreHallsB : AreaScript
     private static void OnPoleTrap(WorldClient client)
     {
         client.SendAnimation(140, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 50000, 59);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 500000, 59);
     }
 
     private static void OnSpikeTrap(WorldClient client)
     {
         client.SendAnimation(112, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 75000, 68);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 750000, 68);
     }
 
     private void RollingSpikeTraps(List<Vector2> trapList)
@@ -167,7 +167,7 @@ public class EvermoreHallsB : AreaScript
             {
                 if (player == null) continue;
                 if (player.Pos != trapPosition) continue;
-                player.ApplyTrapDamage(player, 75000, 68);
+                player.ApplyTrapDamage(player, 750000, 68);
             }
         }
     }
