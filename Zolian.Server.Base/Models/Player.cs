@@ -206,4 +206,5 @@ public class Quests
     public bool CthonicRuinsAccess { get; set; }
     public int CthonicRemainsExplorationLevel { get; set; }
     public bool EndedOmegasRein { get; set; }
+    public bool CraftedMoonArmor { get; set; }
 }

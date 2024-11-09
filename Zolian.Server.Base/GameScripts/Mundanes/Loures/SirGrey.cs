@@ -75,7 +75,7 @@ public class SirGrey : MundaneScript
                     var options = new List<Dialog.OptionsDataItem>();
                     var qualifiedItem = CheckForMoonStoneQualityItem(client);
 
-                    if (qualifiedItem != null)
+                    if (qualifiedItem != null && client.Aisling.QuestManager.CraftedMoonArmor)
                     {
                         options.Add(new(0x02, "Advance"));
                         client.SendOptionsDialog(Mundane, "*Nods in Approval* Very good, are you ready to advance?", options.ToArray());
@@ -92,7 +92,7 @@ public class SirGrey : MundaneScript
                     var options = new List<Dialog.OptionsDataItem> { new(0x00, "Thank you Sensei") };
                     var qualifiedItem = CheckForMoonStoneQualityItem(client);
 
-                    if (qualifiedItem != null)
+                    if (qualifiedItem != null && client.Aisling.QuestManager.CraftedMoonArmor)
                         OnResponse(client, 0x999, $"{client.Aisling.Serial}");
 
                     client.SendOptionsDialog(Mundane, "I will now perform the seal which binds. Congratulations Samurai, come back to me " +

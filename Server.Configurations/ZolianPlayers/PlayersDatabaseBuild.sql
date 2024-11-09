@@ -580,7 +580,8 @@ CREATE TYPE dbo.QuestType AS TABLE
     CthonicDepthsCleansing BIT,
     CthonicRuinsAccess BIT,
     CthonicRemainsExplorationLevel INT,
-    EndedOmegasRein BIT
+    EndedOmegasRein BIT,
+    CraftedMoonArmor BIT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -818,7 +819,7 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
 	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT,
     @CthonicKillTarget VARCHAR(30), @CthonicFindTarget VARCHAR(30), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
-	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT
+	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT, @CraftedMoonArmor BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -838,7 +839,7 @@ BEGIN
 		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate], [EternalBond], [ArmorCraftingCodex],
 		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned],
         [CthonicKillTarget], [CthonicFindTarget], [CthonicKillCompletions], [CthonicCleansingOne], [CthonicCleansingTwo],
-        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel], [EndedOmegasRein]
+        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel], [EndedOmegasRein], [CraftedMoonArmor]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -855,7 +856,7 @@ BEGIN
 		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate, @EternalBond, @ArmorCraftingCodex,
 		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned,
         @CthonicKillTarget, @CthonicFindTarget, @CthonicKillCompletions, @CthonicCleansingOne, @CthonicCleansingTwo,
-        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel, @EndedOmegasRein
+        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel, @EndedOmegasRein, @CraftedMoonArmor
     );
 END
 GO
@@ -1050,7 +1051,8 @@ BEGIN
         [CthonicDepthsCleansing] = source.CthonicDepthsCleansing,
         [CthonicRuinsAccess] = source.CthonicRuinsAccess,
         [CthonicRemainsExplorationLevel] = source.CthonicRemainsExplorationLevel,
-        [EndedOmegasRein] = source.EndedOmegasRein;
+        [EndedOmegasRein] = source.EndedOmegasRein,
+        [CraftedMoonArmor] = source.CraftedMoonArmor;
 END
 GO
 
@@ -1500,7 +1502,7 @@ BEGIN
 		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond, ArmorCraftingCodex,
 		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
            CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions, CthonicCleansingOne, CthonicCleansingTwo,
-		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein
+		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein, CraftedMoonArmor
     FROM   [ZolianPlayers].[dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

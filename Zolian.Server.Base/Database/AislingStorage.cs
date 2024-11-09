@@ -186,6 +186,7 @@ public record AislingStorage : Sql
             cmd5.Parameters.Add("@CthonicRuinsAccess", SqlDbType.Bit).Value = false;
             cmd5.Parameters.Add("@CthonicRemainsExplorationLevel", SqlDbType.Int).Value = 0;
             cmd5.Parameters.Add("@EndedOmegasRein", SqlDbType.Bit).Value = false;
+            cmd5.Parameters.Add("@CraftedMoonArmor", SqlDbType.Bit).Value = false;
 
             #endregion
 
@@ -547,7 +548,7 @@ public record AislingStorage : Sql
             obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
             obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
             obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
-            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein);
+            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein, obj.QuestManager.CraftedMoonArmor);
 
         return qDt;
     }
@@ -1161,6 +1162,7 @@ public record AislingStorage : Sql
         qDt.Columns.Add("CthonicRuinsAccess", typeof(bool));
         qDt.Columns.Add("CthonicRemainsExplorationLevel", typeof(int));
         qDt.Columns.Add("EndedOmegasRein", typeof(bool));
+        qDt.Columns.Add("CraftedMoonArmor", typeof(bool));
         return qDt;
     }
 

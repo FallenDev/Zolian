@@ -1126,6 +1126,9 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Expert")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
+                                    if (!client.Aisling.QuestManager.CraftedMoonArmor)
+                                        client.Aisling.QuestManager.CraftedMoonArmor = true;
+
                                     _itemDetail.ItemMaterial = Item.ItemMaterials.MoonStone;
                                 }
                                 break;

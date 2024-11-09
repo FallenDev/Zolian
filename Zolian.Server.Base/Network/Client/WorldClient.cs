@@ -3631,12 +3631,11 @@ public class WorldClient : WorldClientBase, IWorldClient
                         Aisling.Inventory.RemoveFromInventory(this, itemLoop.First());
                     }
 
-                    break;
+                    continue;
                 }
 
                 // Handle stacked item
                 Aisling.Inventory.RemoveRange(Aisling.Client, item, retainer.AmountRequired);
-                break;
             }
         }
 

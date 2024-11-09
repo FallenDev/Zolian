@@ -6,6 +6,7 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
+using Darkages.Enums;
 
 namespace Darkages.GameScripts.Areas.Piet;
 
@@ -22,7 +23,16 @@ public class Evermore : AreaScript
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
-        if (client.Aisling.Pos is not { X: 24, Y: 13 } || client.Aisling.QuestManager.AssassinsGuildReputation < 4) return;
+        if (client.Aisling.Pos is not { X: 24, Y: 13 }) return;
+        if (client.Aisling.QuestManager.AssassinsGuildReputation < 4)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bYou are not permitted to enter");
+            client.WarpToAndRefresh(new Position(16, 17));
+            Task.Delay(300).Wait();
+            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(198, new Position(16, 17)));
+            return;
+        }
+
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou've placed your hand on the bloodied writing.");
         client.TransitionToMap(289, new Position(55, 21));
         Task.Delay(2500).Wait();
