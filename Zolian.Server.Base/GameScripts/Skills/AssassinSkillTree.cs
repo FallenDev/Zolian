@@ -486,9 +486,9 @@ public class Flurry(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = _skillMethod.GetInCone(aisling);
+        var enemy = aisling.GetInFrontToSide();
 
-        if (enemy.Length == 0)
+        if (enemy.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);
@@ -531,7 +531,8 @@ public class Flurry(Skill skill) : SkillScript(skill)
         }
         else
         {
-            var enemy = _skillMethod.GetInCone(sprite);
+            if (sprite is not Identifiable identifiable) return;
+            var enemy = identifiable.GetInFrontToSide();
 
             var action = new BodyAnimationArgs
             {
@@ -541,7 +542,7 @@ public class Flurry(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            if (enemy == null) return;
+            if (enemy.Count == 0) return;
 
             foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
             {

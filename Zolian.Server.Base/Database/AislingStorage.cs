@@ -19,8 +19,7 @@ public record AislingStorage : Sql
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
-    public FifoAutoReleasingSemaphoreSlim SaveLock { get; } = new(1, 1);
-    private FifoAutoReleasingSemaphoreSlim PasswordSaveLock { get; } = new(1, 1);
+    private SemaphoreSlim SaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim CreateLock { get; } = new(1, 1);
 
@@ -203,7 +202,14 @@ public record AislingStorage : Sql
     /// </summary>
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
-        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
+        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for Create", LogLevel.Error);
+            return default;
+        }
+
         var aisling = new Aisling();
 
         try
@@ -231,14 +237,12 @@ public record AislingStorage : Sql
     /// <summary>
     /// Saves a new password from the LoginServer
     /// </summary>
-    public async Task<bool> PasswordSave(Aisling obj)
+    public static async Task<bool> PasswordSave(Aisling obj)
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
         var continueLoad = await CheckIfPlayerExists(obj.Username, obj.Serial);
         if (!continueLoad) return false;
-
-        await PasswordSaveLock.WaitAsync(TimeSpan.FromSeconds(5));
 
         try
         {
@@ -255,10 +259,6 @@ public record AislingStorage : Sql
         catch (Exception e)
         {
             SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            PasswordSaveLock.Release();
         }
 
         return true;

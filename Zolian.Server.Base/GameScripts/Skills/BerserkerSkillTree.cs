@@ -1084,9 +1084,9 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = _skillMethod.GetInCone(aisling);
+        var enemy = aisling.GetInFrontToSide();
 
-        if (enemy.Length == 0)
+        if (enemy.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);
@@ -1223,7 +1223,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = _skillMethod.GetInCone(aisling).ToList();
+        var enemy = aisling.GetInFrontToSide();
         var enemyTwo = aisling.DamageableGetBehind();
         enemy.Add(enemyTwo.FirstOrDefault());
 

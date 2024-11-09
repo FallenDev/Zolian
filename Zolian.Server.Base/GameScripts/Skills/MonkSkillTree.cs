@@ -701,9 +701,9 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = _skillMethod.GetInCone(aisling);
+        var enemy = aisling.GetInFrontToSide();
 
-        if (enemy.Length == 0)
+        if (enemy.Count == 0)
         {
             _skillMethod.FailedAttempt(aisling, Skill, action);
             OnFailed(aisling);

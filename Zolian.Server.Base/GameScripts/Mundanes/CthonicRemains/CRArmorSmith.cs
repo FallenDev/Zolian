@@ -5,6 +5,7 @@ using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
+
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Mundanes.CthonicRemains;
@@ -1103,9 +1104,109 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
                                 }
                                 break;
                             case Item.ItemMaterials.Hybrasyl:
+                                {
+                                    var noneReqOne = client.Aisling.HasItemReturnItem("Refined Cobalt Steel");
+                                    var noneReqTwo = client.Aisling.HasItemReturnItem("Refined Obsidian");
+                                    var noneReqThree = client.Aisling.HasItemReturnItem("Ancient Bones");
+                                    var noneReqFour = client.Aisling.HasItemReturnItem("Fairy Wing");
+
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqOne, 5);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqTwo, 4);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqThree, 10);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqFour, 7);
+
+                                    if (chance >= .75)
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            "Ah, failed.. Don't worry, lets try again. I won't take your money..\n" +
+                                            "But unfortunately the materials were used up.");
+                                        return;
+                                    }
+
+                                    if (client.Aisling.QuestManager.ArmorSmithingTier is "Expert")
+                                        client.Aisling.QuestManager.ArmorSmithing++;
+
+                                    _itemDetail.ItemMaterial = Item.ItemMaterials.MoonStone;
+                                }
+                                break;
                             case Item.ItemMaterials.MoonStone:
+                                {
+                                    var noneReqOne = client.Aisling.HasItemReturnItem("Refined Cobalt Steel");
+                                    var noneReqTwo = client.Aisling.HasItemReturnItem("Refined Obsidian");
+                                    var noneReqThree = client.Aisling.HasItemReturnItem("Flawless Ruby");
+                                    var noneReqFour = client.Aisling.HasItemReturnItem("Captured Golden Floppy");
+
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqOne, 10);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqTwo, 8);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqThree, 2);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqFour, 3);
+
+                                    if (chance >= .75)
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            "Ah, failed.. Don't worry, lets try again. I won't take your money..\n" +
+                                            "But unfortunately the materials were used up.");
+                                        return;
+                                    }
+
+                                    if (client.Aisling.QuestManager.ArmorSmithingTier is "Expert")
+                                        client.Aisling.QuestManager.ArmorSmithing++;
+
+                                    _itemDetail.ItemMaterial = Item.ItemMaterials.SunStone;
+                                }
+                                break;
                             case Item.ItemMaterials.SunStone:
+                                {
+                                    var noneReqOne = client.Aisling.HasItemReturnItem("Refined Obsidian");
+                                    var noneReqTwo = client.Aisling.HasItemReturnItem("Refined Dark Iron");
+                                    var noneReqThree = client.Aisling.HasItemReturnItem("Flawless Ruby");
+                                    var noneReqFour = client.Aisling.HasItemReturnItem("Flawless Sapphire");
+
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqOne, 15);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqTwo, 10);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqThree, 2);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqFour, 2);
+
+                                    if (chance >= .75)
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            "Ah, failed.. Don't worry, lets try again. I won't take your money..\n" +
+                                            "But unfortunately the materials were used up.");
+                                        return;
+                                    }
+
+                                    if (client.Aisling.QuestManager.ArmorSmithingTier is "Expert")
+                                        client.Aisling.QuestManager.ArmorSmithing++;
+
+                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Ebony;
+                                }
+                                break;
                             case Item.ItemMaterials.Ebony:
+                                {
+                                    var noneReqOne = client.Aisling.HasItemReturnItem("Refined Obsidian");
+                                    var noneReqTwo = client.Aisling.HasItemReturnItem("Omega Module");
+                                    var noneReqThree = client.Aisling.HasItemReturnItem("Flawless Ruby");
+                                    var noneReqFour = client.Aisling.HasItemReturnItem("Flawless Sapphire");
+
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqOne, 20);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqTwo, 1);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqThree, 5);
+                                    client.Aisling.Inventory.RemoveRange(client, noneReqFour, 5);
+
+                                    if (chance >= .70)
+                                    {
+                                        client.SendOptionsDialog(Mundane,
+                                            "Ah, failed.. Don't worry, lets try again. I won't take your money..\n" +
+                                            "But unfortunately the materials were used up.");
+                                        return;
+                                    }
+
+                                    if (client.Aisling.QuestManager.ArmorSmithingTier is "Expert")
+                                        client.Aisling.QuestManager.ArmorSmithing++;
+
+                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Runic;
+                                }
+                                break;
                             case Item.ItemMaterials.Runic:
                             case Item.ItemMaterials.Chaos:
                                 client.SendOptionsDialog(Mundane, "That armor is quite beautiful, we can't do anything further with it.");

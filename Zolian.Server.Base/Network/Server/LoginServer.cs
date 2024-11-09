@@ -423,6 +423,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
     }
 
+    /// <summary>
+    /// 0x2D - Load Character Meta Data (Skills/Spells)
+    /// </summary>
+    public ValueTask OnSelfProfileRequest(ILoginClient client, in Packet clientPacket)
+    {
+        return default;
+    }
+
     #endregion
 
     #region Connection / Handler
@@ -458,6 +466,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.NoticeRequest] = OnNoticeRequest;
         ClientHandlers[(byte)ClientOpCode.PasswordChange] = OnPasswordChange;
         ClientHandlers[(byte)ClientOpCode.ExitRequest] = OnExitRequest;
+        ClientHandlers[(byte)ClientOpCode.SelfProfileRequest] = OnSelfProfileRequest;
     }
 
     protected override void OnConnected(Socket clientSocket)
@@ -680,7 +689,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         try
         {
-            await StorageManager.AislingBucket.PasswordSave(aisling);
+            return await AislingStorage.PasswordSave(aisling);
         }
         catch (Exception ex)
         {
@@ -689,7 +698,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             SentrySdk.CaptureException(ex);
         }
 
-        return true;
+        return false;
     }
 
     private static async Task<bool> ValidateUsernameAndPassword(ILoginClient client, string name, string password)

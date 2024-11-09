@@ -103,16 +103,6 @@ public class GlobalSkillMethods
         buff.OnApplied(target, buff);
     }
 
-    public Sprite[] GetInCone(Sprite sprite)
-    {
-        var objs = new List<Sprite>();
-        if (sprite is not Identifiable identified) return default;
-        var front = identified.GetInFrontToSide();
-        if (front.Count == 0) return default;
-        objs.AddRange(front.Where(monster => monster.TileType == TileContent.Monster && monster.Alive));
-        return objs.ToArray();
-    }
-
     public void Step(Sprite sprite, int savedXStep, int savedYStep)
     {
         if (sprite is not Aisling damageDealingSprite) return;

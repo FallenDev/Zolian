@@ -40,13 +40,13 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Chaos-Networking" Version="2.2.2" />
+		<PackageReference Include="Chaos-Networking" Version="2.2.3" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.2.24473.5">
 		  <TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
-		<PackageReference Include="Sentry" Version="4.12.1" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="4.12.1" />
-		<PackageReference Include="Sentry.Profiling" Version="4.12.1" />
+		<PackageReference Include="Sentry" Version="4.13.0" />
+		<PackageReference Include="Sentry.Extensions.Logging" Version="4.13.0" />
+		<PackageReference Include="Sentry.Profiling" Version="4.13.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
