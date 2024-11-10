@@ -31,7 +31,7 @@ public class MonkMeditation : AreaScript
         if (client.Aisling.Path != Class.Monk && client.Aisling.PastClass != Class.Monk) return;
         var monkNpc = ServerSetup.Instance.GlobalMundaneCache.FirstOrDefault(i => i.Value is { Name: "Sabonim Xi" });
         if (monkNpc.Value == null) return;
-        var monkScript = monkNpc.Value.Scripts.First();
+        var monkScript = monkNpc.Value.Scripts.FirstOrDefault();
         if (monkScript.Value == null) return;
         var script = monkScript.Value;
 

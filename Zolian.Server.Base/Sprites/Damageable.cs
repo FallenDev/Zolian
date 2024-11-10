@@ -1244,7 +1244,7 @@ public class Damageable : Movable
 
         if (this is not Monster monster) return;
         if (monster.Template?.ScriptName == null) return;
-        monster.Scripts?.First().Value.OnDamaged(aisling.Client, dmg, source);
+        monster.Scripts?.FirstOrDefault().Value.OnDamaged(aisling.Client, dmg, source);
     }
 
     private static void ShowDmg(Aisling aisling, TimeSpan elapsedTime)

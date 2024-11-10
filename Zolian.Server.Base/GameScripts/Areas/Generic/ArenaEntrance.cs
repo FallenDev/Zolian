@@ -53,8 +53,8 @@ public class ArenaEntrance : AreaScript
             case 13 when newLocation.Y == 9:
             case 13 when newLocation.Y == 10:
                 var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Arena Host");
-                var script = npc.Scripts.Values.First();
-                script.OnClick(client, npc.Serial);
+                var script = npc.Scripts.Values.FirstOrDefault();
+                script?.OnClick(client, npc.Serial);
                 break;
         }
     }

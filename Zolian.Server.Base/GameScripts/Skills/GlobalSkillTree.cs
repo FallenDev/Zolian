@@ -1,4 +1,5 @@
 ﻿using Chaos.Networking.Entities.Server;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.ScriptingBase;
@@ -13,9 +14,7 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -105,9 +104,7 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -174,9 +171,7 @@ public class InspectItem(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)

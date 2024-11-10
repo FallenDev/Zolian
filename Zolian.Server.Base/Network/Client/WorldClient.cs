@@ -1702,7 +1702,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         var scripts = ScriptManager.Load<SpellScript>(spellName, Spell.Create(1, value));
         if (scripts == null) return false;
 
-        scripts.Values.First().OnUse(caster, target);
+        scripts.Values.FirstOrDefault()?.OnUse(caster, target);
 
         return true;
     }
@@ -3628,7 +3628,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     for (var j = 0; j < retainer.AmountRequired; j++)
                     {
                         var itemLoop = Aisling.Inventory.Get(i => i.Template.Name == retainer.Item);
-                        Aisling.Inventory.RemoveFromInventory(this, itemLoop.First());
+                        Aisling.Inventory.RemoveFromInventory(this, itemLoop.FirstOrDefault());
                     }
 
                     continue;

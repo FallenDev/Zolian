@@ -18,13 +18,11 @@ namespace Darkages.GameScripts.Skills;
 public class Shadowfade(Skill skill) : SkillScript(skill)
 {
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to fade into the shadows.");
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to fade into the shadows.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -43,14 +41,14 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 
                     if (aisling.Dead || aisling.IsInvisible)
                     {
-                        _skillMethod.FailedAttempt(aisling, Skill, action);
+                        GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
                         OnFailed(aisling);
                         return;
                     }
 
                     var buff = new buff_hide();
                     aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
-                    _skillMethod.Train(aisling.Client, Skill);
+                    GlobalSkillMethods.Train(aisling.Client, Skill);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
                     break;
                 }
@@ -67,7 +65,7 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -93,16 +91,8 @@ public class Archery(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -120,7 +110,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -130,7 +120,7 @@ public class Archery(Skill skill) : SkillScript(skill)
         foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
         {
             _target = i;
-            var thrown = _skillMethod.Thrown(aisling.Client, Skill, _crit);
+            var thrown = GlobalSkillMethods.Thrown(aisling.Client, Skill, _crit);
 
             var animation = new AnimationArgs
             {
@@ -142,7 +132,7 @@ public class Archery(Skill skill) : SkillScript(skill)
             };
 
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         }
 
@@ -161,7 +151,7 @@ public class Archery(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -188,7 +178,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
             {
-                _skillMethod.FailedAttempt(sprite, Skill, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
                 OnFailed(sprite);
                 return;
             }
@@ -208,7 +198,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
             sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 
@@ -230,7 +220,7 @@ public class Archery(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Dex * 5;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -242,13 +232,11 @@ public class Archery(Skill skill) : SkillScript(skill)
 public class Splash(Skill skill) : SkillScript(skill)
 {
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-        client.SendServerMessage(ServerMessageType.OrangeBar1, $"{damageDealingAisling.Username} used Splash. It's super effective!");
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{damageDealingAisling.Username} used Splash. It's super effective!");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -266,7 +254,7 @@ public class Splash(Skill skill) : SkillScript(skill)
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial, 75));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Skill.Template.Sound, false));
-        _skillMethod.Train(aisling.Client, Skill);
+        GlobalSkillMethods.Train(aisling.Client, Skill);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -291,7 +279,7 @@ public class Splash(Skill skill) : SkillScript(skill)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -320,16 +308,8 @@ public class Slash(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -348,18 +328,18 @@ public class Slash(Skill skill) : SkillScript(skill)
 
         if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
 
         aisling.ActionUsed = "Slash";
         var dmgCalc = DamageCalc(sprite);
-        _skillMethod.OnSuccess(_target, aisling, Skill, dmgCalc, false, action);
+        GlobalSkillMethods.OnSuccess(_target, aisling, Skill, dmgCalc, false, action);
 
         // Second swing if crit
         if (_crit)
-            _skillMethod.OnSuccessWithoutActionAnimation(_target, aisling, Skill, dmgCalc, _crit);
+            GlobalSkillMethods.OnSuccessWithoutActionAnimation(_target, aisling, Skill, dmgCalc, _crit);
     }
 
     public override void OnUse(Sprite sprite)
@@ -368,7 +348,7 @@ public class Slash(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -395,13 +375,13 @@ public class Slash(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
             {
-                _skillMethod.FailedAttempt(sprite, Skill, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 
@@ -423,7 +403,7 @@ public class Slash(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 8;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -435,15 +415,11 @@ public class Slash(Skill skill) : SkillScript(skill)
 public class Adrenaline(Skill skill) : SkillScript(skill)
 {
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "You're out of stamina");
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, damageDealingAisling.Serial));
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're out of stamina");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -468,10 +444,10 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
 
         var buff = new buff_DexUp();
         {
-            _skillMethod.ApplyPhysicalBuff(aisling, buff);
+            GlobalSkillMethods.ApplyPhysicalBuff(aisling, buff);
         }
 
-        _skillMethod.Train(client, Skill);
+        GlobalSkillMethods.Train(client, Skill);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -480,7 +456,7 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
         if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
-        _success = _skillMethod.OnUse(aisling, Skill);
+        _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
         if (_success)
         {
@@ -499,15 +475,11 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
 public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 {
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance offense");
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, damageDealingAisling.Serial));
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance offense");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -538,10 +510,10 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 
         var buff = new buff_randWeaponElement();
         {
-            _skillMethod.ApplyPhysicalBuff(aisling, buff);
+            GlobalSkillMethods.ApplyPhysicalBuff(aisling, buff);
         }
 
-        _skillMethod.Train(client, Skill);
+        GlobalSkillMethods.Train(client, Skill);
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
@@ -551,7 +523,7 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
         if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
-        _success = _skillMethod.OnUse(aisling, Skill);
+        _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
         if (_success)
         {
@@ -570,15 +542,11 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 public class Elemental_Bane(Skill skill) : SkillScript(skill)
 {
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to increase elemental fortitude");
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, damageDealingAisling.Serial));
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to increase elemental fortitude");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -603,10 +571,10 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
 
         var buff = new buff_ElementalBane();
         {
-            _skillMethod.ApplyPhysicalBuff(aisling, buff);
+            GlobalSkillMethods.ApplyPhysicalBuff(aisling, buff);
         }
 
-        _skillMethod.Train(client, Skill);
+        GlobalSkillMethods.Train(client, Skill);
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(360, null, aisling.Serial));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -617,7 +585,7 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
         if (!Skill.CanUse()) return;
         if (sprite is not Aisling aisling) return;
 
-        _success = _skillMethod.OnUse(aisling, Skill);
+        _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
         if (_success)
         {
@@ -638,9 +606,7 @@ public class Appraise(Skill skill) : SkillScript(skill)
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -793,16 +759,8 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -824,7 +782,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -833,9 +791,9 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -866,7 +824,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
-            _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
 
@@ -876,7 +834,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -958,7 +916,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 3;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -972,16 +930,8 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1003,7 +953,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -1012,9 +962,9 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1045,7 +995,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
-            _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
 
@@ -1055,7 +1005,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -1137,7 +1087,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 4;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -1151,17 +1101,9 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private Debuff _debuff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private DebuffFrozen _debuff;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1183,7 +1125,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -1192,9 +1134,9 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1229,7 +1171,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             _debuff = new DebuffFrozen();
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-            _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
 
@@ -1239,7 +1181,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -1335,7 +1277,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Wis * 4;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -1349,16 +1291,8 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1388,9 +1322,9 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1408,7 +1342,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
             if (_target.CurrentHp > _target.MaximumHp)
                 _target.CurrentHp = _target.MaximumHp;
 
-            _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
 
@@ -1418,7 +1352,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -1485,7 +1419,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 3;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -1499,16 +1433,8 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1538,9 +1464,9 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1574,7 +1500,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
             if (_target.CurrentMp > _target.MaximumMp)
                 _target.CurrentMp = _target.MaximumMp;
 
-            _skillMethod.OnSuccess(_target, sprite, Skill, 0, false, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
         }
     }
 
@@ -1584,7 +1510,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -1667,7 +1593,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 3;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -1681,17 +1607,9 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private Debuff _debuff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private DebuffSilence _debuff;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1720,9 +1638,9 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1758,7 +1676,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
             _debuff = new DebuffSilence();
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 
@@ -1768,7 +1686,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -1862,7 +1780,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 2;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -1876,17 +1794,9 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private Debuff _debuff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private DebuffPoison _debuff;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1915,9 +1825,9 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -1953,7 +1863,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
             _debuff = new DebuffPoison();
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 
@@ -1963,7 +1873,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -2057,7 +1967,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Dex * 2;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -2071,17 +1981,9 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private Debuff _debuff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private DebuffPoison _debuff;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -2111,9 +2013,9 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
-            _skillMethod.Train(aisling.Client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             return;
         }
 
@@ -2149,7 +2051,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
             _debuff = new DebuffPoison();
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-            _skillMethod.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
     }
 
@@ -2159,7 +2061,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -2253,7 +2155,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Con * 2;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -2266,31 +2168,13 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _success;
-    private Buff _buff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private buff_Hasten _buff;
 
     public override void OnFailed(Sprite sprite)
     {
-        if (_target is not { Alive: true }) return;
-        switch (sprite)
-        {
-            case Aisling damageDealingAisling:
-                {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-                    if (_target == null) return;
-                    if (damageDealingAisling.NextTo((int)_target.Pos.X, (int)_target.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
-                        damageDealingAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-
-                    break;
-                }
-            case Monster:
-                {
-                    sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
-                    break;
-                }
-        }
+        if (sprite is not Aisling damageDealingAisling) return;
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
+        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2318,7 +2202,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        _skillMethod.Train(aisling.Client, Skill);
+        GlobalSkillMethods.Train(aisling.Client, Skill);
         _buff = new buff_Hasten();
 
         if (party == null || party.IsEmpty)
@@ -2345,7 +2229,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -2370,31 +2254,13 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _success;
-    private Buff _buff;
-    private readonly GlobalSkillMethods _skillMethod = new();
+    private buff_clawfist _buff;
 
     public override void OnFailed(Sprite sprite)
     {
-        if (_target is not { Alive: true }) return;
-        switch (sprite)
-        {
-            case Aisling damageDealingAisling:
-                {
-                    var client = damageDealingAisling.Client;
-
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-                    if (_target == null) return;
-                    if (damageDealingAisling.NextTo((int)_target.Pos.X, (int)_target.Pos.Y) && damageDealingAisling.Facing((int)_target.Pos.X, (int)_target.Pos.Y, out var direction))
-                        damageDealingAisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-
-                    break;
-                }
-            case Monster:
-                {
-                    sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
-                    break;
-                }
-        }
+        if (sprite is not Aisling damageDealingAisling) return;
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
+        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2433,7 +2299,7 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         Skill.LastUsedSkill = DateTime.UtcNow;
-        _skillMethod.Train(client, Skill);
+        GlobalSkillMethods.Train(client, Skill);
     }
 
     public override void OnUse(Sprite sprite)
@@ -2442,7 +2308,7 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -2467,17 +2333,12 @@ public class Dash(Skill skill) : SkillScript(skill)
     private bool _crit;
     private IList<Sprite> _enemyList;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
-        if (_target is not { Alive: true }) return;
-        if (damageDealingAisling.NextTo(_target.Position.X, _target.Position.Y) && damageDealingAisling.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageDealingAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
+        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
     }
 
     public override void OnSuccess(Sprite sprite)
@@ -2496,8 +2357,8 @@ public class Dash(Skill skill) : SkillScript(skill)
         var position = _target.Position;
         var mapCheck = aisling.Map.ID;
         var wallPosition = aisling.GetPendingChargePosition(3, aisling);
-        var targetPos = _skillMethod.DistanceTo(aisling.Position, position);
-        var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+        var targetPos = GlobalSkillMethods.DistanceTo(aisling.Position, position);
+        var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
 
         if (mapCheck != aisling.Map.ID) return;
 
@@ -2521,12 +2382,12 @@ public class Dash(Skill skill) : SkillScript(skill)
 
             if (aisling.Position != position)
             {
-                _skillMethod.Step(aisling, position.X, position.Y);
+                GlobalSkillMethods.Step(aisling, position.X, position.Y);
             }
 
             if (_target is not Damageable damageable) return;
             damageable.ApplyDamage(aisling, dmgCalc, Skill);
-            _skillMethod.Train(client, Skill);
+            GlobalSkillMethods.Train(client, Skill);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
 
             if (!_crit) return;
@@ -2534,7 +2395,7 @@ public class Dash(Skill skill) : SkillScript(skill)
         }
         else
         {
-            _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+            GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
 
             var stunned = new DebuffBeagsuain();
             aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
@@ -2575,7 +2436,7 @@ public class Dash(Skill skill) : SkillScript(skill)
             dmg = damageMonster.Str * 2 + damageMonster.Dex * 3;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
@@ -2593,14 +2454,14 @@ public class Dash(Skill skill) : SkillScript(skill)
         {
             var mapCheck = aisling.Map.ID;
             var wallPosition = aisling.GetPendingChargePositionNoTarget(3, aisling);
-            var wallPos = _skillMethod.DistanceTo(aisling.Position, wallPosition);
+            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
 
             if (mapCheck != aisling.Map.ID) return;
             if (!(wallPos > 0)) OnFailed(aisling);
 
             if (aisling.Position != wallPosition)
             {
-                _skillMethod.Step(aisling, wallPosition.X, wallPosition.Y);
+                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
             }
 
             if (wallPos <= 2)
@@ -2614,7 +2475,7 @@ public class Dash(Skill skill) : SkillScript(skill)
         }
         else
         {
-            _success = _skillMethod.OnUse(aisling, Skill);
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {

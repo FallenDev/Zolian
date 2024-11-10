@@ -73,7 +73,7 @@ public class MilethCryptTerror : AreaScript
         if (!a) return;
         if (_playersOnMap.IsEmpty) return;
 
-        _playersOnMap.Values.First()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 19)));
+        _playersOnMap.Values.FirstOrDefault()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(214, new Position(1, 19)));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

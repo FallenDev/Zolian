@@ -116,8 +116,8 @@ public class Area : Map
         // Grab list of sprites on x & y
         var spritesOnLocation = sprite.Map.ObjectGrid[x, y].Sprites.ToList();
         if (spritesOnLocation.IsNullOrEmpty()) return false;
-        var first = spritesOnLocation.First();
-        return sprite.Target?.Pos != first.Pos;
+        var first = spritesOnLocation.FirstOrDefault();
+        return sprite.Target?.Pos != first?.Pos;
     }
 
     /// <summary>

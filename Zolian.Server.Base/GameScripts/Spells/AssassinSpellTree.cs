@@ -450,7 +450,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
                     return;
                 }
 
-                var nearestSpriteKey = nearestSpriteList.Keys.First();
+                var nearestSpriteKey = nearestSpriteList.Keys.FirstOrDefault();
                 target = nearestSpriteList[nearestSpriteKey];
 
                 if (target == null)
@@ -480,7 +480,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
                 return;
             }
 
-            var nearestKey = nearestMonsterList.Keys.First();
+            var nearestKey = nearestMonsterList.Keys.FirstOrDefault();
             target = nearestMonsterList[nearestKey];
 
             if (target == null)

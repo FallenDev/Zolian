@@ -414,5 +414,5 @@ public sealed class Monster : Damageable
     public uint Id => Serial;
     public string Name => Template.BaseName;
     public ushort Sprite => Template.Image;
-    public void Activate(Aisling source) => Scripts.First().Value.OnClick(source.Client);
+    public void Activate(Aisling source) => Scripts.FirstOrDefault().Value.OnClick(source.Client);
 }

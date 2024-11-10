@@ -566,7 +566,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.First();
+                        var script = skill.Scripts.Values.FirstOrDefault();
                         script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
@@ -636,7 +636,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.First();
+                        var script = skill.Scripts.Values.FirstOrDefault();
                         script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
@@ -724,7 +724,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.First();
+                        var script = skill.Scripts.Values.FirstOrDefault();
                         script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
@@ -839,7 +839,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.First();
+                        var script = skill.Scripts.Values.FirstOrDefault();
                         script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);

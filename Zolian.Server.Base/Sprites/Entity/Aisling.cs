@@ -520,12 +520,12 @@ public sealed class Aisling : Player, IAisling
 
     public Skill GetSkill(string s)
     {
-        return SkillBook.GetSkills(i => i?.Template.Name == s).First();
+        return SkillBook.GetSkills(i => i?.Template.Name == s).FirstOrDefault();
     }
 
     public Spell GetSpell(string s)
     {
-        return SpellBook.TryGetSpells(i => i?.Template.Name == s).First();
+        return SpellBook.TryGetSpells(i => i?.Template.Name == s).FirstOrDefault();
     }
 
     public bool GiveGold(uint offer, bool sendClientUpdate = true)
@@ -830,7 +830,7 @@ public sealed class Aisling : Player, IAisling
 
                 skill.InUse = true;
 
-                var script = skill.Scripts.Values.First();
+                var script = skill.Scripts.Values.FirstOrDefault();
                 script?.OnUse(this);
                 skill.CurrentCooldown = skill.Template.Cooldown;
                 Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
@@ -841,6 +841,8 @@ public sealed class Aisling : Player, IAisling
 
                 skill.InUse = false;
             }
+
+            Task.Delay(500).Wait();
         }
 
         stopWatch.Stop();
@@ -869,7 +871,7 @@ public sealed class Aisling : Player, IAisling
                 if (spell.Scripts is null || spell.Scripts.IsEmpty) continue;
 
                 spell.InUse = true;
-                var script = spell.Scripts.Values.First();
+                var script = spell.Scripts.Values.FirstOrDefault();
                 script?.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);
                 spell.CurrentCooldown = spell.Template.Cooldown;
                 Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
@@ -877,6 +879,8 @@ public sealed class Aisling : Player, IAisling
                 spell.InUse = false;
                 await Task.Delay(spell.Lines * 1000);
             }
+
+            Task.Delay(500).Wait();
         }
 
         stopWatch.Stop();

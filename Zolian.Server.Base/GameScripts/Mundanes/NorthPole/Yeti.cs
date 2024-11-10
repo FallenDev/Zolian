@@ -217,7 +217,7 @@ public class Yeti(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                     if (client.PendingItemSessions != null)
                     {
-                        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).First();
+                        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).FirstOrDefault();
 
                         if (item == null) return;
 

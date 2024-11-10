@@ -879,17 +879,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                         if (monster.Target is Aisling aisling)
                         {
-                            monster.Scripts.Values.First().OnDeath(aisling.Client);
+                            monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
                         }
                         else
                         {
-                            monster.Scripts.Values.First().OnDeath();
+                            monster.Scripts.Values.FirstOrDefault()?.OnDeath();
                         }
 
                         return;
                     }
 
-                    monster.Scripts.Values.First().Update(elapsedTime);
+                    monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
                     monster.LastUpdated = DateTime.UtcNow;
 
                     if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
@@ -1144,7 +1144,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return default;
                 }
 
-                var item = itemObjs.First();
+                var item = itemObjs.FirstOrDefault();
                 if (item?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
                 if (!(localClient.Aisling.Position.DistanceFrom(item.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
                 var cantPickup = false;
@@ -1425,7 +1425,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (sprite is null) return default;
             if (aisling.CanSeeSprite(sprite)) return default;
             if (sprite is not Monster monster) return default;
-            var script = monster.Scripts.First().Value;
+            var script = monster.Scripts.FirstOrDefault().Value;
             script?.OnLeave(aisling.Client);
             return default;
         }
@@ -1923,15 +1923,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             // Uses a script equipped to the main-hand item if there is one
             var mainHandScript = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScripts;
-            mainHandScript?.First().Value.OnUse(lpClient.Aisling);
+            mainHandScript?.FirstOrDefault().Value.OnUse(lpClient.Aisling);
 
             // Uses a script associated with an accessory like Quivers
             var accessoryScript = lpClient.Aisling.EquipmentManager.Equipment[14]?.Item?.WeaponScripts;
-            accessoryScript?.First().Value.OnUse(lpClient.Aisling);
+            accessoryScript?.FirstOrDefault().Value.OnUse(lpClient.Aisling);
         }
 
         if (!optExecuteScript) return;
-        var script = lpSkill.Scripts.Values.First();
+        var script = lpSkill.Scripts.Values.FirstOrDefault();
         script?.OnUse(lpClient.Aisling);
     }
 
@@ -2135,7 +2135,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             }
             else
             {
-                var script = item.Scripts.Values.First();
+                var script = item.Scripts.Values.FirstOrDefault();
                 script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
                 activated = true;
             }
@@ -2376,14 +2376,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     case Monster monster:
                         {
-                            var script = monster.Scripts.Values.First();
+                            var script = monster.Scripts.Values.FirstOrDefault();
                             if (localArgs.Amount <= 0) return default;
                             script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
                         }
                     case Mundane mundane:
                         {
-                            var script = mundane.Scripts.Values.First();
+                            var script = mundane.Scripts.Values.FirstOrDefault();
                             if (localArgs.Amount <= 0) return default;
                             script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
@@ -2797,7 +2797,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         var board = AislingStorage.ObtainMailboxId(receiver.Result.Serial);
                         var posts = AislingStorage.ObtainPosts(board.BoardId);
                         var postIdList = posts.Select(post => (int)post.PostId).ToList();
-                        var postId = Enumerable.Range(1, 128).Except(postIdList).First();
+                        var postId = Enumerable.Range(1, 128).Except(postIdList).FirstOrDefault();
                         var np = new PostTemplate
                         {
                             PostId = (short)postId,
@@ -2821,7 +2821,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         if (boardFound)
                         {
                             var postIdList = board.Posts.Values.Select(post => (int)post.PostId).ToList();
-                            var postId = Enumerable.Range(1, 128).Except(postIdList).First();
+                            var postId = Enumerable.Range(1, 128).Except(postIdList).FirstOrDefault();
                             var np = new PostTemplate
                             {
                                 PostId = (short)postId,
@@ -2993,7 +2993,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             skill.InUse = true;
 
-            var script = skill.Scripts.Values.First();
+            var script = skill.Scripts.Values.FirstOrDefault();
             script?.OnUse(localClient.Aisling);
             skill.CurrentCooldown = skill.Template.Cooldown;
             localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);

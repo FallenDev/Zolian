@@ -101,7 +101,7 @@ public static class NpcShopExtensions
 
     public static void CompletePendingItemSell(WorldClient client, Mundane mundane)
     {
-        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).First();
+        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).FirstOrDefault();
 
         if (item == null)
         {
@@ -189,10 +189,10 @@ public static class NpcShopExtensions
 
     public static void SellStackedItemFromInventory(WorldClient client, Mundane mundane)
     {
-        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).First();
+        var item = client.Aisling.Inventory.Get(i => i != null && i.ItemId == client.PendingItemSessions.ID).FirstOrDefault();
         var amount = client.PendingItemSessions.Quantity;
 
-        if (item.Stacks < amount)
+        if (item == null || item.Stacks < amount)
         {
             client.SendOptionsDialog(mundane, "Sorry, it looks like you're not carrying enough for what you offered.");
             return;

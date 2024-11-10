@@ -15,16 +15,8 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (_target is not { Alive: true }) return;
-        if (sprite is not Damageable damageable) return;
-        if (damageable.NextTo(_target.Position.X, _target.Position.Y) &&
-            damageable.Facing(_target.Position.X, _target.Position.Y, out _))
-            damageable.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
     public override async void OnSuccess(Sprite sprite)
     {
@@ -47,7 +39,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         else
         {
             client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -56,7 +48,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
 
         if (enemy.Count == 0)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -64,11 +56,11 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         await SendAnimations(aisling, enemy);
 
         // enemy.Count = 0 verified that there is an enemy
-        _target = enemy.First();
+        _target = enemy.FirstOrDefault();
 
-        if (_target.Serial == aisling.Serial || !_target.Attackable)
+        if (_target is null || _target.Serial == aisling.Serial || !_target.Attackable)
         {
-            _skillMethod.FailedAttempt(aisling, Skill, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
             OnFailed(aisling);
             return;
         }
@@ -98,7 +90,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
 
         var dmgCalc = DamageCalc(aisling);
         damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
-        _skillMethod.OnSuccess(_target, aisling, Skill, 0, false, action);
+        GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
     public override async void OnUse(Sprite sprite)
@@ -112,17 +104,13 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Wands" ||
                 client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is "Staves")
             {
-                _success = _skillMethod.OnUse(aisling, Skill);
+                _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
                 if (_success)
                 {
                     OnSuccess(aisling);
+                    return;
                 }
-                else
-                {
-                    OnFailed(aisling);
-                }
-
             }
 
             OnFailed(aisling);
@@ -176,7 +164,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
     {
         if (damageDealingSprite is not Identifiable identifiable) return;
 
-        foreach (var position in identifiable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.First().Position)))
+        foreach (var position in identifiable.GetTilesInFront(damageDealingSprite.Position.DistanceFrom(enemy.FirstOrDefault()?.Position)))
         {
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
@@ -205,7 +193,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             dmg += damageMonster.Wis * 10;
         }
 
-        var critCheck = _skillMethod.OnCrit(dmg);
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
