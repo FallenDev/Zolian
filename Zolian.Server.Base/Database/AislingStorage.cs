@@ -19,7 +19,7 @@ public record AislingStorage : Sql
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
-    private SemaphoreSlim SaveLock { get; } = new(1, 1);
+    public FifoAutoReleasingSemaphoreSlim SaveLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
     private FifoAutoReleasingSemaphoreSlim CreateLock { get; } = new(1, 1);
 
@@ -196,6 +196,10 @@ public record AislingStorage : Sql
         {
             SentrySdk.CaptureException(e);
         }
+        finally
+        {
+            CreateLock.Release();
+        }
     }
 
     /// <summary>
@@ -271,35 +275,93 @@ public record AislingStorage : Sql
 
     /// <summary>
     /// Saves a player's state on disconnect or error
-    /// Creates a new DB connection on event
+    /// Utilizes an active connection that self-heals if closed
     /// </summary>
     public static async Task<bool> Save(Aisling obj)
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-
-        var dt = PlayerDataTable();
-        var qDt = QuestDataTable();
-        var cDt = ComboScrollDataTable();
-        var iDt = ItemsDataTable();
-        var skillDt = SkillDataTable();
-        var spellDt = SpellDataTable();
-        var buffDt = BuffsDataTable();
-        var debuffDt = DeBuffsDataTable();
-        var connection = ConnectToDatabase(ConnectionString);
+        var connection = ServerSetup.Instance.ServerSaveConnection;
 
         try
         {
-            dt = PlayerStatSave(obj, dt);
-            if (obj.QuestManager == null) return false;
-            qDt = PlayerQuestSave(obj, qDt);
-            if (obj.ComboManager == null) return false;
-            cDt = PlayerComboSave(obj, cDt);
-            iDt = PlayerItemSave(obj, iDt);
-            skillDt = PlayerSkillSave(obj, skillDt);
-            spellDt = PlayerSpellSave(obj, spellDt);
-            buffDt = PlayerBuffSave(obj, buffDt);
-            debuffDt = PlayerDebuffSave(obj, debuffDt);
+            _ = Task.Run(PlayerSaveRoutine(obj, connection));
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("Reconnecting Player Save-State");
+                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
+                ServerSetup.Instance.ServerSaveConnection.Open();
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Saves all players states
+    /// Utilizes an active connection that self-heals if closed
+    /// </summary>
+    public async Task<bool> ServerSave(List<Aisling> playerList)
+    {
+        if (playerList.Count == 0) return false;
+        await SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
+
+        var connection = ServerSetup.Instance.ServerSaveConnection;
+
+        try
+        {
+            foreach (var player in playerList.Where(p => p is { Loading: false }))
+                _ = Task.Run(PlayerSaveRoutine(player, connection));
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("Reconnecting Player Save-State");
+                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
+                ServerSetup.Instance.ServerSaveConnection.Open();
+            }
+
+            SaveLock.Release();
+        }
+
+        return true;
+    }
+
+    private static Action PlayerSaveRoutine(Aisling player, SqlConnection connection)
+    {
+        return delegate
+        {
+            player.Client.LastSave = DateTime.UtcNow;
+            var dt = PlayerDataTable();
+            var qDt = QuestDataTable();
+            var cDt = ComboScrollDataTable();
+            var iDt = ItemsDataTable();
+            var skillDt = SkillDataTable();
+            var spellDt = SpellDataTable();
+            var buffDt = BuffsDataTable();
+            var debuffDt = DeBuffsDataTable();
+            dt = PlayerStatSave(player, dt);
+            qDt = PlayerQuestSave(player, qDt);
+            cDt = PlayerComboSave(player, cDt);
+            iDt = PlayerItemSave(player, iDt);
+            skillDt = PlayerSkillSave(player, skillDt);
+            spellDt = PlayerSpellSave(player, spellDt);
+            buffDt = PlayerBuffSave(player, buffDt);
+            debuffDt = PlayerDebuffSave(player, debuffDt);
 
             using (var cmd = new SqlCommand("PlayerSave", connection))
             {
@@ -372,144 +434,7 @@ public record AislingStorage : Sql
                 param8.TypeName = "dbo.DebuffType";
                 cmd8.ExecuteNonQuery();
             }
-
-            connection.Close();
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Saves all players states
-    /// Utilizes an active connection that self-heals if closed
-    /// </summary>
-    public async Task<bool> ServerSave(List<Aisling> playerList)
-    {
-        if (playerList.Count == 0) return false;
-        await SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
-
-        var dt = PlayerDataTable();
-        var qDt = QuestDataTable();
-        var cDt = ComboScrollDataTable();
-        var iDt = ItemsDataTable();
-        var skillDt = SkillDataTable();
-        var spellDt = SpellDataTable();
-        var buffDt = BuffsDataTable();
-        var debuffDt = DeBuffsDataTable();
-        var connection = ServerSetup.Instance.ServerSaveConnection;
-
-        try
-        {
-            foreach (var player in playerList.Where(player => !player.Loading))
-            {
-                if (player.Client == null) continue;
-                player.Client.LastSave = DateTime.UtcNow;
-                dt = PlayerStatSave(player, dt);
-                if (player.QuestManager == null) continue;
-                qDt = PlayerQuestSave(player, qDt);
-                if (player.ComboManager == null) continue;
-                cDt = PlayerComboSave(player, cDt);
-                iDt = PlayerItemSave(player, iDt);
-                skillDt = PlayerSkillSave(player, skillDt);
-                spellDt = PlayerSpellSave(player, spellDt);
-                buffDt = PlayerBuffSave(player, buffDt);
-                debuffDt = PlayerDebuffSave(player, debuffDt);
-
-                using (var cmd = new SqlCommand("PlayerSave", connection))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    var param = cmd.Parameters.AddWithValue("@Players", dt);
-                    param.SqlDbType = SqlDbType.Structured;
-                    param.TypeName = "dbo.PlayerType";
-                    cmd.ExecuteNonQuery();
-                }
-
-                using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
-                {
-                    cmd2.CommandType = CommandType.StoredProcedure;
-                    var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
-                    param2.SqlDbType = SqlDbType.Structured;
-                    param2.TypeName = "dbo.QuestType";
-                    cmd2.ExecuteNonQuery();
-                }
-
-                using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
-                {
-                    cmd3.CommandType = CommandType.StoredProcedure;
-                    var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
-                    param3.SqlDbType = SqlDbType.Structured;
-                    param3.TypeName = "dbo.ComboType";
-                    cmd3.ExecuteNonQuery();
-                }
-
-                using (var cmd4 = new SqlCommand("ItemUpsert", connection))
-                {
-                    cmd4.CommandType = CommandType.StoredProcedure;
-                    var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-                    param4.SqlDbType = SqlDbType.Structured;
-                    param4.TypeName = "dbo.ItemType";
-                    cmd4.ExecuteNonQuery();
-                }
-
-                using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
-                {
-                    cmd5.CommandType = CommandType.StoredProcedure;
-                    var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
-                    param5.SqlDbType = SqlDbType.Structured;
-                    param5.TypeName = "dbo.SkillType";
-                    cmd5.ExecuteNonQuery();
-                }
-
-                using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
-                {
-                    cmd6.CommandType = CommandType.StoredProcedure;
-                    var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
-                    param6.SqlDbType = SqlDbType.Structured;
-                    param6.TypeName = "dbo.SpellType";
-                    cmd6.ExecuteNonQuery();
-                }
-
-                using (var cmd7 = new SqlCommand("BuffSave", connection))
-                {
-                    cmd7.CommandType = CommandType.StoredProcedure;
-                    var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
-                    param7.SqlDbType = SqlDbType.Structured;
-                    param7.TypeName = "dbo.BuffType";
-                    cmd7.ExecuteNonQuery();
-                }
-
-                using (var cmd8 = new SqlCommand("DeBuffSave", connection))
-                {
-                    cmd8.CommandType = CommandType.StoredProcedure;
-                    var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
-                    param8.SqlDbType = SqlDbType.Structured;
-                    param8.TypeName = "dbo.DebuffType";
-                    cmd8.ExecuteNonQuery();
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            if (connection.State != ConnectionState.Open)
-            {
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine("Reconnecting Player Save-State");
-                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
-                ServerSetup.Instance.ServerSaveConnection.Open();
-            }
-
-            SaveLock.Release();
-        }
-
-        return true;
+        };
     }
 
     private static DataTable PlayerStatSave(Aisling obj, DataTable dt)

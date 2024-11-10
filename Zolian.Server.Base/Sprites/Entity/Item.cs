@@ -733,24 +733,29 @@ public sealed class Item : Identifiable
     }
 
     /// <summary>
-    /// Delete from database only happens on death, or item dropped
+    /// Delete from database only happens on death, item dropped, stored, or sold
     /// Checks if item still exists on SQL List, if so remove
     /// Utilizes a semaphore lock to prevent multiple saves and deletes at once
     /// </summary>
-    public async void DeleteFromAislingDb()
+    public async Task DeleteFromAislingDb()
     {
         var itemId = ItemId;
+        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
 
         try
         {
             var sConn = ServerSetup.Instance.ServerSaveConnection;
             const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
-            await sConn.ExecuteAsync(cmd, new { itemId });
+            sConn.Execute(cmd, new { itemId });
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"Failed to delete {ItemId}:{Name} from Player: {Serial}");
             SentrySdk.CaptureException(e);
+        }
+        finally
+        {
+            StorageManager.AislingBucket.SaveLock.Release();
         }
     }
 

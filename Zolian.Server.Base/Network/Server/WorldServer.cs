@@ -617,11 +617,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         pingComponent.Update(elapsed["Ping"]);
                         _componentStopwatches["Ping"].Restart();
                         break;
-                    case PlayerSaveComponent playerSaveComponent:
-                        if (elapsed["PlayerSave"].TotalSeconds < 15) break;
-                        playerSaveComponent.Update(elapsed["PlayerSave"]);
-                        _componentStopwatches["PlayerSave"].Restart();
-                        break;
                     case MundaneComponent mundaneComponent:
                         if (elapsed["Mundane"].TotalSeconds < 10) break;
                         mundaneComponent.Update(elapsed["Mundane"]);
@@ -631,6 +626,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         if (elapsed["DayLight"].TotalSeconds < 15) break;
                         dayLightComponent.Update(elapsed["DayLight"]);
                         _componentStopwatches["DayLight"].Restart();
+                        break;
+                    case PlayerSaveComponent playerSaveComponent:
+                        if (elapsed["PlayerSave"].TotalSeconds < 30) break;
+                        playerSaveComponent.Update(elapsed["PlayerSave"]);
+                        _componentStopwatches["PlayerSave"].Restart();
                         break;
                     case MessageClearComponent messageClearComponent:
                         if (elapsed["MessageClear"].TotalSeconds < 60) break;
