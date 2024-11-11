@@ -583,7 +583,14 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
+        if (sprite is not Aisling aisling)
+        {
+            var buff = new buff_ElementalBane();
+            {
+                GlobalSkillMethods.ApplyPhysicalBuff(sprite, buff);
+            }
+            return;
+        }
 
         _success = GlobalSkillMethods.OnUse(aisling, Skill);
 

@@ -21,7 +21,7 @@ public class Movable : Identifiable
 
             foreach (var player in AislingsNearby())
             {
-                player.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+                player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
             }
 
             LastMovementChanged = readyTime;

@@ -528,7 +528,7 @@ public class Damageable : Movable
     {
         if (source is not Aisling aisling) return dmg;
 
-        if (aisling.DualWield && aisling.EquipmentManager.Equipment[3] != null && aisling.EquipmentManager.Equipment[3].Item.Template.ScriptName == "Weapon")
+        if (aisling.DualWield && aisling.EquipmentManager.Equipment[3]?.Item != null && aisling.EquipmentManager.Equipment[3].Item.Template.ScriptName == "Weapon")
         {
             var weapon2 = aisling.EquipmentManager.Equipment[3].Item;
             long dmg2 = 0;
@@ -589,7 +589,7 @@ public class Damageable : Movable
             dmg += dmg2;
         }
 
-        if (aisling.EquipmentManager.Equipment[1] == null) return dmg;
+        if (aisling.EquipmentManager.Equipment[1]?.Item == null) return dmg;
         var weapon = aisling.EquipmentManager.Equipment[1].Item;
 
         switch (weapon.GearEnhancement)

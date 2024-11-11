@@ -33,7 +33,7 @@ public class Currents : AreaScript
                 break;
         }
 
-        if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
         if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;
@@ -46,7 +46,7 @@ public class Currents : AreaScript
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped)
     {
-        if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
         if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;
@@ -59,7 +59,7 @@ public class Currents : AreaScript
 
     public override void OnGossip(WorldClient client, string message)
     {
-        if (client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
         if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
         var drownTick = client.Aisling.MaximumHp * 0.05;
         client.Aisling.CurrentHp -= (long)drownTick;

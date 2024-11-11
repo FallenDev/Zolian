@@ -47,7 +47,7 @@ public class VoidSphereApex : AreaScript
             return;
         }
 
-        if (client.Aisling.EquipmentManager.Equipment[18]?.Item.Template.Name == "Auto Spark") return;
+        if (client.Aisling.EquipmentManager.Equipment[18]?.Item?.Template.Name == "Auto Spark") return;
 
         // Off-Map Kill
         if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;

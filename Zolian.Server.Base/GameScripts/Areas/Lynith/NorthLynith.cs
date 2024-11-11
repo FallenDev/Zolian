@@ -28,7 +28,7 @@ public class NorthLynith : AreaScript
         switch (newLocation.X)
         {
             case 15 when newLocation.Y == 9:
-                if (client.Aisling.QuestManager.ScubaGearCrafted && client.Aisling.EquipmentManager.Equipment[16]?.Item.Template.Name == "Scuba Gear"
+                if (client.Aisling.QuestManager.ScubaGearCrafted && client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear"
                     || client.Aisling.Race.RaceFlagIsSet(Race.Merfolk))
                 {
                     client.TransitionToMap(5110, new Position(2, 14));

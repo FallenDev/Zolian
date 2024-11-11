@@ -19,7 +19,8 @@ public class Shield(Item item) : ItemScript(item)
         var i = aisling.EquipmentManager.Equipment[1]?.Slot;
         if (i != null)
         {
-            var e = aisling.EquipmentManager.Equipment[1].Item;
+            var e = aisling.EquipmentManager.Equipment[1]?.Item;
+            if (e == null) return;
 
             if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHanded))
             {

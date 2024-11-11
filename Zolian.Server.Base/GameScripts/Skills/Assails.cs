@@ -1328,7 +1328,7 @@ public class TwoHandedAttack(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[1] == null) return;
+            if (aisling.EquipmentManager.Equipment[1]?.Item == null) return;
             if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
             {
                 return;
@@ -1438,7 +1438,7 @@ public class Kobudo(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[1] == null) return;
+            if (aisling.EquipmentManager.Equipment[1]?.Item == null) return;
             if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
             {
                 return;
@@ -1548,7 +1548,7 @@ public class AdvancedStaffTraining(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[1] == null) return;
+            if (aisling.EquipmentManager.Equipment[1]?.Item == null) return;
             if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
             {
                 return;
@@ -1658,7 +1658,7 @@ public class DualWield(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[3] != null)
+            if (aisling.EquipmentManager.Equipment[3]?.Item != null)
             {
                 if (!aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.DualWield)) return;
             }
@@ -1771,7 +1771,7 @@ public class Ambidextrous(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[3] != null)
+            if (aisling.EquipmentManager.Equipment[3]?.Item != null)
             {
                 if (!aisling.EquipmentManager.Equipment[3].Item.Template.Flags.FlagIsSet(ItemFlags.DualWield)) return;
             }
@@ -2504,7 +2504,7 @@ public class CrushingMace(Skill skill) : SkillScript(skill)
             aisling.ActionUsed = "Crushing Mace";
             var dmgCalc = DamageCalc(sprite);
 
-            if (aisling.EquipmentManager.Equipment[1] != null)
+            if (aisling.EquipmentManager.Equipment[1]?.Item != null)
             {
                 if (aisling.EquipmentManager.Equipment[1].Item.Template.Group == "Maces")
                 {
@@ -2632,7 +2632,7 @@ public class Daisho(Skill skill) : SkillScript(skill)
 
         if (sprite is Aisling aisling)
         {
-            if (aisling.EquipmentManager.Equipment[1] == null) return;
+            if (aisling.EquipmentManager.Equipment[1]?.Item == null) return;
             if (aisling.EquipmentManager.Equipment[1]?.Item?.Template?.DmgMin == 0 || aisling.EquipmentManager.Equipment[3]?.Item?.Template?.DmgMin == 0)
             {
                 return;

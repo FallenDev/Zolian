@@ -792,8 +792,8 @@ public sealed class Aisling : Player, IAisling
 
         foreach (var player in AislingsNearby())
         {
-            if (player.Serial == Serial) continue;
-            player.Client.SendCreatureWalk(Serial, new Point(oldPosX, oldPosY), (Direction)Direction);
+            if (player?.Serial == Serial) continue;
+            player?.Client.SendCreatureWalk(Serial, new Point(oldPosX, oldPosY), (Direction)Direction);
         }
 
         LastPosition = new Position(oldPosX, oldPosY);

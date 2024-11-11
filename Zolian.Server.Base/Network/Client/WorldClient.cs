@@ -3584,9 +3584,9 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (!excludeSelf)
             SendDisplayAisling(Aisling);
 
-        var nearbyAislings = Aisling.AislingsNearby();
+        var nearbyAislings = Aisling.AislingsNearby().ToList();
 
-        if (nearbyAislings.Length == 0) return this;
+        if (nearbyAislings.Count == 0) return this;
 
         var self = Aisling;
 

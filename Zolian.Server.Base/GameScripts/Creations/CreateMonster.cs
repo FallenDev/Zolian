@@ -1283,38 +1283,35 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             <= 60 =>
             [
                 "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice",
-                "Desolate", "Dual Slice", "Rush", "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance",
-                "Bite'n Shake", "Howl'n Call", "Death From Above",
-                "Pounce", "Roll Over", "Corrosive Touch"
+                "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Rush",
+                "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance", "Bite'n Shake", "Howl'n Call",
+                "Death From Above", "Pounce", "Roll Over", "Corrosive Touch"
             ],
             <= 75 =>
             [
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
-                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist",
-                "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever",
-                "Wind Slice", "Beag Suain", "Charge",
-                "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call",
-                "Death From Above", "Pounce", "Roll Over",
-                "Swallow Whole", "Tentacle", "Corrosive Touch"
+                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice", "Desolate",
+                "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash",
+                "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above",
+                "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch"
             ],
             <= 120 =>
             [
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
-                "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate",
-                "Dual Slice", "Lullaby Strike", "Rush",
-                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance",
-                "Ebb'n Flow", "Retribution", "Flame Thrower",
-                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle",
-                "Corrosive Touch", "Tantalizing Gaze"
+                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice",
+                "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain",
+                "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution",
+                "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
+                "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
             ],
             _ => new List<string>
             {
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice", "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush",
-                "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution", "Flame Thrower",
-                "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
+                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
+                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice",
+                "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain",
+                "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution",
+                "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
+                "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
             }
         };
 
@@ -1638,7 +1635,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Demon)) return;
         var skillList = new List<string> { "Onslaught", "Two-Handed Attack", "Dual Wield", "Slash", "Thrash" };
-        var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Entice", "Atlantean Weapon" };
+        var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Entice" };
         var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
@@ -1664,8 +1661,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     private void ElementalSet(Monster monster)
     {
         if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Elemental)) return;
-        var skillList = new List<string> { "Onslaught", "Assault" };
-        var abilityList = new List<string> { "Atlantean Weapon", "Elemental Bane" };
+        var skillList = new List<string> { "Flame Thrower", "Water Cannon", "Tornado Vector", "Earth Shatter" };
+        var abilityList = new List<string> { "Elemental Bane" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 

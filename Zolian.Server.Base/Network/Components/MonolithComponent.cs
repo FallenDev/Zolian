@@ -35,14 +35,13 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             PlaceFlower(map);
 
             // Ensure the map isn't overloaded with monsters
-            var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Count();
-            if (monstersOnMap >= map.Height * map.Width / 100) continue;
+            var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).ToList();
+            if (monstersOnMap.Count >= map.Height * map.Width / 100) continue;
 
             // Check each map for monster SpawnMax, and whether it's ready to spawn
             foreach (var (_, monster) in ServerSetup.Instance.GlobalMonsterTemplateCache.Where(i => i.Value.AreaID == map.ID))
             {
-                var count = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive || m.Template.MonsterRace == MonsterRace.Dummy)
-                    .Count(i => i.Template.Name == monster.Name);
+                var count = monstersOnMap.Count(i => i.Template.Name == monster.Name);
 
                 if (count >= monster.SpawnMax) continue;
                 if (!monster.ReadyToSpawn()) continue;

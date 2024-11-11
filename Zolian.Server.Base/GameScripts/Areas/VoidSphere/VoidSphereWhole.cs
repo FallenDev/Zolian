@@ -25,7 +25,7 @@ public class VoidSphereWhole : AreaScript
         if (client.Aisling.Pos != vectorMap) return;
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
-        if (client.Aisling.EquipmentManager.Equipment[18]?.Item.Template.Name == "Auto Spark") return;
+        if (client.Aisling.EquipmentManager.Equipment[18]?.Item?.Template.Name == "Auto Spark") return;
 
         if (!(vectorMap.Y > 35) && !(vectorMap.Y < 3) && !(vectorMap.X > 35) && !(vectorMap.X < 3)) return;
         var debuff = new DebuffReaping();

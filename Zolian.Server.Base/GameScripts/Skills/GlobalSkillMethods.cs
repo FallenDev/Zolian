@@ -292,10 +292,10 @@ public class GlobalSkillMethods
     {
         try
         {
-            if (client.Aisling.EquipmentManager.Equipment[1].Item?.Template.Group is not ("Glaives" or "Shuriken" or "Daggers" or "Bows")) return 10015;
+            if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Glaives" or "Shuriken" or "Daggers" or "Bows")) return 10015;
 
             // 10006,7,8 = ice arrows, 10003,4,5 = fire arrows
-            return client.Aisling.EquipmentManager.Equipment[1].Item.Template.Group switch
+            return client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group switch
             {
                 "Glaives" => 10012,
                 "Shuriken" => 10011,

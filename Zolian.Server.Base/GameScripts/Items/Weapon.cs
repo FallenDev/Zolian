@@ -128,12 +128,12 @@ public class Weapon(Item item) : ItemScript(item)
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
 
-        var templateImage = aisling.EquipmentManager.Equipment[1]?.Item.Template.Image;
-        var offHandImage = aisling.EquipmentManager.Equipment[3]?.Item.Template.OffHandImage;
+        var templateImage = aisling.EquipmentManager.Equipment[1]?.Item?.Template.Image;
+        var offHandImage = aisling.EquipmentManager.Equipment[3]?.Item?.Template.OffHandImage;
 
         if (templateImage != null)
             client.Aisling.WeaponImg = (short)templateImage;
-        if (offHandImage != 0 && slot == 3)
+        if (offHandImage != null && offHandImage != 0 && slot == 3)
             client.Aisling.ShieldImg = (short)Item.Template.OffHandImage;
 
         client.Aisling.UsingTwoHanded = Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff);

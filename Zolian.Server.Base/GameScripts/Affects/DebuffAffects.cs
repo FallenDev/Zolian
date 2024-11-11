@@ -5,6 +5,8 @@ using Darkages.Network.Server;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
+
+using System.Diagnostics;
 using System.Security.Cryptography;
 using MapFlags = Darkages.Enums.MapFlags;
 
@@ -2266,7 +2268,7 @@ public class DebuffBleeding : Debuff
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
     {
         base.OnDurationUpdate(affected, debuff);
-        ApplyBleeding(affected);
+        ApplyBleeding(affected, debuff);
 
         if (affected is Aisling aisling)
         {
@@ -2292,14 +2294,24 @@ public class DebuffBleeding : Debuff
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
-    private static void ApplyBleeding(Sprite affected)
+    private static void ApplyBleeding(Sprite affected, Debuff debuff)
     {
-        var tourniquet = affected.MaximumHp * .10;
+        if (affected.CurrentHp <= affected.MaximumHp * 0.07)
+        {
+            debuff.OnEnded(affected, debuff);
+            return;
+        }
 
-        if (tourniquet <= 500) return;
+        var cap = (int)(affected.CurrentHp * Modifier);
 
-        var cap = (int)(affected.CurrentHp - affected.CurrentHp * Modifier);
-        if (cap > 0) affected.CurrentHp = cap;
+        if (affected is Monster monster)
+        {
+            if (cap > 75000) cap = 75000;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
     }
 }
 

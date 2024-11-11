@@ -265,15 +265,32 @@ public abstract class Sprite : INotifyPropertyChanged
     {
         if (this is not Monster monster) return false;
         if (monster.Template.MonsterRace == MonsterRace.Dummy) return true;
+        var flushTargetRecord = 0;
 
-        // If the dictionary is empty, add the player
-        if (monster.TargetRecord.TaggedAislings.IsEmpty)
+        // If targeting is not empty, check nearby players
+        if (!monster.TargetRecord.TaggedAislings.IsEmpty)
         {
-            monster.TryAddPlayerAndHisGroup(attackingPlayer);
-            return true;
+            var nearby = AislingsNearby();
+            foreach (var player in nearby)
+            {
+                monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerRecord);
+
+                // If nearby player is found, deny a record flush
+                if (playerRecord.player != null) 
+                    flushTargetRecord++;
+            }
+
+            // Return if players are found and run logic if they can attack
+            if (flushTargetRecord != 0)
+                return monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _) || monster.TryAddTagging(attackingPlayer);
+            
+            // Record flush if no players are found
+            monster.TargetRecord.TaggedAislings.Clear();
         }
 
-        return monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _) || monster.TryAddTagging(attackingPlayer);
+        // Add player or player's group
+        monster.TryAddPlayerAndHisGroup(attackingPlayer);
+        return true;
     }
 
     protected IEnumerable<Sprite> GetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
@@ -290,9 +307,9 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
     private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
-    public Aisling[] AislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToArray();
-    public Aisling[] AislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14)).ToArray();
-    public Aisling[] AislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map).ToArray();
+    public IEnumerable<Aisling> AislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    public IEnumerable<Aisling> AislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14));
+    public IEnumerable<Aisling> AislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map);
     public IEnumerable<Monster> MonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
     public IEnumerable<Monster> MonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null);
     public IEnumerable<Mundane> MundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
@@ -499,8 +516,11 @@ public abstract class Sprite : INotifyPropertyChanged
         {
             try
             {
-                var buffObj = Buffs[buff];
-                buffObj?.OnEnded(this, buffObj);
+                var buffObj = Buffs.TryGetValue(buff, out var foundBuff);
+                if (buffObj)
+                {
+                    foundBuff.OnEnded(this, foundBuff);
+                }
             }
             catch
             {
@@ -526,11 +546,11 @@ public abstract class Sprite : INotifyPropertyChanged
         {
             try
             {
-                var debuffObj = Debuffs[debuff];
-                if (debuffObj != null)
+                var debuffObj = Debuffs.TryGetValue(debuff, out var foundDebuff);
+                if (debuffObj)
                 {
-                    debuffObj.Cancelled = cancelled;
-                    debuffObj.OnEnded(this, debuffObj);
+                    foundDebuff.Cancelled = cancelled;
+                    foundDebuff.OnEnded(this, foundDebuff);
                 }
             }
             catch

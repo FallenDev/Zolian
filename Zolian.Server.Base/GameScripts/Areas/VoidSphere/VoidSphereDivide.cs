@@ -26,7 +26,7 @@ public class VoidSphereDivide : AreaScript
         _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
         var debuff = new DebuffReaping();
 
-        if (client.Aisling.EquipmentManager.Equipment[18]?.Item.Template.Name == "Auto Spark") return;
+        if (client.Aisling.EquipmentManager.Equipment[18]?.Item?.Template.Name == "Auto Spark") return;
 
         if (vectorMap.X is > 15 and < 21)
         {
