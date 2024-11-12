@@ -3060,7 +3060,7 @@ public class GeneralPirate : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -3117,7 +3117,7 @@ public class GeneralPirate : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -3301,7 +3301,7 @@ public class GeneralPirate : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -3328,7 +3328,7 @@ public class GeneralPirate : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
             }
         }
 
@@ -3390,7 +3390,7 @@ public class GeneralPirate : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -3575,7 +3575,7 @@ public class PirateOfficer : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See ya next time!!!!!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -3632,7 +3632,7 @@ public class PirateOfficer : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -3825,7 +3825,7 @@ public class PirateOfficer : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, "Pirate: See how you like this!!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -3852,7 +3852,7 @@ public class PirateOfficer : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
             }
         }
 
@@ -3914,7 +3914,7 @@ public class PirateOfficer : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -5031,7 +5031,7 @@ public class AosdaRemnant : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -5102,7 +5102,7 @@ public class AosdaRemnant : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -5159,7 +5159,7 @@ public class AosdaRemnant : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -5343,7 +5343,7 @@ public class AosdaRemnant : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -5370,7 +5370,7 @@ public class AosdaRemnant : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -5432,7 +5432,7 @@ public class AosdaRemnant : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -5554,7 +5554,7 @@ public class AncientDragon : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -5625,7 +5625,7 @@ public class AncientDragon : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I am immortal, see you soon"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I am immortal, see you soon"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -5682,7 +5682,7 @@ public class AncientDragon : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Hahahahaha"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Hahahahaha"));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -5866,7 +5866,7 @@ public class AncientDragon : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Tolo I móliant!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Tolo I móliant!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -5893,7 +5893,7 @@ public class AncientDragon : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -5955,7 +5955,7 @@ public class AncientDragon : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -6077,7 +6077,7 @@ public class DraconicOmega : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -6148,7 +6148,7 @@ public class DraconicOmega : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -6205,7 +6205,7 @@ public class DraconicOmega : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -6389,7 +6389,7 @@ public class DraconicOmega : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -6416,7 +6416,7 @@ public class DraconicOmega : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -6478,7 +6478,7 @@ public class DraconicOmega : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -6600,7 +6600,7 @@ public class JackFrost : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -6671,7 +6671,7 @@ public class JackFrost : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Thank you, Merry Christmas!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Thank you, Merry Christmas!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -6728,7 +6728,7 @@ public class JackFrost : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooo..."));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooo..."));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -6912,7 +6912,7 @@ public class JackFrost : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I do not control my actions!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I do not control my actions!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -6939,7 +6939,7 @@ public class JackFrost : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -7001,7 +7001,7 @@ public class JackFrost : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -7127,7 +7127,7 @@ public class Yeti : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -7144,7 +7144,7 @@ public class Yeti : MonsterScript
     {
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.75 && !_phaseOne)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
+            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7158,7 +7158,7 @@ public class Yeti : MonsterScript
 
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.50 && !_phaseTwo)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
+            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7176,7 +7176,7 @@ public class Yeti : MonsterScript
 
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.25 && !_phaseThree)
         {
-            Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
+            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
             var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
             var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
             var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
@@ -7255,7 +7255,7 @@ public class Yeti : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -7312,7 +7312,7 @@ public class Yeti : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
             }
 
             if (aisling.Skulled || aisling.Dead)
@@ -7496,7 +7496,7 @@ public class Yeti : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -7523,7 +7523,7 @@ public class Yeti : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
@@ -7585,7 +7585,7 @@ public class Yeti : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -7707,7 +7707,7 @@ public class WorldBossBahamut : MonsterScript
                 foreach (var debuff in Monster.Debuffs.Values)
                 {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
                 }
             }
 
@@ -7778,7 +7778,7 @@ public class WorldBossBahamut : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Name}: {{=bLike a phoenix, I will return."));
+        Monster.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Name}: {{=bLike a phoenix, I will return."));
         Monster.LoadAndCastSpellScriptOnDeath("Double XP");
         Task.Delay(600).Wait();
 
@@ -7836,12 +7836,12 @@ public class WorldBossBahamut : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
+                Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
             }
 
             if (aisling.Skulled || aisling.Dead)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
+                Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Weakling!"));
                 if (!Monster.WalkEnabled) return;
                 if (Monster.CantMove) return;
                 if (walk) Walk();
@@ -7883,7 +7883,7 @@ public class WorldBossBahamut : MonsterScript
 
     public override void OnApproach(WorldClient client)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
+        Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
     }
 
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
@@ -7893,7 +7893,7 @@ public class WorldBossBahamut : MonsterScript
             var critical = (long)(Monster.MaximumHp * 0.03);
             if (Monster.CurrentHp <= critical)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
+                Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
                 Monster.Image = (ushort)Monster.Template.ImageVarience;
 
                 var objects = GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
@@ -8125,7 +8125,7 @@ public class WorldBossBahamut : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.90)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
                 }
             }
             else if (Monster.Target != null && Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
@@ -8146,7 +8146,7 @@ public class WorldBossBahamut : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods
@@ -8847,7 +8847,7 @@ public class BBShade : MonsterScript
 
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: See ya next time!!!!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: See ya next time!!!!!"));
         Task.Delay(300).Wait();
 
         foreach (var item in Monster.MonsterBank.Where(item => item != null))
@@ -8904,7 +8904,7 @@ public class BBShade : MonsterScript
             if (Monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Hahahahaha!!"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Hahahahaha!!"));
             }
 
             if (aisling.IsInvisible || aisling.Skulled || aisling.Dead)
@@ -9088,7 +9088,7 @@ public class BBShade : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Dead men tell no tales!!"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Dead men tell no tales!!"));
 
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
@@ -9115,7 +9115,7 @@ public class BBShade : MonsterScript
             var rand = Generator.RandomNumPercentGen();
             if (rand >= 0.93)
             {
-                Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
             }
         }
 
@@ -9177,7 +9177,7 @@ public class BBShade : MonsterScript
                 var rand = Generator.RandomNumPercentGen();
                 if (rand >= 0.80)
                 {
-                    Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
+                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: {Arrrgh[RandomNumberGenerator.GetInt32(RunCount + 1) % Arrrgh.Length]}"));
                 }
 
                 // Wander, AStar, and Standard Walk Methods

@@ -165,7 +165,7 @@ public class Damageable : Movable
 
         if (Immunity)
         {
-            PlayerNearby?.Client.SendHealthBar(this, sound);
+            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             return;
         }
 
@@ -205,7 +205,7 @@ public class Damageable : Movable
                 damagedPlayer.Client.DeathStatusCheck();
         }
         else
-            PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         if (dmg > 50)
             ApplyEquipmentDurability(dmg);
@@ -265,7 +265,7 @@ public class Damageable : Movable
             else
                 dmg = (long)(dmg * 0.5);
         }
-        
+
         if (spell == null)
         {
             if (!MagicDamageTarget(damageDealingSprite, ref dmg, 0, forceTarget)) return;
@@ -319,7 +319,7 @@ public class Damageable : Movable
 
         if (Immunity && !forced)
         {
-            PlayerNearby?.Client.SendHealthBar(this, sound);
+            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             return false;
         }
 
@@ -403,7 +403,7 @@ public class Damageable : Movable
 
         if (Immunity && !forced)
         {
-            PlayerNearby?.Client.SendHealthBar(this, sound);
+            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             return false;
         }
 
@@ -486,7 +486,7 @@ public class Damageable : Movable
 
             if (hit <= Reflex)
             {
-                PlayerNearby?.Client.SendHealthBar(this);
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 if (this is not Aisling aisling) return dmg;
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(92, aisling.Position));
             }
@@ -1217,7 +1217,7 @@ public class Damageable : Movable
                 aisling.Client.DeathStatusCheck();
         }
         else
-            PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return finalDmg;
     }

@@ -68,7 +68,7 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
         if (playerAction.CurrentMp - Spell.Template.ManaCost > 0)
         {
             playerAction.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(playerAction.Client, Spell);
+            GlobalSpellMethods.Train(playerAction.Client, Spell);
         }
         else
         {
@@ -152,7 +152,7 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -198,8 +198,8 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Ray of Sickness";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -210,7 +210,7 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -277,7 +277,7 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
         if (playerAction.CurrentMp - Spell.Template.ManaCost > 0)
         {
             playerAction.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(playerAction.Client, Spell);
+            GlobalSpellMethods.Train(playerAction.Client, Spell);
         }
         else
         {
@@ -289,10 +289,10 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
 
         foreach (var enemy in enemies)
         {
-            _spellMethod.ElementalOnSuccess(sprite, enemy, Spell, 2500);
+            GlobalSpellMethods.ElementalOnSuccess(sprite, enemy, Spell, 2500);
         }
 
-        _spellMethod.ElementalOnSuccess(sprite, target, Spell, 5000);
+        GlobalSpellMethods.ElementalOnSuccess(sprite, target, Spell, 5000);
     }
 }
 
@@ -311,7 +311,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -357,8 +357,8 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Corpse Burst";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR <= target.Will)
@@ -369,7 +369,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -403,7 +403,7 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -423,7 +423,7 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
 
         if (target is not Monster monster)
         {
-            _spellMethod.SpellOnFailed(sprite, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(sprite, target, Spell);
             return;
         }
 
@@ -458,8 +458,8 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Command Undead";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -470,7 +470,7 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -497,7 +497,7 @@ public class Animate_Dead(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -507,7 +507,7 @@ public class Animate_Dead(Spell spell) : SpellScript(spell)
 
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
-            _spellMethod.SpellOnFailed(aisling, aisling, Spell);
+            GlobalSpellMethods.SpellOnFailed(aisling, aisling, Spell);
             return;
         }
 
@@ -595,7 +595,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            _spellMethod.Train(client, Spell);
+            GlobalSpellMethods.Train(client, Spell);
             OnSuccess(aisling, target);
             client.SendAttributes(StatUpdateType.Vitality);
             return;
@@ -625,7 +625,7 @@ public class Macabre(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -635,7 +635,7 @@ public class Macabre(Spell spell) : SpellScript(spell)
 
         if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
-            _spellMethod.SpellOnFailed(aisling, aisling, Spell);
+            GlobalSpellMethods.SpellOnFailed(aisling, aisling, Spell);
             return;
         }
 

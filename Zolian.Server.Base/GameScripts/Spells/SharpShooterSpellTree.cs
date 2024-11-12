@@ -30,7 +30,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -85,7 +85,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Flash Bang";
         var client = playerAction.Client;
-        var success = _spellMethod.Execute(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
 
         if (success)
         {
@@ -93,7 +93,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
         }
         else
         {
-            _spellMethod.SpellOnFailed(playerAction, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
         }
     }
 }
@@ -122,7 +122,7 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {
@@ -176,7 +176,7 @@ public class SecuredPosition(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
         }
         else
         {

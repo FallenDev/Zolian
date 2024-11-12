@@ -415,7 +415,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccessWithoutAction(i, aisling, Skill, dmgCalc, _crit);
             GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, aisling, Skill, dmgCalc, _crit);
-            ThrowBack(i);
+            ThrowBack(aisling, i);
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -486,7 +486,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private static void ThrowBack(Sprite target)
+    private static void ThrowBack(Aisling aisling, Sprite target)
     {
         if (target is not Monster monster) return;
         if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) return;
@@ -498,11 +498,11 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
         {
             var stunned = new DebuffBeagsuain();
             stunned.OnApplied(monster, stunned);
-            monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, monster.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, monster.Serial));
         }
 
         monster.Pos = new Vector2(targetPosition.X, targetPosition.Y);
-        monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendCreatureWalk(monster.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)monster.Direction));
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendCreatureWalk(monster.Serial, new Point(targetPosition.X, targetPosition.Y), (Direction)monster.Direction));
         monster.LastMovementChanged = readyTime;
         monster.LastPosition = new Position(targetPosition.X, targetPosition.Y);
         monster.ThrownBack = true;

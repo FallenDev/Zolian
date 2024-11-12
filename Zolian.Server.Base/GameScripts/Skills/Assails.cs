@@ -1056,7 +1056,7 @@ public class Throw(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
-            aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -1097,8 +1097,8 @@ public class Throw(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            if (sprite is not Identifiable identified) return;
-            var enemy = identified.MonsterGetInFront(3).FirstOrDefault();
+            if (sprite is not Damageable damageable) return;
+            var enemy = damageable.MonsterGetInFront(3).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable) return;
@@ -1112,7 +1112,7 @@ public class Throw(Skill skill) : SkillScript(skill)
                 AnimationSpeed = 100
             };
 
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -1190,7 +1190,7 @@ public class Aim(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
-            aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -1231,8 +1231,8 @@ public class Aim(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            if (sprite is not Identifiable identified) return;
-            var enemy = identified.MonsterGetInFront(5).FirstOrDefault();
+            if (sprite is not Damageable damageable) return;
+            var enemy = damageable.MonsterGetInFront(5).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable) return;
@@ -1250,7 +1250,7 @@ public class Aim(Skill skill) : SkillScript(skill)
                 TargetId = _target.Serial
             };
 
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }

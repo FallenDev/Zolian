@@ -35,7 +35,7 @@ public class Spectral_Shield(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, Spell);
+                GlobalSpellMethods.Train(aisling.Client, Spell);
             }
             else
             {
@@ -47,7 +47,7 @@ public class Spectral_Shield(Spell spell) : SpellScript(spell)
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -74,7 +74,7 @@ public class Aite(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, Spell);
+                GlobalSpellMethods.Train(aisling.Client, Spell);
             }
             else
             {
@@ -86,7 +86,7 @@ public class Aite(Spell spell) : SpellScript(spell)
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -111,7 +111,7 @@ public class Mor_Dion(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, Spell);
+                GlobalSpellMethods.Train(aisling.Client, Spell);
             }
             else
             {
@@ -123,7 +123,7 @@ public class Mor_Dion(Spell spell) : SpellScript(spell)
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -196,7 +196,7 @@ public class Pramh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(aisling.Client, Spell);
+                GlobalSpellMethods.Train(aisling.Client, Spell);
             }
             else
             {
@@ -315,7 +315,7 @@ public class Detect(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -326,7 +326,7 @@ public class Detect(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -334,7 +334,7 @@ public class Detect(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -347,7 +347,7 @@ public class Detect(Spell spell) : SpellScript(spell)
                 return;
             }
 
-            _spellMethod.SpellOnFailed(sprite, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(sprite, target, Spell);
         }
     }
 
@@ -379,10 +379,10 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (target is not Damageable damageable) return;
+
         if (sprite is Aisling aisling)
         {
-            if (target == null) return;
-
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
@@ -406,9 +406,9 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.10);
 
@@ -437,7 +437,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -448,7 +448,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -456,7 +456,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -488,10 +488,10 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (target is not Damageable damageable) return;
+
         if (sprite is Aisling aisling)
         {
-            if (target == null) return;
-
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
@@ -515,9 +515,9 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.25);
 
@@ -546,7 +546,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -557,7 +557,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -565,7 +565,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -597,10 +597,10 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (target is not Damageable damageable) return;
+
         if (sprite is Aisling aisling)
         {
-            if (target == null) return;
-
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
@@ -624,9 +624,9 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.45);
 
@@ -655,7 +655,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -666,7 +666,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -674,7 +674,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -707,10 +707,10 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
 
     public override void OnSuccess(Sprite sprite, Sprite target)
     {
+        if (target is not Damageable damageable) return;
+
         if (sprite is Aisling aisling)
         {
-            if (target == null) return;
-
             if (target.CurrentHp > 0)
             {
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
@@ -723,7 +723,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
                 }
                 else
                 {
-                    _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+                    GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
                 }
 
                 var healBase = target.MaximumHp * 0.80;
@@ -744,9 +744,9 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
         }
         else
         {
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
 
             var healBase = (long)(sprite.BaseHp * 0.70);
 
@@ -775,7 +775,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -786,7 +786,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -794,7 +794,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -884,7 +884,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -895,7 +895,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -903,7 +903,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -970,7 +970,7 @@ public class Forestall(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(client, Spell);
+            GlobalSpellMethods.Train(client, Spell);
         }
         else
         {
@@ -1050,7 +1050,7 @@ public class Raise_Ally(Spell spell) : SpellScript(spell)
         }
 
         var client = aisling.Client;
-        _spellMethod.Train(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
 
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
@@ -1128,8 +1128,8 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1140,7 +1140,7 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -1200,8 +1200,8 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1212,7 +1212,7 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -1272,8 +1272,8 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1284,7 +1284,7 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -1344,8 +1344,8 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
 
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
-        _spellMethod.Train(client, Spell);
-        var success = _spellMethod.Execute(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
@@ -1356,7 +1356,7 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(playerAction, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
             }
         }
         else
@@ -1430,7 +1430,7 @@ public class AoPuinsein(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1441,7 +1441,7 @@ public class AoPuinsein(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1449,7 +1449,7 @@ public class AoPuinsein(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -1526,7 +1526,7 @@ public class AoDall(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1537,7 +1537,7 @@ public class AoDall(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1545,7 +1545,7 @@ public class AoDall(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -1622,7 +1622,7 @@ public class AoBeagCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1633,7 +1633,7 @@ public class AoBeagCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1641,7 +1641,7 @@ public class AoBeagCradh(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -1719,7 +1719,7 @@ public class AoCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1730,7 +1730,7 @@ public class AoCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1738,7 +1738,7 @@ public class AoCradh(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -1816,7 +1816,7 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1827,7 +1827,7 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1835,7 +1835,7 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -1913,7 +1913,7 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
             {
                 aisling.CurrentMp -= Spell.Template.ManaCost;
-                _spellMethod.Train(client, Spell);
+                GlobalSpellMethods.Train(client, Spell);
             }
             else
             {
@@ -1924,7 +1924,7 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = _spellMethod.Execute(client, Spell);
+            var success = GlobalSpellMethods.Execute(client, Spell);
 
             if (success)
             {
@@ -1932,7 +1932,7 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
             }
             else
             {
-                _spellMethod.SpellOnFailed(aisling, target, Spell);
+                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
             }
 
             client.SendAttributes(StatUpdateType.Vitality);
@@ -2004,7 +2004,7 @@ public class AoSuain(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(client, Spell);
+            GlobalSpellMethods.Train(client, Spell);
         }
         else
         {
@@ -2015,7 +2015,7 @@ public class AoSuain(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        var success = _spellMethod.Execute(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
 
         if (success)
         {
@@ -2023,7 +2023,7 @@ public class AoSuain(Spell spell) : SpellScript(spell)
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);

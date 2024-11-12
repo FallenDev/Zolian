@@ -6,7 +6,6 @@ using Darkages.Enums;
 using Darkages.Managers;
 using Darkages.Models;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Templates;
 using Darkages.Types;
 using System.Collections.Concurrent;
@@ -244,67 +243,6 @@ public sealed class Aisling : Player, IAisling
             }
 
             return false;
-        }
-    }
-
-    /// <summary>
-    /// Sends a ServerFormat to target players using a scope or definer
-    /// </summary>
-    /// <param name="op">Scope of the method call</param>
-    /// <param name="method">IWorldClient method to send</param>
-    /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
-    public void SendTargetedClientMethod(PlayerScope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
-    {
-        var selectedPlayers = new List<Aisling>();
-
-        switch (op)
-        {
-            case PlayerScope.NearbyAislingsExludingSelf:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
-                break;
-            case PlayerScope.NearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)));
-                break;
-            case PlayerScope.Clan:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, Clan, StringComparison.CurrentCultureIgnoreCase)));
-                break;
-            case PlayerScope.VeryNearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)));
-                break;
-            case PlayerScope.AislingsOnSameMap:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId));
-                break;
-            case PlayerScope.GroupMembers:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && GroupParty.Has(otherPlayers)));
-                break;
-            case PlayerScope.NearbyGroupMembersExcludingSelf:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial));
-                break;
-            case PlayerScope.NearbyGroupMembers:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && GroupParty.Has(otherPlayers)));
-                break;
-            case PlayerScope.DefinedAislings when definer == null:
-                return;
-            case PlayerScope.DefinedAislings:
-                selectedPlayers.AddRange(definer);
-                break;
-            case PlayerScope.All:
-                selectedPlayers.AddRange(ServerSetup.Instance.Game.Aislings);
-                break;
-            case PlayerScope.Self:
-            default:
-                method(Client);
-                return;
-        }
-
-        foreach (var player in selectedPlayers.Where(player => player?.Client != null))
-        {
-            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") || method.Method.Name.Contains("OnApplied"))
-            {
-                if (!player.GameSettings.Animations) continue;
-            }
-
-            method(player.Client);
         }
     }
 

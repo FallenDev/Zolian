@@ -1,14 +1,5 @@
-﻿using System.Numerics;
-
-using Chaos.Geometry;
-using Chaos.Geometry.Abstractions.Definitions;
-using Chaos.Networking.Entities.Server;
-
-using Darkages.Enums;
-using Darkages.GameScripts.Affects;
-using Darkages.ScriptingBase;
+﻿using Darkages.ScriptingBase;
 using Darkages.Sprites;
-using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;

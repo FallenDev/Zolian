@@ -20,13 +20,7 @@ public class Bite(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -135,13 +129,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -207,13 +195,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -280,13 +262,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -337,13 +313,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -394,13 +364,7 @@ public class Claw(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -451,13 +415,7 @@ public class MuleKick(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -508,13 +466,7 @@ public class TailSlap(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -533,8 +485,8 @@ public class TailSlap(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFrontToSide();
+        if (sprite is not Damageable damageable) return;
+        var enemy = damageable.MonsterGetInFrontToSide();
 
         if (enemy.Count == 0)
         {
@@ -549,7 +501,7 @@ public class TailSlap(Skill skill) : SkillScript(skill)
             GlobalSkillMethods.OnSuccessWithoutAction(_target, sprite, Skill, dmgCalc, _crit);
         }
 
-        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     private long DamageCalc(Sprite sprite)
@@ -569,13 +521,7 @@ public class RollOver(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -641,13 +587,7 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -713,13 +653,7 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -782,16 +716,7 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
 [Script("Howl'n Call")]
 public class HowlAndCall(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
-    private bool _crit;
-
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -841,7 +766,7 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
             break;
         }
 
-        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        casterMonster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 }
 
@@ -851,13 +776,7 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -908,13 +827,7 @@ public class Pounce(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -965,13 +878,7 @@ public class Tentacle(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1060,13 +967,7 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1126,13 +1027,7 @@ public class FireWheel(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite)
-    {
-        if (sprite is not Identifiable identified) return;
-        if (_target is not { Alive: true }) return;
-        if (identified.NextTo(_target.Position.X, _target.Position.Y) && identified.Facing(_target.Position.X, _target.Position.Y, out _))
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.MissAnimation, null, _target.Serial));
-    }
+    public override void OnFailed(Sprite sprite) { }
 
     public override void OnSuccess(Sprite sprite)
     {
@@ -1151,8 +1046,8 @@ public class FireWheel(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemyList = identified.MonsterGetFiveByFourRectInFront();
+        if (sprite is not Damageable damageable) return;
+        var enemyList = damageable.MonsterGetFiveByFourRectInFront();
         if (enemyList.Count == 0)
         {
             OnFailed(sprite);
@@ -1178,7 +1073,7 @@ public class FireWheel(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(223, aisling.Position));
         }
 
-        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     private long FireDamageCalc(Sprite sprite)
@@ -1250,7 +1145,8 @@ public class Megaflare(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(217, aisling.Position));
         }
 
-        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        if (sprite is not Damageable damageable) return;
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     private long DamageCalc(Sprite sprite)

@@ -128,7 +128,7 @@ public class DoubleXp(Spell spell) : SpellScript(spell)
             _buff = new BuffDoubleExperience();
             if (player == null) continue;
             if (!player.LoggedIn) continue;
-            _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
+            GlobalSpellMethods.EnhancementOnSuccess(sprite, player, Spell, _buff);
         }
     }
 }
@@ -150,7 +150,7 @@ public class TripleXp(Spell spell) : SpellScript(spell)
             _buff = new BuffTripleExperience();
             if (player == null) continue;
             if (!player.LoggedIn) continue;
-            _spellMethod.EnhancementOnSuccess(sprite, player, Spell, _buff);
+            GlobalSpellMethods.EnhancementOnSuccess(sprite, player, Spell, _buff);
         }
     }
 }

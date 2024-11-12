@@ -31,7 +31,7 @@ public class TrainingDummy : MonsterScript
         if (_stopwatch.Elapsed.TotalMilliseconds < 1000) return;
         _stopwatch.Restart();
         if (_damage <= 0) return;
-        Monster.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
+        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Dummy: {{=q{_damage:N0} {{=areceived\n"));
         _damage = 0;
     }
 

@@ -5,6 +5,9 @@ using System.Numerics;
 using System.Security.Cryptography;
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
+using Darkages.Enums;
+using Darkages.Network.Client.Abstractions;
+using Darkages.Object;
 
 namespace Darkages.Sprites;
 
@@ -194,5 +197,67 @@ public class Movable : Identifiable
         }
 
         LastTurnUpdated = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Sends a ServerFormat to target players using a scope or definer. Uses client of the players returned to the Action
+    /// </summary>
+    /// <param name="op">Scope of the method call</param>
+    /// <param name="method">IWorldClient method to send</param>
+    /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
+    public void SendTargetedClientMethod(PlayerScope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
+    {
+        var selectedPlayers = new List<Aisling>();
+
+        switch (op)
+        {
+            // Player, Monster, Mundane Scope
+            case PlayerScope.NearbyAislings:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)));
+                break;
+            case PlayerScope.VeryNearbyAislings:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)));
+                break;
+            case PlayerScope.AislingsOnSameMap:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId));
+                break;
+            case PlayerScope.DefinedAislings when definer == null:
+                return;
+            case PlayerScope.DefinedAislings:
+                selectedPlayers.AddRange(definer);
+                break;
+            case PlayerScope.All:
+                selectedPlayers.AddRange(ServerSetup.Instance.Game.Aislings);
+                break;
+            // Player only Scope
+            case PlayerScope.NearbyAislingsExludingSelf when this is Aisling:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial));
+                break;
+            case PlayerScope.GroupMembers when this is Aisling groupMembers:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && groupMembers.GroupParty.Has(otherPlayers)));
+                break;
+            case PlayerScope.NearbyGroupMembersExcludingSelf when this is Aisling groupMembersNearbyExSelf:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearbyExSelf.GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial));
+                break;
+            case PlayerScope.NearbyGroupMembers when this is Aisling groupMembersNearby:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearby.GroupParty.Has(otherPlayers)));
+                break;
+            case PlayerScope.Clan when this is Aisling clan:
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, clan.Clan, StringComparison.CurrentCultureIgnoreCase)));
+                break;
+            case PlayerScope.Self when this is Aisling aisling:
+                method(aisling.Client);
+                return;
+        }
+
+        foreach (var player in selectedPlayers.Where(player => player?.Client != null))
+        {
+            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") || method.Method.Name.Contains("OnApplied"))
+            {
+                if (!player.GameSettings.Animations) continue;
+            }
+
+            method(player.Client);
+        }
     }
 }

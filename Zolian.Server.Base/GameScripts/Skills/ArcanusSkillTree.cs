@@ -70,21 +70,14 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
             _target = Spell.SpellReflect(_target, aisling);
         }
 
         if (_target.SpellNegate)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
             return;
         }
 
@@ -130,32 +123,22 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
                 if (_target.SpellReflect)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
                     _target = Spell.SpellReflect(_target, sprite);
                 }
 
                 if (_target.SpellNegate)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
                     continue;
                 }
 
                 var dmgCalc = DamageCalc(sprite);
                 damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-
-                if (Skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
                 if (!_crit) return;
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
             }
         }
     }
@@ -169,7 +152,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageDealingSprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(147, vector));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(147, vector));
             });
         }
     }
@@ -260,21 +243,14 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
             _target = Spell.SpellReflect(_target, aisling);
         }
 
         if (_target.SpellNegate)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
             return;
         }
 
@@ -320,32 +296,22 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
                 if (_target.SpellReflect)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
                     _target = Spell.SpellReflect(_target, sprite);
                 }
 
                 if (_target.SpellNegate)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
                     continue;
                 }
 
                 var dmgCalc = DamageCalc(sprite);
                 damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
-
-                if (Skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
                 if (!_crit) return;
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
             }
         }
     }
@@ -359,7 +325,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageDealingSprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(150, vector));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(150, vector));
             });
         }
     }
@@ -450,21 +416,14 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
             _target = Spell.SpellReflect(_target, aisling);
         }
 
         if (_target.SpellNegate)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
             return;
         }
 
@@ -510,32 +469,22 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
                 if (_target.SpellReflect)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
                     _target = Spell.SpellReflect(_target, sprite);
                 }
 
                 if (_target.SpellNegate)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
                     continue;
                 }
 
                 var dmgCalc = DamageCalc(sprite);
                 damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
-
-                if (Skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
                 if (!_crit) return;
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
             }
         }
     }
@@ -549,7 +498,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageDealingSprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, vector));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, vector));
             });
         }
     }
@@ -640,21 +589,14 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
         if (_target.SpellReflect)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
-
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
             _target = Spell.SpellReflect(_target, aisling);
         }
 
         if (_target.SpellNegate)
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
-            if (_target is Aisling)
-                _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
             return;
         }
 
@@ -700,32 +642,22 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
                 if (_target.SpellReflect)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
                     _target = Spell.SpellReflect(_target, sprite);
                 }
 
                 if (_target.SpellNegate)
                 {
-                    _target.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-                    if (_target is Aisling)
-                        _target.PlayerNearby?.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Skill.Template.Name}.");
-
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
                     continue;
                 }
 
                 var dmgCalc = DamageCalc(sprite);
                 damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
-
-                if (Skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
                 if (!_crit) return;
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
             }
         }
     }
@@ -739,7 +671,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageDealingSprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(60, vector));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(60, vector));
             });
         }
     }

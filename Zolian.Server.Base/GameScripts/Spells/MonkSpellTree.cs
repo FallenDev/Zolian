@@ -24,11 +24,11 @@ public class Dion(Spell spell) : SpellScript(spell)
         if (target.Immunity)
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }

@@ -121,7 +121,6 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
     public Position Position => new(Pos);
-    public Aisling PlayerNearby => AislingsNearby().FirstOrDefault();
 
     public ushort Level => TileType switch
     {

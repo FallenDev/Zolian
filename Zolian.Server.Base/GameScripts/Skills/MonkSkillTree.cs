@@ -1045,7 +1045,7 @@ public class EmberStrike(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(17, null, _target.Serial));
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
@@ -1215,15 +1215,11 @@ public class Pummel(Skill skill) : SkillScript(skill)
                 damageable.ApplyDamage(sprite, dmgCalc, Skill);
                 damageable.ApplyDamage(sprite, dmgCalc, Skill);
                 damageable.ApplyDamage(sprite, dmgCalc, Skill);
-
-                if (Skill.Template.TargetAnimation > 0)
-                    if (_target is Monster or Mundane or Aisling)
-                        sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
 
                 if (!_crit) return;
-                sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
             }
         }
     }

@@ -10,8 +10,6 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using System.Numerics;
-using Chaos.Extensions.Common;
-using Darkages.GameScripts.Spells;
 
 namespace Darkages.GameScripts.Creations;
 

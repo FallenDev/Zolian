@@ -85,14 +85,14 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
             return;
         }
 
-        _spellMethod.Train(client, Spell);
+        GlobalSpellMethods.Train(client, Spell);
 
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
         if (aisling.CurrentHp < 0)
             aisling.CurrentHp = 1;
 
-        var success = _spellMethod.Execute(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
 
         if (success)
         {
@@ -100,7 +100,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);
@@ -175,7 +175,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
-            _spellMethod.Train(client, Spell);
+            GlobalSpellMethods.Train(client, Spell);
             OnSuccess(aisling, target);
             client.SendAttributes(StatUpdateType.Vitality);
             return;
@@ -223,12 +223,12 @@ public class DeireasFaileas(Spell spell) : SpellScript(spell)
         if (sprite.HasBuff("Deireas Faileas"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
     }
 }
 
@@ -259,7 +259,7 @@ public class Ard_Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Ard Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -267,12 +267,12 @@ public class Ard_Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Mor Fas Nadur") || target.HasBuff("Fas Nadur") || target.HasBuff("Beag Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
     }
 }
 
@@ -303,7 +303,7 @@ public class Mor_Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Ard Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -311,7 +311,7 @@ public class Mor_Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Mor Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -319,12 +319,12 @@ public class Mor_Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Fas Nadur") || target.HasBuff("Beag Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
     }
 }
 
@@ -355,7 +355,7 @@ public class Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Ard Fas Nadur") || target.HasBuff("Mor Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A more potent version has already been cast.");
             return;
         }
@@ -363,7 +363,7 @@ public class Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've already cast that spell.");
             return;
         }
@@ -371,12 +371,12 @@ public class Fas_Nadur(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Beag Fas Nadur"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "A lessor version has already been cast.");
             return;
         }
 
-        _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
     }
 }
 
@@ -408,7 +408,7 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
             aisling.CurrentMp -= Spell.Template.ManaCost;
-            _spellMethod.Train(client, Spell);
+            GlobalSpellMethods.Train(client, Spell);
         }
         else
         {
@@ -416,15 +416,15 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
             return;
         }
 
-        var success = _spellMethod.Execute(client, Spell);
+        var success = GlobalSpellMethods.Execute(client, Spell);
 
         if (success)
         {
-            _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+            GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
         }
         else
         {
-            _spellMethod.SpellOnFailed(aisling, target, Spell);
+            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);
@@ -443,7 +443,7 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
         if (target.HasBuff("Fas Spiorad"))
         {
             if (sprite is not Aisling aisling) return;
-            _spellMethod.Train(aisling.Client, Spell);
+            GlobalSpellMethods.Train(aisling.Client, Spell);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body is too weak.");
             return;
         }
@@ -452,7 +452,7 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
 
         if (healthCheck > 0)
         {
-            _spellMethod.EnhancementOnUse(sprite, target, Spell, _buff);
+            GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
         }
         else
         {

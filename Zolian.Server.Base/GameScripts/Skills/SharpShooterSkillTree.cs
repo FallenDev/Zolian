@@ -59,7 +59,7 @@ public class Bang(Skill skill) : SkillScript(skill)
 
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
-            aisling.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
         }
 
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -92,8 +92,8 @@ public class Bang(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            if (sprite is not Identifiable identifiable) return;
-            var enemy = identifiable.MonsterGetInFront(5).FirstOrDefault();
+            if (sprite is not Damageable damageable) return;
+            var enemy = damageable.MonsterGetInFront(5).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -116,7 +116,7 @@ public class Bang(Skill skill) : SkillScript(skill)
                 TargetId = _target.Serial
             };
 
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
@@ -247,8 +247,8 @@ public class Snipe(Skill skill) : SkillScript(skill)
                 SourceId = sprite.Serial
             };
 
-            if (sprite is not Identifiable identifiable) return;
-            var enemy = identifiable.MonsterGetInFront(5).FirstOrDefault();
+            if (sprite is not Damageable damageable) return;
+            var enemy = damageable.MonsterGetInFront(5).FirstOrDefault();
             _target = enemy;
 
             if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
@@ -271,7 +271,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
                 TargetId = _target.Serial
             };
 
-            sprite.PlayerNearby?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(animation.TargetAnimation, null, animation.TargetId ?? 0, animation.AnimationSpeed, animation.SourceAnimation, animation.SourceId ?? 0));
             var dmgCalc = DamageCalc(sprite);
             GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }

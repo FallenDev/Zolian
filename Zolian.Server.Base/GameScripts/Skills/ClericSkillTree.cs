@@ -320,7 +320,7 @@ public class HolyLance(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
@@ -431,7 +431,7 @@ public class Recite(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             var element = ElementManager.Element.None;
 
             // Determine element
@@ -579,7 +579,7 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Void, Skill);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
@@ -690,7 +690,7 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Holy, Skill);
             GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, 0, _crit);
         }
@@ -801,7 +801,7 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
             _target = i;
             if (_target is not Damageable damageable) continue;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)spellMethod.WeaponDamageElementalProc(aisling, 1);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(aisling, 1);
             var healthMultiplier = aisling.CurrentHp * 0.50;
 
             if (aisling.CurrentHp > healthMultiplier)
