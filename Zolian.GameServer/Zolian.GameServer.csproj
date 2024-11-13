@@ -39,9 +39,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Chaos-Networking" Version="2.2.3" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.2.24473.5">
+		<PackageReference Include="Chaos-Networking" Version="2.2.5" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0">
 		  <TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
 		<PackageReference Include="Sentry" Version="4.13.0" />

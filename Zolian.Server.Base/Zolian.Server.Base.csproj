@@ -40,8 +40,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Chaos-Networking" Version="2.2.3" />
+		<PackageReference Include="Chaos-Networking" Version="2.2.5" />
 		<PackageReference Include="Dapper.StrongName" Version="2.1.35" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0-preview2.24304.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -51,7 +50,7 @@
 		<PackageReference Include="Sentry.Profiling" Version="4.13.0" />
 		<PackageReference Include="ServiceStack" Version="8.4.0" />
 		<PackageReference Include="ServiceStack.Text" Version="8.4.0" />
-		<PackageReference Include="SunCalcNet" Version="1.2.3" />
+		<PackageReference Include="SunCalcNet" Version="1.2.4" />
 	</ItemGroup>
 
 	<ItemGroup>

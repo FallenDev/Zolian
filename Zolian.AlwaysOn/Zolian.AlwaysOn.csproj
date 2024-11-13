@@ -34,7 +34,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<Content Include="Dragon_and_sword.ico" />
 	</ItemGroup>
 
