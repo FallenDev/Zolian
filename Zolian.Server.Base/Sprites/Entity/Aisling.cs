@@ -757,7 +757,7 @@ public sealed class Aisling : Player, IAisling
 
         while (NextTo(Target!.X, Target!.Y) && Client.Connected)
         {
-            if (!(stopWatch.Elapsed.TotalMilliseconds > 1000)) continue;
+            if (!(stopWatch.Elapsed.TotalMilliseconds > Client.SkillSpellTimer.Delay.TotalMilliseconds)) continue;
             stopWatch.Restart();
 
             foreach (var skill in SkillBook.Skills.Values)
@@ -779,8 +779,6 @@ public sealed class Aisling : Player, IAisling
 
                 skill.InUse = false;
             }
-
-            Task.Delay(500).Wait();
         }
 
         stopWatch.Stop();
@@ -795,7 +793,7 @@ public sealed class Aisling : Player, IAisling
 
         while (pos == Pos && Client.Connected)
         {
-            if (!(stopWatch.Elapsed.TotalMilliseconds > 1000)) continue;
+            if (!(stopWatch.Elapsed.TotalMilliseconds > Client.SkillSpellTimer.Delay.TotalMilliseconds)) continue;
             stopWatch.Restart();
 
             var monster = MonstersNearby().RandomIEnum();
@@ -817,8 +815,6 @@ public sealed class Aisling : Player, IAisling
                 spell.InUse = false;
                 await Task.Delay(spell.Lines * 1000);
             }
-
-            Task.Delay(500).Wait();
         }
 
         stopWatch.Stop();
