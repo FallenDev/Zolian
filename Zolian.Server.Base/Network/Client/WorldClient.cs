@@ -70,7 +70,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         { "Lantern", new Stopwatch() },
         { "DayDreaming", new Stopwatch() },
         { "MailMan", new Stopwatch() },
-        { "ItemAnimation", new Stopwatch() }
+        { "ItemAnimation", new Stopwatch() },
+        { "Invisible", new Stopwatch() }
     };
 
     private static readonly SortedDictionary<long, string> AggroColors = new()
@@ -220,14 +221,15 @@ public class WorldClient : WorldClientBase, IWorldClient
             stopwatch.Start();
     }
 
-    public void Update()
+    public Task Update()
     {
-        if (Aisling is not { LoggedIn: true }) return;
+        if (Aisling is not { LoggedIn: true }) return Task.CompletedTask;
 
         var elapsed = new Dictionary<string, TimeSpan>();
         foreach (var kvp in _clientStopwatches)
             elapsed[kvp.Key] = kvp.Value.Elapsed;
 
+        CheckInvisible(Aisling, elapsed);
         EquipLantern(elapsed);
         CheckDayDreaming(elapsed);
         CheckForMail(elapsed);
@@ -236,6 +238,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         ApplyAffliction(elapsed);
         HandleBadTrades();
         HandleSecOffenseEle();
+        return Task.CompletedTask;
     }
 
     #region Events
@@ -368,7 +371,18 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #endregion
 
-    public void EquipLantern(Dictionary<string, TimeSpan> elapsed)
+    private void CheckInvisible(Aisling player, Dictionary<string, TimeSpan> elapsed)
+    {
+        if (player.IsInvisible) return;
+        if (elapsed["Invisible"].TotalMilliseconds < 50) return;
+        _clientStopwatches["Invisible"].Restart();
+        var hide = player.Buffs.Values.FirstOrDefault(b => b.Name is "Hide");
+        var shadowfade = player.Buffs.Values.FirstOrDefault(b => b.Name is "Shadowfade");
+        hide?.OnEnded(player, hide);
+        shadowfade?.OnEnded(player, shadowfade);
+    }
+
+    private void EquipLantern(Dictionary<string, TimeSpan> elapsed)
     {
         if (elapsed["Lantern"].TotalMilliseconds < 2000) return;
         _clientStopwatches["Lantern"].Restart();
@@ -386,7 +400,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         SendDisplayAisling(Aisling);
     }
 
-    public void CheckDayDreaming(Dictionary<string, TimeSpan> elapsed)
+    private void CheckDayDreaming(Dictionary<string, TimeSpan> elapsed)
     {
         switch (Aisling.ActiveStatus)
         {
@@ -420,7 +434,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.Client.SendDisplayAisling(Aisling);
     }
 
-    public void CheckForMail(Dictionary<string, TimeSpan> elapsed)
+    private void CheckForMail(Dictionary<string, TimeSpan> elapsed)
     {
         if (elapsed["MailMan"].TotalMilliseconds < 15000) return;
         _clientStopwatches["MailMan"].Restart();
@@ -439,7 +453,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             SendAttributes(StatUpdateType.Secondary);
     }
 
-    public void ShowAggro(Dictionary<string, TimeSpan> elapsed)
+    private void ShowAggro(Dictionary<string, TimeSpan> elapsed)
     {
         if (elapsed["AggroMessage"].TotalMilliseconds < 20000) return;
         _clientStopwatches["AggroMessage"].Restart();
@@ -477,7 +491,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed)
+    private void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed)
     {
         if (elapsed["ItemAnimation"].TotalMilliseconds < 100) return;
         _clientStopwatches["ItemAnimation"].Restart();
@@ -520,7 +534,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void ApplyAffliction(Dictionary<string, TimeSpan> elapsed)
+    private void ApplyAffliction(Dictionary<string, TimeSpan> elapsed)
     {
         if (elapsed["Affliction"].TotalMilliseconds < 5000) return;
         _clientStopwatches["Affliction"].Restart();
@@ -554,14 +568,14 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.Afflictions |= Afflictions.Normal;
     }
 
-    public void HandleBadTrades()
+    private void HandleBadTrades()
     {
         if (Aisling.Exchange?.Trader == null) return;
         if (Aisling.Exchange.Trader.LoggedIn && Aisling.WithinRangeOf(Aisling.Exchange.Trader)) return;
         Aisling.CancelExchange();
     }
 
-    public void HandleSecOffenseEle()
+    private void HandleSecOffenseEle()
     {
         if (Aisling.IsEnhancingSecondaryOffense) return;
         if (Aisling.EquipmentManager.Shield == null && Aisling.SecondaryOffensiveElement != ElementManager.Element.None)

@@ -172,25 +172,23 @@ public class MilethTrainer(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         client.Aisling.GoldPoints -= 100000;
                         client.TransitionToMap(5269, new Position(17, 17));
-                        await Task.Delay(100).ContinueWith(ct =>
+                        await Task.Delay(100);
+                        client.CloseDialog();
+                        var spot = _dojoMeleeSpots.RandomIEnum();
+                        client.Aisling.Pos = spot;
+                        client.ClientRefreshed();
+                        var monsters = client.Aisling.MonstersNearby()
+                            .Where(i => i.WithinRangeOf(client.Aisling, 2));
+
+                        foreach (var monster in monsters)
                         {
-                            client.CloseDialog();
-                            var spot = _dojoMeleeSpots.RandomIEnum();
-                            client.Aisling.Pos = spot;
-                            client.ClientRefreshed();
-                            var monsters = client.Aisling.MonstersNearby()
-                                .Where(i => i.WithinRangeOf(client.Aisling, 2));
+                            client.Aisling.Facing(monster.X, monster.Y, out var direction);
+                            if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
+                            client.Aisling.Direction = (byte)direction;
+                            client.Aisling.Turn();
+                        }
 
-                            foreach (var monster in monsters)
-                            {
-                                client.Aisling.Facing(monster.X, monster.Y, out var direction);
-                                if (!client.Aisling.Position.IsNextTo(monster.Position)) return;
-                                client.Aisling.Direction = (byte)direction;
-                                client.Aisling.Turn();
-                            }
-
-                            client.Aisling.AutoRoutine();
-                        });
+                        StartAutoRoutine(client);
                     }
                     else
                     {
@@ -225,14 +223,12 @@ public class MilethTrainer(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         client.Aisling.GoldPoints -= 200000;
                         client.TransitionToMap(5269, new Position(17, 17));
-                        await Task.Delay(100).ContinueWith(ct =>
-                        {
-                            client.CloseDialog();
-                            var spot = _dojoCasterSpots.RandomIEnum();
-                            client.Aisling.Pos = spot;
-                            client.ClientRefreshed();
-                            client.Aisling.AutoCastRoutine();
-                        });
+                        await Task.Delay(100);
+                        client.CloseDialog();
+                        var spot = _dojoCasterSpots.RandomIEnum();
+                        client.Aisling.Pos = spot;
+                        client.ClientRefreshed();
+                        StartAutoCastRoutine(client);
                     }
                     else
                     {
@@ -297,5 +293,15 @@ public class MilethTrainer(WorldServer server, Mundane mundane) : MundaneScript(
     private static List<SpellTemplate> ObtainSpellTemplateList(WorldClient client)
     {
         return client.Aisling.SpellBook.TryGetSpells(s => s != null && s.Slot != 0).Select(i => i.Template).ToList();
+    }
+
+    private static void StartAutoRoutine(WorldClient client)
+    {
+        Task.Run(() => client.Aisling.AutoRoutine());
+    }
+
+    private static void StartAutoCastRoutine(WorldClient client)
+    {
+        Task.Run(() => client.Aisling.AutoCastRoutine());
     }
 }

@@ -758,56 +758,57 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async Task UpdateClients()
     {
-        var gameWatch = new Stopwatch();
-        gameWatch.Start();
-        var clientsToRemove = new ConcurrentBag<uint>();
+        const int maxConcurrency = 10;
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var playerUpdateTasks = new List<Task>();
 
         while (ServerSetup.Instance.Running)
         {
-            var gameTimeElapsed = gameWatch.Elapsed;
-            if (gameTimeElapsed.TotalMilliseconds < GameSpeed) continue;
-
-            Parallel.ForEach(Aislings, player =>
+            var tickStart = DateTime.UtcNow;
+            var players = Aislings.Where(player => player?.Client != null).ToList();
+            
+            foreach (var player in players)
             {
-                if (player?.Client == null) return;
-
-                try
-                {
-                    if (!player.LoggedIn)
+                await semaphore.WaitAsync();
+                var task = ProcessClientTask(player)
+                    .ContinueWith(t =>
                     {
-                        clientsToRemove.Add(player.Client.Id);
-                        return;
-                    }
-
-                    player.Client.Update();
-
-                    // If no longer invisible, remove invisible buffs
-                    if (player.IsInvisible) return;
-                    var buffs = player.Buffs.Values;
-
-                    foreach (var buff in buffs)
-                    {
-                        if (buff.Name is "Hide" or "Shadowfade")
-                            buff.OnEnded(player, buff);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                    clientsToRemove.Add(player.Client.Id);
-                    player.Client.Disconnect();
-                }
-            });
-
-            foreach (var clientId in clientsToRemove)
-            {
-                ClientRegistry.TryRemove(clientId, out _);
+                        semaphore.Release();
+                    });
+                playerUpdateTasks.Add(task);
             }
 
-            clientsToRemove.Clear();
-            gameWatch.Restart();
+            await Task.WhenAll(playerUpdateTasks);
+            playerUpdateTasks.Clear();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(GameSpeed));
+            var tickEnd = DateTime.UtcNow;
+            var duration = tickEnd - tickStart;
+            var remainingDelay = GameSpeed - duration.TotalMilliseconds;
+
+            if (remainingDelay > 0)
+                await Task.Delay((int)remainingDelay);
+        }
+    }
+
+    private async Task ProcessClientTask(Aisling player)
+    {
+        if (player?.Client == null) return;
+
+        try
+        {
+            if (!player.LoggedIn)
+            {
+                ClientRegistry.TryRemove(player.Client.Id, out _);
+                return;
+            }
+
+            await player.Client.Update();
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+            player.Client.Disconnect();
+            ClientRegistry.TryRemove(player.Client.Id, out _);
         }
     }
 
@@ -1999,6 +2000,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     {
                         if (player.Client is null) continue;
                         if (!player.GameSettings.GroupChat) continue;
+                        if (player.IgnoredList.ListContains(client.Aisling.Username)) continue;
                         player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {localArgs.Message}");
                     }
                     return default;
@@ -2022,7 +2024,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (targetAisling == null)
             {
-                fromAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{localArgs.TargetName} is not online");
+                fromAisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{localArgs.TargetName} is not online.. :'(");
                 return default;
             }
 

@@ -747,77 +747,116 @@ public sealed class Aisling : Player, IAisling
         return true;
     }
 
-    public void AutoRoutine()
+    public async Task AutoRoutine()
     {
         var monster = MonstersNearby().FirstOrDefault(i => i.WithinRangeOf(this, 2));
         if (monster == null) return;
         Target = monster;
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
 
-        while (NextTo(Target!.X, Target!.Y) && Client.Connected)
+        const int maxConcurrency = 8;
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var tasks = new List<Task>();
+
+        try
         {
-            if (!(stopWatch.Elapsed.TotalMilliseconds > Client.SkillSpellTimer.Delay.TotalMilliseconds)) continue;
-            stopWatch.Restart();
-
-            foreach (var skill in SkillBook.Skills.Values)
+            while (NextTo(Target!.X, Target!.Y) && Client.Connected)
             {
-                if (skill is null) continue;
-                if (!skill.CanUse()) continue;
-                if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+                if (Client.SkillSpellTimer.Delay.TotalMilliseconds > 0)
+                    await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
 
-                skill.InUse = true;
+                foreach (var skill in SkillBook.Skills.Values)
+                {
+                    if (skill is null) continue;
+                    if (!skill.CanUse()) continue;
+                    if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
 
-                var script = skill.Scripts.Values.FirstOrDefault();
-                script?.OnUse(this);
-                skill.CurrentCooldown = skill.Template.Cooldown;
-                Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-                skill.LastUsedSkill = DateTime.UtcNow;
+                    await semaphore.WaitAsync();
 
-                if (skill.Template.SkillType == SkillScope.Assail)
-                    Client.LastAssail = DateTime.UtcNow;
+                    var task = ProcessSkillAsync(skill, semaphore);
+                    tasks.Add(task);
+                }
 
-                skill.InUse = false;
+                await Task.WhenAll(tasks);
+                tasks.Clear();
             }
         }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+    }
 
-        stopWatch.Stop();
+    private Task ProcessSkillAsync(Skill skill, SemaphoreSlim semaphore)
+    {
+        try
+        {
+            skill.InUse = true;
+
+            var script = skill.Scripts.Values.FirstOrDefault();
+            if (script == null) return Task.CompletedTask;
+            script.OnUse(this);
+            skill.CurrentCooldown = skill.Template.Cooldown;
+            Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            skill.LastUsedSkill = DateTime.UtcNow;
+
+            if (skill.Template.SkillType == SkillScope.Assail)
+                Client.LastAssail = DateTime.UtcNow;
+
+            skill.InUse = false;
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+
+        return Task.CompletedTask;
     }
 
     public async void AutoCastRoutine()
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
         var pos = Pos;
         var spells = SetSpellsToCast();
 
-        while (pos == Pos && Client.Connected)
+        const int maxConcurrency = 5;
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var tasks = new List<Task>();
+
+        try
         {
-            if (!(stopWatch.Elapsed.TotalMilliseconds > Client.SkillSpellTimer.Delay.TotalMilliseconds)) continue;
-            stopWatch.Restart();
-
-            var monster = MonstersNearby().RandomIEnum();
-            if (monster == null) return;
-            Target = monster;
-
-            foreach (var spell in spells)
+            while (pos == Pos && Client.Connected)
             {
-                if (spell is null) continue;
-                if (!spell.CanUse()) continue;
-                if (spell.Scripts is null || spell.Scripts.IsEmpty) continue;
+                if (Client.SkillSpellTimer.Delay.TotalMilliseconds > 0)
+                    await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
 
-                spell.InUse = true;
-                var script = spell.Scripts.Values.FirstOrDefault();
-                script?.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);
-                spell.CurrentCooldown = spell.Template.Cooldown;
-                Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-                spell.LastUsedSpell = DateTime.UtcNow;
-                spell.InUse = false;
-                await Task.Delay(spell.Lines * 1000);
+                var monster = MonstersNearby().RandomIEnum();
+                if (monster == null) return;
+                Target = monster;
+
+                foreach (var spell in spells)
+                {
+                    if (spell is null) continue;
+                    if (!spell.CanUse()) continue;
+                    if (spell.Scripts is null || spell.Scripts.IsEmpty) continue;
+
+                    await semaphore.WaitAsync();
+
+                    var task = ProcessSpellAsync(spell, semaphore);
+                    tasks.Add(task);
+                    await Task.Delay(spell.Lines * 500);
+                }
+
+                await Task.WhenAll(tasks);
+                tasks.Clear();
             }
         }
-
-        stopWatch.Stop();
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
     }
 
     private List<Spell> SetSpellsToCast()
@@ -850,5 +889,32 @@ public sealed class Aisling : Player, IAisling
         }
 
         return spells;
+    }
+
+    private Task ProcessSpellAsync(Spell spell, SemaphoreSlim semaphore)
+    {
+        try
+        {
+            spell.InUse = true;
+
+            var script = spell.Scripts.Values.FirstOrDefault();
+            if (script == null) return Task.CompletedTask;
+            script.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);
+            spell.CurrentCooldown = spell.Template.Cooldown;
+            Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+            spell.LastUsedSpell = DateTime.UtcNow;
+
+            spell.InUse = false;
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+
+        return Task.CompletedTask;
     }
 }
