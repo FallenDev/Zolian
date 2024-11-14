@@ -22,6 +22,16 @@ public abstract class Sprite : INotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();
+    private readonly object aislingsNearbyLock = new();
+    private readonly object aislingsEarShotNearbyLock = new();
+    private readonly object aislingsOnMapLock = new();
+    private readonly object monstersNearbyLock = new();
+    private readonly object monstersOnMapLock = new();
+    private readonly object mundanesNearbyLock = new();
+    private readonly object spritesNearbyLock = new();
+    private readonly object getSpritesLock = new();
+    private readonly object getAislingDamageLock = new();
+    private readonly object getMonsterDamageLock = new();
 
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
@@ -275,16 +285,19 @@ public abstract class Sprite : INotifyPropertyChanged
                 monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerRecord);
 
                 // If nearby player is found, deny a record flush
-                if (playerRecord.player != null) 
+                if (playerRecord.player != null)
                     flushTargetRecord++;
             }
 
             // Return if players are found and run logic if they can attack
             if (flushTargetRecord != 0)
                 return monster.TargetRecord.TaggedAislings.TryGetValue(attackingPlayer.Serial, out _) || monster.TryAddTagging(attackingPlayer);
-            
-            // Record flush if no players are found
-            monster.TargetRecord.TaggedAislings.Clear();
+
+            lock (monster.TaggedAislingsLock)
+            {
+                // Record flush if no players are found
+                monster.TargetRecord.TaggedAislings.Clear();
+            }
         }
 
         // Add player or player's group
@@ -292,9 +305,36 @@ public abstract class Sprite : INotifyPropertyChanged
         return true;
     }
 
-    protected IEnumerable<Sprite> GetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
-    protected IEnumerable<Sprite> AislingGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.AislingDamage);
-    protected IEnumerable<Sprite> MonsterGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
+    private IEnumerable<Sprite> UnSafeGetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
+
+    protected List<Sprite> GetSprites(int x, int y)
+    {
+        lock (getSpritesLock)
+        {
+            return UnSafeGetSprites(x, y).ToList();
+        }
+    }
+
+    private IEnumerable<Sprite> UnSafeAislingGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.AislingDamage);
+
+    protected List<Sprite> AislingGetDamageableSprites(int x, int y)
+    {
+        lock (getAislingDamageLock)
+        {
+            return UnSafeAislingGetDamageableSprites(x, y).ToList();
+        }
+    }
+
+    private IEnumerable<Sprite> UnSafeMonsterGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
+
+    protected List<Sprite> MonsterGetDamageableSprites(int x, int y)
+    {
+        lock (getMonsterDamageLock)
+        {
+            return UnSafeMonsterGetDamageableSprites(x, y).ToList();
+        }
+    }
+
     public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
     public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
     public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
@@ -306,14 +346,67 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
     private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
 
-    public IEnumerable<Aisling> AislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
-    public IEnumerable<Aisling> AislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14));
-    public IEnumerable<Aisling> AislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map);
-    public IEnumerable<Monster> MonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
-    public IEnumerable<Monster> MonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null);
-    public IEnumerable<Mundane> MundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    private IEnumerable<Aisling> UnSafeAislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
-    public IEnumerable<Sprite> SpritesNearby()
+    public List<Aisling> AislingsNearby()
+    {
+        lock (aislingsNearbyLock)
+        {
+            return UnSafeAislingsNearby().ToList();
+        }
+    }
+
+    private IEnumerable<Aisling> UnSafeAislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14));
+
+    public List<Aisling> AislingsEarShotNearby()
+    {
+        lock (aislingsEarShotNearbyLock)
+        {
+            return UnSafeAislingsEarShotNearby().ToList();
+        }
+    }
+
+    private IEnumerable<Aisling> UnSafeAislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map);
+
+    public List<Aisling> AislingsOnMap()
+    {
+        lock (aislingsOnMapLock)
+        {
+            return UnSafeAislingsOnMap().ToList();
+        }
+    }
+
+    private IEnumerable<Monster> UnSafeMonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+
+    public List<Monster> MonstersNearby()
+    {
+        lock (monstersNearbyLock)
+        {
+            return UnSafeMonstersNearby().ToList();
+        }
+    }
+
+    private IEnumerable<Monster> UnSafeMonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null);
+
+    public List<Monster> MonstersOnMap()
+    {
+        lock (monstersOnMapLock)
+        {
+            return UnSafeMonstersOnMap().ToList();
+        }
+    }
+
+    private IEnumerable<Mundane> UnSafeMundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+
+    public List<Mundane> MundanesNearby()
+    {
+        lock (mundanesNearbyLock)
+        {
+            return UnSafeMundanesNearby().ToList();
+        }
+    }
+
+    private IEnumerable<Sprite> UnSafeSpritesNearby()
     {
         var result = new List<Sprite>();
         var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
@@ -321,6 +414,14 @@ public abstract class Sprite : INotifyPropertyChanged
         result.AddRange(listA);
         result.AddRange(listB);
         return result;
+    }
+
+    public List<Sprite> SpritesNearby()
+    {
+        lock (spritesNearbyLock)
+        {
+            return UnSafeSpritesNearby().ToList();
+        }
     }
 
     public int DistanceFrom(int x, int y)

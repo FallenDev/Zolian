@@ -27,9 +27,12 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager
     {
         try
         {
-            Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player, false, false), player);
-            if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) Monster.ClearTarget();
+            lock (Monster.TaggedAislingsLock)
+            {
+                Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player), player);
+                if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) Monster.ClearTarget();
+            }
         }
         catch (Exception ex)
         {
@@ -42,12 +45,17 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager
     {
         try
         {
-            var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-            if (!tagged)
-                Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling, true, false));
-            else
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player, true, player.blocked), player);
-            Monster.Aggressive = true;
+            lock (Monster.TaggedAislingsLock)
+            {
+                var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+
+                if (!tagged)
+                    Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling));
+                else
+                    Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player), player);
+            
+                Monster.Aggressive = true;
+            }
         }
         catch (Exception ex)
         {

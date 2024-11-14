@@ -803,8 +803,11 @@ public class Taunt(Skill skill) : SkillScript(skill)
         foreach (var target in targets)
         {
             if (target is not Monster monster) continue;
-            monster.TargetRecord.TaggedAislings.Clear();
-            monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (450000, aisling, true, false));
+            lock (monster.TaggedAislingsLock)
+            {
+                monster.TargetRecord.TaggedAislings.Clear();
+                monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (4500000, aisling));
+            }
             monster.Target = aisling;
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
         }

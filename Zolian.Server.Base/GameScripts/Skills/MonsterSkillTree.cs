@@ -740,8 +740,11 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
         if (casterMonster.Target is not { CurrentHp: > 1 })
         {
             if (casterMonster.Target is not Aisling aisling) return;
-            casterMonster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            casterMonster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling, true, false), playerTuple);
+            lock (casterMonster.TaggedAislingsLock)
+            {
+                casterMonster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
+                casterMonster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling), playerTuple);
+            }
             return;
         }
 

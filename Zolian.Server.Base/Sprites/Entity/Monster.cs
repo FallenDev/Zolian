@@ -10,6 +10,7 @@ using System.Numerics;
 using Darkages.Sprites.Abstractions;
 using Darkages.Network.Server;
 using Darkages.Object;
+using ServiceStack;
 
 namespace Darkages.Sprites.Entity;
 
@@ -18,13 +19,15 @@ public record TargetRecord
     /// <summary>
     /// Serial, Damage, Player, Nearby
     /// </summary>
-    public ConcurrentDictionary<long, (long dmg, Aisling player, bool nearby, bool blocked)> TaggedAislings { get; init; }
+    public ConcurrentDictionary<long, (long dmg, Aisling player)> TaggedAislings { get; init; }
 }
 
 public sealed class Monster : Damageable
 {
     public Task<IList<Vector2>> Path;
     public Vector2 TargetPos = Vector2.Zero;
+    private Vector2 _location = Vector2.Zero;
+    public string Name => Template.BaseName;
 
     public Monster()
     {
@@ -43,6 +46,7 @@ public sealed class Monster : Damageable
     }
 
     public TargetRecord TargetRecord { get; set; }
+    public readonly object TaggedAislingsLock = new();
     public bool Aggressive { get; set; }
     public bool ThrownBack { get; set; }
     public bool AStar { get; set; }
@@ -60,7 +64,8 @@ public sealed class Monster : Damageable
     public WorldServerTimer CastTimer { get; init; }
     public MonsterTemplate Template { get; init; }
     public WorldServerTimer WalkTimer { get; init; }
-    public WorldServerTimer ObjectUpdateTimer { get; init; }
+    public WorldServerTimer ObjectUpdateTimer { get; init; } = new(TimeSpan.FromMilliseconds(250));
+
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
     public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
@@ -108,17 +113,26 @@ public sealed class Monster : Damageable
         if (Summoned) return;
 
         Target = aisling;
-        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
+        lock (TaggedAislingsLock)
+        {
+            TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling));
+        }
 
         if (aisling.GroupId == 0 || aisling.GroupParty == null) return;
 
-        foreach (var member in aisling.GroupParty.PartyMembers.Values.Where(member => member != null && aisling.CurrentMapId == member.CurrentMapId))
-        {
-            var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
-            var playersNearby = AislingsEarShotNearby().Contains(member);
+        var partyList = aisling.GroupParty.PartyMembers.Values
+            .Where(member => member != null && aisling.CurrentMapId == member.CurrentMapId).ToList();
 
-            if (!memberTagged)
-                TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member, playersNearby, false));
+        foreach (var member in partyList)
+        {
+            lock (TaggedAislingsLock)
+            {
+                var memberTagged = TargetRecord.TaggedAislings.TryGetValue(member.Serial, out _);
+                var playersNearby = AislingsEarShotNearby().Contains(member);
+
+                if (!memberTagged)
+                    TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member));
+            }
         }
     }
 
@@ -127,10 +141,27 @@ public sealed class Monster : Damageable
         if (target is not Aisling aisling) return true;
         if (Summoned) return true;
 
-        var checkGroup = TargetRecord.TaggedAislings.FirstOrDefault().Value;
+        // Check if the Aisling is already tagged and belongs to the same group.
+        if (TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var existingTag) && existingTag.player.GroupId == aisling.GroupId)
+        {
+            return true; // The player is already tagged, no need to add again.
+        }
 
-        if (checkGroup.player.GroupId != aisling.GroupId) return false;
-        TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling, true, false));
+        // Otherwise, safely add or update the tag.
+        lock (TaggedAislingsLock) // Lock while modifying the dictionary
+        {
+            // TryAdd will only add the entry if it does not already exist
+            if (!TargetRecord.TaggedAislings.ContainsKey(aisling.Serial))
+            {
+                TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling));
+            }
+            else
+            {
+                // If the entry exists, update it (this should be atomic because we're locking)
+                TargetRecord.TaggedAislings[aisling.Serial] = (0, aisling);
+            }
+        }
+
         return true;
     }
 
@@ -348,13 +379,56 @@ public sealed class Monster : Damageable
         WalkTo((int)nodeX, (int)nodeY);
     }
 
-    public void CheckTarget()
+    public void UpdateTarget(bool ascending = false, bool shadowSight = false)
     {
-        if (Target is not Aisling aisling) return;
-        if (!aisling.Skulled && aisling.LoggedIn) return;
-        if (!aisling.IsInvisible) return;
-        TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
-        Target = null;
+        if (!ObjectUpdateEnabled) return;
+        var nearbyPlayers = AislingsEarShotNearby();
+
+        if (nearbyPlayers.Count == 0)
+        {
+            ClearTarget();
+            lock (TaggedAislingsLock)
+            {
+                TargetRecord.TaggedAislings.Clear();
+            }
+        }
+
+        if (Aggressive)
+        {
+            var tagged = TargetRecord.TaggedAislings.Values.ToList();
+
+            if (!tagged.IsEmpty())
+            {
+                IOrderedEnumerable<(long, Aisling)> groupAttacking = ascending ? tagged.OrderBy(c => c.player.ThreatMeter) : tagged.OrderByDescending(c => c.player.ThreatMeter);
+
+                foreach (var (_, player) in groupAttacking)
+                {
+                    if (player.Skulled || !player.LoggedIn) continue;
+                    if (!shadowSight && player.IsInvisible) continue;
+                    if (player.Map != Map) continue;
+                    Target = player;
+                    break;
+                }
+            }
+            else
+            {
+                if (Target != null) return;
+                var topDps = ascending ? nearbyPlayers.OrderBy(c => c.ThreatMeter) : nearbyPlayers.OrderByDescending(c => c.ThreatMeter);
+
+                foreach (var target in topDps)
+                {
+                    if (target.Skulled || !target.LoggedIn) continue;
+                    if (!shadowSight && target.IsInvisible) continue;
+                    if (target.Map != Map) continue;
+                    Target = target;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            ClearTarget();
+        }
     }
 
     public void ClearTarget()
@@ -365,7 +439,10 @@ public sealed class Monster : Damageable
 
         if (Target is Aisling)
         {
-            TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
+            lock (TaggedAislingsLock)
+            {
+                TargetRecord.TaggedAislings.TryRemove(Target.Serial, out _);
+            }
         }
 
         Target = null;
@@ -409,10 +486,127 @@ public sealed class Monster : Damageable
         }
     }
 
-    public DisplayColor Color => DisplayColor.Default;
-    public EntityType EntityType => EntityType.Creature;
-    public uint Id => Serial;
-    public string Name => Template.BaseName;
-    public ushort Sprite => Template.Image;
-    public void Activate(Aisling source) => Scripts.FirstOrDefault().Value.OnClick(source.Client);
+    public void Walk()
+    {
+        if (CantMove) return;
+        if (ThrownBack) return;
+
+        if (Target != null)
+        {
+            if (Target is not Aisling aisling)
+            {
+                Wander();
+                return;
+            }
+
+            if (aisling.IsInvisible || aisling.Dead || aisling.Skulled || !aisling.LoggedIn || Map.ID != aisling.Map.ID)
+            {
+                ClearTarget();
+                Wander();
+                return;
+            }
+
+            if (NextTo((int)Target.Pos.X, (int)Target.Pos.Y))
+            {
+                NextToTarget();
+            }
+            else
+            {
+                BeginPathFind();
+            }
+
+            return;
+        }
+
+        BashEnabled = false;
+        CastEnabled = false;
+
+        PatrolIfSet();
+    }
+
+    public void NextToTarget()
+    {
+        if (Target == null) return;
+
+        if (Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
+        {
+            BashEnabled = true;
+            AbilityEnabled = true;
+            CastEnabled = true;
+        }
+        else
+        {
+            BashEnabled = false;
+            AbilityEnabled = true;
+            CastEnabled = true;
+            Direction = (byte)direction;
+            Turn();
+        }
+    }
+
+    public void BeginPathFind()
+    {
+        BashEnabled = false;
+        CastEnabled = true;
+
+        try
+        {
+            if (Target != null && Aggressive)
+            {
+                AStar = true;
+                _location = new Vector2(Pos.X, Pos.Y);
+                TargetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
+                Path = Area.GetPath(this, _location, TargetPos);
+
+                if (ThrownBack) return;
+
+                if (TargetPos == Vector2.Zero)
+                {
+                    ClearTarget();
+                    Wander();
+                    return;
+                }
+
+                if (Path.Result.Count > 0)
+                {
+                    AStarPath(this, Path.Result);
+                    if (!Path.Result.IsEmpty())
+                        Path.Result.RemoveAt(0);
+                }
+
+                if (Path.Result.Count != 0) return;
+                AStar = false;
+
+                if (Target != null && WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        Wander();
+    }
+
+    public void PatrolIfSet()
+    {
+        if (Template.PathQualifer.PathFlagIsSet(PathQualifer.Patrol))
+        {
+            if (Template.Waypoints == null)
+            {
+                Wander();
+            }
+            else
+            {
+                if (Template.Waypoints.Count > 0)
+                    Patrol();
+                else
+                    Wander();
+            }
+        }
+        else
+        {
+            Wander();
+        }
+    }
 }
