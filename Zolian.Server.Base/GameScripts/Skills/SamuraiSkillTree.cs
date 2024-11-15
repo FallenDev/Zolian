@@ -1,6 +1,11 @@
-﻿using Darkages.ScriptingBase;
+﻿using Darkages.Enums;
+using Darkages.GameScripts.Affects;
+using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
+
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -8,17 +13,14 @@ namespace Darkages.GameScripts.Skills;
 [Script("Iaido")]
 public class Iaido(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private IEnumerable<Sprite> _enemyList;
+    private List<Sprite> _enemyList;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
-
         client.SendServerMessage(ServerMessageType.OrangeBar1, "My honour has not faltered..");
     }
 
@@ -28,6 +30,60 @@ public class Iaido(Skill skill) : SkillScript(skill)
         var client = aisling.Client;
         aisling.ActionUsed = "Iaido";
 
+        if (_enemyList.Count == 0)
+        {
+            OnFailed(aisling);
+            return;
+        }
+
+        var position = _enemyList.Last()?.Position;
+        if (position == null)
+        {
+            OnFailed(aisling);
+            return;
+        }
+
+        var mapCheck = aisling.Map.ID;
+        var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
+        var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+
+        if (mapCheck != aisling.Map.ID) return;
+        if (!(wallPos > 0)) OnFailed(aisling);
+
+        if (aisling.Position != wallPosition)
+        {
+            GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+        }
+
+        foreach (var enemy in _enemyList)
+        {
+            if (enemy is not Damageable damageable) continue;
+            var dmgCalc = DamageCalc(aisling);
+
+            damageable.ApplyDamage(aisling, dmgCalc, Skill);
+            GlobalSkillMethods.Train(client, Skill);
+            Task.Delay(300).ContinueWith(c =>
+            {
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(119, enemy.Position));
+            });
+
+            if (!_crit) continue;
+            Task.Delay(300).ContinueWith(c =>
+            {
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+            });
+        }
+
+        Task.Delay(300).ContinueWith(c =>
+        {
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, aisling.Position));
+        });
+
+        if (wallPos > 5) return;
+
+        var stunned = new DebuffBeagsuain();
+        aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
     }
 
     public override void OnUse(Sprite sprite)
@@ -36,6 +92,89 @@ public class Iaido(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
 
         var client = aisling.Client;
+
+        if (client.Aisling.CantAttack)
+        {
+            OnFailed(aisling);
+            return;
+        }
+
+        // Prevent Loss of Macro in Dojo areas
+        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+        {
+            GlobalSkillMethods.Train(client, Skill);
+            OnFailed(aisling);
+            return;
+        }
+
+        Target(aisling);
+    }
+
+    private long DamageCalc(Sprite sprite)
+    {
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
+            dmg = client.Aisling.Str * 45 + client.Aisling.Dex * 43;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 2 + damageMonster.Dex * 3;
+        }
+
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+
+    private void Target(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        var client = aisling.Client;
+
+        _enemyList = client.Aisling.DamageableGetInFrontColumn(6);
+
+        if (_enemyList.Count == 0)
+        {
+            var mapCheck = aisling.Map.ID;
+            var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
+            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+
+            if (mapCheck != aisling.Map.ID) return;
+            if (!(wallPos > 0)) OnFailed(aisling);
+
+            if (aisling.Position != wallPosition)
+            {
+                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+            }
+
+            if (wallPos <= 5)
+            {
+                var stunned = new DebuffBeagsuain();
+                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+            }
+
+            aisling.UsedSkill(Skill);
+        }
+        else
+        {
+            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+
+            if (_success)
+            {
+                OnSuccess(aisling);
+            }
+            else
+            {
+                OnFailed(aisling);
+            }
+        }
     }
 }
 
@@ -112,7 +251,7 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
-      
+
     }
 }
 

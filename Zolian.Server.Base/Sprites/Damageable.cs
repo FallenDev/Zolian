@@ -659,7 +659,7 @@ public class Damageable : Movable
         var rendingChance = Generator.RandNumGen100();
         var vampChance = Generator.RandNumGen100();
         var reapChance = Generator.RandomNumPercentGen();
-        var hasteChance = Generator.RandNumGen100();
+        var hasteChance = Generator.RandomNumPercentGen();
         var gustChance = Generator.RandNumGen100();
         var quakeChance = Generator.RandNumGen100();
         var rainChance = Generator.RandNumGen100();
@@ -689,7 +689,7 @@ public class Damageable : Movable
 
         switch (damageDealingSprite.Haste)
         {
-            case 1 when hasteChance >= 99:
+            case 1 when hasteChance >= 0.999:
                 {
                     var buff = new buff_Haste();
                     damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
@@ -697,7 +697,7 @@ public class Damageable : Movable
                     damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
                     break;
                 }
-            case 2 when hasteChance >= 97:
+            case 2 when hasteChance >= 0.995:
                 {
                     var buff = new buff_Hasten();
                     damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);

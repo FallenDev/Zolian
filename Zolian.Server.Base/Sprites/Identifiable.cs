@@ -333,6 +333,53 @@ public class Identifiable : Sprite
         return results;
     }
 
+    public List<Sprite> DamageableGetInFrontColumn(int tileCount = 1, int sides = 1)
+    {
+        var results = new List<Sprite>();
+
+        for (var i = 1; i <= tileCount; i++)
+            switch (Direction)
+            {
+                case 0:
+                    // forward
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X, (int)Pos.Y - i));
+                    // right
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X + sides, (int)Pos.Y - i));
+                    // left
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X - sides, (int)Pos.Y - i));
+                    break;
+
+                case 1: 
+                    // forward
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X + i, (int)Pos.Y));
+                    // right
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X + i, (int)Pos.Y + sides));
+                    // left
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X + i, (int)Pos.Y - sides));
+                    break;
+
+                case 2: 
+                    // forward
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X, (int)Pos.Y + i));
+                    // right
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X - sides, (int)Pos.Y + i));
+                    // left
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X + sides, (int)Pos.Y + i));
+                    break;
+
+                case 3: 
+                    // forward
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X - i, (int)Pos.Y));
+                    // right
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X - i, (int)Pos.Y - sides));
+                    // left
+                    results.AddRange(AislingGetDamageableSprites((int)Pos.X - i, (int)Pos.Y + sides));
+                    break;
+            }
+        
+        return results;
+    }
+
     public List<Position> GetTilesInFront(int tileCount = 1)
     {
         var results = new List<Position>();

@@ -761,17 +761,12 @@ public sealed class Aisling : Player, IAisling
         {
             while (NextTo(Target!.X, Target!.Y) && Client.Connected)
             {
-                if (Client.SkillSpellTimer.Delay.TotalMilliseconds > 0)
-                    await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
+                await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
+                var skills = SkillBook.Skills.Values.Where(s => s != null && s.Level < s.Template.MaxLevel && s.Template.MaxLevel != 1).ToList();
 
-                foreach (var skill in SkillBook.Skills.Values)
+                foreach (var skill in skills.Where(skill => skill.CanUse()).Where(skill => skill.Scripts is not null && !skill.Scripts.IsEmpty))
                 {
-                    if (skill is null) continue;
-                    if (!skill.CanUse()) continue;
-                    if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
-
                     await semaphore.WaitAsync();
-
                     var task = ProcessSkillAsync(skill, semaphore);
                     tasks.Add(task);
                 }
@@ -829,21 +824,14 @@ public sealed class Aisling : Player, IAisling
         {
             while (pos == Pos && Client.Connected)
             {
-                if (Client.SkillSpellTimer.Delay.TotalMilliseconds > 0)
-                    await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
-
+                await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
                 var monster = MonstersNearby().RandomIEnum();
                 if (monster == null) return;
                 Target = monster;
 
-                foreach (var spell in spells)
+                foreach (var spell in from spell in spells where spell is not null where spell.CanUse() where spell.Scripts is not null && !spell.Scripts.IsEmpty select spell)
                 {
-                    if (spell is null) continue;
-                    if (!spell.CanUse()) continue;
-                    if (spell.Scripts is null || spell.Scripts.IsEmpty) continue;
-
                     await semaphore.WaitAsync();
-
                     var task = ProcessSpellAsync(spell, semaphore);
                     tasks.Add(task);
                     await Task.Delay(spell.Lines * 500);
