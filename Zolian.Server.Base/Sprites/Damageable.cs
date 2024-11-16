@@ -647,425 +647,462 @@ public class Damageable : Movable
         return dmg;
     }
 
-    private void VarianceProc(Sprite sprite, long dmg)
+    private static void AegisProc(Aisling aisling)
     {
-        if (sprite is not Aisling damageDealingSprite) return;
-        var client = damageDealingSprite.Client;
-
-        var enemy = client.Aisling.DamageableGetInFront();
-        var target = enemy.FirstOrDefault();
         var aegisChance = Generator.RandNumGen100();
-        var bleedingChance = Generator.RandNumGen100();
-        var rendingChance = Generator.RandNumGen100();
-        var vampChance = Generator.RandNumGen100();
-        var reapChance = Generator.RandomNumPercentGen();
-        var hasteChance = Generator.RandomNumPercentGen();
-        var gustChance = Generator.RandNumGen100();
-        var quakeChance = Generator.RandNumGen100();
-        var rainChance = Generator.RandNumGen100();
-        var flameChance = Generator.RandNumGen100();
-        var duskChance = Generator.RandNumGen100();
-        var dawnChance = Generator.RandNumGen100();
 
-        switch (damageDealingSprite.Aegis)
+        switch (aisling.Aegis)
         {
             case 1 when aegisChance >= 99:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
+                    if (!aisling.HasBuff(buff.Name))
+                    {
+                        aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
+                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, aisling.Serial));
+                    }
                     break;
                 }
             case 2 when aegisChance >= 97:
                 {
                     var buff = new buff_spell_reflect();
-                    if (!damageDealingSprite.HasBuff(buff.Name)) damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, damageDealingSprite.Serial));
+                    if (!aisling.HasBuff(buff.Name))
+                    {
+                        aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
+                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, aisling.Serial));
+                    }
                     break;
                 }
         }
+    }
 
-        switch (damageDealingSprite.Haste)
+    private static void HasteProc(Aisling aisling)
+    {
+        var hasteChance = Generator.RandomNumPercentGen();
+
+        switch (aisling.Haste)
         {
             case 1 when hasteChance >= 0.999:
                 {
                     var buff = new buff_Haste();
-                    damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to slow down around you.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
+                    if (!aisling.HasBuff(buff.Name))
+                    {
+                        aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to slow down around you.");
+                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, aisling.Serial));
+                    }
                     break;
                 }
             case 2 when hasteChance >= 0.995:
                 {
                     var buff = new buff_Hasten();
-                    damageDealingSprite.Client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to really slow down around you.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, damageDealingSprite.Serial));
+                    if (!aisling.HasBuff(buff.Name))
+                    {
+                        aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to really slow down around you.");
+                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, aisling.Serial));
+                    }
                     break;
                 }
         }
+    }
 
-        // The below procs are separated out by these checks to reduce complexity
-        if (target == null) return;
-        if (damageDealingSprite.Vampirism == 0 && damageDealingSprite.Rending == 0 && damageDealingSprite.Bleeding == 0 && damageDealingSprite.Reaping == 0
-            && damageDealingSprite.Gust == 0 && damageDealingSprite.Quake == 0 && damageDealingSprite.Rain == 0
-            && damageDealingSprite.Flame == 0 && damageDealingSprite.Dusk == 0 && damageDealingSprite.Dawn == 0) return;
+    private static void BleedProc(Aisling aisling, Sprite target)
+    {
+        var bleedingChance = Generator.RandNumGen100();
+        var bleed = false;
 
-        switch (damageDealingSprite.Vampirism)
+        switch (target)
         {
-            case 1 when vampChance >= 99:
-                {
-                    switch (target)
-                    {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to be effective. (Level too high)");
-                        return;
-                    }
-
-                    const double absorbPct = 0.07;
-                    var absorb = absorbPct * dmg;
-                    damageDealingSprite.CurrentHp += (int)absorb;
-                    if (target.CurrentHp >= (int)absorb)
-                        target.CurrentHp -= (int)absorb;
-                    client.SendAttributes(StatUpdateType.Vitality);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
-                    break;
-                }
-            case 2 when vampChance >= 97:
-                {
-                    switch (target)
-                    {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to be effective. (Level too high)");
-                        return;
-                    }
-
-                    const double absorbPct = 0.14;
-                    var absorb = absorbPct * dmg;
-                    damageDealingSprite.CurrentHp += (int)absorb;
-                    if (target.CurrentHp >= (int)absorb)
-                        target.CurrentHp -= (int)absorb;
-                    client.SendAttributes(StatUpdateType.Vitality);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, damageDealingSprite.Serial));
-                    break;
-                }
+            case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding is ineffective");
+                return;
         }
 
-        switch (damageDealingSprite.Ghosting)
-        {
-            case 1 when vampChance >= 99:
-                {
-                    switch (target)
-                    {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
-                        return;
-                    }
-
-                    const double absorbPct = 0.07;
-                    var absorb = absorbPct * dmg;
-                    damageDealingSprite.CurrentMp += (int)absorb;
-                    if (target.CurrentMp >= (int)absorb)
-                        target.CurrentMp -= (int)absorb;
-                    client.SendAttributes(StatUpdateType.Vitality);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
-                    break;
-                }
-            case 2 when vampChance >= 97:
-                {
-                    switch (target)
-                    {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
-                        return;
-                    }
-
-                    const double absorbPct = 0.14;
-                    var absorb = absorbPct * dmg;
-                    damageDealingSprite.CurrentMp += (int)absorb;
-                    if (target.CurrentMp >= (int)absorb)
-                        target.CurrentMp -= (int)absorb;
-                    client.SendAttributes(StatUpdateType.Vitality);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, damageDealingSprite.Serial));
-                    break;
-                }
-        }
-
-        switch (damageDealingSprite.Bleeding)
+        switch (aisling.Bleeding)
         {
             case 1 when bleedingChance >= 99:
                 {
-                    switch (target)
+                    if (target.Level >= 15 + aisling.ExpLevel)
                     {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to be effective. (Level too high)");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to be effective. (Level too high)");
                         return;
                     }
 
-                    var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+                    bleed = true;
                     break;
                 }
             case 2 when bleedingChance >= 97:
                 {
-                    switch (target)
+                    if (target.Level >= 20 + aisling.ExpLevel)
                     {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to be effective. (Level too high)");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding doesn't seem to be effective. (Level too high)");
                         return;
                     }
 
-                    var deBuff = new DebuffBleeding();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+                    bleed = true;
                     break;
                 }
         }
 
-        switch (damageDealingSprite.Rending)
+        if (!bleed) return;
+        var deBuff = new DebuffBleeding();
+        if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+    }
+
+    private static void RendProc(Aisling aisling, Sprite target)
+    {
+        var rendingChance = Generator.RandNumGen100();
+
+        switch (aisling.Rending)
         {
             case 1 when rendingChance >= 99:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
                     break;
                 }
             case 2 when rendingChance >= 97:
                 {
                     var deBuff = new DebuffRending();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    break;
+                }
+        }
+    }
+
+    private static void VampProc(Aisling aisling, Sprite target, long dmg)
+    {
+        var vampChance = Generator.RandNumGen100();
+        var vamp = false;
+
+        switch (target)
+        {
+            case Aisling:
+            case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Unable to feast on their health");
+                return;
+        }
+
+        switch (aisling.Vampirism)
+        {
+            case 1 when vampChance >= 99:
+                {
+                    if (target.Level >= 15 + aisling.ExpLevel)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    vamp = true;
+                    const double absorbPct = 0.07;
+                    var absorb = absorbPct * dmg;
+                    aisling.CurrentHp += (int)absorb;
+                    if (target.CurrentHp >= (int)absorb)
+                        target.CurrentHp -= (int)absorb;
+                    break;
+                }
+            case 2 when vampChance >= 97:
+                {
+                    if (target.Level >= 20 + aisling.ExpLevel)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Vampiring doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    vamp = true;
+                    const double absorbPct = 0.14;
+                    var absorb = absorbPct * dmg;
+                    aisling.CurrentHp += (int)absorb;
+                    if (target.CurrentHp >= (int)absorb)
+                        target.CurrentHp -= (int)absorb;
                     break;
                 }
         }
 
-        switch (damageDealingSprite.Reaping)
+        if (!vamp) return;
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, aisling.Serial));
+    }
+
+    private static void GhostProc(Aisling aisling, Sprite target, long dmg)
+    {
+        var vampChance = Generator.RandNumGen100();
+        var vamp = false;
+
+        switch (target)
+        {
+            case Aisling:
+            case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
+                return;
+        }
+
+        switch (aisling.Ghosting)
+        {
+            case 1 when vampChance >= 99:
+                {
+                    if (target.Level >= 15 + aisling.ExpLevel)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    vamp = true;
+                    const double absorbPct = 0.07;
+                    var absorb = absorbPct * dmg;
+                    aisling.CurrentMp += (int)absorb;
+                    if (target.CurrentMp >= (int)absorb)
+                        target.CurrentMp -= (int)absorb;
+                    break;
+                }
+            case 2 when vampChance >= 97:
+                {
+                    if (target.Level >= 20 + aisling.ExpLevel)
+                    {
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to be effective. (Level too high)");
+                        return;
+                    }
+
+                    vamp = true;
+                    const double absorbPct = 0.14;
+                    var absorb = absorbPct * dmg;
+                    aisling.CurrentMp += (int)absorb;
+                    if (target.CurrentMp >= (int)absorb)
+                        target.CurrentMp -= (int)absorb;
+                    break;
+                }
+        }
+
+        if (!vamp) return;
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
+        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, aisling.Serial));
+    }
+
+    private static void ReapProc(Aisling aisling, Sprite target)
+    {
+        var reapChance = Generator.RandomNumPercentGen();
+
+        switch (target)
+        {
+            case Aisling:
+            case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                return;
+        }
+
+        switch (aisling.Reaping)
         {
             case 1 when reapChance >= 0.999:
                 {
-                    switch (target)
+                    if (target.Level >= 15 + aisling.ExpLevel)
                     {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 15 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                         return;
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
+                    if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }
             case 2 when reapChance >= 0.995:
                 {
-                    switch (target)
+                    if (target.Level >= 20 + aisling.ExpLevel)
                     {
-                        case Aisling:
-                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                            return;
-                    }
-
-                    if (target.Level >= 20 + damageDealingSprite.ExpLevel)
-                    {
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
+                        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to be effective. (Level too high)");
                         return;
                     }
 
                     var deBuff = new DebuffReaping();
-                    if (!target.HasDebuff(deBuff.Name)) damageDealingSprite.Client.EnqueueDebuffAppliedEvent(target, deBuff);
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
+                    if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've cast Death.");
                     break;
                 }
         }
+    }
 
-        switch (damageDealingSprite.Gust)
+    private static void GustProc(Aisling aisling, Sprite target)
+    {
+        var gustChance = Generator.RandNumGen100();
+        switch (aisling.Gust)
         {
             case 1 when gustChance >= 98:
-                _ = new Gust(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
+                _ = new Gust(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
                 break;
             case 2 when gustChance >= 95:
-                _ = new Gust(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
+                _ = new Gust(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
                 break;
         }
+    }
 
-        switch (damageDealingSprite.Quake)
+    private static void QuakeProc(Aisling aisling, Sprite target)
+    {
+        var quakeChance = Generator.RandNumGen100();
+
+        switch (aisling.Quake)
         {
             case 1 when quakeChance >= 98:
-                _ = new Quake(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
+                _ = new Quake(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
                 break;
             case 2 when quakeChance >= 95:
-                _ = new Quake(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
+                _ = new Quake(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
                 break;
         }
+    }
 
-        switch (damageDealingSprite.Rain)
+    private static void RainProc(Aisling aisling, Sprite target)
+    {
+        var rainChance = Generator.RandNumGen100();
+
+        switch (aisling.Rain)
         {
             case 1 when rainChance >= 98:
-                _ = new Rain(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
+                _ = new Rain(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
                 break;
             case 2 when rainChance >= 95:
-                _ = new Rain(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
+                _ = new Rain(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
                 break;
         }
 
-        switch (damageDealingSprite.Flame)
+    }
+
+    private static void FlameProc(Aisling aisling, Sprite target)
+    {
+        var flameChance = Generator.RandNumGen100();
+
+        switch (aisling.Flame)
         {
             case 1 when flameChance >= 98:
-                _ = new Flame(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
+                _ = new Flame(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
                 break;
             case 2 when flameChance >= 95:
-                _ = new Flame(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
+                _ = new Flame(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
                 break;
         }
+    }
 
-        switch (damageDealingSprite.Dusk)
+    private static void DuskProc(Aisling aisling, Sprite target)
+    {
+        var duskChance = Generator.RandNumGen100();
+        switch (aisling.Dusk)
         {
             case 1 when duskChance >= 98:
-                _ = new Dusk(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
+                _ = new Dusk(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
                 break;
             case 2 when duskChance >= 95:
-                _ = new Dusk(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
+                _ = new Dusk(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
                 break;
         }
+    }
 
-        switch (damageDealingSprite.Dawn)
+    private static void DawnProc(Aisling aisling, Sprite target)
+    {
+        var dawnChance = Generator.RandNumGen100();
+
+        switch (aisling.Dawn)
         {
             case 1 when dawnChance >= 98:
-                _ = new Dawn(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
+                _ = new Dawn(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
                 break;
             case 2 when dawnChance >= 95:
-                _ = new Dawn(damageDealingSprite, target);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
+                _ = new Dawn(aisling, target);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
                 break;
         }
+    }
+
+    private void VarianceProc(Sprite sprite, long dmg)
+    {
+        if (sprite is not Aisling aisling) return;
+
+        if (aisling.Aegis > 0)
+            AegisProc(aisling);
+
+        if (aisling.Haste > 0)
+            HasteProc(aisling);
+
+        if (aisling.Bleeding > 0)
+            BleedProc(aisling, this);
+
+        if (aisling.Rending > 0)
+            RendProc(aisling, this);
+
+        if (aisling.Reaping > 0)
+            ReapProc(aisling, this);
+
+        if (aisling.Gust > 0)
+            GustProc(aisling, this);
+
+        if (aisling.Quake > 0)
+            QuakeProc(aisling, this);
+
+        if (aisling.Rain > 0)
+            RainProc(aisling, this);
+
+        if (aisling.Flame > 0)
+            FlameProc(aisling, this);
+
+        if (aisling.Dusk > 0)
+            DuskProc(aisling, this);
+
+        if (aisling.Dawn > 0)
+            DawnProc(aisling, this);
+
+        if (aisling.Vampirism > 0)
+            VampProc(aisling, this, dmg);
+
+        if (aisling.Ghosting > 0)
+            GhostProc(aisling, this, dmg);
     }
 
     private long PainBane(long dmg)
