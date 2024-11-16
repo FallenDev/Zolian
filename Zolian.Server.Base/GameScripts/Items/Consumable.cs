@@ -75,7 +75,7 @@ public class Consumable(Item item) : ItemScript(item)
                         case > 0.83 and <= 0.95:
                             stockingItem = stockingItem.Create(aisling, "Rudolph's Costume", quality, variance, wVariance);
                             break;
-                        case > 0.95 and <= 1:
+                        case > 0.95:
                             stockingItem = stockingItem.Create(aisling, "Lumber Jack", quality, variance, wVariance);
                             break;
                     }
@@ -1289,7 +1289,7 @@ public class Consumable(Item item) : ItemScript(item)
                                     wVariance),
                                 > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
                                     wVariance),
-                                > 0.80 and <= 1 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
+                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
                                     wVariance),
                                 _ => stockingItem
                             };

@@ -117,8 +117,8 @@ public class Hybrasyl(WorldServer server, Mundane mundane) : MundaneScript(serve
 
         return tryRefine switch
         {
-            >= 0 and <= .84 => false,
-            > .84 and <= 1 => true,
+            >= 0 and <= .54 => false,
+            > .54 => true,
             _ => false
         };
     }

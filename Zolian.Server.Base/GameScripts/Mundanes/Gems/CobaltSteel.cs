@@ -123,8 +123,8 @@ public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(se
 
         return tryRefine switch
         {
-            >= 0 and <= .93 => false,
-            > .93 and <= 1 => true,
+            >= 0 and <= .63 => false,
+            > .63 => true,
             _ => false
         };
     }

@@ -112,8 +112,8 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
         return tryRefine switch
         {
-            >= 0 and <= .74 => false,
-            > .74 and <= 1 => true,
+            >= 0 and <= .44 => false,
+            > .44 => true,
             _ => false
         };
     }

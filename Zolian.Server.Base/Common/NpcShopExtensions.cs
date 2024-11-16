@@ -363,7 +363,7 @@ public static class NpcShopExtensions
         {
             >= 0 and <= .40 => Item.Quality.Common,
             > .40 and <= .99 => Item.Quality.Uncommon,
-            > .99 and <= 1 => Item.Quality.Rare,
+            > .99 => Item.Quality.Rare,
             _ => Item.Quality.Damaged
         };
     }
@@ -380,7 +380,7 @@ public static class NpcShopExtensions
         {
             >= 0 and <= .75 => Item.Quality.Uncommon,
             > .75 and <= .99 => Item.Quality.Rare,
-            > .99 and <= 1 => Item.Quality.Epic,
+            > .99 => Item.Quality.Epic,
             _ => Item.Quality.Damaged
         };
     }
@@ -398,7 +398,7 @@ public static class NpcShopExtensions
             >= 0 and <= .88 => Item.Quality.Rare,
             > .88 and <= .98 => Item.Quality.Epic,
             > .98 and <= .9975 => Item.Quality.Legendary,
-            > .9975 and <= 1 => Item.Quality.Forsaken,
+            > .9975 => Item.Quality.Forsaken,
             _ => Item.Quality.Damaged
         };
     }
@@ -415,7 +415,7 @@ public static class NpcShopExtensions
         {
             >= 0 and <= .75 => Item.Quality.Uncommon,
             >= .75 and <= .95 => Item.Quality.Rare,
-            > .95 and <= 1 => Item.Quality.Epic,
+            > .95 => Item.Quality.Epic,
             _ => Item.Quality.Damaged
         };
     }
@@ -432,7 +432,7 @@ public static class NpcShopExtensions
         {
             >= 0 and <= .75 => Item.Quality.Rare,
             >= .75 and <= .90 => Item.Quality.Epic,
-            > .90 and <= 1 => Item.Quality.Legendary,
+            > .90 => Item.Quality.Legendary,
             _ => Item.Quality.Damaged
         };
     }
@@ -449,7 +449,7 @@ public static class NpcShopExtensions
         {
             >= 0 and <= .75 => Item.Quality.Epic,
             >= .75 and <= .90 => Item.Quality.Legendary,
-            > .90 and <= 1 => Item.Quality.Forsaken,
+            > .90 => Item.Quality.Forsaken,
             _ => Item.Quality.Damaged
         };
     }

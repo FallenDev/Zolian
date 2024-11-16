@@ -123,8 +123,8 @@ public class Obsidian(WorldServer server, Mundane mundane) : MundaneScript(serve
 
         return tryRefine switch
         {
-            >= 0 and <= .95 => false,
-            > .95 and <= 1 => true,
+            >= 0 and <= .67 => false,
+            > .67 => true,
             _ => false
         };
     }

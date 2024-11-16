@@ -117,8 +117,8 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
 
         return tryRefine switch
         {
-            >= 0 and <= .90 => false,
-            > .90 and <= 1 => true,
+            >= 0 and <= .60 => false,
+            > .60 => true,
             _ => false
         };
     }

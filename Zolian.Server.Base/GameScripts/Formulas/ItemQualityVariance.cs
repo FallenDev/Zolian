@@ -93,7 +93,7 @@ public static class ItemQualityVariance
             > .97 and <= .99 => Item.Quality.Epic,
             > .99 and <= .9975 => Item.Quality.Legendary,
             > .9975 and <= .9998 => Item.Quality.Forsaken,
-            > .9998 and <= 1 => Item.Quality.Mythic,
+            > .9998 => Item.Quality.Mythic,
             _ => Item.Quality.Damaged
         };
     }
@@ -108,7 +108,7 @@ public static class ItemQualityVariance
             > .77 and <= .89 => Item.Quality.Epic,
             > .89 and <= .99 => Item.Quality.Legendary,
             > .99 and <= .997 => Item.Quality.Forsaken,
-            > .997 and <= 1 => Item.Quality.Mythic,
+            > .997 => Item.Quality.Mythic,
             _ => Item.Quality.Rare
         };
     }
@@ -134,7 +134,7 @@ public static class ItemQualityVariance
             >= .89 and <= .91 => Item.WeaponVariance.Rain,
             >= .92 and <= .94 => Item.WeaponVariance.Flame,
             >= .95 and <= .97 => Item.WeaponVariance.Dusk,
-            >= .98 and <= 1 => Item.WeaponVariance.Dawn,
+            >= .98 => Item.WeaponVariance.Dawn,
             _ => Item.WeaponVariance.None
         };
     }

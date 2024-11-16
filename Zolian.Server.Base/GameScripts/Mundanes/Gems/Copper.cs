@@ -117,8 +117,8 @@ public class Copper(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         return tryRefine switch
         {
-            >= 0 and <= .80 => false,
-            > .80 and <= 1 => true,
+            >= 0 and <= .50 => false,
+            > .50 => true,
             _ => false
         };
     }
