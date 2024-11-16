@@ -59,7 +59,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
-    public readonly object SyncModifierRemovalLock = new();
+    public readonly Lock SyncModifierRemovalLock = new();
     public Spell LastSpell = new();
     public bool ExitConfirmed;
 
@@ -189,7 +189,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     public Position LastKnownPosition { get; set; }
     public int MapClicks { get; set; }
     public uint EntryCheck { get; set; }
-    private readonly object _warpCheckLock = new();
+    private readonly Lock _warpCheckLock = new();
     private readonly ConcurrentDictionary<uint, ExperienceEvent> _expQueue = [];
     private readonly ConcurrentDictionary<uint, AbilityEvent> _apQueue = [];
     private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffApplyQueue = [];
@@ -495,7 +495,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (elapsed["ItemAnimation"].TotalMilliseconds < 100) return;
         _clientStopwatches["ItemAnimation"].Restart();
-        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
+        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable).ToList();
 
         try
         {
@@ -3761,16 +3761,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         var obj = ObjectManager.GetObject<Aisling>(null, aisling => aisling.Serial == Aisling.Serial
                                                                     || string.Equals(aisling.Username, Aisling.Username, StringComparison.CurrentCultureIgnoreCase));
 
-        if (obj == null)
-        {
-            ObjectManager.AddObject(Aisling);
-        }
-        else
-        {
-            obj.Remove(update, delete);
-            ObjectManager.AddObject(Aisling);
-        }
-
+        obj?.Remove(update, delete);
+        ObjectManager.AddObject(Aisling);
         return this;
     }
 

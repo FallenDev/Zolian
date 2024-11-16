@@ -46,7 +46,7 @@ public sealed class Monster : Damageable
     }
 
     public TargetRecord TargetRecord { get; set; }
-    public readonly object TaggedAislingsLock = new();
+    public readonly Lock TaggedAislingsLock = new();
     public bool Aggressive { get; set; }
     public bool ThrownBack { get; set; }
     public bool AStar { get; set; }

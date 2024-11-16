@@ -7,7 +7,7 @@ namespace Darkages.Network.Components;
 
 public class PlayerRegenerationComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static readonly object PlayerRegenLock = new();
+    private static readonly Lock PlayerRegenLock = new();
     private static readonly Stopwatch PlayerRegenControl = new();
 
     protected internal override void Update(TimeSpan elapsedTime)

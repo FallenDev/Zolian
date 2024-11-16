@@ -285,7 +285,7 @@ public record AislingStorage : Sql
 
         try
         {
-            _ = Task.Run(PlayerSaveRoutine(obj, connection));
+            _ = PlayerSaveRoutine(obj, connection);
         }
         catch (Exception e)
         {
@@ -318,8 +318,23 @@ public record AislingStorage : Sql
 
         try
         {
+            const int maxConcurrency = 10;
+            var semaphore = new SemaphoreSlim(maxConcurrency);
+            var playerSaveTask = new List<Task>();
+
             foreach (var player in playerList.Where(p => p is { Loading: false }))
-                _ = Task.Run(PlayerSaveRoutine(player, connection));
+            {
+                await semaphore.WaitAsync();
+                var task = PlayerSaveRoutine(player, connection)
+                    .ContinueWith(t =>
+                    {
+                        semaphore.Release();
+                    });
+                playerSaveTask.Add(task);
+            }
+
+            await Task.WhenAll(playerSaveTask);
+            playerSaveTask.Clear();
         }
         catch (Exception e)
         {
@@ -341,100 +356,99 @@ public record AislingStorage : Sql
         return true;
     }
 
-    private static Action PlayerSaveRoutine(Aisling player, SqlConnection connection)
+    private static Task PlayerSaveRoutine(Aisling player, SqlConnection connection)
     {
-        return delegate
+        player.Client.LastSave = DateTime.UtcNow;
+        var dt = PlayerDataTable();
+        var qDt = QuestDataTable();
+        var cDt = ComboScrollDataTable();
+        var iDt = ItemsDataTable();
+        var skillDt = SkillDataTable();
+        var spellDt = SpellDataTable();
+        var buffDt = BuffsDataTable();
+        var debuffDt = DeBuffsDataTable();
+        dt = PlayerStatSave(player, dt);
+        qDt = PlayerQuestSave(player, qDt);
+        cDt = PlayerComboSave(player, cDt);
+        iDt = PlayerItemSave(player, iDt);
+        skillDt = PlayerSkillSave(player, skillDt);
+        spellDt = PlayerSpellSave(player, spellDt);
+        buffDt = PlayerBuffSave(player, buffDt);
+        debuffDt = PlayerDebuffSave(player, debuffDt);
+
+        using (var cmd = new SqlCommand("PlayerSave", connection))
         {
-            player.Client.LastSave = DateTime.UtcNow;
-            var dt = PlayerDataTable();
-            var qDt = QuestDataTable();
-            var cDt = ComboScrollDataTable();
-            var iDt = ItemsDataTable();
-            var skillDt = SkillDataTable();
-            var spellDt = SpellDataTable();
-            var buffDt = BuffsDataTable();
-            var debuffDt = DeBuffsDataTable();
-            dt = PlayerStatSave(player, dt);
-            qDt = PlayerQuestSave(player, qDt);
-            cDt = PlayerComboSave(player, cDt);
-            iDt = PlayerItemSave(player, iDt);
-            skillDt = PlayerSkillSave(player, skillDt);
-            spellDt = PlayerSpellSave(player, spellDt);
-            buffDt = PlayerBuffSave(player, buffDt);
-            debuffDt = PlayerDebuffSave(player, debuffDt);
+            cmd.CommandType = CommandType.StoredProcedure;
+            var param = cmd.Parameters.AddWithValue("@Players", dt);
+            param.SqlDbType = SqlDbType.Structured;
+            param.TypeName = "dbo.PlayerType";
+            cmd.ExecuteNonQuery();
+        }
 
-            using (var cmd = new SqlCommand("PlayerSave", connection))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                var param = cmd.Parameters.AddWithValue("@Players", dt);
-                param.SqlDbType = SqlDbType.Structured;
-                param.TypeName = "dbo.PlayerType";
-                cmd.ExecuteNonQuery();
-            }
+        using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
+        {
+            cmd2.CommandType = CommandType.StoredProcedure;
+            var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
+            param2.SqlDbType = SqlDbType.Structured;
+            param2.TypeName = "dbo.QuestType";
+            cmd2.ExecuteNonQuery();
+        }
 
-            using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
-            {
-                cmd2.CommandType = CommandType.StoredProcedure;
-                var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
-                param2.SqlDbType = SqlDbType.Structured;
-                param2.TypeName = "dbo.QuestType";
-                cmd2.ExecuteNonQuery();
-            }
+        using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
+        {
+            cmd3.CommandType = CommandType.StoredProcedure;
+            var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
+            param3.SqlDbType = SqlDbType.Structured;
+            param3.TypeName = "dbo.ComboType";
+            cmd3.ExecuteNonQuery();
+        }
 
-            using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
-            {
-                cmd3.CommandType = CommandType.StoredProcedure;
-                var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
-                param3.SqlDbType = SqlDbType.Structured;
-                param3.TypeName = "dbo.ComboType";
-                cmd3.ExecuteNonQuery();
-            }
+        using (var cmd4 = new SqlCommand("ItemUpsert", connection))
+        {
+            cmd4.CommandType = CommandType.StoredProcedure;
+            var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
+            param4.SqlDbType = SqlDbType.Structured;
+            param4.TypeName = "dbo.ItemType";
+            cmd4.ExecuteNonQuery();
+        }
 
-            using (var cmd4 = new SqlCommand("ItemUpsert", connection))
-            {
-                cmd4.CommandType = CommandType.StoredProcedure;
-                var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-                param4.SqlDbType = SqlDbType.Structured;
-                param4.TypeName = "dbo.ItemType";
-                cmd4.ExecuteNonQuery();
-            }
+        using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
+        {
+            cmd5.CommandType = CommandType.StoredProcedure;
+            var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
+            param5.SqlDbType = SqlDbType.Structured;
+            param5.TypeName = "dbo.SkillType";
+            cmd5.ExecuteNonQuery();
+        }
 
-            using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
-            {
-                cmd5.CommandType = CommandType.StoredProcedure;
-                var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
-                param5.SqlDbType = SqlDbType.Structured;
-                param5.TypeName = "dbo.SkillType";
-                cmd5.ExecuteNonQuery();
-            }
+        using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
+        {
+            cmd6.CommandType = CommandType.StoredProcedure;
+            var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
+            param6.SqlDbType = SqlDbType.Structured;
+            param6.TypeName = "dbo.SpellType";
+            cmd6.ExecuteNonQuery();
+        }
 
-            using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
-            {
-                cmd6.CommandType = CommandType.StoredProcedure;
-                var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
-                param6.SqlDbType = SqlDbType.Structured;
-                param6.TypeName = "dbo.SpellType";
-                cmd6.ExecuteNonQuery();
-            }
+        using (var cmd7 = new SqlCommand("BuffSave", connection))
+        {
+            cmd7.CommandType = CommandType.StoredProcedure;
+            var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
+            param7.SqlDbType = SqlDbType.Structured;
+            param7.TypeName = "dbo.BuffType";
+            cmd7.ExecuteNonQuery();
+        }
 
-            using (var cmd7 = new SqlCommand("BuffSave", connection))
-            {
-                cmd7.CommandType = CommandType.StoredProcedure;
-                var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
-                param7.SqlDbType = SqlDbType.Structured;
-                param7.TypeName = "dbo.BuffType";
-                cmd7.ExecuteNonQuery();
-            }
+        using (var cmd8 = new SqlCommand("DeBuffSave", connection))
+        {
+            cmd8.CommandType = CommandType.StoredProcedure;
+            var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
+            param8.SqlDbType = SqlDbType.Structured;
+            param8.TypeName = "dbo.DebuffType";
+            cmd8.ExecuteNonQuery();
+        }
 
-            using (var cmd8 = new SqlCommand("DeBuffSave", connection))
-            {
-                cmd8.CommandType = CommandType.StoredProcedure;
-                var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
-                param8.SqlDbType = SqlDbType.Structured;
-                param8.TypeName = "dbo.DebuffType";
-                cmd8.ExecuteNonQuery();
-            }
-        };
+        return Task.CompletedTask;
     }
 
     private static DataTable PlayerStatSave(Aisling obj, DataTable dt)

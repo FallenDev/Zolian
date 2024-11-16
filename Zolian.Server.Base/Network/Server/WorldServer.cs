@@ -628,7 +628,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         _componentStopwatches["DayLight"].Restart();
                         break;
                     case PlayerSaveComponent playerSaveComponent:
-                        if (elapsed["PlayerSave"].TotalSeconds < 30) break;
+                        if (elapsed["PlayerSave"].TotalSeconds < 45) break;
                         playerSaveComponent.Update(elapsed["PlayerSave"]);
                         _componentStopwatches["PlayerSave"].Restart();
                         break;
@@ -766,7 +766,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var tickStart = DateTime.UtcNow;
             var players = Aislings.Where(player => player?.Client != null).ToList();
-            
+
             foreach (var player in players)
             {
                 await semaphore.WaitAsync();
@@ -827,12 +827,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 item.Remove();
 
             foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values
-                     select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground)
+                                 select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground)
                      into items
-                     from item in items
-                     let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
-                     where (!(abandonedDiff.TotalMinutes <= 3) && (item.Template.Name is "Corpse"))
-                     select item)
+                                 from item in items
+                                 let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
+                                 where (!(abandonedDiff.TotalMinutes <= 3) && (item.Template.Name is "Corpse"))
+                                 select item)
                 item.Remove();
         }
         catch (Exception ex)
@@ -1135,7 +1135,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var map = localClient.Aisling.Map;
             var itemObjs = ObjectManager.GetObjects<Item>(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y).Where(i => !i.Template.Flags.FlagIsSet(ItemFlags.Trap)).ToList();
-            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money);
+            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money).ToList();
 
             if (!itemObjs.IsEmpty())
             {
@@ -2239,9 +2239,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
         {
             var result = new List<Sprite>();
-            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
+            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
+            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
             result.AddRange(listA);
             result.AddRange(listB);
             result.AddRange(listC);
@@ -2364,9 +2364,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
         {
             var result = new List<Sprite>();
-            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
-            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity));
+            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
+            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
+            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
 
             result.AddRange(listA);
             result.AddRange(listB);

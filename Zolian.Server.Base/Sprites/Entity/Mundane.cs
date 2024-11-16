@@ -152,7 +152,7 @@ public sealed class Mundane : Movable
 
                     if (!msg.IsNullOrEmpty())
                     {
-                        var nearby = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this));
+                        var nearby = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this)).ToList();
 
                         foreach (var aisling in nearby)
                         {

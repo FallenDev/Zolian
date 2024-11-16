@@ -18,7 +18,7 @@ public class Area : Map
     public byte[] Data;
     public ushort Hash;
     public bool Ready;
-    private readonly object _mapLoadLock = new();
+    private readonly Lock _mapLoadLock = new();
 
     public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = [];
     public int MiningNodesCount { get; set; }

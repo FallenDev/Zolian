@@ -6,7 +6,7 @@ namespace Darkages.Network.Components;
 
 public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static readonly object StatusControlLock = new();
+    private static readonly Lock StatusControlLock = new();
     private static readonly Stopwatch StatusControl = new();
 
     protected internal override void Update(TimeSpan elapsedTime)

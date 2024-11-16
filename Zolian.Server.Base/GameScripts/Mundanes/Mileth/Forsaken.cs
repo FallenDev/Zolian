@@ -130,7 +130,7 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         new (0x05, "No")
                     };
 
-                    client.SendOptionsDialog(Mundane, $"It will cost you; 5,000 Health and 5,000 Mana to proceed.\n{{=bYou will need a base of 5,128 hp/mp", options.ToArray());
+                    client.SendOptionsDialog(Mundane, $"It will cost you 5% Base health and mana to proceed.\n{{=bYou will need a base of 5,128 hp/mp", options.ToArray());
                 }
                 break;
             case 0x04:
@@ -138,8 +138,10 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                     if (client.Aisling.BaseHp >= 5128 && client.Aisling.BaseMp >= 5128)
                     {
                         var levelAbove250 = client.Aisling.ExpLevel >= 250;
-                        client.Aisling.BaseHp -= 5000;
-                        client.Aisling.BaseMp -= 5000;
+                        var baseHp = client.Aisling.BaseHp * 0.05;
+                        var baseMp = client.Aisling.BaseMp * 0.05;
+                        client.Aisling.BaseHp -= (long)baseHp;
+                        client.Aisling.BaseMp -= (long)baseMp;
                         client.Aisling._Str = 5;
                         client.Aisling._Int = 5;
                         client.Aisling._Wis = 5;

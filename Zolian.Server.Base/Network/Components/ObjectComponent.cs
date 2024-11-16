@@ -46,7 +46,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         var payload = new List<Sprite>();
 
         // Retrieve and categorize
-        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All);
+        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
 
         foreach (var obj in objects)
         {

@@ -22,16 +22,16 @@ public abstract class Sprite : INotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();
-    private readonly object aislingsNearbyLock = new();
-    private readonly object aislingsEarShotNearbyLock = new();
-    private readonly object aislingsOnMapLock = new();
-    private readonly object monstersNearbyLock = new();
-    private readonly object monstersOnMapLock = new();
-    private readonly object mundanesNearbyLock = new();
-    private readonly object spritesNearbyLock = new();
-    private readonly object getSpritesLock = new();
-    private readonly object getAislingDamageLock = new();
-    private readonly object getMonsterDamageLock = new();
+    private readonly Lock _aislingsNearbyLock = new();
+    private readonly Lock _aislingsEarShotNearbyLock = new();
+    private readonly Lock _aislingsOnMapLock = new();
+    private readonly Lock _monstersNearbyLock = new();
+    private readonly Lock _monstersOnMapLock = new();
+    private readonly Lock _mundanesNearbyLock = new();
+    private readonly Lock _spritesNearbyLock = new();
+    private readonly Lock _getSpritesLock = new();
+    private readonly Lock _getAislingDamageLock = new();
+    private readonly Lock _getMonsterDamageLock = new();
 
     public bool Alive => CurrentHp > 1;
     public bool Attackable => this is Monster || this is Aisling;
@@ -309,7 +309,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     protected List<Sprite> GetSprites(int x, int y)
     {
-        lock (getSpritesLock)
+        lock (_getSpritesLock)
         {
             return UnSafeGetSprites(x, y).ToList();
         }
@@ -319,7 +319,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     protected List<Sprite> AislingGetDamageableSprites(int x, int y)
     {
-        lock (getAislingDamageLock)
+        lock (_getAislingDamageLock)
         {
             return UnSafeAislingGetDamageableSprites(x, y).ToList();
         }
@@ -329,7 +329,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     protected List<Sprite> MonsterGetDamageableSprites(int x, int y)
     {
-        lock (getMonsterDamageLock)
+        lock (_getMonsterDamageLock)
         {
             return UnSafeMonsterGetDamageableSprites(x, y).ToList();
         }
@@ -350,7 +350,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Aisling> AislingsNearby()
     {
-        lock (aislingsNearbyLock)
+        lock (_aislingsNearbyLock)
         {
             return UnSafeAislingsNearby().ToList();
         }
@@ -360,7 +360,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Aisling> AislingsEarShotNearby()
     {
-        lock (aislingsEarShotNearbyLock)
+        lock (_aislingsEarShotNearbyLock)
         {
             return UnSafeAislingsEarShotNearby().ToList();
         }
@@ -370,7 +370,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Aisling> AislingsOnMap()
     {
-        lock (aislingsOnMapLock)
+        lock (_aislingsOnMapLock)
         {
             return UnSafeAislingsOnMap().ToList();
         }
@@ -380,7 +380,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Monster> MonstersNearby()
     {
-        lock (monstersNearbyLock)
+        lock (_monstersNearbyLock)
         {
             return UnSafeMonstersNearby().ToList();
         }
@@ -390,7 +390,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Monster> MonstersOnMap()
     {
-        lock (monstersOnMapLock)
+        lock (_monstersOnMapLock)
         {
             return UnSafeMonstersOnMap().ToList();
         }
@@ -400,17 +400,17 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Mundane> MundanesNearby()
     {
-        lock (mundanesNearbyLock)
+        lock (_mundanesNearbyLock)
         {
             return UnSafeMundanesNearby().ToList();
         }
     }
 
-    private IEnumerable<Sprite> UnSafeSpritesNearby()
+    private List<Sprite> UnSafeSpritesNearby()
     {
         var result = new List<Sprite>();
-        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
-        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
+        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
         result.AddRange(listA);
         result.AddRange(listB);
         return result;
@@ -418,9 +418,9 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public List<Sprite> SpritesNearby()
     {
-        lock (spritesNearbyLock)
+        lock (_spritesNearbyLock)
         {
-            return UnSafeSpritesNearby().ToList();
+            return UnSafeSpritesNearby();
         }
     }
 
