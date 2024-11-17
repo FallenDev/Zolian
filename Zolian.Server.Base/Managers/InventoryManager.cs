@@ -119,7 +119,7 @@ public class InventoryManager : ObjectManager
         }
         finally
         {
-            item.DeleteFromAislingDb();
+            _ = item.DeleteFromAislingDb();
         }
     }
 
@@ -129,10 +129,12 @@ public class InventoryManager : ObjectManager
     public void RemoveRange(WorldClient client, Item item, int range)
     {
         var remaining = Math.Abs(item.Stacks - range);
-        var original = item;
 
         try
         {
+            var removed = NonStackRemove(client, item, range);
+            if (removed) return;
+
             if (remaining <= 0)
             {
                 RemoveFromInventory(client, item);
@@ -141,7 +143,7 @@ public class InventoryManager : ObjectManager
             {
                 item.Stacks = (ushort)remaining;
                 client.SendRemoveItemFromPane(item.InventorySlot);
-                client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, original);
+                client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, item);
                 UpdateSlot(client, item);
             }
         }
@@ -149,6 +151,19 @@ public class InventoryManager : ObjectManager
         {
             ServerSetup.EventsLogger($"Issue removing item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
+    }
+
+    private bool NonStackRemove(WorldClient client, Item item, int range)
+    {
+        if (item.Template.CanStack) return false;
+
+        for (var i = 0; i < range; i++)
+        {
+            var toBeRemoved = client.Aisling.HasItemReturnItem(item.Template.Name);
+            RemoveFromInventory(client, toBeRemoved);
+        }
+
+        return true;
     }
 
     public void AddRange(WorldClient client, Item item, int range)

@@ -1240,7 +1240,7 @@ public class CrArmorSmith(WorldServer server, Mundane mundane) : MundaneScript(s
                 }
             case 0x90:
                 {
-                    client.SendOptionsDialog(Mundane, "Once again, you are astounding! Look for my brother in the lower levels of {=bChaos {=aand he'll see about reforging your armor with this gem.");
+                    client.SendOptionsDialog(Mundane, "Once again, you are astounding! Look for my brother in the lower levels of {=bChaos {=aand he'll see about reforging your armor with this {=bBahamut's Blood Ruby Eye{=a.");
                     break;
                 }
             case 0x300:
