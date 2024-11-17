@@ -24,8 +24,8 @@ public record TargetRecord
 
 public sealed class Monster : Damageable
 {
-    public Task<IList<Vector2>> Path;
-    public Vector2 TargetPos = Vector2.Zero;
+    private Task<IList<Vector2>> _path;
+    private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     public string Name => Template.BaseName;
 
@@ -36,7 +36,7 @@ public sealed class Monster : Damageable
         CastEnabled = false;
         WalkEnabled = false;
         ObjectUpdateEnabled = false;
-        WaypointIndex = 0;
+        _waypointIndex = 0;
         TileType = TileContent.Monster;
         TargetRecord = new TargetRecord
         {
@@ -49,7 +49,7 @@ public sealed class Monster : Damageable
     public readonly Lock TaggedAislingsLock = new();
     public bool Aggressive { get; set; }
     public bool ThrownBack { get; set; }
-    public bool AStar { get; set; }
+    public bool AStar { get; private set; }
     public bool BashEnabled { get; set; }
     public bool AbilityEnabled { get; set; }
     public bool CastEnabled { get; set; }
@@ -76,9 +76,9 @@ public sealed class Monster : Damageable
     public List<Item> MonsterBank { get; set; }
     public bool Skulled { get; set; }
     public bool Camouflage => AbilityScripts.Any(script => script.Skill.Template.Name == "Camouflage");
-    private int WaypointIndex;
+    private int _waypointIndex;
     public Aisling Summoner => ObjectManager.GetObject<Aisling>(Map, b => b.Serial == SummonerId);
-    private Position CurrentWaypoint => Template?.Waypoints?[WaypointIndex];
+    private Position CurrentWaypoint => Template?.Waypoints?[_waypointIndex];
     private static long SummonerId { get; set; }
     public ushort SummonerAdjLevel { get; set; }
     public readonly Stopwatch TimeTillDead = new();
@@ -334,18 +334,18 @@ public sealed class Monster : Damageable
         ObjectManager.AddObject(newObj);
     }
 
-    public void Patrol()
+    private void Patrol()
     {
         if (CurrentWaypoint != null) WalkTo(CurrentWaypoint.X, CurrentWaypoint.Y);
 
         if (Position.DistanceFrom(CurrentWaypoint) > 1 && CurrentWaypoint != null) return;
-        if (WaypointIndex + 1 < Template.Waypoints.Count)
-            WaypointIndex++;
+        if (_waypointIndex + 1 < Template.Waypoints.Count)
+            _waypointIndex++;
         else
-            WaypointIndex = 0;
+            _waypointIndex = 0;
     }
 
-    public void AStarPath(Monster monster, IList<Vector2> pathList)
+    private void AStarPath(Monster monster, IList<Vector2> pathList)
     {
         if (monster == null) return;
         if (pathList == null)
@@ -446,11 +446,11 @@ public sealed class Monster : Damageable
         }
 
         Target = null;
-        TargetPos = Vector2.Zero;
+        _targetPos = Vector2.Zero;
 
         try
         {
-            Path?.Result?.Clear();
+            _path?.Result?.Clear();
         }
         catch (Exception ex)
         {
@@ -473,11 +473,11 @@ public sealed class Monster : Damageable
         BashEnabled = false;
         WalkEnabled = true;
         Target = null;
-        TargetPos = Vector2.Zero;
+        _targetPos = Vector2.Zero;
 
         try
         {
-            Path?.Result?.Clear();
+            _path?.Result?.Clear();
         }
         catch (Exception ex)
         {
@@ -555,26 +555,26 @@ public sealed class Monster : Damageable
             {
                 AStar = true;
                 _location = new Vector2(Pos.X, Pos.Y);
-                TargetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                Path = Area.GetPath(this, _location, TargetPos);
+                _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
+                _path = Area.GetPath(this, _location, _targetPos);
 
                 if (ThrownBack) return;
 
-                if (TargetPos == Vector2.Zero)
+                if (_targetPos == Vector2.Zero)
                 {
                     ClearTarget();
                     Wander();
                     return;
                 }
 
-                if (Path.Result.Count > 0)
+                if (_path.Result.Count > 0)
                 {
-                    AStarPath(this, Path.Result);
-                    if (!Path.Result.IsEmpty())
-                        Path.Result.RemoveAt(0);
+                    AStarPath(this, _path.Result);
+                    if (!_path.Result.IsEmpty())
+                        _path.Result.RemoveAt(0);
                 }
 
-                if (Path.Result.Count != 0) return;
+                if (_path.Result.Count != 0) return;
                 AStar = false;
 
                 if (Target != null && WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;

@@ -16,9 +16,19 @@ public static class Extensions
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
+    /// Prevents an long from going below or above a set value
+    /// </summary>
+    public static long LongClamp(this long value, long min, long max = long.MaxValue)
+    {
+        if (value < min) return min;
+        return value > max ? max : value;
+    }
+
+
+    /// <summary>
     /// Prevents an integer from going below or above a set value
     /// </summary>
-    public static int IntClamp(this int value, int min, int max)
+    public static int IntClamp(this int value, int min, int max = int.MaxValue)
     {
         if (value < min) return min;
         return value > max ? max : value;
@@ -27,7 +37,7 @@ public static class Extensions
     /// <summary>
     /// Prevents a double from going below or above a set value
     /// </summary>
-    public static double DoubleClamp(this double value, double min, double max)
+    public static double DoubleClamp(this double value, double min, double max = double.MaxValue)
     {
         if (value < min) return min;
         return value > max ? max : value;

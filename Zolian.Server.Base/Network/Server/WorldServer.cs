@@ -644,7 +644,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                         _componentStopwatches["BankInterest"].Restart();
                         break;
                     case MoonPhaseComponent moonPhaseComponent:
-                        if (elapsed["MoonPhase"].TotalMinutes < 30) break;
+                        if (elapsed["MoonPhase"].TotalMinutes < 1) break;
                         moonPhaseComponent.Update(elapsed["MoonPhase"]);
                         _componentStopwatches["MoonPhase"].Restart();
                         break;
@@ -774,7 +774,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     .ContinueWith(t =>
                     {
                         semaphore.Release();
-                    });
+                    }, TaskScheduler.Default);
                 playerUpdateTasks.Add(task);
             }
 

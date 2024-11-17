@@ -1,6 +1,7 @@
 ﻿using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
+
 using ServiceStack;
 
 using SunCalcNet;
@@ -51,7 +52,6 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Nosferatu") continue;
-            ObjectService.RemoveGameObject(npc);
             var rand = Generator.RandNumGen3();
             switch (rand)
             {
@@ -60,25 +60,24 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
                     npc.X = 9;
                     npc.Y = 3;
                     npc.Direction = 2;
-                    npc.UpdateAddAndRemove();
                     break;
                 case 1:
                     npc.CurrentMapId = 286;
                     npc.X = 16;
                     npc.Y = 1;
                     npc.Direction = 1;
-                    npc.UpdateAddAndRemove();
                     break;
                 case 2:
                     npc.CurrentMapId = 1505;
                     npc.X = 1;
                     npc.Y = 23;
                     npc.Direction = 2;
-                    npc.UpdateAddAndRemove();
                     break;
             }
 
-            ObjectService.AddGameObject(npc);
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
+            npc.UpdateAddAndRemove();
+            ObjectManager.AddObject(npc);
         }
     }
 
@@ -87,7 +86,6 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Fenrir") continue;
-            ObjectService.RemoveGameObject(npc);
             var rand = Generator.RandNumGen3();
             switch (rand)
             {
@@ -96,25 +94,24 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
                     npc.X = 9;
                     npc.Y = 3;
                     npc.Direction = 2;
-                    npc.UpdateAddAndRemove();
                     break;
                 case 1:
                     npc.CurrentMapId = 6719;
                     npc.X = 4;
                     npc.Y = 3;
                     npc.Direction = 1;
-                    npc.UpdateAddAndRemove();
                     break;
                 case 2:
                     npc.CurrentMapId = 3212;
                     npc.X = 29;
                     npc.Y = 12;
                     npc.Direction = 1;
-                    npc.UpdateAddAndRemove();
                     break;
             }
 
-            ObjectService.AddGameObject(npc);
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
+            npc.UpdateAddAndRemove();
+            ObjectManager.AddObject(npc);
         }
     }
 
@@ -123,25 +120,27 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Carn") continue;
-            ObjectService.RemoveGameObject(npc);
+            if (npc.CurrentMapId == 5031) continue;
             npc.CurrentMapId = 5031;
             npc.X = 30;
             npc.Y = 12;
             npc.Direction = 2;
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
             npc.UpdateAddAndRemove();
-            ObjectService.AddGameObject(npc);
+            ObjectManager.AddObject(npc);
         }
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Sleeping Carn") continue;
-            ObjectService.RemoveGameObject(npc);
+            if (npc.CurrentMapId == 14759) continue;
             npc.CurrentMapId = 14759;
             npc.X = 3;
             npc.Y = 1;
             npc.Direction = 1;
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
             npc.UpdateAddAndRemove();
-            ObjectService.AddGameObject(npc);
+            ObjectManager.AddObject(npc);
         }
     }
 
@@ -150,25 +149,27 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Carn") continue;
-            ObjectService.RemoveGameObject(npc);
+            if (npc.CurrentMapId == 14759) continue;
             npc.CurrentMapId = 14759;
             npc.X = 4;
             npc.Y = 1;
             npc.Direction = 1;
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
             npc.UpdateAddAndRemove();
-            ObjectService.AddGameObject(npc);
+            ObjectManager.AddObject(npc);
         }
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Sleeping Carn") continue;
-            ObjectService.RemoveGameObject(npc);
+            if (npc.CurrentMapId == 5031) continue;
             npc.CurrentMapId = 5031;
             npc.X = 30;
             npc.Y = 11;
             npc.Direction = 1;
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
             npc.UpdateAddAndRemove();
-            ObjectService.AddGameObject(npc);
+            ObjectManager.AddObject(npc);
         }
     }
 
@@ -178,7 +179,6 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         foreach (var npc in mundanes.Values)
         {
             if (npc.Name is not ("Fenrir" or "Nosferatu")) continue;
-            ObjectService.RemoveGameObject(npc);
             if (npc.Name is "Fenrir")
             {
                 npc.X = 1;
@@ -192,8 +192,10 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
 
             npc.CurrentMapId = 14759;
             npc.Direction = 1;
+
+            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
             npc.UpdateAddAndRemove();
-            ObjectService.AddGameObject(npc);
+            ObjectManager.AddObject(npc);
         }
     }
 }

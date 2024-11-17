@@ -194,7 +194,6 @@ public class Damageable : Movable
             if (aisling.ThreatMeter + dmg >= long.MaxValue)
                 aisling.ThreatMeter = 500000;
             aisling.ThreatMeter += dmg;
-            aisling.ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
             ShowDmg(aisling, estTime);
         }
 

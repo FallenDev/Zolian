@@ -455,7 +455,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private void ShowAggro(Dictionary<string, TimeSpan> elapsed)
     {
-        if (elapsed["AggroMessage"].TotalMilliseconds < 20000) return;
+        if (elapsed["AggroMessage"].TotalMilliseconds < 15000) return;
         _clientStopwatches["AggroMessage"].Restart();
 
         try
@@ -2094,10 +2094,12 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// </summary>
     public void SendHealthBar(Sprite creature, byte? sound = null)
     {
+        var currentHealth = creature.CurrentHp.LongClamp(1);
+
         var args = new HealthBarArgs
         {
             SourceId = creature.Serial,
-            HealthPercent = (byte)((double)100 * creature.CurrentHp / creature.MaximumHp),
+            HealthPercent = (byte)((double)100 * currentHealth / creature.MaximumHp),
             Sound = sound
         };
 

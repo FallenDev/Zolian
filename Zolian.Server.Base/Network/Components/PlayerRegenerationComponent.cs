@@ -1,92 +1,110 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
 public class PlayerRegenerationComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static readonly Lock PlayerRegenLock = new();
     private static readonly Stopwatch PlayerRegenControl = new();
 
     protected internal override void Update(TimeSpan elapsedTime)
     {
-        ZolianUpdateDelegate.Update(UpdatePlayerRegeneration);
+        _ = UpdatePlayerRegeneration();
     }
 
-    private static void UpdatePlayerRegeneration()
+    private static async Task UpdatePlayerRegeneration()
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
+        const int maxConcurrency = 10;
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var playerUpdateTasks = new List<Task>();
+
+        if (!PlayerRegenControl.IsRunning)
+            PlayerRegenControl.Start();
+
+        if (PlayerRegenControl.Elapsed.TotalMilliseconds < 1000) return;
 
         try
         {
-            lock (PlayerRegenLock)
+            var players = Server.Aislings.Where(player => player?.Client != null).ToList();
+
+            foreach (var player in players)
             {
-                if (!PlayerRegenControl.IsRunning)
-                    PlayerRegenControl.Start();
-
-                if (PlayerRegenControl.Elapsed.TotalMilliseconds < 1000) return;
-
-                Parallel.ForEach(Server.Aislings, (player) =>
+                await semaphore.WaitAsync();
+                var task = ProcessUpdates(player).ContinueWith(t =>
                 {
-                    if (player?.Client == null) return;
-                    if (!player.LoggedIn) return;
-                    if (player.IsPoisoned || player.Skulled || player.IsDead())
-                    {
-                        player.RegenTimerDisabled = true;
-                    }
-                    else
-                    {
-                        player.RegenTimerDisabled = false;
-                    }
+                    semaphore.Release();
+                }, TaskScheduler.Default);
 
-                    if (player.RegenTimerDisabled) return;
-                    if (player.CurrentHp == player.MaximumHp &&
-                        player.CurrentMp == player.MaximumMp) return;
-                    
-                    if (player.CurrentHp > player.MaximumHp || player.CurrentMp > player.MaximumMp)
-                    {
-                        player.CurrentHp = player.MaximumHp;
-                        player.CurrentMp = player.MaximumMp;
-                        player.Client.SendAttributes(StatUpdateType.Vitality);
-                    }
-
-                    if (player.Path == Class.Peasant | player.GameMaster)
-                    {
-                        player.Recover();
-                    }
-
-                    if (player.CurrentMp < 1) player.CurrentMp = 1;
-
-                    var hpRegenSeed = HpRegenSoftCap(player.Client);
-                    var mpRegenSeed = MpRegenSoftCap(player.Client);
-                    var hpHardCap = Math.Abs(player.BaseHp / 3.00);
-                    var mpHardCap = Math.Abs(player.BaseMp / 3.00);
-                    var performedRegen = false;
-
-                    if (player.CurrentHp < player.MaximumHp)
-                    {
-                        RegenHpCalculator(player.Client, hpRegenSeed, hpHardCap);
-                        performedRegen = true;
-                    }
-
-                    if (player.CurrentMp < player.MaximumMp)
-                    {
-                        RegenMpCalculator(player.Client, mpRegenSeed, mpHardCap);
-                        performedRegen = true;
-                    }
-
-                    if (performedRegen)
-                        player.Client.SendAttributes(StatUpdateType.Vitality);
-                });
+                playerUpdateTasks.Add(task);
             }
 
+            await Task.WhenAll(playerUpdateTasks);
+            PlayerRegenControl.Restart();
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private static Task ProcessUpdates(Aisling player)
+    {
+        if (player?.Client == null) return Task.CompletedTask;
+        if (!player.LoggedIn) return Task.CompletedTask;
+        if (player.IsPoisoned || player.Skulled || player.IsDead())
+        {
+            player.RegenTimerDisabled = true;
+        }
+        else
+        {
+            player.RegenTimerDisabled = false;
+        }
+
+        if (player.RegenTimerDisabled) return Task.CompletedTask;
+        if (player.CurrentHp == player.MaximumHp &&
+            player.CurrentMp == player.MaximumMp) return Task.CompletedTask;
+
+        if (player.CurrentHp > player.MaximumHp || player.CurrentMp > player.MaximumMp)
+        {
+            player.CurrentHp = player.MaximumHp;
+            player.CurrentMp = player.MaximumMp;
+            player.Client.SendAttributes(StatUpdateType.Vitality);
+        }
+
+        if (player.Path == Class.Peasant | player.GameMaster)
+        {
+            player.Recover();
+        }
+
+        if (player.CurrentMp < 1) player.CurrentMp = 1;
+
+        var hpRegenSeed = HpRegenSoftCap(player.Client);
+        var mpRegenSeed = MpRegenSoftCap(player.Client);
+        var hpHardCap = Math.Abs(player.BaseHp / 3.00);
+        var mpHardCap = Math.Abs(player.BaseMp / 3.00);
+        var performedRegen = false;
+
+        if (player.CurrentHp < player.MaximumHp)
+        {
+            RegenHpCalculator(player.Client, hpRegenSeed, hpHardCap);
+            performedRegen = true;
+        }
+
+        if (player.CurrentMp < player.MaximumMp)
+        {
+            RegenMpCalculator(player.Client, mpRegenSeed, mpHardCap);
+            performedRegen = true;
+        }
+
+        if (performedRegen)
+            player.Client.SendAttributes(StatUpdateType.Vitality);
+
+        return Task.CompletedTask;
     }
 
 
